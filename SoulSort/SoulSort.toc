@@ -1,0 +1,8 @@
+## Interface: 11302
+## Title: SoulSort
+## Notes: Easy Soul Shard Management
+## Author: Anilusion, with assistance from Dive
+## Version: v0.0.1
+## SavedVariablesPerCharacter: MAX_SHARDS, AUTO_SORT, AUTO_MAX, SHOW_COUNTER
+
+SoulSort.lua

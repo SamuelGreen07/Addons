@@ -1,0 +1,6 @@
+## Interface: 4150
+## Author: Cragganmore
+## OptionalDeps: 
+## RequiredDeps: Sea, Cosmos
+## SavedVariables: SHARDTRACKER_CONFIG
+ShardTracker.xml

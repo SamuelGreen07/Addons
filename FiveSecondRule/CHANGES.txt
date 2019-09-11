@@ -1,0 +1,10 @@
+tag 0b8e8af5f596e14da24821a26ba35cad8a182bee Release-1-3
+Author:	Stefan Pedersen <sp@ceptu.com>
+Date:	Sat Aug 31 23:15:40 2019 +0200
+
+commit afa53263af3b03c407974adc4d9df589e6b1c57d
+Author: Stefan Pedersen <sp@ceptu.com>
+Date:   Sat Aug 31 23:15:25 2019 +0200
+
+    Release version 1.3
+
