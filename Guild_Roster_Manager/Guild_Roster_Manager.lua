@@ -38,9 +38,9 @@ GRM_G = {};
 -- }
 
 -- Addon Details:
-GRM_G.Version = "8.2R1.71";
-GRM_G.PatchDay = 1568027056;             -- In Epoch Time
-GRM_G.PatchDayString = "1568027056";     -- 2 Versions saves on conversion computational costs... just keep one stored in memory. Extremely minor gains, but very useful if syncing thousands of pieces of data in large guilds.
+GRM_G.Version = "8.2R1.72";
+GRM_G.PatchDay = 1568137626;             -- In Epoch Time
+GRM_G.PatchDayString = "1568137626";     -- 2 Versions saves on conversion computational costs... just keep one stored in memory. Extremely minor gains, but very useful if syncing thousands of pieces of data in large guilds.
 GRM_G.Patch = "8.2";
 GRM_G.LvlCap = GetMaxPlayerLevel();
 GRM_G.BuildVersion = select ( 4 , GetBuildInfo() ); -- Technically the build level or the patch version as an integer.
@@ -5390,7 +5390,9 @@ GRM.InitializeOldRosterButtons = function( classicSpecific )
                 end
 
                 if name ~= "" and name ~= nil  then
-                    GRM.MemberListBlizTooltip_Update ( button , true , classFileIDEnum[classFile] , name , rank , raceIDEnum [ select ( 4 , GetPlayerInfoByGUID ( guid ) ) ] , level , presence , zone , memberNote , officerNote );
+                    if GRM_G.BuildVersion >= 80000 then
+                        GRM.MemberListBlizTooltip_Update ( button , true , classFileIDEnum[classFile] , name , rank , raceIDEnum [ select ( 4 , GetPlayerInfoByGUID ( guid ) ) ] , level , presence , zone , memberNote , officerNote );
+                    end
                     if GRM_AddonSettings_Save[GRM_G.FID][GRM_G.setPID][2][71] then
                         GRM_G.currentName = name;
                         GRM.SubFrameCheck();
@@ -23016,18 +23018,9 @@ Initialization:SetScript ( "OnEvent" , GRM.ActivateAddon );
     ----- POTENTIAL FEATURES ------------
     -------------------------------------
 
-    -- Titan Panel plugin
-
-    -- Expandable and collapsable log groupings. Maybe?
-
-    -- Expand shift-click to work on event window and ban list and so on.
-
+    -- Titan Panel plugin was requested... not sure what this can do though yet
+    -- Expandable and collapsable log groupings when reported on login. Maybe?
     -- Track who invited the player and add it to the tooltip on the join date.
-
-    -- Expanded features with the sync window...
-
-    -- Accept sync with players by their highest rank. ??
-
     -- Tracking trends - data points of X numbers of members day guild formed... avg number of new members per week, avg number left, etc...
     
     -- Build an API for general use, like GRM slashcommands MoveNote
@@ -23154,113 +23147,72 @@ Initialization:SetScript ( "OnEvent" , GRM.ActivateAddon );
     ----- KNOWN BUGS --------------------
     -------------------------------------
 
-
     -- Syncing the alt data is the last module that needs to be optimized as it is still slow an inefficient. Custom notes need extra info.
-    -- Add/delete or change rank order can cause funny issues... do a rank X to rank X check and delete the reports if it is to same rank and > 10 are counted doing it or something...
-    --  Pratt messing up <M> formatting...and coloring
-    -- Lua errors if your character is in the middle of a sync when getting kicked or leaving guild... less priority, would need to modify every step of the way. Might not be worth it.
-    -- If a new player joins the guild -- does it instantly spam all their custom notes? YES -- possible change here? 
-    -- player will spam guild actions and get "You are not in a guild" error - saw this once, never was able to repeat it... but it's out there.
-    -- If a player goes from not being able to read officer note, to having access, it spams your log. That should be known...
-   
+    -- Pratt messing up <M> formatting...and coloring
+    -- Still an issue with players reporting demotion logging on join
+    -- Promote/demotion/kick/leave should be logged by parsing the chat locally...
+    -- Frames bottom is being cutoff for some reason (problem with resolution)
+    -- Issue with advanced join date tool -- counter shows "0" on numbers to add if the designated note is already too full.
+    -- JD reporting is properly reporting to JD and to promotion - but to the note it gives CURRENT server time... carryover?
+    -- Inactive players > X months not triggering together but one after the other only.
+    -- if the log grows to > 25,000 lines we can potnetially get out of bound errors due to Lua 5.1 limitations. Break it into a table of 10000 lines per index
+    
+
     -------------------------------------
     ----- BUSY work ---------------
     -------------------------------------
 
-    -- Promote/demotion/kick/leave should be logged by parsing the chat locally...
-
-    -- Add option to only show main tags IF the player has alts.
-
-    -- Frames bottom is being cutoff for some reason
-    -- Update the alt side details window to be in the interface on mouseover...
-
-
-
-    -- Finally get around to exporting data.
-
-    -- Calendar MOTD tags, if found on calendar, they are then used to check the MOTD
+    -- If a player goes from not being able to read officer note, to having access, it spams your log. That should be known...
+    -- Connect ban system and integrate banning all the alts to the que system
+    -- Change the "Has left the guild" to "Is no longer in the guild"
+    -- Guild data export needs to be cleaned up
+    -- Expand shift-click to work on event window and ban list and so on.
     
-    -- Remove recommendations?? Unnecessary now?
 
-    -- OF NOTE: Guild Promotion/demotion macro MUST include the full name-Server, even on non merged realms.
-
-    -- More flexibility with the audit window - additional column of "Last online" dates, etc... ability to place columns in certain positions
-
-    -- Add push of the MOTD to chat in an interval.
-
-    -- AddOnSkins - Custom edit box still looks bad, need to hide background texture.
-
-    -- Auto guild welcome message. - Designate that only the sync leader can state it to prevent spam?
-
-    -- Issue with advanced join date tool -- counter shows "0" on numbers to add if the designated note is already too full.
-
-    -- bring back promotions/demotions to the player windows, just build the macro, add the hotkey.
-
-    -- Update AddonSkins
-
-    -- Operators in the search, like googles. Include "^Name" -- include that player and all alts...
-    -- Temporary guide on the left when searching for operators. Google Advanced search.
-    -- https://cdn.discordapp.com/attachments/588012960018858029/601428359649689611/unknown.png
-
-    -- "Arkaan | Ayr"
-    -- "Arkaan AND Ayr" (For finding specific actions taken on a person by a specific officer, for example.)
-    -- "Arkaan -joined -promoted"
-
-    -- Right click and set as main or clear details of player from the audit window.
-
-    -- Allow players to give themselves a nickname (Add a new player setting, and if it is not "" then display it instead.)
-      
-    -- Interface to search public and officer notes
-
-    -- JD reporting is properly reporting to JD and to promotion - but to the note it gives CURRENT server time... carryover?
-    -- issue with deleting inactive returns - reporting only 1 line removed instead of 2. Check lua errors
+    -------------------------------------
+    ----- Feature Additions -------------
+    -------------------------------------
 
     -- Show history of players you have sync'd with
-
-    -- issue with new toons joining and settings not syncing properly...
-
+    -- Allow players to give themselves a nickname (Add a new player setting, and if it is not "" then display it instead.)
+    -- Interface to search public and officer notes
+    -- Add option to only show main tags IF the player has alts.
+    -- Update the alt side details window to be in the interface on mouseover...
+    -- Finally get around to exporting data.
+    -- Add push of the MOTD to chat in an interval (possibly a scheduler for MOTDs)
+    -- OF NOTE: Guild Promotion/demotion macro MUST include the full name-Server, even on non merged realms.
+    -- More flexibility with the audit window - additional column of "Last online" dates, etc... ability to place columns in certain positions
+    -- bring back promotions/demotions to the player windows, just build the macro, add the hotkey.
+    -- Right click and set as main or clear details of player from the audit window.
     -- RGB color selection for each log item...
-
     -- Sync join/promo histories
-
     -- Add player level to chat tag if wanted
-
-    -- >> Guild data export needs to be cleaned up
-    -- set export to only 1000 lines
-
     -- Scan the log for players that joined the guild and left the guild since you last logged...
-
     -- On players that "Still in guild" on ban list add a button to remove them. -- This will require hotkey creation
+    -- When configuring a guild for the first time... scan the log to auto-find guild join dates.
+    -- If in the middle of a scan, add the report to the scan rather than break the scan
+    -- Auto-re-add to alts grouping when it's a rejoin!
+    -- In "Log". Clickable character names that open the roster for the character.
+
+    -- Operators in the search, like googles. Include "^Name" -- include that player and all alts...
+    --      Temporary guide on the left when searching for operators. Google Advanced search.
+    --      https://cdn.discordapp.com/attachments/588012960018858029/601428359649689611/unknown.png
+    --      "Arkaan | Ayr"
+    --      "Arkaan AND Ayr" (For finding specific actions taken on a person by a specific officer, for example.)
+    --      "Arkaan -joined -promoted"
 
     -- Expand addon users window, features, tooltips stating what rank they need to be, etc...
-    -- - { "Ok!" , "Their Rank too Low" , "Your Rank too Low" , "Outdated Version" , "You Need Updated Version" , "Player Sync Disabled" }
-    -- { sender , syncIsEnabled , syncOnlyCurrent , epochTimeVersion , version , senderRankRequirement , banRankRequirement }
+    --      { "Ok!" , "Their Rank too Low" , "Your Rank too Low" , "Outdated Version" , "You Need Updated Version" , "Player Sync Disabled" }
+    --      { sender , syncIsEnabled , syncOnlyCurrent , epochTimeVersion , version , senderRankRequirement , banRankRequirement }
 
-    -- Inactive players > X months not triggering together but one after the other only.
-
-    -- When configuring a guild for the first time... scan the log to auto-find guild join dates.
-    
-    -- - When kicking alts, check the leftplayers list if they were tagged to a main before to add the note to say they were an alt of "player Main" - as of now it drops them from alt/main grouping before
-    -- Need to build the GUID to players who have LEFT the guild
-    -- Checkbox to uncheck all
-    
-    -- Add option to move existing notes to whichever slot you wanted.
-
-    -- Audit log - search for TAGS - like [RAIDER][PVP] etc... 
+    -- Audit log - search for TAGS - like [RAIDER][PVP] etc...
     -- ya, you could use any format you want, for Quality of Life maybe I'd throw in some recommended formatting with easy one-click searches for certain tags... then a custom one you can type
-
-    -- If in the middle of a scan, add the report to the scan.
     
-    -- Auto-re-add to alts grouping when it's a rejoin!
-    -- Patch to analyze all backup player data index, make sure they match... if not, update them
-    -- New playerData index increasing needs to not just do history save and lefthistory - but the entire backups as well...
 
-    -- * In "Log". Clickable character names that open the roster for the character.
     -- GRM.IsValidName -- get ASCII byte values for the other 4 regions' Blizz selected fonts. -- possible built-in check I can use?
 
-    -- BACKEND CODE WRITTEN - NEEDS FRONT END SOLUTION!!!!
     -- Custom Reminders
-    -- Sync the custom event reminder ?? Probably not... keep them unique to player, or maybe give option?
+    --      Like a scheduler/notification system - infrastructure already built if needed.
 
 
     -- CHANGELOG
@@ -23269,7 +23221,7 @@ Initialization:SetScript ( "OnEvent" , GRM.ActivateAddon );
 
 
     -- QOL
-        -- 
+        -- Classic: Communities style tooltip removed in Classic roster as it is unnecessary
         -- 
         
     -- BUGS
@@ -23278,7 +23230,7 @@ Initialization:SetScript ( "OnEvent" , GRM.ActivateAddon );
         -- CLASSIC: 
         -- CLASSIC: 
         -- CLASSIC: 
-        -- BOTH: 
+        -- BOTH: Player nameChanges should now report properly.
         -- BOTH: 
         -- BOTH: 
         -- BOTH: 

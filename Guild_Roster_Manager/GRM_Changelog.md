@@ -1,3 +1,10 @@
+**VERSION 8.2R1.72 DATE: September 10th, 2019**
+
+* Major bug fix - for many addon would not load in 1.71 update - this is resolved
+
+* Player nameChanges should now report properly.
+
+
 **VERSION 8.2R1.71 DATE: September 9th, 2019**
 
 *More progress on the path to smoothing out Classic!*
@@ -34,7 +41,7 @@
 
 * BUG6: Classic - Mouseover window should now be properly pinned to the guild roster in all cases.
 
-* BUG7: BOTH - Ban reason count 14/0 on first focus when adding a ban. For some reason it was tallying maxLetters rather than maxBytes. It has to be set to maxBytes for sync purposes, rather than letters, as some alt-code type special characters or asian characters can take up 3 bytes (but count only as 1 character). 75 characters could be 225 bytes in theory, whilst 75 Bytes is 75 bytes.
+* BUG7: Classic - Critical German Client only bug that caused tons of /ginfo system message spam. Oops!
 
 * BUG8: BOTH - Adding and removing ranks to a guild should properly report how many to the log now.
 
@@ -45,6 +52,10 @@
 * BUG11: BOTH - Macro tool the recommendations to kick if player offline was accidentally set to a default of after 75 months, or in other words, 6 years and 3 months offline lol. If you had not already changed this the settings will be reset to their proper default recommendation of 12 months. This does not re-enable it if you have it disabled. It only changes the stored month interval.
 
 * BUG12: BOTH - The ESCAPE key should once again properly work if you open the macro tool. It was not bringing up the game menu after loading the macro tool and it was messing up some things.
+
+* BUG13: BOTH - Critical storage wasting bug. If you ever used /grm clearguild it created a 2nd index of the backups, wastefully. This now purges the double backups and removes the bug
+
+* BUG14: BOTH - Ban reason count 14/0 on first focus when adding a ban. For some reason it was tallying maxLetters rather than maxBytes. It has to be set to maxBytes for sync purposes, rather than letters, as some alt-code type special characters or asian characters can take up 3 bytes (but count only as 1 character). 75 characters could be 225 bytes in theory, whilst 75 Bytes is 75 bytes.
 
 
 **VERSION 8.2R1.70 DATE: September 5th, 2019**

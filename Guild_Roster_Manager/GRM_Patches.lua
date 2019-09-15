@@ -378,7 +378,7 @@ GRM_Patch.SettingsCheck = function ( numericV )
             GRM_Patch.ModifyNewDefaultSetting ( 53 , false );
         end
 
-        GRM_Patch.PlayerMetaDataDatabaseWideEdit ( GRM_Patch.CleanupPromotionDateMouseOverError , true , true , true );
+        GRM_Patch.PlayerMetaDataDatabaseWideEdit ( GRM_Patch.CleanupPromotionDateMouseOverError , true , true , false );
         GRM_Patch.FixMonthDateRecommendationError();
         GRM_Patch.ClearExtraBackups();
     end

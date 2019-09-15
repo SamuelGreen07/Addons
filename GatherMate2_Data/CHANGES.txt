@@ -1,0 +1,3 @@
+20190911 
+- Fixed the format of the treasure nodes
+- Shifted the Eastern Plaguelands nodes
