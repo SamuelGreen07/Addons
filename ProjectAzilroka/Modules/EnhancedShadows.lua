@@ -1,12 +1,9 @@
 local PA = _G.ProjectAzilroka
-if (PA.SLE or PA.CUI) then return end
-
-local ES = PA:NewModule('EnhancedShadows', 'AceEvent-3.0')
-PA.ES, _G.EnhancedShadows = ES, ES
+local ES = PA:NewModule('EnhancedShadows', 'AceEvent-3.0', 'AceTimer-3.0')
 
 ES.Title = '|cFF16C3F2Enhanced|r |cFFFFFFFFShadows|r'
 ES.Description = 'Adds options for registered shadows'
-ES.Author = 'Azilroka     Whiro'
+ES.Authors = 'Azilroka     Whiro'
 
 local unpack, floor, pairs = unpack, floor, pairs
 local UnitAffectingCombat = UnitAffectingCombat
@@ -18,6 +15,19 @@ function ES:UpdateShadows()
 
 	for frame, _ in pairs(self.RegisteredShadows) do
 		ES:UpdateShadow(frame)
+	end
+end
+
+function ES:RegisterFrameShadows(frame)
+	local shadow = frame.shadow or frame.Shadow
+	if shadow and not shadow.isRegistered then
+		ES.shadows[shadow] = true
+		shadow.isRegistered = true
+	end
+	local ishadow = frame.invertedshadow or frame.InvertedShadow
+	if ishadow and not ishadow.isRegistered then
+		ES.shadows[ishadow] = true
+		shadow.isRegistered = true
 	end
 end
 
@@ -36,7 +46,7 @@ function ES:UpdateShadow(shadow)
 	local r, g, b, a = unpack(ES.db.Color)
 
 	if ES.db.ColorByClass then
-		r, g, b = PA.ClassColor['r'], PA.ClassColor['g'], PA.ClassColor['b']
+		r, g, b = unpack(PA.ClassColor)
 	end
 
 	local backdrop = shadow:GetBackdrop()
@@ -54,7 +64,6 @@ end
 function ES:GetOptions()
 	local Options = {
 		type = "group",
-		order = 207,
 		name = ES.Title,
 		desc = ES.Description,
 		get = function(info) return ES.db[info[#info]] end,
@@ -84,36 +93,48 @@ function ES:GetOptions()
 				name = PA.ACL['Size'],
 				min = 3, max = 10, step = 1,
 			},
+			AuthorHeader = {
+				order = -4,
+				type = 'header',
+				name = PA.ACL['Authors:'],
+			},
+			Authors = {
+				order = -3,
+				type = 'description',
+				name = ES.Authors,
+				fontSize = 'large',
+			},
 		},
 	}
-
-	Options.args.profiles = LibStub('AceDBOptions-3.0'):GetOptionsTable(ES.data)
-	Options.args.profiles.order = -2
 
 	PA.Options.args.EnhancedShadows = Options
 end
 
 function ES:BuildProfile()
-	self.data = PA.ADB:New("EnhancedShadowsDB", {
-		profile = {
-			['Color'] = { 0, 0, 0, 1 },
-			['ColorByClass'] = false,
-			['Size'] = 3,
-		},
-	})
+	PA.Defaults.profile['EnhancedShadows'] = {
+		['Enable'] = true,
+		['Color'] = { 0, 0, 0, 1 },
+		['ColorByClass'] = false,
+		['Size'] = 3,
+	}
 
-	self.data.RegisterCallback(self, "OnProfileChanged", "SetupProfile")
-	self.data.RegisterCallback(self, "OnProfileCopied", "SetupProfile")
-	self.db = self.data.profile
-end
-
-function ES:SetupProfile()
-	self.db = self.data.profile
+	PA.Options.args.general.args.EnhancedShadows = {
+		type = 'toggle',
+		name = ES.Title,
+		desc = ES.Description,
+	}
 end
 
 function ES:Initialize()
-	ES:BuildProfile()
+	ES.db = PA.db['EnhancedShadows']
+
+	if PA.SLE or PA.CUI or ES.db.Enable ~= true then
+		return
+	end
+
+	PA.ES, _G.EnhancedShadows = ES, ES
+
 	ES:GetOptions()
 
-	ES:UpdateShadows()
+	ES:ScheduleTimer('UpdateShadows', 1)
 end

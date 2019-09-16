@@ -1,4 +1,6 @@
 local PA = _G.ProjectAzilroka
+if PA.Classic then return end
+
 local BB = PA:NewModule('BigButtons', 'AceEvent-3.0')
 PA.BB, _G.BigButtons = BB, BB
 
@@ -10,7 +12,7 @@ local GetItemInfo, GetItemInfoInstant, GetSubZoneText, GetItemCount, InCombatLoc
 local NUM_BAG_SLOTS, GetContainerNumSlots, GetContainerItemID, PickupContainerItem, DeleteCursorItem = NUM_BAG_SLOTS, GetContainerNumSlots, GetContainerItemID, PickupContainerItem, DeleteCursorItem
 local _G = _G
 local select, tinsert, unpack, pairs = select, tinsert, unpack, pairs
-local AS, ES
+local AS
 local Locale = GetLocale()
 if Locale == 'esMX' then Locale = 'esES' end
 if Locale == 'enGB' then Locale = 'enUS' end
@@ -120,9 +122,6 @@ function BB:CreateBigButton(ItemID)
 	if AS then
 		AS:SkinButton(Button)
 		AS:CreateShadow(Button)
-		if ES then
-			ES:RegisterShadow(Button.Shadow)
-		end
 	end
 
 	for _, event in pairs(BB.Events) do
@@ -158,7 +157,7 @@ function BB:CreateSeedButton(ItemID)
 	end
 
 	local Button = CreateFrame('Button', nil, self.Bar.SeedsFrame, 'SecureActionButtonTemplate, ActionButtonTemplate')
-	Button:SetTemplate()
+	PA:SetTemplate(Button)
 	Button:SetSize(30, 30)
 	Button:SetAttribute('type', 'item')
 	Button:SetAttribute('item', GetItemInfo(ItemID))
@@ -166,15 +165,16 @@ function BB:CreateSeedButton(ItemID)
 
 	Button.icon:SetTexture(select(5, GetItemInfoInstant(ItemID)))
 	Button.icon:SetTexCoord(unpack(PA.TexCoords))
-	Button.icon:SetInside()
+	Button.icon:SetPoint('TOPLEFT', 1, -1)
+	Button.icon:SetPoint('BOTTOMRIGHT', -1, 1)
 	Button.icon:SetDrawLayer('ARTWORK')
 
 	Button:SetNormalTexture('')
 	Button:SetPushedTexture('')
 	Button:SetHighlightTexture('')
 
-	Button:HookScript('OnEnter', function(self)
-		GameTooltip:SetOwner(self, 'ANCHOR_TOPRIGHT', 2, 4)
+	Button:HookScript('OnEnter', function(button)
+		GameTooltip:SetOwner(button, 'ANCHOR_TOPRIGHT', 2, 4)
 		GameTooltip:ClearLines()
 		GameTooltip:SetItemByID(ItemID)
 		GameTooltip:Show()
@@ -182,18 +182,18 @@ function BB:CreateSeedButton(ItemID)
 
 	Button:HookScript('OnLeave', GameTooltip_Hide)
 
-	local function Update(self)
+	local function Update(button)
 		if not InCombatLockdown() then
-			if self:GetAttribute('item') ~= GetItemInfo(ItemID) then
-				self:SetAttribute('item', GetItemInfo(ItemID))
+			if button:GetAttribute('item') ~= GetItemInfo(button.ItemID) then
+				button:SetAttribute('item', GetItemInfo(button.ItemID))
 			end
-			local Count = GetItemCount(ItemID)
-			self:EnableMouse(Count > 0)
-			self.Count:SetText(Count > 0 and Count or '')
-			self.icon:SetDesaturated(Count == 0)
-			self:UnregisterEvent('PLAYER_REGEN_ENABLED')
+			local Count = GetItemCount(button.ItemID)
+			button:EnableMouse(Count > 0)
+			button.Count:SetText(Count > 0 and Count or '')
+			button.icon:SetDesaturated(Count == 0)
+			button:UnregisterEvent('PLAYER_REGEN_ENABLED')
 		else
-			self:RegisterEvent('PLAYER_REGEN_ENABLED')
+			button:RegisterEvent('PLAYER_REGEN_ENABLED')
 		end
 	end
 
@@ -215,9 +215,6 @@ function BB:CreateSeedButton(ItemID)
 	if AS then
 		AS:SkinButton(Button)
 		AS:CreateShadow(Button)
-		if ES then
-			ES:RegisterShadow(Button.Shadow)
-		end
 	end
 
 	tinsert(self.Bar.SeedsFrame.Buttons, Button)
@@ -243,7 +240,6 @@ function BB:GetOptions()
 		type = 'group',
 		name = BB.Title,
 		desc = BB.Description,
-		order = 219,
 		get = function(info) return BB.db[info[#info]] end,
 		set = function(info, value) BB.db[info[#info]] = value BB:Update() end,
 		args = {
@@ -283,34 +279,34 @@ function BB:GetOptions()
 		},
 	}
 
-	Options.args.profiles = LibStub('AceDBOptions-3.0'):GetOptionsTable(BB.data)
-	Options.args.profiles.order = -2
-
 	PA.Options.args.BigButtons = Options
 end
 
 function BB:BuildProfile()
-	self.data = PA.ADB:New('BigButtonsDB', {
-		profile = {
-			['DropTools'] = false,
-			['ToolSize'] = 50,
-			['SeedSize'] = 30,
-		},
-	}, true)
-	self.data.RegisterCallback(self, 'OnProfileChanged', 'SetupProfile')
-	self.data.RegisterCallback(self, 'OnProfileCopied', 'SetupProfile')
-	self.db = self.data.profile
-end
+	PA.Defaults.profile['BigButtons'] = {
+		['Enable'] = false,
+		['DropTools'] = false,
+		['ToolSize'] = 50,
+		['SeedSize'] = 30,
+	}
 
-function BB:SetupProfile()
-	self.db = self.data.profile
+	PA.Options.args.general.args.BigButtons = {
+		type = 'toggle',
+		name = BB.Title,
+		desc = BB.Description,
+	}
 end
 
 function BB:Initialize()
-	BB:BuildProfile()
+	BB.db = PA.db['BigButtons']
+
+	if BB.db.Enable ~= true then
+		return
+	end
+
 	BB:GetOptions()
 
-	ES, AS = _G.EnhancedShadows, _G.AddOnSkins and _G.AddOnSkins[1]
+	AS = _G.AddOnSkins and _G.AddOnSkins[1]
 
 	local Bar = CreateFrame('Frame', 'BigButtonsBar', UIParent, "SecureHandlerStateTemplate")
 	BB.Bar = Bar
@@ -341,25 +337,25 @@ function BB:Initialize()
 		Bar.SeedsFrame:RegisterEvent(event)
 	end
 
-	Bar:SetScript('OnEvent', function(self)
+	Bar:SetScript('OnEvent', function(frame)
 		if not InCombatLockdown() then
 			if BB:InFarmZone() then
-				self:Show()
-				UIFrameFadeIn(self, 0.5, 0, 1)
+				frame:Show()
+				UIFrameFadeIn(frame, 0.5, 0, 1)
 			else
 				BB:DropTools()
-				self:Hide()
+				frame:Hide()
 			end
 		end
 	end)
 
-	Bar.SeedsFrame:SetScript('OnEvent', function(self)
+	Bar.SeedsFrame:SetScript('OnEvent', function(frame)
 		if not InCombatLockdown() then
 			if BB:InSeedZone() then
-				self:Show()
-				UIFrameFadeIn(self, 0.5, 0, 1)
+				frame:Show()
+				UIFrameFadeIn(frame, 0.5, 0, 1)
 			else
-				self:Hide()
+				frame:Hide()
 			end
 		end
 	end)
@@ -372,12 +368,8 @@ function BB:Initialize()
 		_G.ElvUI[1]:CreateMover(BB.Bar.SeedsFrame, 'BigButtonsSeedBar', 'BigButtons Seed Bar Anchor', nil, nil, nil, 'ALL,GENERAL')
 	end
 
-	if AS then
-		AS:CreateShadow(Bar.SeedsFrame)
-		AS:SetTemplate(Bar.SeedsFrame, 'Transparent')
-		Bar.SeedsFrame.BorderColor = { Bar.SeedsFrame:GetBackdropBorderColor() }
-		if ES then
-			ES:RegisterShadow(Bar.SeedsFrame.Shadow)
-		end
-	end
+	PA:CreateShadow(Bar.SeedsFrame)
+	PA:SetTemplate(Bar.SeedsFrame)
+
+	Bar.SeedsFrame.BorderColor = { Bar.SeedsFrame:GetBackdropBorderColor() }
 end

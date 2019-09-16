@@ -13,7 +13,7 @@ local Minimap = Minimap
 
 SMB.Buttons = {}
 
-local ignoreButtons = {
+SMB.IgnoreButton = {
 	'GameTimeFrame',
 	'HelpOpenWebTicketButton',
 	'MiniMapVoiceChatFrame',
@@ -25,11 +25,13 @@ local ignoreButtons = {
 	'GarrisonLandingPageMinimapButton',
 	'MiniMapMailFrame',
 	'MiniMapTracking',
+	'MinimapZoomIn',
+	'MinimapZoomOut',
 	'TukuiMinimapZone',
 	'TukuiMinimapCoord',
 }
 
-local GenericIgnores = {
+SMB.GenericIgnore = {
 	'Archy',
 	'GatherMatePin',
 	'GatherNote',
@@ -47,11 +49,13 @@ local GenericIgnores = {
 	'DugisArrowMinimapPoint',
 }
 
-local PartialIgnores = { 'Node', 'Note', 'Pin', 'POI' }
+SMB.PartialIgnore = { 'Node', 'Note', 'Pin', 'POI' }
 
-local AcceptedFrames = {
-	'BagSync_MinimapButton',
-	'VendomaticButtonFrame',
+SMB.OverrideTexture = {
+	BagSync_MinimapButton = [[Interface\AddOns\BagSync\media\icon]],
+	DBMMinimapButton = [[Interface\Icons\INV_Helmet_87]],
+	SmartBuff_MiniMapButton = [[Interface\Icons\Spell_Nature_Purge]],
+	VendomaticButtonFrame = [[Interface\Icons\INV_Misc_Rabbit_2]],
 }
 
 local ButtonFunctions = { 'SetParent', 'ClearAllPoints', 'SetPoint', 'SetSize', 'SetScale', 'SetFrameStrata', 'SetFrameLevel' }
@@ -71,47 +75,18 @@ end
 function SMB:HandleBlizzardButtons()
 	if not self.db['BarEnabled'] then return end
 
-	if self.db['HideGarrison'] then
-		GarrisonLandingPageMinimapButton:UnregisterAllEvents()
-		GarrisonLandingPageMinimapButton:SetParent(self.Hider)
-		GarrisonLandingPageMinimapButton:Hide()
-	elseif self.db["MoveGarrison"] and not GarrisonLandingPageMinimapButton.SMB then
-		GarrisonLandingPageMinimapButton:SetParent(Minimap)
-		GarrisonLandingPageMinimapButton:Show()
-		GarrisonLandingPageMinimapButton:SetScale(1)
-		GarrisonLandingPageMinimapButton:SetHitRectInsets(0, 0, 0, 0)
-		GarrisonLandingPageMinimapButton:SetScript('OnEnter', nil)
-		GarrisonLandingPageMinimapButton:SetScript('OnLeave', nil)
-
-		GarrisonLandingPageMinimapButton:HookScript('OnEnter', function(self)
-			self:SetBackdropBorderColor(unpack(PA.ClassColor))
-			if SMB.Bar:IsShown() then
-				UIFrameFadeIn(SMB.Bar, 0.2, SMB.Bar:GetAlpha(), 1)
-			end
-		end)
-		GarrisonLandingPageMinimapButton:HookScript('OnLeave', function(self)
-			self:SetTemplate()
-			if SMB.Bar:IsShown() and SMB.db['BarMouseOver'] then
-				UIFrameFadeOut(SMB.Bar, 0.2, SMB.Bar:GetAlpha(), 0)
-			end
-		end)
-
-		GarrisonLandingPageMinimapButton.SMB = true
-		tinsert(self.Buttons, GarrisonLandingPageMinimapButton)
-	end
-
 	if self.db["MoveMail"] and not MiniMapMailFrame.SMB then
 		local Frame = CreateFrame('Frame', 'SMB_MailFrame', self.Bar)
 		Frame:SetSize(SMB.db['IconSize'], SMB.db['IconSize'])
-		Frame:SetTemplate()
+		PA:SetTemplate(Frame)
 		Frame.Icon = Frame:CreateTexture(nil, 'ARTWORK')
 		Frame.Icon:SetPoint('CENTER')
-		Frame.Icon:Size(18)
+		Frame.Icon:SetSize(18, 18)
 		Frame.Icon:SetTexture(MiniMapMailIcon:GetTexture())
 		Frame:EnableMouse(true)
 		Frame:HookScript('OnEnter', function(self)
 			if HasNewMail() then
-				GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT");
+				GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
 				if GameTooltip:IsOwned(self) then
 					MinimapMailFrameUpdate()
 				end
@@ -123,158 +98,207 @@ function SMB:HandleBlizzardButtons()
 		end)
 		Frame:HookScript('OnLeave', function(self)
 			GameTooltip:Hide()
-			self:SetTemplate()
+			PA:SetTemplate(self)
 			if SMB.Bar:IsShown() and SMB.db['BarMouseOver'] then
 				UIFrameFadeOut(SMB.Bar, 0.2, SMB.Bar:GetAlpha(), 0)
 			end
 		end)
+
 		MiniMapMailFrame:HookScript('OnShow', function() Frame.Icon:SetVertexColor(0, 1, 0)	end)
 		MiniMapMailFrame:HookScript('OnHide', function() Frame.Icon:SetVertexColor(1, 1, 1) end)
+
+		if MiniMapMailFrame:IsShown() then
+			Frame.Icon:SetVertexColor(0, 1, 0)
+		end
 
 		-- Hide Icon & Border
 		MiniMapMailIcon:Hide()
 		MiniMapMailBorder:Hide()
 
+		if SMB.db.Shadows then
+			PA:CreateShadow(Frame)
+		end
+
 		MiniMapMailFrame.SMB = true
 		tinsert(self.Buttons, Frame)
 	end
 
-	if self.db["MoveTracker"] and not MiniMapTrackingButton.SMB then
-		MiniMapTracking.Show = nil
+	if PA.Retail then
+		if self.db['HideGarrison'] then
+			GarrisonLandingPageMinimapButton:UnregisterAllEvents()
+			GarrisonLandingPageMinimapButton:SetParent(self.Hider)
+			GarrisonLandingPageMinimapButton:Hide()
+		elseif self.db["MoveGarrison"] and not GarrisonLandingPageMinimapButton.SMB then
+			GarrisonLandingPageMinimapButton:SetParent(Minimap)
+			GarrisonLandingPageMinimapButton_OnLoad(GarrisonLandingPageMinimapButton)
+			GarrisonLandingPageMinimapButton_UpdateIcon(GarrisonLandingPageMinimapButton)
+			GarrisonLandingPageMinimapButton:Show()
+			GarrisonLandingPageMinimapButton:SetScale(1)
+			GarrisonLandingPageMinimapButton:SetHitRectInsets(0, 0, 0, 0)
+			GarrisonLandingPageMinimapButton:SetScript('OnEnter', function(self)
+				self:SetBackdropBorderColor(unpack(PA.ClassColor))
+				if SMB.Bar:IsShown() then
+					UIFrameFadeIn(SMB.Bar, 0.2, SMB.Bar:GetAlpha(), 1)
+				end
+			end)
+			GarrisonLandingPageMinimapButton:SetScript('OnLeave', function(self)
+				PA:SetTemplate(self)
+				if SMB.Bar:IsShown() and SMB.db['BarMouseOver'] then
+					UIFrameFadeOut(SMB.Bar, 0.2, SMB.Bar:GetAlpha(), 0)
+				end
+			end)
 
-		MiniMapTracking:Show()
+			GarrisonLandingPageMinimapButton.SMB = true
 
-		MiniMapTracking:SetParent(self.Bar)
-		MiniMapTracking:SetSize(self.db['IconSize'], self.db['IconSize'])
-
-		MiniMapTrackingIcon:ClearAllPoints()
-		MiniMapTrackingIcon:SetPoint('CENTER')
-
-		MiniMapTrackingBackground:SetAlpha(0)
-		MiniMapTrackingIconOverlay:SetAlpha(0)
-		MiniMapTrackingButton:SetAlpha(0)
-
-		MiniMapTrackingButton:SetParent(MinimapTracking)
-		MiniMapTrackingButton:ClearAllPoints()
-		MiniMapTrackingButton:SetAllPoints(MiniMapTracking)
-
-		MiniMapTrackingButton:SetScript('OnMouseDown', nil)
-		MiniMapTrackingButton:SetScript('OnMouseUp', nil)
-
-		MiniMapTrackingButton:HookScript('OnEnter', function(self)
-			MiniMapTracking:SetBackdropBorderColor(unpack(PA.ClassColor))
-			if SMB.Bar:IsShown() then
-				UIFrameFadeIn(SMB.Bar, 0.2, SMB.Bar:GetAlpha(), 1)
+			if SMB.db.Shadows then
+				PA:CreateShadow(GarrisonLandingPageMinimapButton)
 			end
-		end)
-		MiniMapTrackingButton:HookScript('OnLeave', function(self)
-			MiniMapTracking:SetTemplate()
-			if SMB.Bar:IsShown() and SMB.db['BarMouseOver'] then
-				UIFrameFadeOut(SMB.Bar, 0.2, SMB.Bar:GetAlpha(), 0)
+
+			tinsert(self.Buttons, GarrisonLandingPageMinimapButton)
+		end
+
+		if self.db["MoveTracker"] and not MiniMapTrackingButton.SMB then
+			MiniMapTracking.Show = nil
+
+			MiniMapTracking:Show()
+
+			MiniMapTracking:SetParent(self.Bar)
+			MiniMapTracking:SetSize(self.db['IconSize'], self.db['IconSize'])
+
+			MiniMapTrackingIcon:ClearAllPoints()
+			MiniMapTrackingIcon:SetPoint('CENTER')
+
+			MiniMapTrackingBackground:SetAlpha(0)
+			MiniMapTrackingIconOverlay:SetAlpha(0)
+			MiniMapTrackingButton:SetAlpha(0)
+
+			MiniMapTrackingButton:SetParent(MinimapTracking)
+			MiniMapTrackingButton:ClearAllPoints()
+			MiniMapTrackingButton:SetAllPoints(MiniMapTracking)
+
+			MiniMapTrackingButton:SetScript('OnMouseDown', nil)
+			MiniMapTrackingButton:SetScript('OnMouseUp', nil)
+
+			MiniMapTrackingButton:HookScript('OnEnter', function(self)
+				MiniMapTracking:SetBackdropBorderColor(unpack(PA.ClassColor))
+				if SMB.Bar:IsShown() then
+					UIFrameFadeIn(SMB.Bar, 0.2, SMB.Bar:GetAlpha(), 1)
+				end
+			end)
+			MiniMapTrackingButton:HookScript('OnLeave', function(self)
+				PA:SetTemplate(MiniMapTracking)
+				if SMB.Bar:IsShown() and SMB.db['BarMouseOver'] then
+					UIFrameFadeOut(SMB.Bar, 0.2, SMB.Bar:GetAlpha(), 0)
+				end
+			end)
+
+			MiniMapTrackingButton.SMB = true
+
+			if SMB.db.Shadows then
+				PA:CreateShadow(MiniMapTracking)
 			end
-		end)
 
-		MiniMapTrackingButton.SMB = true
-		tinsert(self.Buttons, MiniMapTracking)
-	end
+			tinsert(self.Buttons, MiniMapTracking)
+		end
 
-	if self.db["MoveQueue"] and not QueueStatusMinimapButton.SMB then
-		local Frame = CreateFrame('Frame', 'SMB_QueueFrame', self.Bar)
-		Frame:SetTemplate()
-		Frame:SetSize(SMB.db['IconSize'], SMB.db['IconSize'])
-		Frame.Icon = Frame:CreateTexture(nil, 'ARTWORK')
-		Frame.Icon:SetSize(SMB.db['IconSize'], SMB.db['IconSize'])
-		Frame.Icon:SetPoint('CENTER')
-		Frame.Icon:SetTexture([[Interface\LFGFrame\LFG-Eye]])
-		Frame.Icon:SetTexCoord(0, 64 / 512, 0, 64 / 256)
-		Frame:SetScript('OnMouseDown', function()
-			if PVEFrame:IsShown() then
-				HideUIPanel(PVEFrame)
-			else
-				ShowUIPanel(PVEFrame)
-				GroupFinderFrame_ShowGroupFrame()
+		if self.db["MoveQueue"] and not QueueStatusMinimapButton.SMB then
+			local Frame = CreateFrame('Frame', 'SMB_QueueFrame', self.Bar)
+			PA:SetTemplate(Frame)
+			Frame:SetSize(SMB.db['IconSize'], SMB.db['IconSize'])
+			Frame.Icon = Frame:CreateTexture(nil, 'ARTWORK')
+			Frame.Icon:SetSize(SMB.db['IconSize'], SMB.db['IconSize'])
+			Frame.Icon:SetPoint('CENTER')
+			Frame.Icon:SetTexture([[Interface\LFGFrame\LFG-Eye]])
+			Frame.Icon:SetTexCoord(0, 64 / 512, 0, 64 / 256)
+			Frame:SetScript('OnMouseDown', function()
+				if PVEFrame:IsShown() then
+					HideUIPanel(PVEFrame)
+				else
+					ShowUIPanel(PVEFrame)
+					GroupFinderFrame_ShowGroupFrame()
+				end
+			end)
+			Frame:HookScript('OnEnter', function(self)
+				self:SetBackdropBorderColor(unpack(PA.ClassColor))
+				if SMB.Bar:IsShown() then
+					UIFrameFadeIn(SMB.Bar, 0.2, SMB.Bar:GetAlpha(), 1)
+				end
+			end)
+			Frame:HookScript('OnLeave', function(self)
+				PA:SetTemplate(self)
+				if SMB.Bar:IsShown() and SMB.db['BarMouseOver'] then
+					UIFrameFadeOut(SMB.Bar, 0.2, SMB.Bar:GetAlpha(), 0)
+				end
+			end)
+
+			QueueStatusMinimapButton:SetParent(self.Bar)
+			QueueStatusMinimapButton:SetFrameLevel(Frame:GetFrameLevel() + 2)
+			QueueStatusMinimapButton:ClearAllPoints()
+			QueueStatusMinimapButton:SetPoint("CENTER", Frame, "CENTER", 0, 0)
+
+			QueueStatusMinimapButton:SetHighlightTexture(nil)
+
+			QueueStatusMinimapButton:HookScript('OnShow', function(self)
+				Frame:EnableMouse(false)
+			end)
+			QueueStatusMinimapButton:HookScript('PostClick', QueueStatusMinimapButton_OnLeave)
+			QueueStatusMinimapButton:HookScript('OnHide', function(self)
+				Frame:EnableMouse(true)
+			end)
+
+			QueueStatusMinimapButton.SMB = true
+
+			if SMB.db.Shadows then
+				PA:CreateShadow(Frame)
 			end
-		end)
-		Frame:HookScript('OnEnter', function(self)
-			self:SetBackdropBorderColor(unpack(PA.ClassColor))
-			if SMB.Bar:IsShown() then
-				UIFrameFadeIn(SMB.Bar, 0.2, SMB.Bar:GetAlpha(), 1)
-			end
-		end)
-		Frame:HookScript('OnLeave', function(self)
-			self:SetTemplate()
-			if SMB.Bar:IsShown() and SMB.db['BarMouseOver'] then
-				UIFrameFadeOut(SMB.Bar, 0.2, SMB.Bar:GetAlpha(), 0)
-			end
-		end)
 
-		QueueStatusMinimapButton:SetParent(self.Bar)
-		QueueStatusMinimapButton:SetFrameLevel(Frame:GetFrameLevel() + 2)
-		QueueStatusMinimapButton:ClearAllPoints()
-		QueueStatusMinimapButton:SetPoint("CENTER", Frame, "CENTER", 0, 0)
-
-		QueueStatusMinimapButton:SetHighlightTexture(nil)
-
-		QueueStatusMinimapButton:HookScript('OnShow', function(self)
-			Frame:EnableMouse(false)
-		end)
-		QueueStatusMinimapButton:HookScript('PostClick', QueueStatusMinimapButton_OnLeave)
-		QueueStatusMinimapButton:HookScript('OnHide', function(self)
-			Frame:EnableMouse(true)
-		end)
-
-		QueueStatusMinimapButton.SMB = true
-		tinsert(self.Buttons, Frame)
+			tinsert(self.Buttons, Frame)
+		end
 	end
 
 	self:Update()
 end
 
 function SMB:SkinMinimapButton(Button)
-	if (not Button) then return end
-	if Button.isSkinned then return end
+	if (not Button) or Button.isSkinned then return end
 
 	local Name = Button:GetName()
 	if not Name then return end
 
-	if Button:IsObjectType('Button') then
-		if tContains(ignoreButtons, Name) then return end
+	if tContains(SMB.IgnoreButton, Name) then return end
 
-		for i = 1, #GenericIgnores do
-			if strsub(Name, 1, strlen(GenericIgnores[i])) == GenericIgnores[i] then return end
-		end
+	for i = 1, #SMB.GenericIgnore do
+		if strsub(Name, 1, strlen(SMB.GenericIgnore[i])) == SMB.GenericIgnore[i] then return end
+	end
 
-		for i = 1, #PartialIgnores do
-			if strfind(Name, PartialIgnores[i]) ~= nil then return end
-		end
+	for i = 1, #SMB.PartialIgnore do
+		if strfind(Name, SMB.PartialIgnore[i]) ~= nil then return end
 	end
 
 	for i = 1, Button:GetNumRegions() do
 		local Region = select(i, Button:GetRegions())
-		if Region:GetObjectType() == 'Texture' then
-			local Texture = Region:GetTexture()
+		if Region.IsObjectType and Region:IsObjectType('Texture') then
+			local Texture = strlower(tostring(Region:GetTexture()))
 
-			if Texture and (strfind(Texture, 'Border') or strfind(Texture, 'Background') or strfind(Texture, 'AlphaMask') or strfind(Texture, 'Highlight')) then
+			if (strfind(Texture, [[interface\characterframe]]) or (strfind(Texture, [[interface\minimap]]) and not strfind(Texture, [[interface\minimap\tracking\]])) or strfind(Texture, 'border') or strfind(Texture, 'background') or strfind(Texture, 'alphamask') or strfind(Texture, 'highlight')) then
+				Region:SetTexture()
 				Region:SetAlpha(0)
 			else
-				if Name == 'BagSync_MinimapButton' then
-					Region:SetTexture('Interface\\AddOns\\BagSync\\media\\icon')
-				elseif Name == 'DBMMinimapButton' then
-					Region:SetTexture('Interface\\Icons\\INV_Helmet_87')
-				elseif Name == 'OutfitterMinimapButton' then
-					if Region:GetTexture() == 'Interface\\Addons\\Outfitter\\Textures\\MinimapButton' then
-						Region:SetTexture(nil)
-					end
-				elseif Name == 'SmartBuff_MiniMapButton' then
-					Region:SetTexture('Interface\\Icons\\Spell_Nature_Purge')
-				elseif Name == 'VendomaticButtonFrame' then
-					Region:SetTexture('Interface\\Icons\\INV_Misc_Rabbit_2')
+				if SMB.OverrideTexture[Name] then
+					Region:SetTexture(SMB.OverrideTexture[Name])
+				elseif Name == 'OutfitterMinimapButton' and Texture == [[interface\addons\outfitter\textures\minimapbutton]] then
+					Region:SetTexture()
 				end
+
 				Region:ClearAllPoints()
-				Region:SetInside()
-				Region:SetTexCoord(unpack(self.TexCoords))
-				Button:HookScript('OnLeave', function() Region:SetTexCoord(unpack(self.TexCoords)) end)
 				Region:SetDrawLayer('ARTWORK')
+				PA:SetInside(Region)
+
+				if not Button.ignoreCrop then
+					Region:SetTexCoord(unpack(self.TexCoords))
+					Button:HookScript('OnLeave', function() Region:SetTexCoord(unpack(self.TexCoords)) end)
+				end
+
 				Region.SetPoint = function() return end
 			end
 		end
@@ -282,15 +306,22 @@ function SMB:SkinMinimapButton(Button)
 
 	Button:SetFrameLevel(Minimap:GetFrameLevel() + 5)
 	Button:SetSize(SMB.db['IconSize'], SMB.db['IconSize'])
-	Button:SetTemplate()
+
+	if not Button.ignoreTemplate then
+		PA:SetTemplate(Button)
+
+		if SMB.db.Shadows then
+			PA:CreateShadow(Button)
+		end
+	end
+
 	Button:HookScript('OnEnter', function(self)
-		self:SetBackdropBorderColor(unpack(PA.ClassColor))
 		if SMB.Bar:IsShown() then
 			UIFrameFadeIn(SMB.Bar, 0.2, SMB.Bar:GetAlpha(), 1)
 		end
 	end)
 	Button:HookScript('OnLeave', function(self)
-		self:SetTemplate()
+		PA:SetTemplate(self)
 		if SMB.Bar:IsShown() and SMB.db['BarMouseOver'] then
 			UIFrameFadeOut(SMB.Bar, 0.2, SMB.Bar:GetAlpha(), 0)
 		end
@@ -301,18 +332,22 @@ function SMB:SkinMinimapButton(Button)
 end
 
 function SMB:GrabMinimapButtons()
-	if (InCombatLockdown() or C_PetBattles.IsInBattle()) then return end
+	if (InCombatLockdown() or C_PetBattles and C_PetBattles.IsInBattle()) then return end
 
 	for _, Frame in pairs({ Minimap, MinimapBackdrop }) do
-		for i = 1, Frame:GetNumChildren() do
+		local NumChildren = Frame:GetNumChildren()
+		if NumChildren < (Frame.SMBNumChildren or 0) then return end
+		for i = 1, NumChildren do
 			local object = select(i, Frame:GetChildren())
 			if object then
 				local name = object:GetName()
-				if name and (object:IsObjectType('Button') or object:IsObjectType('Frame') and tContains(AcceptedFrames, name)) then
+				local width = object:GetWidth()
+				if name and width > 15 and width < 40 and (object:IsObjectType('Button') or object:IsObjectType('Frame')) then
 					self:SkinMinimapButton(object)
 				end
 			end
 		end
+		Frame.SMBNumChildren = NumChildren
 	end
 
 	self:Update()
@@ -321,39 +356,40 @@ end
 function SMB:Update()
 	if not SMB.db['BarEnabled'] then return end
 
-	local AnchorX, AnchorY, MaxX = 0, 1, SMB.db['ButtonsPerRow']
-	local ButtonsPerRow = SMB.db['ButtonsPerRow']
-	local NumColumns = ceil(#SMB.Buttons / ButtonsPerRow)
-	local Spacing, Mult = SMB.db['ButtonSpacing'], 1
-	local Size = SMB.db['IconSize']
+	local AnchorX, AnchorY = 0, 1
+	local ButtonsPerRow = SMB.db['ButtonsPerRow'] or 12
+	local Spacing = SMB.db['ButtonSpacing'] or 2
+	local Size = SMB.db['IconSize'] or 27
 	local ActualButtons, Maxed = 0
 
-	if NumColumns == 1 and ButtonsPerRow > #SMB.Buttons then
-		ButtonsPerRow = #SMB.Buttons
+	local Anchor, DirMult = 'TOPLEFT', 1
+
+	if SMB.db['ReverseDirection'] then
+		Anchor, DirMult = 'TOPRIGHT', -1
 	end
 
 	for _, Button in pairs(SMB.Buttons) do
 		if Button:IsVisible() then
-			AnchorX = AnchorX + 1
-			ActualButtons = ActualButtons + 1
-			if AnchorX > MaxX then
-				AnchorY = AnchorY + 1
-				AnchorX = 1
-				Maxed = true
+			AnchorX, ActualButtons = AnchorX + 1, ActualButtons + 1
+
+			if (AnchorX % (ButtonsPerRow + 1)) == 0 then
+				AnchorY, AnchorX, Maxed = AnchorY + 1, 1, true
 			end
 
 			SMB:UnlockButton(Button)
 
-			Button:SetTemplate()
+			PA:SetTemplate(Button)
+
 			Button:SetParent(self.Bar)
 			Button:ClearAllPoints()
-			Button:SetPoint('TOPLEFT', self.Bar, 'TOPLEFT', (Spacing + ((Size + Spacing) * (AnchorX - 1))), (- Spacing - ((Size + Spacing) * (AnchorY - 1))))
+			Button:SetPoint(Anchor, self.Bar, Anchor, DirMult * (Spacing + ((Size + Spacing) * (AnchorX - 1))), (- Spacing - ((Size + Spacing) * (AnchorY - 1))))
 			Button:SetSize(SMB.db['IconSize'], SMB.db['IconSize'])
 			Button:SetScale(1)
 			Button:SetFrameStrata('LOW')
 			Button:SetFrameLevel(self.Bar:GetFrameLevel() + 1)
 			Button:SetScript('OnDragStart', nil)
 			Button:SetScript('OnDragStop', nil)
+			--Button:SetScript('OnEvent', nil)
 
 			SMB:LockButton(Button)
 
@@ -361,17 +397,22 @@ function SMB:Update()
 		end
 	end
 
-	local BarWidth = (Spacing + ((Size * (ActualButtons * Mult)) + ((Spacing * (ActualButtons - 1)) * Mult) + (Spacing * Mult)))
-	local BarHeight = (Spacing + ((Size * (AnchorY * Mult)) + ((Spacing * (AnchorY - 1)) * Mult) + (Spacing * Mult)))
+	local BarWidth = Spacing + (Size * ActualButtons) + (Spacing * (ActualButtons - 1)) + Spacing
+	local BarHeight = Spacing + (Size * AnchorY) + (Spacing * (AnchorY - 1)) + Spacing
+
 	self.Bar:SetSize(BarWidth, BarHeight)
 
 	if self.db.Backdrop then
-		self.Bar:SetTemplate('Transparent', true)
+		PA:SetTemplate(self.Bar)
 	else
 		self.Bar:SetBackdrop(nil)
 	end
 
-	self.Bar:Show()
+	if ActualButtons == 0 then
+		self.Bar:Hide()
+	else
+		self.Bar:Show()
+	end
 
 	if self.db['BarMouseOver'] then
 		UIFrameFadeOut(self.Bar, 0.2, self.Bar:GetAlpha(), 0)
@@ -385,7 +426,6 @@ function SMB:GetOptions()
 		type = 'group',
 		name = SMB.Title,
 		desc = SMB.Description,
-		order = 211,
 		get = function(info) return SMB.db[info[#info]] end,
 		set = function(info, value) SMB.db[info[#info]] = value SMB:Update() end,
 		args = {
@@ -431,7 +471,17 @@ function SMB:GetOptions()
 						order = 6,
 						type = 'range',
 						name = PA.ACL['Buttons Per Row'],
-						min = 1, max = 12, step = 1,
+						min = 1, max = 100, step = 1,
+					},
+					Shadows = {
+						order = 7,
+						type = 'toggle',
+						name = PA.ACL['Shadows'],
+					},
+					ReverseDirection = {
+						order = 8,
+						type = "toggle",
+						name = PA.ACL["Reverse Direction"],
 					},
 				},
 			},
@@ -445,29 +495,28 @@ function SMB:GetOptions()
 					HideGarrison  = {
 						type = 'toggle',
 						name = PA.ACL['Hide Garrison'],
-						order = 1,
 						disabled = function() return SMB.db.MoveGarrison end,
+						hidden = function() return PA.Classic end,
 					},
 					MoveGarrison  = {
 						type = 'toggle',
 						name = PA.ACL['Move Garrison Icon'],
-						order = 2,
 						disabled = function() return SMB.db.HideGarrison end,
+						hidden = function() return PA.Classic end,
 					},
 					MoveMail  = {
 						type = 'toggle',
 						name = PA.ACL['Move Mail Icon'],
-						order = 3,
 					},
 					MoveTracker  = {
 						type = 'toggle',
 						name = PA.ACL['Move Tracker Icon'],
-						order = 3,
+						hidden = function() return PA.Classic end,
 					},
 					MoveQueue  = {
 						type = 'toggle',
 						name = PA.ACL['Move Queue Status Icon'],
-						order = 3,
+						hidden = function() return PA.Classic end,
 					},
 				},
 			},
@@ -485,51 +534,53 @@ function SMB:GetOptions()
 		},
 	}
 
-	Options.args.profiles = LibStub('AceDBOptions-3.0'):GetOptionsTable(SMB.data)
-	Options.args.profiles.order = -2
-
 	PA.Options.args.SquareMinimapButton = Options
 end
 
 function SMB:BuildProfile()
-	self.data = PA.ADB:New('SquareMinimapButtonsDB', {
-		profile = {
-			['BarMouseOver'] = false,
-			['BarEnabled'] = false,
-			['Backdrop'] = false,
-			['IconSize'] = 27,
-			['ButtonsPerRow'] = 12,
-			['ButtonSpacing'] = 2,
-			['HideGarrison'] = false,
-			['MoveGarrison'] = true,
-			['MoveMail'] = true,
-			['MoveTracker'] = true,
-			['MoveQueue'] = true,
-		},
-	})
-	self.data.RegisterCallback(self, 'OnProfileChanged', 'SetupProfile')
-	self.data.RegisterCallback(self, 'OnProfileCopied', 'SetupProfile')
-	self.db = self.data.profile
-end
+	PA.Defaults.profile['SquareMinimapButtons'] = {
+		['Enable'] = true,
+		['BarMouseOver'] = false,
+		['BarEnabled'] = false,
+		['Backdrop'] = false,
+		['IconSize'] = 27,
+		['ButtonsPerRow'] = 12,
+		['ButtonSpacing'] = 2,
+		['HideGarrison'] = false,
+		['MoveGarrison'] = true,
+		['MoveMail'] = true,
+		['MoveTracker'] = true,
+		['MoveQueue'] = true,
+		['Shadows'] = true,
+		['ReverseDirection'] = false,
+	}
 
-function SMB:SetupProfile()
-	self.db = self.data.profile
+	PA.Options.args.general.args.SquareMinimapButtons = {
+		type = 'toggle',
+		name = SMB.Title,
+		desc = SMB.Description,
+	}
 end
 
 function SMB:Initialize()
+	SMB.db = PA.db['SquareMinimapButtons']
+
+	if SMB.db.Enable ~= true then
+		return
+	end
+
 	if PA.ElvUI and PA.SLE then
 		if ElvUI[1].private.sle.minimap.mapicons.enable then
-			StaticPopupDialogs["PA_INCOMPATIBLE"].text = 'Square Minimap Buttons and S&L MiniMap Buttons are incompatible. You will have to choose one. This will reload the interface.'
-			StaticPopupDialogs["PA_INCOMPATIBLE"].button1 = 'Square Minimap Buttons'
-			StaticPopupDialogs["PA_INCOMPATIBLE"].button2 = 'S&L MiniMap Buttons'
-			StaticPopupDialogs["PA_INCOMPATIBLE"].OnAccept = function() ElvUI[1].private.sle.minimap.mapicons.enable = false ReloadUI() end
-			StaticPopupDialogs["PA_INCOMPATIBLE"].OnCancel = function() PA.db['SMB'] = false ReloadUI() end
-			StaticPopup_Show("PA_INCOMPATIBLE")
+			StaticPopupDialogs["PROJECTAZILROKA"].text = 'Square Minimap Buttons and S&L MiniMap Buttons are incompatible. You will have to choose one. This will reload the interface.'
+			StaticPopupDialogs["PROJECTAZILROKA"].button1 = 'Square Minimap Buttons'
+			StaticPopupDialogs["PROJECTAZILROKA"].button2 = 'S&L MiniMap Buttons'
+			StaticPopupDialogs["PROJECTAZILROKA"].OnAccept = function() ElvUI[1].private.sle.minimap.mapicons.enable = false ReloadUI() end
+			StaticPopupDialogs["PROJECTAZILROKA"].OnCancel = function() PA.db['SquareMinimapButtons']['Enable'] = false ReloadUI() end
+			StaticPopup_Show("PROJECTAZILROKA")
 			return
 		end
 	end
 
-	SMB:BuildProfile()
 	SMB:GetOptions()
 
 	SMB.Hider = CreateFrame("Frame", nil, UIParent)
@@ -556,9 +607,7 @@ function SMB:Initialize()
 		ElvUI[1]:CreateMover(SMB.Bar, 'SquareMinimapButtonBarMover', 'SquareMinimapButtonBar Anchor', nil, nil, nil, 'ALL,GENERAL')
 	end
 
-	SMB.TexCoords = { .08, .92, .08, .92 }
-
-	Minimap:SetMaskTexture('Interface\\ChatFrame\\ChatFrameBackground')
+	SMB.TexCoords = PA.TexCoords
 
 	SMB:ScheduleRepeatingTimer('GrabMinimapButtons', 6)
 	SMB:ScheduleTimer('HandleBlizzardButtons', 7)
