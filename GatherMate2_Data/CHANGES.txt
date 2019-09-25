@@ -1,3 +1,8 @@
+20190922
+- Ran de-duplication of nodes
+- Added in any nodes I found while questing
+- Removed the "zone [0]" extra data
+
 20190911 
 - Fixed the format of the treasure nodes
 - Shifted the Eastern Plaguelands nodes

@@ -1,8 +1,6 @@
 # GatherMate2
 
-## [1.45](https://github.com/Nevcairiel/GatherMate2/tree/1.45) (2019-08-30)
-[Full Changelog](https://github.com/Nevcairiel/GatherMate2/compare/1.44.4...1.45)
+## [1.45.1](https://github.com/Nevcairiel/GatherMate2/tree/1.45.1) (2019-09-25)
+[Full Changelog](https://github.com/Nevcairiel/GatherMate2/compare/1.45...1.45.1)
 
-- Hide herbs/veins from higher expansions in the filter dialog  
-- Add classic building support  
-- Port classic support from the classic branch into the mainline source  
+- Update TOC for 8.2.5  

@@ -67,10 +67,15 @@ module.db.topEnchGems = {
 	--[5940]="Ring:Mastery:27",
 	--[5941]="Ring:Vers:27",
 
-	[5942]="Ring:Crit:37",
-	[5943]="Ring:Haste:37",
-	[5944]="Ring:Mastery:37",
-	[5945]="Ring:Vers:37",
+	--[5942]="Ring:Crit:37",
+	--[5943]="Ring:Haste:37",
+	--[5944]="Ring:Mastery:37",
+	--[5945]="Ring:Vers:37",
+
+	[6108]="Ring:Crit:60",
+	[6109]="Ring:Haste:60",
+	[6110]="Ring:Mastery:60",
+	[6111]="Ring:Vers:60",
 	
 	[5946]="Weapon:hot",
 	[5965]="Weapon:crit",
@@ -81,6 +86,11 @@ module.db.topEnchGems = {
 	[5966]="Weapon:armor",
 	[5949]="Weapon:elemental",
 	[5962]="Weapon:vers",
+
+	[6112]="Weapon:unk",
+	[6150]="Weapon:unk",
+	[6149]="Weapon:unk",
+	[6148]="Weapon:unk",
 
 	[5955]="HunterWeapon:crit",
 	[5956]="HunterWeapon:haste",
@@ -96,14 +106,24 @@ module.db.topEnchGems = {
 	--[153712]="Gem:vers:30",
 	--[153713]="Gem:mastery:30",
 
-	[153709]="Gem:int:40",
-	[153708]="Gem:agi:40",
-	[153707]="Gem:str:40",
+	--[153709]="Gem:int:40",
+	--[153708]="Gem:agi:40",
+	--[153707]="Gem:str:40",
 
-	[154128]="Gem:vers:40",
-	[154129]="Gem:mastery:40",
-	[154126]="Gem:crit:40",
-	[154127]="Gem:haste:40",
+	[168638]="Gem:int:120",
+	[168637]="Gem:agi:120",
+	[168636]="Gem:str:120",
+
+	--[154128]="Gem:vers:40",
+	--[154129]="Gem:mastery:40",
+	--[154126]="Gem:crit:40",
+	--[154127]="Gem:haste:40",
+
+	[168642]="Gem:vers:50",
+	[168640]="Gem:mastery:50",
+	[168639]="Gem:crit:50",
+	[168641]="Gem:haste:50",
+	[169220]="Gem:movespeed:5",
 }
 
 
@@ -347,7 +367,7 @@ function module.options:Load()
 
 	self.chkAchivs = ELib:Radio(self,ACHIEVEMENTS):Point(385,-28):AddButton():OnClick(reloadChks)
 	self.chkAchivs.id = 4
-	
+
 	do
 		local text = TOOLTIP_AZERITE_UNLOCK_LEVELS:gsub(" %(.*","")
 		self.chkArtifact = ELib:Radio(self,text):Point(260,-28):AddButton():OnClick(reloadChks)
@@ -363,7 +383,7 @@ function module.options:Load()
 			self.chkRelics:Hide()
 		end
 	end
-	
+
 	local inspectScantip = CreateFrame("GameTooltip", "ExRTInspectViewerScanningTooltip", nil, "GameTooltipTemplate")
 	inspectScantip:SetOwner(UIParent, "ANCHOR_NONE")
 
@@ -412,8 +432,8 @@ function module.options:Load()
 	module.db.colorizeLowIlvl685 = VExRT.InspectViewer.ColorizeLowIlvl685
 	module.db.colorizeNoValorUpgrade = VExRT.InspectViewer.ColorizeNoValorUpgrade
 	
-	local colorizeLowIlvl630 = 310
-	local colorizeLowIlvl685 = 350
+	local colorizeLowIlvl630 = 385
+	local colorizeLowIlvl685 = 430
 	if UnitLevel'player' <= 110 then
 		colorizeLowIlvl630 = 185
 		colorizeLowIlvl685 = 240	
@@ -475,7 +495,17 @@ function module.options:Load()
 	
 	local dropDownTable = {
 		[1] = {
-			ExRT.GDB.ClassList,
+			ExRT.isClassic and {
+				"WARRIOR",
+				"PALADIN",
+				"HUNTER",
+				"ROGUE",
+				"PRIEST",
+				"SHAMAN",
+				"MAGE",
+				"WARLOCK",
+				"DRUID",
+			} or ExRT.GDB.ClassList,
 		},
 		[2] = {
 			{"CLOTH","LEATHER","MAIL","PLATE"},
@@ -486,7 +516,11 @@ function module.options:Load()
 			{TANK,HEALER,DAMAGER,MELEE,RANGED},
 		},
 		[4] = {
-			{"_PALADIN_PRIEST_WARLOCK_DEMONHUNTER","_ROGUE_DEATHKNIGHT_MAGE_DRUID_","_WARRIOR_HUNTER_SHAMAN_MONK"},
+			{
+				ExRT.isClassic and "_PALADIN_PRIEST_WARLOCK" or "_PALADIN_PRIEST_WARLOCK_DEMONHUNTER",
+				ExRT.isClassic and "_ROGUE_MAGE_DRUID" or "_ROGUE_DEATHKNIGHT_MAGE_DRUID",
+				ExRT.isClassic and "_WARRIOR_HUNTER_SHAMAN" or "_WARRIOR_HUNTER_SHAMAN_MONK"
+			},
 		},
 	}
 	
@@ -584,6 +618,16 @@ function module.options:Load()
 	self.achievementsDropDown.List[ #self.achievementsDropDown.List + 1 ] = {text = L.minimapmenuclose,checkable = false,func = function()
 		ELib:DropDownClose()
 	end}
+
+	if ExRT.isClassic then
+		self.chkInfo:Hide()
+		self.chkAchivs:Hide()
+		self.chkArtifact:Hide()
+		self.chkRelics:Hide()
+		self.chkItemsTrack:Hide()
+
+		tremove(self.filterDropDown.List,3)
+	end
 	
 		
 	self.borderList = CreateFrame("Frame",nil,self)
@@ -731,6 +775,9 @@ function module.options:Load()
 					if specIcon then
 						line.spec.texture:SetTexture(specIcon)
 						line.spec.id = spec
+					elseif ExRT.isClassic then
+						line.spec.texture:SetTexture("")
+						line.spec.id = nil
 					else
 						line.spec.texture:SetTexture("Interface\\Icons\\INV_MISC_QUESTIONMARK")
 						line.spec.id = nil
@@ -795,13 +842,13 @@ function module.options:Load()
 									itemLevel = items_ilvl[slotID] or itemLevel
 									line.items[j].text:SetText("|c"..(itemColor or "ffffffff")..(itemLevel or ""))
 									
-									if (enchantID == 0 and ((slotID == 2 and UnitLevel'player' < 120) or (slotID == 15 and UnitLevel'player' < 120) or slotID == 11 or slotID == 12 or (slotID == 16 and UnitLevel'player' == 120)) and module.db.colorizeNoEnch) or
+									if not ExRT.isClassic and ((enchantID == 0 and ((slotID == 2 and UnitLevel'player' < 120) or (slotID == 15 and UnitLevel'player' < 120) or slotID == 11 or slotID == 12 or (slotID == 16 and UnitLevel'player' == 120)) and module.db.colorizeNoEnch) or
 										(items_ilvl[slotID] and items_ilvl[slotID] > 0 and items_ilvl[slotID] < colorizeLowIlvl630 and module.db.colorizeLowIlvl) or
 										(module.db.colorizeNoGems and ExRT.F.IsBonusOnItem(item,module.db.socketsBonusIDs) and IsItemHasNotGem(item)) or 
 										(module.db.colorizeNoGems and (slotID == 16 or slotID == 17) and itemQuality == 6 and IsArtifactItemHasNot3rdGem(item)) or 
 										(module.db.colorizeNoTopEnchGems and not IsTopEnchAndGems(item) and ((slotID == 2 and UnitLevel'player' < 120) or (slotID == 15 and UnitLevel'player' < 120) or slotID == 11 or slotID == 12 or (slotID == 16 and UnitLevel'player' == 120))) or
 										(module.db.colorizeNoValorUpgrade and not IsValorUpgraded(item)) or
-										(items_ilvl[slotID] and items_ilvl[slotID] > 0 and items_ilvl[slotID] < colorizeLowIlvl685 and module.db.colorizeLowIlvl685)
+										(items_ilvl[slotID] and items_ilvl[slotID] > 0 and items_ilvl[slotID] < colorizeLowIlvl685 and module.db.colorizeLowIlvl685))
 										then
 										line.items[j].border:Show()
 									end
