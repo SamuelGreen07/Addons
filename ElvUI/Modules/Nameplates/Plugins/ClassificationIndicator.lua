@@ -1,9 +1,6 @@
 local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local oUF = E.oUF
 
--- Cache global variables
--- Lua functions
--- WoW API / Variables
 local function Update(self)
 	local element = self.ClassificationIndicator
 
@@ -45,7 +42,7 @@ local function Enable(self)
 			element:SetTexture([[Interface\TARGETINGFRAME\Nameplates]])
 		end
 
-		self:UnregisterEvent("UNIT_CLASSIFICATION_CHANGED", Path)
+		self:RegisterEvent("UNIT_CLASSIFICATION_CHANGED", Path)
 
 		return true
 	end
@@ -55,7 +52,8 @@ local function Disable(self)
 	local element = self.ClassificationIndicator
 	if (element) then
 		element:Hide()
-		self:UnregisterEvent("UNIT_CLASSIFICATION_CHANGED")
+
+		self:UnregisterEvent("UNIT_CLASSIFICATION_CHANGED", Path)
 	end
 end
 

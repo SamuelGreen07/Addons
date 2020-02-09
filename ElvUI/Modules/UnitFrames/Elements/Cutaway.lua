@@ -8,16 +8,16 @@ function UF:Construct_Cutaway(frame)
 	if frame.Power then
 		local powerTexture = frame.Power:GetStatusBarTexture()
 		local cutawayPower = frame.Power.ClipFrame:CreateTexture(frameName .. "CutawayPower")
-		cutawayPower:SetPoint("TOPLEFT", powerTexture, "TOPRIGHT")
-		cutawayPower:SetPoint("BOTTOMLEFT", powerTexture, "BOTTOMRIGHT")
+		cutawayPower:Point("TOPLEFT", powerTexture, "TOPRIGHT")
+		cutawayPower:Point("BOTTOMLEFT", powerTexture, "BOTTOMRIGHT")
 		cutawayPower:SetTexture(E.media.blankTex)
 		cutaway.Power = cutawayPower
 	end
 
 	local healthTexture = frame.Health:GetStatusBarTexture()
 	local cutawayHealth = frame.Health.ClipFrame:CreateTexture(frameName .. "CutawayHealth")
-	cutawayHealth:SetPoint("TOPLEFT", healthTexture, "TOPRIGHT")
-	cutawayHealth:SetPoint("BOTTOMLEFT", healthTexture, "BOTTOMRIGHT")
+	cutawayHealth:Point("TOPLEFT", healthTexture, "TOPRIGHT")
+	cutawayHealth:Point("BOTTOMLEFT", healthTexture, "BOTTOMRIGHT")
 	cutawayHealth:SetTexture(E.media.blankTex)
 	cutaway.Health = cutawayHealth
 
@@ -56,12 +56,12 @@ function UF:Configure_Cutaway(frame)
 		frame.Cutaway:UpdateConfigurationValues(db)
 		local health = frame.Cutaway.Health
 		if health and healthEnabled then
-			local point1, point2 = UF:GetPoints_Cutaway(frame.db.health)
+			local point1, point2 = UF:GetPoints_Cutaway(healthDB)
 			local barTexture = frame.Health:GetStatusBarTexture()
 
 			health:ClearAllPoints()
-			health:SetPoint(point1[1], barTexture, point1[2])
-			health:SetPoint(point2[1], barTexture, point2[2])
+			health:Point(point1[1], barTexture, point1[2])
+			health:Point(point2[1], barTexture, point2[2])
 
 			frame.Health:PostUpdateColor(frame.unit)
 		end
@@ -69,12 +69,12 @@ function UF:Configure_Cutaway(frame)
 		local power = frame.Cutaway.Power
 		local powerUsable = powerEnabled and frame.USE_POWERBAR
 		if power and powerUsable then
-			local point1, point2 = UF:GetPoints_Cutaway(frame.db.power)
+			local point1, point2 = UF:GetPoints_Cutaway(powerDB)
 			local barTexture = frame.Power:GetStatusBarTexture()
 
 			power:ClearAllPoints()
-			power:SetPoint(point1[1], barTexture, point1[2])
-			power:SetPoint(point2[1], barTexture, point2[2])
+			power:Point(point1[1], barTexture, point1[2])
+			power:Point(point2[1], barTexture, point2[2])
 
 			frame.Power:PostUpdateColor()
 		end

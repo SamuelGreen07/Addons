@@ -1,0 +1,12 @@
+tag v1.6
+90e7f868eda4a005fce1b75b667c77f4fa92b115
+Dorwido <darkz@gmx.de>
+2016-09-07 17:58:25 +0200
+
+tagging as v1.6
+
+
+--------------------
+
+Dorwido:
+	- added coords for broken isles

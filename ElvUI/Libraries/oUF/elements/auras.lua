@@ -82,9 +82,6 @@ local GetSpellInfo = GetSpellInfo
 local UnitAura = UnitAura
 local UnitIsUnit = UnitIsUnit
 local floor, min = math.floor, math.min
-local LCD = LibStub('LibClassicDurations', true)
-local myClass = select(2, UnitClass('player'))
-
 -- GLOBALS: GameTooltip
 -- end block
 
@@ -110,7 +107,7 @@ local function createAuraIcon(element, index)
 	local cd = CreateFrame('Cooldown', '$parentCooldown', button, 'CooldownFrameTemplate')
 	cd:SetAllPoints()
 
-	local icon = button:CreateTexture(nil, 'ARTWORK')
+	local icon = button:CreateTexture(nil, 'BORDER')
 	icon:SetAllPoints()
 
 	local countFrame = CreateFrame('Frame', nil, button)
@@ -159,26 +156,11 @@ local function customFilter(element, unit, button, name)
 end
 
 local function updateIcon(element, unit, index, offset, filter, isDebuff, visible)
-	local name, texture, count, debuffType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll, timeMod, effect1, effect2, effect3 = UnitAura(unit, index, filter)
+	local name, texture, count, debuffType, duration, expiration, caster, isStealable,
+		nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll,
+		timeMod, effect1, effect2, effect3 = UnitAura(unit, index, filter)
 
-	if LCD and spellID then
-		local durationNew, expirationTimeNew = LCD:GetAuraDurationByUnit(unit, spellID, caster, name)
-		if durationNew and durationNew > 0 then
-			duration, expiration = durationNew, expirationTimeNew
-		end
-	end
-
-	if myClass == "SHAMAN" then
-		for slot = 1, 4 do
-			local _, _, start, durationTime, icon = GetTotemInfo(slot)
-			if icon == texture then
-				duration = durationTime
-				expiration = start + duration
-			end
-		end
-	end
-
-	-- ElvUI block
+	-- ElvUI changed block
 	if element.forceShow or element.forceCreate then
 		spellID = 47540
 		name, _, texture = GetSpellInfo(spellID)
@@ -227,9 +209,8 @@ local function updateIcon(element, unit, index, offset, filter, isDebuff, visibl
 		--]]
 
 		-- ElvUI changed block
-		local show = true
-		if element.forceCreate then show = false end
-		if not element.forceShow and not element.forceCreate then
+		local show = not element.forceCreate
+		if not (element.forceShow or element.forceCreate) then
 			show = (element.CustomFilter or customFilter) (element, unit, button, name, texture,
 				count, debuffType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID,
 				canApply, isBossDebuff, casterIsPlayer, nameplateShowAll,timeMod, effect1, effect2, effect3)
@@ -300,10 +281,9 @@ local function updateIcon(element, unit, index, offset, filter, isDebuff, visibl
 		elseif element.forceCreate then
 			local size = element.size or 16
 			button:SetSize(size, size)
-
 			button:Hide()
 
-			if (element.PostUpdateIcon) then
+			if element.PostUpdateIcon then
 				element:PostUpdateIcon(unit, button, index, position, duration, expiration, debuffType, isStealable)
 			end
 
@@ -522,7 +502,7 @@ local function UpdateAuras(self, event, unit)
 end
 
 local function Update(self, event, unit)
-	if(self.unit ~= unit) then return end
+	if (self.isForced and event ~= 'ElvUI_UpdateAllElements') or (self.unit ~= unit) then return end -- ElvUI changed
 
 	UpdateAuras(self, event, unit)
 
@@ -550,9 +530,51 @@ local function ForceUpdate(element)
 	return Update(element.__owner, 'ForceUpdate', element.__owner.unit)
 end
 
+-- ElvUI changed block
+local onUpdateElapsed, onUpdateWait = 0, 0.25
+local function onUpdateAuras(self, elapsed)
+	if onUpdateElapsed > onUpdateWait then
+		Update(self.__owner, 'OnUpdate', self.__owner.unit)
+
+		onUpdateElapsed = 0
+	else
+		onUpdateElapsed = onUpdateElapsed + elapsed
+	end
+end
+
+local function SetAuraUpdateSpeed(self, state)
+	onUpdateWait = state
+end
+
+local function SetAuraUpdateMethod(self, state, force)
+	if self.effectiveAura ~= state or force then
+		self.effectiveAura = state
+
+		if state then
+			self.updateAurasFrame:SetScript('OnUpdate', onUpdateAuras)
+			self:UnregisterEvent('UNIT_AURA', UpdateAuras)
+		else
+			self.updateAurasFrame:SetScript('OnUpdate', nil)
+			self:RegisterEvent('UNIT_AURA', UpdateAuras)
+		end
+	end
+end
+-- end block
+
 local function Enable(self)
+	-- ElvUI changed block
+	if not self.updateAurasFrame then
+		self.updateAurasFrame = CreateFrame('Frame', nil, self)
+		self.updateAurasFrame.__owner = self
+	end
+	-- end block
+
 	if(self.Buffs or self.Debuffs or self.Auras) then
-		self:RegisterEvent('UNIT_AURA', UpdateAuras)
+		-- ElvUI changed block
+		self.SetAuraUpdateSpeed = SetAuraUpdateSpeed
+		self.SetAuraUpdateMethod = SetAuraUpdateMethod
+		SetAuraUpdateMethod(self, self.effectiveAura, true)
+		-- end block
 
 		local buffs = self.Buffs
 		if(buffs) then
@@ -619,6 +641,12 @@ local function Enable(self)
 end
 
 local function Disable(self)
+	-- ElvUI changed block
+	if self.updateAurasFrame then
+		self.updateAurasFrame:SetScript('OnUpdate', nil)
+	end
+	-- end block
+
 	if(self.Buffs or self.Debuffs or self.Auras) then
 		self:UnregisterEvent('UNIT_AURA', UpdateAuras)
 

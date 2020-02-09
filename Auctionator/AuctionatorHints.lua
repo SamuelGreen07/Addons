@@ -541,13 +541,14 @@ hooksecurefunc (GameTooltip, "SetInventoryItem",
   end
 );
 
---[[
+
 hooksecurefunc (GameTooltip, "SetGuildBankItem",
   function (tip, tab, slot)
     local _, num = GetGuildBankItemInfo(tab, slot);
     Atr_ShowTipWithPricing (tip, GetGuildBankItemLink(tab, slot), num);
   end
 );
+
 
 hooksecurefunc( GameTooltip, 'SetRecipeResultItem',
   function( tip, itemId )
@@ -566,7 +567,7 @@ hooksecurefunc( GameTooltip, 'SetRecipeReagentItem',
     Atr_ShowTipWithPricing( tip, link, count )
   end
 );
-]]--
+
 hooksecurefunc (GameTooltip, "SetTradePlayerItem",
   function (tip, id)
     local _, _, num = GetTradePlayerItemInfo(id);

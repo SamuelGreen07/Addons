@@ -1,9 +1,10 @@
 ﻿--Original code and concept by Antiarc. Used and modified with his permission.
---First adaptation in dbm credits to VEM team. Continued on their behalf do to no time from origiinal author to make it an external mod or DBM plugin.
+--First adaptation in dbm credits to VEM team. Continued on their behalf do to no time from original author to make it an external mod or DBM plugin.
 
 local ADDON_NAME = ...
 
 DBMHudMap = {}
+DBMHudMap.Version = 2--That way external usage can querie hud api feature level of of users installed mod version
 local mainFrame = CreateFrame("Frame", "DBMHudMapFrame")
 local mod = DBMHudMap
 
@@ -13,6 +14,7 @@ local error, print = error, print
 
 local CallbackHandler = LibStub:GetLibrary("CallbackHandler-1.0")
 local updateFrame = CreateFrame("Frame", "DBMHudMapUpdateFrame")
+local fixedOnUpdateRate = 0.03
 local onUpdate, Point, Edge
 local callbacks = CallbackHandler:New(mod)
 local activeMarkers = 0
@@ -44,7 +46,7 @@ else
 	standardFont = "Fonts\\FRIZQT__.TTF"
 end
 
-local targetCanvasAlpha
+local targetCanvasAlpha, supressCanvas
 
 local textureLookup = {
 	star		= 137001,--[[Interface\TARGETINGFRAME\UI-RaidTargetingIcon_1.blp]]
@@ -252,7 +254,7 @@ do
 
 			targetZoomScale = computeNewScale()
 			local currentAlpha = mod.canvas:GetAlpha()
-			if targetCanvasAlpha and currentAlpha ~= targetCanvasAlpha then
+			if not supressCanvas and targetCanvasAlpha and currentAlpha ~= targetCanvasAlpha then
 				local newAlpha
 				if targetCanvasAlpha > currentAlpha then
 					newAlpha = min(targetCanvasAlpha, currentAlpha + 1 * elapsed / fadeInDelay)
@@ -293,7 +295,9 @@ function mod:Enable()
 	self.currentMap = select(8, GetInstanceInfo())
 	mainFrame:Show()
 	mainFrame:RegisterEvent("LOADING_SCREEN_DISABLED")
-	self.canvas:Show()
+	if not supressCanvas then
+		self.canvas:Show()
+	end
 	self.canvas:SetAlpha(1)
 	self:UpdateCanvasPosition()
 
@@ -304,7 +308,7 @@ function mod:Enable()
 	self.HUDEnabled = true
 	updateFrame:Show()
 	if not updateFrame.ticker then
-		updateFrame.ticker = C_Timer.NewTicker(0.035, function() onUpdate(updateFrame, 0.035) end)
+		updateFrame.ticker = C_Timer.NewTicker(fixedOnUpdateRate, function() onUpdate(updateFrame, fixedOnUpdateRate) end)
 	end
 end
 
@@ -314,8 +318,6 @@ function mod:Disable()
 	self:FreeEncounterMarkers()
 	Edge:ClearAll()
 	if hudarActive then return end--Don't disable if hudar is open
-	--Anything else needed? maybe clear all marks, hide any frames, etc?
---	mainFrame:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	mainFrame:UnregisterEvent("LOADING_SCREEN_DISABLED")
 	self.canvas:Hide()
 	mainFrame:Hide()
@@ -333,7 +335,7 @@ function mod:ToggleHudar(r, hide)
 		self:FreeEncounterMarkerByTarget(143430, playerName)
 	else
 		hudarActive = true
-		self:RegisterRangeMarkerOnPartyMember(143430, "timer", playerName, r+0.5, nil, 0, 1, 0, 0.3):Appear():RegisterForAlerts("all"):Rotate(360, 9.5)
+		self:RegisterRangeMarkerOnPartyMember(143430, "timer", playerName, 1.5, nil, 0, 1, 0, 0.3):Appear():RegisterForAlerts("all"):Rotate(360, 9.5)
 	end
 end
 
@@ -457,7 +459,12 @@ local function DrawRouteLineCustom(T, C, sx, sy, ex, ey, w, extend, relPoint)
 
 	-- Set texture coordinates and anchors
 	T:ClearAllPoints();
-	T:SetTexCoord(TLx, TLy, BLx, BLy, TRx, TRy, BRx, BRy);
+	-- Hack to fix backwards arrow since it's easier to fix here than figure out wtf is going on up above
+	if reverse == 1 then
+		T:SetTexCoord(TLx, TLy, BLx, BLy, TRx, TRy, BRx, BRy);
+	else
+		T:SetTexCoord(BRx, BRy, TRx, TRy, BLx, BLy, TLx, TLy);
+	end
 	T:SetPoint("BOTTOMLEFT", C, relPoint, cx - Bwid, cy - Bhgt);
 	T:SetPoint("TOPRIGHT",   C, relPoint, cx + Bwid, cy + Bhgt);
 end
@@ -1384,10 +1391,6 @@ function mod:FreeEncounterMarker(key)
 	end
 end
 
-function mod:GetEncounterMarker(key)
-	return encounterMarkers[key]
-end
-
 -- should be called to manually free marker
 function mod:FreeEncounterMarkerByTarget(spellid, name)
 	if not self.HUDEnabled then return end
@@ -1447,6 +1450,14 @@ function mod:SetFixedZoom(zoom)
 		fixedZoomScale = zoom
 	else
 		fixedZoomScale = nil
+	end
+end
+
+function mod:SetFixedUpdateRate(updateRate)
+	if type(updateRate) == "number" and updateRate > 0 then
+		fixedOnUpdateRate = updateRate
+	else
+		fixedOnUpdateRate = 0.03
 	end
 end
 
@@ -1541,6 +1552,20 @@ end
 
 function mod:HideCanvas()
 	targetCanvasAlpha = 0
+end
+
+function mod:SupressCanvas()
+	supressCanvas = true
+	if self.HUDEnabled then
+		self.canvas:Hide()
+	end
+end
+
+function mod:UnSupressCanvas()
+	supressCanvas = nil
+	if self.HUDEnabled then
+		self.canvas:Show()
+	end
 end
 
 function mod:Toggle(flag)

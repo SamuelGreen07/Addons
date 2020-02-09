@@ -51,17 +51,17 @@ function UF:Construct_PowerBar(frame, bg, text, textPos)
 		power.value:Point(textPos, frame.Health, textPos, x, 0)
 	end
 
+	power.useAtlas = false
+	power.colorDisconnected = false
+	power.colorTapping = false
+	power:CreateBackdrop(nil, nil, nil, self.thinBorders, true)
+
 	local clipFrame = CreateFrame('Frame', nil, power)
 	clipFrame:SetClipsChildren(true)
 	clipFrame:SetAllPoints()
 	clipFrame:EnableMouse(false)
 	clipFrame.__frame = frame
 	power.ClipFrame = clipFrame
-
-	power.useAtlas = false
-	power.colorDisconnected = false
-	power.colorTapping = false
-	power:CreateBackdrop(nil, nil, nil, self.thinBorders, true)
 
 	return power
 end
@@ -79,6 +79,9 @@ function UF:Configure_Power(frame)
 		end
 
 		E:SetSmoothing(power, self.db.smoothbars)
+
+		frame:SetPowerUpdateMethod(E.global.unitframe.effectivePower)
+		frame:SetPowerUpdateSpeed(E.global.unitframe.effectivePowerSpeed)
 
 		--Text
 		local attachPoint = self:GetObjectAnchorPoint(frame, db.power.attachTextTo)
@@ -102,8 +105,14 @@ function UF:Configure_Power(frame)
 		power.colorClass = nil
 		power.colorReaction = nil
 		power.colorPower = nil
+		power.colorSelection = nil
+		power.displayAltPower = db.power.displayAltPower
 
-		if self.db.colors.powerclass then
+		if self.db.colors.powerselection then
+			power.colorSelection = true
+		--[[elseif self.db.colors.powerthreat then
+			power.colorThreat = true]]
+		elseif self.db.colors.powerclass then
 			power.colorClass = true
 			power.colorReaction = true
 		else
@@ -114,11 +123,11 @@ function UF:Configure_Power(frame)
 		local heightChanged = false
 		if (not self.thinBorders and not E.PixelMode) and frame.POWERBAR_HEIGHT < 7 then --A height of 7 means 6px for borders and just 1px for the actual power statusbar
 			frame.POWERBAR_HEIGHT = 7
-			if db.power then db.power.height = 7 end
+			db.power.height = 7
 			heightChanged = true
 		elseif (self.thinBorders or E.PixelMode) and frame.POWERBAR_HEIGHT < 3 then --A height of 3 means 2px for borders and just 1px for the actual power statusbar
 			frame.POWERBAR_HEIGHT = 3
-			if db.power then db.power.height = 3 end
+			db.power.height = 3
 			heightChanged = true
 		end
 		if heightChanged then
@@ -140,9 +149,9 @@ function UF:Configure_Power(frame)
 				power:Point("BOTTOMLEFT", power.Holder, "BOTTOMLEFT", frame.BORDER+frame.SPACING, frame.BORDER+frame.SPACING)
 				--Currently only Player and Target can detach power bars, so doing it this way is okay for now
 				if frame.unitframeType and frame.unitframeType == "player" then
-					E:CreateMover(power.Holder, 'PlayerPowerBarMover', L["Player Powerbar"], nil, nil, nil, 'ALL,SOLO', nil, 'unitframe,player,power')
+					E:CreateMover(power.Holder, 'PlayerPowerBarMover', L["Player Powerbar"], nil, nil, nil, 'ALL,SOLO', nil, 'unitframe,individualUnits,player,power')
 				elseif frame.unitframeType and frame.unitframeType == "target" then
-					E:CreateMover(power.Holder, 'TargetPowerBarMover', L["Target Powerbar"], nil, nil, nil, 'ALL,SOLO', nil, 'unitframe,target,power')
+					E:CreateMover(power.Holder, 'TargetPowerBarMover', L["Target Powerbar"], nil, nil, nil, 'ALL,SOLO', nil, 'unitframe,individualUnits,target,power')
 				end
 			else
 				power.Holder:Size(frame.POWERBAR_WIDTH, frame.POWERBAR_HEIGHT)
@@ -164,7 +173,7 @@ function UF:Configure_Power(frame)
 				power:Point("TOPLEFT", frame.Health, "TOPLEFT", -frame.POWERBAR_OFFSET, -frame.POWERBAR_OFFSET)
 				power:Point("BOTTOMRIGHT", frame.Health, "BOTTOMRIGHT", -frame.POWERBAR_OFFSET, -frame.POWERBAR_OFFSET)
 			end
-			power:SetFrameLevel(frame.Health:GetFrameLevel() -5) --Health uses 10
+			power:SetFrameLevel(frame.Health:GetFrameLevel() - 5) --Health uses 10
 		elseif frame.USE_INSET_POWERBAR then
 			power:Height(frame.POWERBAR_HEIGHT  - ((frame.BORDER + frame.SPACING)*2))
 			power:Point("BOTTOMLEFT", frame.Health, "BOTTOMLEFT", frame.BORDER + (frame.BORDER*2), frame.BORDER + (frame.BORDER*2))
@@ -190,7 +199,7 @@ function UF:Configure_Power(frame)
 			power:Point("TOPLEFT", frame.Health.backdrop, "BOTTOMLEFT", frame.BORDER, -frame.SPACING*3)
 			power:Height(frame.POWERBAR_HEIGHT  - ((frame.BORDER + frame.SPACING)*2))
 
-			power:SetFrameLevel(frame.Health:GetFrameLevel() - 5)
+			power:SetFrameLevel(frame.Health:GetFrameLevel() + 5) --Health uses 10
 		end
 
 		--Hide mover until we detach again
@@ -208,8 +217,9 @@ function UF:Configure_Power(frame)
 		end
 		if db.power.strataAndLevel and db.power.strataAndLevel.useCustomLevel then
 			power:SetFrameLevel(db.power.strataAndLevel.frameLevel)
-			power.backdrop:SetFrameLevel(power:GetFrameLevel() - 1)
 		end
+
+		power.backdrop:SetFrameLevel(power:GetFrameLevel() - 1)
 
 		if frame.POWERBAR_DETACHED and db.power.parent == "UIPARENT" then
 			E.FrameLocks[power] = true
@@ -227,7 +237,7 @@ function UF:Configure_Power(frame)
 	frame.Power.custom_backdrop = UF.db.colors.custompowerbackdrop and UF.db.colors.power_backdrop
 
 	--Transparency Settings
-	UF:ToggleTransparentStatusBar(UF.db.colors.transparentPower, frame.Power, frame.Power.BG, nil, UF.db.colors.invertPower)
+	UF:ToggleTransparentStatusBar(UF.db.colors.transparentPower, frame.Power, frame.Power.BG, nil, UF.db.colors.invertPower, db.power.reverseFill)
 
 	--Prediction Texture; keep under ToggleTransparentStatusBar
 	UF:UpdatePredictionStatusBar(frame.PowerPrediction, frame.Power, "Power")
@@ -236,27 +246,38 @@ end
 local tokens = {[0]="MANA","RAGE","FOCUS","ENERGY","RUNIC_POWER"}
 function UF:PostUpdatePowerColor()
 	local parent = self.origParent or self:GetParent()
-	if parent.isForced then
+	if parent.isForced and not self.colorClass then
 		local color = ElvUF.colors.power[tokens[random(0,4)]]
-		self:SetValue(random(1, self.max))
+		self:SetStatusBarColor(color[1], color[2], color[3])
 
-		if not self.colorClass then
-			self:SetStatusBarColor(color[1], color[2], color[3])
-
-			if self.BG then
-				UF:UpdateBackdropTextureColor(self.BG, color[1], color[2], color[3])
-			end
+		if self.BG then
+			UF:UpdateBackdropTextureColor(self.BG, color[1], color[2], color[3])
 		end
 	end
 end
 
-function UF:PostUpdatePower(unit, _, _, max)
+function UF:PostUpdatePower(unit, cur)
 	local parent = self.origParent or self:GetParent()
 	if parent.isForced then
-		self:SetValue(random(1, max))
+		self.cur = random(1, 100)
+		self.max = 100
+		self:SetMinMaxValues(0, self.max)
+		self:SetValue(self.cur)
 	end
 
-	if parent.db and parent.db.power and parent.db.power.hideonnpc then
-		UF:PostNamePosition(parent, unit)
+	if parent.db and parent.db.power then
+		if unit == 'player' and parent.db.power.autoHide and parent.POWERBAR_DETACHED then
+			if cur == 0 then
+				self:Hide()
+			else
+				self:Show()
+			end
+		elseif not self:IsShown() then
+			self:Show()
+		end
+
+		if parent.db.power.hideonnpc then
+			UF:PostNamePosition(parent, unit)
+		end
 	end
 end

@@ -1,4 +1,4 @@
-local MAJOR, MINOR = "LibElvUIPlugin-1.0", 30
+local MAJOR, MINOR = "LibElvUIPlugin-1.0", 33
 local lib = _G.LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
 -- GLOBALS: ElvUI
@@ -44,6 +44,7 @@ local C_ChatInfo_RegisterAddonMessagePrefix = C_ChatInfo.RegisterAddonMessagePre
 local C_ChatInfo_SendAddonMessage = C_ChatInfo.SendAddonMessage
 local LE_PARTY_CATEGORY_HOME = LE_PARTY_CATEGORY_HOME
 local LE_PARTY_CATEGORY_INSTANCE = LE_PARTY_CATEGORY_INSTANCE
+local UNKNOWN = UNKNOWN
 
 lib.prefix = "ElvUIPluginVC"
 lib.plugins = {}
@@ -51,7 +52,6 @@ lib.groupSize = 0
 lib.index = 0
 
 local MSG_OUTDATED = "Your version of %s %s is out of date (latest is version %s). You can download the latest version from http://www.tukui.org"
-local HDR_CONFIG = "Plugins"
 local HDR_INFORMATION = "LibElvUIPlugin-1.0.%d - Plugins Loaded  (Green means you have current version, Red means out of date)"
 local INFO_BY = "by"
 local INFO_VERSION = "Version:"
@@ -61,7 +61,6 @@ local LIBRARY = "Library"
 local locale = GetLocale()
 if locale == "deDE" then
 	MSG_OUTDATED = "Deine Version von %s %s ist veraltet (akutelle Version ist %s). Du kannst die aktuelle Version von http://www.tukui.org herunterrladen."
-	HDR_CONFIG = "Plugins"
 	HDR_INFORMATION = "LibElvUIPlugin-1.0.%d - Plugins geladen (Grün bedeutet du hast die aktuelle Version, Rot bedeutet es ist veraltet)"
 	INFO_BY = "von"
 	INFO_VERSION = "Version:"
@@ -69,7 +68,6 @@ if locale == "deDE" then
 	LIBRARY = "Bibliothek"
 elseif locale == "ruRU" then
 	MSG_OUTDATED = "Ваша версия %s %s устарела (последняя версия %s). Вы можете скачать последнюю версию на http://www.tukui.org"
-	HDR_CONFIG = "Плагины"
 	HDR_INFORMATION = "LibElvUIPlugin-1.0.%d - загруженные плагины (зеленый означает, что у вас последняя версия, красный - устаревшая)"
 	INFO_BY = "от"
 	INFO_VERSION = "Версия:"
@@ -77,7 +75,6 @@ elseif locale == "ruRU" then
 	LIBRARY = "Библиотека"
 elseif locale == "zhCN" then
 	MSG_OUTDATED = "你的 %s %s 版本已经过期 (最新版本是 %s)。你可以从 http://www.tukui.org 下载最新版本"
-	HDR_CONFIG = "插件"
 	HDR_INFORMATION = "LibElvUIPlugin-1.0.%d - 载入的插件 (绿色表示拥有当前版本, 红色表示版本已经过期)"
 	INFO_BY = "作者"
 	INFO_VERSION = "版本:"
@@ -85,7 +82,6 @@ elseif locale == "zhCN" then
 	LIBRARY = "库"
 elseif locale == "zhTW" then
 	MSG_OUTDATED = "你的 %s %s 版本已經過期 (最新版本為 %s)。你可以透過 http://www.tukui.org 下載最新的版本"
-	HDR_CONFIG = "插件"
 	HDR_INFORMATION = "LibElvUIPlugin-1.0.%d - 載入的插件 (綠色表示擁有當前版本, 紅色表示版本已經過期)"
 	INFO_BY = "作者"
 	INFO_VERSION = "版本:"
@@ -93,10 +89,11 @@ elseif locale == "zhTW" then
 	LIBRARY = "庫"
 end
 
-local E
+local E, L
 local function checkElvUI()
 	if not E then
 		E = ElvUI[1]
+		L = ElvUI[2]
 		assert(E, "ElvUI not found.")
 	end
 end
@@ -113,7 +110,7 @@ function lib:RegisterPlugin(name, callback, isLib, libVersion)
 		plugin.isLib = true
 		plugin.version = libVersion or 1
 	else
-		plugin.version = (name == MAJOR and MINOR) or GetAddOnMetadata(name, "Version")
+		plugin.version = (name == MAJOR and MINOR) or GetAddOnMetadata(name, "Version") or UNKNOWN
 	end
 
 	lib.plugins[name] = plugin
@@ -182,9 +179,9 @@ end
 
 function lib:GetPluginOptions()
 	E.Options.args.plugins = {
-		order = -10,
+		order = 3,
 		type = "group",
-		name = HDR_CONFIG,
+		name = L["Plugins"],
 		guiInline = false,
 		args = {
 			pluginheader = {
@@ -220,8 +217,8 @@ function lib:VersionCheck(event, prefix, message, _, sender)
 
 		if not E.pluginRecievedOutOfDateMessage then
 			for name, version in gmatch(message, "([^=]+)=([%d%p]+);") do
-				local plugin = name and lib.plugins[name]
-				if version and plugin and plugin.version and (plugin.version ~= "BETA") then
+				local plugin = (version and name) and lib.plugins[name]
+				if plugin and plugin.version then
 					local Pver, ver = lib:StripVersion(plugin.version), lib:StripVersion(version)
 					if (ver and Pver) and (ver > Pver) then
 						plugin.old, plugin.newversion = true, version

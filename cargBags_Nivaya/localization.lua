@@ -1,4 +1,4 @@
-﻿cBnivL = {}
+cBnivL = {}
 local gl = GetLocale()
 
 cBnivL.Search = SEARCH

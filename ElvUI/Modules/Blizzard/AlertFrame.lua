@@ -29,6 +29,7 @@ function E:PostAlertMove()
 	end
 
 	local AlertFrame = _G.AlertFrame
+	local GroupLootContainer = _G.GroupLootContainer
 
 	local rollBars = Misc.RollBars
 	if E.private.general.lootRoll then
@@ -56,14 +57,25 @@ function E:PostAlertMove()
 		end
 
 		AlertFrame:ClearAllPoints()
+		GroupLootContainer:ClearAllPoints()
 		if lastShownFrame then
 			AlertFrame:SetAllPoints(lastShownFrame)
+			GroupLootContainer:Point(POSITION, lastShownFrame, ANCHOR_POINT, 0, YOFFSET)
 		else
 			AlertFrame:SetAllPoints(AlertFrameHolder)
+			GroupLootContainer:Point(POSITION, AlertFrameHolder, ANCHOR_POINT, 0, YOFFSET)
+		end
+		if GroupLootContainer:IsShown() then
+			B.GroupLootContainer_Update(GroupLootContainer)
 		end
 	else
 		AlertFrame:ClearAllPoints()
 		AlertFrame:SetAllPoints(AlertFrameHolder)
+		GroupLootContainer:ClearAllPoints()
+		GroupLootContainer:Point(POSITION, AlertFrameHolder, ANCHOR_POINT, 0, YOFFSET)
+		if GroupLootContainer:IsShown() then
+			B.GroupLootContainer_Update(GroupLootContainer)
+		end
 	end
 end
 
@@ -151,6 +163,7 @@ function B:AlertMovers()
 	end)
 
 	self:SecureHook(_G.AlertFrame, "UpdateAnchors", E.PostAlertMove)
+	hooksecurefunc("GroupLootContainer_Update", B.GroupLootContainer_Update)
 
 	--[[ Code you can use for alert testing
 		--Queued Alerts:
@@ -170,7 +183,8 @@ function B:AlertMovers()
 		/run GarrisonMissionAlertSystem:AddAlert(681) (Requires a mission ID that is in your mission list.)
 		/run GarrisonShipFollowerAlertSystem:AddAlert(592, "Test", "Transport", "GarrBuilding_Barracks_1_H", 3, 2, 1)
 		/run LegendaryItemAlertSystem:AddAlert("\124cffa335ee\124Hitem:18832::::::::::\124h[Brutality Blade]\124h\124r")
-		/run StorePurchaseAlertSystem:AddAlert("", "Interface\\Icons\\Ability_pvp_gladiatormedallion", TRINKET0SLOT, 214)
+		/run EntitlementDeliveredAlertSystem:AddAlert("", "Interface\\Icons\\Ability_pvp_gladiatormedallion", TRINKET0SLOT, 214)
+		/run RafRewardDeliveredAlertSystem:AddAlert("", "Interface\\Icons\\Ability_pvp_gladiatormedallion", TRINKET0SLOT, 214)
 		/run DigsiteCompleteAlertSystem:AddAlert("Human")
 
 		--Bonus Rolls

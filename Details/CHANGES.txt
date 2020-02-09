@@ -1,0 +1,10 @@
+lightweight tag 2519ea0b9668ef9680be43f59cb83b6eb5bf6bfa DetailsRetail.8.3.0.7259.140
+Author:	Tercio Jose <terciob19@hotmail.com>
+Date:	Mon Jan 27 20:43:18 2020 -0300
+
+commit 2519ea0b9668ef9680be43f59cb83b6eb5bf6bfa
+Author: Tercio Jose <terciob19@hotmail.com>
+Date:   Mon Jan 27 20:43:18 2020 -0300
+
+    Framework Update
+

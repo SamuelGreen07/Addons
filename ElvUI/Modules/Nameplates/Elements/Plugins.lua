@@ -5,24 +5,26 @@ local _G = _G
 local pairs, unpack = pairs, unpack
 local CreateFrame = CreateFrame
 
+local questIconTypes = { "Item", "Loot", "Skull", "Chat" }
+local targetIndicators = { "Spark", "TopIndicator", "LeftIndicator", "RightIndicator" }
+
 function NP:Construct_QuestIcons(nameplate)
 	local QuestIcons = CreateFrame("Frame", nameplate:GetDebugName() .. "QuestIcons", nameplate)
+	QuestIcons:Size(20)
 	QuestIcons:Hide()
 
-	for _, object in pairs({"Item", "Loot", "Skull", "Chat"}) do
-		QuestIcons[object] = QuestIcons:CreateTexture(nil, "BORDER", nil, 1)
-		QuestIcons[object]:Point("CENTER")
-		QuestIcons[object]:Hide()
+	for _, object in pairs(questIconTypes) do
+		local icon = QuestIcons:CreateTexture(nil, "BORDER", nil, 1)
+		icon.Text = QuestIcons:CreateFontString(nil, "OVERLAY")
+		icon.Text:FontTemplate()
+		icon:Hide()
+
+		QuestIcons[object] = icon
 	end
 
 	QuestIcons.Item:SetTexCoord(unpack(E.TexCoords))
-
 	QuestIcons.Chat:SetTexture([[Interface\WorldMap\ChatBubble_64.PNG]])
 	QuestIcons.Chat:SetTexCoord(0, 0.5, 0.5, 1)
-
-	QuestIcons.Text = QuestIcons:CreateFontString(nil, "OVERLAY")
-	QuestIcons.Text:Point("BOTTOMRIGHT", QuestIcons, "BOTTOMRIGHT", 2, -0.8)
-	QuestIcons.Text:FontTemplate(E.Libs.LSM:Fetch("font", NP.db.font), NP.db.fontSize, NP.db.fontOutline)
 
 	return QuestIcons
 end
@@ -38,15 +40,16 @@ function NP:Update_QuestIcons(nameplate)
 		nameplate.QuestIcons:ClearAllPoints()
 		nameplate.QuestIcons:Point(E.InversePoints[db.questIcon.position], nameplate, db.questIcon.position, db.questIcon.xOffset, db.questIcon.yOffset)
 
-		nameplate.QuestIcons:Size(db.questIcon.size + 4, db.questIcon.size + 4)
-		nameplate.QuestIcons.Item:Size(db.questIcon.size, db.questIcon.size)
-		nameplate.QuestIcons.Loot:Size(db.questIcon.size, db.questIcon.size)
-		nameplate.QuestIcons.Skull:Size(db.questIcon.size + 4, db.questIcon.size + 4)
-		nameplate.QuestIcons.Chat:Size(db.questIcon.size + 4, db.questIcon.size + 4)
-	else
-		if nameplate:IsElementEnabled("QuestIcons") then
-			nameplate:DisableElement("QuestIcons")
+		for _, object in pairs(questIconTypes) do
+			local icon = nameplate.QuestIcons[object]
+			icon:Size(db.questIcon.size, db.questIcon.size)
+			icon.Text:FontTemplate(E.Libs.LSM:Fetch("font", db.questIcon.font), db.questIcon.fontSize, db.questIcon.fontOutline)
+			icon.Text:ClearAllPoints()
+			icon.Text:Point(db.questIcon.textPosition, icon)
+			icon.size, icon.position = db.questIcon.size, db.questIcon.position
 		end
+	elseif nameplate:IsElementEnabled("QuestIcons") then
+		nameplate:DisableElement("QuestIcons")
 	end
 end
 
@@ -64,12 +67,9 @@ function NP:Update_ClassificationIndicator(nameplate)
 
 		nameplate.ClassificationIndicator:ClearAllPoints()
 		nameplate.ClassificationIndicator:Size(db.eliteIcon.size, db.eliteIcon.size)
-
 		nameplate.ClassificationIndicator:Point(E.InversePoints[db.eliteIcon.position], nameplate, db.eliteIcon.position, db.eliteIcon.xOffset, db.eliteIcon.yOffset)
-	else
-		if nameplate:IsElementEnabled("ClassificationIndicator") then
-			nameplate:DisableElement("ClassificationIndicator")
-		end
+	elseif nameplate:IsElementEnabled("ClassificationIndicator") then
+		nameplate:DisableElement("ClassificationIndicator")
 	end
 end
 
@@ -81,15 +81,12 @@ function NP:Construct_TargetIndicator(nameplate)
 	TargetIndicator.Shadow:SetBackdrop({edgeFile = E.LSM:Fetch("border", "ElvUI GlowBorder"), edgeSize = E:Scale(5)})
 	TargetIndicator.Shadow:Hide()
 
-	for _, object in pairs({"Spark", "TopIndicator", "LeftIndicator", "RightIndicator"}) do
-		TargetIndicator[object] = TargetIndicator:CreateTexture(nil, "BACKGROUND", nil, -5)
-		TargetIndicator[object]:Hide()
-	end
+	for _, object in pairs(targetIndicators) do
+		local indicator = TargetIndicator:CreateTexture(nil, "BACKGROUND", nil, -5)
+		indicator:Hide()
 
-	TargetIndicator.Spark:SetTexture(E.Media.Textures.Spark)
-	TargetIndicator.TopIndicator:SetTexture(E.Media.Textures.NameplateTargetIndicator)
-	TargetIndicator.LeftIndicator:SetTexture(E.Media.Textures.NameplateTargetIndicatorLeft)
-	TargetIndicator.RightIndicator:SetTexture(E.Media.Textures.NameplateTargetIndicatorRight)
+		TargetIndicator[object] = indicator
+	end
 
 	return TargetIndicator
 end
@@ -139,7 +136,6 @@ function NP:Update_TargetIndicator(nameplate)
 
 		if nameplate.TargetIndicator.Spark and (GlowStyle == "style2" or GlowStyle == "style6" or GlowStyle == "style8") then
 			local size = E.Border + 14
-
 			nameplate.TargetIndicator.Spark:Point("TOPLEFT", nameplate.Health, "TOPLEFT", -(size * 2), size)
 			nameplate.TargetIndicator.Spark:Point("BOTTOMRIGHT", nameplate.Health, "BOTTOMRIGHT", (size * 2), -size)
 			nameplate.TargetIndicator.Spark:SetVertexColor(Color.r, Color.g, Color.b, Color.a)
@@ -166,19 +162,46 @@ function NP:Update_Highlight(nameplate)
 			nameplate:EnableElement("Highlight")
 		end
 
-		if db.health.enable and not (db.nameOnly or nameplate.NameOnlyChanged) then
+		if db.health.enable and not (db.nameOnly or NP:StyleFilterCheckChanges(nameplate, 'NameOnly')) then
 			nameplate.Highlight.texture:SetColorTexture(1, 1, 1, 0.25)
-			nameplate.Highlight.texture:SetAllPoints(nameplate.FlashTexture)
+			nameplate.Highlight.texture:SetAllPoints(nameplate.HealthFlashTexture)
 			nameplate.Highlight.texture:SetAlpha(0.75)
 		else
 			nameplate.Highlight.texture:SetTexture(E.Media.Textures.Spark)
 			nameplate.Highlight.texture:SetAllPoints(nameplate)
 			nameplate.Highlight.texture:SetAlpha(0.50)
 		end
-	else
-		if nameplate:IsElementEnabled("Highlight") then
-			nameplate:DisableElement("Highlight")
+	elseif nameplate:IsElementEnabled("Highlight") then
+		nameplate:DisableElement("Highlight")
+	end
+end
+
+function NP:Construct_PVPRole(nameplate)
+	local texture = nameplate:CreateTexture(nameplate:GetDebugName() .. "PVPRole", "OVERLAY")
+	texture:Size(40, 40)
+	texture.HealerTexture = E.Media.Textures.Healer
+	texture.TankTexture = E.Media.Textures.Tank
+	texture:SetTexture(texture.HealerTexture)
+
+	texture:Hide()
+
+	return texture
+end
+
+function NP:Update_PVPRole(nameplate)
+	local db = NP.db.units[nameplate.frameType]
+
+	if (nameplate.frameType == "FRIENDLY_PLAYER" or nameplate.frameType == "ENEMY_PLAYER") and (db.markHealers or db.markTanks) then
+		if not nameplate:IsElementEnabled("PVPRole") then
+			nameplate:EnableElement("PVPRole")
 		end
+
+		nameplate.PVPRole.ShowHealers = db.markHealers
+		nameplate.PVPRole.ShowTanks = db.markTanks
+
+		nameplate.PVPRole:Point("RIGHT", nameplate.Health, "LEFT", -6, 0)
+	elseif nameplate:IsElementEnabled("PVPRole") then
+		nameplate:DisableElement("PVPRole")
 	end
 end
 
@@ -219,28 +242,14 @@ function NP:Construct_Cutaway(nameplate)
 	local Cutaway = {}
 
 	Cutaway.Health = nameplate.Health.ClipFrame:CreateTexture(nameplate:GetDebugName() .. "CutawayHealth")
-	if NP.db.cutaway.health.forceBlankTexture then
-		Cutaway.Health:SetTexture(E.media.blankTex)
-	else
-		Cutaway.Health:SetTexture(E.Libs.LSM:Fetch("statusbar", NP.db.statusbar))
-		NP.StatusBars[Cutaway.Health] = true
-	end
-
 	local healthTexture = nameplate.Health:GetStatusBarTexture()
-	Cutaway.Health:SetPoint("TOPLEFT", healthTexture, "TOPRIGHT")
-	Cutaway.Health:SetPoint("BOTTOMLEFT", healthTexture, "BOTTOMRIGHT")
+	Cutaway.Health:Point("TOPLEFT", healthTexture, "TOPRIGHT")
+	Cutaway.Health:Point("BOTTOMLEFT", healthTexture, "BOTTOMRIGHT")
 
 	Cutaway.Power = nameplate.Power.ClipFrame:CreateTexture(nameplate:GetDebugName() .. "CutawayPower")
-	if NP.db.cutaway.power.forceBlankTexture then
-		Cutaway.Power:SetTexture(E.media.blankTex)
-	else
-		Cutaway.Power:SetTexture(E.Libs.LSM:Fetch("statusbar", NP.db.statusbar))
-		NP.StatusBars[Cutaway.Power] = true
-	end
-
 	local powerTexture = nameplate.Power:GetStatusBarTexture()
-	Cutaway.Power:SetPoint("TOPLEFT", powerTexture, "TOPRIGHT")
-	Cutaway.Power:SetPoint("BOTTOMLEFT", powerTexture, "BOTTOMRIGHT")
+	Cutaway.Power:Point("TOPLEFT", powerTexture, "TOPRIGHT")
+	Cutaway.Power:Point("BOTTOMLEFT", powerTexture, "BOTTOMRIGHT")
 
 	return Cutaway
 end
@@ -255,20 +264,63 @@ function NP:Update_Cutaway(nameplate)
 		if not nameplate:IsElementEnabled("Cutaway") then
 			nameplate:EnableElement("Cutaway")
 		end
+
 		nameplate.Cutaway:UpdateConfigurationValues(NP.db.cutaway)
+
+		if NP.db.cutaway.health.forceBlankTexture then
+			nameplate.Cutaway.Health:SetTexture(E.media.blankTex)
+		else
+			nameplate.Cutaway.Health:SetTexture(E.Libs.LSM:Fetch("statusbar", NP.db.statusbar))
+		end
+
+		if NP.db.cutaway.power.forceBlankTexture then
+			nameplate.Cutaway.Power:SetTexture(E.media.blankTex)
+		else
+			nameplate.Cutaway.Power:SetTexture(E.Libs.LSM:Fetch("statusbar", NP.db.statusbar))
+		end
 	end
 end
 
-function NP:Update_Cutaway(nameplate)
-	local eitherEnabled = NP.db.cutaway.health.enabled or NP.db.cutaway.power.enabled
-	if not eitherEnabled then
-		if nameplate:IsElementEnabled("Cutaway") then
-			nameplate:DisableElement("Cutaway")
+function NP:Construct_WidgetXPBar(nameplate)
+	local WidgetXPBar = CreateFrame("StatusBar", nameplate:GetDebugName() .. "WidgetXPBar", nameplate)
+	WidgetXPBar:SetFrameStrata(nameplate:GetFrameStrata())
+	WidgetXPBar:SetFrameLevel(5)
+	WidgetXPBar:SetStatusBarTexture(E.Libs.LSM:Fetch("statusbar", NP.db.statusbar))
+	WidgetXPBar:CreateBackdrop("Transparent")
+
+	WidgetXPBar.Rank = NP:Construct_TagText(nameplate.RaisedElement)
+	WidgetXPBar.ProgressText = NP:Construct_TagText(nameplate.RaisedElement)
+
+	NP.StatusBars[WidgetXPBar] = true
+
+	return WidgetXPBar
+end
+
+function NP:Update_WidgetXPBar(nameplate)
+	local db = NP.db.units[nameplate.frameType]
+	if not db.widgetXPBar or not db.widgetXPBar.enable then
+		if nameplate:IsElementEnabled("WidgetXPBar") then
+			nameplate:DisableElement("WidgetXPBar")
 		end
 	else
-		if not nameplate:IsElementEnabled("Cutaway") then
-			nameplate:EnableElement("Cutaway")
+		if not nameplate:IsElementEnabled("WidgetXPBar") then
+			nameplate:EnableElement("WidgetXPBar")
 		end
-		nameplate.Cutaway:UpdateConfigurationValues(NP.db.cutaway)
+
+		local bar = nameplate.WidgetXPBar
+		bar:ClearAllPoints()
+		bar:Point("TOPLEFT", nameplate, "BOTTOMLEFT", 0, db.widgetXPBar.yOffset)
+		bar:Point("TOPRIGHT", nameplate, "BOTTOMRIGHT", 0, db.widgetXPBar.yOffset)
+		bar:Height(10)
+
+		bar.Rank:ClearAllPoints()
+		bar.Rank:Point("RIGHT", bar, "LEFT", -4, 0)
+		bar.ProgressText:ClearAllPoints()
+		bar.ProgressText:Point("CENTER", bar, "CENTER")
+
+		local color = db.widgetXPBar.color
+		bar:SetStatusBarColor(color.r, color.g, color.b)
+
+		bar:ForceUpdate()
 	end
 end

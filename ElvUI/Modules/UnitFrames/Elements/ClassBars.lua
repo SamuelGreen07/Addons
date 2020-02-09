@@ -48,7 +48,7 @@ function UF:Configure_ClassBar(frame, cur)
 	bars.backdrop:SetBackdropBorderColor(color.r, color.g, color.b)
 
 	if frame.USE_MINI_CLASSBAR and not frame.CLASSBAR_DETACHED then
-		if frame.MAX_CLASS_BAR == 1 or frame.ClassBar == "AdditionalPower" or frame.ClassBar == "Stagger" then
+		if frame.MAX_CLASS_BAR == 1 or frame.ClassBar == "AdditionalPower" or frame.ClassBar == "Stagger" or frame.ClassBar == 'AlternativePower' then
 			CLASSBAR_WIDTH = CLASSBAR_WIDTH * 2/3
 		else
 			CLASSBAR_WIDTH = CLASSBAR_WIDTH * (frame.MAX_CLASS_BAR - 1) / frame.MAX_CLASS_BAR
@@ -162,7 +162,7 @@ function UF:Configure_ClassBar(frame, cur)
 		else
 			bars.backdrop:Hide()
 		end
-	elseif (frame.ClassBar == "AdditionalPower" or frame.ClassBar == "Stagger") then
+	elseif (frame.ClassBar == "AdditionalPower" or frame.ClassBar == "Stagger" or frame.ClassBar == "AlternativePower") then
 		if frame.CLASSBAR_DETACHED and db.classbar.verticalOrientation then
 			bars:SetOrientation("VERTICAL")
 		else
@@ -186,7 +186,7 @@ function UF:Configure_ClassBar(frame, cur)
 		if not bars.Holder.mover then
 			bars:ClearAllPoints()
 			bars:Point("BOTTOMLEFT", bars.Holder, "BOTTOMLEFT", frame.BORDER + frame.SPACING, frame.BORDER + frame.SPACING)
-			E:CreateMover(bars.Holder, 'ClassBarMover', L["Classbar"], nil, nil, nil, 'ALL,SOLO', nil, 'unitframe,player,classbar')
+			E:CreateMover(bars.Holder, 'ClassBarMover', L["Classbar"], nil, nil, nil, 'ALL,SOLO', nil, 'unitframe,individualUnits,player,classbar')
 		else
 			bars:ClearAllPoints()
 			bars:Point("BOTTOMLEFT", bars.Holder, "BOTTOMLEFT", frame.BORDER + frame.SPACING, frame.BORDER + frame.SPACING)
@@ -201,7 +201,7 @@ function UF:Configure_ClassBar(frame, cur)
 		end
 
 		if not db.classbar.strataAndLevel.useCustomLevel then
-			bars:SetFrameLevel(frame:GetFrameLevel() + 5)
+			bars:SetFrameLevel(frame.Health:GetFrameLevel() + 10) --Health uses 10, Power uses (Health + 5) when attached
 		else
 			bars:SetFrameLevel(db.classbar.strataAndLevel.frameLevel)
 		end
@@ -213,7 +213,8 @@ function UF:Configure_ClassBar(frame, cur)
 			bars:Point("BOTTOMLEFT", frame.Health.backdrop, "TOPLEFT", frame.BORDER, frame.SPACING*3)
 		end
 
-		bars:SetFrameLevel(frame:GetFrameLevel() + 5)
+		bars:SetFrameStrata("LOW")
+		bars:SetFrameLevel(frame.Health:GetFrameLevel() + 10) --Health uses 10, Power uses (Health + 5) when attached
 
 		if bars.Holder and bars.Holder.mover then
 			bars.Holder.mover:SetScale(0.0001)
@@ -242,6 +243,9 @@ function UF:Configure_ClassBar(frame, cur)
 		if frame.Stagger and not frame:IsElementEnabled("Stagger") then
 			frame:EnableElement("Stagger")
 		end
+		if frame.AlternativePower and not frame:IsElementEnabled("AlternativePower") then
+			frame:EnableElement("AlternativePower")
+		end
 	else
 		if frame.ClassPower and frame:IsElementEnabled("ClassPower") then
 			frame:DisableElement("ClassPower")
@@ -254,6 +258,9 @@ function UF:Configure_ClassBar(frame, cur)
 		end
 		if frame.Stagger and frame:IsElementEnabled("Stagger") then
 			frame:DisableElement("Stagger")
+		end
+		if frame.AlternativePower and frame:IsElementEnabled("AlternativePower") then
+			frame:DisableElement("AlternativePower")
 		end
 	end
 end
@@ -285,7 +292,8 @@ local function ToggleResourceBar(bars, overrideVisibility)
 
 	if not frame.CLASSBAR_DETACHED then --Only update when necessary
 		UF:Configure_HealthBar(frame)
-		UF:Configure_Portrait(frame, true) --running :Hide on portrait makes the frame all funky
+		UF:Configure_Portrait(frame)
+		UF:Configure_Threat(frame)
 	end
 end
 UF.ToggleResourceBar = ToggleResourceBar --Make available to combobar
@@ -435,6 +443,7 @@ function UF:Construct_AdditionalPowerBar(frame)
 	local additionalPower = CreateFrame('StatusBar', "AdditionalPowerBar", frame)
 	additionalPower:SetFrameLevel(additionalPower:GetFrameLevel() + 1)
 	additionalPower.colorPower = true
+	additionalPower.frequentUpdates = true
 	additionalPower.PostUpdate = UF.PostUpdateAdditionalPower
 	additionalPower.PostUpdateVisibility = UF.PostVisibilityAdditionalPower
 	additionalPower:CreateBackdrop(nil, nil, nil, self.thinBorders, true)

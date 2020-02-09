@@ -41,6 +41,26 @@ G.nameplate.filters = {
 			alpha = 30
 		}
 	},
+	ElvUI_Explosives = {
+		triggers = {
+			priority = 2,
+			nameplateType = {
+				enable = true,
+				enemyNPC = true
+			},
+			names = {
+				["120651"] = true
+			}
+		},
+		actions = {
+			usePortrait = true,
+			scale = 1.15,
+			color = {
+				health = true,
+				healthColor = {r = 0, g = 255, b = 255}
+			}
+		}
+	}
 }
 
 E.StyleFilterDefaults = {
@@ -170,7 +190,18 @@ E.StyleFilterDefaults = {
 			scenario = false,
 			party = false,
 			raid = false,
-			pvp = false,
+			arena = false,
+			pvp = false
+		},
+		location = {
+			mapIDEnabled = false,
+			mapIDs = {},
+			instanceIDEnabled = false,
+			instanceIDs = {},
+			zoneNamesEnabled = false,
+			zoneNames = {},
+			subZoneNamesEnabled = false,
+			subZoneNames = {},
 		},
 		keyMod = {
 			enable = false,

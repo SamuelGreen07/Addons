@@ -56,6 +56,7 @@ function UF:Construct_HealthBar(frame, bg, text, textPos)
 	clipFrame:SetScript('OnUpdate', UF.HealthClipFrame_OnUpdate)
 	clipFrame:SetClipsChildren(true)
 	clipFrame:SetAllPoints()
+	clipFrame:EnableMouse(false)
 	clipFrame.__frame = frame
 	health.ClipFrame = clipFrame
 
@@ -82,6 +83,7 @@ function UF:Configure_HealthBar(frame)
 	health.colorHealth = nil
 	health.colorClass = nil
 	health.colorReaction = nil
+	health.colorSelection = nil
 
 	if db.colorOverride and db.colorOverride == "FORCE_ON" then
 		health.colorClass = true
@@ -93,7 +95,11 @@ function UF:Configure_HealthBar(frame)
 			health.colorHealth = true
 		end
 	else
-		if self.db.colors.healthclass ~= true then
+		if self.db.colors.healthselection then
+			health.colorSelection = true
+		--[[elseif self.db.colors.healththreat then
+			health.colorThreat = true]]
+		elseif self.db.colors.healthclass ~= true then
 			if self.db.colors.colorhealthbyvalue then
 				health.colorSmooth = true
 			else
@@ -188,20 +194,12 @@ function UF:Configure_HealthBar(frame)
 	end
 
 	if db.health then
-		if db.health.reverseFill then
-			health:SetReverseFill(true)
-		else
-			health:SetReverseFill(false)
-		end
-
 		--Party/Raid Frames allow to change statusbar orientation
 		if db.health.orientation then
 			health:SetOrientation(db.health.orientation)
 		end
 
-		if db.health.bgUseBarTexture then
-			health.bg:SetTexture(E.Libs.LSM:Fetch('statusbar', E.db.unitframe.statusbar))
-		end
+		health:SetReverseFill(db.health.reverseFill)
 	end
 
 	--Transparency Settings
@@ -210,10 +208,12 @@ function UF:Configure_HealthBar(frame)
 	--Prediction Texture; keep under ToggleTransparentStatusBar
 	UF:UpdatePredictionStatusBar(frame.HealthPrediction, frame.Health, "Health")
 
-	--Highlight Texture
+	--Frame Glow
 	UF:Configure_FrameGlow(frame)
 
 	if frame:IsElementEnabled("Health") then
+		frame:SetHealthUpdateMethod(E.global.unitframe.effectiveHealth)
+		frame:SetHealthUpdateSpeed(E.global.unitframe.effectiveHealthSpeed)
 	    frame.Health:ForceUpdate()
 	end
 end
@@ -237,13 +237,7 @@ function UF:PostUpdateHealthColor(unit, r, g, b)
 	local newr, newg, newb -- fallback for bg if custom settings arent used
 	if not b then r, g, b = colors.health.r, colors.health.g, colors.health.b end
 	if (((colors.healthclass and colors.colorhealthbyvalue) or (colors.colorhealthbyvalue and parent.isForced)) and not UnitIsTapDenied(unit)) then
-		local cur, max = self.cur or 1, self.max or 100
-		if parent.isForced then
-			cur = parent.forcedHealth or cur
-			max = (cur > max and cur * 2) or max
-		end
-
-		newr, newg, newb = ElvUF:ColorGradient(cur, max, 1, 0, 0, 1, 1, 0, r, g, b)
+		newr, newg, newb = ElvUF:ColorGradient(self.cur, self.max, 1, 0, 0, 1, 1, 0, r, g, b)
 		self:SetStatusBarColor(newr, newg, newb)
 	end
 
@@ -275,18 +269,14 @@ function UF:PostUpdateHealthColor(unit, r, g, b)
 	end
 end
 
-function UF:PostUpdateHealth(_, cur, max)
+function UF:PostUpdateHealth(_, cur)
 	local parent = self:GetParent()
 	if parent.isForced then
-		cur = random(1, max or 100)
-		parent.forcedHealth = cur
-		self:SetValue(cur)
-	else
-		if parent.forcedHealth then
-			parent.forcedHealth = nil
-		end
-		if parent.ResurrectIndicator then
-			parent.ResurrectIndicator:SetAlpha(cur == 0 and 1 or 0)
-		end
+		self.cur = random(1, 100)
+		self.max = 100
+		self:SetMinMaxValues(0, self.max)
+		self:SetValue(self.cur)
+	elseif parent.ResurrectIndicator then
+		parent.ResurrectIndicator:SetAlpha(cur == 0 and 1 or 0)
 	end
 end

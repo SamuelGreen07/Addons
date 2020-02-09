@@ -80,11 +80,11 @@ end
 
 function NP:Castbar_PostCastStart(unit)
 	self:CheckInterrupt(unit)
-	--NP:StyleFilterUpdate(self.__owner, 'FAKE_Casting')
+	NP:StyleFilterUpdate(self.__owner, 'FAKE_Casting')
 end
 
 function NP:Castbar_PostCastFail()
-	--NP:StyleFilterUpdate(self.__owner, 'FAKE_Casting')
+	NP:StyleFilterUpdate(self.__owner, 'FAKE_Casting')
 end
 
 function NP:Castbar_PostCastInterruptible(unit)
@@ -92,7 +92,7 @@ function NP:Castbar_PostCastInterruptible(unit)
 end
 
 function NP:Castbar_PostCastStop()
-	--NP:StyleFilterUpdate(self.__owner, 'FAKE_Casting')
+	NP:StyleFilterUpdate(self.__owner, 'FAKE_Casting')
 end
 
 function NP:Construct_Castbar(nameplate)
@@ -150,7 +150,7 @@ function NP:COMBAT_LOG_EVENT_UNFILTERED()
 					if db.castbar.sourceInterruptClassColor then
 						local _, sourceClass = GetPlayerInfoByGUID(sourceGUID)
 						if sourceClass then
-							local classColor = (_G.CUSTOM_CLASS_COLORS and _G.CUSTOM_CLASS_COLORS[sourceClass]) or _G.RAID_CLASS_COLORS[sourceClass];
+							local classColor = E:ClassColor(sourceClass)
 							sourceClass = classColor and classColor.colorStr
 						end
 

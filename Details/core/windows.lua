@@ -2489,9 +2489,9 @@
 						else
 							bookmark.atributo = bookmark.atributo or 1
 							bookmark.sub_atributo = bookmark.sub_atributo or 1
-							this_block.label.text = _detalhes.sub_atributos [bookmark.atributo].lista [bookmark.sub_atributo]
-							this_block.icon.texture = _detalhes.sub_atributos [bookmark.atributo].icones [bookmark.sub_atributo] [1]
-							this_block.icon.texcoord = _detalhes.sub_atributos [bookmark.atributo].icones [bookmark.sub_atributo] [2]
+							this_block.label.text = _detalhes.sub_atributos [bookmark.atributo] and _detalhes.sub_atributos [bookmark.atributo].lista [bookmark.sub_atributo]
+							this_block.icon.texture = _detalhes.sub_atributos [bookmark.atributo] and _detalhes.sub_atributos [bookmark.atributo].icones [bookmark.sub_atributo] [1]
+							this_block.icon.texcoord = _detalhes.sub_atributos [bookmark.atributo] and _detalhes.sub_atributos [bookmark.atributo].icones [bookmark.sub_atributo] [2]
 							this_block.bg:SetVertexColor (.4, .4, .4, .6)
 						end
 						
@@ -4831,17 +4831,6 @@
 			Api2Frame:SetPoint ("center")
 			DetailsFramework:ApplyStandardBackdrop (Api2Frame, false, 1.2)
 			
-			--add a box telling to use spell name instead of spellid (classic wow only)
-			local classicWarningFrame = CreateFrame ("frame", nil, Api2Frame)
-			DetailsFramework:ApplyStandardBackdrop (classicWarningFrame, false, 1.2)
-			classicWarningFrame:SetPoint ("bottomleft", Api2Frame, "bottomleft", scrollWidth + 31, 1)
-			classicWarningFrame:SetPoint ("bottomright", Api2Frame, "bottomright", -0, 1)
-			classicWarningFrame:SetHeight (20)
-			local classicWarningLabel = DetailsFramework:CreateLabel (classicWarningFrame)
-			classicWarningLabel.text = "WoW Classic: use the spell name instead of spellID."
-			classicWarningLabel.color = "orange"
-			classicWarningLabel:SetPoint("left", classicWarningFrame, "left", 4, 0)
-
 			--store
 			local apiFunctionNames = {}
 			local parametersLines = {}

@@ -142,10 +142,17 @@ do
 		end
 
 		local x, y, _, mapId = UnitPosition("player")
-
+ 		--New bug in 8.2.5, unit position returns nil for position in areas there aren't restrictions for first few frames in that new area
+		--this just has the arrow skip some onupdates during that
+		if (not x or not y) then
+			if IsInInstance() then--Somehow x and y returned on entering an instance, before restrictions kicked in?
+				frame:Hide()--Hide, if in an instance, disable arrow entirely
+			end
+			return--Not in instance, but x and y nil, just skip updates until x and y start returning
+		end
 		if targetType == "player" then
 			targetX, targetY, _, targetMapId = UnitPosition(targetPlayer)
-			if not targetX or mapId ~= targetMapId then
+			if not targetX or not targetY or mapId ~= targetMapId then
 				self:Hide() -- hide the arrow if the target doesn't exist. TODO: just hide the texture and add a timeout
 			end
 		elseif targetType == "rotate" then
@@ -219,9 +226,6 @@ local function show(runAway, x, y, distance, time, legacy, dwayed, title, custom
 		end
 		targetX, targetY = x, y
 	end
-	if dwayed then
-		DBM:AddMsg(DBM_ARROW_WAY_SUCCESS)
-	end
 end
 
 function arrowFrame:ShowRunTo(...)
@@ -268,7 +272,7 @@ function arrowFrame:Move()
 	hideDistance = 0
 	frame:EnableMouse(true)
 	frame:Show()
-	DBM.Bars:CreateBar(25, DBM_ARROW_MOVABLE, 136106)
+	DBM.Bars:CreateBar(25, DBM_ARROW_MOVABLE, 237538)
 	DBM:Unschedule(endMove)
 	DBM:Schedule(25, endMove)
 end

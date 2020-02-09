@@ -6,6 +6,9 @@ local LSM = E.Libs.LSM
 local _G = _G
 local format = format
 --WoW API / Variables
+local C_Reputation_GetFactionParagonInfo = C_Reputation.GetFactionParagonInfo
+local C_Reputation_IsFactionParagon = C_Reputation.IsFactionParagon
+local GetFriendshipReputation = GetFriendshipReputation
 local GetWatchedFactionInfo, GetNumFactions, GetFactionInfo = GetWatchedFactionInfo, GetNumFactions, GetFactionInfo
 local InCombatLockdown = InCombatLockdown
 local ToggleCharacter = ToggleCharacter
@@ -19,35 +22,58 @@ function mod:UpdateReputation(event)
 	if not mod.db.reputation.enable then return end
 
 	local bar = self.repBar
-	local ID, standingLabel
-	local isCapped
-	local name, reaction, min, max, value = GetWatchedFactionInfo()
+	local name, reaction, min, max, value, factionID = GetWatchedFactionInfo()
 
-	if reaction == _G.MAX_REPUTATION_REACTION then
-		-- max rank, make it look like a full bar
-		min, max, value = 0, 1, 1
-		isCapped = true
-	end
-
-	local numFactions = GetNumFactions();
-
-	if not name or (event == "PLAYER_REGEN_DISABLED" and self.db.reputation.hideInCombat) then
+	if not name or (self.db.reputation.hideInCombat and (event == "PLAYER_REGEN_DISABLED" or InCombatLockdown())) then
 		bar:Hide()
-	elseif name and (not self.db.reputation.hideInCombat or not InCombatLockdown()) then
+	else
 		bar:Show()
 
-		local text = ''
-		local textFormat = self.db.reputation.textFormat
-		local color = _G.FACTION_BAR_COLORS[reaction] or backupColor
-		bar.statusBar:SetStatusBarColor(color.r, color.g, color.b)
+		if self.db.reputation.hideInVehicle then
+			E:RegisterObjectForVehicleLock(bar, E.UIParent)
+		else
+			E:UnregisterObjectForVehicleLock(bar)
+		end
+
+		local ID, isFriend, friendText, standingLabel
+		local isCapped
+
+		if factionID and C_Reputation_IsFactionParagon(factionID) then
+			local currentValue, threshold, _, hasRewardPending = C_Reputation_GetFactionParagonInfo(factionID)
+			if currentValue and threshold then
+				min, max = 0, threshold
+				value = currentValue % threshold
+				if hasRewardPending then
+					value = value + threshold
+				end
+			end
+		else
+			if reaction == _G.MAX_REPUTATION_REACTION then
+				-- max rank, make it look like a full bar
+				min, max, value = 0, 1, 1
+				isCapped = true
+			end
+		end
 
 		bar.statusBar:SetMinMaxValues(min, max)
 		bar.statusBar:SetValue(value)
+		local color = _G.FACTION_BAR_COLORS[reaction] or backupColor
+		bar.statusBar:SetStatusBarColor(color.r, color.g, color.b)
+
+		local numFactions = GetNumFactions()
+		local text = ''
+		local textFormat = self.db.reputation.textFormat
 
 		for i=1, numFactions do
-			local factionName, _, standingID = GetFactionInfo(i);
+			local factionName, _, standingID,_,_,_,_,_,_,_,_,_,_, FactionID = GetFactionInfo(i)
+			local friendID, _, _, _, _, _, friendTextLevel = GetFriendshipReputation(FactionID)
 			if factionName == name then
-				ID = standingID
+				if friendID ~= nil then
+					isFriend = true
+					friendText = friendTextLevel
+				else
+					ID = standingID
+				end
 			end
 		end
 
@@ -65,22 +91,22 @@ function mod:UpdateReputation(event)
 
 		if isCapped and textFormat ~= 'NONE' then
 			-- show only name and standing on exalted
-			text = format('%s: [%s]', name, standingLabel)
+			text = format('%s: [%s]', name, isFriend and friendText or standingLabel)
 		else
 			if textFormat == 'PERCENT' then
-				text = format('%s: %d%% [%s]', name, ((value - min) / (maxMinDiff) * 100), standingLabel)
+				text = format('%s: %d%% [%s]', name, ((value - min) / (maxMinDiff) * 100), isFriend and friendText or standingLabel)
 			elseif textFormat == 'CURMAX' then
-				text = format('%s: %s - %s [%s]', name, E:ShortValue(value - min), E:ShortValue(max - min), standingLabel)
+				text = format('%s: %s - %s [%s]', name, E:ShortValue(value - min), E:ShortValue(max - min), isFriend and friendText or standingLabel)
 			elseif textFormat == 'CURPERC' then
-				text = format('%s: %s - %d%% [%s]', name, E:ShortValue(value - min), ((value - min) / (maxMinDiff) * 100), standingLabel)
+				text = format('%s: %s - %d%% [%s]', name, E:ShortValue(value - min), ((value - min) / (maxMinDiff) * 100), isFriend and friendText or standingLabel)
 			elseif textFormat == 'CUR' then
-				text = format('%s: %s [%s]', name, E:ShortValue(value - min), standingLabel)
+				text = format('%s: %s [%s]', name, E:ShortValue(value - min), isFriend and friendText or standingLabel)
 			elseif textFormat == 'REM' then
-				text = format('%s: %s [%s]', name, E:ShortValue((max - min) - (value-min)), standingLabel)
+				text = format('%s: %s [%s]', name, E:ShortValue((max - min) - (value-min)), isFriend and friendText or standingLabel)
 			elseif textFormat == 'CURREM' then
-				text = format('%s: %s - %s [%s]', name, E:ShortValue(value - min), E:ShortValue((max - min) - (value-min)), standingLabel)
+				text = format('%s: %s - %s [%s]', name, E:ShortValue(value - min), E:ShortValue((max - min) - (value-min)), isFriend and friendText or standingLabel)
 			elseif textFormat == 'CURPERCREM' then
-				text = format('%s: %s - %d%% (%s) [%s]', name, E:ShortValue(value - min), ((value - min) / (maxMinDiff) * 100), E:ShortValue((max - min) - (value-min)), standingLabel)
+				text = format('%s: %s - %d%% (%s) [%s]', name, E:ShortValue(value - min), ((value - min) / (maxMinDiff) * 100), E:ShortValue((max - min) - (value-min)), isFriend and friendText or standingLabel)
 			end
 		end
 
@@ -98,14 +124,27 @@ function mod:ReputationBar_OnEnter()
 	GameTooltip:ClearLines()
 	GameTooltip:SetOwner(self, 'ANCHOR_CURSOR', 0, -4)
 
-	local name, reaction, min, max, value = GetWatchedFactionInfo()
+	local name, reaction, min, max, value, factionID = GetWatchedFactionInfo()
+	if factionID and C_Reputation_IsFactionParagon(factionID) then
+		local currentValue, threshold, _, hasRewardPending = C_Reputation_GetFactionParagonInfo(factionID)
+		if currentValue and threshold then
+			min, max = 0, threshold
+			value = currentValue % threshold
+			if hasRewardPending then
+				value = value + threshold
+			end
+		end
+	end
 
 	if name then
 		GameTooltip:AddLine(name)
 		GameTooltip:AddLine(' ')
 
-		GameTooltip:AddDoubleLine(STANDING..':', _G['FACTION_STANDING_LABEL'..reaction], 1, 1, 1)
-		if reaction ~= _G.MAX_REPUTATION_REACTION then
+		local friendID, friendTextLevel, _
+		if factionID then friendID, _, _, _, _, _, friendTextLevel = GetFriendshipReputation(factionID) end
+
+		GameTooltip:AddDoubleLine(STANDING..':', (friendID and friendTextLevel) or _G['FACTION_STANDING_LABEL'..reaction], 1, 1, 1)
+		if reaction ~= _G.MAX_REPUTATION_REACTION or C_Reputation_IsFactionParagon(factionID) then
 			GameTooltip:AddDoubleLine(REPUTATION..':', format('%d / %d (%d%%)', value - min, max - min, (value - min) / ((max - min == 0) and max or (max - min)) * 100), 1, 1, 1)
 		end
 	end

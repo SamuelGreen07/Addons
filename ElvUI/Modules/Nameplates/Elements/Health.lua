@@ -8,6 +8,7 @@ local unpack = unpack
 -- WoW API / Variables
 local UnitPlayerControlled = UnitPlayerControlled
 local UnitIsTapDenied = UnitIsTapDenied
+local UnitThreatSituation = UnitThreatSituation
 local UnitIsPlayer = UnitIsPlayer
 local UnitClass = UnitClass
 local UnitReaction = UnitReaction
@@ -16,6 +17,7 @@ local CreateFrame = CreateFrame
 function NP:Health_UpdateColor(event, unit)
 	if(not unit or self.unit ~= unit) then return end
 	local element = self.Health
+	local Selection = element.colorSelection and NP:UnitSelectionType(unit, element.considerSelectionInCombatHostile)
 
 	local r, g, b, t
 	if(element.colorDead and element.dead) then
@@ -24,11 +26,16 @@ function NP:Health_UpdateColor(event, unit)
 		t = self.colors.disconnected
 	elseif(element.colorTapping and not UnitPlayerControlled(unit) and UnitIsTapDenied(unit)) then
 		t = NP.db.colors.tapped
+	--[=[elseif(element.colorThreat and not UnitPlayerControlled(unit) and UnitThreatSituation('player', unit)) then
+		t =  self.colors.threat[UnitThreatSituation('player', unit)]]=]
 	elseif(element.colorClass and UnitIsPlayer(unit)) or
 		(element.colorClassNPC and not UnitIsPlayer(unit)) or
 		(element.colorClassPet and UnitPlayerControlled(unit) and not UnitIsPlayer(unit)) then
 		local _, class = UnitClass(unit)
 		t = self.colors.class[class]
+	elseif Selection then
+		if Selection == 3 then Selection = UnitPlayerControlled(unit) and 5 or 3 end
+		t = NP.db.colors.selection[Selection]
 	elseif(element.colorReaction and UnitReaction(unit, 'player')) then
 		local reaction = UnitReaction(unit, 'player')
 		if reaction <= 3 then reaction = 'bad' elseif reaction == 4 then reaction = 'neutral' else reaction = 'good' end
@@ -39,24 +46,27 @@ function NP:Health_UpdateColor(event, unit)
 		t = NP.db.colors.health
 	end
 
-	if(t) then
+	if t then
 		r, g, b = t[1] or t.r, t[2] or t.g, t[3] or t.b
 		element.r, element.g, element.b = r, g, b -- save these for the style filter to switch back
 	end
 
-	if self.HealthColorChanged then
-		r, g, b = self.HealthColorChanged.r, self.HealthColorChanged.g, self.HealthColorChanged.b -- use the style filter values
+	local SF_HealthColor = NP:StyleFilterCheckChanges(self, 'HealthColor')
+	if SF_HealthColor then
+		r, g, b = SF_HealthColor.r, SF_HealthColor.g, SF_HealthColor.b
 	end
 
 	if b then
 		element:SetStatusBarColor(r, g, b)
 
-		if element.bg then element.bg:SetVertexColor(r * NP.multiplier, g * NP.multiplier, b * NP.multiplier) end
+		if element.bg then
+			element.bg:SetVertexColor(r * NP.multiplier, g * NP.multiplier, b * NP.multiplier)
+		end
 	end
 
-    if(element.PostUpdateColor) then
-        element:PostUpdateColor(unit, r, g, b)
-    end
+	if element.PostUpdateColor then
+		element:PostUpdateColor(unit, r, g, b)
+	end
 end
 
 function NP:Construct_Health(nameplate)
@@ -69,6 +79,7 @@ function NP:Construct_Health(nameplate)
 	local clipFrame = CreateFrame('Frame', nil, Health)
 	clipFrame:SetClipsChildren(true)
 	clipFrame:SetAllPoints()
+	clipFrame:EnableMouse(false)
 	Health.ClipFrame = clipFrame
 
 	--[[Health.bg = Health:CreateTexture(nil, "BACKGROUND")
@@ -79,15 +90,15 @@ function NP:Construct_Health(nameplate)
 	NP.StatusBars[Health] = true
 
 	local statusBarTexture = Health:GetStatusBarTexture()
-	nameplate.FlashTexture = Health:CreateTexture(nameplate:GetDebugName()..'FlashTexture', "OVERLAY")
-	nameplate.FlashTexture:SetTexture(E.Libs.LSM:Fetch("background", "ElvUI Blank"))
-	nameplate.FlashTexture:Point("BOTTOMLEFT", statusBarTexture, "BOTTOMLEFT")
-	nameplate.FlashTexture:Point("TOPRIGHT", statusBarTexture, "TOPRIGHT")
-	nameplate.FlashTexture:Hide()
+	local healthFlashTexture = Health:CreateTexture(nameplate:GetDebugName()..'FlashTexture', "OVERLAY")
+	healthFlashTexture:SetTexture(E.Libs.LSM:Fetch("background", "ElvUI Blank"))
+	healthFlashTexture:Point("BOTTOMLEFT", statusBarTexture, "BOTTOMLEFT")
+	healthFlashTexture:Point("TOPRIGHT", statusBarTexture, "TOPRIGHT")
+	healthFlashTexture:Hide()
+	nameplate.HealthFlashTexture = healthFlashTexture
 
 	Health.colorTapping = true
-	Health.colorReaction = true
-	Health.frequentUpdates = true --Azil, keep this for now. It seems it may prevent event bugs
+	Health.colorSelection = true
 	Health.UpdateColor = NP.Health_UpdateColor
 
 	return Health
@@ -97,8 +108,9 @@ function NP:Update_Health(nameplate)
 	local db = NP.db.units[nameplate.frameType]
 
 	nameplate.Health.colorTapping = true
+	nameplate.Health.colorSelection = true
 	nameplate.Health.colorClass = db.health.useClassColor
-	nameplate.Health.colorReaction = true
+	nameplate.Health.considerSelectionInCombatHostile = true
 
 	if db.health.enable then
 		if not nameplate:IsElementEnabled('Health') then
@@ -108,6 +120,9 @@ function NP:Update_Health(nameplate)
 		nameplate.Health:Point('CENTER')
 		nameplate.Health:Point('LEFT')
 		nameplate.Health:Point('RIGHT')
+
+		nameplate:SetHealthUpdateMethod(E.global.nameplate.effectiveHealth)
+		nameplate:SetHealthUpdateSpeed(E.global.nameplate.effectiveHealthSpeed)
 
 		E:SetSmoothing(nameplate.Health, NP.db.smoothbars)
 	else
@@ -126,7 +141,6 @@ function NP:Update_Health(nameplate)
 	end
 
 	nameplate:Tag(nameplate.Health.Text, db.health.text.format)
-
 	nameplate.Health.Text.frequentUpdates = .1
 
 	nameplate.Health.width = db.health.width
@@ -137,14 +151,16 @@ end
 function NP:Construct_HealthPrediction(nameplate)
 	local HealthPrediction = CreateFrame('Frame', nameplate:GetDebugName()..'HealthPrediction', nameplate)
 
-	HealthPrediction.myBar = CreateFrame('StatusBar', nil, nameplate.Health.ClipFrame)
-	HealthPrediction.myBar:SetFrameStrata(nameplate:GetFrameStrata())
-	HealthPrediction.myBar:SetStatusBarTexture(E.LSM:Fetch('statusbar', NP.db.statusbar))
-	HealthPrediction.myBar:Point('TOP')
-	HealthPrediction.myBar:Point('BOTTOM')
-	HealthPrediction.myBar:Width(150)
+	for _, Bar in pairs({ 'myBar', 'otherBar', 'absorbBar', 'healAbsorbBar' }) do
+		HealthPrediction[Bar] = CreateFrame('StatusBar', nil, nameplate.Health.ClipFrame)
+		HealthPrediction[Bar]:SetFrameStrata(nameplate:GetFrameStrata())
+		HealthPrediction[Bar]:SetStatusBarTexture(E.LSM:Fetch('statusbar', NP.db.statusbar))
+		HealthPrediction[Bar]:Point('TOP')
+		HealthPrediction[Bar]:Point('BOTTOM')
+		HealthPrediction[Bar]:Width(150)
 
-	NP.StatusBars[HealthPrediction.myBar] = true
+		NP.StatusBars[HealthPrediction[Bar]] = true
+	end
 
 	local healthTexture = nameplate.Health:GetStatusBarTexture()
 	local healthFrameLevel = nameplate.Health:GetFrameLevel()
@@ -152,6 +168,19 @@ function NP:Construct_HealthPrediction(nameplate)
 	HealthPrediction.myBar:SetFrameLevel(healthFrameLevel + 2)
 	HealthPrediction.myBar:SetStatusBarColor(NP.db.colors.healPrediction.personal.r, NP.db.colors.healPrediction.personal.g, NP.db.colors.healPrediction.personal.b)
 	HealthPrediction.myBar:SetMinMaxValues(0, 1)
+
+	HealthPrediction.otherBar:Point('LEFT', HealthPrediction.myBar:GetStatusBarTexture(), 'RIGHT')
+	HealthPrediction.otherBar:SetFrameLevel(healthFrameLevel + 1)
+	HealthPrediction.otherBar:SetStatusBarColor(NP.db.colors.healPrediction.others.r, NP.db.colors.healPrediction.others.g, NP.db.colors.healPrediction.others.b)
+
+	HealthPrediction.absorbBar:Point('LEFT', HealthPrediction.otherBar:GetStatusBarTexture(), 'RIGHT')
+	HealthPrediction.absorbBar:SetFrameLevel(healthFrameLevel)
+	HealthPrediction.absorbBar:SetStatusBarColor(NP.db.colors.healPrediction.absorbs.r, NP.db.colors.healPrediction.absorbs.g, NP.db.colors.healPrediction.absorbs.b)
+
+	HealthPrediction.healAbsorbBar:Point('RIGHT', healthTexture)
+	HealthPrediction.healAbsorbBar:SetFrameLevel(healthFrameLevel + 3)
+	HealthPrediction.healAbsorbBar:SetStatusBarColor(NP.db.colors.healPrediction.healAbsorbs.r, NP.db.colors.healPrediction.healAbsorbs.g, NP.db.colors.healPrediction.healAbsorbs.b)
+	HealthPrediction.healAbsorbBar:SetReverseFill(true)
 
 	HealthPrediction.maxOverflow = 1
 	HealthPrediction.frequentUpdates = true
@@ -168,6 +197,9 @@ function NP:Update_HealthPrediction(nameplate)
 		end
 
 		nameplate.HealthPrediction.myBar:SetStatusBarColor(NP.db.colors.healPrediction.personal.r, NP.db.colors.healPrediction.personal.g, NP.db.colors.healPrediction.personal.b)
+		nameplate.HealthPrediction.otherBar:SetStatusBarColor(NP.db.colors.healPrediction.others.r, NP.db.colors.healPrediction.others.g, NP.db.colors.healPrediction.others.b)
+		nameplate.HealthPrediction.absorbBar:SetStatusBarColor(NP.db.colors.healPrediction.absorbs.r, NP.db.colors.healPrediction.absorbs.g, NP.db.colors.healPrediction.absorbs.b)
+		nameplate.HealthPrediction.healAbsorbBar:SetStatusBarColor(NP.db.colors.healPrediction.healAbsorbs.r, NP.db.colors.healPrediction.healAbsorbs.g, NP.db.colors.healPrediction.healAbsorbs.b)
 	else
 		if nameplate:IsElementEnabled('HealthPrediction') then
 			nameplate:DisableElement('HealthPrediction')

@@ -5,13 +5,14 @@ local Skins = E:GetModule('Skins')
 --Lua functions
 local _G = _G
 local select, tonumber, pairs = select, tonumber, pairs
-local floor, format = floor, format
+local floor = floor
+local format = format
 --WoW API / Variables
 local hooksecurefunc = hooksecurefunc
 local CreateFrame = CreateFrame
 local GetSpellInfo = GetSpellInfo
 local IsAddOnLoaded = IsAddOnLoaded
-local LoadBindings, SaveBindings = LoadBindings, AttemptToSaveBindings
+local LoadBindings, SaveBindings = LoadBindings, SaveBindings
 local GetCurrentBindingSet = GetCurrentBindingSet
 local SetBinding = SetBinding
 local GetBindingKey = GetBindingKey
@@ -23,6 +24,8 @@ local GetSpellBookItemName = GetSpellBookItemName
 local GameTooltip_ShowCompareItem = GameTooltip_ShowCompareItem
 local GetMacroInfo = GetMacroInfo
 local SecureActionButton_OnClick = SecureActionButton_OnClick
+local GetNumFlyouts, GetFlyoutInfo = GetNumFlyouts, GetFlyoutInfo
+local GetFlyoutID = GetFlyoutID
 local GameTooltip_Hide = GameTooltip_Hide
 local MAX_ACCOUNT_MACROS = MAX_ACCOUNT_MACROS
 local CHARACTER_SPECIFIC_KEYBINDING_TOOLTIP = CHARACTER_SPECIFIC_KEYBINDING_TOOLTIP
@@ -307,6 +310,24 @@ function AB:Tooltip_OnUpdate(tooltip, e)
 	end
 end
 
+function AB:UpdateFlyouts()
+	for i=1, GetNumFlyouts() do
+		local x = GetFlyoutID(i)
+		local _, _, numSlots, isKnown = GetFlyoutInfo(x)
+		if (isKnown) then
+			for k=1, numSlots do
+				local b = _G["SpellFlyoutButton"..k]
+				if _G.SpellFlyout:IsShown() and b and b:IsShown() then
+					if not b.hookedFlyout then
+						b:HookScript("OnEnter", function(b) AB:BindUpdate(b, "FLYOUT"); end)
+						b.hookedFlyout = true
+					end
+				end
+			end
+		end
+	end
+end
+
 function AB:RegisterMacro(addon)
 	if addon == "Blizzard_MacroUI" then
 		for i=1, MAX_ACCOUNT_MACROS do
@@ -364,6 +385,9 @@ function AB:LoadKeyBinder()
 	else
 		self:RegisterMacro("Blizzard_MacroUI")
 	end
+
+	self:SecureHook("ActionButton_UpdateFlyout", "UpdateFlyouts")
+	self:UpdateFlyouts()
 
 	--Special Popup
 	local f = CreateFrame("Frame", "ElvUIBindPopupWindow", _G.UIParent)

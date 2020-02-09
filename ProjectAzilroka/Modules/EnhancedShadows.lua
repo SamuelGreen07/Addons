@@ -1,9 +1,11 @@
 local PA = _G.ProjectAzilroka
 local ES = PA:NewModule('EnhancedShadows', 'AceEvent-3.0', 'AceTimer-3.0')
 
-ES.Title = '|cFF16C3F2Enhanced|r |cFFFFFFFFShadows|r'
-ES.Description = 'Adds options for registered shadows'
-ES.Authors = 'Azilroka     Whiro'
+ES.Title = 'Enhanced Shadows'
+ES.Header = PA.ACL['|cFF16C3F2Enhanced|r |cFFFFFFFFShadows|r']
+ES.Description = PA.ACL['Adds options for registered shadows']
+ES.Authors = 'Azilroka     NihilisticPandemonium'
+ES.isEnabled = false
 
 local unpack, floor, pairs = unpack, floor, pairs
 local UnitAffectingCombat = UnitAffectingCombat
@@ -62,7 +64,7 @@ function ES:UpdateShadow(shadow)
 end
 
 function ES:GetOptions()
-	local Options = {
+	PA.Options.args.EnhancedShadows = {
 		type = "group",
 		name = ES.Title,
 		desc = ES.Description,
@@ -72,26 +74,47 @@ function ES:GetOptions()
 			Header = {
 				order = 0,
 				type = 'header',
-				name = PA:Color(ES.Title)
+				name = ES.Header
 			},
-			Color = {
-				type = "color",
+			Enable = {
 				order = 1,
-				name = PA.ACL['Shadow Color'],
-				hasAlpha = true,
-				get = function(info) return unpack(ES.db[info[#info]]) end,
-				set = function(info, r, g, b, a) ES.db[info[#info]] = { r, g, b, a } ES:UpdateShadows() end,
-			},
-			ColorByClass = {
 				type = 'toggle',
-				order = 2,
-				name = PA.ACL['Color by Class'],
+				name = PA.ACL['Enable'],
+				set = function(info, value)
+					ES.db[info[#info]] = value
+					if (not ES.isEnabled) then
+						ES:Initialize()
+					else
+						_G.StaticPopup_Show('PROJECTAZILROKA_RL')
+					end
+				end,
 			},
-			Size = {
-				order = 3,
-				type = 'range',
-				name = PA.ACL['Size'],
-				min = 3, max = 10, step = 1,
+			General = {
+				order = 2,
+				type = 'group',
+				name = PA.ACL['General'],
+				guiInline = true,
+				args = {
+					Color = {
+						type = "color",
+						order = 1,
+						name = PA.ACL['Shadow Color'],
+						hasAlpha = true,
+						get = function(info) return unpack(ES.db[info[#info]]) end,
+						set = function(info, r, g, b, a) ES.db[info[#info]] = { r, g, b, a } ES:UpdateShadows() end,
+					},
+					ColorByClass = {
+						type = 'toggle',
+						order = 2,
+						name = PA.ACL['Color by Class'],
+					},
+					Size = {
+						order = 3,
+						type = 'range',
+						name = PA.ACL['Size'],
+						min = 3, max = 10, step = 1,
+					},
+				},
 			},
 			AuthorHeader = {
 				order = -4,
@@ -106,35 +129,27 @@ function ES:GetOptions()
 			},
 		},
 	}
-
-	PA.Options.args.EnhancedShadows = Options
 end
 
 function ES:BuildProfile()
-	PA.Defaults.profile['EnhancedShadows'] = {
-		['Enable'] = true,
-		['Color'] = { 0, 0, 0, 1 },
-		['ColorByClass'] = false,
-		['Size'] = 3,
-	}
-
-	PA.Options.args.general.args.EnhancedShadows = {
-		type = 'toggle',
-		name = ES.Title,
-		desc = ES.Description,
+	PA.Defaults.profile.EnhancedShadows = {
+		Enable = true,
+		Color = { 0, 0, 0, 1 },
+		ColorByClass = false,
+		Size = 3,
 	}
 end
 
 function ES:Initialize()
-	ES.db = PA.db['EnhancedShadows']
+	ES.db = PA.db.EnhancedShadows
 
-	if PA.SLE or PA.CUI or ES.db.Enable ~= true then
+	if PA.SLE or PA.NUI or ES.db.Enable ~= true then
 		return
 	end
 
 	PA.ES, _G.EnhancedShadows = ES, ES
 
-	ES:GetOptions()
+	ES.isEnabled = true
 
 	ES:ScheduleTimer('UpdateShadows', 1)
 end

@@ -1,0 +1,18 @@
+## Interface: 70000
+## Title: ExplorerCoords
+## Author: Dorwido
+## Version: 1.6
+## Notes: Shows all coords left to explore for the achievement
+## SavedVariables: ExplorerCoords_Config, ExplorerCoord, ExplorerCoordTracker,ExplorerCoordsGather_Config
+## X-Curse-Packaged-Version: v1.6
+## X-Curse-Project-Name: Explorer Coords
+## X-Curse-Project-ID: explorercoords
+## X-Curse-Repository-ID: wow/explorercoords/mainline
+libs\LibStub.lua
+libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+libs\HereBeDragons-1.0\HereBeDragons-1.0.lua
+libs\HereBeDragons-1.0\HereBeDragons-Pins-1.0.lua
+ExplorerCoords.xml
+ExplorerCoords_lang.lua
+explorer_data.lua
+ExplorerCoordsConfig.lua

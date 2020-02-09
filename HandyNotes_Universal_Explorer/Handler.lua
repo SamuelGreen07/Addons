@@ -1,0 +1,200 @@
+-----------------------------------------------------------------------
+local _G = getfenv(0)
+-- ----------------------------------------------------------------------------
+-- AddOn namespace.
+-- ----------------------------------------------------------------------------
+local FOLDER_NAME, plugin	= ...
+local IMAGES_FOLDER		= "Interface\\Addons\\" .. FOLDER_NAME .. "\\Images\\"
+-- ----------------------------------------------------------------------------
+local HandyNotes = LibStub("AceAddon-3.0"):GetAddon("HandyNotes")
+local HL = LibStub("AceAddon-3.0"):NewAddon(FOLDER_NAME, "AceEvent-3.0")
+--	-------------------------------------------------------------------------------------------
+--	Plugin Handlers to HandyNotes
+--	-------------------------------------------------------------------------------------------
+local HLHandler = {}
+local tip = {}
+local info = {}
+--	-------------------------------------------------------------------------------------------
+--	Functions
+--	-------------------------------------------------------------------------------------------
+	--	Create TomTom Way Point
+	-------------------------------------------------------------------------------------------
+	local function addTomTomWaypoint(button, uiMapID, coord)
+		if TomTom then
+			local x, y = HandyNotes:getXY(coord)
+			TomTom:AddWaypoint(uiMapID, x, y, {
+				title = tip.title,
+				persistent = nil,
+				minimap = true,
+				world = true
+			})
+		end
+	end
+	--	End of TomTom Way Point
+	-------------------------------------------------------------------------------------------
+	local function hideNode(button, uiMapID, coord)
+		plugin.hidden[uiMapID][coord] = true
+		HL:Refresh()
+	end
+
+	local function closeAllDropdowns()
+		CloseDropDownMenus(1)
+	end
+--	-------------------------------------------------------------------------------------------
+--	Tooltip
+--	-------------------------------------------------------------------------------------------
+	function HLHandler:OnEnter(uiMapID, coord)
+		local tooltip = self:GetParent() == WorldMapFrame:GetCanvas() and WorldMapTooltip or GameTooltip
+		if ( self:GetCenter() > UIParent:GetCenter() ) then -- compare X coordinate
+			tooltip:SetOwner(self, "ANCHOR_LEFT")
+		else
+			tooltip:SetOwner(self, "ANCHOR_RIGHT")
+		end
+
+		local value = plugin.points[uiMapID][coord]
+		if not value then return nil end
+		------------------------------------------------------------------------------------
+		if value.achievement then
+			tip.title	= select(1, GetAchievementCriteriaInfoByID(value.achievement, value.criteria))
+			tip.note	= select(2, GetAchievementInfo(value.achievement))
+			tip.note2	= select(8, GetAchievementInfo(value.achievement))
+		end
+		------------------------------------------------------------------------------------
+		if tip.title then 
+			tooltip:SetText("|cff3399ff" .. tip.title)
+			if tip.note then 
+			tooltip:AddLine(tip.note, nil, nil, nil, true)	
+				if tip.note2 then 
+				tooltip:AddLine(tip.note2, 1, 1, 1, true)
+				end
+				if tip.note3 then 
+				tooltip:AddLine(tip.note3, 1, 1, 1, true)
+				end
+				if tip.note4 then 
+				tooltip:AddLine(tip.note4, 1, 1, 1, true)
+				end
+
+			end
+		end
+		tooltip:Show()
+	end
+--	-------------------------------------------------------------------------------------------
+--	Tooltip Hide
+--	-------------------------------------------------------------------------------------------
+	function HLHandler:OnLeave(uiMapID, coord)
+		if self:GetParent() == WorldMapFrame:GetCanvas() then
+		WorldMapTooltip:Hide()
+		else
+		GameTooltip:Hide()
+		end
+	end
+--	-------------------------------------------------------------------------------------------
+--	--	End of Tooltip
+--	-------------------------------------------------------------------------------------------
+do
+    local currentZone, currentCoord
+    local function generateMenu(button, level)
+
+        if (not level) then return end
+        wipe(info)
+        if (level == 1) then
+		-- Create the title of the menu
+		info.isTitle      = 1
+		info.text         = "HandyNotes - " .. FOLDER_NAME:gsub("HandyNotes_", "")
+		info.notCheckable = 1
+		UIDropDownMenu_AddButton(info, level)
+		wipe(info)
+			
+		if TomTom then
+			-- Waypoint menu item
+			info.text = "Create waypoint"
+			info.notCheckable = 1
+			info.func = addTomTomWaypoint
+			info.arg1 = currentZone
+			info.arg2 = currentCoord
+			UIDropDownMenu_AddButton(info, level)
+			wipe(info)
+		end
+			
+		-- Hide menu item
+		info.text         = "Hide node"
+		info.notCheckable = 1
+		info.func         = hideNode
+		info.arg1         = currentZone
+		info.arg2         = currentCoord
+		UIDropDownMenu_AddButton(info, level)
+		wipe(info)
+		-- Close menu item
+		info.text         = "Close"
+		info.func         = closeAllDropdowns
+		info.notCheckable = 1
+		UIDropDownMenu_AddButton(info, level)
+		wipe(info)
+        end
+    end
+
+    local HL_Dropdown = CreateFrame("Frame", FOLDER_NAME.."DropdownMenu")
+    HL_Dropdown.displayMode = "MENU"
+    HL_Dropdown.initialize = generateMenu
+
+    function HLHandler:OnClick(button, down, uiMapID, coord)
+        currentZone = uiMapID
+        currentCoord = coord
+        -- given we're in a click handler, this really *should* exist, but just in case...
+        local point = plugin.points[currentZone] and plugin.points[currentZone][currentCoord]
+        if button == "RightButton" and not down then
+            ToggleDropDownMenu(1, nil, HL_Dropdown, self, 0, 0)
+        end
+    end
+end
+
+
+
+do
+    -- This is a custom iterator we use to iterate over every node in a given zone
+    local function iter(t, prestate)
+        if not t then return nil end
+        local state, value = next(t, prestate)
+        while state do
+	    if value  then
+--      -------------------------------------------------------------------------------------------
+--	Create ICON
+--      -------------------------------------------------------------------------------------------
+		local icon, alpha, scale
+			scale = value.scale or 1
+			alpha = value.alpha or 1
+			if value.achievement then
+				if (UnitName("player") ~= select ( 6, GetAchievementCriteriaInfoByID (value.achievement, value.criteria) ) ) then
+				icon = "Interface\\Addons\\" .. FOLDER_NAME .. "\\Images\\Explorer Coord" 
+				end
+			end
+--      -------------------------------------------------------------------------------------------
+                return state, nil, icon, scale, alpha
+            end
+            state, value = next(t, state) -- Get next data
+        end
+        return nil, nil, nil, nil
+    end
+    function HLHandler:GetNodes2(uiMapID, minimap)
+        return iter, plugin.points[uiMapID], nil
+    end
+end
+---------------------------------------------------------
+-- Addon initialization, enabling and disabling
+
+function HL:OnInitialize()
+    -- Set up our database
+    self.db = LibStub("AceDB-3.0"):New(FOLDER_NAME.."DB", plugin.defaults)
+    plugin.db = self.db.profile
+    plugin.hidden = self.db.char.hidden
+    -- Initialize our database with HandyNotes
+    HandyNotes:RegisterPluginDB(FOLDER_NAME:gsub("HandyNotes_", ""), HLHandler, plugin.options)
+
+    -- watch for LOOT_CLOSED
+    self:RegisterEvent("LOOT_CLOSED", "Refresh")
+    self:RegisterEvent("ZONE_CHANGED_INDOORS", "Refresh")
+end
+
+function HL:Refresh()
+    self:SendMessage("HandyNotes_NotifyUpdate", FOLDER_NAME:gsub("HandyNotes_", ""))
+end

@@ -916,7 +916,6 @@ local default_profile = {
 		disable_stretch_button = false,
 		disable_alldisplays_window = false,
 		damage_taken_everything = false,
-		force_class_icons = false,
 	
 	--> info window
 		player_details_window = {
@@ -937,7 +936,7 @@ local default_profile = {
 		
 	--> instances
 		instances_amount = 5,
-		instances_segments_locked = false,
+		instances_segments_locked = true,
 		instances_disable_bar_highlight = false,
 		instances_menu_click_to_open = false,
 		instances_no_libwindow = false,
@@ -1391,10 +1390,6 @@ local default_global_data = {
 	
 	--> dungeon information - can be accessed by plugins and third party mods
 		dungeon_data = {},
-
-	--> mobs data
-		mobs_data = {},
-		mobs_data_compiled = {},
 	
 	--> raid information - can be accessed by plugins and third party mods
 		raid_data = {},

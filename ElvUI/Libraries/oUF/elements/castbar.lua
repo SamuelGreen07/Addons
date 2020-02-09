@@ -89,11 +89,31 @@ A default texture will be applied to the StatusBar and Texture widgets if they d
 local _, ns = ...
 local oUF = ns.oUF
 
-local DEFAULT_ICON = [[Interface\ICONS\INV_Misc_QuestionMark]]
-local LibClassicCasterino = LibStub('LibClassicCasterino', true)
-local UnitCastingInfo = CastingInfo
-local UnitChannelInfo = ChannelInfo
-local EventFunctions = {}
+local FALLBACK_ICON = 136243 -- Interface\ICONS\Trade_Engineering
+
+-- ElvUI block
+local select = select
+local FAILED = FAILED
+local INTERRUPTED = INTERRUPTED
+local GetNetStats = GetNetStats
+local UnitCastingInfo = UnitCastingInfo
+local UnitChannelInfo = UnitChannelInfo
+local UnitIsUnit = UnitIsUnit
+local GetTime = GetTime
+
+-- GLOBALS: PetCastingBarFrame, PetCastingBarFrame_OnLoad
+-- GLOBALS: CastingBarFrame, CastingBarFrame_OnLoad, CastingBarFrame_SetUnit
+
+local tradeskillCurrent, tradeskillTotal, mergeTradeskill = 0, 0, false
+local UNIT_SPELLCAST_SENT = function (self, event, unit, target, castID, spellID)
+	local castbar = self.Castbar
+	castbar.curTarget = (target and target ~= "") and target or nil
+
+	if castbar.isTradeSkill then
+		castbar.tradeSkillCastId = castID
+	end
+end
+-- end block
 
 local function resetAttributes(self)
 	self.castID = nil
@@ -101,6 +121,7 @@ local function resetAttributes(self)
 	self.channeling = nil
 	self.notInterruptible = nil
 	self.spellID = nil
+	self.spellName = nil -- ElvUI
 end
 
 local function CastStart(self, event, unit)
@@ -134,6 +155,7 @@ local function CastStart(self, event, unit)
 	element.holdTime = 0
 	element.castID = castID
 	element.spellID = spellID
+	element.spellName = name -- ElvUI
 
 	if(element.casting) then
 		element.duration = GetTime() - startTime
@@ -141,14 +163,22 @@ local function CastStart(self, event, unit)
 		element.duration = endTime - GetTime()
 	end
 
+	-- ElvUI block
+	if(mergeTradeskill and isTradeSkill and UnitIsUnit(unit, "player")) then
+		element.duration = element.duration + (element.max * tradeskillCurrent);
+		element.max = element.max * tradeskillTotal;
+		element.holdTime = 1
+
+		if(unit == "player") then
+			tradeskillCurrent = tradeskillCurrent + 1;
+		end
+	end
+	-- end block
+
 	element:SetMinMaxValues(0, element.max)
 	element:SetValue(element.duration)
 
-	if texture == 136235 then
-		texture = DEFAULT_ICON
-	end
-
-	if(element.Icon) then element.Icon:SetTexture(texture or DEFAULT_ICON) end
+	if(element.Icon) then element.Icon:SetTexture(texture or FALLBACK_ICON) end
 	if(element.Shield) then element.Shield:SetShown(notInterruptible) end
 	if(element.Spark) then element.Spark:Show() end
 	if(element.Text) then element.Text:SetText(name) end
@@ -193,14 +223,8 @@ local function CastUpdate(self, event, unit, castID, spellID)
 	if(self.unit ~= unit) then return end
 
 	local element = self.Castbar
-	if unit == 'player' then
-		if(not element:IsShown() or element.castID ~= castID or element.spellID ~= spellID) then
-			return
-		end
-	else
-		if(not element:IsShown()) then
-			return
-		end
+	if(not element:IsShown() or element.castID ~= castID or element.spellID ~= spellID) then
+		return
 	end
 
 	local name, startTime, endTime, _
@@ -252,15 +276,17 @@ local function CastStop(self, event, unit, castID, spellID)
 	if(self.unit ~= unit) then return end
 
 	local element = self.Castbar
-	if unit == 'player' then
-		if(not element:IsShown() or element.castID ~= castID or element.spellID ~= spellID) then
-			return
-		end
-	else
-		if(not element:IsShown()) then
-			return
+	if(not element:IsShown() or element.castID ~= castID or element.spellID ~= spellID) then
+		return
+	end
+
+	-- ElvUI block
+	if mergeTradeskill and UnitIsUnit(unit, "player") then
+		if tradeskillCurrent == tradeskillTotal then
+			mergeTradeskill = false
 		end
 	end
+	-- end block
 
 	resetAttributes(element)
 
@@ -280,14 +306,8 @@ local function CastFail(self, event, unit, castID, spellID)
 	if(self.unit ~= unit) then return end
 
 	local element = self.Castbar
-	if unit == 'player' then
-		if(not element:IsShown() or element.castID ~= castID or element.spellID ~= spellID) then
-			return
-		end
-	else
-		if(not element:IsShown()) then
-			return
-		end
+	if(not element:IsShown() or element.castID ~= castID or element.spellID ~= spellID) then
+		return
 	end
 
 	if(element.Text) then
@@ -297,6 +317,13 @@ local function CastFail(self, event, unit, castID, spellID)
 	if(element.Spark) then element.Spark:Hide() end
 
 	element.holdTime = element.timeToHold or 0
+
+	-- ElvUI block
+	if mergeTradeskill and UnitIsUnit(unit, "player") then
+		mergeTradeskill = false
+		element.tradeSkillCastId = nil
+	end
+	-- end block
 
 	resetAttributes(element)
 	element:SetValue(element.max)
@@ -310,6 +337,27 @@ local function CastFail(self, event, unit, castID, spellID)
 	--]]
 	if(element.PostCastFail) then
 		return element:PostCastFail(unit, spellID)
+	end
+end
+
+local function CastInterruptible(self, event, unit)
+	if(self.unit ~= unit) then return end
+
+	local element = self.Castbar
+	if(not element:IsShown()) then return end
+
+	element.notInterruptible = event == 'UNIT_SPELLCAST_NOT_INTERRUPTIBLE'
+
+	if(element.Shield) then element.Shield:SetShown(element.notInterruptible) end
+
+	--[[ Callback: Castbar:PostCastInterruptible(unit)
+	Called after the element has been updated when a spell cast has become interruptible or uninterruptible.
+
+	* self - the Castbar widget
+	* unit - the unit for which the update has been triggered (string)
+	--]]
+	if(element.PostCastInterruptible) then
+		return element:PostCastInterruptible(unit)
 	end
 end
 
@@ -385,29 +433,20 @@ local function Enable(self, unit)
 		element.__owner = self
 		element.ForceUpdate = ForceUpdate
 
-		if LibClassicCasterino then
-			local CastbarEventHandler = function(event, ...)
-				return EventFunctions[event](self, event, ...)
-			end
+		self:RegisterEvent('UNIT_SPELLCAST_START', CastStart)
+		self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_START', CastStart)
+		self:RegisterEvent('UNIT_SPELLCAST_STOP', CastStop)
+		self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_STOP', CastStop)
+		self:RegisterEvent('UNIT_SPELLCAST_DELAYED', CastUpdate)
+		self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_UPDATE', CastUpdate)
+		self:RegisterEvent('UNIT_SPELLCAST_FAILED', CastFail)
+		self:RegisterEvent('UNIT_SPELLCAST_INTERRUPTED', CastFail)
+		self:RegisterEvent('UNIT_SPELLCAST_INTERRUPTIBLE', CastInterruptible)
+		self:RegisterEvent('UNIT_SPELLCAST_NOT_INTERRUPTIBLE', CastInterruptible)
 
-			LibClassicCasterino.RegisterCallback(self, 'UNIT_SPELLCAST_START', CastbarEventHandler)
-			LibClassicCasterino.RegisterCallback(self, 'UNIT_SPELLCAST_DELAYED', CastbarEventHandler)
-			LibClassicCasterino.RegisterCallback(self, 'UNIT_SPELLCAST_STOP', CastbarEventHandler)
-			LibClassicCasterino.RegisterCallback(self, 'UNIT_SPELLCAST_FAILED', CastbarEventHandler)
-			LibClassicCasterino.RegisterCallback(self, 'UNIT_SPELLCAST_INTERRUPTED', CastbarEventHandler)
-			LibClassicCasterino.RegisterCallback(self, 'UNIT_SPELLCAST_CHANNEL_START', CastbarEventHandler)
-			LibClassicCasterino.RegisterCallback(self, 'UNIT_SPELLCAST_CHANNEL_UPDATE', CastbarEventHandler)
-			LibClassicCasterino.RegisterCallback(self, 'UNIT_SPELLCAST_CHANNEL_STOP', CastbarEventHandler)
-		else
-			self:RegisterEvent('UNIT_SPELLCAST_START', CastStart)
-			self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_START', CastStart)
-			self:RegisterEvent('UNIT_SPELLCAST_STOP', CastStop)
-			self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_STOP', CastStop)
-			self:RegisterEvent('UNIT_SPELLCAST_DELAYED', CastUpdate)
-			self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_UPDATE', CastUpdate)
-			self:RegisterEvent('UNIT_SPELLCAST_FAILED', CastFail)
-			self:RegisterEvent('UNIT_SPELLCAST_INTERRUPTED', CastFail)
-		end
+		-- ElvUI block
+		self:RegisterEvent('UNIT_SPELLCAST_SENT', UNIT_SPELLCAST_SENT, true)
+		-- end block
 
 		element.holdTime = 0
 
@@ -437,6 +476,8 @@ local function Enable(self, unit)
 			safeZone:SetColorTexture(1, 0, 0)
 		end
 
+		element:Hide()
+
 		return true
 	end
 end
@@ -446,25 +487,16 @@ local function Disable(self)
 	if(element) then
 		element:Hide()
 
-		if LibClassicCasterino then
-			LibClassicCasterino.UnregisterCallback(self, 'UNIT_SPELLCAST_START')
-			LibClassicCasterino.UnregisterCallback(self, 'UNIT_SPELLCAST_DELAYED')
-			LibClassicCasterino.UnregisterCallback(self, 'UNIT_SPELLCAST_STOP')
-			LibClassicCasterino.UnregisterCallback(self, 'UNIT_SPELLCAST_FAILED')
-			LibClassicCasterino.UnregisterCallback(self, 'UNIT_SPELLCAST_INTERRUPTED')
-			LibClassicCasterino.UnregisterCallback(self, 'UNIT_SPELLCAST_CHANNEL_START')
-			LibClassicCasterino.UnregisterCallback(self, 'UNIT_SPELLCAST_CHANNEL_UPDATE')
-			LibClassicCasterino.UnregisterCallback(self, 'UNIT_SPELLCAST_CHANNEL_STOP')
-		else
-			self:UnregisterEvent('UNIT_SPELLCAST_START', CastStart)
-			self:UnregisterEvent('UNIT_SPELLCAST_CHANNEL_START', CastStart)
-			self:UnregisterEvent('UNIT_SPELLCAST_DELAYED', CastUpdate)
-			self:UnregisterEvent('UNIT_SPELLCAST_CHANNEL_UPDATE', CastUpdate)
-			self:UnregisterEvent('UNIT_SPELLCAST_STOP', CastStop)
-			self:UnregisterEvent('UNIT_SPELLCAST_CHANNEL_STOP', CastStop)
-			self:UnregisterEvent('UNIT_SPELLCAST_FAILED', CastFail)
-			self:UnregisterEvent('UNIT_SPELLCAST_INTERRUPTED', CastFail)
-		end
+		self:UnregisterEvent('UNIT_SPELLCAST_START', CastStart)
+		self:UnregisterEvent('UNIT_SPELLCAST_CHANNEL_START', CastStart)
+		self:UnregisterEvent('UNIT_SPELLCAST_DELAYED', CastUpdate)
+		self:UnregisterEvent('UNIT_SPELLCAST_CHANNEL_UPDATE', CastUpdate)
+		self:UnregisterEvent('UNIT_SPELLCAST_STOP', CastStop)
+		self:UnregisterEvent('UNIT_SPELLCAST_CHANNEL_STOP', CastStop)
+		self:UnregisterEvent('UNIT_SPELLCAST_FAILED', CastFail)
+		self:UnregisterEvent('UNIT_SPELLCAST_INTERRUPTED', CastFail)
+		self:UnregisterEvent('UNIT_SPELLCAST_INTERRUPTIBLE', CastInterruptible)
+		self:UnregisterEvent('UNIT_SPELLCAST_NOT_INTERRUPTIBLE', CastInterruptible)
 
 		element:SetScript('OnUpdate', nil)
 
@@ -475,23 +507,12 @@ local function Disable(self)
 	end
 end
 
-if LibClassicCasterino then
-	UnitCastingInfo = function(unit)
-		return LibClassicCasterino:UnitCastingInfo(unit)
-	end
-
-	UnitChannelInfo = function(unit)
-		return LibClassicCasterino:UnitChannelInfo(unit)
-	end
-
-	EventFunctions["UNIT_SPELLCAST_START"] = CastStart
-	EventFunctions["UNIT_SPELLCAST_FAILED"] = CastFail
-	EventFunctions["UNIT_SPELLCAST_INTERRUPTED"] = CastFail
-	EventFunctions["UNIT_SPELLCAST_DELAYED"] = CastUpdate
-	EventFunctions["UNIT_SPELLCAST_STOP"] = CastStop
-	EventFunctions["UNIT_SPELLCAST_CHANNEL_START"] = CastStart
-	EventFunctions["UNIT_SPELLCAST_CHANNEL_UPDATE"] = CastUpdate
-	EventFunctions["UNIT_SPELLCAST_CHANNEL_STOP"] = CastStop
-end
+-- ElvUI block
+hooksecurefunc(C_TradeSkillUI, "CraftRecipe", function(_, num)
+	tradeskillCurrent = 0
+	tradeskillTotal = num or 1
+	mergeTradeskill = true
+end)
+-- end block
 
 oUF:AddElement('Castbar', Update, Enable, Disable)

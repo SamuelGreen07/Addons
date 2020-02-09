@@ -272,13 +272,13 @@ end
 
 local function IsCataEnchanter()
   Auctionator.Debug.Message( 'IsCataEnchanter' )
---[[
+
   local prof1, prof2 = GetProfessions()
 
   if (IsCataEnchanting (prof1) or IsCataEnchanting (prof2)) then
     return true
   end
-]]--
+
   return false
 end
 
@@ -674,12 +674,12 @@ local function Atr_ModTradeSkillFrame()
   if (gTradeSkillFrameModded) then
     return
   end
---[[
+
   if (TradeSkillFrame) then
     gTradeSkillFrameModded = true
 
     local button = CreateFrame("BUTTON", "Auctionator_Search", TradeSkillFrame, "UIPanelButtonTemplate");
-    button:SetPoint("RIGHT", "TradeSkillFrame", "RIGHT", -65, -20);
+    button:SetPoint("RIGHT", "TradeSkillFrame", "RIGHT", -35, 100);
 
     button:SetHeight (20)
     button:SetText(ZT("AH"))
@@ -691,7 +691,7 @@ local function Atr_ModTradeSkillFrame()
   else
     zz ("TradeSkillFrame not loaded")
   end
-]]--
+
 
 
 end
@@ -2643,7 +2643,7 @@ function Atr_ShowRecTooltip ()
 
   if (link) then
     if (num < 1) then num = 1; end;
---[[
+
     if (zc.IsBattlePetLink (link)) then
       local speciesID, level, breedQuality, maxHealth, power, speed, battlePetID, name = zc.ParseBattlePetLink(link)
 
@@ -2652,12 +2652,13 @@ function Atr_ShowRecTooltip ()
       BattlePetTooltip:ClearAllPoints();
       BattlePetTooltip:SetPoint("BOTTOMLEFT", Atr_RecommendItem_Tex, "BOTTOMRIGHT", 10, 0)
 
-    else ]]--
+    else
       GameTooltip:SetOwner(Atr_RecommendItem_Tex, "ANCHOR_RIGHT");
       GameTooltip:SetHyperlink (link, num);
       gCurrentPane.tooltipvisible = true;
-    --end
+    end
   end
+
 end
 
 -----------------------------------------
@@ -2667,7 +2668,7 @@ function Atr_HideRecTooltip ()
 
   gCurrentPane.tooltipvisible = nil;
   GameTooltip:Hide();
-  --BattlePetTooltip:Hide();
+  BattlePetTooltip:Hide();
 
 end
 
@@ -3469,7 +3470,7 @@ function Atr_ShowLineTooltip (self)
   Auctionator.Debug.Message( 'Atr_ShowLineTooltip', self )
 
   local itemLink = self.itemLink;
---[[
+
   if (zc.IsBattlePetLink (itemLink)) then
 
     local speciesID, level, breedQuality, maxHealth, power, speed, battlePetID, name = zc.ParseBattlePetLink(itemLink)
@@ -3480,7 +3481,7 @@ function Atr_ShowLineTooltip (self)
     BattlePetTooltip:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 10, 0)
 
   else   -- normal case
---]]
+
     local fname = self:GetName()
     local ftname = fname.."_EntryText"
     local textPart = _G[ftname]
@@ -3489,7 +3490,7 @@ function Atr_ShowLineTooltip (self)
       GameTooltip:SetOwner(self, "ANCHOR_RIGHT", -280)
       GameTooltip:SetHyperlink (itemLink, 1)
     end
- -- end
+  end
 end
 
 
@@ -3501,7 +3502,7 @@ function Atr_HideLineTooltip (self)
   Auctionator.Debug.Message( 'Atr_HideLineTooltip', self )
 
   GameTooltip:Hide();
-  --BattlePetTooltip:Hide();
+  BattlePetTooltip:Hide();
 end
 
 

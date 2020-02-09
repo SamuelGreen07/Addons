@@ -7,17 +7,53 @@ local _G = _G
 local wipe, date = wipe, date
 local format, select, type, ipairs, pairs = format, select, type, ipairs, pairs
 local strmatch, strfind, tonumber, tostring = strmatch, strfind, tonumber, tostring
+local strlen, CreateFrame = strlen, CreateFrame
 local GetAddOnEnableState = GetAddOnEnableState
+local GetBattlefieldArenaFaction = GetBattlefieldArenaFaction
 local GetCVar, SetCVar = GetCVar, SetCVar
 local GetCVarBool = GetCVarBool
 local GetFunctionCPUUsage = GetFunctionCPUUsage
 local GetInstanceInfo = GetInstanceInfo
+local GetSpecialization = GetSpecialization
+local GetSpecializationRole = GetSpecializationRole
 local InCombatLockdown = InCombatLockdown
 local IsAddOnLoaded = IsAddOnLoaded
+local IsWargame = IsWargame
+local PLAYER_FACTION_GROUP = PLAYER_FACTION_GROUP
 local RequestBattlefieldScoreData = RequestBattlefieldScoreData
 local UIParentLoadAddOn = UIParentLoadAddOn
+local UnitAttackPower = UnitAttackPower
+local UnitFactionGroup = UnitFactionGroup
+local UnitGroupRolesAssigned = UnitGroupRolesAssigned
 local UnitHasVehicleUI = UnitHasVehicleUI
+local UnitIsMercenary = UnitIsMercenary
+local UnitStat = UnitStat
+local C_PetBattles_IsInBattle = C_PetBattles.IsInBattle
+local C_PvP_IsRatedBattleground = C_PvP.IsRatedBattleground
 local C_UIWidgetManager_GetStatusBarWidgetVisualizationInfo = C_UIWidgetManager.GetStatusBarWidgetVisualizationInfo
+local FACTION_HORDE = FACTION_HORDE
+local FACTION_ALLIANCE = FACTION_ALLIANCE
+local ERR_NOT_IN_COMBAT = ERR_NOT_IN_COMBAT
+-- GLOBALS: ElvDB
+
+function E:ClassColor(class, usePriestColor)
+	if not class then return end
+
+	local color = (_G.CUSTOM_CLASS_COLORS and _G.CUSTOM_CLASS_COLORS[class]) or _G.RAID_CLASS_COLORS[class]
+	if type(color) ~= 'table' then return end
+
+	if not color.colorStr then
+		color.colorStr = E:RGBToHex(color.r, color.g, color.b, 'ff')
+	elseif strlen(color.colorStr) == 6 then
+		color.colorStr = 'ff'..color.colorStr
+	end
+
+	if (usePriestColor and class == 'PRIEST') and tonumber(color.colorStr, 16) > tonumber(E.PriestColors.colorStr, 16) then
+		return E.PriestColors
+	else
+		return color
+	end
+end
 
 do -- other non-english locales require this
 	E.UnlocalizedClasses = {}
@@ -25,7 +61,7 @@ do -- other non-english locales require this
 	for k,v in pairs(_G.LOCALIZED_CLASS_NAMES_FEMALE) do E.UnlocalizedClasses[v] = k end
 
 	function E:UnlocalizedClassName(className)
-		return (className and className ~= "") and E.UnlocalizedClasses[className]
+		return (className and className ~= '') and E.UnlocalizedClasses[className]
 	end
 end
 
@@ -33,60 +69,127 @@ function E:IsFoolsDay()
 	return strfind(date(), '04/01/') and not E.global.aprilFools
 end
 
-function E:ScanTooltipTextures(clean, grabTextures)
-	local essenceTextureID, textures, essences = 2975691
-	for i = 1, 10 do
-		local tex = _G["ElvUI_ScanTooltipTexture"..i]
-		local texture = tex and tex:GetTexture()
-		if texture then
-			if grabTextures then
-				if not textures then textures = {} end
-				if texture == essenceTextureID then
-					if not essences then essences = {} end
+do
+	local essenceTextureID = 2975691
+	function E:ScanTooltipTextures()
+		local tt = E.ScanTooltip
 
-					local selected = (textures[i-1] ~= essenceTextureID and textures[i-1]) or nil
-					essences[i] = {selected, tex:GetAtlas(), texture}
+		if not tt.gems then
+			tt.gems = {}
+		else
+			wipe(tt.gems)
+		end
 
-					if selected then
-						textures[i-1] = nil
-					end
-				else
-					textures[i] = texture
-				end
-			end
-			if clean then
-				tex:SetTexture()
+		if not tt.essences then
+			tt.essences = {}
+		else
+			for _, essences in pairs(tt.essences) do
+				wipe(essences)
 			end
 		end
+
+		local step = 1
+		for i = 1, 10 do
+			local tex = _G['ElvUI_ScanTooltipTexture'..i]
+			local texture = tex and tex:IsShown() and tex:GetTexture()
+			if texture then
+				if texture == essenceTextureID then
+					local selected = (tt.gems[i-1] ~= essenceTextureID and tt.gems[i-1]) or nil
+					if not tt.essences[step] then tt.essences[step] = {} end
+
+					tt.essences[step][1] = selected			--essence texture if selected or nil
+					tt.essences[step][2] = tex:GetAtlas()	--atlas place 'tooltip-heartofazerothessence-major' or 'tooltip-heartofazerothessence-minor'
+					tt.essences[step][3] = texture			--border texture placed by the atlas
+					--`CollectEssenceInfo` will add 4 (hex quality color) and 5 (essence name)
+
+					step = step + 1
+
+					if selected then
+						tt.gems[i-1] = nil
+					end
+				else
+					tt.gems[i] = texture
+				end
+			end
+		end
+
+		return tt.gems, tt.essences
+	end
+end
+
+function E:GetPlayerRole()
+	local assignedRole = UnitGroupRolesAssigned('player')
+	if assignedRole == 'NONE' then
+		return E.myspec and GetSpecializationRole(E.myspec)
 	end
 
-	return textures, essences
+	return assignedRole
+end
+
+function E:CheckRole()
+	self.myspec = GetSpecialization()
+	self.myrole = E:GetPlayerRole()
+
+	-- myrole = group role; TANK, HEALER, DAMAGER
+	-- role   = class role; Tank, Melee, Caster
+
+	local role
+	if type(self.ClassRole[self.myclass]) == 'string' then
+		role = self.ClassRole[self.myclass]
+	elseif self.myspec then
+		role = self.ClassRole[self.myclass][self.myspec]
+	end
+
+	if not role then
+		local playerint = select(2, UnitStat('player', 4))
+		local playeragi	= select(2, UnitStat('player', 2))
+		local base, posBuff, negBuff = UnitAttackPower('player')
+		local playerap = base + posBuff + negBuff
+
+		role = ((playerap > playerint) or (playeragi > playerint)) and 'Melee' or 'Caster'
+	end
+
+	if self.role ~= role then
+		self.role = role
+		self.callbacks:Fire('RoleChanged')
+	end
+
+	local dispel = self.DispelClasses[self.myclass]
+	if self.myrole and (self.myclass ~= 'PRIEST' and dispel ~= nil) then
+		dispel.Magic = (self.myrole == 'HEALER')
+	end
 end
 
 function E:IsDispellableByMe(debuffType)
-	if not self.DispelClasses[self.myclass] then return end
-	if self.DispelClasses[self.myclass][debuffType] then return true end
+	local dispel = self.DispelClasses[self.myclass]
+	return dispel and dispel[debuffType]
 end
 
 do
-	local function SetOriginalHeight()
+	local function SetOriginalHeight(f)
 		if InCombatLockdown() then
-			E:RegisterEvent('PLAYER_REGEN_ENABLED', SetOriginalHeight)
+			E:RegisterEventForObject('PLAYER_REGEN_ENABLED', SetOriginalHeight, SetOriginalHeight)
 			return
 		end
 
-		E:UnregisterEvent('PLAYER_REGEN_ENABLED')
 		E.UIParent:SetHeight(E.UIParent.origHeight)
+
+		if f == SetOriginalHeight then
+			E:UnregisterEventForObject('PLAYER_REGEN_ENABLED', SetOriginalHeight, SetOriginalHeight)
+		end
 	end
 
-	local function SetModifiedHeight()
+	local function SetModifiedHeight(f)
 		if InCombatLockdown() then
-			E:RegisterEvent('PLAYER_REGEN_ENABLED', SetModifiedHeight)
+			E:RegisterEventForObject('PLAYER_REGEN_ENABLED', SetModifiedHeight, SetModifiedHeight)
 			return
 		end
 
-		E:UnregisterEvent('PLAYER_REGEN_ENABLED')
 		E.UIParent:SetHeight(E.UIParent.origHeight - (_G.OrderHallCommandBar:GetHeight() + E.Border))
+
+		if f == SetModifiedHeight then
+			E:UnregisterEventForObject('PLAYER_REGEN_ENABLED', SetModifiedHeight, SetModifiedHeight)
+		end
 	end
 
 	--This function handles disabling of OrderHall Bar or resizing of ElvUIParent if needed
@@ -95,7 +198,7 @@ do
 			_G.OrderHallCommandBar:UnregisterAllEvents()
 			_G.OrderHallCommandBar:SetScript('OnShow', _G.OrderHallCommandBar.Hide)
 			_G.OrderHallCommandBar:Hide()
-			_G.UIParent:UnregisterEvent('UNIT_AURA')--Only used for OrderHall Bar
+			_G.UIParent:UnregisterEvent('UNIT_AURA') --Only used for OrderHall Bar
 		elseif E.global.general.commandBarSetting == 'ENABLED_RESIZEPARENT' then
 			_G.OrderHallCommandBar:HookScript('OnShow', SetModifiedHeight)
 			_G.OrderHallCommandBar:HookScript('OnHide', SetOriginalHeight)
@@ -104,20 +207,32 @@ do
 end
 
 do
-	E.MaxNazjatarBodyguardRank = 30
-	function E:GetNazjatarBodyguardXP(widgetID)
+	function E:GetWidgetInfoID(guid)
+		return E.global.nameplate.widgetMap[guid]
+	end
+
+	function E:SetWidgetInfoID(guid, widgetID)
+		if widgetID then
+			E.global.nameplate.widgetMap[guid] = widgetID
+		end
+	end
+
+	E.MaxWidgetInfoRank = 30
+	function E:GetWidgetInfoBase(widgetID)
 		local widget = widgetID and C_UIWidgetManager_GetStatusBarWidgetVisualizationInfo(widgetID)
 		if not widget then return end
-
-		local rank = tonumber(strmatch(widget.overrideBarText, "%d+"))
-		if not rank then return end
 
 		local cur = widget.barValue - widget.barMin
 		local toNext = widget.barMax - widget.barMin
 		local total = widget.barValue
-		local isMax = rank == E.MaxNazjatarBodyguardRank
 
-		return rank, cur, toNext, total, isMax
+		local rank, maxRank
+		if widget.overrideBarText then
+			rank = tonumber(strmatch(widget.overrideBarText, "%d+"))
+			maxRank = rank == E.MaxWidgetInfoRank
+		end
+
+		return cur, toNext, total, rank, maxRank
 	end
 end
 
@@ -254,32 +369,87 @@ function E:Dump(object, inspect)
 end
 
 function E:AddNonPetBattleFrames()
-	if InCombatLockdown() then return end
+	if InCombatLockdown() then
+		E:UnregisterEventForObject('PLAYER_REGEN_DISABLED', E.AddNonPetBattleFrames, E.AddNonPetBattleFrames)
+		return
+	elseif E:IsEventRegisteredForObject('PLAYER_REGEN_DISABLED', E.AddNonPetBattleFrames) then
+		E:UnregisterEventForObject('PLAYER_REGEN_DISABLED', E.AddNonPetBattleFrames, E.AddNonPetBattleFrames)
+	end
+
 	for object, data in pairs(E.FrameLocks) do
-		local obj = _G[object] or object
 		local parent, strata
 		if type(data) == 'table' then
 			parent, strata = data.parent, data.strata
 		elseif data == true then
 			parent = _G.UIParent
 		end
+
+		local obj = _G[object] or object
 		obj:SetParent(parent)
 		if strata then
 			obj:SetFrameStrata(strata)
 		end
 	end
-
-	self:UnregisterEvent('PLAYER_REGEN_DISABLED')
 end
 
 function E:RemoveNonPetBattleFrames()
-	if InCombatLockdown() then return end
+	if InCombatLockdown() then
+		E:RegisterEventForObject('PLAYER_REGEN_DISABLED', E.RemoveNonPetBattleFrames, E.RemoveNonPetBattleFrames)
+		return
+	elseif E:IsEventRegisteredForObject('PLAYER_REGEN_DISABLED', E.RemoveNonPetBattleFrames) then
+		E:UnregisterEventForObject('PLAYER_REGEN_DISABLED', E.RemoveNonPetBattleFrames, E.RemoveNonPetBattleFrames)
+	end
+
 	for object in pairs(E.FrameLocks) do
 		local obj = _G[object] or object
 		obj:SetParent(E.HiddenFrame)
 	end
+end
 
-	self:RegisterEvent('PLAYER_REGEN_DISABLED', 'AddNonPetBattleFrames')
+function E:RegisterPetBattleHideFrames(object, originalParent, originalStrata)
+	if not object or not originalParent then
+		E:Print('Error. Usage: RegisterPetBattleHideFrames(object, originalParent, originalStrata)')
+		return
+	end
+
+	object = _G[object] or object
+
+	--If already doing pokemon
+	if C_PetBattles_IsInBattle() then
+		object:SetParent(E.HiddenFrame)
+	end
+
+	E.FrameLocks[object] = {
+		parent = originalParent,
+		strata = originalStrata or nil,
+	}
+end
+
+function E:UnregisterPetBattleHideFrames(object)
+	if not object then
+		E:Print('Error. Usage: UnregisterPetBattleHideFrames(object)')
+		return
+	end
+
+	object = _G[object] or object
+
+	--Check if object was registered to begin with
+	if not E.FrameLocks[object] then return end
+
+	--Change parent of object back to original parent
+	local originalParent = E.FrameLocks[object].parent
+	if originalParent then
+		object:SetParent(originalParent)
+	end
+
+	--Change strata of object back to original
+	local originalStrata = E.FrameLocks[object].strata
+	if originalStrata then
+		object:SetFrameStrata(originalStrata)
+	end
+
+	--Remove object from table
+	E.FrameLocks[object] = nil
 end
 
 function E:RegisterObjectForVehicleLock(object, originalParent)
@@ -345,7 +515,13 @@ function E:RequestBGInfo()
 	RequestBattlefieldScoreData()
 end
 
-function E:PLAYER_ENTERING_WORLD()
+function E:PLAYER_ENTERING_WORLD(_, initLogin)
+	self:CheckRole()
+
+	if initLogin or not ElvDB.LuaErrorDisabledAddOns then
+		ElvDB.LuaErrorDisabledAddOns = {}
+	end
+
 	if not self.MediaUpdated then
 		self:UpdateMedia()
 		self.MediaUpdated = true
@@ -371,6 +547,63 @@ function E:PLAYER_REGEN_ENABLED()
 
 		self.CVarUpdate = nil
 	end
+
+	if self.ShowOptionsUI then
+		self:ToggleOptionsUI()
+
+		self.ShowOptionsUI = nil
+	end
+end
+
+function E:PLAYER_REGEN_DISABLED()
+	local err
+
+	if IsAddOnLoaded('ElvUI_OptionsUI') then
+		local ACD = self.Libs.AceConfigDialog
+		if ACD and ACD.OpenFrames and ACD.OpenFrames.ElvUI then
+			ACD:Close('ElvUI')
+			err = true
+		end
+	end
+
+	if self.CreatedMovers then
+		for name in pairs(self.CreatedMovers) do
+			local mover = _G[name]
+			if mover and mover:IsShown() then
+				mover:Hide()
+				err = true
+			end
+		end
+	end
+
+	if err then
+		self:Print(ERR_NOT_IN_COMBAT)
+	end
+end
+
+function E:GetUnitBattlefieldFaction(unit)
+	local englishFaction, localizedFaction = UnitFactionGroup(unit)
+
+	-- this might be a rated BG or wargame and if so the player's faction might be altered
+	-- should also apply if `player` is a mercenary.
+	if unit == 'player' then
+		if C_PvP_IsRatedBattleground() or IsWargame() then
+			englishFaction = PLAYER_FACTION_GROUP[GetBattlefieldArenaFaction()]
+			localizedFaction = (englishFaction == 'Alliance' and FACTION_ALLIANCE) or FACTION_HORDE
+		elseif UnitIsMercenary(unit) then
+			if englishFaction == 'Alliance' then
+				englishFaction, localizedFaction = 'Horde', FACTION_HORDE
+			else
+				englishFaction, localizedFaction = 'Alliance', FACTION_ALLIANCE
+			end
+		end
+	end
+
+	return englishFaction, localizedFaction
+end
+
+function E:NEUTRAL_FACTION_SELECT_RESULT()
+	E.myfaction, E.myLocalizedFaction = UnitFactionGroup('player')
 end
 
 function E:PLAYER_LEVEL_UP(_, level)
@@ -378,10 +611,17 @@ function E:PLAYER_LEVEL_UP(_, level)
 end
 
 function E:LoadAPI()
-	self:RegisterEvent('PLAYER_LEVEL_UP')
-	self:RegisterEvent('PLAYER_ENTERING_WORLD')
-	self:RegisterEvent('PLAYER_REGEN_ENABLED')
-	self:RegisterEvent('UI_SCALE_CHANGED', 'PixelScaleChanged')
+	E:RegisterEvent('PLAYER_LEVEL_UP')
+	E:RegisterEvent('PLAYER_ENTERING_WORLD')
+	E:RegisterEvent('PLAYER_REGEN_ENABLED')
+	E:RegisterEvent('PLAYER_REGEN_DISABLED')
+	E:RegisterEvent('NEUTRAL_FACTION_SELECT_RESULT')
+	E:RegisterEvent('PET_BATTLE_CLOSE', 'AddNonPetBattleFrames')
+	E:RegisterEvent('PET_BATTLE_OPENING_START', 'RemoveNonPetBattleFrames')
+	E:RegisterEvent('PLAYER_SPECIALIZATION_CHANGED', 'CheckRole')
+	E:RegisterEvent('UNIT_ENTERED_VEHICLE', 'EnterVehicleHideFrames')
+	E:RegisterEvent('UNIT_EXITED_VEHICLE', 'ExitVehicleShowFrames')
+	E:RegisterEvent('UI_SCALE_CHANGED', 'PixelScaleChanged')
 
 	do -- setup cropIcon texCoords
 		local opt = E.db.general.cropIcon
@@ -397,5 +637,25 @@ function E:LoadAPI()
 
 	if not strfind(date(), '04/01/') then
 		E.global.aprilFools = nil
+	end
+
+	if _G.OrderHallCommandBar then
+		E:HandleCommandBar()
+	else
+		local frame = CreateFrame('Frame')
+		frame:RegisterEvent('ADDON_LOADED')
+		frame:SetScript('OnEvent', function(Frame, event, addon)
+			if event == 'ADDON_LOADED' and addon == 'Blizzard_OrderHallUI' then
+				if InCombatLockdown() then
+					Frame:RegisterEvent('PLAYER_REGEN_ENABLED')
+				else
+					E:HandleCommandBar()
+				end
+				Frame:UnregisterEvent(event)
+			elseif event == 'PLAYER_REGEN_ENABLED' then
+				E:HandleCommandBar()
+				Frame:UnregisterEvent(event)
+			end
+		end)
 	end
 end

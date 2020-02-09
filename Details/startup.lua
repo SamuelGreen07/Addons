@@ -3,7 +3,6 @@ local UnitGroupRolesAssigned = DetailsFramework.UnitGroupRolesAssigned
 
 --> check unloaded files:
 if (
-	-- version 1.21.0
 	not _G._detalhes.atributo_custom.damagedoneTooltip or
 	not _G._detalhes.atributo_custom.healdoneTooltip
 	) then
@@ -1236,7 +1235,7 @@ function _G._detalhes:Start()
 	--> restore cooltip anchor position
 		DetailsTooltipAnchor:Restore()
 	
-	--> check if this is the first run
+	--> check is this is the first run
 		if (self.is_first_run) then
 			if (#self.custom == 0) then
 				_detalhes:AddDefaultCustomDisplays()
@@ -1877,13 +1876,11 @@ function _G._detalhes:Start()
 	--Details.overall_flag = 0x10
 	
 	--show warning message about classic beta
+	
 	if (not DetailsFramework.IsClassicWow()) then
-		print ("|CFFFFFF00[Details!]: you're using the classic version of Details! on the 8.2.0 patch. If you need help, see our Discord (/details discord)")
+		--print ("|CFFFFFF00[Details!]: Details! now has a separated version for Classic, Twitch app should give the right version, any issues report at Discord (/details discord).")
 	else
-		if (math.random (0, 2) == 0) then
-			print ("|CFFFFFF00[Details!]: Tiny Threat (aggro meter) plugin is updated to classic (cogwheel > raid plugins > Tiny Threat).")
-			print ("|CFFFFFF00[Details!]: Tiny Threat won't show users which does not have their Details! updated.")
-		end
+		print ("|CFFFFFF00[Details!]: you're using Details! for RETAIL on Classic WOW, please get the classic version (Details! Damage Meter Classic WoW), if you need help see our Discord (/details discord).")
 	end
 
 end

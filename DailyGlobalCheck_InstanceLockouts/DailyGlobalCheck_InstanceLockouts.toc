@@ -1,0 +1,9 @@
+## Interface: 80000
+## Title: DGC - Instance Lockouts
+## Author: Jadya  EU-Well of Eternity
+## Notes: A |cff00FF00Daily Global Check|r plugin that tracks instance lockouts for your character and your alts
+## eMail: n_rhygar@yahoo.it
+## Dependencies: DailyGlobalCheck
+## DefaultState: Enabled
+## LoadOnDemand: 0
+DailyGlobalCheck_InstanceLockouts.lua

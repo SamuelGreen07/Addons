@@ -28,8 +28,8 @@ local UnitIsDead = UnitIsDead
 local UnitIsFriend = UnitIsFriend
 local UnitName = UnitName
 
-local ITEM_QUALITY_COLORS = ITEM_QUALITY_COLORS
 local LOOT = LOOT
+local ITEM_QUALITY_COLORS = ITEM_QUALITY_COLORS
 local TEXTURE_ITEM_QUEST_BANG = TEXTURE_ITEM_QUEST_BANG
 
 local coinTextureIDs = {
@@ -176,6 +176,7 @@ function M:LOOT_SLOT_CLEARED(_, slot)
 	if lootFrame.slots[slot] then
 		lootFrame.slots[slot]:Hide()
 	end
+
 	anchorSlots(lootFrame)
 end
 
@@ -194,8 +195,6 @@ function M:LOOT_OPENED(_, autoloot)
 	if not lootFrame:IsShown() then
 		CloseLoot(not autoloot)
 	end
-
-	local items = GetNumLootItems()
 
 	if IsFishingLoot() then
 		lootFrame.title:SetText(L["Fishy Loot"])
@@ -223,6 +222,7 @@ function M:LOOT_OPENED(_, autoloot)
 	end
 
 	local m, w, t = 0, 0, lootFrame.title:GetStringWidth()
+	local items = GetNumLootItems()
 	if items > 0 then
 		for i=1, items do
 			local slot = lootFrame.slots[i] or createSlot(i)
@@ -285,7 +285,7 @@ function M:LOOT_OPENED(_, autoloot)
 		if color then
 			slot.name:SetTextColor(color.r, color.g, color.b)
 		end
-		slot.icon:SetTexture([[Interface\Icons\Inv_misc_questionmark]])
+		slot.icon:SetTexture[[Interface\Icons\INV_Misc_Herb_AncientLichen]]
 
 		w = max(w, slot.name:GetStringWidth())
 
@@ -304,14 +304,6 @@ function M:LOOT_OPENED(_, autoloot)
 	lootFrame:Width(max(w, t))
 end
 
-function M:OPEN_MASTER_LOOT_LIST()
-	ToggleDropDownMenu(1, nil, GroupLootDropDown, lootFrame.slots[LootFrame.selectedSlot], 0, 0)
-end
-
-function M:UPDATE_MASTER_LOOT_LIST()
-	UIDropDownMenu_Refresh(GroupLootDropDown)
-end
-
 function M:LoadLoot()
 	if not E.private.general.loot then return end
 	lootFrameHolder = CreateFrame('Frame', 'ElvLootFrameHolder', E.UIParent)
@@ -320,7 +312,6 @@ function M:LoadLoot()
 	lootFrameHolder:Height(22)
 
 	lootFrame = CreateFrame('Button', 'ElvLootFrame', lootFrameHolder)
-	lootFrame:Hide()
 	lootFrame:SetClampedToScreen(true)
 	lootFrame:Point('TOPLEFT')
 	lootFrame:Size(256, 64)
@@ -340,29 +331,10 @@ function M:LoadLoot()
 	self:RegisterEvent('LOOT_OPENED')
 	self:RegisterEvent('LOOT_SLOT_CLEARED')
 	self:RegisterEvent('LOOT_CLOSED')
-	self:RegisterEvent("OPEN_MASTER_LOOT_LIST")
-	self:RegisterEvent("UPDATE_MASTER_LOOT_LIST")
 
 	E:CreateMover(lootFrameHolder, 'LootFrameMover', L["Loot Frame"], nil, nil, nil, nil, nil, 'general,blizzUIImprovements')
 
 	-- Fuzz
 	_G.LootFrame:UnregisterAllEvents()
 	tinsert(_G.UISpecialFrames, 'ElvLootFrame')
-
-	function _G.GroupLootDropDown_GiveLoot()
-		if LootFrame.selectedQuality >= MASTER_LOOT_THREHOLD then
-			local dialog = StaticPopup_Show("CONFIRM_LOOT_DISTRIBUTION", ITEM_QUALITY_COLORS[LootFrame.selectedQuality].hex..LootFrame.selectedItemName..FONT_COLOR_CODE_CLOSE, self:GetText())
-			if dialog then
-				dialog.data = self.value
-			end
-		else
-			GiveMasterLoot(LootFrame.selectedSlot, self.value)
-		end
-		CloseDropDownMenus()
-	end
-
-	E.PopupDialogs["CONFIRM_LOOT_DISTRIBUTION"].OnAccept = function(data)
-		GiveMasterLoot(LootFrame.selectedSlot, data)
-	end
-	StaticPopupDialogs["CONFIRM_LOOT_DISTRIBUTION"].preferredIndex = 3
 end

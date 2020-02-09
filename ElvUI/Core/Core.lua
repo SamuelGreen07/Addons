@@ -1,40 +1,23 @@
 local ElvUI = select(2, ...)
-
-ElvUI[2] = ElvUI[1].Libs.ACL:GetLocale('ElvUI', ElvUI[1]:GetLocale())
-
+ElvUI[2] = ElvUI[1].Libs.ACL:GetLocale('ElvUI', ElvUI[1]:GetLocale()) -- Locale doesn't exist yet, make it exist.
 local E, L, V, P, G = unpack(ElvUI); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
-
-local ActionBars = E:GetModule('ActionBars')
-local AFK = E:GetModule('AFK')
-local Auras = E:GetModule('Auras')
-local Bags = E:GetModule('Bags')
---local Blizzard = E:GetModule('Blizzard')
-local Chat = E:GetModule('Chat')
-local DataBars = E:GetModule('DataBars')
-local DataTexts = E:GetModule('DataTexts')
-local Layout = E:GetModule('Layout')
-local Minimap = E:GetModule('Minimap')
-local NamePlates = E:GetModule('NamePlates')
-local Threat = E:GetModule('Threat')
-local Tooltip = E:GetModule('Tooltip')
-local Totems = E:GetModule('Totems')
-local UnitFrames = E:GetModule('UnitFrames')
-local LSM = E.Libs.LSM
 
 --Lua functions
 local _G = _G
 local tonumber, pairs, ipairs, error, unpack, select, tostring = tonumber, pairs, ipairs, error, unpack, select, tostring
 local gsub, strjoin, twipe, tinsert, tremove, tContains = gsub, strjoin, wipe, tinsert, tremove, tContains
 local format, find, strrep, strlen, sub = format, strfind, strrep, strlen, strsub
-local assert, type, xpcall, next, print = assert, type, xpcall, next, print
+local assert, type, pcall, xpcall, next, print = assert, type, pcall, xpcall, next, print
 --WoW API / Variables
 local CreateFrame = CreateFrame
 local GetCVar = GetCVar
 local GetCVarBool = GetCVarBool
+local GetSpellInfo = GetSpellInfo
 local GetNumGroupMembers = GetNumGroupMembers
+local GetSpecialization = GetSpecialization
 local hooksecurefunc = hooksecurefunc
 local InCombatLockdown = InCombatLockdown
-local IsAddOnLoaded = IsAddOnLoaded
+local GetAddOnEnableState = GetAddOnEnableState
 local IsInGroup = IsInGroup
 local IsInGuild = IsInGuild
 local IsInRaid = IsInRaid
@@ -48,24 +31,49 @@ local LE_PARTY_CATEGORY_INSTANCE = LE_PARTY_CATEGORY_INSTANCE
 local C_ChatInfo_SendAddonMessage = C_ChatInfo.SendAddonMessage
 -- GLOBALS: ElvUIPlayerBuffs, ElvUIPlayerDebuffs
 
+--Modules
+local ActionBars = E:GetModule('ActionBars')
+local AFK = E:GetModule('AFK')
+local Auras = E:GetModule('Auras')
+local Bags = E:GetModule('Bags')
+local Blizzard = E:GetModule('Blizzard')
+local Chat = E:GetModule('Chat')
+local DataBars = E:GetModule('DataBars')
+local DataTexts = E:GetModule('DataTexts')
+local Layout = E:GetModule('Layout')
+local Minimap = E:GetModule('Minimap')
+local NamePlates = E:GetModule('NamePlates')
+local Threat = E:GetModule('Threat')
+local Tooltip = E:GetModule('Tooltip')
+local Totems = E:GetModule('Totems')
+local UnitFrames = E:GetModule('UnitFrames')
+local LSM = E.Libs.LSM
+
 --Constants
 E.noop = function() end
 E.title = format('|cfffe7b2c%s |r', 'ElvUI')
+E.version = tonumber(GetAddOnMetadata('ElvUI', 'Version'))
 E.myfaction, E.myLocalizedFaction = UnitFactionGroup('player')
 E.mylevel = UnitLevel('player')
 E.myLocalizedClass, E.myclass, E.myClassID = UnitClass('player')
 E.myLocalizedRace, E.myrace = UnitRace('player')
 E.myname = UnitName('player')
 E.myrealm = GetRealmName()
-E.version = GetAddOnMetadata('ElvUI', 'Version')
+E.myspec = GetSpecialization()
 E.wowpatch, E.wowbuild = GetBuildInfo()
 E.wowbuild = tonumber(E.wowbuild)
-E.resolution = ({GetScreenResolutions()})[GetCurrentResolution()] or GetCVar('gxWindowedResolution') --only used for now in our install.lua line 779
-E.screenwidth, E.screenheight = GetPhysicalScreenSize()
 E.isMacClient = IsMacClient()
+E.IsRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+E.screenwidth, E.screenheight = GetPhysicalScreenSize()
+E.resolution = format('%dx%d', E.screenwidth, E.screenheight)
 E.NewSign = '|TInterface\\OptionsFrame\\UI-OptionsFrame-NewFeatureIcon:14:14|t' -- not used by ElvUI yet, but plugins like BenikUI and MerathilisUI use it.
+E.TexturePath = 'Interface\\AddOns\\ElvUI\\Media\\Textures\\' -- for plugins?
 E.InfoColor = '|cfffe7b2c'
-E.TexturePath = [[Interface\\AddOns\\ElvUI_Classic\\Media\\Textures\\]]
+E.UserList = {}
+
+-- oUF Defines
+E.oUF.Tags.Vars.E = E
+E.oUF.Tags.Vars.L = L
 
 --Tables
 E.media = {}
@@ -147,8 +155,27 @@ E.DispelClasses = {
 	MAGE = { Curse = true }
 }
 
+E.BadDispels = {
+	[34914] = 'Vampiric Touch', --horrifies
+	[233490] = 'Unstable Affliction' --silences
+}
+
 --Workaround for people wanting to use white and it reverting to their class color.
-E.PriestColors = { r = 0.99, g = 0.99, b = 0.99, colorStr = 'fcfcfc' }
+E.PriestColors = { r = 0.99, g = 0.99, b = 0.99, colorStr = 'fffcfcfc' }
+
+-- Socket Type info from 8.2
+E.GemTypeInfo = {
+	Yellow = {r = 0.97, g = 0.82, b = 0.29},
+	Red = {r = 1, g = 0.47, b = 0.47},
+	Blue = {r = 0.47, g = 0.67, b = 1},
+	Hydraulic = {r = 1, g = 1, b = 1},
+	Cogwheel = {r = 1, g = 1, b = 1},
+	Meta = {r = 1, g = 1, b = 1},
+	Prismatic = {r = 1, g = 1, b = 1},
+	PunchcardRed = {r = 1, g = 0.47, b = 0.47},
+	PunchcardYellow = {r = 0.97, g = 0.82, b = 0.29},
+	PunchcardBlue = {r = 0.47, g = 0.67, b = 1},
+}
 
 --This frame everything in ElvUI should be anchored to for Eyefinity support.
 E.UIParent = CreateFrame('Frame', 'ElvUIParent', _G.UIParent)
@@ -199,7 +226,7 @@ function E:CheckClassColor(r, g, b)
 	local matchFound = false
 	for class in pairs(_G.RAID_CLASS_COLORS) do
 		if class ~= E.myclass then
-			local colorTable = class == 'PRIEST' and E.PriestColors or (_G.CUSTOM_CLASS_COLORS and _G.CUSTOM_CLASS_COLORS[class] or _G.RAID_CLASS_COLORS[class])
+			local colorTable = E:ClassColor(class, true)
 			local red, green, blue = E:GrabColorPickerValues(colorTable.r, colorTable.g, colorTable.b)
 			if red == r and green == g and blue == b then
 				matchFound = true
@@ -273,7 +300,7 @@ function E:UpdateMedia()
 	--Border Color
 	local border = E.db.general.bordercolor
 	if self:CheckClassColor(border.r, border.g, border.b) then
-		local classColor = E.myclass == 'PRIEST' and E.PriestColors or (_G.CUSTOM_CLASS_COLORS and _G.CUSTOM_CLASS_COLORS[E.myclass] or _G.RAID_CLASS_COLORS[E.myclass])
+		local classColor = E:ClassColor(E.myclass, true)
 		E.db.general.bordercolor.r = classColor.r
 		E.db.general.bordercolor.g = classColor.g
 		E.db.general.bordercolor.b = classColor.b
@@ -284,7 +311,7 @@ function E:UpdateMedia()
 	--UnitFrame Border Color
 	border = E.db.unitframe.colors.borderColor
 	if self:CheckClassColor(border.r, border.g, border.b) then
-		local classColor = E.myclass == 'PRIEST' and E.PriestColors or (_G.CUSTOM_CLASS_COLORS and _G.CUSTOM_CLASS_COLORS[E.myclass] or _G.RAID_CLASS_COLORS[E.myclass])
+		local classColor = E:ClassColor(E.myclass, true)
 		E.db.unitframe.colors.borderColor.r = classColor.r
 		E.db.unitframe.colors.borderColor.g = classColor.g
 		E.db.unitframe.colors.borderColor.b = classColor.b
@@ -301,7 +328,7 @@ function E:UpdateMedia()
 	local value = self.db.general.valuecolor
 
 	if self:CheckClassColor(value.r, value.g, value.b) then
-		value = E.myclass == 'PRIEST' and E.PriestColors or (_G.CUSTOM_CLASS_COLORS and _G.CUSTOM_CLASS_COLORS[E.myclass] or _G.RAID_CLASS_COLORS[E.myclass])
+		value = E:ClassColor(E.myclass, true)
 		self.db.general.valuecolor.r = value.r
 		self.db.general.valuecolor.g = value.g
 		self.db.general.valuecolor.b = value.b
@@ -326,7 +353,7 @@ end
 
 do	--Update font/texture paths when they are registered by the addon providing them
 	--This helps fix most of the issues with fonts or textures reverting to default because the addon providing them is loading after ElvUI.
-	--We use a wrapper to avoid errors in :UpdateMedia because "self" is passed to the function with a value other than ElvUI.
+	--We use a wrapper to avoid errors in :UpdateMedia because 'self' is passed to the function with a value other than ElvUI.
 	local function LSMCallback() E:UpdateMedia() end
 	LSM.RegisterCallback(E, 'LibSharedMedia_Registered', LSMCallback)
 end
@@ -475,13 +502,18 @@ function E:IncompatibleAddOn(addon, module)
 	E:StaticPopup_Show('INCOMPATIBLE_ADDON', addon, module)
 end
 
+function E:IsAddOnEnabled(addon)
+	return GetAddOnEnableState(E.myname, addon) == 2
+end
+
 function E:CheckIncompatible()
 	if E.global.ignoreIncompatible then return end
-	if IsAddOnLoaded('Prat-3.0') and E.private.chat.enable then E:IncompatibleAddOn('Prat-3.0', 'Chat') end
-	if IsAddOnLoaded('Chatter') and E.private.chat.enable then E:IncompatibleAddOn('Chatter', 'Chat') end
-	if IsAddOnLoaded('TidyPlates') and E.private.nameplates.enable then E:IncompatibleAddOn('TidyPlates', 'NamePlates') end
-	if IsAddOnLoaded('Aloft') and E.private.nameplates.enable then E:IncompatibleAddOn('Aloft', 'NamePlates') end
-	if IsAddOnLoaded('Healers-Have-To-Die') and E.private.nameplates.enable then E:IncompatibleAddOn('Healers-Have-To-Die', 'NamePlates') end
+	if E:IsAddOnEnabled('Prat-3.0') and E.private.chat.enable then E:IncompatibleAddOn('Prat-3.0', 'Chat') end
+	if E:IsAddOnEnabled('Chatter') and E.private.chat.enable then E:IncompatibleAddOn('Chatter', 'Chat') end
+	if E:IsAddOnEnabled('TidyPlates') and E.private.nameplates.enable then E:IncompatibleAddOn('TidyPlates', 'NamePlates') end
+	if E:IsAddOnEnabled('Aloft') and E.private.nameplates.enable then E:IncompatibleAddOn('Aloft', 'NamePlates') end
+	if E:IsAddOnEnabled('Healers-Have-To-Die') and E.private.nameplates.enable then E:IncompatibleAddOn('Healers-Have-To-Die', 'NamePlates') end
+	if E:IsAddOnEnabled('Bartender4') and E.private.actionbar.enable then E:IncompatibleAddOn('Bartender4', 'ActionBar') end
 end
 
 function E:CopyTable(currentTable, defaultTable)
@@ -694,7 +726,7 @@ do	--The code in this function is from WeakAuras, credit goes to Mirrored and th
 		if not profileText then return end
 
 		twipe(lineStructureTable)
-		local ret = ""
+		local ret = ''
 		if inTable and profileType then
 			sameLine = false
 			ret = recurse(inTable, ret, profileText)
@@ -749,9 +781,10 @@ do
 		if event == 'CHAT_MSG_ADDON' then
 			if sender == myName then return end
 			if prefix == 'ELVUI_VERSIONCHK' then
-				local msg, ver = tonumber(message), tonumber(E.version)
+				local msg, ver = tonumber(message), E.version
 				local inCombat = InCombatLockdown()
 
+				E.UserList[gsub(sender, '%-'..myRealm,'')] = msg
 				if ver ~= G.general.version then
 					if not E.shownUpdatedWhileRunningPopup and not inCombat then
 						E:StaticPopup_Show('ELVUI_UPDATED_WHILE_RUNNING', nil, nil, {mismatch = ver > G.general.version})
@@ -806,7 +839,7 @@ function E:UpdateStart(skipCallback, skipUpdateDB)
 	E:UpdateUnitFrames()
 
 	if not skipCallback then
-		E.callbacks:Fire("StaggeredUpdate")
+		E.callbacks:Fire('StaggeredUpdate')
 	end
 end
 
@@ -835,7 +868,7 @@ end
 
 function E:UpdateMoverPositions()
 	--The mover is positioned before it is resized, which causes issues for unitframes
-	--Allow movers to be "pushed" outside the screen, when they are resized they should be back in the screen area.
+	--Allow movers to be 'pushed' outside the screen, when they are resized they should be back in the screen area.
 	--We set movers to be clamped again at the bottom of this function.
 	E:SetMoversClampedToScreen(false)
 	E:SetMoversPositions()
@@ -857,7 +890,7 @@ function E:UpdateMediaItems(skipCallback)
 	E:UpdateStatusBars()
 
 	if not skipCallback then
-		E.callbacks:Fire("StaggeredUpdate")
+		E.callbacks:Fire('StaggeredUpdate')
 	end
 end
 
@@ -868,32 +901,34 @@ function E:UpdateLayout(skipCallback)
 	Layout:SetDataPanelStyle()
 
 	if not skipCallback then
-		E.callbacks:Fire("StaggeredUpdate")
+		E.callbacks:Fire('StaggeredUpdate')
 	end
 end
 
 function E:UpdateActionBars(skipCallback)
+	ActionBars:Extra_SetAlpha()
+	ActionBars:Extra_SetScale()
 	ActionBars:ToggleCooldownOptions()
 	ActionBars:UpdateButtonSettings()
 	ActionBars:UpdateMicroPositionDimensions()
 	ActionBars:UpdatePetCooldownSettings()
 
 	if not skipCallback then
-		E.callbacks:Fire("StaggeredUpdate")
+		E.callbacks:Fire('StaggeredUpdate')
 	end
 end
 
 function E:UpdateNamePlates(skipCallback)
 	NamePlates:ConfigureAll()
-	--NamePlates:StyleFilterInitialize()
+	NamePlates:StyleFilterInitialize()
 
 	if not skipCallback then
-		E.callbacks:Fire("StaggeredUpdate")
+		E.callbacks:Fire('StaggeredUpdate')
 	end
 end
 
 function E:UpdateTooltip()
-	-- for plugins :3
+	Tooltip:SetTooltipFonts()
 end
 
 function E:UpdateBags(skipCallback)
@@ -904,7 +939,7 @@ function E:UpdateBags(skipCallback)
 	Bags:UpdateItemLevelDisplay()
 
 	if not skipCallback then
-		E.callbacks:Fire("StaggeredUpdate")
+		E.callbacks:Fire('StaggeredUpdate')
 	end
 end
 
@@ -914,18 +949,19 @@ function E:UpdateChat(skipCallback)
 	Chat:UpdateAnchors()
 
 	if not skipCallback then
-		E.callbacks:Fire("StaggeredUpdate")
+		E.callbacks:Fire('StaggeredUpdate')
 	end
 end
 
 function E:UpdateDataBars(skipCallback)
+	DataBars:EnableDisable_AzeriteBar()
 	DataBars:EnableDisable_ExperienceBar()
-	DataBars:EnableDisable_PetExperienceBar()
+	DataBars:EnableDisable_HonorBar()
 	DataBars:EnableDisable_ReputationBar()
 	DataBars:UpdateDataBarDimensions()
 
 	if not skipCallback then
-		E.callbacks:Fire("StaggeredUpdate")
+		E.callbacks:Fire('StaggeredUpdate')
 	end
 end
 
@@ -933,7 +969,7 @@ function E:UpdateDataTexts(skipCallback)
 	DataTexts:LoadDataTexts()
 
 	if not skipCallback then
-		E.callbacks:Fire("StaggeredUpdate")
+		E.callbacks:Fire('StaggeredUpdate')
 	end
 end
 
@@ -941,7 +977,7 @@ function E:UpdateMinimap(skipCallback)
 	Minimap:UpdateSettings()
 
 	if not skipCallback then
-		E.callbacks:Fire("StaggeredUpdate")
+		E.callbacks:Fire('StaggeredUpdate')
 	end
 end
 
@@ -950,19 +986,21 @@ function E:UpdateAuras(skipCallback)
 	if ElvUIPlayerDebuffs then Auras:UpdateHeader(ElvUIPlayerDebuffs) end
 
 	if not skipCallback then
-		E.callbacks:Fire("StaggeredUpdate")
+		E.callbacks:Fire('StaggeredUpdate')
 	end
 end
 
 function E:UpdateMisc(skipCallback)
 	AFK:Toggle()
---	Blizzard:SetObjectiveFrameHeight()
+	Blizzard:SetObjectiveFrameHeight()
 
---	Totems:PositionAndSize()
---	Totems:ToggleEnable()
+	Threat:ToggleEnable()
+	Threat:UpdatePosition()
+
+	Totems:PositionAndSize()
 
 	if not skipCallback then
-		E.callbacks:Fire("StaggeredUpdate")
+		E.callbacks:Fire('StaggeredUpdate')
 	end
 end
 
@@ -975,7 +1013,8 @@ function E:UpdateEnd()
 
 	E:SetMoversClampedToScreen(true) -- Go back to using clamp after resizing has taken place.
 
-	if (E.installSetup ~= true) and (E.private.install_complete == nil or (E.private.install_complete and type(E.private.install_complete) == 'boolean') or (E.private.install_complete and type(tonumber(E.private.install_complete)) == 'number' and tonumber(E.private.install_complete) <= 3.83)) then
+	local iver = E.private.install_complete
+	if (E.installSetup ~= true) and (not iver or ((type(iver) == 'boolean') or (type(tonumber(iver)) == 'number' and tonumber(iver) <= 3.83))) then
 		E.installSetup = nil
 		E:Install()
 	end
@@ -1005,7 +1044,7 @@ do
 			E:Delay(nextDelay or staggerDelay, E[nextUpdate])
 		end
 	end
-	E:RegisterCallback("StaggeredUpdate", CallStaggeredUpdate)
+	E:RegisterCallback('StaggeredUpdate', CallStaggeredUpdate)
 
 	function E:StaggeredUpdateAll(event, installSetup)
 		if not self.initialized then
@@ -1014,30 +1053,33 @@ do
 		end
 
 		self.installSetup = installSetup
-		if (installSetup or event and event == "OnProfileChanged" or event == "OnProfileCopied") and not self.staggerUpdateRunning then
-			tinsert(staggerTable, "UpdateLayout")
+		if (installSetup or event and event == 'OnProfileChanged' or event == 'OnProfileCopied') and not self.staggerUpdateRunning then
+			tinsert(staggerTable, 'UpdateLayout')
 			if E.private.actionbar.enable then
-				tinsert(staggerTable, "UpdateActionBars")
+				tinsert(staggerTable, 'UpdateActionBars')
 			end
 			if E.private.nameplates.enable then
-				tinsert(staggerTable, "UpdateNamePlates")
+				tinsert(staggerTable, 'UpdateNamePlates')
 			end
 			if E.private.bags.enable then
-				tinsert(staggerTable, "UpdateBags")
+				tinsert(staggerTable, 'UpdateBags')
 			end
 			if E.private.chat.enable then
-				tinsert(staggerTable, "UpdateChat")
+				tinsert(staggerTable, 'UpdateChat')
 			end
-			tinsert(staggerTable, "UpdateDataBars")
-			tinsert(staggerTable, "UpdateDataTexts")
+			if E.private.tooltip.enable then
+				tinsert(staggerTable, 'UpdateTooltip')
+			end
+			tinsert(staggerTable, 'UpdateDataBars')
+			tinsert(staggerTable, 'UpdateDataTexts')
 			if E.private.general.minimap.enable then
-				tinsert(staggerTable, "UpdateMinimap")
+				tinsert(staggerTable, 'UpdateMinimap')
 			end
 			if ElvUIPlayerBuffs or ElvUIPlayerDebuffs then
-				tinsert(staggerTable, "UpdateAuras")
+				tinsert(staggerTable, 'UpdateAuras')
 			end
-			tinsert(staggerTable, "UpdateMisc")
-			tinsert(staggerTable, "UpdateEnd")
+			tinsert(staggerTable, 'UpdateMisc')
+			tinsert(staggerTable, 'UpdateEnd')
 
 			--Stagger updates
 			self.staggerUpdateRunning = true
@@ -1124,7 +1166,7 @@ do
 		if not objs then
 			objs = {}
 			eventTable[event] = objs
-			eventFrame:RegisterEvent(event)
+			pcall(eventFrame.RegisterEvent, eventFrame, event)
 		end
 
 		local funcs = objs[object]
@@ -1242,6 +1284,22 @@ function E:InitializeModules()
 	end
 end
 
+local function buffwatchConvert(spell)
+	if spell.sizeOverride then spell.sizeOverride = nil end
+	if spell.size then spell.size = nil end
+
+	if not spell.sizeOffset then
+		spell.sizeOffset = 0
+	end
+
+	if spell.styleOverride then
+		spell.style = spell.styleOverride
+		spell.styleOverride = nil
+	elseif not spell.style then
+		spell.style = 'coloredIcon'
+	end
+end
+
 function E:DBConversions()
 	--Fix issue where UIScale was incorrectly stored as string
 	E.global.general.UIScale = tonumber(E.global.general.UIScale)
@@ -1281,8 +1339,7 @@ function E:DBConversions()
 			E.db.unitframe.OORAlpha = nil
 		end
 
-		local rangeCheckUnits = { 'target', 'targettarget', 'targettargettarget', 'pet', 'pettarget', 'party', 'raid', 'raid40', 'raidpet', 'tank', 'assist' }
-		for _, unit in pairs(rangeCheckUnits) do
+		for _, unit in ipairs({'target','targettarget','targettargettarget','focus','focustarget','pet','pettarget','boss','arena','party','raid','raid40','raidpet','tank','assist'}) do
 			if E.db.unitframe.units[unit].rangeCheck ~= nil then
 				local enabled = E.db.unitframe.units[unit].rangeCheck
 				E.db.unitframe.units[unit].fader.enable = enabled
@@ -1297,7 +1354,7 @@ function E:DBConversions()
 		end
 	end
 
-	--Convert old "Buffs and Debuffs" font size option to individual options
+	--Convert old 'Buffs and Debuffs' font size option to individual options
 	if E.db.auras.fontSize then
 		local fontSize = E.db.auras.fontSize
 		E.db.auras.buffs.countFontSize = fontSize
@@ -1305,6 +1362,11 @@ function E:DBConversions()
 		E.db.auras.debuffs.countFontSize = fontSize
 		E.db.auras.debuffs.durationFontSize = fontSize
 		E.db.auras.fontSize = nil
+	end
+
+	--Remove stale font settings from Cooldown system for top auras
+	if E.db.auras.cooldown.fonts then
+		E.db.auras.cooldown.fonts = nil
 	end
 
 	--Convert Nameplate Aura Duration to new Cooldown system
@@ -1327,6 +1389,23 @@ function E:DBConversions()
 		E.db.nameplates.units.TARGET.nonTargetTransparency = nil
 	end
 
+	--Removed additional table in nameplate filters cause it was basically useless
+	for _, unit in ipairs({'PLAYER','FRIENDLY_PLAYER','ENEMY_PLAYER','FRIENDLY_NPC','ENEMY_NPC'}) do
+		if E.db.nameplates.units[unit].buffs and E.db.nameplates.units[unit].buffs.filters ~= nil then
+			E.db.nameplates.units[unit].buffs.minDuration = E.db.nameplates.units[unit].buffs.filters.minDuration or P.nameplates.units[unit].buffs.minDuration
+			E.db.nameplates.units[unit].buffs.maxDuration = E.db.nameplates.units[unit].buffs.filters.maxDuration or P.nameplates.units[unit].buffs.maxDuration
+			E.db.nameplates.units[unit].buffs.priority = E.db.nameplates.units[unit].buffs.filters.priority or P.nameplates.units[unit].buffs.priority
+			E.db.nameplates.units[unit].buffs.filters = nil
+		end
+		if E.db.nameplates.units[unit].debuffs and E.db.nameplates.units[unit].debuffs.filters ~= nil then
+			E.db.nameplates.units[unit].debuffs.minDuration = E.db.nameplates.units[unit].debuffs.filters.minDuration or P.nameplates.units[unit].debuffs.minDuration
+			E.db.nameplates.units[unit].debuffs.maxDuration = E.db.nameplates.units[unit].debuffs.filters.maxDuration or P.nameplates.units[unit].debuffs.maxDuration
+			E.db.nameplates.units[unit].debuffs.priority = E.db.nameplates.units[unit].debuffs.filters.priority or P.nameplates.units[unit].debuffs.priority
+			E.db.nameplates.units[unit].debuffs.filters = nil
+		end
+	end
+
+	--Moved target scale to a style filter
 	if E.db.nameplates.units.TARGET.scale ~= nil then
 		E.global.nameplate.filters.ElvUI_Target.actions.scale = E.db.nameplates.units.TARGET.scale
 		E.db.nameplates.units.TARGET.scale = nil
@@ -1352,8 +1431,7 @@ function E:DBConversions()
 	end
 
 	--Heal Prediction is now a table instead of a bool
-	local healPredictionUnits = {'player','target','pet','party','raid','raid40','raidpet'}
-	for _, unit in pairs(healPredictionUnits) do
+	for _, unit in ipairs({'player','target','focus','pet','arena','party','raid','raid40','raidpet'}) do
 		if type(E.db.unitframe.units[unit].healPrediction) ~= 'table' then
 			local enabled = E.db.unitframe.units[unit].healPrediction
 			E.db.unitframe.units[unit].healPrediction = {}
@@ -1418,6 +1496,41 @@ function E:DBConversions()
 		E.db.nameplates.units.ENEMY_PLAYER.minions = nil
 		E.db.nameplates.units.ENEMY_NPC.minions = nil
 	end
+
+	-- removed override stuff from aurawatch
+	for _, spells in pairs(E.global.unitframe.buffwatch) do
+		for _, spell in pairs(spells) do
+			buffwatchConvert(spell)
+		end
+	end
+	for _, spell in pairs(E.db.unitframe.filters.buffwatch) do
+		buffwatchConvert(spell)
+	end
+
+	-- fix aurabars colors
+	local auraBarColors = E.global.unitframe.AuraBarColors
+	for spell, info in pairs(auraBarColors) do
+		if type(spell) == 'string' then
+			local spellID = select(7, GetSpellInfo(spell))
+			if spellID and not auraBarColors[spellID] then
+				auraBarColors[spellID] = info
+				auraBarColors[spell] = nil
+				spell = spellID
+			end
+		end
+
+		if type(info) == 'boolean' then
+			auraBarColors[spell] = { color = { r = 1, g = 1, b = 1 }, enable = info }
+		elseif type(info) == 'table' then
+			if info.r or info.g or info.b then
+				auraBarColors[spell] = { color = { r = info.r or 1, g = info.g or 1, b = info.b or 1 }, enable = true }
+			elseif info.color then -- azil created a void hole, delete it -x-
+				if info.color.color then info.color.color = nil end
+				if info.color.enable then info.color.enable = nil end
+				if info.color.a then info.color.a = nil end -- alpha isnt supported by this
+			end
+		end
+	end
 end
 
 function E:RefreshModulesDB()
@@ -1438,6 +1551,7 @@ function E:Initialize()
 	self.data.RegisterCallback(self, 'OnProfileCopied', 'StaggeredUpdateAll')
 	self.data.RegisterCallback(self, 'OnProfileReset', 'OnProfileReset')
 	self.charSettings = E.Libs.AceDB:New('ElvPrivateDB', self.privateVars)
+	E.Libs.DualSpec:EnhanceDatabase(self.data, 'ElvUI')
 	self.private = self.charSettings.profile
 	self.db = self.data.profile
 	self.global = self.data.global

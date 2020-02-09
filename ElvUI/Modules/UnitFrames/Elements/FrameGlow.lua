@@ -1,8 +1,8 @@
 local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local UF = E:GetModule('UnitFrames');
 
-local _G = _G
 --Lua functions
+local _G = _G
 local pairs = pairs
 local select = select
 local assert = assert
@@ -33,7 +33,7 @@ function UF:FrameGlow_ElementHook(frame, glow, which)
 		end
 
 		if which == 'mouseoverGlow' then
-			UF:FrameGlow_PositionGlow(frame)
+			UF:FrameGlow_PositionTexture(frame)
 			UF:FrameGlow_CheckMouseover(frame)
 		else
 			UF:FrameGlow_PositionGlow(frame, glow, glow.powerGlow)
@@ -84,7 +84,7 @@ function UF:FrameGlow_ClassGlowPosition(frame, powerName, glow, offset, fromScri
 	end
 
 	local portrait = (frame.USE_PORTRAIT and not frame.USE_PORTRAIT_OVERLAY) and (frame.Portrait and frame.Portrait.backdrop)
-	if (power and power.backdrop and power:IsVisible()) and ((power == frame.AlternativePower) or not (frame.CLASSBAR_DETACHED or frame.USE_MINI_CLASSBAR)) then
+	if (power and power.backdrop and power:IsVisible()) and ((power == frame.AlternativePower and not frame.USE_MINI_CLASSBAR) or not (frame.CLASSBAR_DETACHED or frame.USE_MINI_CLASSBAR)) then
 		glow:Point('TOPLEFT', (frame.ORIENTATION == "LEFT" and portrait) or power.backdrop, -offset, offset)
 		glow:Point('TOPRIGHT', (frame.ORIENTATION == "RIGHT" and portrait) or power.backdrop, offset, offset)
 	elseif frame.Health and frame.Health.backdrop then
@@ -128,7 +128,7 @@ function UF:FrameGlow_PositionGlow(frame, mainGlow, powerGlow)
 
 	if classPower then
 		UF:FrameGlow_ClassGlowPosition(frame, 'ClassPower', mainGlow, offset)
-	elseif altPower and (frame.isForced or (frame.unit and frame.unit:find('boss%d'))) then
+	elseif altPower then
 		UF:FrameGlow_ClassGlowPosition(frame, 'AlternativePower', mainGlow, offset)
 	elseif pvpSpec and pvpSpec:IsShown() then
 		local shownPanel = (infoPanel and infoPanel:IsShown() and infoPanel.backdrop)
@@ -194,7 +194,7 @@ function UF:FrameGlow_SetGlowColor(glow, unit, which)
 		if isPlayer then
 			local _, class = UnitClass(unit)
 			if class then
-				local color = _G.CUSTOM_CLASS_COLORS and _G.CUSTOM_CLASS_COLORS[class] or _G.RAID_CLASS_COLORS[class]
+				local color = E:ClassColor(class)
 				if color then
 					r, g, b = color.r, color.g, color.b
 				end
@@ -326,7 +326,7 @@ function UF:FrameGlow_CheckMouseover(frame)
 	end
 end
 
-function UF:FrameGlow_PositionGlow(frame)
+function UF:FrameGlow_PositionTexture(frame)
 	if frame.FrameGlow and frame.FrameGlow.texture then
 		frame.FrameGlow.texture:ClearAllPoints()
 		frame.FrameGlow.texture:Point('TOPLEFT', frame.Health, 'TOPLEFT')
@@ -405,6 +405,11 @@ function UF:FrameGlow_UpdateFrames()
 
 	-- focus, focustarget, pet, pettarget, player, target, targettarget, targettargettarget
 	for unit in pairs(self.units) do
+		UF:FrameGlow_ConfigureGlow(self[unit], unit, dbTexture)
+	end
+
+	-- arena{1-5}, boss{1-5}
+	for unit in pairs(self.groupunits) do
 		UF:FrameGlow_ConfigureGlow(self[unit], unit, dbTexture)
 	end
 

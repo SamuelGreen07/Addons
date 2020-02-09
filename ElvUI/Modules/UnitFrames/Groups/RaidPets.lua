@@ -32,6 +32,7 @@ function UF:Construct_RaidpetFrames()
 	self.DebuffHighlight = UF:Construct_DebuffHighlight(self)
 	self.TargetGlow = UF:Construct_TargetGlow(self)
 	self.MouseGlow = UF:Construct_MouseGlow(self)
+	self.ThreatIndicator = UF:Construct_Threat(self)
 	self.RaidTargetIndicator = UF:Construct_RaidIcon(self)
 	self.HealthPrediction = UF:Construct_HealComm(self)
 	self.Fader = UF:Construct_Fader()
@@ -44,25 +45,6 @@ function UF:Construct_RaidpetFrames()
 	return self
 end
 
---I don't know if this function is needed or not? But the error I pm'ed you about was because of the missing OnEvent so I just added it.
-function UF:RaidPetsSmartVisibility(event)
-	if not self.db or (self.db and not self.db.enable) or (UF.db and not UF.db.smartRaidFilter) or self.isForced then return; end
-	if event == "PLAYER_REGEN_ENABLED" then self:UnregisterEvent("PLAYER_REGEN_ENABLED") end
-
-	if not InCombatLockdown() then
-		local _, instanceType = GetInstanceInfo()
-		if instanceType == "raid" then
-			UnregisterStateDriver(self, "visibility")
-			self:Show()
-		elseif self.db.visibility then
-			RegisterStateDriver(self, "visibility", self.db.visibility)
-		end
-	else
-		self:RegisterEvent("PLAYER_REGEN_ENABLED")
-		return
-	end
-end
-
 function UF:Update_RaidpetHeader(header, db)
 	header.db = db
 
@@ -72,22 +54,19 @@ function UF:Update_RaidpetHeader(header, db)
 	if not headerHolder.positioned then
 		headerHolder:ClearAllPoints()
 		headerHolder:Point("BOTTOMLEFT", E.UIParent, "BOTTOMLEFT", 4, 574)
+		E:CreateMover(headerHolder, headerHolder:GetName()..'Mover', L["Raid Pet Frames"], nil, nil, nil, 'ALL,RAID', nil, 'unitframe,groupUnits,raidpet,generalGroup')
 
-		E:CreateMover(headerHolder, headerHolder:GetName()..'Mover', L["Raid Pet Frames"], nil, nil, nil, 'ALL,RAID', nil, 'unitframe,raidpet,generalGroup')
 		headerHolder.positioned = true;
-
-		headerHolder:RegisterEvent("PLAYER_ENTERING_WORLD")
-		headerHolder:RegisterEvent("ZONE_CHANGED_NEW_AREA")
-		headerHolder:SetScript("OnEvent", UF.RaidPetsSmartVisibility)
 	end
 
-	UF.RaidPetsSmartVisibility(headerHolder)
+	if not headerHolder.isForced and db.enable then
+		RegisterStateDriver(headerHolder, "visibility", db.visibility)
+	end
 end
 
 function UF:Update_RaidpetFrames(frame, db)
 	frame.db = db
 
-	frame.Portrait = frame.Portrait or (db.portrait.style == '2D' and frame.Portrait2D or frame.Portrait3D)
 	frame.colors = ElvUF.colors
 	frame:RegisterForClicks(self.db.targetOnMouseDown and 'AnyDown' or 'AnyUp')
 
@@ -125,9 +104,7 @@ function UF:Update_RaidpetFrames(frame, db)
 		frame.VARIABLES_SET = true
 	end
 
-	if not InCombatLockdown() then
-		frame:Size(frame.UNIT_WIDTH, frame.UNIT_HEIGHT)
-	end
+	frame:Size(frame.UNIT_WIDTH, frame.UNIT_HEIGHT)
 
 	--Health
 	UF:Configure_HealthBar(frame)
@@ -138,10 +115,12 @@ function UF:Update_RaidpetFrames(frame, db)
 	--Portrait
 	UF:Configure_Portrait(frame)
 
+	--Threat
+	UF:Configure_Threat(frame)
+
 	--Auras
 	UF:EnableDisable_Auras(frame)
-	UF:Configure_Auras(frame, 'Buffs')
-	UF:Configure_Auras(frame, 'Debuffs')
+	UF:Configure_AllAuras(frame)
 
 	--RaidDebuffs
 	UF:Configure_RaidDebuffs(frame)
@@ -159,7 +138,7 @@ function UF:Update_RaidpetFrames(frame, db)
 	UF:Configure_Fader(frame)
 
 	--BuffIndicator
-	UF:UpdateAuraWatch(frame, true) --2nd argument is the petOverride
+	UF:Configure_AuraWatch(frame, true)
 
 	--Cutaway
 	UF:Configure_Cutaway(frame)

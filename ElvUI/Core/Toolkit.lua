@@ -4,6 +4,7 @@ local LSM = E.Libs.LSM
 --Lua functions
 local _G = _G
 local unpack, type, select, getmetatable, assert, pairs, pcall = unpack, type, select, getmetatable, assert, pairs, pcall
+local tonumber = tonumber
 --WoW API / Variables
 local CreateFrame = CreateFrame
 local hooksecurefunc = hooksecurefunc
@@ -24,7 +25,7 @@ function E:SafeGetPoint(frame)
 end
 
 -- ls, Azil, and Simpy made this to replace Blizzard's SetBackdrop API while the textures can't snap
-E.PixelBorders = {"TOPLEFT", "TOPRIGHT", "BOTTOMLEFT", "BOTTOMRIGHT", "TOP", "BOTTOM", "LEFT", "RIGHT"}
+E.PixelBorders = {'TOPLEFT', 'TOPRIGHT', 'BOTTOMLEFT', 'BOTTOMRIGHT', 'TOP', 'BOTTOM', 'LEFT', 'RIGHT'}
 function E:SetBackdrop(frame, giveBorder, bgFile, edgeSize, insetLeft, insetRight, insetTop, insetBottom)
 	if not frame.pixelBorders then return end
 
@@ -40,22 +41,22 @@ function E:SetBackdrop(frame, giveBorder, bgFile, edgeSize, insetLeft, insetRigh
 	if not (giveBorder or bgFile) then return end
 
 	if insetLeft or insetRight or insetTop or insetBottom then
-		frame.pixelBorders.CENTER:SetPoint('TOPLEFT', frame, 'TOPLEFT', -insetLeft or 0, insetTop or 0)
-		frame.pixelBorders.CENTER:SetPoint('BOTTOMRIGHT', frame, 'BOTTOMRIGHT', insetRight or 0, -insetBottom or 0)
+		frame.pixelBorders.CENTER:Point('TOPLEFT', frame, 'TOPLEFT', -insetLeft or 0, insetTop or 0)
+		frame.pixelBorders.CENTER:Point('BOTTOMRIGHT', frame, 'BOTTOMRIGHT', insetRight or 0, -insetBottom or 0)
 	else
-		frame.pixelBorders.CENTER:SetPoint('TOPLEFT', frame)
-		frame.pixelBorders.CENTER:SetPoint('BOTTOMRIGHT', frame)
+		frame.pixelBorders.CENTER:Point('TOPLEFT', frame)
+		frame.pixelBorders.CENTER:Point('BOTTOMRIGHT', frame)
 	end
 
-	frame.pixelBorders.TOPLEFT:SetSize(edgeSize, edgeSize)
-	frame.pixelBorders.TOPRIGHT:SetSize(edgeSize, edgeSize)
-	frame.pixelBorders.BOTTOMLEFT:SetSize(edgeSize, edgeSize)
-	frame.pixelBorders.BOTTOMRIGHT:SetSize(edgeSize, edgeSize)
+	frame.pixelBorders.TOPLEFT:Size(edgeSize)
+	frame.pixelBorders.TOPRIGHT:Size(edgeSize)
+	frame.pixelBorders.BOTTOMLEFT:Size(edgeSize)
+	frame.pixelBorders.BOTTOMRIGHT:Size(edgeSize)
 
-	frame.pixelBorders.TOP:SetHeight(edgeSize)
-	frame.pixelBorders.BOTTOM:SetHeight(edgeSize)
-	frame.pixelBorders.LEFT:SetWidth(edgeSize)
-	frame.pixelBorders.RIGHT:SetWidth(edgeSize)
+	frame.pixelBorders.TOP:Height(edgeSize)
+	frame.pixelBorders.BOTTOM:Height(edgeSize)
+	frame.pixelBorders.LEFT:Width(edgeSize)
+	frame.pixelBorders.RIGHT:Width(edgeSize)
 end
 
 function E:GetBackdropColor(frame)
@@ -113,32 +114,32 @@ function E:BuildPixelBorders(frame, noSecureHook)
 		local borders = {}
 
 		for _, v in pairs(E.PixelBorders) do
-			borders[v] = frame:CreateTexture("$parentPixelBorder"..v, "BORDER", nil, 1)
+			borders[v] = frame:CreateTexture('$parentPixelBorder'..v, 'BORDER', nil, 1)
 			borders[v]:SetTexture(E.media.blankTex)
 		end
 
-		borders.CENTER = frame:CreateTexture("$parentPixelBorderCENTER", "BACKGROUND", nil, -8)
+		borders.CENTER = frame:CreateTexture('$parentPixelBorderCENTER', 'BACKGROUND', nil, -1)
 
-		borders.TOPLEFT:Point("BOTTOMRIGHT", borders.CENTER, "TOPLEFT", 1, -1)
-		borders.TOPRIGHT:Point("BOTTOMLEFT", borders.CENTER, "TOPRIGHT", -1, -1)
-		borders.BOTTOMLEFT:Point("TOPRIGHT", borders.CENTER, "BOTTOMLEFT", 1, 1)
-		borders.BOTTOMRIGHT:Point("TOPLEFT", borders.CENTER, "BOTTOMRIGHT", -1, 1)
+		borders.TOPLEFT:Point('BOTTOMRIGHT', borders.CENTER, 'TOPLEFT', 1, -1)
+		borders.TOPRIGHT:Point('BOTTOMLEFT', borders.CENTER, 'TOPRIGHT', -1, -1)
+		borders.BOTTOMLEFT:Point('TOPRIGHT', borders.CENTER, 'BOTTOMLEFT', 1, 1)
+		borders.BOTTOMRIGHT:Point('TOPLEFT', borders.CENTER, 'BOTTOMRIGHT', -1, 1)
 
-		borders.TOP:Point("TOPLEFT", borders.TOPLEFT, "TOPRIGHT", 0, 0)
-		borders.TOP:Point("TOPRIGHT", borders.TOPRIGHT, "TOPLEFT", 0, 0)
+		borders.TOP:Point('TOPLEFT', borders.TOPLEFT, 'TOPRIGHT', 0, 0)
+		borders.TOP:Point('TOPRIGHT', borders.TOPRIGHT, 'TOPLEFT', 0, 0)
 
-		borders.BOTTOM:Point("BOTTOMLEFT", borders.BOTTOMLEFT, "BOTTOMRIGHT", 0, 0)
-		borders.BOTTOM:Point("BOTTOMRIGHT", borders.BOTTOMRIGHT, "BOTTOMLEFT", 0, 0)
+		borders.BOTTOM:Point('BOTTOMLEFT', borders.BOTTOMLEFT, 'BOTTOMRIGHT', 0, 0)
+		borders.BOTTOM:Point('BOTTOMRIGHT', borders.BOTTOMRIGHT, 'BOTTOMLEFT', 0, 0)
 
-		borders.LEFT:Point("TOPLEFT", borders.TOPLEFT, "BOTTOMLEFT", 0, 0)
-		borders.LEFT:Point("BOTTOMLEFT", borders.BOTTOMLEFT, "TOPLEFT", 0, 0)
+		borders.LEFT:Point('TOPLEFT', borders.TOPLEFT, 'BOTTOMLEFT', 0, 0)
+		borders.LEFT:Point('BOTTOMLEFT', borders.BOTTOMLEFT, 'TOPLEFT', 0, 0)
 
-		borders.RIGHT:Point("TOPRIGHT", borders.TOPRIGHT, "BOTTOMRIGHT", 0, 0)
-		borders.RIGHT:Point("BOTTOMRIGHT", borders.BOTTOMRIGHT, "TOPRIGHT", 0, 0)
+		borders.RIGHT:Point('TOPRIGHT', borders.TOPRIGHT, 'BOTTOMRIGHT', 0, 0)
+		borders.RIGHT:Point('BOTTOMRIGHT', borders.BOTTOMRIGHT, 'TOPRIGHT', 0, 0)
 
 		if not noSecureHook then
-			hooksecurefunc(frame, "SetBackdropColor", E.HookedSetBackdropColor)
-			hooksecurefunc(frame, "SetBackdropBorderColor", E.HookedSetBackdropBorderColor)
+			hooksecurefunc(frame, 'SetBackdropColor', E.HookedSetBackdropColor)
+			hooksecurefunc(frame, 'SetBackdropBorderColor', E.HookedSetBackdropBorderColor)
 		end
 
 		frame.pixelBorders = borders
@@ -173,7 +174,7 @@ local function GetTemplate(template, isUnitFrameElement)
 	backdropa = 1
 
 	if template == 'ClassColor' then
-		local color = _G.CUSTOM_CLASS_COLORS and _G.CUSTOM_CLASS_COLORS[E.myclass] or _G.RAID_CLASS_COLORS[E.myclass]
+		local color = E:ClassColor(E.myclass)
 		borderr, borderg, borderb = color.r, color.g, color.b
 		backdropr, backdropg, backdropb = unpack(E.media.backdropcolor)
 	elseif template == 'Transparent' then
@@ -368,6 +369,7 @@ local StripTexturesBlizzFrames = {
 	'ArtOverlayFrame',
 	'Portrait',
 	'portrait',
+	'ScrollFrameBorder',
 }
 
 local STRIP_TEX = 'Texture'
@@ -418,6 +420,10 @@ local function StripTexts(object, kill, alpha)
 end
 
 local function FontTemplate(fs, font, fontSize, fontStyle)
+	if type(fontSize) == 'string' then
+		fontSize = tonumber(fontSize)
+	end
+
 	fs.font, fs.fontSize, fs.fontStyle = font, fontSize, fontStyle
 
 	font = font or LSM:Fetch('font', E.db.general.font)
@@ -452,7 +458,7 @@ local function StyleButton(button, noHover, noPushed, noChecked)
 		local hover = button:CreateTexture()
 		hover:SetInside()
 		hover:SetBlendMode('ADD')
-		hover:SetColorTexture(1, 1, 1, .3)
+		hover:SetColorTexture(1, 1, 1, 0.3)
 		button:SetHighlightTexture(hover)
 		button.hover = hover
 	end
@@ -461,7 +467,7 @@ local function StyleButton(button, noHover, noPushed, noChecked)
 		local pushed = button:CreateTexture()
 		pushed:SetInside()
 		pushed:SetBlendMode('ADD')
-		pushed:SetColorTexture(0.9, 0.8, 0.1, .3)
+		pushed:SetColorTexture(0.9, 0.8, 0.1, 0.3)
 		button:SetPushedTexture(pushed)
 		button.pushed = pushed
 	end
@@ -470,7 +476,7 @@ local function StyleButton(button, noHover, noPushed, noChecked)
 		local checked = button:CreateTexture()
 		checked:SetInside()
 		checked:SetBlendMode('ADD')
-		checked:SetColorTexture(1, 1, 1, .3)
+		checked:SetColorTexture(1, 1, 1, 0.3)
 		button:SetCheckedTexture(checked)
 		button.checked = checked
 	end
@@ -566,6 +572,6 @@ end
 --Add API to `CreateFont` objects without actually creating one
 addapi(_G.GameFontNormal)
 
---Hacky fix for issue on 7.1 PTR where scroll frames no longer seem to inherit the methods from the "Frame" widget
+--Hacky fix for issue on 7.1 PTR where scroll frames no longer seem to inherit the methods from the 'Frame' widget
 local scrollFrame = CreateFrame('ScrollFrame')
 addapi(scrollFrame)

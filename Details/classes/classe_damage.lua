@@ -1,8 +1,8 @@
 -- damage object
---2672
 
 	local _detalhes = 		_G._detalhes
 	local Loc = LibStub ("AceLocale-3.0"):GetLocale ( "Details" )
+	local Translit = LibStub ("LibTranslit-1.0")
 	local gump = 			_detalhes.gump
 	local _
 
@@ -337,12 +337,27 @@
 				if (_type (spellid) ~= "number") then
 					return spellid
 				end
+				if (spellid == 1) then --melee
+					return GetSpellLink (6603)
+				elseif (spellid == 2) then --autoshot
+					return GetSpellLink (75)
+				elseif (spellid > 10) then
+					return GetSpellLink (spellid)
+				else
+					local spellname = _GetSpellInfo (spellid)
+					return spellname
+				end
 			end
 			
 --[[exported]]	function _detalhes:GameTooltipSetSpellByID (spellid)
-				local _, _, _, _, _, _, spellID = GetSpellInfo (spellid)
-				if (spellID) then
-					GameTooltip:SetSpellByID (spellID)
+				if (spellid == 1) then
+					GameTooltip:SetSpellByID (6603)
+				elseif (spellid == 2) then
+					GameTooltip:SetSpellByID (75)
+				elseif (spellid > 10) then
+					GameTooltip:SetSpellByID (spellid)
+				else
+					GameTooltip:SetSpellByID (spellid)
 				end
 			end
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -554,7 +569,7 @@
 			if (not is_custom_spell) then
 				for spellid, spell in pairs (character.spells._ActorTable) do
 					if (spellid ~= from_spell) then
-						local spellname = Details.GetSpellInfoC (spellid)
+						local spellname = select (1, GetSpellInfo (spellid))
 						if (spellname == from_spellname) then
 							for targetname, amount in pairs (spell.targets) do
 						
@@ -596,7 +611,7 @@
 
 		GameCooltip:SetOption ("StatusBarTexture", "Interface\\AddOns\\Details\\images\\bar_serenity")
 
-		local spellname, _, spellicon = Details.GetSpellInfoC (from_spell)  --select (1, _GetSpellInfo (from_spell))
+		local spellname, _, spellicon = select (1, _GetSpellInfo (from_spell))
 		GameCooltip:AddLine (spellname .. " " .. Loc ["STRING_CUSTOM_ATTRIBUTE_DAMAGE"], nil, nil, headerColor, nil, 10)
 		GameCooltip:AddIcon (spellicon, 1, 1, 14, 14, 0.078125, 0.921875, 0.078125, 0.921875)
 		GameCooltip:AddIcon ([[Interface\AddOns\Details\images\key_shift]], 1, 2, _detalhes.tooltip_key_size_width, _detalhes.tooltip_key_size_height, 0, 1, 0, 0.640625, _detalhes.tooltip_key_overlay2)
@@ -652,12 +667,11 @@
 		local total, top, amount = 0, 0, 0
 		--> hold the targets
 		local Targets = {}
-
+		
 		local from_spell = @SPELLID@
 		local from_spellname
-
 		if (from_spell) then
-			from_spellname = Details.GetSpellInfoC (from_spell)
+			from_spellname = select (1, GetSpellInfo (from_spell))
 		end
 
 		--> get a list of all damage actors
@@ -892,7 +906,7 @@
 		local tabela_anterior = esta_barra.minha_tabela
 		esta_barra.minha_tabela = tabela
 		
-		local spellname, _, spellicon = Details.GetSpellInfoC (tabela [1])
+		local spellname, _, spellicon = _GetSpellInfo (tabela [1])
 		
 		tabela.nome = spellname --> evita dar erro ao redimencionar a janela
 		tabela.minha_barra = qual_barra
@@ -1757,10 +1771,8 @@ function atributo_damage:RefreshWindow (instancia, tabela_do_combate, forcar, ex
 								local on_player = spell.targets [character.nome]
 					
 								if (on_player and on_player >= 1) then
-
-									--local spellname = _GetSpellInfo (spellid)
-									local spellname = Details.GetSpellInfoC (spellid)
-
+								
+									local spellname = _GetSpellInfo (spellid)
 									if (spellname) then
 										local has_index = bs_index_table [spellname]
 										local this_spell
@@ -2660,6 +2672,11 @@ local InBarIconPadding = 6
 		bar_number = bar.colocacao .. ". "
 	end
 
+	--translate cyrillic alphabet to western alphabet by Vardex (https://github.com/Vardex May 22, 2019)
+	if (instance.row_info.textL_translit_text) then
+		self.displayName = Translit:Transliterate(self.displayName, "!")
+	end
+
 	if (enemy) then
 		if (arena_enemy) then
 			if (_detalhes.show_arena_role_icon) then
@@ -2717,7 +2734,6 @@ local InBarIconPadding = 6
 	set_text_size (bar, instance)
 end
 
--- ~color ~barcolor
 --[[ exported]] function _detalhes:SetBarColors (bar, instance, r, g, b, a)
 
 	a = a or 1
@@ -2743,7 +2759,6 @@ end
 	
 end 
 
--- ~icon ~classicon ~specicon
 --[[ exported]] function _detalhes:SetClassIcon (texture, instance, classe)
 
 	if (self.spellicon) then
@@ -2786,20 +2801,13 @@ end
 		texture:SetTexCoord (0.25, 0.49609375, 0.75, 1)
 		texture:SetVertexColor (actor_class_color_r, actor_class_color_g, actor_class_color_b)
 	else
-
-		if (not Details.force_class_icons) then
-			if (instance and instance.row_info.use_spec_icons or Details.IsValidSpecId (self.spec)) then
-				if (self.spec and type (self.spec) == "number" and self.spec > 20) then
-					texture:SetTexture (instance.row_info.spec_file)
-					texture:SetTexCoord (_unpack (_detalhes.class_specs_coords [self.spec]))
-					texture:SetVertexColor (1, 1, 1)
-				else
-					texture:SetTexture (instance.row_info.icon_file or [[Interface\AddOns\Details\images\classes_small]])
-					texture:SetTexCoord (_unpack (_detalhes.class_coords [classe]))
-					texture:SetVertexColor (1, 1, 1)
-				end
+		if (instance and instance.row_info.use_spec_icons) then
+			if (self.spec) then
+				texture:SetTexture (instance.row_info.spec_file)
+				texture:SetTexCoord (_unpack (_detalhes.class_specs_coords [self.spec]))
+				texture:SetVertexColor (1, 1, 1)
 			else
-				texture:SetTexture (instance and instance.row_info.icon_file or [[Interface\AddOns\Details\images\classes_small]])
+				texture:SetTexture (instance.row_info.icon_file or [[Interface\AddOns\Details\images\classes_small]])
 				texture:SetTexCoord (_unpack (_detalhes.class_coords [classe]))
 				texture:SetVertexColor (1, 1, 1)
 			end
@@ -2906,18 +2914,14 @@ function atributo_damage:ToolTip_DamageDone (instancia, numero, barra, keydown)
 			
 			--add actor spells
 			for _spellid, _skill in _pairs (ActorSkillsContainer) do
-				if (_skill.total > 0) then
-					ActorSkillsSortTable [#ActorSkillsSortTable+1] = {_spellid, _skill.total, _skill.total/meu_tempo}
-				end
+				ActorSkillsSortTable [#ActorSkillsSortTable+1] = {_spellid, _skill.total, _skill.total/meu_tempo}
 			end
 			--add actor pets
 			for petIndex, petName in _ipairs (self:Pets()) do
 				local petActor = instancia.showing[class_type]:PegarCombatente (nil, petName)
 				if (petActor) then
 					for _spellid, _skill in _pairs (petActor:GetActorSpells()) do
-						if (_skill.total > 0) then
-							ActorSkillsSortTable [#ActorSkillsSortTable+1] = {_spellid, _skill.total, _skill.total/meu_tempo, petName:gsub ((" <.*"), "")}
-						end
+						ActorSkillsSortTable [#ActorSkillsSortTable+1] = {_spellid, _skill.total, _skill.total/meu_tempo, petName:gsub ((" <.*"), "")}
 					end
 				end
 			end
@@ -2963,18 +2967,22 @@ function atributo_damage:ToolTip_DamageDone (instancia, numero, barra, keydown)
 			
 			if (#ActorSkillsSortTable > 0) then
 				for i = 1, _math_min (tooltip_max_abilities, #ActorSkillsSortTable) do
-					
+				
 					local SkillTable = ActorSkillsSortTable [i]
 					
 					local spellID = SkillTable [1]
 					local totalDamage = SkillTable [2]
 					local totalDPS = SkillTable [3]
 					local petName = SkillTable [4]
-					
-					local nome_magia, _, icone_magia = Details.GetSpellInfoC(spellID)
-
+				
+					local nome_magia, _, icone_magia = _GetSpellInfo (spellID)
 					if (petName) then
-						nome_magia = nome_magia .. " (|cFFCCBBBB" .. petName .. "|r)"
+						if (not nome_magia) then
+							spellID = spellID or "spellId?"
+							nome_magia = "|cffffaa00" .. spellID .. " " .. " (|cFFCCBBBB" .. petName .. "|r)"
+						else
+							nome_magia = nome_magia .. " (|cFFCCBBBB" .. petName .. "|r)"
+						end
 					end
 					
 					if (instancia.sub_atributo == 1 or instancia.sub_atributo == 6) then
@@ -3050,7 +3058,7 @@ function atributo_damage:ToolTip_DamageDone (instancia, numero, barra, keydown)
 					totais [#totais+1] = {nome, my_self.total_without_pet, my_self.total_without_pet/meu_tempo}
 					
 					for spellid, tabela in _pairs (tabela) do
-						local nome, rank, icone = Details.GetSpellInfoC(spellid)
+						local nome, rank, icone = _GetSpellInfo (spellid)
 						_table_insert (meus_danos, {spellid, tabela.total, tabela.total/meu_total*100, {nome, rank, icone}})
 					end
 					_table_sort (meus_danos, _detalhes.Sort2)
@@ -3476,7 +3484,7 @@ function atributo_damage:ToolTip_DamageTaken (instancia, numero, barra, keydown)
 			end
 			
 			for _, spell in _ipairs (all_spells) do
-				local spellname, _, spellicon = Details.GetSpellInfoC (spell [1])
+				local spellname, _, spellicon = _GetSpellInfo (spell [1])
 				GameCooltip:AddLine (spellname .. " (|cFFFFFF00" .. spell [3] .. "|r)", FormatTooltipNumber (_, spell [2]).." (" .. _cstr ("%.1f", (spell [2] / damage_taken) * 100).."%)")
 				GameCooltip:AddIcon (spellicon, 1, 1, icon_size.W, icon_size.H, icon_border.L, icon_border.R, icon_border.T, icon_border.B)
 				_detalhes:AddTooltipBackgroundStatusbar()
@@ -3628,7 +3636,7 @@ function atributo_damage:ToolTip_FriendlyFire (instancia, numero, barra, keydown
 	_table_sort (SpellsInOrder, _detalhes.Sort2)
 	
 	for i = 1, _math_min (max_abilities2, #SpellsInOrder) do
-		local nome, _, icone = Details.GetSpellInfoC (SpellsInOrder[i][1])
+		local nome, _, icone = _GetSpellInfo (SpellsInOrder[i][1])
 		GameCooltip:AddLine (nome, FormatTooltipNumber (_, SpellsInOrder[i][2]).." (".._cstr("%.1f", SpellsInOrder[i][2]/FriendlyFireTotal*100).."%)")
 		GameCooltip:AddIcon (icone, nil, nil, icon_size.W, icon_size.H, icon_border.L, icon_border.R, icon_border.T, icon_border.B)
 		_detalhes:AddTooltipBackgroundStatusbar()
@@ -3770,7 +3778,7 @@ function atributo_damage:MontaInfoFriendlyFire()
 
 	local SkillTable = {}
 	for spellid, amt in _pairs (Skills) do
-		local nome, _, icone = Details.GetSpellInfoC (spellid)
+		local nome, _, icone = _GetSpellInfo (spellid)
 		SkillTable [#SkillTable+1] = {nome, amt, amt/FriendlyFireTotal*100, icone}
 	end
 
@@ -3991,11 +3999,9 @@ function atributo_damage:MontaInfoDamageDone()
 	end
 	
 	for _spellid, _skill in _pairs (ActorSkillsContainer) do --> da foreach em cada spellid do container
-		local nome, _, icone = Details.GetSpellInfoC (_spellid)
+		local nome, _, icone = _GetSpellInfo (_spellid)
 		if (nome) then
-			if (_skill.total > 0) then
-				_table_insert (ActorSkillsSortTable, {_spellid, _skill.total, _skill.total/ActorTotalDamage*100, nome, icone, nil, _skill.spellschool})
-			end
+			_table_insert (ActorSkillsSortTable, {_spellid, _skill.total, _skill.total/ActorTotalDamage*100, nome, icone, nil, _skill.spellschool})
 		end
 	end
 	
@@ -4034,12 +4040,10 @@ function atributo_damage:MontaInfoDamageDone()
 		if (PetActor) then 
 			local PetSkillsContainer = PetActor.spells._ActorTable
 			for _spellid, _skill in _pairs (PetSkillsContainer) do --> da foreach em cada spellid do container
-				local nome, _, icone = Details.GetSpellInfoC (_spellid)
+				local nome, _, icone = _GetSpellInfo (_spellid)
 				--_table_insert (ActorSkillsSortTable, {_spellid, _skill.total, _skill.total/ActorTotalDamage*100, nome .. " |TInterface\\AddOns\\Details\\images\\classes_small_alpha:12:12:0:0:128:128:33:64:96:128|t|c" .. class_color .. PetName:gsub ((" <.*"), "") .. "|r", icone, PetActor, _skill.spellschool})
 				if (nome) then
-					if (_skill.total > 0) then
-						_table_insert (ActorSkillsSortTable, {_spellid, _skill.total, _skill.total/ActorTotalDamage*100, nome .. " (|c" .. class_color .. PetName:gsub ((" <.*"), "") .. "|r)", icone, PetActor, _skill.spellschool})
-					end
+					_table_insert (ActorSkillsSortTable, {_spellid, _skill.total, _skill.total/ActorTotalDamage*100, nome .. " (|c" .. class_color .. PetName:gsub ((" <.*"), "") .. "|r)", icone, PetActor, _skill.spellschool})
 				end
 			end
 		end
@@ -4279,7 +4283,7 @@ function atributo_damage:MontaDetalhesFriendlyFire (nome, barra)
 	local minhas_magias = {}
 
 	for spellid, amount in _pairs (ff_table.spells) do --> da foreach em cada spellid do container
-		local nome, _, icone = Details.GetSpellInfoC (spellid)
+		local nome, _, icone = _GetSpellInfo (spellid)
 		_table_insert (minhas_magias, {spellid, amount, amount / total * 100, nome, icone})
 	end
 
@@ -4440,7 +4444,7 @@ function atributo_damage:MontaDetalhesDamageTaken (nome, barra)
 	for spellid, tabela in _pairs (conteudo) do --> da foreach em cada spellid do container
 		local este_alvo = tabela.targets [actor]
 		if (este_alvo) then --> esta magia deu dano no actor
-			local spell_nome, rank, icone = Details.GetSpellInfoC (spellid)
+			local spell_nome, rank, icone = _GetSpellInfo (spellid)
 			_table_insert (minhas_magias, {spellid, este_alvo, este_alvo/total*100, spell_nome, icone})
 		end
 	end
@@ -4500,7 +4504,7 @@ local t1, t2, t3, t4 = {}, {}, {}, {}
 
 local function FormatSpellString(str)
 	return (string.gsub(str, "%d+", function(spellID)
-				local name, _, icon = Details.GetSpellInfoC (spellID);
+				local name, _, icon = GetSpellInfo (spellID);
 				return string.format("|T%s:16|t", icon);
 			end));
 end
@@ -4522,7 +4526,7 @@ local MontaDetalhesBuffProcs = function (actor, row, instance)
 					local spellID = mainAuras [i]
 					local spellObject = miscActor.buff_uptime_spells._ActorTable [spellID]
 					if (spellObject) then
-						local spellName, spellIcon = Details.GetSpellInfoC (spellID)
+						local spellName, spellIcon = GetSpellInfo (spellID)
 						local spellUptime = spellObject.uptime
 						local spellApplies = spellObject.appliedamt
 						local spellRefreshes = spellObject.refreshamt
@@ -4566,7 +4570,7 @@ function atributo_damage:MontaDetalhesDamageDone (spellid, barra, instancia)
 	end
 	
 	--> icone direito superior
-	local _, _, icone = Details.GetSpellInfoC (spellid)
+	local _, _, icone = _GetSpellInfo (spellid)
 
 	_detalhes.janela_info.spell_icone:SetTexture (icone)
 
@@ -4627,9 +4631,9 @@ function atributo_damage:MontaDetalhesDamageDone (spellid, barra, instancia)
 			local spell_cast = misc_actor.spell_cast and misc_actor.spell_cast [spellid]
 			
 			if (not spell_cast and misc_actor.spell_cast) then
-				local spellname = Details.GetSpellInfoC (spellid)
+				local spellname = GetSpellInfo (spellid)
 				for casted_spellid, amount in _pairs (misc_actor.spell_cast) do
-					local casted_spellname = Details.GetSpellInfoC (casted_spellid)
+					local casted_spellname = GetSpellInfo (casted_spellid)
 					if (casted_spellname == spellname) then
 						spell_cast = amount .. " (|cFFFFFF00?|r)"
 					end
@@ -4878,7 +4882,7 @@ function atributo_damage:MontaTooltipDamageTaken (esta_barra, index)
 	GameTooltip:AddLine (" ")
 	
 	for index, tabela in _ipairs (habilidades) do
-		local nome, _, icone = Details.GetSpellInfoC (tabela[1])
+		local nome, _, icone = _GetSpellInfo (tabela[1])
 		if (index < 8) then
 			GameTooltip:AddDoubleLine (index..". |T"..icone..":0|t "..nome, _detalhes:comma_value (tabela[2]).." (".._cstr("%.1f", tabela[2]/total*100).."%)", 1, 1, 1, 1, 1, 1)
 		else
@@ -4910,7 +4914,7 @@ function atributo_damage:MontaTooltipAlvos (esta_barra, index, instancia)
 	for spellid, spell in _pairs (self.spells._ActorTable) do
 		for target_name, amount in _pairs (spell.targets) do
 			if (target_name == inimigo) then
-				local nome, _, icone = Details.GetSpellInfoC (spellid)
+				local nome, _, icone = _GetSpellInfo (spellid)
 				
 				local t = habilidades [i]
 				if (not t) then
@@ -4940,7 +4944,7 @@ function atributo_damage:MontaTooltipAlvos (esta_barra, index, instancia)
 							t = habilidades [i]
 						end
 						
-						local nome, _, icone = Details.GetSpellInfoC (_spellid)
+						local nome, _, icone = _GetSpellInfo (_spellid)
 						t[1], t[2], t[3] = nome .. " (" .. PetName:gsub ((" <.*"), "") .. ")", amount, icone
 						
 						i = i + 1
@@ -5159,11 +5163,7 @@ end
 			if (not no_refresh) then
 				_detalhes.refresh:r_atributo_damage (actor, shadow)
 			end
-			
-			--a refer�ncia do .owner pode ter sido apagada?
-			--os 2 segmentos foram juntados por�m a refer�ncia do owner de um pet criado ali em cima deve ser nula?
-			--teria que analisar se o novo objecto � de um pet e colocar a refer�ncia do owner no pet novamente, ou pelo menos verificar se a refer�ncia � valida
-			
+
 			--> tempo decorrido (captura de dados)
 				local end_time = actor.end_time
 				if (not actor.end_time) then

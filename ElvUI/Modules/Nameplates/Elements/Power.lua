@@ -3,6 +3,7 @@ local NP = E:GetModule('NamePlates')
 
 -- Cache global variables
 -- Lua functions
+local _G = _G
 local unpack = unpack
 -- WoW API / Variables
 local UnitPlayerControlled = UnitPlayerControlled
@@ -12,6 +13,7 @@ local UnitClass = UnitClass
 local UnitReaction = UnitReaction
 local CreateFrame = CreateFrame
 local UnitPowerType = UnitPowerType
+local ALTERNATE_POWER_INDEX = Enum.PowerType.Alternate or 10
 
 function NP:Power_UpdateColor(event, unit)
 	if self.unit ~= unit then return end
@@ -20,7 +22,8 @@ function NP:Power_UpdateColor(event, unit)
 	local ptype, ptoken, altR, altG, altB = UnitPowerType(unit)
 	element.token = ptoken
 
-	if self.PowerColorChanged then return end
+	if NP:StyleFilterCheckChanges(self, 'PowerColor') then return end
+	local Selection = element.colorSelection and NP:UnitSelectionType(unit, element.considerSelectionInCombatHostile)
 
 	local r, g, b, t, atlas
 	if(element.colorDead and element.dead) then
@@ -29,18 +32,24 @@ function NP:Power_UpdateColor(event, unit)
 		t = self.colors.disconnected
 	elseif(element.colorTapping and not UnitPlayerControlled(unit) and UnitIsTapDenied(unit)) then
 		t = self.colors.tapped
+	--[=[elseif(element.colorThreat and not UnitPlayerControlled(unit) and UnitThreatSituation('player', unit)) then
+		t =  self.colors.threat[UnitThreatSituation('player', unit)]]=]
 	elseif(element.colorPower) then
-		t = NP.db.colors.power[ptoken or ptype]
-		if(not t) then
-			if(element.GetAlternativeColor) then
-				r, g, b = element:GetAlternativeColor(unit, ptype, ptoken, altR, altG, altB)
-			elseif(altR) then
-				r, g, b = altR, altG, altB
-				if(r > 1 or g > 1 or b > 1) then
-					-- BUG: As of 7.0.3, altR, altG, altB may be in 0-1 or 0-255 range.
-					r, g, b = r / 255, g / 255, b / 255
+		if(element.displayType ~= ALTERNATE_POWER_INDEX) then
+			t = NP.db.colors.power[ptoken or ptype]
+			if(not t) then
+				if(element.GetAlternativeColor) then
+					r, g, b = element:GetAlternativeColor(unit, ptype, ptoken, altR, altG, altB)
+				elseif(altR) then
+					r, g, b = altR, altG, altB
+					if(r > 1 or g > 1 or b > 1) then
+						-- BUG: As of 7.0.3, altR, altG, altB may be in 0-1 or 0-255 range.
+						r, g, b = r / 255, g / 255, b / 255
+					end
 				end
 			end
+		else
+			t = NP.db.colors.power.ALT_POWER
 		end
 
 		if(element.useAtlas and t and t.atlas) then
@@ -51,6 +60,8 @@ function NP:Power_UpdateColor(event, unit)
 		(element.colorClassPet and UnitPlayerControlled(unit) and not UnitIsPlayer(unit)) then
 		local _, class = UnitClass(unit)
 		t = self.colors.class[class]
+	elseif Selection then
+		t = NP.db.colors.selection[Selection]
 	elseif(element.colorReaction and UnitReaction(unit, 'player')) then
 		local reaction = UnitReaction(unit, 'player')
 		if reaction <= 3 then reaction = 'bad' elseif reaction == 4 then reaction = 'neutral' else reaction = 'good' end
@@ -114,7 +125,7 @@ function NP:Construct_Power(nameplate)
 
 	NP.StatusBars[Power] = true
 
-	Power.frequentUpdates = true --Azil, keep this for now. It seems it may prevent event bugs
+	Power.frequentUpdates = true
 	Power.colorTapping = false
 	Power.colorClass = false
 
@@ -134,6 +145,9 @@ function NP:Update_Power(nameplate)
 
 		nameplate.Power:Point('CENTER', nameplate, 'CENTER', db.power.xOffset, db.power.yOffset)
 
+		nameplate:SetPowerUpdateMethod(E.global.nameplate.effectivePower)
+		nameplate:SetPowerUpdateSpeed(E.global.nameplate.effectivePowerSpeed)
+
 		E:SetSmoothing(nameplate.Power, NP.db.smoothbars)
 	else
 		if nameplate:IsElementEnabled('Power') then
@@ -152,6 +166,7 @@ function NP:Update_Power(nameplate)
 
 	nameplate:Tag(nameplate.Power.Text, db.power.text.format)
 
+	nameplate.Power.displayAltPower = db.power.displayAltPower
 	nameplate.Power.useAtlas = db.power.useAtlas
 	nameplate.Power.colorClass = db.power.useClassColor
 	nameplate.Power.colorPower = not db.power.useClassColor

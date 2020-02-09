@@ -16,13 +16,16 @@ end
 function B:PositionDurabilityFrame()
 	local DurabilityFrame = _G.DurabilityFrame
 
+	local Scale = E.db.general.durabilityScale or 1
+
 	local DurabilityFrameHolder = CreateFrame("Frame", "DurabilityFrameHolder", E.UIParent)
 	DurabilityFrameHolder:Size(DurabilityFrame:GetSize())
-	DurabilityFrameHolder:SetPoint('TOPRIGHT', E.UIParent, 'TOPRIGHT', -135, -300)
+	DurabilityFrameHolder:Point('TOPRIGHT', E.UIParent, 'TOPRIGHT', -135, -300)
 
 	E:CreateMover(DurabilityFrameHolder, 'DurabilityFrameMover', L["Durability Frame"], nil, nil, nil, nil, nil, 'all,general')
 
 	DurabilityFrame:SetFrameStrata("HIGH")
+	DurabilityFrame:SetScale(Scale)
 
 	hooksecurefunc(DurabilityFrame, "SetPoint", SetPosition)
 end

@@ -876,6 +876,7 @@
 						local text = editbox:GetText()
 						
 						local deserialized_object = Details:DecompressData (text, "print")
+						
 						if (not deserialized_object) then
 							_detalhes:Msg (Loc ["STRING_CUSTOM_IMPORT_ERROR"])
 							return						

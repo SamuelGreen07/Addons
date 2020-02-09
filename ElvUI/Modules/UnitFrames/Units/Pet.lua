@@ -12,7 +12,6 @@ local tinsert = tinsert
 
 function UF:Construct_PetFrame(frame)
 	frame.Health = self:Construct_HealthBar(frame, true, true, 'RIGHT')
-	frame.Health.frequentUpdates = true;
 	frame.Power = self:Construct_PowerBar(frame, true, true, 'LEFT')
 	frame.PowerPrediction = self:Construct_PowerPrediction(frame)
 	frame.Name = self:Construct_NameText(frame)
@@ -23,6 +22,7 @@ function UF:Construct_PetFrame(frame)
 	frame.Castbar = self:Construct_Castbar(frame, L["Pet Castbar"])
 	frame.Castbar.SafeZone = nil
 	frame.Castbar.LatencyTexture:Hide()
+	frame.ThreatIndicator = self:Construct_Threat(frame)
 	frame.HealthPrediction = self:Construct_HealComm(frame)
 	frame.AuraWatch = self:Construct_AuraWatch(frame)
 	frame.AuraBars = self:Construct_AuraBarHeader(frame)
@@ -34,7 +34,7 @@ function UF:Construct_PetFrame(frame)
 	frame.customTexts = {}
 
 	frame:Point('BOTTOM', E.UIParent, 'BOTTOM', 0, 118)
-	E:CreateMover(frame, frame:GetName()..'Mover', L["Pet Frame"], nil, nil, nil, 'ALL,SOLO', nil, 'unitframe,pet,generalGroup')
+	E:CreateMover(frame, frame:GetName()..'Mover', L["Pet Frame"], nil, nil, nil, 'ALL,SOLO', nil, 'unitframe,individualUnits,pet,generalGroup')
 
 	frame.unitframeType = "pet"
 end
@@ -51,7 +51,7 @@ function UF:Update_PetFrame(frame, db)
 		frame.POWERBAR_DETACHED = db.power.detachFromFrame
 		frame.USE_INSET_POWERBAR = not frame.POWERBAR_DETACHED and db.power.width == 'inset' and frame.USE_POWERBAR
 		frame.USE_MINI_POWERBAR = (not frame.POWERBAR_DETACHED and db.power.width == 'spaced' and frame.USE_POWERBAR)
-		frame.USE_POWERBAR_OFFSET = db.power.offset ~= 0 and frame.USE_POWERBAR and not frame.POWERBAR_DETACHED
+		frame.USE_POWERBAR_OFFSET = (db.power.width == 'offset' and db.power.offset ~= 0) and frame.USE_POWERBAR and not frame.POWERBAR_DETACHED
 		frame.POWERBAR_OFFSET = frame.USE_POWERBAR_OFFSET and db.power.offset or 0
 
 		frame.POWERBAR_HEIGHT = not frame.USE_POWERBAR and 0 or db.power.height
@@ -70,7 +70,6 @@ function UF:Update_PetFrame(frame, db)
 	end
 
 	frame.colors = ElvUF.colors
-	frame.Portrait = frame.Portrait or (db.portrait.style == '2D' and frame.Portrait2D or frame.Portrait3D)
 	frame:RegisterForClicks(self.db.targetOnMouseDown and 'AnyDown' or 'AnyUp')
 	frame:Size(frame.UNIT_WIDTH, frame.UNIT_HEIGHT)
 	_G[frame:GetName()..'Mover']:Size(frame:GetSize())
@@ -92,10 +91,12 @@ function UF:Update_PetFrame(frame, db)
 	--Portrait
 	UF:Configure_Portrait(frame)
 
+	--Threat
+	UF:Configure_Threat(frame)
+
 	--Auras
 	UF:EnableDisable_Auras(frame)
-	UF:Configure_Auras(frame, 'Buffs')
-	UF:Configure_Auras(frame, 'Debuffs')
+	UF:Configure_AllAuras(frame)
 
 	--Fader
 	UF:Configure_Fader(frame)
@@ -115,7 +116,8 @@ function UF:Update_PetFrame(frame, db)
 	--CustomTexts
 	UF:Configure_CustomTexts(frame)
 
-	UF:UpdateAuraWatch(frame)
+	UF:Configure_AuraWatch(frame, true)
+
 	frame:UpdateAllElements("ElvUI_UpdateAllElements")
 end
 

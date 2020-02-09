@@ -1,0 +1,7 @@
+changeset:   177:44ce007189e0
+tag:         v83
+user:        yellowfive
+date:        Sun Jan 26 12:37:12 2020 -0800
+summary:     Fix to automatic search on shopping list at auction house.
+
+

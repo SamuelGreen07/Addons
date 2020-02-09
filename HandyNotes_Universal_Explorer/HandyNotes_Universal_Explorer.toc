@@ -1,0 +1,19 @@
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+## Interface: 80300
+## Name: HandyNotes: Universal Explorer
+## Version: 8.3
+## Notes: Will show you on the map |nthe co-ordinations of every area |nyou need to discover for the |nUniversal Explorer achievement. |n|n(Coordinate Sources from Wowhead)|n|cff3399ff                                      Coded by |cffff0000Devil|r |cffFFFFFF(C)|r|n|n
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+## Author: Devil
+## eMail: devil.wow.uk@gmail.com
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+## SavedVariables: HandyNotes_Universal_ExplorerDB
+## DefaultState: Enabled
+## RequiredDeps: HandyNotes
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+## X-Category: Map
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+Handler.lua
+Config.lua
+Explorer Data.lua

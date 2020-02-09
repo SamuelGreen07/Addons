@@ -4,52 +4,54 @@ if PA.Classic then return end
 local BB = PA:NewModule('BigButtons', 'AceEvent-3.0')
 PA.BB, _G.BigButtons = BB, BB
 
-BB.Title = '|cFF16C3F2Big|r|cFFFFFFFFButtons|r'
-BB.Description = 'A farm tool for Sunsong Ranch.'
-BB.Authors = 'Azilroka    Whiro'
+BB.Title = 'BigButtons'
+BB.Header = PA.ACL['|cFF16C3F2Big|r|cFFFFFFFFButtons|r']
+BB.Description = PA.ACL['A farm tool for Sunsong Ranch.']
+BB.Authors = 'Azilroka    NihilisticPandemonium'
+BB.isEnabled = false
 
-local GetItemInfo, GetItemInfoInstant, GetSubZoneText, GetItemCount, InCombatLockdown = GetItemInfo, GetItemInfoInstant, GetSubZoneText, GetItemCount, InCombatLockdown
-local NUM_BAG_SLOTS, GetContainerNumSlots, GetContainerItemID, PickupContainerItem, DeleteCursorItem = NUM_BAG_SLOTS, GetContainerNumSlots, GetContainerItemID, PickupContainerItem, DeleteCursorItem
 local _G = _G
-local select, tinsert, unpack, pairs = select, tinsert, unpack, pairs
-local AS
-local Locale = GetLocale()
+
+local select = select
+local tinsert = tinsert
+local unpack = unpack
+local pairs = pairs
+local GetItemInfo = GetItemInfo
+local GetItemInfoInstant = GetItemInfoInstant
+local GetSubZoneText = GetSubZoneText
+local GetItemCount = GetItemCount
+local InCombatLockdown = InCombatLockdown
+local NUM_BAG_SLOTS = NUM_BAG_SLOTS
+local GetContainerNumSlots = GetContainerNumSlots
+local GetContainerItemID = GetContainerItemID
+local PickupContainerItem = PickupContainerItem
+local DeleteCursorItem = DeleteCursorItem
+
+local CreateFrame = CreateFrame
+local Locale = PA.Locale
+
 if Locale == 'esMX' then Locale = 'esES' end
 if Locale == 'enGB' then Locale = 'enUS' end
 
-BB.Ranch = {
-	['enUS'] = 'Sunsong Ranch',
-	['esES'] = 'Rancho Cantosol',
-	['ptBR'] = 'Fazenda Sol Cantante',
-	['frFR'] = 'Ferme Chant du Soleil',
-	['deDE'] = 'Gehöft Sonnensang',
-	['itIT'] = 'Tenuta Cantasole',
-	['koKR'] = '태양노래 농장',
-	['zhCN'] = '日歌农场',
-	['zhTW'] = '日歌農莊',
-	['ruRU'] = 'Ферма Солнечной Песни',
+local Locales = {
+	enUS = { Ranch = 'Sunsong Ranch', Market = 'The Halfhill Market' },
+	esES = { Ranch = 'Rancho Cantosol', Market = 'El Mercado del Alcor' },
+	ptBR = { Ranch = 'Fazenda Sol Cantante', Market = 'Mercado da Meia Colina' },
+	frFR = { Ranch = 'Ferme Chant du Soleil', Market = 'Marché de Micolline' },
+	deDE = { Ranch = 'Gehöft Sonnensang', Market = 'Der Halbhügelmarkt' },
+	itIT = { Ranch = 'Tenuta Cantasole', Market = 'Mercato di Mezzocolle' },
+	koKR = { Ranch = '태양노래 농장', Market = '언덕골 시장' },
+	zhCN = { Ranch = '日歌农场', Market = '半山市集' },
+	zhTW = { Ranch = '日歌農莊', Market = '半丘市集' },
+	ruRU = { Ranch = 'Ферма Солнечной Песни', Market = 'Рынок Полугорья' },
 }
 
-BB.Ranch = BB.Ranch[Locale]
-
-BB.Market = {
-	['enUS'] = 'The Halfhill Market',
-	['esES'] = 'El Mercado del Alcor',
-	['ptBR'] = 'Mercado da Meia Colina',
-	['frFR'] = 'Marché de Micolline',
-	['deDE'] = 'Der Halbhügelmarkt',
-	['itIT'] = 'Mercato di Mezzocolle',
-	['koKR'] = '언덕골 시장',
-	['zhCN'] = '半山市集',
-	['zhTW'] = '半丘市集',
-	['ruRU'] = 'Рынок Полугорья',
-}
-
-BB.Market = BB.Market[Locale]
+BB.Ranch, BB.Market = Locales[Locale].Ranch, Locales[Locale].Market
 
 BB.Events = {'PLAYER_ENTERING_WORLD', 'ZONE_CHANGED', 'ZONE_CHANGED_NEW_AREA', 'ZONE_CHANGED_INDOORS', 'BAG_UPDATE'}
 
 BB.Tools = { 79104, 80513, 89880, 89815 }
+
 BB.Seeds = {
 	[1] = { Seed = 79102, Bag = 80809 }, -- Green Cabbage
 	[2] = { Seed = 89328, Bag = 89848 }, -- Jade Squash
@@ -74,17 +76,21 @@ BB.Seeds = {
 }
 
 function BB:Update()
+	if not BB.Bar then return end
+
 	local PrevButton, NumShown = nil, 0
-	for _, Button in pairs(self.Bar.Buttons) do
+	for _, Button in pairs(BB.Bar.Buttons) do
 		if Button:IsShown() then
 			Button:ClearAllPoints()
-			Button:SetPoint(unpack(PrevButton and {'LEFT', PrevButton, 'RIGHT', (PA.ElvUI and ElvUI[1].PixelMode and 1 or 3), 0} or {'LEFT', self.Bar, 'LEFT', 0, 0}))
+			Button:SetPoint(unpack(PrevButton and {'LEFT', PrevButton, 'RIGHT', (PA.ElvUI and _G.ElvUI[1].PixelMode and 1 or 3), 0} or {'LEFT', BB.Bar, 'LEFT', 0, 0}))
 			PrevButton = Button
 			NumShown = NumShown + 1
 		end
 	end
+
 	if NumShown == 0 then NumShown = 1 end
-	self.Bar:SetSize(NumShown * (50 + (PA.ElvUI and ElvUI[1].PixelMode and 1 or 3)), 50)
+
+	BB.Bar:SetSize(NumShown * (50 + (PA.ElvUI and _G.ElvUI[1].PixelMode and 1 or 3)), 50)
 end
 
 function BB:InSeedZone()
@@ -101,7 +107,7 @@ function BB:InFarmZone()
 end
 
 function BB:CreateBigButton(ItemID)
-	local Button = CreateFrame('Button', nil, self.Bar, 'SecureActionButtonTemplate, ActionButtonTemplate')
+	local Button = CreateFrame('Button', nil, BB.Bar, 'SecureActionButtonTemplate, ActionButtonTemplate')
 	Button:Hide()
 	Button:SetTemplate()
 	Button:SetSize(50, 50)
@@ -119,34 +125,31 @@ function BB:CreateBigButton(ItemID)
 	Button:SetPushedTexture('')
 	Button:SetHighlightTexture('')
 
-	if AS then
-		AS:SkinButton(Button)
-		AS:CreateShadow(Button)
-	end
+	PA:CreateShadow(Button)
 
 	for _, event in pairs(BB.Events) do
 		Button:RegisterEvent(event)
 	end
 
-	Button:SetScript('OnShow', function(self)
-		if self:GetAttribute('item') ~= GetItemInfo(ItemID) then
-			self:SetAttribute('item', GetItemInfo(ItemID))
+	Button:SetScript('OnShow', function()
+		if Button:GetAttribute('item') ~= GetItemInfo(ItemID) then
+			Button:SetAttribute('item', GetItemInfo(ItemID))
 		end
 	end)
 
-	Button:SetScript('OnEvent', function(self)
+	Button:SetScript('OnEvent', function()
 		if not InCombatLockdown() then
 			if BB:InFarmZone() and GetItemCount(ItemID) == 1 then
-				self:Show()
+				Button:Show()
 				BB:Update()
 			end
-			self:UnregisterEvent('PLAYER_REGEN_ENABLED')
+			Button:UnregisterEvent('PLAYER_REGEN_ENABLED')
 		else
-			self:RegisterEvent('PLAYER_REGEN_ENABLED')
+			Button:RegisterEvent('PLAYER_REGEN_ENABLED')
 		end
 	end)
 
-	tinsert(self.Bar.Buttons, Button)
+	tinsert(BB.Bar.Buttons, Button)
 end
 
 local SeedX, SeedY = 0, 1
@@ -156,7 +159,7 @@ function BB:CreateSeedButton(ItemID)
 		SeedX, SeedY = 1, 2
 	end
 
-	local Button = CreateFrame('Button', nil, self.Bar.SeedsFrame, 'SecureActionButtonTemplate, ActionButtonTemplate')
+	local Button = CreateFrame('Button', nil, BB.Bar.SeedsFrame, 'SecureActionButtonTemplate, ActionButtonTemplate')
 	PA:SetTemplate(Button)
 	Button:SetSize(30, 30)
 	Button:SetAttribute('type', 'item')
@@ -174,13 +177,13 @@ function BB:CreateSeedButton(ItemID)
 	Button:SetHighlightTexture('')
 
 	Button:HookScript('OnEnter', function(button)
-		GameTooltip:SetOwner(button, 'ANCHOR_TOPRIGHT', 2, 4)
-		GameTooltip:ClearLines()
-		GameTooltip:SetItemByID(ItemID)
-		GameTooltip:Show()
+		_G.GameTooltip:SetOwner(button, 'ANCHOR_TOPRIGHT', 2, 4)
+		_G.GameTooltip:ClearLines()
+		_G.GameTooltip:SetItemByID(ItemID)
+		_G.GameTooltip:Show()
 	end)
 
-	Button:HookScript('OnLeave', GameTooltip_Hide)
+	Button:HookScript('OnLeave', _G.GameTooltip_Hide)
 
 	local function Update(button)
 		if not InCombatLockdown() then
@@ -212,12 +215,9 @@ function BB:CreateSeedButton(ItemID)
 
 	Button:SetPoint(yTable[SeedY].point, xOffset, yTable[SeedY].offset)
 
-	if AS then
-		AS:SkinButton(Button)
-		AS:CreateShadow(Button)
-	end
+	PA:CreateShadow(Button)
 
-	tinsert(self.Bar.SeedsFrame.Buttons, Button)
+	tinsert(BB.Bar.SeedsFrame.Buttons, Button)
 end
 
 function BB:DropTools()
@@ -236,92 +236,103 @@ function BB:DropTools()
 end
 
 function BB:GetOptions()
-	local Options = {
+	PA.Options.args.BigButtons = {
 		type = 'group',
 		name = BB.Title,
 		desc = BB.Description,
 		get = function(info) return BB.db[info[#info]] end,
-		set = function(info, value) BB.db[info[#info]] = value BB:Update() end,
 		args = {
 			Header = {
 				order = 0,
 				type = 'header',
-				name = PA:Color(BB.Title),
+				name = BB.Header,
 			},
-			DropTools = {
+			Enable = {
 				order = 1,
 				type = 'toggle',
-				name = PA.ACL['Drop Farm Tools'],
+				name = PA.ACL['Enable'],
+				set = function(info, value)
+					BB.db[info[#info]] = value
+					if not BB.isEnabled then
+						BB:Initialize()
+					else
+						_G.StaticPopup_Show('PROJECTAZILROKA_RL')
+					end
+				end,
 			},
-			ToolSize = {
+			General = {
 				order = 2,
-				type = 'range',
-				name = PA.ACL['Farm Tool Size'],
-				min = 16, max = 64, step = 1,
-			},
-			SeedSize = {
-				order = 3,
-				type = 'range',
-				name = PA.ACL['Seed Size'],
-				min = 16, max = 64, step = 1,
+				type = 'group',
+				name = PA.ACL['General'],
+				guiInline = true,
+				set = function(info, value) BB.db[info[#info]] = value BB:Update() end,
+				args = {
+					DropTools = {
+						order = 1,
+						type = 'toggle',
+						name = PA.ACL['Drop Farm Tools'],
+					},
+					ToolSize = {
+						order = 2,
+						type = 'range',
+						name = PA.ACL['Farm Tool Size'],
+						min = 16, max = 64, step = 1,
+					},
+					SeedSize = {
+						order = 3,
+						type = 'range',
+						name = PA.ACL['Seed Size'],
+						min = 16, max = 64, step = 1,
+					},
+				},
 			},
 			AuthorHeader = {
-				order = 11,
+				order = -2,
 				type = 'header',
 				name = PA.ACL['Authors:'],
 			},
 			Authors = {
-				order = 12,
+				order = -1,
 				type = 'description',
 				name = BB.Authors,
 				fontSize = 'large',
 			},
 		},
 	}
-
-	PA.Options.args.BigButtons = Options
 end
 
 function BB:BuildProfile()
-	PA.Defaults.profile['BigButtons'] = {
-		['Enable'] = false,
-		['DropTools'] = false,
-		['ToolSize'] = 50,
-		['SeedSize'] = 30,
-	}
-
-	PA.Options.args.general.args.BigButtons = {
-		type = 'toggle',
-		name = BB.Title,
-		desc = BB.Description,
+	PA.Defaults.profile.BigButtons = {
+		Enable = false,
+		DropTools = false,
+		ToolSize = 50,
+		SeedSize = 30,
 	}
 end
 
 function BB:Initialize()
-	BB.db = PA.db['BigButtons']
+	BB.db = PA.db.BigButtons
 
 	if BB.db.Enable ~= true then
 		return
 	end
 
-	BB:GetOptions()
+	BB.isEnabled = true
 
-	AS = _G.AddOnSkins and _G.AddOnSkins[1]
-
-	local Bar = CreateFrame('Frame', 'BigButtonsBar', UIParent, "SecureHandlerStateTemplate")
+	local Bar = CreateFrame('Frame', 'BigButtonsBar', _G.UIParent, "SecureHandlerStateTemplate")
 	BB.Bar = Bar
 	Bar:Hide()
 	Bar:SetFrameStrata('MEDIUM')
 	Bar:SetFrameLevel(0)
 	Bar:SetSize(50, 50)
-	Bar:SetPoint('TOP', UIParent, 'TOP', 0, -250)
+	Bar:SetPoint('TOP', _G.UIParent, 'TOP', 0, -250)
 	Bar.Buttons = {}
 
-	Bar.SeedsFrame = CreateFrame('Frame', 'BigButtonsSeedBar', UIParent)
+	Bar.SeedsFrame = CreateFrame('Frame', 'BigButtonsSeedBar', _G.UIParent)
 	Bar.SeedsFrame:SetFrameStrata('MEDIUM')
 	Bar.SeedsFrame:SetFrameLevel(0)
 	Bar.SeedsFrame:SetSize(344, 72)
-	Bar.SeedsFrame:SetPoint('TOP', UIParent, 'TOP', 0, -300)
+	Bar.SeedsFrame:SetPoint('TOP', _G.UIParent, 'TOP', 0, -300)
 	Bar.SeedsFrame.Buttons = {}
 
 	for _, ItemID in pairs(BB.Tools) do

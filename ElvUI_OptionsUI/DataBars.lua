@@ -6,6 +6,7 @@ E.Options.args.databars = {
 	type = "group",
 	name = L["DataBars"],
 	childGroups = "tab",
+	order = 2,
 	get = function(info) return E.db.databars[info[#info]] end,
 	set = function(info, value) E.db.databars[info[#info]] = value; end,
 	args = {
@@ -20,17 +21,12 @@ E.Options.args.databars = {
 			name = "",
 		},
 		experience = {
-			order = 1,
+			order = 5,
 			get = function(info) return mod.db.experience[info[#info]] end,
 			set = function(info, value) mod.db.experience[info[#info]] = value; mod:UpdateExperienceDimensions() end,
 			type = "group",
 			name = L["XPBAR_LABEL"],
 			args = {
-				header = {
-					order = 0,
-					type = "header",
-					name = L["XPBAR_LABEL"],
-				},
 				enable = {
 					order = 1,
 					type = "toggle",
@@ -48,6 +44,12 @@ E.Options.args.databars = {
 					name = L["Hide At Max Level"],
 					set = function(info, value) mod.db.experience[info[#info]] = value; mod:UpdateExperience() end,
 				},
+				hideInVehicle = {
+					order = 4,
+					type = "toggle",
+					name = L["Hide In Vehicle"],
+					set = function(info, value) mod.db.experience[info[#info]] = value; mod:UpdateExperience() end,
+				},
 				hideInCombat = {
 					order = 5,
 					type = "toggle",
@@ -115,115 +117,16 @@ E.Options.args.databars = {
 						CURPERCREM = L["Current - Percent (Remaining)"],
 					},
 					set = function(info, value) mod.db.experience[info[#info]] = value; mod:UpdateExperience() end,
-				},
-			},
-		},
-		petExperience = {
-			order = 2,
-			get = function(info) return mod.db.petExperience[info[#info]] end,
-			set = function(info, value) mod.db.petExperience[info[#info]] = value; mod:UpdatePetExperienceDimensions() end,
-			type = "group",
-			name = L["Pet Experience"],
-			args = {
-				enable = {
-					order = 1,
-					type = "toggle",
-					name = L["Enable"],
-					set = function(info, value) mod.db.petExperience[info[#info]] = value; mod:EnableDisable_PetExperienceBar() end,
-				},
-				mouseover = {
-					order = 2,
-					type = "toggle",
-					name = L["Mouseover"],
-				},
-				hideAtMaxLevel = {
-					order = 3,
-					type = "toggle",
-					name = L["Hide At Max Level"],
-					set = function(info, value) mod.db.petExperience[info[#info]] = value; mod:UpdatePetExperience() end,
-				},
-				hideInCombat = {
-					order = 5,
-					type = "toggle",
-					name = L["Hide In Combat"],
-					set = function(info, value) mod.db.petExperience[info[#info]] = value; mod:UpdatePetExperience() end,
-				},
-				reverseFill = {
-					order = 6,
-					type = "toggle",
-					name = L["Reverse Fill Direction"],
-				},
-				orientation = {
-					order = 7,
-					type = "select",
-					name = L["Statusbar Fill Orientation"],
-					desc = L["Direction the bar moves on gains/losses"],
-					values = {
-						['HORIZONTAL'] = L["Horizontal"],
-						['VERTICAL'] = L["Vertical"]
-					}
-				},
-				width = {
-					order = 8,
-					type = "range",
-					name = L["Width"],
-					min = 5, max = ceil(GetScreenWidth() or 800), step = 1,
-				},
-				height = {
-					order = 9,
-					type = "range",
-					name = L["Height"],
-					min = 5, max = ceil(GetScreenHeight() or 800), step = 1,
-				},
-				font = {
-					order = 10,
-					type = "select", dialogControl = "LSM30_Font",
-					name = L["Font"],
-					values = AceGUIWidgetLSMlists.font,
-				},
-				textSize = {
-					order = 11,
-					name = L["FONT_SIZE"],
-					type = "range",
-					min = 6, max = 22, step = 1,
-				},
-				fontOutline = {
-					order = 12,
-					type = "select",
-					name = L["Font Outline"],
-					values = C.Values.FontFlags,
-				},
-				textFormat = {
-					order = 13,
-					type = 'select',
-					name = L["Text Format"],
-					width = "double",
-					values = {
-						NONE = L["NONE"],
-						PERCENT = L["Percent"],
-						CUR = L["Current"],
-						REM = L["Remaining"],
-						CURMAX = L["Current - Max"],
-						CURPERC = L["Current - Percent"],
-						CURREM = L["Current - Remaining"],
-						CURPERCREM = L["Current - Percent (Remaining)"],
-					},
-					set = function(info, value) mod.db.petExperience[info[#info]] = value; mod:UpdatePetExperience() end,
 				},
 			},
 		},
 		reputation = {
-			order = 3,
+			order = 6,
 			get = function(info) return mod.db.reputation[info[#info]] end,
 			set = function(info, value) mod.db.reputation[info[#info]] = value; mod:UpdateReputationDimensions() end,
 			type = "group",
 			name = L["REPUTATION"],
 			args = {
-				header = {
-					order = 0,
-					type = "header",
-					name = L["REPUTATION"],
-				},
 				enable = {
 					order = 1,
 					type = "toggle",
@@ -234,6 +137,12 @@ E.Options.args.databars = {
 					order = 2,
 					type = "toggle",
 					name = L["Mouseover"],
+				},
+				hideInVehicle = {
+					order = 3,
+					type = "toggle",
+					name = L["Hide In Vehicle"],
+					set = function(info, value) mod.db.reputation[info[#info]] = value; mod:UpdateReputation() end,
 				},
 				hideInCombat = {
 					order = 4,
@@ -246,11 +155,6 @@ E.Options.args.databars = {
 					type = "toggle",
 					name = L["Reverse Fill Direction"],
 				},
-				spacer = {
-					order = 6,
-					type = "description",
-					name = " ",
-				},
 				orientation = {
 					order = 7,
 					type = "select",
@@ -307,6 +211,212 @@ E.Options.args.databars = {
 						CURPERCREM = L["Current - Percent (Remaining)"],
 					},
 					set = function(info, value) mod.db.reputation[info[#info]] = value; mod:UpdateReputation() end,
+				},
+			},
+		},
+		honor = {
+			order = 7,
+			get = function(info) return mod.db.honor[info[#info]] end,
+			set = function(info, value) mod.db.honor[info[#info]] = value; mod:UpdateHonorDimensions() end,
+			type = "group",
+			name = L["HONOR"],
+			args = {
+				enable = {
+					order = 1,
+					type = "toggle",
+					name = L["Enable"],
+					set = function(info, value) mod.db.honor[info[#info]] = value; mod:EnableDisable_HonorBar() end,
+				},
+				mouseover = {
+					order = 2,
+					type = "toggle",
+					name = L["Mouseover"],
+				},
+				hideInVehicle = {
+					order = 3,
+					type = "toggle",
+					name = L["Hide In Vehicle"],
+					set = function(info, value) mod.db.honor[info[#info]] = value; mod:UpdateHonor() end,
+				},
+				hideInCombat = {
+					order = 4,
+					type = "toggle",
+					name = L["Hide In Combat"],
+					set = function(info, value) mod.db.honor[info[#info]] = value; mod:UpdateHonor() end,
+				},
+				hideOutsidePvP = {
+					order = 5,
+					type = "toggle",
+					name = L["Hide Outside PvP"],
+					set = function(info, value) mod.db.honor[info[#info]] = value; mod:UpdateHonor() end,
+				},
+				hideBelowMaxLevel = {
+					order = 6,
+					type = "toggle",
+					name = L["Hide Below Max Level"],
+					set = function(info, value) mod.db.honor[info[#info]] = value; mod:UpdateHonor() end,
+				},
+				reverseFill = {
+					order = 7,
+					type = "toggle",
+					name = L["Reverse Fill Direction"],
+				},
+				orientation = {
+					order = 8,
+					type = "select",
+					name = L["Statusbar Fill Orientation"],
+					desc = L["Direction the bar moves on gains/losses"],
+					values = {
+						['HORIZONTAL'] = L["Horizontal"],
+						['VERTICAL'] = L["Vertical"]
+					}
+				},
+				width = {
+					order = 9,
+					type = "range",
+					name = L["Width"],
+					min = 5, max = ceil(GetScreenWidth() or 800), step = 1,
+				},
+				height = {
+					order = 10,
+					type = "range",
+					name = L["Height"],
+					min = 5, max = ceil(GetScreenHeight() or 800), step = 1,
+				},
+				font = {
+					order = 11,
+					type = "select", dialogControl = "LSM30_Font",
+					name = L["Font"],
+					values = AceGUIWidgetLSMlists.font,
+				},
+				textSize = {
+					order = 12,
+					name = L["FONT_SIZE"],
+					type = "range",
+					min = 6, max = 22, step = 1,
+				},
+				fontOutline = {
+					order = 13,
+					type = "select",
+					name = L["Font Outline"],
+					values = C.Values.FontFlags,
+				},
+				textFormat = {
+					order = 14,
+					type = 'select',
+					name = L["Text Format"],
+					width = "double",
+					values = {
+						NONE = L["NONE"],
+						PERCENT = L["Percent"],
+						CUR = L["Current"],
+						REM = L["Remaining"],
+						CURMAX = L["Current - Max"],
+						CURPERC = L["Current - Percent"],
+						CURREM = L["Current - Remaining"],
+						CURPERCREM = L["Current - Percent (Remaining)"],
+					},
+					set = function(info, value) mod.db.honor[info[#info]] = value; mod:UpdateHonor() end,
+				},
+			},
+		},
+		azerite = {
+			order = 8,
+			get = function(info) return mod.db.azerite[info[#info]] end,
+			set = function(info, value) mod.db.azerite[info[#info]] = value; mod:UpdateAzeriteDimensions() end,
+			type = "group",
+			name = L["Azerite Bar"],
+			args = {
+				enable = {
+					order = 1,
+					type = "toggle",
+					name = L["Enable"],
+					set = function(info, value) mod.db.azerite[info[#info]] = value; mod:EnableDisable_AzeriteBar() end,
+				},
+				mouseover = {
+					order = 2,
+					type = "toggle",
+					name = L["Mouseover"],
+				},
+				hideAtMaxLevel = {
+					order = 3,
+					type = "toggle",
+					name = L["Hide At Max Power"],
+					set = function(info, value) mod.db.azerite[info[#info]] = value; mod:UpdateAzerite() end,
+				},
+				hideInVehicle = {
+					order = 4,
+					type = "toggle",
+					name = L["Hide In Vehicle"],
+					set = function(info, value) mod.db.azerite[info[#info]] = value; mod:UpdateAzerite() end,
+				},
+				hideInCombat = {
+					order = 5,
+					type = "toggle",
+					name = L["Hide In Combat"],
+					set = function(info, value) mod.db.azerite[info[#info]] = value; mod:UpdateAzerite() end,
+				},
+				reverseFill = {
+					order = 6,
+					type = "toggle",
+					name = L["Reverse Fill Direction"],
+				},
+				orientation = {
+					order = 7,
+					type = "select",
+					name = L["Statusbar Fill Orientation"],
+					desc = L["Direction the bar moves on gains/losses"],
+					values = {
+						['HORIZONTAL'] = L["Horizontal"],
+						['VERTICAL'] = L["Vertical"]
+					}
+				},
+				width = {
+					order = 8,
+					type = "range",
+					name = L["Width"],
+					min = 5, max = ceil(GetScreenWidth() or 800), step = 1,
+				},
+				height = {
+					order = 9,
+					type = "range",
+					name = L["Height"],
+					min = 5, max = ceil(GetScreenHeight() or 800), step = 1,
+				},
+				font = {
+					order = 10,
+					type = "select", dialogControl = "LSM30_Font",
+					name = L["Font"],
+					values = AceGUIWidgetLSMlists.font,
+				},
+				textSize = {
+					order = 11,
+					name = L["FONT_SIZE"],
+					type = "range",
+					min = 6, max = 22, step = 1,
+				},
+				fontOutline = {
+					order = 12,
+					type = "select",
+					name = L["Font Outline"],
+					values = C.Values.FontFlags,
+				},
+				textFormat = {
+					order = 13,
+					type = 'select',
+					name = L["Text Format"],
+					width = "double",
+					values = {
+						NONE = L["NONE"],
+						CUR = L["Current"],
+						REM = L["Remaining"],
+						PERCENT = L["Percent"],
+						CURMAX = L["Current - Max"],
+						CURPERC = L["Current - Percent"],
+						CURREM = L["Current - Remaining"],
+						CURPERCREM = L["Current - Percent (Remaining)"],
+					},
+					set = function(info, value) mod.db.azerite[info[#info]] = value; mod:UpdateAzerite() end,
 				},
 			},
 		},

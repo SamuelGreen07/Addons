@@ -6,8 +6,8 @@ local CreateFrame = CreateFrame
 
 function UF:Construct_InfoPanel(frame)
 	local infoPanel = CreateFrame("Frame", nil, frame)
-
 	infoPanel:SetFrameLevel(7) --Health is 10 and filled power is 5 by default
+
 	local thinBorders = self.thinBorders
 	infoPanel:CreateBackdrop(nil, true, nil, thinBorders, true)
 
@@ -22,7 +22,7 @@ function UF:Configure_InfoPanel(frame, noTemplateChange)
 		frame.InfoPanel:Show()
 		frame.InfoPanel:ClearAllPoints()
 
-		if frame.ORIENTATION == "RIGHT" then
+		if frame.ORIENTATION == "RIGHT" and not (frame.unitframeType == "arena") then
 			frame.InfoPanel:Point("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -frame.BORDER - frame.SPACING, frame.BORDER + frame.SPACING)
 			if(frame.USE_POWERBAR and not frame.USE_INSET_POWERBAR and not frame.POWERBAR_DETACHED) then
 				frame.InfoPanel:Point("TOPLEFT", frame.Power.backdrop, "BOTTOMLEFT", frame.BORDER, -(frame.SPACING*3))

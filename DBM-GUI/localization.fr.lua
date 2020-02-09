@@ -106,7 +106,6 @@ L.ShowGuildMessages 		= "Afficher les messages engagement/victoire/défaite en g
 L.ShowRecoveryMessage 		= "Afficher les messages de récupération des timers dans la fenêtre de chat"
 L.WhisperMessages			= "Options des chuchotements"
 L.AutoRespond 				= "Répondre automatiquement aux chuchotements pendant les combats"
-L.EnableStatus 				= "Répondre aux chuchotements de 'statut'"
 L.WhisperStats 				= "Inclure les victoires/défaites dans les réponses"
 L.DisableStatusWhisper 		= "Désactiver les chuchotements de statut pour le groupe entier (requiert Chef de groupe). S'appplique seulement aux raids normaux/heroïques/mythiques et aux donjons défis/mythiques."
 
@@ -236,6 +235,7 @@ L.DontShowPTNoID			= "Bloquer les chronos de pull envoyés depuis une zone diff�
 L.DontShowPT				= "Ne pas afficher la barre de pull"
 L.DontShowPTText			= "Ne pas afficher le texte d'annonce du chrono de pull"
 L.DontPlayPTCountdown		= "Ne pas jouer le son du compte à rebours du chrono de pull"
+L.DontShowPTCountdownText	= "Ne pas afficher le texte du compte à rebours du chrono de pull"
 L.PT_Threshold				= "Ne pas afficher le texte du compte à rebours s'il reste plus de: %d sec."
 
 L.Panel_HideBlizzard		= "Masquer Blizzard"
@@ -253,6 +253,7 @@ L.Always					= "Toujours"
 L.Panel_ExtraFeatures		= "Fonctionnalités supplémentaires"
 --
 L.Area_ChatAlerts			= "Options des alertes dans le chat"
+L.RoleSpecAlert				= "Afficher une alerte lorsque votre spé ne correspond pas à votre choix de loot en rejoignant un raid"
 L.CheckGear					= "Affiche un message d'alerte pendant les pull quand votre ilvl équipé est beaucoup plus bas que votre ilvl global (40+)"
 L.WorldBossAlert			= "Afficher une alerte lorsqu'un World Boss a probablement été engagé sur votre royaume par votre guilde ou des amis (érronée si info reçue de CRZed)"
 --
@@ -261,6 +262,7 @@ L.LFDEnhance				= "Jouer le son du readycheck sur les vérif. de rôle &amp; sur
 L.WorldBossNearAlert		= "Jouer le son du readycheck lorsqu'un World Boss proche de vous que vous avez besoin est engagé (Outrepasse l'option par boss)"
 L.RLReadyCheckSound			= "Jouer les sons de l'appel des vrais appels via le canal principal ou de dialogue"
 L.AFKHealthWarning			= "Jouer un son d'alerte si vous perdez de la vie alors que vous ABS"
+L.AutoReplySound			= "Jouer un son d'alerte lorsque vous recevez une réponse automatique de DBM"
 --
 L.TimerGeneral 				= "Options des timers"
 L.SKT_Enabled				= "Afficher le timer du record pour lecombat actuel s'il est disponible"
@@ -274,7 +276,7 @@ L.ChallengeTimerRealm		= "Serveur"
 L.Area_AutoLogging			= "Options d'enregistrement auto"
 L.AutologBosses				= "Automatiquement enregistrer le combat contre un boss en utilisant le combat log de Blizzard (Il faut utiliser la commande /dbm pull avant le boss pour que ce soit compatible avec <a href=\"http://www.warcraftlogs.com\">|cff3588ffwarcraftlogs.com|r</a>)"
 L.AdvancedAutologBosses		= "Automatiquement enregistrer le combat contre un boss en utilisant Transcriptor"
-L.LogOnlyRaidBosses			= "N'enregistrer que les combats contre un boss (exclus RdR/dongeon/scenario)"
+L.LogOnlyNonTrivial			= "N'enregistrer que les combats contre un boss (exclus RdR/dongeon/scenario)"
 --
 L.Area_3rdParty				= "Options des Addons tiers"
 L.ShowBBOnCombatStart		= "Effectuer la vérification des buffs de Big Brother au début des combats"
@@ -285,7 +287,6 @@ L.AutoAcceptGuildInvite		= "Accepter les invitations venant d'un membre de la gu
 L.Area_Advanced				= "Options Avancées"
 L.FakeBW					= "Prétendre être BigWigs lors des vérifications de versions au lieu de DBM (Utile pour les guildes qui forcent l'utilisation de BigWigs)"
 L.AITimer					= "Utiliser un générateur automatique de timers pour des nouveaux combats utilisant l'IA intégrée de DBM (Utile pout engager les boss jamais vus sur la beta). Note: ceci ne fonctionnera pas correctement s'il y a plusieurs adds avec la même abilité"
-L.AutoCorrectTimer			= "Corriger automatiquement les timers trop longs (Utile pour les guildes sur le contenu haut niveau pour lequel les bossmods ne sont pas encore mis à jour)"
 
 L.Panel_Profile				= "Profils"
 L.Area_CreateProfile		= "Création de Profil"
