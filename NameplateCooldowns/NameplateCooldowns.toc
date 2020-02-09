@@ -1,0 +1,11 @@
+## Interface: 80205
+## Title: NameplateCooldowns
+## Notes: Shows the cooldowns of enemy players above their nameplates
+## SavedVariables: NameplateCooldownsAceDB
+
+embeds.xml
+localizations.lua
+defaultSpells.lua
+defaultSpells_Classic.lua
+NameplateCooldowns.lua
+NameplateCooldowns_Classic.lua
