@@ -1,5 +1,0 @@
-<Bindings>
-	<Binding name="DOSHARDTRACKERSORT" header="SHARDTRACKERSORT">
-		ShardTracker_Sort();
-	</Binding>
-</Bindings>
