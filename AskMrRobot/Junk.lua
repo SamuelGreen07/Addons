@@ -288,6 +288,8 @@ end
 
 function Amr:ShowJunkWindow()
 
+    if InCombatLockdown() then return end
+    
 	if not _frameJunk then
 		_frameJunk = AceGUI:Create("AmrUiFrame")
 		_frameJunk:SetStatusTable(Amr.db.profile.junkWindow) -- window position is remembered in db

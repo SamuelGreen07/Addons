@@ -11,7 +11,7 @@ local mod, CL = BigWigs:NewBoss("Ra-den the Despoiled", 2217, 2364)
 if not mod then return end
 mod:RegisterEnableMob(156866) -- Ra-den
 mod.engageId = 2331
-mod.respawnTime = 15
+mod.respawnTime = 30
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -65,6 +65,10 @@ function mod:GetOptions()
 		[313213] = CL.stage:format(2),
 		[312996] = CL.mythic,
 	}
+end
+
+function mod:VerifyEnable(_, _, mapArtID)
+	return mapArtID == 1591 -- Prevent enabling unless on the same area as Ra-den (Can see him from Vexiona)
 end
 
 function mod:OnBossEnable()

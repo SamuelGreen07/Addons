@@ -193,17 +193,17 @@ do --this can save some main file locals
 	local Clover		= E:TextureString(E.Media.ChatLogos.Clover,x)
 	local Burger		= E:TextureString(E.Media.ChatLogos.Burger,x)
 	local Lion			= E:TextureString(E.Media.ChatLogos.Lion,x)
+	local GoldShield	= E:TextureString(E.Media.ChatLogos.GoldShield,x)
+	local DeathlyH		= E:TextureString(E.Media.ChatLogos.DeathlyHallows,x)
 
-	--[[ Simpys Things
-		-- new icon color every message, in order then reversed back, repeating of course
+	--[[ Simpys Thing: new icon color every message, in order then reversed back, repeating of course
 		local a, b, c = 0, false, {ElvRed, ElvOrange, ElvYellow, ElvGreen, ElvBlue, ElvPurple, ElvPink}
 		(a = a - (b and 1 or -1) if (b and a == 1 or a == 0) or a == #c then b = not b end return c[a])
 	]]
 
-	local itsElv, itsMis, itsMel, itsSimpyA, itsSimpyH
-	do	--Simpy Chaos
-		--super cute text coloring function that ignores hyperlinks and keywords
-		local e, f, g = {'|%x+%[?|H.-|h.-|h]?|r', '|H.-|h.-|h', '|[TA].-|[ta]', '|c.-|r'}, {}, {}
+	local itsElv, itsMis, itsMel, itsSimpyA, itsSimpyH, itsTheFlyestNihilist
+	do	--Simpy Chaos: super cute text coloring function that ignores hyperlinks and keywords
+		local e, f, g = {'|[TA].-|[ta]', '|?c?%x-%[?|H.-|h.-|h]?|?r?', '|c.-|r'}, {}, {}
 		local prettify = function(t,...) return gsub(gsub(E:TextGradient(gsub(gsub(t,'%%%%','\27'),'\124\124','\26'),...),'\27','%%%%'),'\26','||') end
 		local protectText = function(t, u, v) local w = E:EscapeString(v) local r, s = strfind(u, w) while f[r] do r, s = strfind(u, w, s) end tinsert(g, r) f[r] = w return gsub(t, w, '\24') end
 		local specialText = function(t,...) local u = t for _, w in ipairs(e) do for k in gmatch(t, w) do t = protectText(t, u, k) end end t = prettify(t,...)
@@ -218,16 +218,16 @@ do --this can save some main file locals
 		local MisColors = function(t) return specialText(t, 0.99,0.24,0.26, 0.99,0.59,0.28, 1.00,0.87,0.29, 0.42,0.99,0.39, 0.32,0.76,0.98, 0.63,0.36,0.98, 0.77,0.47,0.98, 0.99,0.50,0.75) end
 		--Light Spring: '50dad3','56e580','d8da33','dfa455','ee8879','f972d1','b855df','50dad3'
 		local MelColors = function(t) return specialText(t, 0.31,0.85,0.82, 0.33,0.89,0.50, 0.84,0.85,0.20, 0.87,0.64,0.33, 0.93,0.53,0.47, 0.97,0.44,0.81, 0.72,0.33,0.87, 0.31,0.85,0.82) end
+		--Class Colors: Normal to Negative (Orange->Blue, Red->Cyan, etc)
+		local nm = function(c) return math.max(1-c,0.15) end
+		local NihiColors = function(class) local c = _G.RAID_CLASS_COLORS[class] local c1,c2,c3, n1,n2,n3 = c.r,c.g,c.b, nm(c.r), nm(c.g), nm(c.b) return function(t) return specialText(t, c1,c2,c3, n1,n2,n3, c1,c2,c3, n1,n2,n3) end end
 
 		itsSimpyH = function() return Burger..ElvMelon, SimpyColors end
 		itsSimpyA = function() return Lion..ElvMelon, SimpyColors end
 		itsMel = function() return Hibiscus, MelColors end
 		itsElv = function() return ElvBlue, ElvColors end
 		itsMis = function() return Rainbow, MisColors end
-	end
-
-	local itsTheFlyestNihilist = function(class)
-		return E:TextureString(E.Media.ChatLogos["Fox"..class],x)
+		itsTheFlyestNihilist = function(class) local icon, prettyText = E:TextureString(E.Media.ChatLogos["Fox"..class],x), NihiColors(strupper(class)) return function() return icon, prettyText end end
 	end
 
 	specialChatIcons = {
@@ -267,31 +267,31 @@ do --this can save some main file locals
 		["Misdecay-Spirestone"]		= itsMis,
 		["Mislust-Spirestone"] 		= itsMis,
 		-- Luckyone
-		["Luckyone-Gorgonnash"]		= Clover,
-		["Luckypriest-Gorgonnash"]	= Clover,
-		["Luckymonkas-Blackrock"]	= Clover,
-		["Luckysabers-Blackrock"]	= Clover,
-		["Luckydemon-Blackrock"]	= Clover,
-		["Luckymage-Blackrock"]		= Clover,
-		["Luckyshaman-Blackrock"]	= Clover,
-		["Luckylockx-Blackrock"]	= Clover,
-		["Luckybow-Blackrock"]		= Clover,
-		["Luckypepega-Blackrock"]	= Clover,
-		["Luckypoggers-Blackrock"]	= Clover,
-		["Luckyclap-Blackrock"]		= Clover,
+		["Luckyone-LaughingSkull"]      = Clover,
+		["Luckypriest-LaughingSkull"]	= Clover,
+		["Luckymonkas-Blackrock"]   	= Clover,
+		["Luckysabers-Blackrock"]   	= Clover,
+		["Luckydemon-Blackrock"]    	= Clover,
+		["Luckymage-Blackrock"]	    	= Clover,
+		["Luckyshaman-Blackrock"]   	= Clover,
+		["Luckylockx-Blackrock"]    	= Clover,
+		["Luckybow-Blackrock"]	    	= Clover,
+		["Luckypepega-Blackrock"]   	= Clover,
+		["Luckypoggers-Blackrock"]  	= Clover,
+		["Luckyclap-Blackrock"]	    	= Clover,
 		-- NihilisticPandemonium
 		["Dirishia-WyrmrestAccord"]		= itsTheFlyestNihilist("Warlock"),
 		["Xanikani-WyrmrestAccord"]		= itsTheFlyestNihilist("Mage"),
 		["Rikanza-WyrmrestAccord"]		= itsTheFlyestNihilist("Monk"),
 		["Onaguda-WyrmrestAccord"]		= itsTheFlyestNihilist("Druid"),
 		["Cerishia-WyrmrestAccord"]		= itsTheFlyestNihilist("Priest"),
-		["Vellilara-WyrmestAccord"]		= itsTheFlyestNihilist("DemonHunter"),
-		["Sayalia-WyrmestAccord"]		= itsTheFlyestNihilist("DeathKnight"),
+		["Vellilara-WyrmrestAccord"]		= itsTheFlyestNihilist("DemonHunter"),
+		["Sayalia-WyrmrestAccord"]		= itsTheFlyestNihilist("DeathKnight"),
 		["Pakasta-WyrmrestAccord"]		= itsTheFlyestNihilist("Paladin"),
 		["Orlyrala-WyrmrestAccord"]		= itsTheFlyestNihilist("Shaman"),
-		["Scerila-WyrmestAccord"]		= itsTheFlyestNihilist("Rogue"),
+		["Scerila-WyrmrestAccord"]		= itsTheFlyestNihilist("Rogue"),
 		["Ralaniki-WyrmrestAccord"]		= itsTheFlyestNihilist("Hunter"),
-		["Moyanza-WyrmestAccord"]		= itsTheFlyestNihilist("Warrior"),
+		["Moyanza-WyrmrestAccord"]		= itsTheFlyestNihilist("Warrior"),
 		["Erasaya-WyrmrestAccord"]		= itsTheFlyestNihilist("DeathKnight"),
 		["Linabla-WyrmrestAccord"]		= itsTheFlyestNihilist("Druid"),
 		["Dirikoa-WyrmrestAccord"]		= itsTheFlyestNihilist("Hunter"),
@@ -347,6 +347,25 @@ do --this can save some main file locals
 		["Chaosfire-Cenarius"]			= itsMel, -- Warlock
 		["Melbelle-Cenarius"]			= itsMel, -- Druid
 		["Spãrkles-Cenarius"]			= itsMel, -- Mage
+		-- Lulupeep (Nihilist's wife)
+		["Arïä-WyrmrestAccord"] 		= DeathlyH,
+		["Belladonnä-WyrmrestAccord"] 	= DeathlyH,
+		["Cadense-WyrmrestAccord"]		= DeathlyH,
+		["Cäydence-WyrmrestAccord"] 	= DeathlyH,
+		["Esmæ-WyrmrestAccord"]			= DeathlyH,
+		["Falorya-WyrmrestAccord"]		= DeathlyH,
+		["Fufus-WyrmrestAccord"]		= DeathlyH,
+		["Gemmä-WyrmrestAccord"]		= DeathlyH,
+		["Lilliës-WyrmrestAccord"]		= DeathlyH,
+		["Louisianagrl-WyrmrestAccord"]	= DeathlyH,
+		["Lulupeep-WyrmrestAccord"]		= DeathlyH,
+		["Nolalove-WyrmrestAccord"]		= DeathlyH,
+		["Onyxnovä-WyrmrestAccord"]		= DeathlyH,
+		["Rukíá-WyrmrestAccord"]		= DeathlyH,
+		["Songbïrd-WyrmrestAccord"]		= DeathlyH,
+		["Vidiä-WyrmrestAccord"]		= DeathlyH,
+		-- Quickhanz (Nihilist's absolute bestie)
+		["Ironhanz-WyrmrestAccord"]		= GoldShield,
 	}
 end
 
@@ -863,7 +882,7 @@ end
 function CH:PositionChat(override)
 	if ((InCombatLockdown() and not override and self.initialMove) or (IsMouseButtonDown("LeftButton") and not override)) then return end
 
-	local RightChatPanel, LeftChatPanel, RightChatDataPanel, LeftChatToggleButton, LeftChatTab, CombatLogButton = _G.RightChatPanel, _G.LeftChatPanel, _G.RightChatDataPanel, _G.LeftChatToggleButton, _G.LeftChatTab, _G.CombatLogQuickButtonFrame_Custom
+	local RightChatPanel, LeftChatPanel, RightChatDataPanel, LeftChatToggleButton, LeftChatTab = _G.RightChatPanel, _G.LeftChatPanel, _G.RightChatDataPanel, _G.LeftChatToggleButton, _G.LeftChatTab
 	if not RightChatPanel or not LeftChatPanel then return end
 
 	RightChatPanel:Size(E.db.chat.separateSizes and E.db.chat.panelWidthRight or E.db.chat.panelWidth, E.db.chat.separateSizes and E.db.chat.panelHeightRight or E.db.chat.panelHeight)
@@ -871,7 +890,8 @@ function CH:PositionChat(override)
 
 	if E.private.chat.enable ~= true or not self.db.lockPositions then return end
 
-	CombatLogButton:Size(LeftChatTab:GetWidth(), LeftChatTab:GetHeight())
+	local CombatLogButton = _G.CombatLogQuickButtonFrame_Custom
+	if CombatLogButton then CombatLogButton:Size(LeftChatTab:GetWidth(), LeftChatTab:GetHeight()) end
 
 	self.RightChatWindowID = FindRightChatID()
 
@@ -908,7 +928,7 @@ function CH:PositionChat(override)
 			if id ~= 2 then
 				chat:Size((E.db.chat.separateSizes and E.db.chat.panelWidthRight or E.db.chat.panelWidth) - 11, (E.db.chat.separateSizes and E.db.chat.panelHeightRight or E.db.chat.panelHeight) - BASE_OFFSET)
 			else
-				chat:Size(E.db.chat.panelWidth - 11, (E.db.chat.panelHeight - BASE_OFFSET) - CombatLogButton:GetHeight())
+				chat:Size(E.db.chat.panelWidth - 11, (E.db.chat.panelHeight - BASE_OFFSET) - LeftChatTab:GetHeight())
 			end
 
 			--Pass a 2nd argument which prevents an infinite loop in our ON_FCF_SavePositionAndDimensions function
@@ -1234,12 +1254,21 @@ function CH:AddPluginIcons(func)
 end
 
 function CH:GetPluginIcon(sender)
-	local icon
-	for _,func in ipairs(PluginIconsCalls) do
-		icon = func(sender)
-		if icon and icon ~= "" then break end
+	for _, func in ipairs(PluginIconsCalls) do
+		local icon = func(sender)
+		if icon and icon ~= "" then
+			return icon
+		end
 	end
-	return icon
+end
+
+CH.PluginMessageFilters = {}
+function CH:AddPluginMessageFilter(func, position)
+	if position then
+		tinsert(CH.PluginMessageFilters, position, func)
+	else
+		tinsert(CH.PluginMessageFilters, func)
+	end
 end
 
 --Copied from FrameXML ChatFrame.lua and modified to add CUSTOM_CLASS_COLORS
@@ -1712,6 +1741,10 @@ function CH:ChatFrame_MessageEventHandler(frame, event, arg1, arg2, arg3, arg4, 
 
 			if CH.db.shortChannels and (chatType ~= "EMOTE" and chatType ~= "TEXT_EMOTE") then
 				body = CH:HandleShortChannels(body)
+			end
+
+			for _, filter in ipairs(CH.PluginMessageFilters) do
+				body = filter(body)
 			end
 
 			local accessID = ChatHistory_GetAccessID(chatGroup, chatTarget)

@@ -48,13 +48,13 @@ function mod:GetOptions()
 		307116, -- Power of the Chosen
 		307639, -- Heart of Darkness
 		{310323, "SAY", "SAY_COUNTDOWN"}, -- Desolation
-		309882, -- Brutal Smash
+		315932, -- Brutal Smash
 	},{
 		["stages"] = "general",
 		[307314] = CL.stage:format(1),
 		[315762] = CL.stage:format(2),
 		[307639] = CL.stage:format(3),
-		[309882] = "mythic",
+		[315932] = "mythic",
 	}
 end
 
@@ -82,13 +82,14 @@ function mod:OnBossEnable()
 	self:Log("SPELL_CAST_SUCCESS", "TheVoidUnleashed", 307453)
 	self:Log("SPELL_CAST_START", "HeartofDarkness", 307639)
 	self:Log("SPELL_AURA_APPLIED", "DesolationApplied", 310323)
+	self:Log("SPELL_AURA_REMOVED", "DesolationRemoved", 310323)
 
 	self:Log("SPELL_AURA_APPLIED", "GroundDamage", 307343) -- Shadowy Residue
 	self:Log("SPELL_PERIODIC_DAMAGE", "GroundDamage", 307343)
 	self:Log("SPELL_PERIODIC_MISSED", "GroundDamage", 307343)
 
 	-- Mythic
-	self:Log("SPELL_CAST_START", "BrutalSmash", 309882)
+	self:Log("SPELL_CAST_START", "BrutalSmash", 315932)
 end
 
 function mod:OnEngage()
@@ -126,6 +127,7 @@ function mod:UNIT_POWER_FREQUENT(event, unit)
 		self:Bar(307057, 3.9) -- Dark Gateway
 		self:Bar(307020, 5) -- Twilight Breath
 		self:Bar(307359, 10) -- Despair
+		nextStageTwoTime = GetTime() + 80
 		self:CDBar("stages", 80, CL.stage:format(2), 315762) -- Twilight Decimator
 	end
 	lastPower = power
@@ -137,7 +139,7 @@ do
 		if spellId == 307043 then -- Dark Gateway
 			self:Message2(307057, "cyan")
 			self:PlaySound(307057, "info")
-			if nextStageTwoTime < GetTime() + 33 then
+			if nextStageTwoTime > GetTime() + 33 then
 				self:Bar(307057, 33)
 			end
 		elseif spellId == 307116 then -- Stage 2 // Power of the Chosen
@@ -175,13 +177,13 @@ end
 function mod:TwilightBreath(args)
 	self:Message2(args.spellId, "orange")
 	self:PlaySound(args.spellId, "alarm")
-	if nextStageTwoTime < GetTime() + 17 then
+	if nextStageTwoTime > GetTime() + 17 then
 		self:Bar(args.spellId, 17)
 	end
 end
 
 function mod:DespairSuccess(args)
-	if nextStageTwoTime < GetTime() + 35.3 then
+	if nextStageTwoTime > GetTime() + 35.3 then
 		self:Bar(args.spellId, 35.3)
 	end
 end
@@ -252,8 +254,14 @@ function mod:DesolationApplied(args)
 	self:PlaySound(args.spellId, "warning", args.destName)
 	self:Bar(args.spellId, self:Mythic() and 33 or 32.5)
 	if self:Me(args.destGUID) then
-		self:Say(args.spellId)
-		self:SayCountdown(args.spellId, 5)
+		self:Yell2(args.spellId)
+		self:YellCountdown(args.spellId, 5)
+	end
+end
+
+function mod:DesolationRemoved(args)
+	if self:Me(args.destGUID) then
+		self:CancelYellCountdown(args.spellId)
 	end
 end
 

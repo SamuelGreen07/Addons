@@ -60,6 +60,8 @@ end
 
 function Amr:ShowShopWindow()
 
+	if InCombatLockdown() then return end
+	
 	if not _frameShop then
 		_frameShop = AceGUI:Create("AmrUiFrame")
 		_frameShop:SetStatusTable(Amr.db.profile.shopWindow) -- window position is remembered in db

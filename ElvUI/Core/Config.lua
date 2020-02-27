@@ -221,7 +221,7 @@ function E:NudgeMover(nudgeX, nudgeY)
 	local x, y, point = E:CalculateMoverPoints(mover, nudgeX, nudgeY)
 
 	mover:ClearAllPoints()
-	mover:Point(mover.positionOverride or point, E.UIParent, mover.positionOverride and 'BOTTOMLEFT' or point, x, y)
+	mover:Point(point, E.UIParent, point, x, y)
 	E:SaveMoverPosition(mover.name)
 
 	--Update coordinates in Nudge Window
@@ -918,6 +918,8 @@ function E:Config_WindowOpened(frame)
 end
 
 function E:Config_CreateBottomButtons(frame, unskinned)
+	local L = E.Libs.ACL:GetLocale('ElvUI', E.global.general.locale or 'enUS')
+
 	local last
 	for _, info in ipairs({
 		{

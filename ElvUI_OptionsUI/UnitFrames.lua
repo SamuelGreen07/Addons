@@ -95,7 +95,6 @@ local blendModeValues = {
 	['DISABLE'] = L["Disable"],
 	['BLEND'] = L["Blend"],
 	['ADD'] = L["Additive Blend"],
-	['MOD'] = L["Modulating Blend"],
 	['ALPHAKEY'] = L["Alpha Key"],
 }
 
@@ -326,7 +325,7 @@ local function GetOptionsTable_AuraBars(updateFunc, groupName)
 					priority = {
 						order = 5,
 						name = L["Add Regular Filter"],
-						desc = L["These filters use a list of spells to determine if an aura should be allowed or blocked. The content of these filters can be modified in the 'Filters' section of the config."],
+						desc = L["These filters use a list of spells to determine if an aura should be allowed or blocked. The content of these filters can be modified in the Filters section of the config."],
 						type = 'select',
 						values = function()
 							local filters = {}
@@ -558,7 +557,6 @@ local function GetOptionsTable_Auras(auraType, isGroupFrame, updateFunc, groupNa
 						order = 1,
 						type = "execute",
 						name = L["Cooldowns"],
-						buttonElvUI = true,
 						func = function() ACD:SelectGroup("ElvUI", "cooldown", "unitframe") end,
 					},
 					durationPosition = {
@@ -627,7 +625,7 @@ local function GetOptionsTable_Auras(auraType, isGroupFrame, updateFunc, groupNa
 					priority = {
 						order = 5,
 						name = L["Add Regular Filter"],
-						desc = L["These filters use a list of spells to determine if an aura should be allowed or blocked. The content of these filters can be modified in the 'Filters' section of the config."],
+						desc = L["These filters use a list of spells to determine if an aura should be allowed or blocked. The content of these filters can be modified in the Filters section of the config."],
 						type = 'select',
 						values = function()
 							local filters = {}
@@ -775,7 +773,7 @@ local function GetOptionsTable_AuraWatch(updateFunc, groupName, numGroup)
 			profileSpecific = {
 				type = 'toggle',
 				name = L["Profile Specific"],
-				desc = L["Use the profile specific filter 'Buff Indicator (Profile)' instead of the global filter 'Buff Indicator'."],
+				desc = L["Use the profile specific filter Buff Indicator (Profile) instead of the global filter Buff Indicator."],
 				order = 4,
 			},
 			configureButton = {
@@ -1639,12 +1637,6 @@ local function GetOptionsTable_Health(isGroupFrame, updateFunc, groupName, numUn
 				type = 'execute',
 				func = function() ACD:SelectGroup("ElvUI", "unitframe", "generalOptionsGroup", "allColorsGroup", "healthGroup") end,
 			},
-			bgUseBarTexture = {
-				type = "toggle",
-				order = 8,
-				name = L["Use Health Texture on Background"],
-				customWidth = 250,
-			},
 			textGroup = {
 				type = 'group',
 				name = L["Text Options"],
@@ -1726,7 +1718,6 @@ local function GetOptionsTable_HealPrediction(updateFunc, groupName, numGroup)
 				order = 4,
 				type = "execute",
 				name = L["COLORS"],
-				buttonElvUI = true,
 				func = function() ACD:SelectGroup("ElvUI", "unitframe", "generalOptionsGroup", "allColorsGroup") end,
 				disabled = function() return not E.UnitFrames.Initialized end,
 			},
@@ -2957,6 +2948,13 @@ E.Options.args.unitframe = {
 							type = 'toggle',
 							disabled = function() return E.private.general.pixelPerfect end,
 							set = function(info, value) E.db.unitframe[info[#info]] = value; E:StaticPopup_Show("CONFIG_RL") end,
+						},
+						smartRaidFilter = {
+							order = 4,
+							name = L["Smart Raid Filter"],
+							desc = L["Override any custom visibility setting in certain situations, EX: Only show groups 1 and 2 inside a 10 man instance."],
+							type = 'toggle',
+							set = function(info, value) E.db.unitframe[info[#info]] = value; UF:UpdateAllHeaders() end
 						},
 						targetOnMouseDown = {
 							order = 5,
@@ -6179,6 +6177,7 @@ E.Options.args.unitframe.args.groupUnits.args.raid = {
 			type = 'toggle',
 			order = 1,
 			name = L["Enable"],
+			disabled = function() return E.db.unitframe.smartRaidFilter end,
 		},
 		configureToggle = {
 			order = 2,
@@ -6354,6 +6353,7 @@ E.Options.args.unitframe.args.groupUnits.args.raid = {
 							type = 'input',
 							name = L["Visibility"],
 							desc = L["VISIBILITY_DESC"],
+							disabled = function() return E.db.unitframe.smartRaidFilter end,
 							width = 'full',
 						},
 					},
@@ -6459,6 +6459,7 @@ E.Options.args.unitframe.args.groupUnits.args.raid40 = {
 			type = 'toggle',
 			order = 1,
 			name = L["Enable"],
+			disabled = function() return E.db.unitframe.smartRaidFilter end,
 		},
 		configureToggle = {
 			order = 2,
@@ -6635,6 +6636,7 @@ E.Options.args.unitframe.args.groupUnits.args.raid40 = {
 							name = L["Visibility"],
 							desc = L["VISIBILITY_DESC"],
 							width = 'full',
+							disabled = function() return E.db.unitframe.smartRaidFilter end,
 						},
 					},
 				},
@@ -6739,6 +6741,7 @@ E.Options.args.unitframe.args.groupUnits.args.raidpet = {
 			type = 'toggle',
 			order = 1,
 			name = L["Enable"],
+			disabled = function() return E.db.unitframe.smartRaidFilter end,
 		},
 		configureToggle = {
 			order = 2,
@@ -6901,6 +6904,7 @@ E.Options.args.unitframe.args.groupUnits.args.raidpet = {
 							name = L["Visibility"],
 							desc = L["VISIBILITY_DESC"],
 							width = 'full',
+							disabled = function() return E.db.unitframe.smartRaidFilter end,
 						},
 					},
 				},

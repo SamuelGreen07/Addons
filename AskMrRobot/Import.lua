@@ -252,7 +252,7 @@ local function parseEssenceList(essenceString)
     local parts = { strsplit("_", essenceString) }
     for i = 1, #parts do
         local essence = { strsplit(".", parts[i]) }
-        table.insert(ret, { tonumber(essence[0]), tonumber(essence[1]), tonumber(essence[2]) })
+        table.insert(ret, { tonumber(essence[1]), tonumber(essence[2]), tonumber(essence[3]) })
     end
 
     return ret

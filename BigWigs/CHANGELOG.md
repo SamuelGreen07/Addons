@@ -1,8 +1,6 @@
 # BigWigs
 
-## [v181.1](https://github.com/BigWigsMods/BigWigs/tree/v181.1) (2020-02-03)
-[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v181...v181.1)
+## [v183.2](https://github.com/BigWigsMods/BigWigs/tree/v183.2) (2020-02-24)
+[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v183.1...v183.2)
 
-- Nyalotha/Maut: Fix sound not playing for Black Wings  
-- Nyalotha/Maut: Fix the say countdown not cancelling when Devour Magic is removed  
-- Nyalotha/Shadhar: Fix Lua error  
+- Nyalotha/Vexiona: Swap Desolation from say to yell and make sure to cancel the countdown when removed.  

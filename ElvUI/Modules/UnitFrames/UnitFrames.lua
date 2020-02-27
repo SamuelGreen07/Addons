@@ -23,8 +23,8 @@ local UnitIsEnemy = UnitIsEnemy
 local UnitIsFriend = UnitIsFriend
 local UnitFrame_OnEnter = UnitFrame_OnEnter
 local UnitFrame_OnLeave = UnitFrame_OnLeave
-local UnregisterAttributeDriver = UnregisterAttributeDriver
 local UnregisterStateDriver = UnregisterStateDriver
+local GetNumGroupMembers = GetNumGroupMembers
 local PlaySound = PlaySound
 
 local C_NamePlate_GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
@@ -71,6 +71,28 @@ UF.classMaxResourceBar = {
 	['MAGE'] = 4,
 	['ROGUE'] = 6,
 	["DRUID"] = 5
+}
+
+UF.instanceMapIDs = {
+	[30]   = 40, -- Alterac Valley
+	[489]  = 10, -- Classic Warsong Gulch
+	[529]  = 15, -- Classic Arathi Basin
+	[566]  = 15, -- Eye of the Storm
+	[607]  = 15, -- Strand of the Ancients
+	[628]  = 40, -- Isle of Conquest
+	[726]  = 10, -- Twin Peaks
+	[727]  = 10, -- Silvershard Mines
+	[761]  = 10, -- The Battle for Gilneas
+	[968]  = 10, -- Rated Eye of the Storm
+	[998]  = 10, -- Temple of Kotmogu
+	[1280] = 40, -- Southshore vs Tarren Mill
+	[1681] = 15, -- Arathi Basin Winter
+	[1803] = 10, -- Seething Shore
+	[2106] = 10, -- Warsong Gulch
+	[2107] = 15, -- Arathi Basin
+	[2118] = 40, -- Battle for Wintergrasp
+	[2245] = 15, -- Deepwind Gorge
+	[3358] = 15, -- Arathi Basin (NEW - Only Brawl?)
 }
 
 UF.headerGroupBy = {
@@ -537,6 +559,7 @@ function UF:Update_AllFrames()
 	end
 
 	UF:UpdateAllHeaders()
+	UF:HandleSmartVisibility()
 end
 
 function UF:CreateAndUpdateUFGroup(group, numGroup)
@@ -816,6 +839,71 @@ function UF.headerPrototype:Reset()
 	self:SetAttribute("yOffset", nil)
 end
 
+function UF:HandleSmartVisibility()
+	local smartRaidOn = UF.db.smartRaidFilter
+	UF.raid.blockVisibilityChanges = smartRaidOn
+	UF.raid40.blockVisibilityChanges = smartRaidOn
+
+	if smartRaidOn then
+		local _, instanceType, _, _, maxPlayers, _, _, instanceID = GetInstanceInfo()
+		if instanceType == 'raid' or instanceType == 'pvp' then
+			if UF.instanceMapIDs[instanceID] then
+				maxPlayers = UF.instanceMapIDs[instanceID]
+			end
+
+			local less40 = maxPlayers < 40
+			local raid40 = maxPlayers == 40
+			E.db.unitframe.units.raid.enable = less40
+			E.db.unitframe.units.raid40.enable = raid40
+			E.db.unitframe.units.raidpet.enable = false
+
+			UnregisterStateDriver(UF.raid, 'visibility')
+			UnregisterStateDriver(UF.raid40, 'visibility')
+			UnregisterStateDriver(UF.raidpet, 'visibility')
+
+			UF.raid:SetShown(less40)
+			UF.raid40:SetShown(raid40)
+			UF.raidpet:SetShown(false)
+
+			if less40 then
+				local maxGroups = E:Round(maxPlayers/5)
+				if E.db.unitframe.units.raid.numGroups ~= maxGroups and maxGroups > 0 then
+					E.db.unitframe.units.raid.numGroups = maxGroups
+					UF:CreateAndUpdateHeaderGroup('raid')
+				end
+			elseif raid40 then
+				UF:CreateAndUpdateHeaderGroup('raid40')
+			end
+		end
+	end
+end
+
+function UF:PLAYER_ENTERING_WORLD(_, initLogin, isReload)
+	if initLogin or isReload then
+		UF:Update_AllFrames()
+	end
+
+	UF:RegisterRaidDebuffIndicator()
+
+	if UF.db.smartRaidFilter then
+		E.db.unitframe.units.raid40.numGroups = 8
+		UF:HandleSmartVisibility()
+
+		local _, instanceType = GetInstanceInfo()
+		if instanceType ~= 'raid' and instanceType ~= 'pvp' then
+			E.db.unitframe.units.raid.enable = true
+			E.db.unitframe.units.raid40.enable = true
+			E.db.unitframe.units.raid.numGroups = 6
+
+			RegisterStateDriver(UF.raid, 'visibility', '[@raid6,noexists][@raid31,exists] hide;show')
+			RegisterStateDriver(UF.raid40, 'visibility', '[@raid31,noexists] hide;show')
+
+			if E.db.unitframe.units.raid.enable then UF:CreateAndUpdateHeaderGroup('raid') end
+			if E.db.unitframe.units.raid40.enable then UF:CreateAndUpdateHeaderGroup('raid40') end
+		end
+	end
+end
+
 function UF:CreateHeader(parent, groupFilter, overrideName, template, groupName, headerTemplate)
 	local group = parent.groupName or groupName
 	local db = UF.db.units[group]
@@ -839,7 +927,7 @@ function UF:CreateHeader(parent, groupFilter, overrideName, template, groupName,
 	return header
 end
 
-function UF:CreateAndUpdateHeaderGroup(group, groupFilter, template, headerUpdate, headerTemplate)
+function UF:CreateAndUpdateHeaderGroup(group, groupFilter, template, headerTemplate)
 	local db = self.db.units[group]
 	local numGroups = db.numGroups
 
@@ -868,6 +956,7 @@ function UF:CreateAndUpdateHeaderGroup(group, groupFilter, template, headerUpdat
 	end
 
 	self[group].numGroups = numGroups
+
 	if numGroups then
 		local groupName = E:StringTitle(self[group].groupName)
 		if db.raidWideSorting then
@@ -877,23 +966,18 @@ function UF:CreateAndUpdateHeaderGroup(group, groupFilter, template, headerUpdat
 		else
 			while numGroups > #self[group].groups do
 				local index = tostring(#self[group].groups + 1)
-				 tinsert(self[group].groups, self:CreateHeader(self[group], index, "ElvUF_"..groupName..'Group'..index, template or self[group].template, nil, headerTemplate or self[group].headerTemplate))
+				tinsert(self[group].groups, self:CreateHeader(self[group], index, "ElvUF_"..groupName..'Group'..index, template or self[group].template, nil, headerTemplate or self[group].headerTemplate))
 			end
 		end
 
 		UF.headerFunctions[group]:AdjustVisibility(self[group])
+		UF.headerFunctions[group]:Configure_Groups(self[group])
+		UF.headerFunctions[group]:Update(self[group])
 
-		if headerUpdate or not self[group].mover then
-			UF.headerFunctions[group]:Configure_Groups(self[group])
+		if(db.enable) then
 			if not self[group].isForced and not self[group].blockVisibilityChanges then
 				RegisterStateDriver(self[group], "visibility", db.visibility)
 			end
-		else
-			UF.headerFunctions[group]:Configure_Groups(self[group])
-			UF.headerFunctions[group]:Update(self[group])
-		end
-
-		if(db.enable) then
 			if self[group].mover then
 				E:EnableMover(self[group].mover:GetName())
 			end
@@ -903,7 +987,6 @@ function UF:CreateAndUpdateHeaderGroup(group, groupFilter, template, headerUpdat
 			if self[group].mover then
 				E:DisableMover(self[group].mover:GetName())
 			end
-			return
 		end
 	else
 		self[group].db = db
@@ -913,15 +996,6 @@ function UF:CreateAndUpdateHeaderGroup(group, groupFilter, template, headerUpdat
 		if not UF.headerFunctions[group] then UF.headerFunctions[group] = {} end
 		if not UF.headerFunctions[group].Update then
 			UF.headerFunctions[group].Update = function()
-				local db = UF.db.units[group]
-				if db.enable ~= true then
-					UnregisterAttributeDriver(UF[group], "state-visibility")
-					UF[group]:Hide()
-					if(UF[group].mover) then
-						E:DisableMover(UF[group].mover:GetName())
-					end
-					return
-				end
 				UF["Update_"..groupName.."Header"](UF, UF[group], db)
 
 				for i = 1, UF[group]:GetNumChildren() do
@@ -936,15 +1010,24 @@ function UF:CreateAndUpdateHeaderGroup(group, groupFilter, template, headerUpdat
 						UF["Update_"..groupName.."Frames"](UF, _G[child:GetName()..'Pet'], UF.db.units[group])
 					end
 				end
-
-				E:EnableMover(UF[group].mover:GetName())
 			end
 		end
 
-		if not UF.headerFunctions[group].Update then
-			UF["Update_"..groupName.."Header"](self, self[group], db)
+		UF.headerFunctions[group]:Update(self[group])
+
+		if(db.enable) then
+			if not self[group].isForced then
+				RegisterStateDriver(self[group], "visibility", db.visibility)
+			end
+			if self[group].mover then
+				E:EnableMover(self[group].mover:GetName())
+			end
 		else
-			UF.headerFunctions[group]:Update(self[group])
+			UnregisterStateDriver(self[group], "visibility")
+			self[group]:Hide()
+			if self[group].mover then
+				E:DisableMover(self[group].mover:GetName())
+			end
 		end
 	end
 end
@@ -995,7 +1078,7 @@ function UF:LoadUnits()
 			groupFilter, template, headerTemplate = unpack(groupOptions)
 		end
 
-		self:CreateAndUpdateHeaderGroup(group, groupFilter, template, nil, headerTemplate)
+		self:CreateAndUpdateHeaderGroup(group, groupFilter, template, headerTemplate)
 	end
 	self.headerstoload = nil
 end
@@ -1023,14 +1106,8 @@ function UF:UpdateAllHeaders()
 		ElvUF:DisableBlizzard('party')
 	end
 
-	self:RegisterRaidDebuffIndicator()
-
-	for group, header in pairs(self.headers) do
-		if UF.headerFunctions[group].Update then
-			UF.headerFunctions[group]:Update(header)
-		else
-			self:CreateAndUpdateHeaderGroup(group, nil, nil, true)
-		end
+	for group in pairs(self.headers) do
+		self:CreateAndUpdateHeaderGroup(group)
 	end
 end
 
@@ -1393,25 +1470,26 @@ function UF:PLAYER_TARGET_CHANGED()
 end
 
 function UF:Initialize()
-	self.db = E.db.unitframe
-	self.thinBorders = self.db.thinBorders or E.PixelMode
+	UF.db = E.db.unitframe
+	UF.thinBorders = UF.db.thinBorders or E.PixelMode
 	if E.private.unitframe.enable ~= true then return end
-	self.Initialized = true
+	UF.Initialized = true
 
 	E.ElvUF_Parent = CreateFrame('Frame', 'ElvUF_Parent', E.UIParent, 'SecureHandlerStateTemplate');
 	E.ElvUF_Parent:SetFrameStrata("LOW")
 	RegisterStateDriver(E.ElvUF_Parent, "visibility", "[petbattle] hide; show")
 
-	self:UpdateColors()
+	UF:UpdateColors()
 	ElvUF:RegisterStyle('ElvUF', function(frame, unit)
-		self:Construct_UF(frame, unit)
+		UF:Construct_UF(frame, unit)
 	end)
 	ElvUF:SetActiveStyle("ElvUF")
 	UF:LoadUnits()
 
-	self:RegisterEvent('PLAYER_ENTERING_WORLD', 'Update_AllFrames')
-	self:RegisterEvent('PLAYER_TARGET_CHANGED')
-	self:RegisterEvent('PLAYER_FOCUS_CHANGED')
+	UF:RegisterEvent('PLAYER_ENTERING_WORLD')
+	UF:RegisterEvent('ZONE_CHANGED_NEW_AREA', 'HandleSmartVisibility')
+	UF:RegisterEvent('PLAYER_TARGET_CHANGED')
+	UF:RegisterEvent('PLAYER_FOCUS_CHANGED')
 
 	--InterfaceOptionsFrameCategoriesButton9:SetScale(0.0001)
 	--[[if E.private.unitframe.disabledBlizzardFrames.arena and E.private.unitframe.disabledBlizzardFrames.focus and E.private.unitframe.disabledBlizzardFrames.party then
@@ -1424,7 +1502,7 @@ function UF:Initialize()
 	end]]
 
 	if E.private.unitframe.disabledBlizzardFrames.party and E.private.unitframe.disabledBlizzardFrames.raid then
-		self:DisableBlizzard()
+		UF:DisableBlizzard()
 	end
 
 	if (not E.private.unitframe.disabledBlizzardFrames.party) and (not E.private.unitframe.disabledBlizzardFrames.raid) then
@@ -1432,22 +1510,22 @@ function UF:Initialize()
 	end
 
 	if E.private.unitframe.disabledBlizzardFrames.arena then
-		self:SecureHook('UnitFrameThreatIndicator_Initialize')
+		UF:SecureHook('UnitFrameThreatIndicator_Initialize')
 
 		if not IsAddOnLoaded('Blizzard_ArenaUI') then
-			self:RegisterEvent('ADDON_LOADED')
+			UF:RegisterEvent('ADDON_LOADED')
 		else
 			ElvUF:DisableBlizzard('arena')
 		end
 	end
+
+	UF:UpdateRangeCheckSpells()
 
 	local ORD = ns.oUF_RaidDebuffs or _G.oUF_RaidDebuffs
 	if not ORD then return end
 	ORD.ShowDispellableDebuff = true
 	ORD.FilterDispellableDebuff = true
 	ORD.MatchBySpellName = false
-
-	self:UpdateRangeCheckSpells()
 end
 
 E:RegisterInitialModule(UF:GetName())

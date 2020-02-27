@@ -43,12 +43,12 @@ BigWigs:AddSounds("Dark Inquisitor Xanesh", {
 BigWigs:AddSounds("The Hivemind", {
 	[307201] = "long",
 	[307213] = "long",
-	[307232] = "alert",
+	[307232] = "warning",
 	[307569] = "info",
-	[307968] = "alarm",
-	[308227] = "alert",
-	[310340] = "alarm",
-	[313652] = "alarm",
+	[307637] = "alert",
+	[307968] = "alert",
+	[310340] = "info",
+	[313652] = "long",
 	[313672] = "alarm",
 	[314583] = "warning",
 })
@@ -70,7 +70,7 @@ BigWigs:AddSounds("Shad'har the Insatiable", {
 })
 
 BigWigs:AddSounds("Drest'agath", {
-	[308377] = "long",
+	[308377] = "warning",
 	[308941] = {"info","long"},
 	[310246] = "alarm",
 	[310277] = "alarm",
@@ -91,9 +91,9 @@ BigWigs:AddSounds("Vexiona", {
 	[307403] = "alert",
 	[307639] = "alert",
 	[307729] = "long",
-	[309882] = "alarm",
 	[310323] = "warning",
 	[315762] = "warning",
+	[315932] = "alarm",
 	["stages"] = {"info","long"},
 })
 
@@ -136,13 +136,16 @@ BigWigs:AddSounds("Carapace of N'Zoth", {
 	[306984] = "warning",
 	[306988] = "alarm",
 	[307011] = "info",
+	[307064] = "long",
 	[307092] = "alarm",
+	[307809] = "alert",
 	[315954] = "warning",
 	["stages"] = {"info","long"},
 })
 
 BigWigs:AddSounds("N'Zoth, the Corruptor", {
 	[-21491] = "info",
+	[-21286] = "long",
 	[309698] = "alert",
 	[309991] = "alarm",
 	[310042] = "warning",
@@ -152,13 +155,19 @@ BigWigs:AddSounds("N'Zoth, the Corruptor", {
 	[313184] = "info",
 	[313400] = {"alarm","alert"},
 	[313609] = "warning",
+	[313960] = "alert",
 	[315772] = "long",
 	[315927] = {"info","warning"},
 	[316463] = "long",
 	[316711] = {"alarm","warning"},
+	[316970] = "alert",
 	[317066] = "alarm",
 	[317102] = "warning",
+	[318091] = "long",
+	[318196] = "warning",
 	[318449] = "alert",
+	[318459] = "warning",
+	[318971] = "alarm",
 	[318976] = "long",
 	["stages"] = {"info","long"},
 })

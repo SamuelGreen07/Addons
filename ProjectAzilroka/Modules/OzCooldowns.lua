@@ -46,6 +46,9 @@ OzCD.DelayCooldowns = {}
 OzCD.IsChargeCooldown = {}
 OzCD.SpellList = {}
 
+local GLOBAL_COOLDOWN_TIME = 1.5
+local COOLDOWN_MIN_DURATION = .1
+
 -- Simpy Magic
 local t = {}
 for _, name in pairs({'SPELL_RECAST_TIME_SEC','SPELL_RECAST_TIME_MIN','SPELL_RECAST_TIME_CHARGES_SEC','SPELL_RECAST_TIME_CHARGES_MIN'}) do
@@ -82,7 +85,7 @@ function OzCD:ScanSpellBook(bookType, numSpells, offset)
 				SpellName, Rank, SpellID = GetSpellBookItemName(index, bookType)
 				SpellName = (Rank and Rank ~= '') and format('%s %s', SpellName, Rank)
 			end
-			if OzCD:ScanTooltip(index, bookType) then
+			if SpellID and OzCD:ScanTooltip(index, bookType) then
 				OzCD.SpellList[SpellID] = SpellName or true
 			end
 		elseif skillType == 'FLYOUT' then
@@ -157,7 +160,7 @@ function OzCD:UpdateActiveCooldowns()
 
 			Frame.Icon:SetTexture(Icon)
 
-			if (CurrentDuration and CurrentDuration > 0) then
+			if (CurrentDuration and CurrentDuration >= COOLDOWN_MIN_DURATION) then
 				Frame.Cooldown:SetCooldown(Start, Duration)
 				Frame:Show()
 			else
@@ -334,7 +337,7 @@ function OzCD:PLAYER_ENTERING_WORLD()
 		if Enable and (CurrentDuration > .1) and (CurrentDuration < OzCD.db.IgnoreDuration) then
 			if (CurrentDuration >= OzCD.db.SuppressDuration) then
 				OzCD.DelayCooldowns[SpellID] = Duration
-			else
+			elseif (CurrentDuration >= COOLDOWN_MIN_DURATION) then
 				OzCD.ActiveCooldowns[SpellID] = Duration
 			end
 		end
@@ -343,6 +346,8 @@ function OzCD:PLAYER_ENTERING_WORLD()
 	if OzCD.db.SortByDuration then
 		sort(OzCD.ActiveCooldowns)
 	end
+
+	OzCD:UnregisterEvent('PLAYER_ENTERING_WORLD')
 end
 
 function OzCD:GROUP_ROSTER_UPDATE()
@@ -378,7 +383,7 @@ function OzCD:SPELL_UPDATE_COOLDOWN()
 		if Enable and CurrentDuration and (CurrentDuration < OzCD.db.IgnoreDuration) then
 			if (CurrentDuration >= OzCD.db.SuppressDuration) then
 				OzCD.DelayCooldowns[SpellID] = Duration
-			else
+			elseif (CurrentDuration >= GLOBAL_COOLDOWN_TIME) then
 				OzCD.ActiveCooldowns[SpellID] = Duration
 			end
 		end
@@ -667,7 +672,7 @@ function OzCD:Initialize()
 	if PA.Tukui then
 		_G.Tukui[1].Movers:RegisterFrame(Holder)
 	elseif PA.ElvUI then
-		_G.ElvUI[1]:CreateMover(Holder, 'OzCooldownsMover', 'OzCooldowns Anchor', nil, nil, nil, 'ALL,GENERAL')
+		_G.ElvUI[1]:CreateMover(Holder, 'OzCooldownsMover', 'OzCooldowns Anchor', nil, nil, nil, 'ALL,GENERAL', nil, 'ProjectAzilroka,OzCooldowns')
 	else
 		Holder:SetMovable(true)
 		Holder:SetScript('OnDragStart', Holder.StartMoving)
@@ -678,7 +683,10 @@ function OzCD:Initialize()
 
 	OzCD:GROUP_ROSTER_UPDATE()
 
-	OzCD:RegisterEvent('PLAYER_ENTERING_WORLD') -- Check for Active Cooldowns Login / Reload.
+	if PA.Retail then
+		OzCD:RegisterEvent('PLAYER_ENTERING_WORLD') -- Check for Active Cooldowns Login / Reload.
+	end
+
 	OzCD:RegisterEvent('GROUP_ROSTER_UPDATE') -- Channel Distribution
 	OzCD:RegisterEvent('UNIT_SPELLCAST_SUCCEEDED') -- For Cooldown Queue
 	OzCD:RegisterEvent('SPELL_UPDATE_COOLDOWN')	-- Process Cooldown Queue

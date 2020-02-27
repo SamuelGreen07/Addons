@@ -228,7 +228,11 @@ function PA:CreateShadow(frame)
 		_G.AddOnSkins[1]:CreateShadow(frame)
 	elseif frame.CreateShadow then
 		frame:CreateShadow()
-		if _G.EnhancedShadows then _G.EnhancedShadows:RegisterFrameShadows(frame) end
+		if not PA.SLE then
+			PA.ES:RegisterFrameShadows(frame)
+		elseif PA.SLE then
+			_G.EnhancedShadows:RegisterShadow(frame.shadow)
+		end
 	end
 end
 
@@ -260,7 +264,6 @@ function PA:SetOutside(obj, anchor, xOffset, yOffset, anchor2)
 	obj:SetPoint('BOTTOMRIGHT', anchor2 or anchor, 'BOTTOMRIGHT', xOffset, -yOffset)
 end
 
--- /dump "["..select(2, strsplit('-', UnitGUID('player'))) .. "] = '" ..GetRealmName().."'"
 PA.ClassicServerNameByID = {
 	[4703] = 'Amnennar',
 	[4715] = 'Anathema',

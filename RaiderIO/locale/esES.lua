@@ -66,10 +66,8 @@ L["DUNGEON_SHORT_NAME_UNDR"] = "Catacumbas"
 L["DUNGEON_SHORT_NAME_UPPR"] = "Kara-S"
 L["DUNGEON_SHORT_NAME_VOTW"] = "Celadoras"
 L["DUNGEON_SHORT_NAME_WM"] = "Mansión "
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_WORK"] = ""--]] 
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_YARD"] = ""--]] 
+L["DUNGEON_SHORT_NAME_WORK"] = "Taller"
+L["DUNGEON_SHORT_NAME_YARD"] = "Desguace"
 L["ENABLE_AUTO_FRAME_POSITION"] = "Posicionar automáticamente el marco de perfil de RaiderIO"
 L["ENABLE_AUTO_FRAME_POSITION_DESC"] = "Fija la ventana emergente de perfil de M+ junto al marco del buscador de grupos o la ventana emergente de jugador."
 L["ENABLE_DEBUG_MODE_RELOAD"] = "Estás activando el modo depuración. Esto es solo para fines de pruebas y desarrollo, y puede incurrir en un aumento del uso de memoria. Haz clic en confirmar para recargar la interfaz."

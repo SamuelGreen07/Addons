@@ -8,10 +8,7 @@ assert(ElvUF, "ElvUI was unable to locate oUF.")
 local _G = _G
 --WoW API / Variables
 local CreateFrame = CreateFrame
-local GetInstanceInfo = GetInstanceInfo
-local InCombatLockdown = InCombatLockdown
 local RegisterStateDriver = RegisterStateDriver
-local UnregisterStateDriver = UnregisterStateDriver
 
 function UF:Construct_RaidpetFrames()
 	self:SetScript('OnEnter', _G.UnitFrame_OnEnter)
@@ -58,10 +55,6 @@ function UF:Update_RaidpetHeader(header, db)
 
 		headerHolder.positioned = true;
 	end
-
-	if not headerHolder.isForced and db.enable then
-		RegisterStateDriver(headerHolder, "visibility", db.visibility)
-	end
 end
 
 function UF:Update_RaidpetFrames(frame, db)
@@ -78,13 +71,11 @@ function UF:Update_RaidpetFrames(frame, db)
 			frame.BORDER = E.Border
 			frame.SPACING = E.Spacing
 		end
+
 		frame.SHADOW_SPACING = 3
-
 		frame.ORIENTATION = db.orientation --allow this value to change when unitframes position changes on screen?
-
 		frame.UNIT_WIDTH = db.width
 		frame.UNIT_HEIGHT = db.height
-
 		frame.USE_POWERBAR = false
 		frame.POWERBAR_DETACHED = false
 		frame.USE_INSET_POWERBAR = false
@@ -93,15 +84,11 @@ function UF:Update_RaidpetFrames(frame, db)
 		frame.POWERBAR_OFFSET = 0
 		frame.POWERBAR_HEIGHT = 0
 		frame.POWERBAR_WIDTH = 0
-
 		frame.USE_PORTRAIT = db.portrait and db.portrait.enable
 		frame.USE_PORTRAIT_OVERLAY = frame.USE_PORTRAIT and (db.portrait.overlay or frame.ORIENTATION == "MIDDLE")
 		frame.PORTRAIT_WIDTH = (frame.USE_PORTRAIT_OVERLAY or not frame.USE_PORTRAIT) and 0 or db.portrait.width
-
 		frame.CLASSBAR_YOFFSET = 0
 		frame.BOTTOM_OFFSET = 0
-
-		frame.VARIABLES_SET = true
 	end
 
 	frame:Size(frame.UNIT_WIDTH, frame.UNIT_HEIGHT)

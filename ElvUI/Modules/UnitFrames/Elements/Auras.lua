@@ -132,8 +132,6 @@ function UF:UpdateAuraCooldownPosition(button)
 end
 
 function UF:Configure_AllAuras(frame)
-	if not frame.VARIABLES_SET then return end
-
 	if frame.Buffs then frame.Buffs:ClearAllPoints() end
 	if frame.Debuffs then frame.Debuffs:ClearAllPoints() end
 
@@ -142,8 +140,6 @@ function UF:Configure_AllAuras(frame)
 end
 
 function UF:Configure_Auras(frame, which)
-	if not frame.VARIABLES_SET then return end
-
 	local db = frame.db
 	local auras = frame[which]
 	local auraType = which:lower()
@@ -210,13 +206,25 @@ function UF:Configure_Auras(frame, which)
 
 	local rows = auras.db.numrows
 	auras.spacing = auras.db.spacing
+	auras.attachTo = self:GetAuraAnchorFrame(frame, auras.db.attachTo)
+
+	if auras.db.sizeOverride and auras.db.sizeOverride > 0 then
+		auras:Width(auras.db.perrow * auras.db.sizeOverride + ((auras.db.perrow - 1) * auras.spacing))
+	else
+		local totalWidth = frame.UNIT_WIDTH - frame.SPACING*2
+		if frame.USE_POWERBAR_OFFSET and not (auras.attachTo == "POWER" and frame.ORIENTATION == "MIDDLE") then
+			local powerOffset = ((frame.ORIENTATION == "MIDDLE" and 2 or 1) * frame.POWERBAR_OFFSET)
+			totalWidth = totalWidth - powerOffset
+		end
+		auras:Width(totalWidth)
+	end
+
 	auras.num = auras.db.perrow * rows
 	auras.size = auras.db.sizeOverride ~= 0 and auras.db.sizeOverride or ((((auras:GetWidth() - (auras.spacing*(auras.num/rows - 1))) / auras.num)) * rows)
 	auras.forceShow = frame.forceShowAuras
 	auras.disableMouse = auras.db.clickThrough
 	auras.anchorPoint = auras.db.anchorPoint
 	auras.initialAnchor = E.InversePoints[auras.anchorPoint]
-	auras.attachTo = self:GetAuraAnchorFrame(frame, auras.db.attachTo)
 	auras["growth-y"] = strfind(auras.anchorPoint, 'TOP') and 'UP' or 'DOWN'
 	auras["growth-x"] = auras.anchorPoint == 'LEFT' and 'LEFT' or  auras.anchorPoint == 'RIGHT' and 'RIGHT' or (strfind(auras.anchorPoint, 'LEFT') and 'RIGHT' or 'LEFT')
 
@@ -231,17 +239,6 @@ function UF:Configure_Auras(frame, which)
 	end
 	auras.xOffset = x + auras.db.xOffset
 	auras.yOffset = y + auras.db.yOffset
-
-	if auras.db.sizeOverride and auras.db.sizeOverride > 0 then
-		auras:Width(auras.db.perrow * auras.db.sizeOverride + ((auras.db.perrow - 1) * auras.spacing))
-	else
-		local totalWidth = frame.UNIT_WIDTH - frame.SPACING*2
-		if frame.USE_POWERBAR_OFFSET and not (auras.attachTo == "POWER" and frame.ORIENTATION == "MIDDLE") then
-			local powerOffset = ((frame.ORIENTATION == "MIDDLE" and 2 or 1) * frame.POWERBAR_OFFSET)
-			totalWidth = totalWidth - powerOffset
-		end
-		auras:Width(totalWidth)
-	end
 
 	local index = 1
 	while auras[index] do

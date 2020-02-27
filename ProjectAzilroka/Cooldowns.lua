@@ -171,11 +171,9 @@ function PA:Cooldown_OnSizeChanged(cd, width, force)
 	end
 
 	if cd.customFont then -- override font
-		cd.text:FontTemplate(cd.customFont, (scale * cd.customFontSize), cd.customFontOutline)
+		cd.text:SetFont(PA.LSM:Fetch('font', cd.customFont), (scale * cd.customFontSize), cd.customFontOutline)
 	elseif scale then -- default, no override
-		cd.text:FontTemplate(nil, (scale * FONT_SIZE), 'OUTLINE')
-	else -- this should never happen but just incase
-		cd.text:FontTemplate()
+		cd.text:SetFont(PA.LSM:Fetch('font', PA.LSM:GetDefault('font')), (scale * FONT_SIZE), 'OUTLINE')
 	end
 end
 
@@ -233,7 +231,7 @@ function PA:Cooldown_Options(timer, db, parent)
 	end
 
 	if fonts and fonts.enable then
-		timer.customFont = PA.LSM:Fetch('font', fonts.font)
+		timer.customFont = fonts.font
 		timer.customFontSize = fonts.fontSize
 		timer.customFontOutline = fonts.fontOutline
 	else
@@ -251,7 +249,7 @@ function PA:CreateCooldownTimer(parent)
 	parent.timer = timer
 
 	local text = timer:CreateFontString(nil, 'OVERLAY')
-	text:Point('CENTER', 1, 1)
+	text:SetPoint('CENTER', 1, 1)
 	text:SetJustifyH('CENTER')
 	timer.text = text
 
@@ -359,7 +357,7 @@ function PA:UpdateCooldownOverride(module)
 
 				PA:ToggleBlizzardCooldownText(parent, cd)
 			elseif cd.text and cd.customFont then
-				cd.text:FontTemplate(cd.customFont, cd.customFontSize, cd.customFontOutline)
+				cd.text:SetFont(PA.LSM:Fetch('font', cd.customFont), cd.customFontSize, cd.customFontOutline)
 			end
 		end
 	end

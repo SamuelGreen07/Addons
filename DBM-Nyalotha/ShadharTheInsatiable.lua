@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(2367, "DBM-Nyalotha", nil, 1180)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20200206171259")
+mod:SetRevision("20200215180727")
 mod:SetCreatureID(157231)
 mod:SetEncounterID(2335)
 mod:SetZone()
@@ -79,7 +79,6 @@ mod.vb.bubblingCount = 0
 mod.vb.buildupCount = 0
 mod.vb.fixateCount = 0
 mod.vb.bossPowerUpdateRate = 4
-mod.vb.comboCount = 0
 mod.vb.firstCrush = nil
 mod.vb.firstDissolve = nil
 local playerName = UnitName("player")
@@ -165,7 +164,6 @@ function mod:OnCombatStart(delay)
 	self.vb.phase = 1
 	self.vb.fixateCount = 0
 	self.vb.bossPowerUpdateRate = 4
-	self.vb.comboCount = 0
 	self.vb.firstCrush = nil
 	self.vb.firstDissolve = nil
 	table.wipe(SpitStacks)
@@ -213,25 +211,29 @@ function mod:SPELL_CAST_START(args)
 		timerDebilitatingSpitCD:Start()
 	elseif spellId == 307478 then--Dissolve
 		if self:AntiSpam(11, 1) then
-			self.vb.comboCount = 0
+			self.vb.firstCrush = nil
+			self.vb.firstDissolve = nil
 		end
-		self.vb.comboCount = self.vb.comboCount + 1
 		--there is already a crush debuffed tank, and it is not us, therefor WE must taunt dissolve
 		--or, we are the dissolve debuffed tank and we need to tank this dissolve too
-		if (self.vb.firstCrush and self.vb.firstCrush ~= playerName) or (self.vb.firstDissolve and self.vb.firstDissolve == playerName) then
-			specWarnDissolveTaunt:Show(self.vb.firstCrush)
-			specWarnDissolveTaunt:Play("tauntboss")
+		if not self:IsTanking("player", "boss1", nil, true) then
+			if (self.vb.firstCrush and self.vb.firstCrush ~= playerName) or (self.vb.firstDissolve and self.vb.firstDissolve == playerName) then
+				specWarnDissolveTaunt:Show(self.vb.firstCrush)
+				specWarnDissolveTaunt:Play("tauntboss")
+			end
 		end
 	elseif spellId == 307476 then--Crush
 		if self:AntiSpam(11, 1) then
-			self.vb.comboCount = 0
+			self.vb.firstCrush = nil
+			self.vb.firstDissolve = nil
 		end
-		self.vb.comboCount = self.vb.comboCount + 1
 		--there is already a dissolve debuffed tank, and it is not us, therefor WE must taunt crush
 		--or, we are the crush debuffed tank and we need to tank this crush too
-		if (self.vb.firstDissolve and self.vb.firstDissolve ~= playerName) or (self.vb.firstCrush and self.vb.firstCrush == playerName) then
-			specWarnCrushTaunt:Show(self.vb.firstCrush)
-			specWarnCrushTaunt:Play("tauntboss")
+		if not self:IsTanking("player", "boss1", nil, true) then
+			if (self.vb.firstDissolve and self.vb.firstDissolve ~= playerName) or (self.vb.firstCrush and self.vb.firstCrush == playerName) then
+				specWarnCrushTaunt:Show(self.vb.firstCrush)
+				specWarnCrushTaunt:Play("tauntboss")
+			end
 		end
 	end
 end

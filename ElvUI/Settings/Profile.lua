@@ -15,6 +15,7 @@ P.general = {
 	autoRepair = 'NONE',
 	autoRoll = false,
 	autoAcceptInvite = false,
+	topPanel = false,
 	bottomPanel = true,
 	hideErrorFrame = true,
 	enhancedPvpMessages = true,
@@ -816,7 +817,7 @@ P.auras = {
 		sortDir = '-',
 		seperateOwn = 1,
 		size = 32,
-		countFontsize = 10,
+		countFontSize = 10,
 		durationFontSize = 10,
 	},
 	debuffs = {
@@ -829,7 +830,7 @@ P.auras = {
 		sortDir = '-',
 		seperateOwn = 1,
 		size = 32,
-		countFontsize = 10,
+		countFontSize = 10,
 		durationFontSize = 10,
 	},
 }
@@ -845,6 +846,7 @@ P.chat = {
 	fade = true,
 	font = 'PT Sans Narrow',
 	fontOutline = 'NONE',
+	fontSize = 10,
 	sticky = true,
 	emotionIcons = true,
 	keywordSound = 'None',
@@ -938,6 +940,7 @@ P.datatexts = {
 		--clients
 		hideWoW = false,
 		hideD3 = false,
+		hideVIPR = false,
 		hideWTCG = false, --Hearthstone
 		hideHero = false, --Heros of the Storm
 		hidePro = false, --Overwatch
@@ -1334,6 +1337,7 @@ P.unitframe = {
 	fontSize = 10,
 	fontOutline = 'MONOCHROMEOUTLINE',
 	debuffHighlighting = 'FILL',
+	smartRaidFilter = true,
 	targetOnMouseDown = false,
 	auraBlacklistModifier = 'SHIFT',
 	thinBorders = false,
@@ -1639,6 +1643,7 @@ P.unitframe = {
 		},
 		boss = {
 			enable = true,
+			threatStyle = 'NONE',
 			growthDirection = 'DOWN',
 			orientation = 'RIGHT',
 			smartAuraPosition = 'DISABLED',

@@ -6,10 +6,10 @@ local translitMark = "!"
 
 --Lua functions
 local _G = _G
-local tonumber = tonumber
-local unpack, pairs, wipe, floor = unpack, pairs, wipe, floor
-local gmatch, gsub, format, select = gmatch, gsub, format, select
-local strfind, strmatch, strlower, utf8lower, utf8sub = strfind, strmatch, strlower, string.utf8lower, string.utf8sub
+local tonumber, strlen, next = tonumber, strlen, next
+local unpack, pairs, wipe, floor, ceil = unpack, pairs, wipe, floor, ceil
+local gmatch, gsub, format, select, strsplit = gmatch, gsub, format, select, strsplit
+local strfind, strmatch, strlower, utf8lower, utf8sub, utf8len = strfind, strmatch, strlower, string.utf8lower, string.utf8sub, string.utf8len
 --WoW API / Variables
 local CreateTextureMarkup = CreateTextureMarkup
 local UnitFactionGroup = UnitFactionGroup
@@ -80,6 +80,9 @@ local SPELL_POWER_SOUL_SHARDS = Enum.PowerType.SoulShards
 
 -- GLOBALS: Hex, _TAGS, ElvUF
 
+--Expose local functions for plugins onto this table
+E.TagFunctions = {}
+
 ------------------------------------------------------------------------
 --	Tag Extra Events
 ------------------------------------------------------------------------
@@ -105,8 +108,9 @@ local function UnitName(unit)
 		return name
 	end
 end
+E.TagFunctions.UnitName = UnitName
 
-local function abbrev(name)
+local function Abbrev(name)
 	local letters, lastWord = '', strmatch(name, '.+%s(.+)$')
 	if lastWord then
 		for word in gmatch(name, '.-%s') do
@@ -119,6 +123,7 @@ local function abbrev(name)
 	end
 	return name
 end
+E.TagFunctions.Abbrev = Abbrev
 
 local Harmony = {
 	[0] = {1, 1, 1},
@@ -172,6 +177,7 @@ local function GetClassPower(class)
 
 	return min, max, r, g, b
 end
+E.TagFunctions.GetClassPower = GetClassPower
 
 ElvUF.Tags.Events['altpowercolor'] = "UNIT_POWER_UPDATE UNIT_POWER_BAR_SHOW UNIT_POWER_BAR_HIDE"
 ElvUF.Tags.Methods['altpowercolor'] = function(u)
@@ -225,10 +231,38 @@ ElvUF.Tags.Methods['name:abbrev'] = function(unit)
 	local name = UnitName(unit)
 
 	if name and strfind(name, '%s') then
-		name = abbrev(name)
+		name = Abbrev(name)
 	end
 
 	return name ~= nil and name or ''
+end
+
+do
+	local function NameHealthColor(tags,hex,unit,default)
+		if hex == 'class' or hex == 'reaction' then
+			return tags.namecolor(unit)
+		elseif hex and strmatch(hex, '^%x%x%x%x%x%x$') then
+			return '|cFF'..hex
+		end
+
+		return default
+	end
+	E.TagFunctions.NameHealthColor = NameHealthColor
+
+	-- the third arg here is added from the user as like [name:health{ff00ff:00ff00}] or [name:health{class:00ff00}]
+	ElvUF.Tags.Events['name:health'] = 'UNIT_NAME_UPDATE UNIT_FACTION UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH'
+	ElvUF.Tags.Methods['name:health'] = function(unit, _, args)
+		local name = UnitName(unit)
+		if not name then return '' end
+
+		local min, max, bco, fco = UnitHealth(unit), UnitHealthMax(unit), strsplit(':', args or '')
+		local to = ceil(utf8len(name) * (min / max))
+
+		local fill = NameHealthColor(_TAGS, fco, unit, '|cFFff3333')
+		local base = NameHealthColor(_TAGS, bco, unit, '|cFFffffff')
+
+		return to > 0 and (base..utf8sub(name, 0, to)..fill..utf8sub(name, to+1, -1)) or fill..name
+	end
 end
 
 ElvUF.Tags.Events['health:deficit-percent:nostatus'] = 'UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH'
@@ -323,7 +357,7 @@ for textFormat, length in pairs({veryshort = 5, short = 10, medium = 15, long = 
 		local name = UnitName(unit)
 
 		if name and strfind(name, '%s') then
-			name = abbrev(name)
+			name = Abbrev(name)
 		end
 
 		return name ~= nil and E:ShortenString(name, length) or ''
@@ -1052,6 +1086,27 @@ ElvUF.Tags.Methods['quest:info'] = function(unit)
 	end
 end
 
+local highestVersion = E.version
+ElvUF.Tags.OnUpdateThrottle['ElvUI-Users'] = 20
+ElvUF.Tags.Methods['ElvUI-Users'] = function(unit)
+	if E.UserList and next(E.UserList) then
+		local name, realm = UnitName(unit)
+		if name then
+			local nameRealm = (realm and realm ~= "" and format("%s-%s", name, realm)) or name
+			local userVersion = nameRealm and E.UserList[nameRealm]
+			if userVersion then
+				if highestVersion < userVersion then
+					highestVersion = userVersion
+				end
+				return (userVersion < highestVersion) and "|cffFF3333E|r" or "|cff3366ffE|r"
+			end
+		end
+	end
+	return ""
+end
+
+ElvUF.Tags.Events['creature'] = ''
+
 E.TagInfo = {
 	--Colors
 	['namecolor'] = { category = 'Colors', description = "Colors names by player class or NPC reaction" },
@@ -1067,6 +1122,7 @@ E.TagInfo = {
 	['difficulty'] = { category = 'Colors', description = "Changes color of the next tag based on how difficult the unit is compared to the players level" },
 	--Classification
 	['classification'] = { category = 'Classification', description = "Displays the unit's classification (e.g. 'ELITE' and 'RARE')" },
+	['creature'] = { category = 'Classification', description = "Displays the creature type of the unit" },
 	['shortclassification'] = { category = 'Classification', description = "Displays the unit's classification in short form (e.g. '+' for ELITE and 'R' for RARE)" },
 	['classification:icon'] = { category = 'Classification', description = "Displays the unit's classification in icon form (golden icon for 'ELITE' silver icon for 'RARE')" },
 	['rare'] = { category = 'Classification', description = "Displays 'Rare' when the unit is a rare or rareelite" },
@@ -1220,7 +1276,6 @@ E.TagInfo = {
 	['speed:percent'] = { category = 'Speed', description = "" },
 	['speed:percent-raw'] = { category = 'Speed', description = "" },
 	['speed:yardspersec'] = { category = 'Speed', description = "" },
-	['speed:percent'] = { category = 'Speed', description = "" },
 	['speed:percent-moving'] = { category = 'Speed', description = "" },
 	['speed:yardspersec-moving'] = { category = 'Speed', description = "" },
 	['speed:percent-moving-raw'] = { category = 'Speed', description = "" },
@@ -1235,6 +1290,7 @@ E.TagInfo = {
 	['dead'] = { category = 'Status', description = "Displays <DEAD> if the unit is dead" },
 	['resting'] = { category = 'Status', description = "Displays 'zzz' if the unit is resting" },
 	['offline'] = { category = 'Status', description = "Displays 'OFFLINE' if the unit is disconnected" },
+	['ElvUI-Users'] = { category = 'Status', description = "Displays current ElvUI users." },
 	--Target
 	['target'] = { category = 'Target', description = "Displays the current target of the unit" },
 	['target:veryshort'] = { category = 'Target', description = "Displays the current target of the unit (limited to 5 letters)" },

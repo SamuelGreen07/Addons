@@ -223,7 +223,7 @@ local function renderGear(setupId, container)
 	local gear
 	local spec
 	local setupIndex
-	local essences
+	local essences	
 	for i, setup in ipairs(Amr.db.char.GearSetups) do
 		if setup.Id == setupId then
 			setupIndex = i
@@ -235,7 +235,8 @@ local function renderGear(setupId, container)
 	end
 
 	local equipped = player.Equipped[player.ActiveSpec]
-		
+	local equippedEssences = player.Essences[player.ActiveSpec]
+
 	if not gear then
 		-- no gear has been imported for this spec so show a message
 		renderEmptyGear(container)
@@ -394,7 +395,31 @@ local function renderGear(setupId, container)
 						end
 					end
 				elseif isEssence then
-					-- TODO: render essence differences
+					for i = 1, 4 do
+						if essences and #essences >= i then
+							local essence = essences[i]
+							local equippedEssence = equippedEssences and #equippedEssences >= i and equippedEssences[i] or nil
+							if essence then
+								local essenceInfo = C_AzeriteEssence.GetEssenceInfo(essence[2])
+								if essenceInfo then
+									local isEssenceActive = equippedEssence and equippedEssence[2] == essence[2]
+
+									local socketBorder, socketIcon = createSocketWidget(panelMods, prevSocket or lblItem, prevSocket, isEssenceActive)
+
+									-- set icon and tooltip
+									socketIcon:SetIcon(essenceInfo.icon)
+									Amr:SetEssenceTooltip(socketIcon, string.format("azessence:%d:%d", essence[2], essence[3]) , "ANCHOR_TOPRIGHT")
+									
+									--[[
+									if essence[1] and essence[1] > 4 then
+										Amr:SetSpellTooltip(socketIcon, essence[1], "ANCHOR_TOPRIGHT")
+									end]]
+
+									prevSocket = socketBorder
+								end
+							end
+						end
+					end
 				else
 					for i = 1, #optimalItem.gemIds do
 						-- we rely on the fact that the gear sets coming back from the site will almost always have all sockets filled,

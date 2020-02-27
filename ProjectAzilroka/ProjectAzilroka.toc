@@ -1,9 +1,11 @@
 ## Interface: 80300
 ## Title: |cFF16C3F2Project|r|cFFFFFFFFAzilroka|r
 ## Author: Azilroka
-## Version: 1.58
-## OptionalDeps: Masque
+## Version: 1.65
+## OptionalDeps: Masque, Tukui, ElvUI
 ## SavedVariables: ProjectAzilrokaDB, stAddonManagerProfilesDB, stAddonManagerServerDB
+## X-Tukui-ProjectID: 79
+## X-Tukui-ProjectFolders: ProjectAzilroka
 
 Libs\Load_Libs.xml
 Locales\Load_Locales.xml
@@ -16,3 +18,4 @@ Libs\LibElvUIPlugin-1.0\LibElvUIPlugin-1.0.lua
 
 Media\Media.lua
 Modules\Load_Modules.xml
+

@@ -1,5 +1,6 @@
 local PA = _G.ProjectAzilroka
 local ES = PA:NewModule('EnhancedShadows', 'AceEvent-3.0', 'AceTimer-3.0')
+PA.ES = ES
 
 ES.Title = 'Enhanced Shadows'
 ES.Header = PA.ACL['|cFF16C3F2Enhanced|r |cFFFFFFFFShadows|r']
@@ -15,7 +16,7 @@ ES.RegisteredShadows = {}
 function ES:UpdateShadows()
 	if UnitAffectingCombat('player') then return end
 
-	for frame, _ in pairs(self.RegisteredShadows) do
+	for frame, _ in pairs(ES.RegisteredShadows) do
 		ES:UpdateShadow(frame)
 	end
 end
@@ -23,12 +24,12 @@ end
 function ES:RegisterFrameShadows(frame)
 	local shadow = frame.shadow or frame.Shadow
 	if shadow and not shadow.isRegistered then
-		ES.shadows[shadow] = true
+		ES.RegisteredShadows[shadow] = true
 		shadow.isRegistered = true
 	end
 	local ishadow = frame.invertedshadow or frame.InvertedShadow
 	if ishadow and not ishadow.isRegistered then
-		ES.shadows[ishadow] = true
+		ES.RegisteredShadows[ishadow] = true
 		shadow.isRegistered = true
 	end
 end
@@ -147,7 +148,7 @@ function ES:Initialize()
 		return
 	end
 
-	PA.ES, _G.EnhancedShadows = ES, ES
+	_G.EnhancedShadows = ES
 
 	ES.isEnabled = true
 

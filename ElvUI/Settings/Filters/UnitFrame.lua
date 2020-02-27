@@ -656,8 +656,16 @@ G.unitframe.aurafilters.RaidDebuffs = {
 		[240559] = Defaults(), -- Grievous
 		[240443] = Defaults(), -- Bursting
 		[196376] = Defaults(), -- Grievous Tear
-		[288388] = Defaults(), -- Reap Soul
-		[288694] = Defaults(), -- Shadow Smash
+		-- 8.3 Affix
+		[314531] = Defaults(), -- Tear Flesh
+		[314308] = Defaults(), -- Spirit Breaker
+		[314478] = Defaults(), -- Cascading Terror
+		[314483] = Defaults(), -- Cascading Terror
+		[314592] = Defaults(), -- Mind Flay
+		[314406] = Defaults(), -- Crippling Pestilence
+		[314411] = Defaults(), -- Lingering Doubt
+		[314565] = Defaults(), -- Defiled Ground
+		[314392] = Defaults(), -- Vile Corruption
 
 	-- BFA Dungeons
 		-- Freehold
@@ -843,6 +851,13 @@ G.unitframe.aurafilters.RaidDebuffs = {
 		[297283] = Defaults(), -- Cave In
 		[291914] = Defaults(), -- Cutting Beam
 		[302384] = Defaults(), -- Static Discharge
+		[294195] = Defaults(), -- Arcing Zap
+		[299572] = Defaults(), -- Shrink
+		[300659] = Defaults(), -- Consuming Slime
+		[300650] = Defaults(), -- Suffocating Smog
+		[301712] = Defaults(), -- Pounce
+		[299475] = Defaults(), -- B.O.R.K
+		[293670] = Defaults(), -- Chain Blade
 
 	-- Uldir
 		-- MOTHER
@@ -1290,9 +1305,7 @@ G.unitframe.AuraBarColors = {
 	[90355] = { enable = true, color = {r = 0.98, g = 0.57, b = 0.10 }}, -- Ancient Hysteria
 }
 
-G.unitframe.DebuffHighlightColors = {
-	[25771] = {enable = false, style = "FILL", color = {r = 0.85, g = 0, b = 0, a = 0.85}},
-}
+G.unitframe.DebuffHighlightColors = {}
 
 G.unitframe.specialFilters = {
 	-- Whitelists

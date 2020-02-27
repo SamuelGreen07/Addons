@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(2375, "DBM-Nyalotha", nil, 1180)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20200207041402")
+mod:SetRevision("20200225040315")
 mod:SetCreatureID(158041)
 mod:SetEncounterID(2344)
 mod:SetZone()
@@ -87,6 +87,7 @@ local specWarnMentalDecay					= mod:NewSpecialWarningInterrupt(313611, "HasInter
 local specWarnGTFO							= mod:NewSpecialWarningGTFO(309991, nil, nil, nil, 1, 8)
 --Stage 1: Dominant Mind
 ----Psychus
+local specWarnCreepingAnguish				= mod:NewSpecialWarningMove(310184, "Tank", nil, nil, 3, 2)
 local specWarnMindwrack						= mod:NewSpecialWarningInterruptCount(316711, "HasInterrupt", nil, nil, 1, 2)
 local specWarnMindwrackTaunt				= mod:NewSpecialWarningTaunt(316711, nil, nil, nil, 1, 2)
 local specWarnManifestMadness				= mod:NewSpecialWarningSpell(310134, nil, nil, nil, 3)--Basically an automatic wipe unless Psychus was like sub 1% health, no voice because there isn't really one that says "you're fucked"
@@ -180,6 +181,7 @@ local timerCleansingProtocol				= mod:NewCastTimer(8, 316970, nil, nil, nil, 2)
 mod:AddRangeFrameOption(4, 317112)
 mod:AddInfoFrameOption(307831, true)
 mod:AddSetIconOption("SetIconOnCorruptor", "ej21441", true, true, {1, 2, 3, 4})
+mod:AddSetIconOption("SetIconOnHarvester", "ej21308", true, true, {1, 2, 3, 4})
 mod:AddBoolOption("ArrowOnGlare", true)
 mod:AddMiscLine(DBM_CORE_OPTION_CATEGORY_DROPDOWNS)
 mod:AddDropdownOption("InterruptBehavior", {"Four", "Five", "Six", "NoReset"}, "Five", "misc")
@@ -204,6 +206,7 @@ mod.vb.blackVolleyCount = 0
 mod.vb.addIcon = 1
 mod.vb.interruptBehavior = "Five"
 mod.vb.difficultyName = "None"
+mod.vb.egoActive = false
 local selfInMind = false
 local lastSanity = 100
 local lastHarvesterTime = 0
@@ -228,7 +231,7 @@ local allTimers = {
 			--Eternal Torment
 			[318449] = {32.8, 70.9, 10.9, 34.1, 60.7, 10.5, 33.2},
 			--Thought Harvester spawns
-			[316711] = {15, 27, 45},
+			[316711] = {15, 25.6, 44.9, 29.7, 30.1, 43, 30.5, 30.4},
 			--Evoke Anquish
 			[317102] = {15.3, 46.2, 31.6, 44.9, 37.7, 15.8, 51, 37.7},
 			--Stupefying Glare
@@ -248,7 +251,7 @@ local allTimers = {
 			--Eternal Torment
 			[318449] = {32.8, 70.9, 10.9, 34.1, 60.7, 10.5, 33.2},
 			--Thought Harvester spawns
-			[316711] = {15, 25.6, 45},--, 31.2, 30.4, 43, 31.7
+			[316711] = {15, 25.6, 44.9, 29.7, 30.1, 43, 30.5, 30.4},
 			--Evoke Anquish
 			[317102] = {15.3, 46.2, 31.6, 44.9, 37.7, 15.8, 51, 37.7},
 			--Stupefying Glare
@@ -268,7 +271,7 @@ local allTimers = {
 			--Eternal Torment
 			[318449] = {32.8, 70.9, 10.5, 24.5, 10.9, 23.2, 11, 23.1},--It might be that after first two casts it just alternates between 10.5 and 23.1?
 			--Thought Harvester spawns
-			[316711] = {15.1, 25.1, 45, 31, 3.9},--, 31.6, 3.7, 30.4, 4.8 It might be that after 3rd cast, it just alternates between 29-30 and 3.7-4.8
+			[316711] = {15.1, 25.1, 45, 29.4, 3.3, 30.2, 3.8},--, 31.6, 3.7, 30.4, 4.8 It might be that after 3rd cast, it just alternates between 29-30 and 3.7-4.8
 			--Evoke Anquish
 			[317102] = {15.3, 45.2, 32.6, 30.6, 35.3, 35.3},
 			--Stupefying Glare
@@ -292,13 +295,13 @@ local allTimers = {
 			--Stupefying Glare
 			[317874] = {35, 70},
 			--Paranoia
-			[315927] = {56.6},
+			[315927] = {56.6, 65.7},
 		},
 		[3] = {
 			--Eternal Torment (Nzoth)
 			[318449] = {20, 6.1},--6.1 repeating
 			--Cleansing Protocol (Chamber)
-			[318449] = {25, 16, 12, 27, 29.9},
+			[316970] = {25, 16, 12, 27, 29.9},
 			--Event Horizon (Chamber)
 			[318196] = {20, 30, 30, 30},
 			--Dark Matter (Chamber)
@@ -307,7 +310,7 @@ local allTimers = {
 			[318460] = {60, 26.7},
 			----Returning to nzoth after Chamber (ie phase 2, 2.0)
 			--Thought Harvester spawns
-			[316711] = {12.3, 82.1, 26.3, 44.9, 26.6, 44.9},--second one might still be 76.9 and 82.1 was a fluke do to trolling the boss
+			[316711] = {12.3, 76.9, 26.3, 44.9, 26.6, 44.9},
 			--Evoke Anquish
 			[317102] = {27.7, 19.5, 33.9, 20.6, 42.5, 30.4, 41.2, 30.4, 42.5, 29.1},
 			--Stupefying Glare
@@ -379,13 +382,13 @@ local function stupefyingGlareLoop(self)
 				direction = DBM_CORE_RIGHT--ie Clockwise
 			end
 		end
-	else--Not mythic
+	--else--Not mythic
 		--Guessed same as mythic stage 2, but if wrong I'm sure i'll get feedback quickly
-		if self.vb.stupefyingGlareCount % 2 == 0 then
-			direction = DBM_CORE_RIGHT--ie counter clockwise
-		else
-			direction = DBM_CORE_LEFT--ie Clockwise
-		end
+	--	if self.vb.stupefyingGlareCount % 2 == 0 then
+	--		direction = DBM_CORE_LEFT--ie Clockwise
+	--	else
+	--		direction = DBM_CORE_RIGHT--ie counter clockwise
+	--	end
 	end
 	specWarnStupefyingGlare:Show(self.vb.stupefyingGlareCount .. direction)
 	specWarnStupefyingGlare:Play("farfromline")
@@ -463,6 +466,7 @@ function mod:OnCombatStart(delay)
 	self.vb.cataclysmCount = 0
 	self.vb.blackVolleyCount = 0
 	self.vb.interruptBehavior = self.Options.InterruptBehavior--Default it to whatever user has it set to, until group leader overrides it
+	self.vb.egoActive = false
 	lastHarvesterTime = 0
 	table.wipe(debugSpawnTable)
 	table.wipe(castsPerGUID)
@@ -483,13 +487,13 @@ function mod:OnCombatStart(delay)
 	else
 		if self:IsHeroic() then
 			self.vb.difficultyName = "heroic"
+			berserkTimer:Start(720-delay)
 		elseif self:IsNormal() then
 			self.vb.difficultyName = "normal"
 		else
 			self.vb.difficultyName = "lfr"
 		end
 		self.vb.phase = 0
-		berserkTimer:Start(720-delay)
 	end
 	UpdateTimerFades(self)
 	if UnitIsGroupLeader("player") and not self:IsLFR() then
@@ -549,7 +553,9 @@ function mod:SPELL_CAST_START(args)
 	if spellId == 311176 then
 		self.vb.phase = 1--Non Mythic
 		--Start P1 timers here, more accurate, especially if boss forgets to cast this :D
-		timerVoidGazeCD:Start(14.7)
+		if not self.vb.egoActive then
+			timerVoidGazeCD:Start(14.7)
+		end
 	elseif spellId == 316711 then
 		if args:GetSrcCreatureID() == 158376 then--Psychus
 			timerMindwrackCD:Start(4.9, args.sourceGUID)
@@ -582,7 +588,12 @@ function mod:SPELL_CAST_START(args)
 		end
 	elseif spellId == 310184 then
 		if selfInMind then
-			warnCreepingAnguish:Show()
+			if self.Options.SpecWarn310184move then
+				specWarnCreepingAnguish:Show()
+				specWarnCreepingAnguish:Play("moveboss")
+			else
+				warnCreepingAnguish:Show()
+			end
 		end
 		timerCreepingAnguishCD:Start(self:IsMythic() and 26.6 or 28.2)
 	elseif spellId == 310134 then
@@ -689,6 +700,7 @@ function mod:SPELL_CAST_START(args)
 		self.vb.harvestThoughtsCount = 0
 		self.vb.evokeAnguishCount = 0
 		self.vb.stupefyingGlareCount = 0
+		self.vb.addIcon = 1
 		lastHarvesterTime = GetTime()
 		timerMindgraspCD:Stop()--Shouldn't even be running but just in case
 		timerMindgateCD:Stop()
@@ -780,7 +792,9 @@ function mod:SPELL_CAST_SUCCESS(args)
 		if selfInMind then
 			warnCataclysmicFlames:Show(self.vb.cataclysmCount)
 		end
-		timerCataclysmicFlamesCD:Start(22.4, self.vb.cataclysmCount+1)
+		if not self.vb.egoActive then
+			timerCataclysmicFlamesCD:Start(22.4, self.vb.cataclysmCount+1)
+		end
 	end
 end
 
@@ -885,6 +899,7 @@ function mod:SPELL_AURA_APPLIED(args)
 		end
 	elseif (spellId == 312155 or spellId == 319015) and args:GetDestCreatureID() == 158041 then--Shattered Ego on N'Zoth
 		self.vb.egoCount = self.vb.egoCount + 1
+		self.vb.egoActive = true
 		warnShatteredEgo:Show(args.destName)
 		timerShatteredEgo:Start(30)
 		if not self:IsMythic() and self.vb.phase == 1 then
@@ -971,7 +986,9 @@ function mod:SPELL_AURA_APPLIED(args)
 		if selfInMind then
 			warnBlackVolley:Show(self.vb.blackVolleyCount)
 		end
-		timerBlackVolleyCD:Start(self:IsMythic() and 20 or 19, self.vb.blackVolleyCount+1)
+		if not self.vb.egoActive then
+			timerBlackVolleyCD:Start(self:IsMythic() and 20 or 19, self.vb.blackVolleyCount+1)
+		end
 	end
 end
 mod.SPELL_AURA_APPLIED_DOSE = mod.SPELL_AURA_APPLIED
@@ -986,6 +1003,7 @@ function mod:SPELL_AURA_REMOVED(args)
 			yellGiftofNzothFades:Cancel()
 		end
 	elseif (spellId == 312155 or spellId == 319015) and args:GetDestCreatureID() == 158041 then--Shattered Ego on N'Zoth
+		self.vb.egoActive = false
 		--These always happen after this
 		timerShatteredEgo:Stop()
 		--Basically below only runs after first psychus phase in Stage 1 mythic/Stage 2 non mythic. 2nd one ending is start of next phase
@@ -1125,17 +1143,15 @@ function mod:INSTANCE_ENCOUNTER_ENGAGE_UNIT()
 				end
 				timerHarvestThoughtsCD:Start(self:IsMythic() and 6.4 or 8.2, GUID)
 				timerMindwrackCD:Start(self:IsMythic() and 12 or 5, GUID)--Cast immediately on heroic but on mythic they cast harvest thoughts first
+				if self.Options.SetIconOnCorruptor then
+					SetRaidTarget(unitID, self.vb.addIcon)
+				end
+				self.vb.addIcon = self.vb.addIcon + 1
+				if self.vb.addIcon > 4 then--Cycle through 4 icons as they spawn. On mythic 2 spawn at a time so every other set it should cycle icons back to 1
+					self.vb.addIcon = 1
+				end
 			elseif cid == 163612 then--Voidspawn Annihilator
 				if self.vb.phase == 3 then
-					--self.vb.darkMatterCount = 0
-					--self.vb.eventHorrizonCount = 0
-					--self.vb.cleansingActive = 0
-					--self.vb.cleansingCastCount = 0
-					--self.vb.annihilateCastCount = 0
-					--timerEventHorizonCD:Start(9.1)
-					--timerCleansingProtocolCD:Start(14.1, 1)
-					--timerDarkMatterCD:Start(28.1, 1)
-					--timerAnnihilateCD:Start(50)
 					if self.Options.InfoFrame and not DBM.InfoFrame:IsShown() then
 						DBM.InfoFrame:SetHeader(DBM:GetSpellInfo(307831))
 						if DBM.Options.DebugMode then

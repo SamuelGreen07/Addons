@@ -240,6 +240,12 @@ function Amr:OnDisable()
 	-- disabling is not supported
 end
 
+local function onEnterCombat()
+	Amr:Hide()
+	Amr:HideShopWindow()
+	Amr:HideJunkWindow()
+end
+
 
 ----------------------------------------------------------------------------------------
 -- Slash Commands
@@ -682,6 +688,7 @@ end
 
 Amr:AddEventHandler("PLAYER_ENTERING_WORLD", onPlayerEnteringWorld)
 
+Amr:AddEventHandler("PLAYER_REGEN_DISABLED", onEnterCombat)
 
 ----------------------------------------------------------------------------------------
 -- Debugging
