@@ -1,22 +1,10 @@
-lightweight tag 4a1fbf44aa02fd9cd55bed153165e643024c4813 v202002270600
+lightweight tag dd8c681dbfd37e5416d2ffc923edddacf7a0fb27 v202003140600
 Author:	Jah Raphael <jahraphael@yahoo.com>
-Date:	Thu Feb 27 06:18:59 2020 +0000
+Date:	Sat Mar 14 06:22:10 2020 +0000
 
-commit 4a1fbf44aa02fd9cd55bed153165e643024c4813
+commit dd8c681dbfd37e5416d2ffc923edddacf7a0fb27
 Author: Jah Raphael <jahraphael@yahoo.com>
-Date:   Thu Feb 27 06:18:59 2020 +0000
+Date:   Sat Mar 14 06:22:10 2020 +0000
 
     [Raider.IO] Database Refresh
-
-commit 6e769d89809e2422392b3c4209e014c0a707f57a
-Author: François "Isak" W <wroblewski.francois@gmail.com>
-Date:   Wed Feb 26 15:57:00 2020 +0100
-
-    Allow to search by slug (#127)
-
-commit 66b6e83074436250e0f89447e969484eb23dab9d
-Author: Vlad <Vladinator89@users.noreply.github.com>
-Date:   Wed Feb 26 15:46:20 2020 +0100
-
-    Make the dropdown extension part of the dropdown area to avoid blizzard from closing the dropdown as we try to click one of our options. (#128)
 

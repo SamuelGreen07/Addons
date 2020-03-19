@@ -1,6 +1,7 @@
 # BigWigs
 
-## [v183.2](https://github.com/BigWigsMods/BigWigs/tree/v183.2) (2020-02-24)
-[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v183.1...v183.2)
+## [v184.2](https://github.com/BigWigsMods/BigWigs/tree/v184.2) (2020-03-08)
+[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v184.1...v184.2)
 
-- Nyalotha/Vexiona: Swap Desolation from say to yell and make sure to cancel the countdown when removed.  
+- Nyalotha/Skitra: Fix 2nd project pre-warning.  
+- Nyalotha/Skitra: Adjust stage warnings to reflect hotfixes Feb 24th  

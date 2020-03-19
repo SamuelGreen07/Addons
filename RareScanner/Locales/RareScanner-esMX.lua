@@ -188,6 +188,7 @@ if AL then
 	AL["NAVIGATION_SHOW_NEXT"] = "Mostrar siguiente entidad"
 	AL["NAVIGATION_SHOW_PREVIOUS"] = "Mostrar entidad anterior"
 	AL["NOT_TARGETEABLE"] = "No es seleccionable"
+	AL["NOTE_10263"] = "Los [Brujo del Escudo del Estigma] abren un portal rojo cada poco tiempo del que puede aparecer este NPC."
 	AL["NOTE_130350"] = "Tienes que montar a este caballo hasta un contenedor que se encuentra siguiendo el camino hacia la derecha desde esta posición."
 	AL["NOTE_131453"] = "Tienes que traer a [Guardián de la fuente] a esta posición. El caballo es un raro amistodo que se encuentra siguiendo el camino hacia la izquierda."
 	AL["NOTE_135497"] = "Disponible durante la misión diaria [Ayuda de Nordrassil] que ofrece Mylune. Durante esta misión aparecen por debajo de los árboles unas setas, que al pulsarlas se estacionan y te mantienen en combate. Para hacer que el NPC aparezca tienes que conseguir que 4 setas se mantengan en este estado al mismo tiempo (si no eres lo suficientemente rápido las setas desaparecen y tienes que volver a empezar)."

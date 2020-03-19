@@ -69,9 +69,9 @@ local function showRealDate(curseDate)
 end
 
 DBM = {
-	Revision = parseCurseDate("20200225040315"),
-	DisplayVersion = "8.3.15", -- the string that is shown as version
-	ReleaseRevision = releaseDate(2020, 2, 24) -- the date of the latest stable version that is available, optionally pass hours, minutes, and seconds for multiple releases in one day
+	Revision = parseCurseDate("20200311230502"),
+	DisplayVersion = "8.3.17", -- the string that is shown as version
+	ReleaseRevision = releaseDate(2020, 3, 11) -- the date of the latest stable version that is available, optionally pass hours, minutes, and seconds for multiple releases in one day
 }
 DBM.HighestRelease = DBM.ReleaseRevision --Updated if newer version is detected, used by update nags to reflect critical fixes user is missing on boss pulls
 
@@ -5124,7 +5124,7 @@ do
 	end
 
 	function DBM:ShowUpdateReminder(newVersion, newRevision, text, url)
-		urlText = url or DBM_CORE_UPDATEREMINDER_URL or "http://www.deadlybossmods.com"
+		urlText = url or "https://github.com/DeadlyBossMods/DeadlyBossMods/wiki"
 		if not frame then
 			createFrame()
 		else
@@ -5735,7 +5735,7 @@ do
 				mod:RegisterEvents(unpack(mod.inCombatOnlyEvents))
 			end
 			--Fix for "attempt to perform arithmetic on field 'stats' (a nil value)"
-			if not mod.stats then
+			if not mod.stats and not mod.noStatistics then
 				self:AddMsg(DBM_CORE_BAD_LOAD)--Warn user that they should reload ui soon as they leave combat to get their mod to load correctly as soon as possible
 				mod.ignoreBestkill = true--Force this to true so we don't check any more occurances of "stats"
 			elseif event == "TIMER_RECOVERY" then --add a lag time to delay when TIMER_RECOVERY
@@ -5812,12 +5812,12 @@ do
 			--serperate timer recovery and normal start.
 			if event ~= "TIMER_RECOVERY" then
 				--add pull count
-				if mod.stats then
+				if mod.stats and not mod.noStatistics then
 					if not mod.stats[statVarTable[savedDifficulty].."Pulls"] then mod.stats[statVarTable[savedDifficulty].."Pulls"] = 0 end
 					mod.stats[statVarTable[savedDifficulty].."Pulls"] = mod.stats[statVarTable[savedDifficulty].."Pulls"] + 1
 				end
 				--show speed timer
-				if self.Options.AlwaysShowSpeedKillTimer2 and mod.stats and not mod.ignoreBestkill then
+				if self.Options.AlwaysShowSpeedKillTimer2 and mod.stats and not mod.ignoreBestkill and not mod.noStatistics then
 					local bestTime
 					if difficultyIndex == 8 then--Mythic+/Challenge Mode
 						local bestMPRank = mod.stats.challengeBestRank or 0
@@ -5881,7 +5881,7 @@ do
 					end
 				end
 				--show enage message
-				if self.Options.ShowEngageMessage then
+				if self.Options.ShowEngageMessage and not mod.noStatistics then
 					if mod.ignoreBestkill and (savedDifficulty == "worldboss") then--Should only be true on in progress field bosses, not in progress raid bosses we did timer recovery on.
 						self:AddMsg(DBM_CORE_COMBAT_STARTED_IN_PROGRESS:format(difficultyText..name))
 					elseif mod.ignoreBestkill and mod.inScenario then
@@ -6040,7 +6040,7 @@ do
 			end
 			local name = mod.combatInfo.name
 			local modId = mod.id
-			if wipe and mod.stats then
+			if wipe and mod.stats and not mod.noStatistics then
 				mod.lastWipeTime = GetTime()
 				--Fix for "attempt to perform arithmetic on field 'pull' (a nil value)" (which was actually caused by stats being nil, so we never did getTime on pull, fixing one SHOULD fix the other)
 				local thisTime = GetTime() - mod.combatInfo.pull
@@ -6110,7 +6110,7 @@ do
 					sendWhisper(k, msg)
 				end
 				fireEvent("DBM_Wipe", mod)
-			elseif not wipe and mod.stats then
+			elseif not wipe and mod.stats and not mod.noStatistics then
 				mod.lastKillTime = GetTime()
 				local thisTime = GetTime() - (mod.combatInfo.pull or 0)
 				local lastTime = mod.stats[statVarTable[savedDifficulty].."LastTime"]
@@ -7275,12 +7275,13 @@ do
 		local isInstance, instanceType = IsInInstance()
 		if not isInstance or C_Garrison:IsOnGarrisonMap() or instanceType == "scenario" or self.Options.MovieFilter2 == "Never" or DBM.Options.MovieFilter2 == "OnlyFight" and not IsEncounterInProgress() then return end
 		local currentMapID = C_Map.GetBestMapForUnit("player")
+		local currentSubZone = GetSubZoneText() or ""
 		if not currentMapID then return end--Protection from map failures in zones that have no maps yet
-		if self.Options.MovieFilter2 == "Block" or (self.Options.MovieFilter2 == "AfterFirst" or self.Options.MovieFilter2 == "OnlyFight") and self.Options.MoviesSeen[currentMapID] then
+		if self.Options.MovieFilter2 == "Block" or (self.Options.MovieFilter2 == "AfterFirst" or self.Options.MovieFilter2 == "OnlyFight") and self.Options.MoviesSeen[currentMapID..currentSubZone] then
 			CinematicFrame_CancelCinematic()
 			self:AddMsg(DBM_CORE_MOVIE_SKIPPED)
 		else
-			self.Options.MoviesSeen[currentMapID] = true
+			self.Options.MoviesSeen[currentMapID..currentSubZone] = true
 		end
 	end
 	function DBM:CINEMATIC_STOP()
@@ -11471,7 +11472,7 @@ end
 
 function bossModPrototype:SetRevision(revision)
 	revision = parseCurseDate(revision or "")
-	if not revision or revision == "20200225040315" then
+	if not revision or revision == "20200311230502" then
 		-- bad revision: either forgot the svn keyword or using github
 		revision = DBM.Revision
 	end
