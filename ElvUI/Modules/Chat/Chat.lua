@@ -314,6 +314,7 @@ do --this can save some main file locals
 		["Melisendra-Shattrath"]		= ElvBlue,		-- [Alliance] Mage
 		["Merathilis-Shattrath"]		= ElvOrange,	-- [Alliance] Druid
 		["Merathilîs-Shattrath"]		= ElvBlue,		-- [Alliance] Shaman
+		["Róhal-Shattrath"]				= ElvGreen,		-- [Alliance] Hunter
 		-- Simpy
 		["Arieva-Cenarius"]				= itsSimpyA, -- Hunter
 		["Buddercup-Cenarius"]			= itsSimpyA, -- Rogue
@@ -365,7 +366,7 @@ do --this can save some main file locals
 		["Songbïrd-WyrmrestAccord"]		= DeathlyH,
 		["Vidiä-WyrmrestAccord"]		= DeathlyH,
 		-- Quickhanz (Nihilist's absolute bestie)
-		["Ironhanz-WyrmrestAccord"]		= GoldShield,
+		["Zandahanz-Area52"]			= GoldShield,
 	}
 end
 
@@ -903,18 +904,18 @@ function CH:PositionChat(override)
 
 		local chat = _G[format("ChatFrame%d", i)]
 		local chatbg = format("ChatFrame%dBackground", i)
-		local id = chat:GetID()
 		local tab = _G[format("ChatFrame%sTab", i)]
 		local isDocked = chat.isDocked
+		local id = chat:GetID()
 		tab.isDocked = isDocked
 		tab.owner = chat
 
 		if id > NUM_CHAT_WINDOWS then
-			if select(2, tab:GetPoint()):GetName() ~= chatbg then
-				isDocked = true
-			else
-				isDocked = false
-			end
+			isDocked = select(2, tab:GetPoint()):GetName() ~= chatbg
+		end
+
+		if chat.FontStringContainer then
+			chat.FontStringContainer:SetOutside(chat)
 		end
 
 		if chat:IsShown() and not (id > NUM_CHAT_WINDOWS) and id == self.RightChatWindowID then
@@ -2750,33 +2751,6 @@ function CH:Initialize()
 			editbox:SetBackdropBorderColor(info.r, info.g, info.b)
 		end
 	end)
-
-	-- Combat Log Skinning (credit: Aftermathh)
-	local CombatLogButton = _G.CombatLogQuickButtonFrame_Custom
-	if CombatLogButton then
-		local CombatLogFontContainer = _G.ChatFrame2 and _G.ChatFrame2.FontStringContainer
-		CombatLogButton:StripTextures()
-		CombatLogButton:SetTemplate("Transparent")
-		if CombatLogFontContainer then
-			CombatLogButton:ClearAllPoints()
-			CombatLogButton:Point("BOTTOMLEFT", CombatLogFontContainer, "TOPLEFT", -1, 1)
-			CombatLogButton:Point("BOTTOMRIGHT", CombatLogFontContainer, "TOPRIGHT", E.PixelMode and 4 or 0, 1)
-		end
-		for i = 1, 2 do
-			local CombatLogQuickButton = _G["CombatLogQuickButtonFrameButton"..i]
-			if CombatLogQuickButton then
-				local CombatLogText = CombatLogQuickButton:GetFontString()
-				CombatLogText:FontTemplate(nil, nil, 'OUTLINE')
-			end
-		end
-		local CombatLogProgressBar = _G.CombatLogQuickButtonFrame_CustomProgressBar
-		CombatLogProgressBar:SetStatusBarTexture(E.media.normTex)
-		CombatLogProgressBar:SetInside(CombatLogButton)
-		Skins:HandleNextPrevButton(_G.CombatLogQuickButtonFrame_CustomAdditionalFilterButton)
-		_G.CombatLogQuickButtonFrame_CustomAdditionalFilterButton:Size(20, 22)
-		_G.CombatLogQuickButtonFrame_CustomAdditionalFilterButton:Point("TOPRIGHT", CombatLogButton, "TOPRIGHT", 0, -1)
-		_G.CombatLogQuickButtonFrame_CustomTexture:Hide()
-	end
 
 	--Chat Heads Frame
 	self.ChatHeadFrame = CreateFrame("Frame", "ElvUIChatHeadFrame", E.UIParent)

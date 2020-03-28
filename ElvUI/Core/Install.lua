@@ -206,7 +206,7 @@ function E:SetupTheme(theme, noDisplayMsg)
 	if theme == 'class' then
 		E.db.general.valuecolor = E:GetColor(classColor.r, classColor.g, classColor.b)
 	else
-		E.db.general.valuecolor = E:GetColor(254/255, 123/255, 44/255)
+		E.db.general.valuecolor = E:GetColor(23/255, 132/255, 209/255)
 	end
 
 	E:UpdateStart(true, true)
@@ -301,7 +301,6 @@ function E:SetupLayout(layout, noDataReset, noDisplayMsg)
 				E:SaveMoverDefaultPosition(mover)
 			end
 		--Tooltip
-			E.db.tooltip.textFontSize = 10
 			E.db.tooltip.healthBar.fontOutline = 'MONOCHROMEOUTLINE'
 			E.db.tooltip.healthBar.height = 12
 		--UnitFrames

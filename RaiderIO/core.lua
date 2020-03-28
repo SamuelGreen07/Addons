@@ -1,7 +1,7 @@
 local addonName, ns = ...
 
 -- if we're on the developer version the addon behaves slightly different
-ns.DEBUG_MODE = not not (GetAddOnMetadata(addonName, "Version") or ""):find("v202003140600", nil, true)
+ns.DEBUG_MODE = not not (GetAddOnMetadata(addonName, "Version") or ""):find("v202003280600", nil, true)
 
 -- micro-optimization for more speed
 local unpack = unpack
@@ -842,7 +842,7 @@ do
 		for encoderIndex = 1, #encodingOrder do
 			local field = encodingOrder[encoderIndex]
 			if field == ENCODER_MYTHICPLUS_FIELDS.CURRENT_SCORE then
-				results.currentScore, bitOffset = ReadBitsFromString(bucket, bitOffset, 12)
+				results.currentScore, bitOffset = ReadBitsFromString(bucket, bitOffset, 13)
 			elseif field == ENCODER_MYTHICPLUS_FIELDS.CURRENT_ROLES then
 				value, bitOffset = ReadBitsFromString(bucket, bitOffset, 7)
 				results.currentRoleOrdinalIndex = 1 + value -- indexes are one-based
@@ -853,7 +853,7 @@ do
 				value, bitOffset = ReadBitsFromString(bucket, bitOffset, 7)
 				results.previousRoleOrdinalIndex = 1 + value -- indexes are one-based
 			elseif field == ENCODER_MYTHICPLUS_FIELDS.MAIN_CURRENT_SCORE then
-				results.mainCurrentScore, bitOffset = ReadBitsFromString(bucket, bitOffset, 12)
+				results.mainCurrentScore, bitOffset = ReadBitsFromString(bucket, bitOffset, 13)
 			elseif field == ENCODER_MYTHICPLUS_FIELDS.MAIN_CURRENT_ROLES then
 				value, bitOffset = ReadBitsFromString(bucket, bitOffset, 7)
 				results.mainCurrentRoleOrdinalIndex = 1 + value -- indexes are one-based

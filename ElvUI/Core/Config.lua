@@ -877,6 +877,7 @@ function E:Config_WindowClosed()
 		self.originalClose:Show()
 
 		E:StopElasticize(self.leftHolder.logo)
+		E:StopElasticize(self.leftHolder.topLogo)
 
 		E:Config_RestoreOldPosition(self.topHolder.version)
 		E:Config_RestoreOldPosition(self.obj.content)
@@ -894,6 +895,10 @@ function E:Config_WindowOpened(frame)
 		frame.originalClose:Hide()
 
 		E:Elasticize(frame.leftHolder.logo, 128, 64)
+		E:Elasticize(frame.leftHolder.topLogo, 128, 64)
+
+		local color = E.db.general.valuecolor
+		frame.leftHolder.topLogo:SetVertexColor(color.r, color.g, color.b)
 
 		local unskinned = not E.private.skins.ace3.enable
 		local offset = unskinned and 14 or 8
@@ -1138,10 +1143,16 @@ function E:ToggleOptionsUI(msg)
 			frame.topHolder = top
 
 			local logo = left:CreateTexture()
-			logo:SetTexture(E.Media.Textures.LogoSmall)
+			logo:SetTexture(E.Media.Textures.LogoSmallBottom)
 			logo:Point("CENTER", left, "TOP", unskinned and 10 or 0, unskinned and -40 or -36)
 			logo:Size(128, 64)
 			left.logo = logo
+
+			local topLogo = left:CreateTexture()
+			topLogo:SetTexture(E.Media.Textures.LogoSmallTop)
+			topLogo:Point("CENTER", left, "TOP", unskinned and 10 or 0, unskinned and -40 or -36)
+			topLogo:Size(128, 64)
+			left.topLogo = topLogo
 
 			local buttonsHolder = CreateFrame('Frame', nil, left)
 			buttonsHolder:Point("BOTTOMLEFT", bottom, "TOPLEFT", 0, 1)

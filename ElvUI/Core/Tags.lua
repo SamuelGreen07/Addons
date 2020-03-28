@@ -6,10 +6,12 @@ local translitMark = "!"
 
 --Lua functions
 local _G = _G
-local tonumber, strlen, next = tonumber, strlen, next
+local tonumber, next = tonumber, next
+local gmatch, gsub, format, select = gmatch, gsub, format, select
 local unpack, pairs, wipe, floor, ceil = unpack, pairs, wipe, floor, ceil
-local gmatch, gsub, format, select, strsplit = gmatch, gsub, format, select, strsplit
-local strfind, strmatch, strlower, utf8lower, utf8sub, utf8len = strfind, strmatch, strlower, string.utf8lower, string.utf8sub, string.utf8len
+local strfind, strmatch, strlower, strsplit = strfind, strmatch, strlower, strsplit
+local utf8lower, utf8sub, utf8len = string.utf8lower, string.utf8sub, string.utf8len
+
 --WoW API / Variables
 local CreateTextureMarkup = CreateTextureMarkup
 local UnitFactionGroup = UnitFactionGroup
@@ -63,6 +65,9 @@ local UnitReaction = UnitReaction
 local UnitStagger = UnitStagger
 local CreateAtlasMarkup = CreateAtlasMarkup
 
+local CHAT_FLAG_AFK = CHAT_FLAG_AFK:gsub('<(.-)>', '|r<|cffFF3333%1|r>')
+local CHAT_FLAG_DND = CHAT_FLAG_DND:gsub('<(.-)>', '|r<|cffFFFF33%1|r>')
+
 local ALTERNATE_POWER_INDEX = Enum.PowerType.Alternate or 10
 local SPEC_MONK_BREWMASTER = SPEC_MONK_BREWMASTER
 local SPEC_PALADIN_RETRIBUTION = SPEC_PALADIN_RETRIBUTION
@@ -78,7 +83,7 @@ local SPELL_POWER_HOLY_POWER = Enum.PowerType.HolyPower
 local SPELL_POWER_MANA = Enum.PowerType.Mana
 local SPELL_POWER_SOUL_SHARDS = Enum.PowerType.SoulShards
 
--- GLOBALS: Hex, _TAGS, ElvUF
+-- GLOBALS: ElvUF, Hex, _TAGS, _COLORS
 
 --Expose local functions for plugins onto this table
 E.TagFunctions = {}
@@ -224,6 +229,28 @@ ElvUF.Tags.Methods['healthcolor'] = function(unit)
 		local r, g, b = ElvUF:ColorGradient(UnitHealth(unit), UnitHealthMax(unit), 0.69, 0.31, 0.31, 0.65, 0.63, 0.35, 0.33, 0.59, 0.33)
 		return Hex(r, g, b)
 	end
+end
+
+ElvUF.Tags.Events['status:text'] = 'PLAYER_FLAGS_CHANGED'
+ElvUF.Tags.Methods['status:text'] = function(unit)
+	if UnitIsAFK(unit) then
+		return CHAT_FLAG_AFK
+	elseif UnitIsDND(unit) then
+		return CHAT_FLAG_DND
+	end
+
+	return nil
+end
+
+ElvUF.Tags.Events['status:icon'] = 'PLAYER_FLAGS_CHANGED'
+ElvUF.Tags.Methods['status:icon'] = function(unit)
+	if UnitIsAFK(unit) then
+		return CreateTextureMarkup('Interface\\FriendsFrame\\StatusIcon-Away', 16, 16, 16, 16, 0, 1, 0, 1, 0, 0)
+	elseif UnitIsDND(unit) then
+		return CreateTextureMarkup('Interface\\FriendsFrame\\StatusIcon-DnD', 16, 16, 16, 16, 0, 1, 0, 1, 0, 0)
+	end
+
+	return nil
 end
 
 ElvUF.Tags.Events['name:abbrev'] = 'UNIT_NAME_UPDATE INSTANCE_ENCOUNTER_ENGAGE_UNIT'
@@ -572,7 +599,7 @@ ElvUF.Tags.Methods['realm:dash:translit'] = function(unit)
 	return realm
 end
 
-ElvUF.Tags.Events['threat:percent'] = 'UNIT_THREAT_LIST_UPDATE GROUP_ROSTER_UPDATE'
+ElvUF.Tags.Events['threat:percent'] = 'UNIT_THREAT_LIST_UPDATE UNIT_THREAT_SITUATION_UPDATE GROUP_ROSTER_UPDATE'
 ElvUF.Tags.Methods['threat:percent'] = function(unit)
 	local _, _, percent = UnitDetailedThreatSituation('player', unit)
 	if(percent and percent > 0) and (IsInGroup() or UnitExists('pet')) then
@@ -582,7 +609,7 @@ ElvUF.Tags.Methods['threat:percent'] = function(unit)
 	end
 end
 
-ElvUF.Tags.Events['threat:current'] = 'UNIT_THREAT_LIST_UPDATE GROUP_ROSTER_UPDATE'
+ElvUF.Tags.Events['threat:current'] = 'UNIT_THREAT_LIST_UPDATE UNIT_THREAT_SITUATION_UPDATE GROUP_ROSTER_UPDATE'
 ElvUF.Tags.Methods['threat:current'] = function(unit)
 	local _, _, percent, _, threatvalue = UnitDetailedThreatSituation('player', unit)
 	if(percent and percent > 0) and (IsInGroup() or UnitExists('pet')) then
@@ -592,7 +619,7 @@ ElvUF.Tags.Methods['threat:current'] = function(unit)
 	end
 end
 
-ElvUF.Tags.Events['threatcolor'] = 'UNIT_THREAT_LIST_UPDATE GROUP_ROSTER_UPDATE'
+ElvUF.Tags.Events['threatcolor'] = 'UNIT_THREAT_LIST_UPDATE UNIT_THREAT_SITUATION_UPDATE GROUP_ROSTER_UPDATE'
 ElvUF.Tags.Methods['threatcolor'] = function(unit)
 	local _, status = UnitDetailedThreatSituation('player', unit)
 	if (status) and (IsInGroup() or UnitExists('pet')) then
@@ -1109,7 +1136,7 @@ ElvUF.Tags.Events['creature'] = ''
 
 E.TagInfo = {
 	--Colors
-	['namecolor'] = { category = 'Colors', description = "Colors names by player class or NPC reaction" },
+	['namecolor'] = { category = 'Colors', description = "Colors names by player class or NPC reaction (Ex: ['namecolor']['name'])" },
 	['reactioncolor'] = { category = 'Colors', description = "Colors names by NPC reaction (Bad/Neutral/Good)" },
 	['powercolor'] = { category = 'Colors', description = "Colors the power text based upon its type" },
 	['difficultycolor'] = { category = 'Colors', description = "Colors the following tags by difficulty, red for impossible, orange for hard, green for easy" },

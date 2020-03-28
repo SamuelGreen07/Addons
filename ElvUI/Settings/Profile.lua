@@ -58,7 +58,7 @@ P.general = {
 	bordercolor = { r = 0.1, g = 0.1, b = 0.1 },
 	backdropcolor = { r = 0.1, g = 0.1, b = 0.1 },
 	backdropfadecolor = { r = .06, g = .06, b = .06, a = 0.8 },
-	valuecolor = {r = 254/255, g = 123/255, b = 44/255},
+	valuecolor = {r = 23/255, g = 132/255, b = 209/255},
 	cropIcon = 2,
 	minimap = {
 		size = 176,
@@ -206,6 +206,7 @@ P.bags = {
 	specialtyColors = true,
 	showBindType = false,
 	transparent = false,
+	showAssignedIcon = true,
 	colors = {
 		profession = {
 			leatherworking = { r = .88, g = .73, b = .29 },
@@ -1020,6 +1021,7 @@ local UF_Auras = {
 	countFont = 'PT Sans Narrow',
 	countFontOutline = 'OUTLINE',
 	countFontSize = 12,
+	desaturate = true,
 	durationPosition = 'CENTER',
 	enable = false,
 	numrows = 1,
@@ -1937,6 +1939,7 @@ P.unitframe.units.arena.debuffs.perrow = 3
 P.unitframe.units.arena.debuffs.priority = 'Blacklist,blockNoDuration,Personal,CCDebuffs,Whitelist'
 P.unitframe.units.arena.debuffs.sizeOverride = 27
 P.unitframe.units.arena.debuffs.yOffset = -16
+P.unitframe.units.arena.debuffs.desaturate = false
 P.unitframe.units.arena.healPrediction.enable = true
 P.unitframe.units.arena.health.text_format = '[healthcolor][health:current]'
 P.unitframe.units.arena.infoPanel.height = 17
@@ -2155,7 +2158,6 @@ P.actionbar = {
 		backdropSpacing = 2,
 		alpha = 1,
 		inheritGlobalFade = false,
-		usePositionOverride = true,
 		visibility = '[vehicleui] hide; [petbattle] hide;show',
 	},
 	extraActionButton = {
