@@ -1,10 +1,10 @@
 ## Interface: 80300
 ## Title: BtWQuests
-## Version: 1.61
+## Version: 1.66
 ## Notes: 
 ## Author: Breen
 ## SavedVariables: BtWQuests_Characters
-## SavedVariablesPerCharacter: BtWQuests_Settings
+## SavedVariablesPerCharacter: BtWQuests_Settings BtWQuests_AutoLoad
 
 Defines.lua
 BtWQuestsCharacters.lua

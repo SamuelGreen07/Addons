@@ -97,8 +97,8 @@ BtWQuestsDatabase:AddChain(BTWQUESTS_CHAIN_BATTLE_FOR_AZEROTH_SECRETS_BAAL, {
                 type = "coords",
                 name = "Pebble #3",
                 mapID = 862,
-                x = 0.31,
-                y = 0.35,
+                x = 0.31935,
+                y = 0.35296,
             },
             -- onClick = function ()
             --     BtWQuests_ShowMapWithWaypoint(862, 0.31, 0.35, "Pebble #3")

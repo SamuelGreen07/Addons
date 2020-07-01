@@ -377,8 +377,8 @@ function BtWQuestsChainViewMixin:SetChain(chainID, scrollTo, zoom)
     do
         local Child = self:GetScrollChild();
         local rect = self.rect;
-        rect.left, rect.right = floor(rect.left), ceil(rect.right)
-        rect.top, rect.bottom = floor(rect.top), ceil(rect.bottom)
+        rect.left, rect.right = floor(rect.left or 0), ceil(rect.right or 0)
+        rect.top, rect.bottom = floor(rect.top or 0), ceil(rect.bottom or 0)
         rect.top = max(rect.top, 0)
 
         local width = rect.right - rect.left;
@@ -770,15 +770,27 @@ function BtWQuestsExpansionMixin:Set(item, character)
 
     self.buttonPool:ReleaseAll()
 
-    local items = item:GetMajorItems(character)
-    local previous = self.ViewAll
-    for i=#items,1,-1 do
-        local button = self.buttonPool:Acquire()
-        button:Set(items[i], character)
-        button:SetPoint("BOTTOM", previous, "TOP", 0, 5)
-        button:Show()
-        previous = button
+    self.AutoLoad:SetShown(item:SupportAutoLoad())
+    self.AutoLoad:SetChecked(item:IsAutoLoad())
+
+    if item:IsLoaded() then
+        local items = item:GetMajorItems(character)
+        local previous = self.ViewAll
+        for i=#items,1,-1 do
+            local button = self.buttonPool:Acquire()
+            button:Set(items[i], character)
+            button:SetPoint("BOTTOM", previous, "TOP", 0, 5)
+            button:Show()
+            previous = button
+        end
+
+        self.Load:Hide()
+        self.ViewAll:Show()
+    else
+        self.Load:Show()
+        self.ViewAll:Hide()
     end
+
 end
 
 -- [[ Navbar ]]
@@ -1631,13 +1643,13 @@ function BtWQuestsTooltipMixin:SetChain(chainID, character)
         self:AddLine(GREEN_FONT_COLOR_CODE..L["BTWQUESTS_QUEST_CHAIN_ACTIVE"]..FONT_COLOR_CODE_CLOSE)
     end
 
-    local prerequisites = chain:GetPrerequisites()
+    local prerequisites, hasLowPrio = chain:GetPrerequisites()
     if prerequisites then
         local addedPrerequisite
         for _,prerequisite in ipairs(prerequisites) do
             prerequisite = prerequisite:GetVariation(character) or prerequisite;
 
-            if prerequisite:IsValidForCharacter(character) and prerequisite:Visible(character) then
+            if prerequisite:IsValidForCharacter(character) and prerequisite:Visible(character, IsModifiedClick("SHIFT")) then
                 if not addedPrerequisite then
                     self:AddLine(" ")
                     self:AddLine(L["BTWQUESTS_TOOLTIP_PREREQUISITES"])

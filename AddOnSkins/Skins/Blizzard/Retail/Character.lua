@@ -330,7 +330,7 @@ function AS:Blizzard_DressUpFrame()
 
 	_G.DressUpFrame.portrait:SetAlpha(0)
 
-	AS:SkinMaxMinFrame(_G.MaximizeMinimizeFrame)
+	AS:SkinMaxMinFrame(_G.DressUpFrame.MaximizeMinimizeFrame)
 
 	AS:SkinButton(_G.DressUpFrameCancelButton)
 	_G.DressUpFrame.ResetButton:SetPoint("RIGHT", _G.DressUpFrameCancelButton, "LEFT", -2, 0)
@@ -383,7 +383,7 @@ function AS:Blizzard_Inspect(event, addon)
 				return
 			end
 
-			local slotInfo = C_SpecializationInfo_GetInspectSelectedPvpTalent(_G.INSPECTED_UNIT, self.slotIndex)
+			local slotInfo = C_SpecializationInfo.GetInspectSelectedPvpTalent(_G.INSPECTED_UNIT, self.slotIndex)
 
 			if (slotInfo) then
 				AS:SkinTexture(self.Texture)

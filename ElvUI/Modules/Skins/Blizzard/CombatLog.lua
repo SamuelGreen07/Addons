@@ -1,6 +1,9 @@
 local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local S = E:GetModule('Skins')
 
+local _G = _G
+local hooksecurefunc = hooksecurefunc
+
 -- credit: Aftermathh
 function S:Blizzard_CombatLog()
 	if E.private.chat.enable ~= true then return end
@@ -8,19 +11,26 @@ function S:Blizzard_CombatLog()
 
 	local Button = _G.CombatLogQuickButtonFrame_Custom
 	Button:StripTextures()
-	Button:SetTemplate("Transparent")
+	Button:SetTemplate('Transparent')
 
 	local FontContainer = _G.ChatFrame2.FontStringContainer
 	if FontContainer then
 		Button:ClearAllPoints()
-		Button:Point("BOTTOMLEFT", FontContainer, "TOPLEFT", -1, 1)
-		Button:Point("BOTTOMRIGHT", FontContainer, "TOPRIGHT", E.PixelMode and 4 or 0, 1)
+		Button:Point('BOTTOMLEFT', FontContainer, 'TOPLEFT', -1, 1)
+		Button:Point('BOTTOMRIGHT', FontContainer, 'TOPRIGHT', E.PixelMode and 4 or 0, 1)
 	end
 
-	for i = 1, 2 do
-		local TabText = _G["CombatLogQuickButtonFrameButton"..i]:GetFontString()
-		TabText:FontTemplate(nil, nil, 'OUTLINE')
-	end
+	hooksecurefunc('Blizzard_CombatLog_Update_QuickButtons', function()
+		for index in ipairs(_G.Blizzard_CombatLog_Filters.filters) do
+			local button = _G['CombatLogQuickButtonFrameButton'..index]
+			if button then
+				local text = button:GetFontString()
+				if text then
+					text:FontTemplate(nil, nil, 'OUTLINE')
+				end
+			end
+		end
+	end)
 
 	local ProgressBar = _G.CombatLogQuickButtonFrame_CustomProgressBar
 	ProgressBar:SetStatusBarTexture(E.media.normTex)
@@ -29,7 +39,7 @@ function S:Blizzard_CombatLog()
 	S:HandleNextPrevButton(_G.CombatLogQuickButtonFrame_CustomAdditionalFilterButton)
 
 	_G.CombatLogQuickButtonFrame_CustomAdditionalFilterButton:Size(20, 22)
-	_G.CombatLogQuickButtonFrame_CustomAdditionalFilterButton:Point("TOPRIGHT", Button, "TOPRIGHT", 0, -1)
+	_G.CombatLogQuickButtonFrame_CustomAdditionalFilterButton:Point('TOPRIGHT', Button, 'TOPRIGHT', 0, -1)
 	_G.CombatLogQuickButtonFrame_CustomTexture:Hide()
 end
 

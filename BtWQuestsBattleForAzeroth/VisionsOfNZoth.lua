@@ -28,7 +28,7 @@ Database:AddChain(Chain.Chain01, {
     category = CATEGORY_ID,
     expansion = EXPANSION_ID,
     range = {120,120},
-    alternative = {
+    alternatives = {
         Chain.Chain02,
     },
     restrictions = Restrictions.Alliance,
@@ -126,7 +126,7 @@ Database:AddChain(Chain.Chain02, {
     category = CATEGORY_ID,
     expansion = EXPANSION_ID,
     range = {120,120},
-    alternative = {
+    alternatives = {
         Chain.Chain01,
     },
     restrictions = Restrictions.Horde,
@@ -221,8 +221,55 @@ Database:AddChain(Chain.Chain03, {
             level = 120,
         },
         {
+            type = "quest",
+            ids = {51918, 52450},
+            count = 1,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_ALLIANCE,
+            },
+        },
+        {
+            type = "quest",
+            ids = {51916, 52451},
+            count = 1,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_HORDE,
+            },
+        },
+        {
+            type = "quest",
+            id = 54972,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_ALLIANCE,
+            },
+        },
+        {
+            type = "quest",
+            id = 55053,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_HORDE,
+            },
+        },
+        {
             type = "chain",
-            ids = {Chain.Chain01, Chain.Chain02},
+            id = BTWQUESTS_CHAIN_BATTLE_FOR_AZEROTH_THE_HEART_FORGE_CHAIN01,
+            lowPriority = true,
+        },
+        {
+            type = "chain",
+            id = Chain.Chain01,
+        },
+        {
+            type = "chain",
+            id = Chain.Chain02,
         },
     },
     active = {
@@ -355,8 +402,57 @@ Database:AddChain(Chain.Chain04, {
             level = 120,
         },
         {
+            type = "quest",
+            ids = {51918, 52450},
+            count = 1,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_ALLIANCE,
+            },
+        },
+        {
+            type = "quest",
+            ids = {51916, 52451},
+            count = 1,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_HORDE,
+            },
+        },
+        {
+            type = "quest",
+            id = 54972,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_ALLIANCE,
+            },
+        },
+        {
+            type = "quest",
+            id = 55053,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_HORDE,
+            },
+        },
+        {
             type = "chain",
-            ids = {Chain.Chain01, Chain.Chain02},
+            id = BTWQUESTS_CHAIN_BATTLE_FOR_AZEROTH_THE_HEART_FORGE_CHAIN01,
+            lowPriority = true,
+        },
+        {
+            type = "chain",
+            id = Chain.Chain01,
+            lowPriority = true,
+        },
+        {
+            type = "chain",
+            id = Chain.Chain02,
+            lowPriority = true,
         },
         {
             type = "chain",
@@ -535,12 +631,62 @@ Database:AddChain(Chain.Chain05, {
             level = 120,
         },
         {
+            type = "quest",
+            ids = {51918, 52450},
+            count = 1,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_ALLIANCE,
+            },
+        },
+        {
+            type = "quest",
+            ids = {51916, 52451},
+            count = 1,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_HORDE,
+            },
+        },
+        {
+            type = "quest",
+            id = 54972,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_ALLIANCE,
+            },
+        },
+        {
+            type = "quest",
+            id = 55053,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_HORDE,
+            },
+        },
+        {
             type = "chain",
-            ids = {Chain.Chain01, Chain.Chain02},
+            id = BTWQUESTS_CHAIN_BATTLE_FOR_AZEROTH_THE_HEART_FORGE_CHAIN01,
+            lowPriority = true,
+        },
+        {
+            type = "chain",
+            id = Chain.Chain01,
+            lowPriority = true,
+        },
+        {
+            type = "chain",
+            id = Chain.Chain02,
+            lowPriority = true,
         },
         {
             type = "chain",
             id = Chain.Chain03,
+            lowPriority = true,
         },
         {
             type = "chain",
@@ -791,8 +937,57 @@ Database:AddChain(Chain.Chain07, {
             level = 120,
         },
         {
+            type = "quest",
+            ids = {51918, 52450},
+            count = 1,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_ALLIANCE,
+            },
+        },
+        {
+            type = "quest",
+            ids = {51916, 52451},
+            count = 1,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_HORDE,
+            },
+        },
+        {
+            type = "quest",
+            id = 54972,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_ALLIANCE,
+            },
+        },
+        {
+            type = "quest",
+            id = 55053,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_HORDE,
+            },
+        },
+        {
             type = "chain",
-            ids = {Chain.Chain01, Chain.Chain02},
+            id = BTWQUESTS_CHAIN_BATTLE_FOR_AZEROTH_THE_HEART_FORGE_CHAIN01,
+            lowPriority = true,
+        },
+        {
+            type = "chain",
+            id = Chain.Chain01,
+            lowPriority = true,
+        },
+        {
+            type = "chain",
+            id = Chain.Chain02,
+            lowPriority = true,
         },
         {
             type = "quest",
@@ -929,12 +1124,62 @@ Database:AddChain(Chain.Chain08, {
             level = 120,
         },
         {
+            type = "quest",
+            ids = {51918, 52450},
+            count = 1,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_ALLIANCE,
+            },
+        },
+        {
+            type = "quest",
+            ids = {51916, 52451},
+            count = 1,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_HORDE,
+            },
+        },
+        {
+            type = "quest",
+            id = 54972,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_ALLIANCE,
+            },
+        },
+        {
+            type = "quest",
+            id = 55053,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_HORDE,
+            },
+        },
+        {
             type = "chain",
-            ids = {Chain.Chain01, Chain.Chain02},
+            id = BTWQUESTS_CHAIN_BATTLE_FOR_AZEROTH_THE_HEART_FORGE_CHAIN01,
+            lowPriority = true,
+        },
+        {
+            type = "chain",
+            id = Chain.Chain01,
+            lowPriority = true,
+        },
+        {
+            type = "chain",
+            id = Chain.Chain02,
+            lowPriority = true,
         },
         {
             type = "chain",
             id = Chain.Chain03,
+            lowPriority = true,
         },
         {
             type = "chain",
@@ -1070,12 +1315,62 @@ Database:AddChain(Chain.Chain09, {
             level = 120,
         },
         {
+            type = "quest",
+            ids = {51918, 52450},
+            count = 1,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_ALLIANCE,
+            },
+        },
+        {
+            type = "quest",
+            ids = {51916, 52451},
+            count = 1,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_HORDE,
+            },
+        },
+        {
+            type = "quest",
+            id = 54972,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_ALLIANCE,
+            },
+        },
+        {
+            type = "quest",
+            id = 55053,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_HORDE,
+            },
+        },
+        {
             type = "chain",
-            ids = {Chain.Chain01, Chain.Chain02},
+            id = BTWQUESTS_CHAIN_BATTLE_FOR_AZEROTH_THE_HEART_FORGE_CHAIN01,
+            lowPriority = true,
+        },
+        {
+            type = "chain",
+            id = Chain.Chain01,
+            lowPriority = true,
+        },
+        {
+            type = "chain",
+            id = Chain.Chain02,
+            lowPriority = true,
         },
         {
             type = "chain",
             id = Chain.Chain03,
+            lowPriority = true,
         },
         {
             type = "chain",
@@ -1211,8 +1506,57 @@ Database:AddChain(Chain.Chain10, {
             level = 120,
         },
         {
+            type = "quest",
+            ids = {51918, 52450},
+            count = 1,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_ALLIANCE,
+            },
+        },
+        {
+            type = "quest",
+            ids = {51916, 52451},
+            count = 1,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_HORDE,
+            },
+        },
+        {
+            type = "quest",
+            id = 54972,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_ALLIANCE,
+            },
+        },
+        {
+            type = "quest",
+            id = 55053,
+            lowPriority = true,
+            restrictions = {
+                type = "faction",
+                id = BTWQUESTS_FACTION_ID_HORDE,
+            },
+        },
+        {
             type = "chain",
-            ids = {Chain.Chain01, Chain.Chain02},
+            id = BTWQUESTS_CHAIN_BATTLE_FOR_AZEROTH_THE_HEART_FORGE_CHAIN01,
+            lowPriority = true,
+        },
+        {
+            type = "chain",
+            id = Chain.Chain01,
+            lowPriority = true,
+        },
+        {
+            type = "chain",
+            id = Chain.Chain02,
+            lowPriority = true,
         },
         {
             type = "quest",

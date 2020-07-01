@@ -40,6 +40,8 @@ in different types of locations]=],
 There are updated cooldowns for some of your spells. Do you want to apply update?]=],
 	["New spell has been added: %s"] = "New spell has been added: %s",
 	["Options are not available in combat!"] = "Options are not available in combat!",
+	["options:borders:show-blizz-borders"] = "Show Blizzard's borders around icons",
+	["options:category:borders"] = "Borders",
 	["options:category:spells"] = "Spells",
 	["options:general:disable-addon-btn"] = "Disable addon",
 	["options:general:enable-addon-btn"] = "Enable addon",
@@ -106,6 +108,10 @@ There are updated cooldowns for some of your spells. Do you want to apply update
 	["msg:question:import-existing-spells"] = [=[NameplateCooldownsEs gibt aktualisierte Abklingzeiten für manche deiner Zauber. Möchtest du sie aktualisieren?]=],
 	["New spell has been added: %s"] = "Ein neuer Zauber wurde hinzugefügt: %s",
 	["Options are not available in combat!"] = "Einstellungen sind nicht im Kampf verfügbar",
+	--[[Translation missing --]]
+	["options:borders:show-blizz-borders"] = "Show Blizzard's borders around icons",
+	--[[Translation missing --]]
+	["options:category:borders"] = "Borders",
 	["options:category:spells"] = "Zauber",
 	["options:general:disable-addon-btn"] = "Addon deaktivieren",
 	["options:general:enable-addon-btn"] = "Addon aktivieren",
@@ -119,16 +125,13 @@ There are updated cooldowns for some of your spells. Do you want to apply update
 	["options:spells:delete-all-spells"] = "Alle Zauber entfernen",
 	["options:spells:delete-all-spells-confirmation"] = "Möchtest du wirklich ALLE Zauber entfernen?",
 	["options:spells:delete-spell"] = "Zauber löschen",
-	--[[Translation missing --]]
-	["options:spells:disable-all-spells"] = "Disable all spells",
-	--[[Translation missing --]]
-	["options:spells:enable-all-spells"] = "Enable all spells",
+	["options:spells:disable-all-spells"] = "Alle Zauber deaktivieren",
+	["options:spells:enable-all-spells"] = "Alle Zauber aktivieren",
 	["options:spells:enable-tracking-of-this-spell"] = "Verfolgung dieses Zaubers aktivieren",
 	["options:spells:icon-glow"] = "Symbolleuchten ist deaktiviert",
 	["options:spells:icon-glow-always"] = "Symbol wird leuchten, falls der Zauber abklingt",
 	["options:spells:icon-glow-threshold"] = "Symbol wird leuchten, falls die verbleibende Zeit weniger ist als",
-	--[[Translation missing --]]
-	["options:spells:please-push-once-more"] = "Please push once more",
+	["options:spells:please-push-once-more"] = "Bitte drücke noch einmal",
 	["options:spells:track-only-this-spellid"] = [=[Nur diese Zauber-IDs verfolgen(kommasepariert)]=],
 	["Profile '%s' has been successfully deleted"] = "Profil '%s' wurde erfolgreich gelöscht.",
 	["Profiles"] = "Profile",
@@ -174,6 +177,10 @@ There are updated cooldowns for some of your spells. Do you want to apply update
 	["msg:question:import-existing-spells"] = [=[NameplateCooldownsHa habido cambios en algunos de tus hechizos y sus reutilizaciones. ¿Quieres comprobar si hay actualizaciones?]=],
 	["New spell has been added: %s"] = "Añadido un nuevo hechizo: %s",
 	["Options are not available in combat!"] = "Las opciones no estan disponibles en combate!",
+	--[[Translation missing --]]
+	["options:borders:show-blizz-borders"] = "Show Blizzard's borders around icons",
+	--[[Translation missing --]]
+	["options:category:borders"] = "Borders",
 	["options:category:spells"] = "Hechizos",
 	["options:general:disable-addon-btn"] = "Deshabilita el addon",
 	["options:general:enable-addon-btn"] = "Habilita el addon",
@@ -244,6 +251,10 @@ There are updated cooldowns for some of your spells. Do you want to apply update
 Hay reutilizaciones actualizadas para algunas de tus habilidades. Quieres aplicar la actualización?]=],
 	["New spell has been added: %s"] = "Se ha agregado un nuevo hechizo: %s",
 	["Options are not available in combat!"] = "Configuración no disponible durante el combate!",
+	--[[Translation missing --]]
+	["options:borders:show-blizz-borders"] = "Show Blizzard's borders around icons",
+	--[[Translation missing --]]
+	["options:category:borders"] = "Borders",
 	["options:category:spells"] = "Hechizos",
 	["options:general:disable-addon-btn"] = "Desactivar addon",
 	["options:general:enable-addon-btn"] = "Activar addon",
@@ -278,103 +289,70 @@ Hay reutilizaciones actualizadas para algunas de tus habilidades. Quieres aplica
 },
 	["frFR"] = 
 {
-	["Always display CD icons at full opacity (ReloadUI is needed)"] = "Toujours afficher les icônes des CD sans transparence (un rechargement de l'interface est nécessaire)",
+	["Always display CD icons at full opacity (ReloadUI is needed)"] = "Toujours afficher les temps de recharge à une opacité totale (un rechargement de l'interface est nécessaire)",
 	["chat:addon-is-disabled"] = "L'addon est désactivé",
-	["chat:addon-is-disabled-note"] = "Remarque: cet addon est désactivé. Vous pouvez l'activer dans la boîte de dialogue (/nc)",
-	["chat:addon-is-enabled"] = "Addon activé",
-	--[[Translation missing --]]
-	["chat:default-spell-is-added-to-ignore-list"] = "Default spell is added to ignore list: %s. You will not receive cooldown time updates for this spell.",
-	["chat:enable-only-for-target-nameplate"] = "Les temps de recharge ne seront visibles que sur la cible",
-	--[[Translation missing --]]
-	["chat:print-updated-spells"] = "%s: your cooldown: %s sec, new cooldown: %s sec",
+	["chat:addon-is-disabled-note"] = "Remarque: cet addon est désactivé. Vous pouvez l'activer dans la fenêtre d'options (/nc)",
+	["chat:addon-is-enabled"] = "Add-on activé",
+	["chat:default-spell-is-added-to-ignore-list"] = "Le sort par défaut est ajoutée à la liste des ignorées : %s. Vous ne recevrez plus de mise à jour sur le temp de recharge pour ce sort.",
+	["chat:enable-only-for-target-nameplate"] = "Les temps de recharge ne seront visibles que sur la barre de vie de la cible",
+	["chat:print-updated-spells"] = "%s: votre temps de recharge: %s sec, nouveau temps de recharge: %s sec",
 	["Click on icon to enable/disable tracking"] = "Cliquez sur l'icone pour activer/désactiver le suivi",
 	["Copy"] = "Copier",
-	["Copy other profile to current profile:"] = "Copier un profil vers le profil courant",
-	["Current profile: [%s]"] = "Profil actuel : [%s]",
+	["Copy other profile to current profile:"] = "Copier un profil vers le profil actuel",
+	["Current profile: [%s]"] = "Profil actuel: [%s]",
 	["Data from '%s' has been successfully copied to '%s'"] = "Les données de '%s' ont été copiées vers '%s'",
 	["Delete"] = "Effacer",
 	["Delete profile:"] = "Effacer le profile :",
-	["Disable test mode"] = "Désactiver le mode test",
-	["Enable test mode (need at least one visible nameplate)"] = "Activer le mode test ( nécessite au moins une étiquette de nom visible)",
-	--[[Translation missing --]]
-	["Filters"] = "Filters",
-	--[[Translation missing --]]
-	["filters.instance-types"] = [=[Set the visibility of the cooldowns
-in different types of locations]=],
-	["Font:"] = "Police d'écriture:",
+	["Disable test mode"] = "Désactiver le mode test.",
+	["Enable test mode (need at least one visible nameplate)"] = "Activer le mode test (nécessite au moins une barre de vie visible)",
+	["Filters"] = "Filtres",
+	["filters.instance-types"] = "Définir la visibilité des temps de recharges dans des types de lieux différents",
+	["Font:"] = "Police:",
 	["General"] = "Général",
-	--[[Translation missing --]]
 	["general.sort-mode"] = "Sort mode:",
 	["Icon size"] = "Taille de l'icone",
-	["Icon X-coord offset"] = "Icon X-coord offset",
-	["Icon Y-coord offset"] = "Icon Y-coord offset",
-	--[[Translation missing --]]
-	["instance-type:arena"] = "Arenas",
-	--[[Translation missing --]]
-	["instance-type:none"] = "Open World",
-	--[[Translation missing --]]
-	["instance-type:party"] = "5ppl dungeons",
-	--[[Translation missing --]]
-	["instance-type:pvp"] = "Battlegrounds",
-	--[[Translation missing --]]
-	["instance-type:raid"] = "Raid dungeons",
-	--[[Translation missing --]]
-	["instance-type:scenario"] = "Scenarios",
-	--[[Translation missing --]]
-	["instance-type:unknown"] = "Unknown dungeons (some quest scenarios)",
+	["Icon X-coord offset"] = "Décalage de l'icône : X-coord",
+	["Icon Y-coord offset"] = "Décalage de l'icône : Y-coord",
+	["instance-type:arena"] = "Arènes",
+	["instance-type:none"] = "Extérieur",
+	["instance-type:party"] = "Donjons à 5",
+	["instance-type:pvp"] = "Champs de bataille",
+	["instance-type:raid"] = "Raid",
+	["instance-type:scenario"] = "Scénarios ",
+	["instance-type:unknown"] = "Donjons inconnus (quêtes scénarisées et zones instanciés)",
 	["MISC"] = "Divers",
-	--[[Translation missing --]]
-	["msg:question:import-existing-spells"] = [=[NameplateCooldowns
-There are updated cooldowns for some of your spells. Do you want to apply update?]=],
+	["msg:question:import-existing-spells"] = "NameplateCooldowns Des mises à jours pour les temps de recharge de certains de vos sorts sont disponibles. Voulez-vous effectuer la mise à jour ?",
 	["New spell has been added: %s"] = "Un nouveau sort a été ajouté : %s",
 	["Options are not available in combat!"] = "Les options sont indisponibles durant un combat",
 	--[[Translation missing --]]
-	["options:category:spells"] = "Spells",
+	["options:borders:show-blizz-borders"] = "Show Blizzard's borders around icons",
 	--[[Translation missing --]]
-	["options:general:disable-addon-btn"] = "Disable addon",
-	--[[Translation missing --]]
-	["options:general:enable-addon-btn"] = "Enable addon",
-	--[[Translation missing --]]
-	["options:general:enable-only-for-target-nameplate"] = "Show the cooldowns on the current target nameplate only",
-	--[[Translation missing --]]
-	["options:general:space-between-icons"] = "Space between icons (px)",
-	--[[Translation missing --]]
-	["options:profiles:open-profiles-dialog"] = "Open profiles dialog",
-	--[[Translation missing --]]
-	["options:spells:add-new-spell"] = "Add new spell (name or id):",
-	--[[Translation missing --]]
-	["options:spells:add-spell"] = "Add spell",
-	--[[Translation missing --]]
-	["options:spells:click-to-select-spell"] = "Click to select spell",
-	--[[Translation missing --]]
-	["options:spells:cooldown-time"] = "Cooldown time",
-	--[[Translation missing --]]
-	["options:spells:delete-all-spells"] = "Delete all spells",
-	--[[Translation missing --]]
-	["options:spells:delete-all-spells-confirmation"] = "Do you really want to delete ALL spells?",
-	--[[Translation missing --]]
-	["options:spells:delete-spell"] = "Delete spell",
-	--[[Translation missing --]]
-	["options:spells:disable-all-spells"] = "Disable all spells",
-	--[[Translation missing --]]
-	["options:spells:enable-all-spells"] = "Enable all spells",
-	--[[Translation missing --]]
-	["options:spells:enable-tracking-of-this-spell"] = "Enable tracking of this spell",
-	--[[Translation missing --]]
-	["options:spells:icon-glow"] = "Icon glow is disabled",
-	--[[Translation missing --]]
-	["options:spells:icon-glow-always"] = "Icon will glow if spell is on cooldown",
-	--[[Translation missing --]]
-	["options:spells:icon-glow-threshold"] = "Icon will glow if remaining time is less than",
-	--[[Translation missing --]]
-	["options:spells:please-push-once-more"] = "Please push once more",
-	--[[Translation missing --]]
-	["options:spells:track-only-this-spellid"] = [=[Track only these spell IDs
-(comma-separated)]=],
+	["options:category:borders"] = "Borders",
+	["options:category:spells"] = "Sorts.",
+	["options:general:disable-addon-btn"] = "Désactiver l'add-on",
+	["options:general:enable-addon-btn"] = "Activer l'add-on",
+	["options:general:enable-only-for-target-nameplate"] = "Montrer les temps de recharge sur la barre de vie de la cible actuelle uniquement ",
+	["options:general:space-between-icons"] = "Espace entre les icônes (px)",
+	["options:profiles:open-profiles-dialog"] = "Ouvrir la boîte de dialogue des profils",
+	["options:spells:add-new-spell"] = "Ajouter nouveau sort (nom ou id):",
+	["options:spells:add-spell"] = "Ajouter sort ",
+	["options:spells:click-to-select-spell"] = "Cliquer pour sélectionner le sort",
+	["options:spells:cooldown-time"] = "Temps de recharge ",
+	["options:spells:delete-all-spells"] = "Supprimer tout les sorts ",
+	["options:spells:delete-all-spells-confirmation"] = "Êtes-vous sûr de vouloir supprimer TOUT les sorts ?",
+	["options:spells:delete-spell"] = "Supprimer sort",
+	["options:spells:disable-all-spells"] = "Désactiver tout les sorts ",
+	["options:spells:enable-all-spells"] = "Activer tout les sorts ",
+	["options:spells:enable-tracking-of-this-spell"] = "Activer le suivi de ce sort ",
+	["options:spells:icon-glow"] = "Surbrillance de l'icône désactivée",
+	["options:spells:icon-glow-always"] = "L'icône sera en surbrillance si le sort est en rechargement ",
+	["options:spells:icon-glow-threshold"] = "l'icône sera en surbrillance uniquement si le temps restant est inférieur à",
+	["options:spells:please-push-once-more"] = "Merci d'appuyer une fois de plus",
+	["options:spells:track-only-this-spellid"] = "Suivre uniquement l'ID de ces sort",
 	["Profile '%s' has been successfully deleted"] = "Le profile '%s' a été effacé.",
 	["Profiles"] = "Profiles",
-	["Show border around interrupts"] = "Afficher les bordures autour des interruptions",
-	["Show border around trinkets"] = "Afficher les bordures autour des bijoux",
+	["Show border around interrupts"] = "Afficher une bordure autour des interruptions",
+	["Show border around trinkets"] = "Afficher une bordure autour des bijoux",
 	["Unknown spell: %s"] = "Sort inconnu : %s",
 	["Value must be a number"] = "La valeur doit être un nombre"
 },
@@ -419,6 +397,10 @@ There are updated cooldowns for some of your spells. Do you want to apply update
 There are updated cooldowns for some of your spells. Do you want to apply update?]=],
 	["New spell has been added: %s"] = "Una nuova magia è stata aggiunta: %s",
 	["Options are not available in combat!"] = "Non è possibile accedere alle opzioni in combattimento!",
+	--[[Translation missing --]]
+	["options:borders:show-blizz-borders"] = "Show Blizzard's borders around icons",
+	--[[Translation missing --]]
+	["options:category:borders"] = "Borders",
 	--[[Translation missing --]]
 	["options:category:spells"] = "Spells",
 	--[[Translation missing --]]
@@ -528,6 +510,10 @@ There are updated cooldowns for some of your spells. Do you want to apply update
 	["New spell has been added: %s"] = "새로운 주문이 추가되었습니다: %s",
 	["Options are not available in combat!"] = "전투 중에는 옵션을 사용할 수 없습니다!",
 	--[[Translation missing --]]
+	["options:borders:show-blizz-borders"] = "Show Blizzard's borders around icons",
+	--[[Translation missing --]]
+	["options:category:borders"] = "Borders",
+	--[[Translation missing --]]
 	["options:category:spells"] = "Spells",
 	--[[Translation missing --]]
 	["options:general:disable-addon-btn"] = "Disable addon",
@@ -614,6 +600,10 @@ There are updated cooldowns for some of your spells. Do you want to apply update
 	["msg:question:import-existing-spells"] = [=[NameplateCooldowsExistem recargas atualizadas para algumas de seus feitiços. Você deseja atualizar?]=],
 	["New spell has been added: %s"] = "Um novo feitiço foi adicionado: %s",
 	["Options are not available in combat!"] = "Opções não estão disponíveis em combate!",
+	--[[Translation missing --]]
+	["options:borders:show-blizz-borders"] = "Show Blizzard's borders around icons",
+	--[[Translation missing --]]
+	["options:category:borders"] = "Borders",
 	["options:category:spells"] = "Feitiços",
 	["options:general:disable-addon-btn"] = "Desativar addon",
 	["options:general:enable-addon-btn"] = "Ativar addon",
@@ -682,6 +672,8 @@ There are updated cooldowns for some of your spells. Do you want to apply update
 	["msg:question:import-existing-spells"] = [=[NameplateCooldownsДоступны обновленные значения кулдаунов для некоторых ваших заклинаний. Хотите применить обновление?]=],
 	["New spell has been added: %s"] = "Добавлено новое заклинание: %s",
 	["Options are not available in combat!"] = "Настройки недоступны, пока идет бой!",
+	["options:borders:show-blizz-borders"] = "Показывать стандартные границы иконок",
+	["options:category:borders"] = "Границы",
 	["options:category:spells"] = "Заклинания",
 	["options:general:disable-addon-btn"] = "Отключить аддон",
 	["options:general:enable-addon-btn"] = "Включить аддон",
@@ -703,8 +695,7 @@ There are updated cooldowns for some of your spells. Do you want to apply update
 	["options:spells:icon-glow"] = "Подсветка иконки выключена",
 	["options:spells:icon-glow-always"] = "Подсветка иконки включена постоянно",
 	["options:spells:icon-glow-threshold"] = [=[Иконка будет подсвечиваться если оставшеесявремя кулдауна меньше чем]=],
-	--[[Translation missing --]]
-	["options:spells:please-push-once-more"] = "Please push once more",
+	["options:spells:please-push-once-more"] = "Нажмите ещё раз",
 	["options:spells:track-only-this-spellid"] = [=[Отслеживать только эти id заклинания(разделять запятыми)]=],
 	["Profile '%s' has been successfully deleted"] = "Профиль '%s' успешно удален",
 	["Profiles"] = "Профили",
@@ -750,6 +741,10 @@ There are updated cooldowns for some of your spells. Do you want to apply update
 	["msg:question:import-existing-spells"] = [=[NameplateCooldowns你的某些法术冷却已更新，是否要应用更新?]=],
 	["New spell has been added: %s"] = "新的法术已添加：%s",
 	["Options are not available in combat!"] = "选项在战斗中不可用！",
+	--[[Translation missing --]]
+	["options:borders:show-blizz-borders"] = "Show Blizzard's borders around icons",
+	--[[Translation missing --]]
+	["options:category:borders"] = "Borders",
 	["options:category:spells"] = "法术",
 	["options:general:disable-addon-btn"] = "禁用插件",
 	["options:general:enable-addon-btn"] = "启用插件",
@@ -818,6 +813,8 @@ There are updated cooldowns for some of your spells. Do you want to apply update
 	["msg:question:import-existing-spells"] = [=[NameplateCooldowns你的某些法術冷卻已更新，是否要套用更新?]=],
 	["New spell has been added: %s"] = "已加入新的法術：%s",
 	["Options are not available in combat!"] = "戰鬥中無法調整設定!",
+	["options:borders:show-blizz-borders"] = "圖示周圍顯示暴雪預設的邊框。",
+	["options:category:borders"] = "邊框",
 	["options:category:spells"] = "法術",
 	["options:general:disable-addon-btn"] = "停用插件",
 	["options:general:enable-addon-btn"] = "啟用插件",
@@ -918,7 +915,9 @@ local locales = {
 		["Show border around interrupts"] = "Show border around interrupts",
 		["Show border around trinkets"] = "Show border around trinkets",
 		["Unknown spell: %s"] = "Unknown spell: %s",
-		["Value must be a number"] = "Value must be a number"
+		["Value must be a number"] = "Value must be a number",
+		["options:category:borders"] = "Borders",
+		["options:borders:show-blizz-borders"] = "Show Blizzard's borders around icons",
 	},
 	["ruRU"] = 
 {
@@ -985,7 +984,9 @@ local locales = {
 	["Show border around interrupts"] = "Показывать контур вокруг прерываний",
 	["Show border around trinkets"] = "Показывать контур вокруг тринкетов",
 	["Unknown spell: %s"] = "Неизвестное заклинание: %s",
-	["Value must be a number"] = "Значение должно быть числом"
+	["Value must be a number"] = "Значение должно быть числом",
+	["options:category:borders"] = "Границы",
+	["options:borders:show-blizz-borders"] = "Показывать стандартные границы иконок",
 },
 };
 --@end-debug@]===]

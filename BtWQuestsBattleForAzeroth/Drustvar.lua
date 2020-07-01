@@ -2388,35 +2388,14 @@ BtWQuestsDatabase:AddChain(Chain.Chain06, {
         visible = false,
     },
     active = {
-        {
-            type = "quest",
-            id = 47945,
-            status = {"active", "completed"},
-        },
-        {
-            type = "quest",
-            id = 47946,
-            status = {"active", "completed"},
-        },
-        {
-            type = "quest",
-            id = 47947,
-            status = {"active", "completed"},
-        },
-        {
-            type = "quest",
-            id = 47948,
-            status = {"active", "completed"},
-        },
-        {
-            type = "quest",
-            id = 47949,
-            status = {"active", "completed"},
-        },
+        type = "quest",
+        ids = {47945, 47946, 47947, 47948, 47949},
+        status = {"active", "completed"},
     },
     completed = {
         type = "quest",
-        id = 47950,
+        ids = {47946, 47947, 47948, 47950},
+        count = 4,
     },
     rewards = {
         {
@@ -2438,6 +2417,14 @@ BtWQuestsDatabase:AddChain(Chain.Chain06, {
     },
     items = {
         {
+            type = "object",
+            id = 277459,
+            x = 0,
+            connections = {
+                2,
+            },
+        },
+        {
             variations = {
                 {
                     type = "quest",
@@ -2449,53 +2436,36 @@ BtWQuestsDatabase:AddChain(Chain.Chain06, {
                     id = 124786,
                 }
             },
-            x = 3,
+            x = 4,
             y = 0,
             connections = {
-                1, 2, 3, 4,
+                2, 3, 4,
             },
         },
         {
             type = "quest",
-            id = 47946,
+            id = 47949,
             x = 0,
-            y = 1,
             connections = {
                 4,
             },
         },
         {
             type = "quest",
+            id = 47946,
+        },
+        {
+            type = "quest",
             id = 47947,
-            x = 2,
-            y = 1,
-            connections = {
-                3,
-            },
         },
         {
             type = "quest",
             id = 47948,
-            x = 4,
-            y = 1,
-            connections = {
-                2,
-            },
-        },
-        {
-            type = "quest",
-            id = 47949,
-            x = 6,
-            y = 1,
-            connections = {
-                1,
-            },
         },
         {
             type = "quest",
             id = 47950,
-            x = 3,
-            y = 2,
+            x = 0,
         },
     },
 })

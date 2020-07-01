@@ -8,7 +8,7 @@ local Trinkets = addonTable.Trinkets;
 local Reductions = addonTable.Reductions;
 
 --@non-debug@
-local buildTimestamp = "80205.1-release";
+local buildTimestamp = "80300.2-release";
 --@end-non-debug@
 
 local LRD = LibStub("LibRedDropdown-1.0");
