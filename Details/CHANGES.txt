@@ -1,22 +1,14 @@
-lightweight tag 168056cffb2a84399bb7c8105b4d0b4060ef33ca DetailsRetail.8.3.0.7345a.141
+lightweight tag 72ddfe8202a7d6e86c0eb791017ca17dae93966e DetailsRetail.8.3.0.7346.141
 Author:	Tercio Jose <terciob19@hotmail.com>
-Date:	Tue Jun 30 14:35:02 2020 -0300
+Date:	Wed Jul 1 12:54:30 2020 -0300
 
-commit 168056cffb2a84399bb7c8105b4d0b4060ef33ca
+commit 72ddfe8202a7d6e86c0eb791017ca17dae93966e
 Author: Tercio Jose <terciob19@hotmail.com>
-Date:   Tue Jun 30 14:35:02 2020 -0300
+Date:   Wed Jul 1 12:54:30 2020 -0300
 
-    More fixes for hiding issues
-
-commit 9b03c8184e619d375e1b414795271761acc2b6ce
-Author: Tercio Jose <terciob19@hotmail.com>
-Date:   Tue Jun 30 14:24:46 2020 -0300
-
-    Fix for some Hiding issues
-
-commit 1d980f085e28f876c73d293d5365c8b490987abd
-Author: Tercio Jose <terciob19@hotmail.com>
-Date:   Mon Jun 29 19:51:35 2020 -0300
-
-    Search first for Female Declensions
+    Another round of general bug fixes
+    
+    - Added Abyssal  Healing Potion.
+    - Fixed healing done targets on the breakdown window.
+    - Fixed hovering bars when the window is embed into the chat window.
 
