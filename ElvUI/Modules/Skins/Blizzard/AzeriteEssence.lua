@@ -1,18 +1,17 @@
 local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local S = E:GetModule('Skins')
 
---Lua functions
 local _G = _G
 local pairs = pairs
---WoW API / Variables
+
 local C_AzeriteEssence_CanOpenUI = C_AzeriteEssence.CanOpenUI
 
 function S:Blizzard_AzeriteEssenceUI()
-	if not (E.private.skins.blizzard.enable and E.private.skins.blizzard.AzeriteEssence) then return end
+	if not (E.private.skins.blizzard.enable and E.private.skins.blizzard.azeriteEssence) then return end
 	if not C_AzeriteEssence_CanOpenUI() then return end
 
 	local AzeriteEssenceUI = _G.AzeriteEssenceUI
-	S:HandlePortraitFrame(AzeriteEssenceUI, true)
+	S:HandlePortraitFrame(AzeriteEssenceUI)
 
 	-- Reposition the Level Badge
 	AzeriteEssenceUI.PowerLevelBadgeFrame:ClearAllPoints()
@@ -31,11 +30,11 @@ function S:Blizzard_AzeriteEssenceUI()
 		button:StyleButton()
 
 		S:HandleIcon(button.Icon)
-		button.Icon:Point("LEFT", button, "LEFT", 6, 0)
+		button.Icon:Point('LEFT', button, 'LEFT', 6, 0)
 
 		button:CreateBackdrop()
-		button.backdrop:Point("TOPLEFT", 2, -3)
-		button.backdrop:Point("BOTTOMRIGHT", -2, 3)
+		button.backdrop:Point('TOPLEFT', 2, -3)
+		button.backdrop:Point('BOTTOMRIGHT', -2, 3)
 	end
 
 	-- Header on the Essence List

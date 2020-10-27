@@ -1,25 +1,23 @@
 local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local S = E:GetModule('Skins')
 
---Lua functions
 local _G = _G
---WoW API / Variables
 
 --Just some test code
 --[[
 local talkingHeadTextureKitRegionFormatStrings = {
-	["TextBackground"] = "%s-TextBackground",
-	["Portrait"] = "%s-PortraitFrame",
+	TextBackground = '%s-TextBackground',
+	Portrait = '%s-PortraitFrame',
 }
 local talkingHeadDefaultAtlases = {
-	["TextBackground"] = "TalkingHeads-TextBackground",
-	["Portrait"] = "TalkingHeads-Alliance-PortraitFrame",
+	TextBackground = 'TalkingHeads-TextBackground',
+	Portrait = 'TalkingHeads-Alliance-PortraitFrame',
 }
 local talkingHeadFontColor = {
-	["TalkingHeads-Horde"] = {Name = CreateColor(0.28, 0.02, 0.02), Text = CreateColor(0.0, 0.0, 0.0), Shadow = CreateColor(0.0, 0.0, 0.0, 0.0)},
-	["TalkingHeads-Alliance"] = {Name = CreateColor(0.02, 0.17, 0.33), Text = CreateColor(0.0, 0.0, 0.0), Shadow = CreateColor(0.0, 0.0, 0.0, 0.0)},
-	["TalkingHeads-Neutral"] = {Name = CreateColor(0.33, 0.16, 0.02), Text = CreateColor(0.0, 0.0, 0.0), Shadow = CreateColor(0.0, 0.0, 0.0, 0.0)},
-	["Normal"] = {Name = CreateColor(1, 0.82, 0.02), Text = CreateColor(1, 1, 1), Shadow = CreateColor(0.0, 0.0, 0.0, 1.0)},
+	['TalkingHeads-Horde'] = {Name = CreateColor(0.28, 0.02, 0.02), Text = CreateColor(0.0, 0.0, 0.0), Shadow = CreateColor(0.0, 0.0, 0.0, 0.0)},
+	['TalkingHeads-Alliance'] = {Name = CreateColor(0.02, 0.17, 0.33), Text = CreateColor(0.0, 0.0, 0.0), Shadow = CreateColor(0.0, 0.0, 0.0, 0.0)},
+	['TalkingHeads-Neutral'] = {Name = CreateColor(0.33, 0.16, 0.02), Text = CreateColor(0.0, 0.0, 0.0), Shadow = CreateColor(0.0, 0.0, 0.0, 0.0)},
+	['Normal'] = {Name = CreateColor(1, 0.82, 0.02), Text = CreateColor(1, 1, 1), Shadow = CreateColor(0.0, 0.0, 0.0, 1.0)},
 }
 
 --test
@@ -27,11 +25,11 @@ function TestTalkingHead()
 	local frame = TalkingHeadFrame;
 	local model = frame.MainFrame.Model;
 
-	if( frame.finishTimer ) then
+	if frame.finishTimer then
 		frame.finishTimer:Cancel();
 		frame.finishTimer = nil;
 	end
-	if ( frame.voHandle ) then
+	if frame.voHandle then
 		StopSound(frame.voHandle);
 		frame.voHandle = nil;
 	end
@@ -45,22 +43,22 @@ function TestTalkingHead()
 	duration = 20.220001220703
 	lineNumber = 0
 	numLines = 4
-	name = "Some Ugly Woman"
-	text = "Testing this sheet out Testing this sheet out Testing this sheet out Testing this sheet out Testing this sheet out Testing this sheet out Testing this sheet out "
+	name = 'Some Ugly Woman'
+	text = 'Testing this sheet out Testing this sheet out Testing this sheet out Testing this sheet out Testing this sheet out Testing this sheet out Testing this sheet out '
 	isNewTalkingHead = true
 	textureKitID = 0
 
 	local textFormatted = format(text);
-	if ( displayInfo and displayInfo ~= 0 ) then
+	if displayInfo and displayInfo ~= 0 then
 		local textureKit;
-		if ( textureKitID ~= 0 ) then
+		if textureKitID ~= 0 then
 			SetupTextureKits(textureKitID, frame.BackgroundFrame, talkingHeadTextureKitRegionFormatStrings, false, true);
 			SetupTextureKits(textureKitID, frame.PortraitFrame, talkingHeadTextureKitRegionFormatStrings, false, true);
 			textureKit = GetUITextureKitInfo(textureKitID);
 		else
 			SetupAtlasesOnRegions(frame.BackgroundFrame, talkingHeadDefaultAtlases, true);
 			SetupAtlasesOnRegions(frame.PortraitFrame, talkingHeadDefaultAtlases, true);
-			textureKit = "Normal";
+			textureKit = 'Normal';
 		end
 		local nameColor = talkingHeadFontColor[textureKit].Name;
 		local textColor = talkingHeadFontColor[textureKit].Text;
@@ -70,22 +68,22 @@ function TestTalkingHead()
 		frame.TextFrame.Text:SetTextColor(textColor:GetRGB());
 		frame.TextFrame.Text:SetShadowColor(shadowColor:GetRGBA());
 		frame:Show();
-		if ( currentDisplayInfo ~= displayInfo ) then
+		if currentDisplayInfo ~= displayInfo then
 			model.uiCameraID = cameraID;
 			model:SetDisplayInfo(displayInfo);
 		else
-			if ( model.uiCameraID ~= cameraID ) then
+			if model.uiCameraID ~= cameraID then
 				model.uiCameraID = cameraID;
 				Model_ApplyUICamera(model, model.uiCameraID);
 			end
 			TalkingHeadFrame_SetupAnimations(model);
 		end
 
-		if ( isNewTalkingHead ) then
+		if isNewTalkingHead then
 			TalkingHeadFrame_Reset(frame, textFormatted, name);
 			TalkingHeadFrame_FadeinFrames();
 		else
-			if ( name ~= frame.NameFrame.Name:GetText() ) then
+			if name ~= frame.NameFrame.Name:GetText() then
 				-- Fade out the old name and fade in the new name
 				frame.NameFrame.Fadeout:Play();
 				E:Delay(0.25, frame.NameFrame.Name.SetText, frame.NameFrame.Name, name);
@@ -94,7 +92,7 @@ function TestTalkingHead()
 				frame.MainFrame.TalkingHeadsInAnim:Play();
 			end
 
-			if ( textFormatted ~= frame.TextFrame.Text:GetText() ) then
+			if textFormatted ~= frame.TextFrame.Text:GetText() then
 				-- Fade out the old text and fade in the new text
 				frame.TextFrame.Fadeout:Play();
 				E:Delay(0.25, frame.TextFrame.Text.SetText, frame.TextFrame.Text, textFormatted);
@@ -102,8 +100,8 @@ function TestTalkingHead()
 			end
 		end
 
-		local success, voHandle = PlaySound(vo, "Talking Head", true, true);
-		if ( success ) then
+		local success, voHandle = PlaySound(vo, 'Talking Head', true, true);
+		if success then
 			frame.voHandle = voHandle;
 		end
 	end
@@ -122,16 +120,16 @@ function S:Blizzard_TalkingHeadUI()
 	if E.db.general.talkingHeadFrameBackdrop then
 		TalkingHeadFrame:StripTextures()
 		TalkingHeadFrame.MainFrame:StripTextures()
-		TalkingHeadFrame:CreateBackdrop("Transparent")
+		TalkingHeadFrame:CreateBackdrop('Transparent')
 
 		local button = TalkingHeadFrame.MainFrame.CloseButton
 		S:HandleCloseButton(button)
 		button:ClearAllPoints()
 		button:Point('TOPRIGHT', TalkingHeadFrame.BackgroundFrame, 'TOPRIGHT', 0, -2)
 	else
-		TalkingHeadFrame.MainFrame.Model:CreateBackdrop("Transparent")
+		TalkingHeadFrame.MainFrame.Model:CreateBackdrop('Transparent')
 		TalkingHeadFrame.MainFrame.Model.backdrop:ClearAllPoints()
-		TalkingHeadFrame.MainFrame.Model.backdrop:Point("CENTER")
+		TalkingHeadFrame.MainFrame.Model.backdrop:Point('CENTER')
 		TalkingHeadFrame.MainFrame.Model.backdrop:Size(120, 119)
 
 		TalkingHeadFrame.MainFrame.CloseButton:Kill()

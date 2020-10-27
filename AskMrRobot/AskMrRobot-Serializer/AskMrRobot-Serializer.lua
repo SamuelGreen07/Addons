@@ -1,6 +1,6 @@
 -- AskMrRobot-Serializer will serialize and communicate character data between users.
 
-local MAJOR, MINOR = "AskMrRobot-Serializer", 86
+local MAJOR, MINOR = "AskMrRobot-Serializer", 92
 local Amr, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not Amr then return end -- already loaded by something else
@@ -160,7 +160,8 @@ Amr.InstanceIds = {
 	Dazar = 2070,
 	Storms = 2096,
 	Palace = 2164,
-	Nyalotha = 2217
+	Nyalotha = 2217,
+	Nathria = 2296
 }
 
 -- instances that AskMrRobot currently supports logging for
@@ -169,7 +170,8 @@ Amr.SupportedInstanceIds = {
 	[2070] = true,
 	[2096] = true,
 	[2164] = true,
-	[2217] = true
+	[2217] = true,
+	[2296] = true
 }
 
 
@@ -208,9 +210,10 @@ function Amr.ParseItemLink(itemLink)
     -- part 8 is some unique ID... we never really used it
     -- part 9 is current player level
 	-- part 10 is player spec
-	local upgradeIdType = tonumber(parts[11]) or 0 -- part 11 indicates what kind of upgrade ID is just after the bonus IDs
+	-- unsure what 11 is now  --local upgradeIdType = tonumber(parts[11]) or 0 -- part 11 indicates what kind of upgrade ID is just after the bonus IDs
     -- part 12 is instance difficulty id
-    
+	
+	-- 13 is num bonus IDs, followed by bonus IDs
     local numBonuses = tonumber(parts[13]) or 0
 	local offset = numBonuses
     if numBonuses > 0 then
@@ -219,13 +222,24 @@ function Amr.ParseItemLink(itemLink)
 	
 	item.upgradeId = 0
 	item.level = 0
-	
-	-- the next part after bonus IDs depends on the upgrade id type
-	if upgradeIdType == 4 then
-		item.upgradeId = tonumber(parts[14 + offset]) or 0
-	elseif upgradeIdType == 512 then
-		item.level = tonumber(parts[14 + offset]) or 0
-	elseif #parts > 16 + offset then
+
+	-- part 14 + numBonuses, unsure what this is... sometimes it is "2"
+	-- part 15 + numBonuses, unsure what this is... may indicate what part 16 will mean?
+	-- part 16 + numBonuses, is player level at drop when applicable
+	-- part 17 + numBonuses, unsure what this is...
+	-- part 18 + numBonuses, unsure what this is...
+	-- part 19 + numBonuses, relic info would be here for legion artifacts
+
+	local someNumber = tonumber(parts[15 + offset]) or 0
+	if someNumber ~= 0 then
+		local lvl = tonumber(parts[16 + offset]) or 0
+		if lvl <= 60 then
+			item.level = lvl
+		end
+	end
+
+	-- we don't need relic information anymore
+	--[[elseif #parts > 19 + offset then
 		-- check for relic info
 		item.relicBonusIds = { nil, nil, nil }
 		numBonuses = tonumber(parts[16 + offset])
@@ -254,7 +268,7 @@ function Amr.ParseItemLink(itemLink)
 				end
 			end
 		end
-	end
+	end]]
 	
     return item
 end
@@ -387,6 +401,7 @@ local function dump(o)
 	end
 end
 
+--[[
 -- read azerite powers on the item in loc and put it on itemData
 function Amr.ReadAzeritePowers(loc)
 	local ret = {}
@@ -409,6 +424,7 @@ function Amr.ReadAzeritePowers(loc)
 		return nil
 	end
 end
+]]
 
 -- get currently equipped items, store with currently active spec
 local function readEquippedItems(ret)
@@ -420,6 +436,7 @@ local function readEquippedItems(ret)
 		if itemLink then
 			local itemData = Amr.ParseItemLink(itemLink)
 			if itemData then
+				--[[
 				-- see if this is an azerite item and read azerite power ids
 				loc:SetEquipmentSlot(slotId)
 				if C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItem(loc) then
@@ -428,6 +445,7 @@ local function readEquippedItems(ret)
 						itemData.azerite = powers
 					end
 				end
+				]]
 
 				equippedItems[slotId] = itemData
 			end
@@ -438,6 +456,7 @@ local function readEquippedItems(ret)
 	ret.Equipped[GetSpecialization()] = equippedItems
 end
 
+--[[
 local function readHeartOfAzerothLevel(ret)
 	local azeriteItemLocation = C_AzeriteItem.FindActiveAzeriteItem();	
 	if azeriteItemLocation then 
@@ -447,6 +466,7 @@ local function readHeartOfAzerothLevel(ret)
 		ret.HeartOfAzerothLevel = 0
 	end	
 end
+]]
 
 -- Get just the player's currently equipped gear
 function Amr:GetEquipped()
@@ -477,7 +497,7 @@ function Amr:GetPlayerData()
 	ret.Guild = GetGuildInfo("player")
     ret.ActiveSpec = GetSpecialization()
     ret.Level = UnitLevel("player");
-	readHeartOfAzerothLevel(ret)
+	--readHeartOfAzerothLevel(ret)
 	
     local _, clsEn = UnitClass("player")
     ret.Class = clsEn;
@@ -500,8 +520,8 @@ function Amr:GetPlayerData()
 	readSpecs(ret)
 
 	-- these get updated later, since need to cache info for inactive specs
-	ret.UnlockedEssences = {}
-	ret.Essences = {}
+	--ret.UnlockedEssences = {}
+	--ret.Essences = {}
 	
 	ret.Equipped = {}	
 	readEquippedItems(ret)
@@ -551,7 +571,7 @@ local function appendItemsToExport(fields, itemObjects)
     local prevUpgradeId = 0
     local prevBonusId = 0
 	local prevLevel = 0
-	local prevAzeriteId = 0
+	--local prevAzeriteId = 0
 	local prevRelicBonusId = 0
     for i, itemData in ipairs(itemObjects) do
         local itemParts = {}
@@ -576,13 +596,15 @@ local function appendItemsToExport(fields, itemObjects)
             end
 		end
 		
+		--[[
 		if itemData.azerite then
 			for aIndex, aValue in ipairs(itemData.azerite) do
                 table.insert(itemParts, "a" .. (aValue - prevAzeriteId))
                 prevAzeriteId = aValue
             end
 		end
-		
+		]]
+
 		if itemData.gemIds[1] ~= 0 then 
 			table.insert(itemParts, "x" .. (itemData.gemIds[1] - prevGemId))
 			prevGemId = itemData.gemIds[1]
@@ -671,8 +693,7 @@ function Amr:SerializePlayerData(data, complete)
     table.insert(fields, raceval)
     
 	table.insert(fields, data.Level)
-	table.insert(fields, data.HeartOfAzerothLevel)
-    
+
     local profs = {}
     local noprofs = true
     if data.Professions then
@@ -698,7 +719,9 @@ function Amr:SerializePlayerData(data, complete)
             table.insert(fields, ".s" .. spec) -- indicates the start of a spec block
 			table.insert(fields, data.Specs[spec])
 			table.insert(fields, data.Talents[spec] or "")
-			
+			table.insert(fields, data.ActiveSoulbinds and data.ActiveSoulbinds[spec] or "0")
+
+			--[[
 			local essences = {}
 			if data.Essences and data.Essences[spec] then
 				for i, ess in ipairs(data.Essences[spec]) do
@@ -706,6 +729,7 @@ function Amr:SerializePlayerData(data, complete)
 				end
 			end
 			table.insert(fields, table.concat(essences, "_"))
+			]]
         end
     end
     
@@ -726,6 +750,26 @@ function Amr:SerializePlayerData(data, complete)
         end
 	end
 
+	-- export soulbind tree info
+	if data.Soulbinds then
+		table.insert(fields, ".sol")
+		for soulbindId, soulbindData in pairs(data.Soulbinds) do
+			table.insert(fields, string.format("u.%s.%s", soulbindId, soulbindData.UnlockedTier))
+			for tier, node in pairs(soulbindData.Nodes) do
+				table.insert(fields, table.concat(node, "."))
+			end
+		end
+	end
+
+	-- export unlocked conduits
+	if data.UnlockedConduits then
+		table.insert(fields, ".con")
+		for i, conduit in ipairs(data.UnlockedConduits) do
+			table.insert(fields, table.concat(conduit, "."))
+		end
+	end
+
+	--[[
 	-- export unlocked essences
 	if data.UnlockedEssences then
 		table.insert(fields, ".ess")
@@ -733,7 +777,8 @@ function Amr:SerializePlayerData(data, complete)
 			table.insert(fields, table.concat(ess, "_"))
 		end
 	end
-    
+	]]
+	
     -- if doing a complete export, include bank/bag items too
 	if complete then
 		    

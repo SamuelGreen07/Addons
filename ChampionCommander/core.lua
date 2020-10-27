@@ -45,8 +45,16 @@ local OHFTOPLEFT=OHF.GarrCorners.TopLeftGarrCorner
 local OHFTOPRIGHT=OHF.GarrCorners.TopRightGarrCorner
 local OHFBOTTOMLEFT=OHF.GarrCorners.BottomTopLeftGarrCorner
 local OHFBOTTOMRIGHT=OHF.GarrCorners.BottomRightGarrCorner
-local followerType=LE_FOLLOWER_TYPE_GARRISON_8_0
-local garrisonType=LE_GARRISON_TYPE_8_0
+local LE_FOLLOWER_TYPE_GARRISON_6_0=Enum.GarrisonFollowerType.FollowerType_6_0
+local LE_FOLLOWER_TYPE_SHIPYARD_6_2=Enum.GarrisonFollowerType.FollowerType_6_2
+local LE_FOLLOWER_TYPE_GARRISON_7_0=Enum.GarrisonFollowerType.FollowerType_7_0
+local LE_FOLLOWER_TYPE_GARRISON_8_0=Enum.GarrisonFollowerType.FollowerType_8_0
+local LE_GARRISON_TYPE_6_0=Enum.GarrisonType.Type_6_0
+local LE_GARRISON_TYPE_6_2=Enum.GarrisonType.Type_6_2
+local LE_GARRISON_TYPE_7_0=Enum.GarrisonType.Type_7_0
+local LE_GARRISON_TYPE_8_0=Enum.GarrisonType.Type_8_0
+local followerType=Enum.GarrisonFollowerType.FollowerType_8_0
+local garrisonType=Enum.GarrisonType.Type_8_0
 local FAKE_FOLLOWERID="0x0000000000000000"
 local MAX_LEVEL=110
 
@@ -69,8 +77,6 @@ dprint=function() end
 ddump=function() end
 local print=function() end
 --@end-non-debug@
-local LE_FOLLOWER_TYPE_GARRISON_8_0=LE_FOLLOWER_TYPE_GARRISON_8_0
-local LE_GARRISON_TYPE_8_0=LE_GARRISON_TYPE_8_0
 local GARRISON_FOLLOWER_COMBAT_ALLY=GARRISON_FOLLOWER_COMBAT_ALLY
 local GARRISON_FOLLOWER_ON_MISSION=GARRISON_FOLLOWER_ON_MISSION
 local GARRISON_FOLLOWER_INACTIVE=GARRISON_FOLLOWER_INACTIVE
@@ -120,7 +126,6 @@ BFA- OrderHallMissionFrame.FollowerTab.XPBar : OnShow :  table: 00000000335585D0
 -- Upvalued functions
 local GetItemInfo=GetItemInfo
 --if I then GetItemInfo=I:GetCachingGetItemInfo() end
-local GetCurrencyInfo=GetCurrencyInfo
 local tostring=tostring
 local tostringall=tostringall
 local strjoin=strjoin
@@ -134,10 +139,10 @@ local menu
 local menuType="BFAMenu"
 local menuOptions={mission={},follower={}}
 local _G=_G
+
 function addon:ApplyMOVEPANEL(value)
 	OHF:SetMovable(value)
 end
-
 function addon:OnInitialized()
   _G.dbBFAperChar=_G.dbBFAperChar or {}
   if type(self.db.global.tutorialStep)~="number" then
@@ -291,6 +296,7 @@ function addon:MarkAsSeen(key)
 	db.news[key]=true
 	if newsframes[key] then newsframes[key]:Hide() end
 end
+
 
 if not _G.BFA then
 _G.BFA=addon

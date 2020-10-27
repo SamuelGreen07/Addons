@@ -1,10 +1,9 @@
 local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local S = E:GetModule('Skins')
 
---Lua functions
 local _G = _G
 local unpack, select = unpack, select
---WoW API / Variables
+
 local CreateFrame = CreateFrame
 local GetItemInfo = GetItemInfo
 local GetItemQualityColor = GetItemQualityColor
@@ -20,13 +19,13 @@ local QUESTS_LABEL = QUESTS_LABEL
 local TEXTURE_ITEM_QUEST_BORDER = TEXTURE_ITEM_QUEST_BORDER
 
 local function UpdateBorderColors(button)
-	button:SetBackdropBorderColor(unpack(E.media.bordercolor))
+	button.backdrop:SetBackdropBorderColor(unpack(E.media.bordercolor))
 
 	if button.type and button.type == QUESTS_LABEL then
-		button:SetBackdropBorderColor(1, 0.2, 0.2)
+		button.backdrop:SetBackdropBorderColor(1, 0.2, 0.2)
 	elseif button.quality and button.quality > 1 then
 		local r, g, b = GetItemQualityColor(button.quality)
-		button:SetBackdropBorderColor(r, g, b)
+		button.backdrop:SetBackdropBorderColor(r, g, b)
 	end
 end
 
@@ -39,9 +38,9 @@ local function SkinButton(button)
 			end
 		end
 
-		button:SetTemplate(nil, true)
+		button:CreateBackdrop()
 		button:StyleButton()
-		button.IconBorder:SetAlpha(0)
+		button.IconBorder:Kill()
 
 		local icon = button.icon
 		icon:SetInside()
@@ -68,7 +67,7 @@ local function SkinBagButtons(container, button)
 
 	local texture, _, _, _, _, _, itemLink = GetContainerItemInfo(container:GetID(), button:GetID())
 	local isQuestItem, questId = GetContainerItemQuestInfo(container:GetID(), button:GetID())
-	_G[button:GetName().."IconTexture"]:SetTexture(texture)
+	_G[button:GetName()..'IconTexture']:SetTexture(texture)
 
 	button.type = nil
 	button.quality = nil
@@ -98,7 +97,7 @@ end
 local function SkinContainer(container)
 	if container and container.size then
 		for b=1, container.size, 1 do
-			local button = _G[container:GetName().."Item"..b]
+			local button = _G[container:GetName()..'Item'..b]
 			if button then
 				SkinBagButtons(container, button)
 			end
@@ -108,23 +107,23 @@ end
 
 local function SkinBags()
 	for i = 1, NUM_CONTAINER_FRAMES, 1 do
-		local container = _G["ContainerFrame"..i]
+		local container = _G['ContainerFrame'..i]
 		if container and not container.backdrop then
-			container:SetFrameStrata("HIGH")
+			container:SetFrameStrata('HIGH')
 			container:StripTextures(true)
-			container:CreateBackdrop("Transparent")
+			container:CreateBackdrop('Transparent')
 			container.backdrop:SetInside()
-			S:HandleCloseButton(_G[container:GetName().."CloseButton"])
+			S:HandleCloseButton(_G[container:GetName()..'CloseButton'])
 			S:HandleButton(container.PortraitButton)
 			container.PortraitButton:Size(35)
 			container.PortraitButton.Highlight:SetAlpha(0)
-			container:HookScript("OnShow", SkinContainer)
+			container:HookScript('OnShow', SkinContainer)
 
 			if i == 1 then
 				_G.BackpackTokenFrame:StripTextures(true)
 
 				for j = 1, MAX_WATCHED_TOKENS do
-					local token = _G["BackpackTokenFrameToken"..j]
+					local token = _G['BackpackTokenFrameToken'..j]
 					token:CreateBackdrop()
 					token.backdrop:SetOutside(token.icon)
 					token.icon:SetTexCoord(unpack(E.TexCoords))
@@ -144,20 +143,20 @@ function S:ContainerFrame()
 	S:HandleTab(_G.BankFrameTab1)
 	S:HandleTab(_G.BankFrameTab2)
 	S:HandleButton(_G.ReagentBankFrame.DespositButton)
-	_G.ReagentBankFrame:HookScript("OnShow", function(b)
+	_G.ReagentBankFrame:HookScript('OnShow', function(b)
 		b:StripTextures()
 	end)
 
 	hooksecurefunc('ContainerFrame_Update', function(frame)
 		local frameName = frame:GetName()
 		for i=1, frame.size, 1 do
-			local questTexture = _G[frameName.."Item"..i.."IconQuestTexture"];
+			local questTexture = _G[frameName..'Item'..i..'IconQuestTexture'];
 			if questTexture:IsShown() and questTexture:GetTexture() == TEXTURE_ITEM_QUEST_BORDER then
 				questTexture:Hide()
 			end
 		end
 
-		local title = _G[frameName.."Name"]
+		local title = _G[frameName..'Name']
 		if title and title.GetText then
 			local name = title:GetText()
 			if bagIconCache[name] then
@@ -177,22 +176,22 @@ function S:ContainerFrame()
 
 	--Bank
 	local BankFrame = _G.BankFrame
-	hooksecurefunc("BankFrameItemButton_Update", function(button)
+	hooksecurefunc('BankFrameItemButton_Update', function(button)
 		if not BankFrame.backdrop then
 			BankFrame:StripTextures(true)
-			BankFrame:SetTemplate('Transparent')
+			BankFrame:CreateBackdrop('Transparent')
 			S:HandleButton(_G.BankFramePurchaseButton, true)
 			S:HandleCloseButton(_G.BankFrameCloseButton)
 
-			BankFrame.backdrop2 = CreateFrame("Frame", nil, _G.BankSlotsFrame)
+			BankFrame.backdrop2 = CreateFrame('Frame', nil, _G.BankSlotsFrame, 'BackdropTemplate')
 			BankFrame.backdrop2:SetTemplate()
-			BankFrame.backdrop2:Point("TOPLEFT", _G.BankFrameItem1, "TOPLEFT", -6, 6)
-			BankFrame.backdrop2:Point("BOTTOMRIGHT", _G.BankFrameItem28, "BOTTOMRIGHT", 6, -6)
+			BankFrame.backdrop2:Point('TOPLEFT', _G.BankFrameItem1, 'TOPLEFT', -6, 6)
+			BankFrame.backdrop2:Point('BOTTOMRIGHT', _G.BankFrameItem28, 'BOTTOMRIGHT', 6, -6)
 
-			BankFrame.backdrop3 = CreateFrame("Frame", nil, _G.BankSlotsFrame)
+			BankFrame.backdrop3 = CreateFrame('Frame', nil, _G.BankSlotsFrame, 'BackdropTemplate')
 			BankFrame.backdrop3:SetTemplate()
-			BankFrame.backdrop3:Point("TOPLEFT", _G.BankSlotsFrame.Bag1, "TOPLEFT", -6, 6)
-			BankFrame.backdrop3:Point("BOTTOMRIGHT", _G.BankSlotsFrame.Bag7, "BOTTOMRIGHT", 6, -6)
+			BankFrame.backdrop3:Point('TOPLEFT', _G.BankSlotsFrame.Bag1, 'TOPLEFT', -6, 6)
+			BankFrame.backdrop3:Point('BOTTOMRIGHT', _G.BankSlotsFrame.Bag7, 'BOTTOMRIGHT', 6, -6)
 
 			_G.BankFrameMoneyFrameInset:Kill()
 			_G.BankFrameMoneyFrameBorder:Kill()
@@ -207,12 +206,12 @@ function S:ContainerFrame()
 		end
 
 		local inventoryID = button:GetInventorySlot()
-		local textureName = GetInventoryItemTexture("player",inventoryID);
+		local textureName = GetInventoryItemTexture('player',inventoryID);
 
 		if textureName then
 			button.icon:SetTexture(textureName)
 		elseif button.isBag then
-			local _, slotTextureName = GetInventorySlotInfo("Bag"..button:GetID())
+			local _, slotTextureName = GetInventorySlotInfo('Bag'..button:GetID())
 			button.icon:SetTexture(slotTextureName)
 		end
 
@@ -242,23 +241,24 @@ function S:ContainerFrame()
 
 	local BankItemSearchBox = _G.BankItemSearchBox
 	BankItemSearchBox:StripTextures()
-	BankItemSearchBox:CreateBackdrop("Overlay")
-	BankItemSearchBox.backdrop:Point("TOPLEFT", 10, -1)
-	BankItemSearchBox.backdrop:Point("BOTTOMRIGHT", 4, 1)
+	BankItemSearchBox:CreateBackdrop('Overlay')
+	BankItemSearchBox.backdrop:Point('TOPLEFT', 10, -1)
+	BankItemSearchBox.backdrop:Point('BOTTOMRIGHT', 4, 1)
 
 	local AutoSort = _G.BagItemAutoSortButton
 	AutoSort:StripTextures()
-	AutoSort:SetTemplate()
+	--AutoSort:SetTemplate()
+	AutoSort:CreateBackdrop()
 	AutoSort.Icon = AutoSort:CreateTexture()
-	AutoSort.Icon:SetTexture("Interface\\ICONS\\INV_Pet_Broom")
+	AutoSort.Icon:SetTexture([[Interface\ICONS\INV_Pet_Broom]])
 	AutoSort.Icon:SetTexCoord(unpack(E.TexCoords))
 	AutoSort.Icon:SetInside()
 
-	local Bags = CreateFrame("Frame")
-	Bags:RegisterEvent("BAG_UPDATE")
-	Bags:RegisterEvent("ITEM_LOCK_CHANGED")
-	Bags:RegisterEvent("BAG_CLOSED")
-	Bags:SetScript("OnEvent", SkinBags)
+	local Bags = CreateFrame('Frame')
+	Bags:RegisterEvent('BAG_UPDATE')
+	Bags:RegisterEvent('ITEM_LOCK_CHANGED')
+	Bags:RegisterEvent('BAG_CLOSED')
+	Bags:SetScript('OnEvent', SkinBags)
 	SkinBags()
 end
 

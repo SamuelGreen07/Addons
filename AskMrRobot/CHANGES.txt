@@ -1,7 +1,7 @@
-changeset:   183:c6369f8f277c
-tag:         v86
+changeset:   189:21a69c63fee8
+tag:         v92
 user:        yellowfive
-date:        Sat Feb 15 11:16:49 2020 -0800
-summary:     Removed a piece of debugging code causing an issue.
+date:        Mon Oct 19 11:19:56 2020 -0700
+summary:     Added BfA auto-logging back for now.
 
 

@@ -3,12 +3,11 @@ local UF = E:GetModule('UnitFrames');
 local _, ns = ...
 local ElvUF = ns.oUF
 
---Lua functions
 local _G = _G
 local setmetatable, getfenv, setfenv = setmetatable, getfenv, setfenv
 local type, unpack, select, pairs = type, unpack, select, pairs
 local min, random, format = min, random, format
---WoW API / Variables
+
 local UnitPower = UnitPower
 local UnitPowerMax = UnitPowerMax
 local UnitHealth = UnitHealth
@@ -23,13 +22,18 @@ local LOCALIZED_CLASS_NAMES_MALE = LOCALIZED_CLASS_NAMES_MALE
 local CLASS_SORT_ORDER = CLASS_SORT_ORDER
 local MAX_RAID_MEMBERS = MAX_RAID_MEMBERS
 
-local attributeBlacklist = {["showRaid"] = true, ["showParty"] = true, ["showSolo"] = true}
 local configEnv
 local originalEnvs = {}
 local overrideFuncs = {}
 
+local attributeBlacklist = {
+	showRaid = true,
+	showParty = true,
+	showSolo = true
+}
+
 local function createConfigEnv()
-	if( configEnv ) then return end
+	if configEnv then return end
 	configEnv = setmetatable({
 		UnitPower = function (unit, displayType)
 			if unit:find('target') or unit:find('focus') then
@@ -64,10 +68,10 @@ local function createConfigEnv()
 			return LOCALIZED_CLASS_NAMES_MALE[classToken], classToken
 		end,
 		Hex = function(r, g, b)
-			if type(r) == "table" then
+			if type(r) == 'table' then
 				if r.r then r, g, b = r.r, r.g, r.b else r, g, b = unpack(r) end
 			end
-			return format("|cff%02x%02x%02x", r*255, g*255, b*255)
+			return format('|cff%02x%02x%02x', r*255, g*255, b*255)
 		end,
 		ColorGradient = ElvUF.ColorGradient,
 		_COLORS = ElvUF.colors
@@ -107,10 +111,10 @@ function UF:ForceShow(frame)
 		frame.oldUnit = frame.unit
 		frame.unit = 'player'
 		frame.isForced = true;
-		frame.oldOnUpdate = frame:GetScript("OnUpdate")
+		frame.oldOnUpdate = frame:GetScript('OnUpdate')
 	end
 
-	frame:SetScript("OnUpdate", nil)
+	frame:SetScript('OnUpdate', nil)
 	frame.forceShowAuras = true
 	UnregisterUnitWatch(frame)
 	RegisterUnitWatch(frame, true)
@@ -122,12 +126,12 @@ function UF:ForceShow(frame)
 		frame:Update()
 	end
 
-	if(_G[frame:GetName().."Target"]) then
-		self:ForceShow(_G[frame:GetName().."Target"])
+	if _G[frame:GetName()..'Target'] then
+		self:ForceShow(_G[frame:GetName()..'Target'])
 	end
 
-	if(_G[frame:GetName().."Pet"]) then
-		self:ForceShow(_G[frame:GetName().."Pet"])
+	if _G[frame:GetName()..'Pet'] then
+		self:ForceShow(_G[frame:GetName()..'Pet'])
 	end
 end
 
@@ -146,7 +150,7 @@ function UF:UnforceShow(frame)
 	frame:EnableMouse(true)
 
 	if frame.oldOnUpdate then
-		frame:SetScript("OnUpdate", frame.oldOnUpdate)
+		frame:SetScript('OnUpdate', frame.oldOnUpdate)
 		frame.oldOnUpdate = nil
 	end
 
@@ -157,19 +161,19 @@ function UF:UnforceShow(frame)
 		frame:Update()
 	end
 
-	if(_G[frame:GetName().."Target"]) then
-		self:UnforceShow(_G[frame:GetName().."Target"])
+	if _G[frame:GetName()..'Target'] then
+		self:UnforceShow(_G[frame:GetName()..'Target'])
 	end
 
-	if(_G[frame:GetName().."Pet"]) then
-		self:UnforceShow(_G[frame:GetName().."Pet"])
+	if _G[frame:GetName()..'Pet'] then
+		self:UnforceShow(_G[frame:GetName()..'Pet'])
 	end
 end
 
 function UF:ShowChildUnits(header, ...)
 	header.isForced = true
 
-	for i=1, select("#", ...) do
+	for i=1, select('#', ...) do
 		local frame = select(i, ...)
 		frame:SetID(i)
 		self:ForceShow(frame)
@@ -179,7 +183,7 @@ end
 function UF:UnshowChildUnits(header, ...)
 	header.isForced = nil
 
-	for i=1, select("#", ...) do
+	for i=1, select('#', ...) do
 		local frame = select(i, ...)
 		self:UnforceShow(frame)
 	end
@@ -193,8 +197,8 @@ local function OnAttributeChanged(self)
 	local maxUnits = MAX_RAID_MEMBERS
 
 	local startingIndex = db.raidWideSorting and -(min(db.numGroups * (db.groupsPerRowCol * 5), maxUnits) + 1) or -4
-	if self:GetAttribute("startingIndex") ~= startingIndex then
-		self:SetAttribute("startingIndex", startingIndex)
+	if self:GetAttribute('startingIndex') ~= startingIndex then
+		self:SetAttribute('startingIndex', startingIndex)
 		UF:ShowChildUnits(self, self:GetChildren())
 	end
 end
@@ -224,10 +228,10 @@ function UF:HeaderConfig(header, configMode)
 			originalEnvs[func] = nil
 		end
 
-		RegisterStateDriver(header, "visibility", header.db.visibility)
+		RegisterStateDriver(header, 'visibility', header.db.visibility)
 
-		if header:GetScript("OnEvent") then
-			header:GetScript("OnEvent")(header, "PLAYER_ENTERING_WORLD")
+		if header:GetScript('OnEvent') then
+			header:GetScript('OnEvent')(header, 'PLAYER_ENTERING_WORLD')
 		end
 	end
 
@@ -237,7 +241,7 @@ function UF:HeaderConfig(header, configMode)
 		if group:IsShown() then
 			group.forceShow = header.forceShow
 			group.forceShowAuras = header.forceShowAuras
-			group:HookScript("OnAttributeChanged", OnAttributeChanged)
+			group:HookScript('OnAttributeChanged', OnAttributeChanged)
 			if configMode then
 				for key in pairs(attributeBlacklist) do
 					group:SetAttribute(key, nil)
@@ -277,14 +281,16 @@ function UF:PLAYER_REGEN_DISABLED()
 	end
 
 	for i=1, 5 do
-		if self['arena'..i] and self['arena'..i].isForced then
-			self:UnforceShow(self['arena'..i])
+		local arena = self['arena'..i]
+		if arena and arena.isForced then
+			self:UnforceShow(arena)
 		end
-	end
 
-	for i=1, 4 do
-		if self['boss'..i] and self['boss'..i].isForced then
-			self:UnforceShow(self['boss'..i])
+		if i < 5 then
+			local boss = self['boss'..i]
+			if boss and boss.isForced then
+				self:UnforceShow(boss)
+			end
 		end
 	end
 end

@@ -46,8 +46,9 @@ local function initializeDb()
 			LastVersion = 0,           -- used to clean out old stuff	
 			FirstUse = true,           -- true if this is first time use, gets cleared after seeing the export help splash window
 			Talents = {},              -- for each spec, selected talents
-			Essences = {},             -- for each spec, selected essences
-			UnlockedEssences = {},     -- unlocked essences for this character
+			Soulbinds = {},            -- selected nodes in each soulbind tree for this character
+			ActiveSoulbinds = {},      -- for each spec, active soulbind
+			UnlockedConduits = {},     -- unlocked conduits for this character
 			Equipped = {},             -- for each spec, slot id to item info
 			BagItems = {},             -- list of item info for bags
 			BankItems = {},            -- list of item info for bank
@@ -708,4 +709,10 @@ end
 
 function Amr:Test()
 	
+	--local item = Item:CreateFromItemID(171416)
+	--local blah = C_LegendaryCrafting.GetRuneforgePowers(item:GetItemLocation())
+
+	--local info = C_LegendaryCrafting.GetRuneforgePowerInfo(30)
+
+	--print(Amr:dump(info))
 end

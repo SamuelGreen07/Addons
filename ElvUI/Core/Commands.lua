@@ -2,11 +2,10 @@ local E, L, V, P, G = unpack(select(2, ...)) --Import: Engine, Locales, PrivateD
 local DT = E:GetModule('DataTexts')
 local AB = E:GetModule('ActionBars')
 
---Lua functions
 local _G = _G
 local tonumber, type, pairs, select = tonumber, type, pairs, select
-local lower, split, format, wipe, next = strlower, strsplit, format, wipe, next
---WoW API / Variables
+local lower, split, format, wipe, next, print = strlower, strsplit, format, wipe, next, print
+
 local debugprofilestop = debugprofilestop
 local EnableAddOn = EnableAddOn
 local GetAddOnCPUUsage = GetAddOnCPUUsage
@@ -20,9 +19,9 @@ local GetNumGuildMembers = GetNumGuildMembers
 local GuildControlGetNumRanks = GuildControlGetNumRanks
 local GuildControlGetRankName = GuildControlGetRankName
 local GuildUninvite = GuildUninvite
-local ReloadUI = ReloadUI
 local ResetCPUUsage = ResetCPUUsage
 local SendChatMessage = SendChatMessage
+local ReloadUI = ReloadUI
 local SetCVar = SetCVar
 local UpdateAddOnCPUUsage = UpdateAddOnCPUUsage
 -- GLOBALS: ElvUIGrid, ElvDB
@@ -44,7 +43,7 @@ function E:LuaError(msg)
 	if switch == 'on' or switch == '1' then
 		for i=1, GetNumAddOns() do
 			local name = GetAddOnInfo(i)
-			if (name ~= 'ElvUI' and name ~= 'ElvUI_OptionsUI') and E:IsAddOnEnabled(name) then
+			if name ~= 'ElvUI' and name ~= 'ElvUI_OptionsUI' and E:IsAddOnEnabled(name) then
 				DisableAddOn(name, E.myname)
 				ElvDB.LuaErrorDisabledAddOns[name] = i
 			end
@@ -71,13 +70,6 @@ function E:LuaError(msg)
 	end
 end
 
-function E:BGStats()
-	DT.ForceHideBGStats = nil
-	DT:LoadDataTexts()
-
-	E:Print(L["Battleground datatexts will now show again if you are inside a battleground."])
-end
-
 local function OnCallback(command)
 	_G.MacroEditBox:GetScript('OnEvent')(_G.MacroEditBox, 'EXECUTE_CHAT_LINE', command)
 end
@@ -85,7 +77,7 @@ end
 function E:DelayScriptCall(msg)
 	local secs, command = msg:match('^(%S+)%s+(.*)$')
 	secs = tonumber(secs)
-	if (not secs) or (#command == 0) then
+	if not secs or (#command == 0) then
 		self:Print('usage: /in <seconds> <command>')
 		self:Print('example: /in 1.5 /say hi')
 	else
@@ -160,12 +152,14 @@ function E:GetCPUImpact()
 		local ms_passed = debugprofilestop() - debugTimer
 		UpdateAddOnCPUUsage()
 
-		local per, passed =
-			((num_frames == 0 and 0) or (GetAddOnCPUUsage('ElvUI') / num_frames)),
-			((num_frames == 0 and 0) or (ms_passed / num_frames))
+		local per, passed = ((num_frames == 0 and 0) or (GetAddOnCPUUsage('ElvUI') / num_frames)), ((num_frames == 0 and 0) or (ms_passed / num_frames))
 		self:Print(format(cpuImpactMessage, per and per > 0 and format('%.3f', per) or 0, passed and passed > 0 and format('%.3f', passed) or 0))
 		toggleMode = false
 	end
+end
+
+function E:EHelp()
+	print(L["EHELP_COMMANDS"])
 end
 
 local BLIZZARD_ADDONS = {
@@ -277,7 +271,8 @@ function E:LoadCommands()
 	---- Note: showall, delay, and minCalls will default if not set
 	---- arg1 can be 'all' this will scan all registered modules!
 
-	self:RegisterChatCommand('bgstats', 'BGStats')
+	self:RegisterChatCommand('hdt', DT.HyperDT)
+	self:RegisterChatCommand('bgstats', DT.ToggleBattleStats)
 	self:RegisterChatCommand('hellokitty', 'HelloKittyToggle')
 	self:RegisterChatCommand('hellokittyfix', 'HelloKittyFix')
 	self:RegisterChatCommand('harlemshake', 'HarlemShakeToggle')
@@ -288,6 +283,8 @@ function E:LoadCommands()
 	self:RegisterChatCommand('cleanguild', 'MassGuildKick')
 	self:RegisterChatCommand('enableblizzard', 'EnableBlizzardAddOns')
 	self:RegisterChatCommand('estatus', 'ShowStatusReport')
+	self:RegisterChatCommand('ehelp', 'EHelp')
+	self:RegisterChatCommand('ecommands', 'EHelp')
 	-- self:RegisterChatCommand('aprilfools', '') --Don't need this until next april fools
 
 	if E.private.actionbar.enable then

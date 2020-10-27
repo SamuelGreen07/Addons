@@ -1,4 +1,4 @@
-local addon, ns = ...
+﻿local addon, ns = ...
 local cargBags = ns.cargBags
 
 local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
@@ -33,7 +33,7 @@ cB_Filters.fHideEmpty = function(item) if cBnivCfg.CompressEmpty then return ite
 ------------------------------------
 cB_Filters.fItemClass = function(item, container)
 	if not item.id or not item.name then	return false	end	-- incomplete data (itemID or itemName missing), return (item that aren't loaded yet will get classified on the next successful call)
-	if not cB_ItemClass[item.id] then cbNivaya:ClassifyItem(item) end
+	if not cB_ItemClass[item.id] or item.bagID == -2 then cbNivaya:ClassifyItem(item) end
 	
 	local t, bag = cB_ItemClass[item.id]
 

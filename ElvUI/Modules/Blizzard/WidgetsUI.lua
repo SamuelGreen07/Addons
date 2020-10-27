@@ -1,9 +1,7 @@
 local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local B = E:GetModule('Blizzard')
 
---Lua functions
 local _G = _G
---WoW API / Variables
 local CreateFrame = CreateFrame
 local hooksecurefunc = hooksecurefunc
 
@@ -30,11 +28,11 @@ local function UIWidgets()
 	local belowMiniMapcontainer = _G.UIWidgetBelowMinimapContainerFrame
 
 	local topCenterHolder = CreateFrame('Frame', 'TopCenterContainerHolder', E.UIParent)
-	topCenterHolder:Point("TOP", E.UIParent, "TOP", 0, -30)
+	topCenterHolder:Point('TOP', E.UIParent, 'TOP', 0, -30)
 	topCenterHolder:Size(10, 58)
 
 	local belowMiniMapHolder = CreateFrame('Frame', 'BelowMinimapContainerHolder', E.UIParent)
-	belowMiniMapHolder:Point("TOPRIGHT", _G.Minimap, "BOTTOMRIGHT", 0, -16)
+	belowMiniMapHolder:Point('TOPRIGHT', _G.Minimap, 'BOTTOMRIGHT', 0, -16)
 	belowMiniMapHolder:Size(128, 40)
 
 	E:CreateMover(topCenterHolder, 'TopCenterContainerMover', L["UIWidgetTopContainer"], nil, nil, nil,'ALL,SOLO')

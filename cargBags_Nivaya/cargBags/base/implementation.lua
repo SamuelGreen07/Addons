@@ -356,7 +356,7 @@ function Implementation:GetItemInfo(bagID, slotID, i)
 		-- *edits by Lars "Goldpaw" Norberg for WoW 5.0.4 (MoP)
 		-- last return value here, "texture", doesn't show for battle pets
 		local texture
-		i.name, i.link, i.rarity, i.level, i.minLevel, i.type, i.subType, i.stackCount, i.equipLoc, texture, i.sellPrice  = GetItemInfo(clink)
+		i.name, i.link, i.rarity, i.level, i.minLevel, i.type, i.subType, i.stackCount, i.equipLoc, texture, i.sellPrice, i.classID, i.subClassID  = GetItemInfo(clink)
 		if isClassic then
 			if i.type == cBnivL.Quest then
 				i.isQuestItem = true
@@ -408,6 +408,7 @@ end
 	@param bagID <number>
 	@param slotID <number>
 ]]
+local function nope() end
 function Implementation:UpdateSlot(bagID, slotID)
 	local item = self:GetItemInfo(bagID, slotID)
 	local button = self:GetButton(bagID, slotID)
@@ -430,6 +431,7 @@ function Implementation:UpdateSlot(bagID, slotID)
 		button.container:RemoveButton(button)
 		self:SetButton(bagID, slotID, nil)
 		button:Free()
+
 	end
 end
 

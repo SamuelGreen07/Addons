@@ -555,6 +555,13 @@ do
 	function boss:RegisterUnitEvent(event, func, ...)
 		if type(event) ~= "string" then core:Print(format(noEvent, self.moduleName)) return end
 		if not ... then core:Print(format(noUnit, self.moduleName)) return end
+		if event == "UNIT_HEALTH_FREQUENT" then
+			-- pre-shadowlands compat for old modules
+			if not func then
+				func = event
+			end
+			event = "UNIT_HEALTH"
+		end
 		if (not func and not self[event]) or (func and not self[func]) then core:Print(format(noFunc, self.moduleName, func or event)) return end
 		if not unitEventMap[self][event] then unitEventMap[self][event] = {} end
 		for i = 1, select("#", ...) do
@@ -574,6 +581,7 @@ do
 	function boss:UnregisterUnitEvent(event, ...)
 		if type(event) ~= "string" then core:Print(format(noEvent, self.moduleName)) return end
 		if not ... then core:Print(format(noUnit, self.moduleName)) return end
+		if event == "UNIT_HEALTH_FREQUENT" then event = "UNIT_HEALTH" end -- pre-shadowlands compat for old modules
 		if not unitEventMap[self][event] then return end
 		for i = 1, select("#", ...) do
 			local unit = select(i, ...)
@@ -635,7 +643,8 @@ do
 end
 
 -------------------------------------------------------------------------------
--- Engage / wipe checking + unit scanning
+-- Engage/wipe checking and unit scanning
+-- @section unit_scanning
 --
 
 do
@@ -1126,10 +1135,15 @@ do
 			end
 		else
 			for i = 1, 100 do
-				local name, _, stack, _, duration, expirationTime, _, _, _, spellId, _, _, _, _, _, value = UnitAura(unit, i, "HELPFUL")
+				local name, _, stack, auraType, duration, expirationTime, _, _, _, spellId, _, _, _, _, _, value = UnitAura(unit, i, "HELPFUL")
 
 				if not spellId then
 					return
+				elseif not spell then
+					local desiredType = ...
+					if auraType == desiredType then
+						return name, stack, duration, expirationTime
+					end
 				elseif spellId == spell then
 					return name, stack, duration, expirationTime, value
 				end
@@ -1167,10 +1181,15 @@ do
 			end
 		else
 			for i = 1, 100 do
-				local name, _, stack, _, duration, expirationTime, _, _, _, spellId, _, _, _, _, _, value = UnitAura(unit, i, "HARMFUL")
+				local name, _, stack, auraType, duration, expirationTime, _, _, _, spellId, _, _, _, _, _, value = UnitAura(unit, i, "HARMFUL")
 
 				if not spellId then
 					return
+				elseif not spell then
+					local desiredType = ...
+					if auraType == desiredType then
+						return name, stack, duration, expirationTime
+					end
 				elseif spellId == spell then
 					return name, stack, duration, expirationTime, value
 				end
@@ -1183,6 +1202,28 @@ end
 -- @return boolean
 function boss:Solo()
 	return solo
+end
+
+do
+	local GetOptions = C_GossipInfo.GetOptions
+	local SelectOption = C_GossipInfo.SelectOption
+	--- Request the gossip options of the selected NPC
+	-- @return table
+	function boss:GetGossipOptions()
+		local tbl = GetOptions()
+		if tbl[1] then
+			return tbl
+		end
+	end
+
+	--- Select a specific NPC gossip option
+	-- @number optionNumber The number of the specific option to be selected
+	-- @bool[opt] skipConfirmDialogBox If the pop up confirmation dialog box should be skipped
+	-- @return args
+	function boss:SelectGossipOption(optionNumber, skipConfirmDialogBox)
+		SelectOption(optionNumber, "", skipConfirmDialogBox) -- Don't think the text arg is something we will ever need
+	end
+
 end
 
 -------------------------------------------------------------------------------
@@ -1551,6 +1592,7 @@ end
 --- Open the "Info Box" display.
 -- @param key the option key to check
 -- @string title the title of the window
+-- @bool[opt] TEMP
 function boss:OpenInfo(key, title, TEMP)
 	if checkFlag(self, key, C.INFOBOX) then
 		self:SendMessage("BigWigs_ShowInfoBox", self, title, TEMP)
@@ -2194,8 +2236,8 @@ do
 	end
 
 	--- Get the time left for a running nameplate bar.
-	-- @param guid nameplate unit's guid
 	-- @param text the bar text
+	-- @param guid nameplate unit's guid
 	-- @return the remaining duration in seconds or 0
 	function boss:NameplateBarTimeLeft(text, guid)
 		if type(guid) ~= "string" then

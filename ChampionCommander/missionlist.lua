@@ -45,8 +45,16 @@ local OHFTOPLEFT=OHF.GarrCorners.TopLeftGarrCorner
 local OHFTOPRIGHT=OHF.GarrCorners.TopRightGarrCorner
 local OHFBOTTOMLEFT=OHF.GarrCorners.BottomTopLeftGarrCorner
 local OHFBOTTOMRIGHT=OHF.GarrCorners.BottomRightGarrCorner
-local followerType=LE_FOLLOWER_TYPE_GARRISON_8_0
-local garrisonType=LE_GARRISON_TYPE_8_0
+local LE_FOLLOWER_TYPE_GARRISON_6_0=Enum.GarrisonFollowerType.FollowerType_6_0
+local LE_FOLLOWER_TYPE_SHIPYARD_6_2=Enum.GarrisonFollowerType.FollowerType_6_2
+local LE_FOLLOWER_TYPE_GARRISON_7_0=Enum.GarrisonFollowerType.FollowerType_7_0
+local LE_FOLLOWER_TYPE_GARRISON_8_0=Enum.GarrisonFollowerType.FollowerType_8_0
+local LE_GARRISON_TYPE_6_0=Enum.GarrisonType.Type_6_0
+local LE_GARRISON_TYPE_6_2=Enum.GarrisonType.Type_6_2
+local LE_GARRISON_TYPE_7_0=Enum.GarrisonType.Type_7_0
+local LE_GARRISON_TYPE_8_0=Enum.GarrisonType.Type_8_0
+local followerType=Enum.GarrisonFollowerType.FollowerType_8_0
+local garrisonType=Enum.GarrisonType.Type_8_0
 local FAKE_FOLLOWERID="0x0000000000000000"
 local MAX_LEVEL=110
 
@@ -69,8 +77,6 @@ dprint=function() end
 ddump=function() end
 local print=function() end
 --@end-non-debug@
-local LE_FOLLOWER_TYPE_GARRISON_8_0=LE_FOLLOWER_TYPE_GARRISON_8_0
-local LE_GARRISON_TYPE_8_0=LE_GARRISON_TYPE_8_0
 local GARRISON_FOLLOWER_COMBAT_ALLY=GARRISON_FOLLOWER_COMBAT_ALLY
 local GARRISON_FOLLOWER_ON_MISSION=GARRISON_FOLLOWER_ON_MISSION
 local GARRISON_FOLLOWER_INACTIVE=GARRISON_FOLLOWER_INACTIVE
@@ -672,7 +678,7 @@ end
 local warner
 function module:NoMartiniNoParty(text)
 	if not warner then
-		warner=CreateFrame("Frame","BFAWarner",OHFMissions)
+		warner=CreateFrame("Frame","BFAWarner",OHFMissions , BackdropTemplateMixin and "BackdropTemplate")
 		warner.label=warner:CreateFontString(nil,"OVERLAY","GameFontNormalHuge3Outline")
 		warner.label:SetTextColor(C:Orange())
 		warner:SetAllPoints()
@@ -1161,19 +1167,21 @@ function module:AddThreats(frame,threats,party,missionID)
 	threats:Show()
 	local enemies=addon:GetMissionData(missionID,'enemies')
 	if type(enemies)~="table" then
-		enemies=select(8,G.GetMissionInfo(missionID))
+		enemies=G.GetMissionDeploymentInfo(missionID)['enemies']
 	end
 	local mechanics=new()
 	local counters=new()
 	local biases=new()
 	for _,enemy in pairs(enemies) do
 		if type(enemy.mechanics)=="table" then
-			for mechanicID,mechanic in pairs(enemy.mechanics) do
+			for _,mechanic in pairs(enemy.mechanics) do
 			-- icon=enemy.mechanics[id].icon
-				mechanic.id=mechanicID
-				mechanic.icon=icons[mechanicID] and icons[mechanicID].icon or mechanic.id
-				mechanic.bias=-1
+			  --local mechanicID=enemy.mechanicTypeID
+				mechanic.id=mechanic.mechanicTypeID
+				mechanic.icon=mechanic.ability and mechanic.ability.icon or mechanic.icon
+				mechanic.bias=mechanic.ability and mechanic.ability.bias or -1
 				tinsert(mechanics,mechanic)
+				print(mechanic.mechanicTypeID,mechanic.id,mechanic.name)
 			end
 		end
 	end
@@ -1187,16 +1195,16 @@ function module:AddThreats(frame,threats,party,missionID)
 	table.sort(counters)
 	for _,data in pairs(counters) do
 		local _,followerID,_,bias=strsplit(",",data)
-			local abilities=G.GetFollowerAbilities(followerID)
-			for _,ability in pairs(abilities) do
-				for counter,info in pairs(ability.counters) do
-					for _,mechanic in pairs(mechanics) do
-						if mechanic.id==counter and not biases[mechanic] then
-							biases[mechanic]=todefault(bias,0)
-							break
-						end
+		local abilities=G.GetFollowerAbilities(followerID)
+		for _,ability in pairs(abilities) do
+			for counter,info in pairs(ability.counters) do
+				for _,mechanic in pairs(mechanics) do
+					if mechanic.id==counter and not biases[mechanic] then
+						biases[mechanic]=todefault(bias,0)
+						break
 					end
 				end
+			end
 		end
 	end
 	tinsert(mechanics,false) -- separator

@@ -1,8 +1,9 @@
 local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
-local Skins = E:GetModule('Skins')
+local LSM = E.Libs.LSM
 
 local wipe, sort, unpack = wipe, sort, unpack
 local next, pairs, tinsert = next, pairs, tinsert
+
 local CreateFrame = CreateFrame
 local GetAddOnInfo = GetAddOnInfo
 local GetCVar = GetCVar
@@ -11,6 +12,7 @@ local GetNumAddOns = GetNumAddOns
 local GetRealZoneText = GetRealZoneText
 local GetSpecialization = GetSpecialization
 local GetSpecializationInfo = GetSpecializationInfo
+local UNKNOWN = UNKNOWN
 
 function E:AreOtherAddOnsEnabled()
 	local EP, addons, plugins = E.Libs.EP.plugins
@@ -31,18 +33,18 @@ function E:GetDisplayMode()
 end
 
 local EnglishClassName = {
-	['DEATHKNIGHT'] = 'Death Knight',
-	['DEMONHUNTER'] = 'Demon Hunter',
-	['DRUID'] = 'Druid',
-	['HUNTER'] = 'Hunter',
-	['MAGE'] = 'Mage',
-	['MONK'] = 'Monk',
-	['PALADIN'] = 'Paladin',
-	['PRIEST'] = 'Priest',
-	['ROGUE'] = 'Rogue',
-	['SHAMAN'] = 'Shaman',
-	['WARLOCK'] = 'Warlock',
-	['WARRIOR'] = 'Warrior',
+	DEATHKNIGHT = 'Death Knight',
+	DEMONHUNTER = 'Demon Hunter',
+	DRUID = 'Druid',
+	HUNTER = 'Hunter',
+	MAGE = 'Mage',
+	MONK = 'Monk',
+	PALADIN = 'Paladin',
+	PRIEST = 'Priest',
+	ROGUE = 'Rogue',
+	SHAMAN = 'Shaman',
+	WARLOCK = 'Warlock',
+	WARRIOR = 'Warrior',
 }
 
 local EnglishSpecName = {
@@ -85,7 +87,7 @@ local EnglishSpecName = {
 }
 
 local function GetSpecName()
-	return EnglishSpecName[GetSpecializationInfo(GetSpecialization())]
+	return EnglishSpecName[GetSpecializationInfo(GetSpecialization())] or UNKNOWN
 end
 
 function E:CreateStatusContent(num, width, parent, anchorTo, content)
@@ -93,7 +95,7 @@ function E:CreateStatusContent(num, width, parent, anchorTo, content)
 	content:Size(width, (num * 20) + ((num-1)*5)) --20 height and 5 spacing
 	content:Point('TOP', anchorTo, 'BOTTOM')
 
-	local font = E.Libs.LSM:Fetch('font', 'Expressway')
+	local font = LSM:Fetch('font', 'Expressway')
 	for i = 1, num do
 		if not content['Line'..i] then
 			local line = CreateFrame('Frame', nil, content)
@@ -129,8 +131,8 @@ end
 function E:CreateStatusSection(width, height, headerWidth, headerHeight, parent, anchor1, anchorTo, anchor2, yOffset)
 	local parentWidth, parentHeight = parent:GetSize()
 
-	if width > parentWidth then parent:SetWidth(width + 25) end
-	if height then parent:SetHeight(parentHeight + height) end
+	if width > parentWidth then parent:Width(width + 25) end
+	if height then parent:Height(parentHeight + height) end
 
 	local section = CreateFrame('Frame', nil, parent)
 	section:Size(width, height or 0)
@@ -141,7 +143,7 @@ function E:CreateStatusSection(width, height, headerWidth, headerHeight, parent,
 	header:Point('TOP', section)
 	section.Header = header
 
-	local font = E.Libs.LSM:Fetch('font', 'Expressway')
+	local font = LSM:Fetch('font', 'Expressway')
 	local text = section.Header:CreateFontString(nil, 'ARTWORK')
 	text:Point('TOP')
 	text:Point('BOTTOM')
@@ -154,7 +156,7 @@ function E:CreateStatusSection(width, height, headerWidth, headerHeight, parent,
 	leftDivider:Height(8)
 	leftDivider:Point('LEFT', section.Header, 'LEFT', 5, 0)
 	leftDivider:Point('RIGHT', section.Header.Text, 'LEFT', -5, 0)
-	leftDivider:SetTexture('Interface\\Tooltips\\UI-Tooltip-Border')
+	leftDivider:SetTexture([[Interface\Tooltips\UI-Tooltip-Border]])
 	leftDivider:SetTexCoord(0.81, 0.94, 0.5, 1)
 	section.Header.LeftDivider = leftDivider
 
@@ -162,7 +164,7 @@ function E:CreateStatusSection(width, height, headerWidth, headerHeight, parent,
 	rightDivider:Height(8)
 	rightDivider:Point('RIGHT', section.Header, 'RIGHT', -5, 0)
 	rightDivider:Point('LEFT', section.Header.Text, 'RIGHT', 5, 0)
-	rightDivider:SetTexture('Interface\\Tooltips\\UI-Tooltip-Border')
+	rightDivider:SetTexture([[Interface\Tooltips\UI-Tooltip-Border]])
 	rightDivider:SetTexCoord(0.81, 0.94, 0.5, 1)
 	section.Header.RightDivider = rightDivider
 
@@ -177,16 +179,16 @@ function E:CreateStatusFrame()
 	StatusFrame:CreateBackdrop('Transparent', nil, true)
 	StatusFrame.backdrop:SetBackdropColor(0, 0, 0, 0.6)
 	StatusFrame:SetMovable(true)
-	StatusFrame:SetSize(0, 35)
+	StatusFrame:Size(0, 35)
 	StatusFrame:Hide()
 
 	--Plugin frame
 	local PluginFrame = CreateFrame('Frame', 'ElvUIStatusPlugins', StatusFrame)
-	PluginFrame:SetPoint('TOPLEFT', StatusFrame, 'TOPRIGHT', E.mult + 2*E.Border, 0)
+	PluginFrame:Point('TOPLEFT', StatusFrame, 'TOPRIGHT', E.Border * 2, 0)
 	PluginFrame:SetFrameStrata('HIGH')
 	PluginFrame:CreateBackdrop('Transparent', nil, true)
 	PluginFrame.backdrop:SetBackdropColor(0, 0, 0, 0.6)
-	PluginFrame:SetSize(0, 25)
+	PluginFrame:Size(0, 25)
 	StatusFrame.PluginFrame = PluginFrame
 
 	--Close button and script to retoggle the options.
@@ -303,7 +305,7 @@ function E:UpdateStatusFrame()
 			end
 
 			PluginFrame.SectionP:Height(count * 20)
-			PluginFrame:SetHeight(PluginSection.Content:GetHeight() + 50)
+			PluginFrame:Height(PluginSection.Content:GetHeight() + 50)
 			PluginFrame:Show()
 		else
 			PluginFrame:Hide()
@@ -319,7 +321,7 @@ function E:UpdateStatusFrame()
 	local Section3 = StatusFrame.Section3
 	Section3.Content.Line4.Text:SetFormattedText('Specialization: |cff4beb2c%s|r', GetSpecName())
 	Section3.Content.Line5.Text:SetFormattedText('Level: |cff4beb2c%s|r', E.mylevel)
-	Section3.Content.Line6.Text:SetFormattedText('Zone: |cff4beb2c%s|r', GetRealZoneText())
+	Section3.Content.Line6.Text:SetFormattedText('Zone: |cff4beb2c%s|r', GetRealZoneText() or UNKNOWN)
 
 	StatusFrame.TitleLogoFrame.LogoTop:SetVertexColor(unpack(E.media.rgbvaluecolor))
 end

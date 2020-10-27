@@ -1,5 +1,5 @@
-## Interface: 80200
-## Title: cargBags_Nivaya: |cffffffffReal|r|cffbf3030UI|r
+## Interface: 90001
+## Title: cargBags_Nivaya
 ## Author: Luzzifus (Modified by Nibelheim, humfras)
 ## OptionalDeps: nibRealUI, ItemRack, Outfitter
 ## SavedVariables: cBnivCfg, cB_CustomBags, cBniv_CatInfo

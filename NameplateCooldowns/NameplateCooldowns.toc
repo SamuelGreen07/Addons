@@ -2,9 +2,12 @@
 ## Title: NameplateCooldowns
 ## Notes: Shows the cooldowns of enemy players above their nameplates
 ## SavedVariables: NameplateCooldownsAceDB
+## Version: 80300.13-release
 
 embeds.xml
-localizations.lua
+src\constants.lua
+src\utilities.lua
+locales\localizations.xml
 defaultSpells.lua
 defaultSpells_Classic.lua
 NameplateCooldowns.lua

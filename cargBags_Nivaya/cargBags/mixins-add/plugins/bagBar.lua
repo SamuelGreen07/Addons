@@ -38,6 +38,8 @@ local Implementation = cargBags.classes.Implementation
 
 local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 
+local BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate" or nil
+
 function Implementation:GetBagButtonClass()
 	return self:GetClass("BagButton", true, "BagButton")
 end
@@ -93,7 +95,7 @@ function BagButton:Create(bagID)
     button.Quest =      _G[name.."IconQuestTexture"]
     button.Border =     _G[name.."NormalTexture"]
     
-    button.bg = CreateFrame("Frame", nil, button)
+    button.bg = CreateFrame("Frame", nil, button, BackdropTemplate)
     button.bg:SetAllPoints(button)
     button.bg:SetBackdrop({
         bgFile = "Interface\\ChatFrame\\ChatFrameBackground",

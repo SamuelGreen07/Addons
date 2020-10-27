@@ -8,7 +8,7 @@ BtWQuestsDatabase:AddChain(BTWQUESTS_CHAIN_BATTLE_FOR_AZEROTH_SECRETS_BAAL, {
     },
     category = BTWQUESTS_CATEGORY_BATTLE_FOR_AZEROTH_SECRETS,
     expansion = BTWQUESTS_EXPANSION_BATTLE_FOR_AZEROTH,
-    range = {110,120},
+    range = {50,50},
     completed = {
         type = "pet",
         id = 2352,
@@ -403,7 +403,7 @@ BtWQuestsDatabase:AddChain(BTWQUESTS_CHAIN_BATTLE_FOR_AZEROTH_SECRETS_WAIST_OF_T
     name = L["WAIST_OF_TIME"],
     category = BTWQUESTS_CATEGORY_BATTLE_FOR_AZEROTH_SECRETS,
     expansion = BTWQUESTS_EXPANSION_BATTLE_FOR_AZEROTH,
-    range = {110,120},
+    range = {50,50},
     prerequisites = {
         {
             type = "quest",
@@ -1251,7 +1251,7 @@ BtWQuestsDatabase:AddChain(BtWQuests.Constant.Chain.BattleForAzeroth.Secrets.Hon
     },
     category = BTWQUESTS_CATEGORY_BATTLE_FOR_AZEROTH_SECRETS,
     expansion = BTWQUESTS_EXPANSION_BATTLE_FOR_AZEROTH,
-    range = {110,120},
+    range = {50,50},
     restrictions = {
         type = "faction",
         id = BtWQuests.Constant.Faction.Alliance,

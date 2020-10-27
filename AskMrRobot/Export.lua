@@ -123,13 +123,13 @@ local function scanBag(bagId, isBank, bagTable, bagItemsWithCount)
 			if itemData ~= nil then
 
 				-- see if this is an azerite item and read azerite power ids
-				loc:SetBagAndSlot(bagId, slotId)
+				--[[loc:SetBagAndSlot(bagId, slotId)
 				if C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItem(loc) then
 					local powers = Amr.ReadAzeritePowers(loc)
 					if powers then
 						itemData.azerite = powers
 					end
-				end
+				end]]
 
 				if isBank then
 					_lastBankBagId = bagId
@@ -259,6 +259,62 @@ local function scanVoid()
 end
 ]]
 
+local function scanSoulbinds()
+	if not C_Soulbinds then return end
+
+	-- read which conduits this player has unlocked
+	Amr.db.char.UnlockedConduits = {}
+
+	for t = 0,2 do
+		local conduits = C_Soulbinds.GetConduitCollection(t)
+		for i, conduit in ipairs(conduits) do
+			table.insert(Amr.db.char.UnlockedConduits, { conduit.conduitID, conduit.conduitRank })
+		end
+	end
+
+	if not Amr.db.char.ActiveSoulbinds then
+		Amr.db.char.ActiveSoulbinds = {}
+	end
+
+	-- read the currently active soulbind for this spec
+	local specPos = GetSpecialization()	
+	if specPos and specPos >= 1 and specPos <= 4 then
+		Amr.db.char.ActiveSoulbinds[specPos] = C_Soulbinds.GetActiveSoulbindID() or 0
+	end
+
+	-- update soulbind tree info for all soulbinds
+	Amr.db.char.Soulbinds = {}
+	
+	local covenantData = C_Covenants.GetCovenantData(C_Covenants.GetActiveCovenantID())
+
+	if covenantData and covenantData.soulbindIDs then
+		for i, soulbindId in ipairs(covenantData.soulbindIDs) do
+			local soulbindData = soulbindId and C_Soulbinds.GetSoulbindData(soulbindId)
+			local nodes = {}
+			local unlockedTier = 0
+
+			if soulbindData and soulbindData.tree and soulbindData.tree.nodes then
+				for i, node in ipairs(soulbindData.tree.nodes) do
+					if node.state == 3 then
+						nodes[node.row] = { soulbindId, node.row, node.column, node.conduitID, node.conduitRank }
+					end
+					if node.state > 0 then
+						unlockedTier = math.max(node.row, unlockedTier)
+					end
+				end
+			end
+
+			Amr.db.char.Soulbinds[soulbindId] = {
+				UnlockedTier = unlockedTier,
+				Nodes = nodes
+			}
+
+		end
+	end
+
+end
+
+--[[
 local function scanEssences()
 	if not C_AzeriteEssence then return end
 
@@ -300,6 +356,7 @@ local function scanEssences()
 		end
 	end
 end
+]]
 
 local function scanTalents()	
 	local specPos = GetSpecialization()	
@@ -345,12 +402,18 @@ function Amr:ExportCharacter()
 	-- scan current spec's talents just before exporting
 	scanTalents()
 
+	-- scan all soulbinds just before exporting
+	scanSoulbinds()
+
 	-- scan current spec's essences just before exporting
-	scanEssences()
+	--scanEssences()
 	
 	data.Talents = Amr.db.char.Talents	
-	data.UnlockedEssences = Amr.db.char.UnlockedEssences
-	data.Essences = Amr.db.char.Essences
+	data.UnlockedConduits = Amr.db.char.UnlockedConduits
+	data.ActiveSoulbinds = Amr.db.char.ActiveSoulbinds
+	data.Soulbinds = Amr.db.char.Soulbinds
+	--data.UnlockedEssences = Amr.db.char.UnlockedEssences
+	--data.Essences = Amr.db.char.Essences
 	data.Equipped = Amr.db.char.Equipped	
 	data.BagItems = Amr.db.char.BagItems
 
@@ -385,6 +448,10 @@ Amr:AddEventHandler("BAG_UPDATE", onBankUpdated)
 
 Amr:AddEventHandler("PLAYER_TALENT_UPDATE", scanTalents)
 
-if C_AzeriteEssence then
-	Amr:AddEventHandler("AZERITE_ESSENCE_UPDATE", scanEssences)
+--if C_AzeriteEssence then
+--	Amr:AddEventHandler("AZERITE_ESSENCE_UPDATE", scanEssences)
+--end
+
+if C_Soulbinds then
+	Amr:AddEventHandler("SOULBIND_ACTIVATED", scanSoulbinds)
 end

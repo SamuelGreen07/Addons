@@ -134,7 +134,7 @@ local function parseItemList(parts, startPos, endToken, hasSlot)
     local prevUpgradeId = 0
     local prevBonusId = 0
     local prevLevel = 0
-    local prevAzeriteId = 0
+    --local prevAzeriteId = 0
     local digits = {
         ["-"] = true,
         ["0"] = true,
@@ -155,9 +155,9 @@ local function parseItemList(parts, startPos, endToken, hasSlot)
         elseif itemString ~= "" and itemString ~= "_" then
             local tokens = {}
             local bonusIds = {}
-            local azerite = {}
+            --local azerite = {}
             local hasBonuses = false
-            local hasAzerites = false
+            --local hasAzerites = false
             local token = ""
             local prop = "i"
             local tokenComplete = false
@@ -189,17 +189,17 @@ local function parseItemList(parts, startPos, endToken, hasSlot)
                     elseif prop == "e" then
                         val = val + prevEnchantId
                         prevEnchantId = val
-                    elseif prop == "a" then
-                        val = val + prevAzeriteId
-                        prevAzeriteId = val
+                    --elseif prop == "a" then
+                    --    val = val + prevAzeriteId
+                    --    prevAzeriteId = val
                     end
                     
                     if prop == "b" then
                         table.insert(bonusIds, val)
                         hasBonuses = true
-                    elseif prop == "a" then
-                        table.insert(azerite, val)
-                        hasAzerites = true
+                    --elseif prop == "a" then
+                    --    table.insert(azerite, val)
+                    --    hasAzerites = true
                     else
                         tokens[prop] = val
                     end
@@ -237,15 +237,16 @@ local function parseItemList(parts, startPos, endToken, hasSlot)
                 obj.bonusIds = bonusIds
             end
             
-            if hasAzerites then
-                obj.azerite = azerite
-            end
+            --if hasAzerites then
+            --    obj.azerite = azerite
+            --end
         end
     end
 
     return importData
 end
 
+--[[
 local function parseEssenceList(essenceString)
     local ret = {}
 
@@ -253,6 +254,19 @@ local function parseEssenceList(essenceString)
     for i = 1, #parts do
         local essence = { strsplit(".", parts[i]) }
         table.insert(ret, { tonumber(essence[1]), tonumber(essence[2]), tonumber(essence[3]) })
+    end
+
+    return ret
+end
+]]
+
+local function parseSoulbinds(soulbindString)
+    local ret = {}
+
+    local parts = { strsplit(",", soulbindString) }
+    for i = 1, #parts do
+        local node = { strsplit(".", parts[i]) }
+        table.insert(ret, { tonumber(node[1]), tonumber(node[2]), tonumber(node[3]) })
     end
 
     return ret
@@ -353,9 +367,11 @@ function Amr:ImportCharacter(data, isTest, isChild)
     end
     
     -- if we make it this far, the data is valid, so read item information
-	local specSlot = tonumber(parts[11])
+	local specSlot = tonumber(parts[10])
     
-    local essences = parseEssenceList(parts[15])
+    local soulbindId = tonumber(parts[14])
+    local soulbindNodes = parseSoulbinds(parts[15])
+    --local essences = parseEssenceList(parts[15])
 
     local importData = parseItemList(parts, 17, "n/a", true)
     
@@ -412,7 +428,9 @@ function Amr:ImportCharacter(data, isTest, isChild)
             Id = setupId,
             Label = setupName,
             Gear = importData,
-            Essences = essences
+            SoulbindId = soulbindId,
+            SoulbindNodes = soulbindNodes
+            --Essences = essences
         }
 
         if not result.IsBib then

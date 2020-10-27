@@ -121,7 +121,7 @@ RaidAchFilter:RegisterEvent("ZONE_CHANGED_NEW_AREA", "ZoneChange")
 
 -- Main Window
 function RaidAchFilter:Initialize()
-	local fra = CreateFrame("Frame", "RaidAch_Frame", UIParent)
+	local fra = CreateFrame("Frame", "RaidAch_Frame", UIParent, BackdropTemplateMixin and "BackdropTemplate")
 	fra:SetFrameStrata("DIALOG")
 	fra:SetMovable(true); fra:EnableMouse(true)
 	fra:RegisterForDrag("LeftButton")
@@ -167,7 +167,7 @@ function RaidAchFilter:Initialize()
 		end)
 	local content = CreateFrame("Frame", "RaidAch_Content", scrFra) 
 	content:SetSize(128, 128) 
-	scrFra.content = content 
+	scrFra.content = content
 	scrFra:SetScrollChild(content)
 	local backdrop = { -- Border
 	  edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
@@ -267,6 +267,9 @@ function RaidAchFilter:Initialize()
 				info.text = "Battle for Azeroth"
 				info.value = "submenua6"
 				UIDropDownMenu_AddButton(info, level)
+				info.text = "Shadowlands"
+				info.value = "submenua7"
+				UIDropDownMenu_AddButton(info, level)
 			elseif UIDROPDOWNMENU_MENU_VALUE == "topmenu2" then
 				info.text = "Lich King"
 				info.value = "submenub1"
@@ -286,8 +289,11 @@ function RaidAchFilter:Initialize()
 				info.text = "Battle for Azeroth"
 				info.value = "submenub6"
 				UIDropDownMenu_AddButton(info, level)
+				info.text = "Shadowlands"
+				info.value = "submenub7"
+				UIDropDownMenu_AddButton(info, level)
 			elseif UIDROPDOWNMENU_MENU_VALUE == "topmenu3" then
-				for i = 102, 115 do --Scenarios!
+				for i = 116, 130 do --Scenarios!
 				  info.value = i
 				  info.checked = false
 				  info.hasArrow = false
@@ -352,7 +358,17 @@ function RaidAchFilter:Initialize()
 				  UIDropDownMenu_AddButton(info, level)
 				end
 			elseif UIDROPDOWNMENU_MENU_VALUE == "submenua6" then
-				for i = 31, 31 do
+				for i = 31, 35 do
+				  info.value = i
+				  info.checked = false
+				  info.text = RAFdb.MapName[i]
+				  info.func = function() 
+					RaidAchFilter:ShowAch(i); ToggleDropDownMenu(1, nil, dropDown);
+				  end
+				  UIDropDownMenu_AddButton(info, level)
+				end
+			elseif UIDROPDOWNMENU_MENU_VALUE == "submenua7" then
+				for i = 36, 36 do
 				  info.value = i
 				  info.checked = false
 				  info.text = RAFdb.MapName[i]
@@ -363,7 +379,7 @@ function RaidAchFilter:Initialize()
 				end
 			-- Dungeons!
 			elseif UIDROPDOWNMENU_MENU_VALUE == "submenub1" then
-				for i = 32, 47 do
+				for i = 37, 52 do
 					  info.value = i
 					  info.checked = false
 					  info.text = RAFdb.MapName[i]
@@ -373,7 +389,7 @@ function RaidAchFilter:Initialize()
 					  UIDropDownMenu_AddButton(info, level)
 				end
 			elseif UIDROPDOWNMENU_MENU_VALUE == "submenub2" then
-				for i = 48, 61 do
+				for i = 53, 66 do
 					  info.value = i
 					  info.checked = false
 					  info.text = RAFdb.MapName[i]
@@ -383,7 +399,7 @@ function RaidAchFilter:Initialize()
 					  UIDropDownMenu_AddButton(info, level)
 				end
 			elseif UIDROPDOWNMENU_MENU_VALUE == "submenub3" then
-				for i = 62, 70 do
+				for i = 67, 75 do
 					  info.value = i
 					  info.checked = false
 					  info.text = RAFdb.MapName[i]
@@ -393,7 +409,7 @@ function RaidAchFilter:Initialize()
 					  UIDropDownMenu_AddButton(info, level)
 				end
 			elseif UIDROPDOWNMENU_MENU_VALUE == "submenub4" then
-				for i = 71, 78 do
+				for i = 76, 83 do
 					  info.value = i
 					  info.checked = false
 					  info.text = RAFdb.MapName[i]
@@ -403,7 +419,7 @@ function RaidAchFilter:Initialize()
 					  UIDropDownMenu_AddButton(info, level)
 				end
 			elseif UIDROPDOWNMENU_MENU_VALUE == "submenub5" then
-				for i = 79, 91 do
+				for i = 84, 96 do
 					  info.value = i
 					  info.checked = false
 					  info.text = RAFdb.MapName[i]
@@ -413,7 +429,17 @@ function RaidAchFilter:Initialize()
 					  UIDropDownMenu_AddButton(info, level)
 				end
 			elseif UIDROPDOWNMENU_MENU_VALUE == "submenub6" then
-				for i = 92, 101 do
+				for i = 97, 107 do
+					  info.value = i
+					  info.checked = false
+					  info.text = RAFdb.MapName[i]
+					  info.func = function() 
+					    RaidAchFilter:ShowAch(i); ToggleDropDownMenu(1, nil, dropDown);
+					  end
+					  UIDropDownMenu_AddButton(info, level)
+				end
+			elseif UIDROPDOWNMENU_MENU_VALUE == "submenub7" then
+				for i = 108, 115 do
 					  info.value = i
 					  info.checked = false
 					  info.text = RAFdb.MapName[i]
@@ -440,6 +466,7 @@ function RaidAchFilter:AchAdd(fraID, ach_ID, indent_num)
 	fr_name = "achFra"..fraID
 	if not fra then 
 		fra = CreateFrame("Frame", fr_name, frame)
+		Mixin(fra, BackdropTemplateMixin)
 		fra:SetSize(508,75)
 		if indent_num == 0 then fra:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
 		else fra:SetPoint("TOPLEFT", prevFra, "BOTTOMLEFT", 0, 0) end

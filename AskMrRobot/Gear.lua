@@ -235,7 +235,7 @@ local function renderGear(setupId, container)
 	end
 
 	local equipped = player.Equipped[player.ActiveSpec]
-	local equippedEssences = player.Essences[player.ActiveSpec]
+	--local equippedEssences = player.Essences[player.ActiveSpec]
 
 	if not gear then
 		-- no gear has been imported for this spec so show a message
@@ -313,8 +313,10 @@ local function renderGear(setupId, container)
 				end
 			end
 
-			local isAzerite = optimalItem and C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItemByID(optimalItem.id)
-			local isEssence = essences and optimalItem and optimalItem.id == 158075
+			--local isAzerite = optimalItem and C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItemByID(optimalItem.id)
+			--local isEssence = essences and optimalItem and optimalItem.id == 158075
+			local isAzerite = false
+			local isEssence = false
 			
 			-- find the item in the player's inventory that best matches what the optimization wants to use
 			local matchItem = Amr:FindMatchingItem(optimalItem, player, usedItems)
@@ -684,13 +686,13 @@ local function scanBagForItem(item, bagId, bestItem, bestDiff, bestLink)
 			local bagItem = Amr.ParseItemLink(itemLink)
 			if bagItem ~= nil then
 				-- see if this is an azerite item and read azerite power ids
-				loc:SetBagAndSlot(bagId, slotId)
+				--[[loc:SetBagAndSlot(bagId, slotId)
 				if C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItem(loc) then
 					local powers = Amr.ReadAzeritePowers(loc)
 					if powers then
 						bagItem.azerite = powers
 					end
-				end
+				end]]
 
 				local diff = countItemDifferences(item, bagItem)
 				if diff < bestDiff then

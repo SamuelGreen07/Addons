@@ -9,18 +9,18 @@ function S:Blizzard_DeathRecap()
 
 	local DeathRecapFrame = _G.DeathRecapFrame
 	DeathRecapFrame:StripTextures()
-	DeathRecapFrame:SetTemplate("Transparent")
+	DeathRecapFrame:CreateBackdrop('Transparent')
 	DeathRecapFrame.CloseButton:SetFrameLevel(5)
 	S:HandleCloseButton(DeathRecapFrame.CloseXButton)
 	S:HandleButton(DeathRecapFrame.CloseButton)
 
 	for i=1, 5 do
-		local recap = DeathRecapFrame["Recap"..i].SpellInfo
+		local recap = DeathRecapFrame['Recap'..i].SpellInfo
 		recap:CreateBackdrop()
 		recap.backdrop:SetOutside(recap.Icon)
 		recap.Icon:SetTexCoord(unpack(E.TexCoords))
 		recap.Icon:SetParent(recap.backdrop)
-		recap.IconBorder:SetAlpha(0)
+		recap.IconBorder:Kill()
 	end
 end
 

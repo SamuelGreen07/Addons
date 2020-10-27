@@ -27,6 +27,7 @@ function mod:GetOptions()
 		308278, -- Darkened Sky
 		309819, -- Void Eruption
 		298691, -- Chains of Servitude
+		309648, -- Tainted Polymorph
 	}
 end
 
@@ -35,23 +36,15 @@ function mod:OnRegister()
 end
 
 function mod:OnBossEnable()
-	self:RegisterEvent("ENCOUNTER_START")
-
 	self:Log("SPELL_CAST_SUCCESS", "DarkenedSky", 308278)
 	self:Log("SPELL_CAST_START", "VoidEruption", 309819)
 	self:Log("SPELL_CAST_START", "ChainsOfServitude", 298691)
+	self:Log("SPELL_CAST_START", "TaintedPolymorph", 309648)
 end
 
 function mod:OnEngage()
 	self:Bar(308278, 6.8) -- Darkened Sky
 	self:Bar(309819, 20.6) -- Void Eruption
-end
-
--- There are no boss frames to trigger the engage
-function mod:ENCOUNTER_START(_, encounterId)
-	if encounterId == self.engageId then
-		self:Engage()
-	end
 end
 
 --------------------------------------------------------------------------------
@@ -73,4 +66,9 @@ end
 function mod:ChainsOfServitude(args)
 	self:Message2(args.spellId, "red")
 	self:PlaySound(args.spellId, "alarm")
+end
+
+function mod:TaintedPolymorph(args)
+	self:Message2(args.spellId, "yellow", CL.casting:format(args.spellName))
+	self:PlaySound(args.spellId, "alert")
 end

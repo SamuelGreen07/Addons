@@ -7,7 +7,7 @@ assert(oUF, "oUF_Fader cannot find an instance of oUF. If your oUF is embedded i
 -------------
 
 local _G = _G
-local pairs, ipairs = pairs, ipairs
+local pairs, ipairs, type = pairs, ipairs, type
 local next, tinsert, tremove = next, tinsert, tremove
 local CreateFrame = CreateFrame
 local GetMouseFocus = GetMouseFocus
@@ -94,6 +94,10 @@ local function Update(self, _, unit)
 		ToggleAlpha(self, element, element.MaxAlpha)
 	else
 		if element.Delay then
+			if element.DelayAlpha then
+				ToggleAlpha(self, element, element.DelayAlpha)
+			end
+
 			element:ClearTimers()
 			element.delayTimer = E:ScheduleTimer(ToggleAlpha, element.Delay, self, element, element.MinAlpha)
 		else
@@ -109,7 +113,7 @@ end
 local function onRangeUpdate(frame, elapsed)
 	frame.timer = (frame.timer or 0) + elapsed
 
-	if frame.timer >= .20 then
+	if (frame.timer >= .20) then
 		for _, object in next, onRangeObjects do
 			if object:IsVisible() then
 				object.Fader:ForceUpdate()
@@ -221,10 +225,9 @@ local options = {
 	Health = {
 		enable = function(self)
 			self:RegisterEvent('UNIT_HEALTH', Update)
-			self:RegisterEvent('UNIT_HEALTH_FREQUENT', Update)
 			self:RegisterEvent('UNIT_MAXHEALTH', Update)
 		end,
-		events = {'UNIT_HEALTH','UNIT_HEALTH_FREQUENT','UNIT_MAXHEALTH'}
+		events = {'UNIT_HEALTH','UNIT_MAXHEALTH'}
 	},
 	Power = {
 		enable = function(self)
@@ -264,6 +267,7 @@ local options = {
 		end
 	},
 	Smooth = {countIgnored = true},
+	DelayAlpha = {countIgnored = true},
 	Delay = {countIgnored = true},
 }
 

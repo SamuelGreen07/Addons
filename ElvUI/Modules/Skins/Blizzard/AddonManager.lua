@@ -1,8 +1,10 @@
 local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local S = E:GetModule('Skins')
+local LSM = E.Libs.LSM
 
 local _G = _G
 local gsub = gsub
+local unpack = unpack
 local GetNumAddOns = GetNumAddOns
 local GetAddOnInfo = GetAddOnInfo
 local GetAddOnEnableState = GetAddOnEnableState
@@ -16,7 +18,7 @@ function S:AddonList()
 	local maxShown = _G.MAX_ADDONS_DISPLAYED
 	local AddonCharacterDropDown = _G.AddonCharacterDropDown
 
-	S:HandlePortraitFrame(AddonList, true)
+	S:HandlePortraitFrame(AddonList)
 	S:HandleButton(AddonList.EnableAllButton, true)
 	S:HandleButton(AddonList.DisableAllButton, true)
 	S:HandleButton(AddonList.OkayButton, true)
@@ -32,19 +34,19 @@ function S:AddonList()
 	_G.AddonListScrollFrame.backdrop:Point('BOTTOMRIGHT', 0, -1)
 
 	for i = 1, maxShown do
-		S:HandleCheckBox(_G["AddonListEntry"..i.."Enabled"], nil, nil, true)
-		S:HandleButton(_G["AddonListEntry"..i].LoadAddonButton)
+		S:HandleCheckBox(_G['AddonListEntry'..i..'Enabled'])
+		S:HandleButton(_G['AddonListEntry'..i].LoadAddonButton)
 	end
 
-	local font = E.Libs.LSM:Fetch('font', 'Expressway')
+	local font = LSM:Fetch('font', 'Expressway')
 	hooksecurefunc('AddonList_Update', function()
 		local numEntrys = GetNumAddOns()
 		for i = 1, maxShown do
 			local index = AddonList.offset + i
 			if index <= numEntrys then
-				local entry = _G["AddonListEntry"..i]
-				local string = _G["AddonListEntry"..i.."Title"]
-				local checkbox = _G["AddonListEntry"..i.."Enabled"]
+				local entry = _G['AddonListEntry'..i]
+				local string = _G['AddonListEntry'..i..'Title']
+				local checkbox = _G['AddonListEntry'..i..'Enabled']
 				local name, title, _, loadable, reason = GetAddOnInfo(index)
 
 				-- Get the character from the current list (nil is all characters)
@@ -74,27 +76,34 @@ function S:AddonList()
 					entry.Status:SetTextColor(0.7, 0.7, 0.7)
 				end
 
-				if disabled or reason == "DEP_DISABLED" then
+				if disabled or reason == 'DEP_DISABLED' then
 					string:SetText(gsub(title or name, '|c%x%x%x%x%x%x%x%x(.-)|?r?','%1'))
 				end
 
 				if enabledForSome then
 					string:SetTextColor(0.5, 0.5, 0.5)
-				elseif enabled and (loadable or reason == "DEP_DEMAND_LOADED" or reason == "DEMAND_LOADED") then
+				elseif enabled and (loadable or reason == 'DEP_DEMAND_LOADED' or reason == 'DEMAND_LOADED') then
 					string:SetTextColor(0.9, 0.9, 0.9)
-				elseif enabled and reason ~= "DEP_DISABLED" then
+				elseif enabled and reason ~= 'DEP_DISABLED' then
 					string:SetTextColor(1.0, 0.2, 0.2)
 				else
 					string:SetTextColor(0.3, 0.3, 0.3)
 				end
 
 				local checktex = checkbox:GetCheckedTexture()
+				checktex:Show()
+
 				if not enabled and checkall == 1 then
 					checktex:SetVertexColor(0.3, 0.3, 0.3)
-					checktex:SetDesaturated(false)
-					checktex:Show()
-				elseif checkstate == 0 then
+					checktex:SetDesaturated(true)
+				elseif not checkbox.state or checkbox.state == 0 then
 					checktex:Hide()
+				elseif checkbox.state == 1 then
+					checktex:SetVertexColor(0.6, 0.6, 0.6)
+					checktex:SetDesaturated(true)
+				elseif checkbox.state == 2 then
+					checktex:SetVertexColor(unpack(E.media.rgbvaluecolor))
+					checktex:SetDesaturated(false)
 				end
 			end
 		end

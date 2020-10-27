@@ -1,6 +1,6 @@
-## Interface: 80300
+## Interface: 90001
 ## Title: BtWQuests
-## Version: 1.66
+## Version: 1.73.3
 ## Notes: 
 ## Author: Breen
 ## SavedVariables: BtWQuests_Characters

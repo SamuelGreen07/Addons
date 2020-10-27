@@ -33,6 +33,8 @@ local unpack = unpack
 local math = math
 local string = string
 
+local BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate" or nil
+
 local function noop() end
 
 --[[
@@ -83,11 +85,7 @@ local function CreateInfoString(button, position)
 		str:SetJustifyH("RIGHT")
 		str:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 1.5, 1.5)
 	end
-	if RealUI then
-		str:SetFontObject(RealUIFont_PixelSmall)
-	else
-		str:SetFont(unpack(ns.options.fonts.itemCount))
-	end
+	str:SetFont(unpack(ns.options.fonts.itemCount))
 
 	return str
 end
@@ -125,7 +123,7 @@ local function ItemButton_Scaffold(self)
 	self.Count = _G[name.."Count"]
 	self.Cooldown = _G[name.."Cooldown"]
 	self.Quest = _G[name.."IconQuestTexture"]
-	self.Border = CreateFrame("Frame", nil, self)
+	self.Border = CreateFrame("Frame", nil, self, BackdropTemplate)
 	self.Border:SetPoint("TOPLEFT", self.Icon, 0, 0)
 	self.Border:SetPoint("BOTTOMRIGHT", self.Icon, 0, 0)
 	self.Border:SetBackdrop({

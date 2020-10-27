@@ -111,7 +111,6 @@ local function Update(self, event, unit)
 
 		if(health < healAbsorb) then
 			hasOverHealAbsorb = true
-			healAbsorb = health
 		end
 	else
 		allIncomingHeal = allIncomingHeal - healAbsorb
@@ -129,12 +128,8 @@ local function Update(self, event, unit)
 	end
 
 	local hasOverAbsorb = false
-	if(health + allIncomingHeal + absorb >= maxHealth) then
-		if(absorb > 0) then
-			hasOverAbsorb = true
-		end
-
-		absorb = math.max(0, maxHealth - health - allIncomingHeal)
+	if(health + allIncomingHeal + absorb >= maxHealth) and (absorb > 0) then
+		hasOverAbsorb = true
 	end
 
 	if(element.myBar) then
@@ -190,7 +185,7 @@ local function Update(self, event, unit)
 	* hasOverHealAbsorb - indicates if the amount of heal absorb is higher than the unit's current health (boolean)
 	--]]
 	if(element.PostUpdate) then
-		return element:PostUpdate(unit, myIncomingHeal, otherIncomingHeal, absorb, healAbsorb, hasOverAbsorb, hasOverHealAbsorb)
+		return element:PostUpdate(unit, myIncomingHeal, otherIncomingHeal, absorb, healAbsorb, hasOverAbsorb, hasOverHealAbsorb, health, maxHealth)
 	end
 end
 
@@ -215,7 +210,7 @@ local function Enable(self)
 		element.__owner = self
 		element.ForceUpdate = ForceUpdate
 
-		self:RegisterEvent('UNIT_HEALTH_FREQUENT', Path)
+		self:RegisterEvent('UNIT_HEALTH', Path)
 		self:RegisterEvent('UNIT_MAXHEALTH', Path)
 		self:RegisterEvent('UNIT_HEAL_PREDICTION', Path)
 		self:RegisterEvent('UNIT_ABSORB_AMOUNT_CHANGED', Path)
@@ -294,7 +289,7 @@ local function Disable(self)
 			element.overHealAbsorb:Hide()
 		end
 
-		self:UnregisterEvent('UNIT_HEALTH_FREQUENT', Path)
+		self:UnregisterEvent('UNIT_HEALTH', Path)
 		self:UnregisterEvent('UNIT_MAXHEALTH', Path)
 		self:UnregisterEvent('UNIT_HEAL_PREDICTION', Path)
 		self:UnregisterEvent('UNIT_ABSORB_AMOUNT_CHANGED', Path)

@@ -1,14 +1,10 @@
-lightweight tag 72ddfe8202a7d6e86c0eb791017ca17dae93966e DetailsRetail.8.3.0.7346.141
+lightweight tag a50a49bf0b0eec014ee21cf5df35db9e0e3aa832 DetailsRetail.9.0.1.7933.143
 Author:	Tercio Jose <terciob19@hotmail.com>
-Date:	Wed Jul 1 12:54:30 2020 -0300
+Date:	Sun Oct 25 20:51:04 2020 -0300
 
-commit 72ddfe8202a7d6e86c0eb791017ca17dae93966e
+commit a50a49bf0b0eec014ee21cf5df35db9e0e3aa832
 Author: Tercio Jose <terciob19@hotmail.com>
-Date:   Wed Jul 1 12:54:30 2020 -0300
+Date:   Sun Oct 25 20:51:04 2020 -0300
 
-    Another round of general bug fixes
-    
-    - Added Abyssal  Healing Potion.
-    - Fixed healing done targets on the breakdown window.
-    - Fixed hovering bars when the window is embed into the chat window.
+    Fixed customs
 

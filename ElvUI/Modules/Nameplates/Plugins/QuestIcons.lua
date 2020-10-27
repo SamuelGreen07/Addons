@@ -1,110 +1,86 @@
 local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
+local NP = E:GetModule('NamePlates')
 local oUF = E.oUF
 
---Lua functions
 local _G = _G
-local pairs, ceil, floor, tonumber = pairs, ceil, floor, tonumber
+local pairs, ipairs, ceil, floor, tonumber = pairs, ipairs, ceil, floor, tonumber
 local strmatch, strlower, strfind = strmatch, strlower, strfind
---WoW API / Variables
+
 local GetLocale = GetLocale
-local GetQuestLogIndexByID = GetQuestLogIndexByID
-local GetQuestLogSpecialItemInfo = GetQuestLogSpecialItemInfo
-local GetQuestLogTitle = GetQuestLogTitle
 local IsInInstance = IsInInstance
 local UnitIsPlayer = UnitIsPlayer
+local GetQuestLogSpecialItemInfo = GetQuestLogSpecialItemInfo
+local C_QuestLog_GetTitleForQuestID = C_QuestLog.GetTitleForQuestID
+local C_QuestLog_GetLogIndexForQuestID = C_QuestLog.GetLogIndexForQuestID
+local C_QuestLog_GetTitleForLogIndex = C_QuestLog.GetTitleForLogIndex
+local C_QuestLog_GetNumQuestLogEntries = C_QuestLog.GetNumQuestLogEntries
+local C_QuestLog_GetQuestIDForLogIndex = C_QuestLog.GetQuestIDForLogIndex
 local ThreatTooltip = THREAT_TOOLTIP:gsub('%%d', '%%d-')
 
-local questIconTypes = {"Item", "Loot", "Skull", "Chat"}
-local ActiveQuests = {
-	--[questName] = questID
+local questIcons = {
+	iconTypes = { 'Default', 'Item', 'Skull', 'Chat' },
+	indexByID = {}, --[questID] = questIndex
+	activeQuests = {} --[questTitle] = questID
 }
 
-local UsedLocale = GetLocale()
-local QuestTypesLocalized = {
-	["enUS"] = {
-		["slain"] = "KILL",
-		["destroy"] = "KILL",
-		["eleminate"] = "KILL",
-		["repel"] = "KILL",
-		["kill"] = "KILL",
-		["defeat"] = "KILL",
-		["speak"] = "CHAT",
-		["ask"] = "CHAT",
-		["talk"] = "CHAT",
+NP.QuestIcons = questIcons
+
+local typesLocalized = {
+	enUS = {
+		--- short matching applies here so,
+		-- kill: killed, destory: destoryed, etc ...
+		KILL = {'slain', 'destroy', 'eliminate', 'repel', 'kill', 'defeat'},
+		CHAT = {'speak', 'talk'}
 	},
-	["deDE"] = {
-		["besiegen"] = "KILL",
-		["besiegt"] = "KILL",
-		["getötet"] = "KILL",
-		["töten"] = "KILL",
-		["tötet"] = "KILL",
-		["zerstört"] = "KILL",
-		["befragt"] = "CHAT",
-		["sprecht"] = "CHAT",
-		["genährt"] = "KILL",
+	deDE = {
+		KILL = {'besiegen', 'besiegt', 'getötet', 'töten', 'tötet', 'vernichtet', 'zerstört', 'genährt'},
+		CHAT = {'befragt', 'sprecht'}
 	},
-	["esMX"] = {
-		["slain"] = "KILL",
-		["destroyed"] = "KILL",
-		["speak"] = "CHAT",
+	ruRU = {
+		KILL = {'убит', 'уничтож', 'разбомблен', 'разбит', 'сразит'},
+		CHAT = {'поговорит', 'спрашивать'}
 	},
-	["frFR"] = {
-		["slain"] = "KILL",
-		["destroyed"] = "KILL",
-		["speak"] = "CHAT",
+	esMX = {
+		-- asesinad: asesinado, asesinados, asesinada, asesinadas
+		-- derrota: derrotar, derrotado, derrotados, derrotada, derrotadas
+		-- destrui: destruir, destruido, destruidos, destruida, destruidas
+		-- elimin: eliminar, elimine, eliminadas, eliminada, eliminados, eliminado
+		-- repel: repele, repelido, repelidos, repelida, repelidas
+		KILL = {'asesinad', 'destrui', 'elimin', 'repel', 'derrota'},
+		CHAT = {'habla', 'pídele'}
 	},
-	["koKR"] = {
-		["slain"] = "KILL",
-		["destroyed"] = "KILL",
-		["speak"] = "CHAT",
+	ptBR = {
+		-- destrui: above but also destruição
+		-- repel: repelir, repelido, repelidos, repelida, repelidas
+		KILL = {'morto', 'morta', 'matar', 'destrui', 'elimin', 'repel', 'derrota'},
+		CHAT = {'falar', 'pedir'}
 	},
-	["ptBR"] = {
-		["slain"] = "KILL",
-		["destroyed"] = "KILL",
-		["speak"] = "CHAT",
+	frFR = {
+		-- tué: tués, tuée, tuées
+		-- abattu: abattus, abattue
+		-- détrui: détruite, détruire, détruit, détruits, détruites
+		-- repouss: repousser, repoussés, repoussée, repoussées
+		-- élimin: éliminer, éliminé, éliminés, éliminée, éliminées
+		KILL = {'tué', 'tuer', 'attaqué', 'attaque', 'abattre', 'abattu', 'détrui', 'élimin', 'repouss', 'vaincu', 'vaincre'},
+		-- demande: demander, demandez
+		-- parle: parler, parlez
+		CHAT = {'parle', 'demande'}
 	},
-	["ruRU"] = {
-		["убит"] = "KILL",
-		["уничтож"] = "KILL",
-		["разбомблен"] = "KILL",
-		["разбит"] = "KILL",
-		["сразит"] = "KILL",
-		["поговорит"] = "CHAT",
+	koKR = {
+		KILL = {'쓰러뜨리기', '물리치기', '공격', '파괴'},
+		CHAT = {'대화'}
 	},
-	["zhCN"] = {
-		["消灭"] = "KILL",
-		["摧毁"] = "KILL",
-		["获得"] = "KILL",
-		["击败"] = "KILL",
-		["交谈"] = "CHAT",
+	zhCN = {
+		KILL = {'消灭', '摧毁', '击败', '毁灭', '击退'},
+		CHAT = {'交谈', '谈一谈'}
 	},
-	["zhTW"] = {
-		["slain"] = "KILL",
-		["destroyed"] = "KILL",
-		["speak"] = "CHAT",
+	zhTW = {
+		KILL = {'毀滅', '擊退', '殺死'},
+		CHAT = {'交談', '說話'}
 	},
 }
 
-local QuestTypes = QuestTypesLocalized[UsedLocale] or QuestTypesLocalized.enUS
-
-local function QUEST_ACCEPTED(self, event, questLogIndex, questID)
-	if questLogIndex and questLogIndex > 0 then
-		local questName = GetQuestLogTitle(questLogIndex)
-		if questName and (questID and questID > 0) then
-			ActiveQuests[questName] = questID
-		end
-	end
-end
-
-local function QUEST_REMOVED(self, event, questID)
-	if not questID then return end
-	for questName, id in pairs(ActiveQuests) do
-		if id == questID then
-			ActiveQuests[questName] = nil
-			break
-		end
-	end
-end
+local questTypes = typesLocalized[GetLocale()] or typesLocalized.enUS
 
 local function CheckTextForQuest(text)
 	local x, y = strmatch(text, '(%d+)/(%d+)')
@@ -117,15 +93,16 @@ local function CheckTextForQuest(text)
 		end
 	end
 end
+NP.QuestIcons.CheckTextForQuest = CheckTextForQuest
 
 local function GetQuests(unitID)
 	if IsInInstance() then return end
 
-	E.ScanTooltip:SetOwner(_G.UIParent, "ANCHOR_NONE")
+	E.ScanTooltip:SetOwner(_G.UIParent, 'ANCHOR_NONE')
 	E.ScanTooltip:SetUnit(unitID)
 	E.ScanTooltip:Show()
 
-	local QuestList, notMyQuest
+	local QuestList, notMyQuest, activeID
 	for i = 3, E.ScanTooltip:NumLines() do
 		local str = _G['ElvUI_ScanTooltipTextLeft' .. i]
 		local text = str and str:GetText()
@@ -135,23 +112,38 @@ local function GetQuests(unitID)
 			notMyQuest = text ~= E.myname
 		elseif text and not notMyQuest then
 			local count, percent = CheckTextForQuest(text)
+
+			-- this line comes from one line up in the tooltip
+			local activeQuest = NP.QuestIcons.activeQuests[text]
+			if activeQuest then activeID = activeQuest end
+
 			if count then
 				local type, index, texture, _
-
-				local activeID = ActiveQuests[text]
 				if activeID then
-					index = GetQuestLogIndexByID(activeID)
+					index = questIcons.indexByID[activeID]
 					_, texture = GetQuestLogSpecialItemInfo(index)
 				end
 
 				if texture then
-					type = "QUEST_ITEM"
+					type = 'QUEST_ITEM'
 				else
 					local lowerText = strlower(text)
-					for typeString in pairs(QuestTypes) do
-						if strfind(lowerText, typeString, nil, true) then
-							type = QuestTypes[typeString]
+
+					-- check chat type first
+					for _, listText in ipairs(questTypes.CHAT) do
+						if strfind(lowerText, listText, nil, true) then
+							type = 'CHAT'
 							break
+						end
+					end
+
+					-- check kill type if chat type doesn't exist
+					if not type then
+						for _, listText in ipairs(questTypes.KILL) do
+							if strfind(lowerText, listText, nil, true) then
+								type = 'KILL'
+								break
+							end
 						end
 					end
 				end
@@ -161,7 +153,7 @@ local function GetQuests(unitID)
 					isPercent = percent,
 					itemTexture = texture,
 					objectiveCount = count,
-					questType = type or "LOOT",
+					questType = type or 'DEFAULT',
 					-- below keys are currently unused
 					questLogIndex = index,
 					questID = activeID
@@ -175,7 +167,7 @@ local function GetQuests(unitID)
 end
 
 local function hideIcons(element)
-	for _, object in pairs(questIconTypes) do
+	for _, object in pairs(questIcons.iconTypes) do
 		local icon = element[object]
 		icon:Hide()
 
@@ -185,14 +177,11 @@ local function hideIcons(element)
 	end
 end
 
-local function Update(self, event, unit)
+local function Update(self, event, arg1)
 	local element = self.QuestIcons
 	if not element then return end
 
-	if event ~= "UNIT_NAME_UPDATE" then
-		unit = self.unit
-	end
-
+	local unit = (event == 'UNIT_NAME_UPDATE' and arg1) or self.unit
 	if unit ~= self.unit then return end
 
 	if element.PreUpdate then
@@ -218,34 +207,33 @@ local function Update(self, event, unit)
 
 		if isPercent or objectiveCount > 0 then
 			local icon
-
-			if questType == "KILL" then
+			if questType == 'DEFAULT' then
+				icon = element.Default
+			elseif questType == 'KILL' then
 				icon = element.Skull
-			elseif questType == "LOOT" then
-				icon = element.Loot
-			elseif questType == "CHAT" then
+			elseif questType == 'CHAT' then
 				icon = element.Chat
-			elseif questType == "QUEST_ITEM" then
+			elseif questType == 'QUEST_ITEM' then
 				icon = element.Item
 			end
 
-			if not icon:IsShown() then
+			if icon and not icon:IsShown() then
 				shownCount = (shownCount and shownCount + 1) or 0
 
 				local size = icon.size or 25
-				local setPosition = icon.position or "TOPLEFT"
+				local setPosition = icon.position or 'TOPLEFT'
 				local newPosition = E.InversePoints[setPosition]
-				local offset = 2 + (shownCount * size)
+				local offset = shownCount * (5 + size)
 
 				icon:Show()
 				icon:ClearAllPoints()
-				icon:Point(newPosition, element, newPosition, (strmatch(setPosition, "LEFT") and -offset) or offset, 0)
+				icon:Point(newPosition, element, newPosition, (strmatch(setPosition, 'LEFT') and -offset) or offset, 0)
 
-				if questType ~= "CHAT" and icon.Text then
-					icon.Text:SetText((isPercent and objectiveCount.."%") or objectiveCount)
+				if questType ~= 'CHAT' and icon.Text and (isPercent or objectiveCount > 1) then
+					icon.Text:SetText((isPercent and objectiveCount..'%') or objectiveCount)
 				end
 
-				if questType == "QUEST_ITEM" then
+				if questType == 'QUEST_ITEM' then
 					element.Item:SetTexture(quest.itemTexture)
 				end
 			end
@@ -271,8 +259,8 @@ local function Enable(self)
 		element.__owner = self
 		element.ForceUpdate = ForceUpdate
 
-		if element.Loot:IsObjectType('Texture') and not element.Loot:GetAtlas() then
-			element.Loot:SetAtlas('Banker')
+		if element.Default:IsObjectType('Texture') and not element.Default:GetAtlas() then
+			element.Default:SetAtlas('SmallQuestBang')
 		end
 		if element.Skull:IsObjectType('Texture') and not element.Skull:GetTexture() then
 			element.Skull:SetTexture(E.Media.Textures.SkullIcon)
@@ -281,8 +269,6 @@ local function Enable(self)
 			element.Chat:SetTexture([[Interface\WorldMap\ChatBubble_64.PNG]])
 		end
 
-		self:RegisterEvent('QUEST_ACCEPTED', QUEST_ACCEPTED, true)
-		self:RegisterEvent('QUEST_REMOVED', QUEST_REMOVED, true)
 		self:RegisterEvent('QUEST_LOG_UPDATE', Path, true)
 		self:RegisterEvent('UNIT_NAME_UPDATE', Path, true)
 		self:RegisterEvent('PLAYER_ENTERING_WORLD', Path, true)
@@ -297,12 +283,50 @@ local function Disable(self)
 		element:Hide()
 		hideIcons(element)
 
-		self:UnregisterEvent('QUEST_ACCEPTED', QUEST_ACCEPTED)
-		self:UnregisterEvent('QUEST_REMOVED', QUEST_REMOVED)
 		self:UnregisterEvent('QUEST_LOG_UPDATE', Path)
 		self:UnregisterEvent('UNIT_NAME_UPDATE', Path)
 		self:UnregisterEvent('PLAYER_ENTERING_WORLD', Path)
 	end
 end
+
+local frame = CreateFrame('Frame')
+frame:RegisterEvent('QUEST_ACCEPTED')
+frame:RegisterEvent('QUEST_REMOVED')
+frame:RegisterEvent('PLAYER_ENTERING_WORLD')
+frame:SetScript('OnEvent', function(self, event, questID)
+	if event == 'PLAYER_ENTERING_WORLD' then
+		for i = 1, C_QuestLog_GetNumQuestLogEntries() do
+			local id = C_QuestLog_GetQuestIDForLogIndex(i)
+			if id and id > 0 then
+				questIcons.indexByID[id] = i
+
+				local title = C_QuestLog_GetTitleForLogIndex(i)
+				if title then questIcons.activeQuests[title] = id end
+			end
+		end
+
+		self:UnregisterEvent(event)
+	elseif event == 'QUEST_ACCEPTED' then
+		if questID and questID > 0 then
+			local index = C_QuestLog_GetLogIndexForQuestID(questID)
+			if index and index > 0 then
+				questIcons.indexByID[questID] = index
+
+				local title = C_QuestLog_GetTitleForQuestID(questID)
+				if title then questIcons.activeQuests[title] = questID end
+			end
+		end
+	elseif event == 'QUEST_REMOVED' then
+		if not questID then return end
+		questIcons.indexByID[questID] = nil
+
+		for title, id in pairs(questIcons.activeQuests) do
+			if id == questID then
+				questIcons.activeQuests[title] = nil
+				break
+			end
+		end
+	end
+end)
 
 oUF:AddElement('QuestIcons', Path, Enable, Disable)

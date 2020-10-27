@@ -7,7 +7,7 @@ local LibStub = LibStub
 local gui = LibStub("AceGUI-3.0")
 local reg = LibStub("AceConfigRegistry-3.0-ElvUI")
 
-local MAJOR, MINOR = "AceConfigDialog-3.0-ElvUI", 79
+local MAJOR, MINOR = "AceConfigDialog-3.0-ElvUI", 81
 local AceConfigDialog, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not AceConfigDialog then return end
@@ -563,6 +563,7 @@ end
 local function OptionOnMouseLeave(widget, event)
 	if AceConfigDialog.tooltip:IsShown() then
 		AceConfigDialog.tooltip:Hide()
+		AceConfigDialog.tooltip:ClearAllPoints()
 	end
 end
 
@@ -948,7 +949,7 @@ end
 
 local function MultiControlOnClosed(widget, event, ...)
 	local user = widget:GetUserDataTable()
-	if user.valuechanged then
+	if user.valuechanged and not widget:IsReleasing() then
 		local iscustom = user.rootframe:GetUserData("iscustom")
 		local basepath = user.rootframe:GetUserData("basepath") or emptyTbl
 		if iscustom then
@@ -1142,6 +1143,11 @@ end
 
 local function sortTblAsStrings(x,y)
 	return tostring(x) < tostring(y) -- Support numbers as keys
+end
+
+-- added by ElvUI
+local function sortTblByValue(x,y)
+	return x[2] < y[2]
 end
 
 --[[
@@ -1346,14 +1352,20 @@ local function FeedOptions(appName, options,container,rootframe,path,group,inlin
 				elseif v.type == "multiselect" then
 					local values = GetOptionsMemberValue("values", v, options, path, appName)
 					local disabled = CheckOptionDisabled(v, options, path, appName)
+					local sortByValue = GetOptionsMemberValue("sortByValue", v, options, path, appName)
 
 					local valuesort = new()
 					if values then
 						for value, text in pairs(values) do
-							tinsert(valuesort, value)
+							tinsert(valuesort, (sortByValue and {value, text}) or value)
 						end
 					end
-					tsort(valuesort)
+
+					if sortByValue then
+						tsort(valuesort, sortTblByValue)
+					else
+						tsort(valuesort)
+					end
 
 					local controlType = v.dialogControl or v.control
 					if controlType then
@@ -1383,7 +1395,7 @@ local function FeedOptions(appName, options,container,rootframe,path,group,inlin
 						end
 						--check:SetTriState(v.tristate)
 						for i = 1, #valuesort do
-							local key = valuesort[i]
+							local key = (sortByValue and valuesort[i][1]) or valuesort[i]
 							local value = GetOptionsMemberValue("get",v, options, path, appName, key)
 							control:SetItemValue(key,value)
 						end
@@ -1399,7 +1411,7 @@ local function FeedOptions(appName, options,container,rootframe,path,group,inlin
 						control:PauseLayout()
 
 						for i = 1, #valuesort do
-							local value = valuesort[i]
+							local value = (sortByValue and valuesort[i][1]) or valuesort[i]
 							local text = values[value]
 							if dragdrop then
 								local button = gui:Create("Button-ElvUI")
@@ -1612,6 +1624,7 @@ end
 
 local function TreeOnButtonLeave(widget, event, value, button)
 	AceConfigDialog.tooltip:Hide()
+	AceConfigDialog.tooltip:ClearAllPoints()
 end
 
 

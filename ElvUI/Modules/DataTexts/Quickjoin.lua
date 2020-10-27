@@ -2,10 +2,8 @@ local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, Private
 local DT = E:GetModule('DataTexts')
 local CH = E:GetModule('Chat')
 
---Lua functions
 local next, pairs, select, type = next, pairs, select, type
 local format, strjoin, wipe, gsub = format, strjoin, wipe, gsub
---WoW API / Variables
 local ToggleQuickJoinPanel = ToggleQuickJoinPanel
 local SocialQueueUtil_GetQueueName = SocialQueueUtil_GetQueueName
 local SocialQueueUtil_GetRelationshipInfo = SocialQueueUtil_GetRelationshipInfo
@@ -18,13 +16,13 @@ local UNKNOWN, QUICK_JOIN = UNKNOWN, QUICK_JOIN
 local displayString = ''
 local quickJoin = {}
 
-local function OnEnter(self)
-	DT:SetupTooltip(self)
-
+local function OnEnter()
 	if not next(quickJoin) then return end
+	DT.tooltip:ClearLines()
 
 	DT.tooltip:AddLine(QUICK_JOIN, nil, nil, nil, true)
-	DT.tooltip:AddLine(" ")
+	DT.tooltip:AddLine(' ')
+
 	for name, activity in pairs(quickJoin) do
 		DT.tooltip:AddDoubleLine(name, activity, nil, nil, nil, 1, 1, 1)
 	end
@@ -32,10 +30,11 @@ local function OnEnter(self)
 	DT.tooltip:Show()
 end
 
-local function Update(panel)
+local function Update(self)
 	wipe(quickJoin)
 
-	if not panel then return end
+	if not self then return end
+
 	local quickJoinGroups = C_SocialQueue_GetAllGroups()
 	for _, guid in pairs(quickJoinGroups) do
 		local players = C_SocialQueue_GetGroupMembers(guid)
@@ -47,7 +46,7 @@ local function Update(panel)
 			local queues = C_SocialQueue_GetGroupQueues(guid)
 			local firstQueue, numQueues = queues and queues[1], queues and #queues or 0
 			local isLFGList = firstQueue and firstQueue.queueData and firstQueue.queueData.queueType == 'lfglist'
-			local coloredName = (playerName and format('%s%s|r%s', nameColor, playerName, extraCount)) or format('{%s%s}', UNKNOWN, extraCount)
+			local coloredName = (playerName and playerName ~= '' and format('%s%s|r%s', nameColor, playerName, extraCount)) or format('{%s%s}', UNKNOWN, extraCount)
 
 			local activity
 			if isLFGList and firstQueue and firstQueue.eligible then
@@ -61,12 +60,12 @@ local function Update(panel)
 				end
 
 				if isLeader then
-					coloredName = format("|TInterface\\GroupFrame\\UI-Group-LeaderIcon:16:16|t%s", coloredName)
+					coloredName = format([[|TInterface\GroupFrame\UI-Group-LeaderIcon:16:16|t%s]], coloredName)
 				end
 
 				activity = activityName or UNKNOWN
 				if numQueues > 1 then
-					activity = format("[+%s]%s", numQueues - 1, activity)
+					activity = format('[+%s]%s', numQueues - 1, activity)
 				end
 			elseif firstQueue then
 				local output, queueCount = '', 0
@@ -85,7 +84,7 @@ local function Update(panel)
 				end
 				if output ~= '' then
 					if queueCount > 0 then
-						activity = format("%s[+%s]", output, queueCount)
+						activity = format('%s[+%s]', output, queueCount)
 					else
 						activity = output
 					end
@@ -96,17 +95,21 @@ local function Update(panel)
 		end
 	end
 
-	panel.text:SetFormattedText(displayString, QUICK_JOIN, #quickJoinGroups)
+	if E.global.datatexts.settings.QuickJoin.NoLabel then
+		self.text:SetFormattedText(displayString, #quickJoinGroups)
+	else
+		self.text:SetFormattedText(displayString, E.global.datatexts.settings.QuickJoin.Label ~= '' and E.global.datatexts.settings.QuickJoin.Label or QUICK_JOIN..': ', #quickJoinGroups)
+	end
 end
 
-local delayed, panel
+local delayed, lastPanel
 local function throttle()
-	if panel then Update(panel) end
+	if lastPanel then Update(lastPanel) end
 	delayed = nil
 end
 
 local function OnEvent(self, event)
-	if panel ~= self then panel = self end
+	if lastPanel ~= self then lastPanel = self end
 	if delayed then return end
 
 	-- use a nonarg passing function, so that it goes through c_timer instead of the waitframe
@@ -114,9 +117,9 @@ local function OnEvent(self, event)
 end
 
 local function ValueColorUpdate(hex)
-	displayString = strjoin("", "%s: ", hex, "%s|r")
-	if panel then OnEvent(panel) end
+	displayString = strjoin('', E.global.datatexts.settings.QuickJoin.NoLabel and '' or '%s', hex, '%d|r')
+	if lastPanel then OnEvent(lastPanel) end
 end
 
 E.valueColorUpdateFuncs[ValueColorUpdate] = true
-DT:RegisterDatatext('Quick Join', {"SOCIAL_QUEUE_UPDATE"}, OnEvent, nil, ToggleQuickJoinPanel, OnEnter, nil, QUICK_JOIN)
+DT:RegisterDatatext('QuickJoin', _G.SOCIAL_LABEL, {"SOCIAL_QUEUE_UPDATE"}, OnEvent, nil, ToggleQuickJoinPanel, OnEnter, nil, QUICK_JOIN, nil, ValueColorUpdate)

@@ -1,9 +1,7 @@
 local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local DT = E:GetModule('DataTexts')
 
---Lua functions
 local format, strjoin = format, strjoin
---WoW API / Variables
 local BreakUpLargeNumbers = BreakUpLargeNumbers
 local GetCombatRating = GetCombatRating
 local GetCombatRatingBonus = GetCombatRatingBonus
@@ -15,11 +13,12 @@ local FONT_COLOR_CODE_CLOSE = FONT_COLOR_CODE_CLOSE
 local HIGHLIGHT_FONT_COLOR_CODE = HIGHLIGHT_FONT_COLOR_CODE
 local STAT_VERSATILITY = STAT_VERSATILITY
 local VERSATILITY_TOOLTIP_FORMAT = VERSATILITY_TOOLTIP_FORMAT
+local STAT_CATEGORY_ENHANCEMENTS = STAT_CATEGORY_ENHANCEMENTS
 
 local displayString, lastPanel = ''
 
-local function OnEnter(self)
-	DT:SetupTooltip(self)
+local function OnEnter()
+	DT.tooltip:ClearLines()
 
 	local versatility = GetCombatRating(CR_VERSATILITY_DAMAGE_DONE)
 	local versatilityDamageBonus = GetCombatRatingBonus(CR_VERSATILITY_DAMAGE_DONE) + GetVersatilityBonus(CR_VERSATILITY_DAMAGE_DONE)
@@ -35,17 +34,20 @@ end
 
 local function OnEvent(self)
 	local versatility = GetCombatRatingBonus(CR_VERSATILITY_DAMAGE_DONE) + GetVersatilityBonus(CR_VERSATILITY_DAMAGE_DONE)
-	self.text:SetFormattedText(displayString, STAT_VERSATILITY, versatility)
+	if E.global.datatexts.settings.Versatility.NoLabel then
+		self.text:SetFormattedText(displayString, versatility)
+	else
+		self.text:SetFormattedText(displayString, E.global.datatexts.settings.Versatility.Label ~= '' and E.global.datatexts.settings.Versatility.Label or STAT_VERSATILITY, versatility)
+	end
+
 	lastPanel = self
 end
 
 local function ValueColorUpdate(hex)
-	displayString = strjoin("", "%s: ", hex, "%.2f%%|r")
+	displayString = strjoin('', E.global.datatexts.settings.Versatility.NoLabel and '' or '%s: ', hex, '%.'..E.global.datatexts.settings.Versatility.decimalLength..'f%%|r')
 
-	if lastPanel ~= nil then
-		OnEvent(lastPanel)
-	end
+	if lastPanel then OnEvent(lastPanel) end
 end
 E.valueColorUpdateFuncs[ValueColorUpdate] = true
 
-DT:RegisterDatatext('Versatility', {"UNIT_STATS", "UNIT_AURA", "ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE", "PLAYER_DAMAGE_DONE_MODS"}, OnEvent, nil, nil, OnEnter, nil, STAT_VERSATILITY)
+DT:RegisterDatatext('Versatility', STAT_CATEGORY_ENHANCEMENTS, {"UNIT_STATS", "UNIT_AURA", "ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE", "PLAYER_DAMAGE_DONE_MODS"}, OnEvent, nil, nil, OnEnter, nil, STAT_VERSATILITY, nil, ValueColorUpdate)

@@ -523,7 +523,7 @@ do
 	local function printNew(locale, clue)
 		timer = nil
 		knownClues[clue] = true -- Throttle to only show once per new message
-		if clue == GetGossipText() then -- Extra safety
+		if clue == C_GossipInfo.GetText() then -- Extra safety
 			RaidNotice_AddMessage(RaidWarningFrame, "LittleWigs: Unknown clue detected, see chat for info.", {r=1,g=1,b=1})
 			BigWigs:Print("LittleWigs has found an unknown clue, please report it on Discord or GitHub so we can add it and shorten the message.")
 			BigWigs:Error(("|cffffff00TELL THE AUTHORS:|r New clue '%s' with '%s'"):format(clue, locale))
@@ -540,8 +540,8 @@ do
 		local mobId = self:MobId(UnitGUID("npc"))
 		local spyEventHelper = self:GetOption("spy_helper") > 0
 		if autoTalk[mobId] or buffItems[mobId] then
-			if not GetGossipOptions() and mobId == 107486 then -- Chatty Rumormonger
-				local clue = GetGossipText()
+			if not self:GetGossipOptions() and mobId == 107486 then -- Chatty Rumormonger
+				local clue = C_GossipInfo.GetText()
 				local num = L[clue]
 				if num then
 					prev = GetTime()
@@ -558,7 +558,7 @@ do
 				end
 			end
 			if (spyEventHelper and autoTalk[mobId]) or (self:GetOption("custom_on_use_buff_items") and buffItems[mobId]) then
-				SelectGossipOption(1)
+				self:SelectGossipOption(1)
 			end
 		end
 	end

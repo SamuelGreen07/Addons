@@ -1,8 +1,8 @@
 local LIB_NAME = "LibRedDropdown-1.0";
-local lib = LibStub:NewLibrary(LIB_NAME, 2);
+local lib = LibStub:NewLibrary(LIB_NAME, 5);
 if (not lib) then return; end -- No upgrade needed
 
-local table_insert, string_find, string_format = table.insert, string.find, string.format;
+local table_insert, string_find, string_format, max = table.insert, string.find, string.format, math.max;
 
 local function table_contains_value(t, v)
 	for _, value in pairs(t) do
@@ -79,6 +79,15 @@ function lib.CreateDropdownMenu()
 			button.Icon:SetWidth(20);
 			button.Icon:SetHeight(20);
 			button.Icon:SetTexCoord(0.07, 0.93, 0.07, 0.93);
+			button.closeButton = lib.CreateButton();
+			button.closeButton:SetParent(button);
+			button.closeButton:SetWidth(button:GetHeight());
+			button.closeButton:SetHeight(button:GetHeight());
+			button.closeButton:SetPoint("LEFT", button, "RIGHT", 3, 0);
+			button.closeButton.Text:SetText("X");
+			button.closeButton:Hide();
+			button.closeButton:SetScript("OnShow", function(self) button:SetWidth(button:GetWidth() - button.closeButton:GetWidth() - 3); end);
+			button.closeButton:SetScript("OnHide", function(self) button:SetWidth(button:GetWidth() + button.closeButton:GetWidth() + 3); end);
 			button:Hide();
 			s.buttons[counter] = button;
 			return button;
@@ -95,6 +104,8 @@ function lib.CreateDropdownMenu()
 			button.Icon:SetTexture();
 			button.Text:SetFont(button.font, button.fontSize, button.fontFlags);
 			button.Text:SetText(); -- not tested
+			button.closeButton:Hide();
+			button.closeButton:SetScript("OnClick", nil);
 			button:SetScript("OnClick", nil);
 			button:SetCheckBoxVisible(false);
 		end
@@ -109,16 +120,24 @@ function lib.CreateDropdownMenu()
 				button:SetGray(true);
 			end
 			button.Icon:SetTexture(value.icon);
-			button:SetScript("OnClick", function()
-				value:func();
-				if (not value.dontCloseOnClick) then
-					s:Hide();
-				end
-			end);
+			if (value.func ~= nil) then
+				button:SetScript("OnClick", function()
+					value:func();
+					if (not value.dontCloseOnClick) then
+						s:Hide();
+					end
+				end);
+			end
 			if (value.checkBoxEnabled) then
 				button:SetCheckBoxVisible(true);
 				button:SetCheckBoxOnClickHandler(value.onCheckBoxClick);
 				button:SetChecked(value.checkBoxState);
+			end
+			if (value.onCloseButtonClick ~= nil) then
+				button.closeButton:Show();
+				button.closeButton:SetScript("OnClick", function()
+					value:onCloseButtonClick();
+				end);
 			end
 			button:SetScript("OnEnter", value.onEnter);
 			button:SetScript("OnLeave", value.onLeave);
@@ -301,7 +320,7 @@ function lib.CreateSlider()
 	frame.label:SetPoint("TOPLEFT");
 	frame.label:SetPoint("TOPRIGHT");
 	frame.label:SetJustifyH("CENTER");
-	frame.slider = CreateFrame("Slider", nil, frame);
+	frame.slider = CreateFrame("Slider", nil, frame, BackdropTemplateMixin and "BackdropTemplate");
 	frame.slider:SetOrientation("HORIZONTAL")
 	frame.slider:SetHeight(15)
 	frame.slider:SetHitRectInsets(0, 0, -10, 0)
@@ -319,7 +338,7 @@ function lib.CreateSlider()
 	frame.lowtext:SetPoint("TOPLEFT", frame.slider, "BOTTOMLEFT", 2, 3)
 	frame.hightext = frame.slider:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
 	frame.hightext:SetPoint("TOPRIGHT", frame.slider, "BOTTOMRIGHT", -2, 3)
-	frame.editbox = CreateFrame("EditBox", nil, frame)
+	frame.editbox = CreateFrame("EditBox", nil, frame, BackdropTemplateMixin and "BackdropTemplate")
 	frame.editbox:SetAutoFocus(false)
 	frame.editbox:SetFontObject(GameFontHighlightSmall)
 	frame.editbox:SetPoint("TOP", frame.slider, "BOTTOM")
@@ -486,7 +505,7 @@ function lib.CreateDebugWindow()
 		self:GetScrollChild():SetFocus();
 	end);
 
-	local bg = CreateFrame("Frame",nil,UIParent)
+	local bg = CreateFrame("Frame",nil,UIParent, BackdropTemplateMixin and "BackdropTemplate")
 	bg:SetFrameStrata("DIALOG")
 	bg:SetBackdrop({
 		bgFile = "Interface\\ChatFrame\\ChatFrameBackground",

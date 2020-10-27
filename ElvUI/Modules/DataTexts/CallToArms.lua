@@ -1,9 +1,9 @@
 local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local DT = E:GetModule('DataTexts')
 
---Lua functions
 local _G = _G
---WoW API / Variables
+local strjoin = strjoin
+
 local GetLFGRandomDungeonInfo = GetLFGRandomDungeonInfo
 local GetLFGRoleShortageRewards = GetLFGRoleShortageRewards
 local GetNumRandomDungeons = GetNumRandomDungeons
@@ -15,14 +15,14 @@ local BATTLEGROUND_HOLIDAY = BATTLEGROUND_HOLIDAY
 local DUNGEONS = DUNGEONS
 local RAID_FINDER = RAID_FINDER
 
-local TANK_ICON = E:TextureString(E.Media.Textures.Tank, ":14:14")
-local HEALER_ICON = E:TextureString(E.Media.Textures.Healer, ":14:14")
-local DPS_ICON = E:TextureString(E.Media.Textures.DPS, ":14:14")
-local NOBONUSREWARDS = BATTLEGROUND_HOLIDAY..": N/A"
+local TANK_ICON = E:TextureString(E.Media.Textures.Tank, ':14:14')
+local HEALER_ICON = E:TextureString(E.Media.Textures.Healer, ':14:14')
+local DPS_ICON = E:TextureString(E.Media.Textures.DPS, ':14:14')
 local enteredFrame, lastPanel = false
+local displayString = ''
 
 local function MakeIconString(tank, healer, damage)
-	local str = ""
+	local str = ''
 	if tank then
 		str = str..TANK_ICON
 	end
@@ -43,9 +43,9 @@ local function OnEvent(self)
 	local unavailable = true
 
 	--Dungeons
-	for i=1, GetNumRandomDungeons() do
+	for i = 1, GetNumRandomDungeons() do
 		local id = GetLFGRandomDungeonInfo(i)
-		for x = 1,LFG_ROLE_NUM_SHORTAGE_TYPES do
+		for x = 1, LFG_ROLE_NUM_SHORTAGE_TYPES do
 			local eligible, forTank, forHealer, forDamage, itemCount = GetLFGRoleShortageRewards(id, x)
 			if eligible and forTank and itemCount > 0 then tankReward = true; unavailable = false; end
 			if eligible and forHealer and itemCount > 0 then healerReward = true; unavailable = false; end
@@ -64,42 +64,38 @@ local function OnEvent(self)
 		end
 	end
 
-	if unavailable then
-		self.text:SetText(NOBONUSREWARDS)
+	if E.global.datatexts.settings.CallToArms.NoLabel then
+		self.text:SetFormattedText(displayString, unavailable and 'N/A' or MakeIconString(tankReward, healerReward, dpsReward))
 	else
-		self.text:SetText(BATTLEGROUND_HOLIDAY..": "..MakeIconString(tankReward, healerReward, dpsReward))
+		self.text:SetFormattedText(displayString, E.global.datatexts.settings.CallToArms.Label ~= '' and E.global.datatexts.settings.CallToArms.Label or BATTLEGROUND_HOLIDAY..": ", unavailable and 'N/A' or MakeIconString(tankReward, healerReward, dpsReward))
 	end
 	lastPanel = self
 end
 
 local function OnClick()
-	PVEFrame_ToggleFrame("GroupFinderFrame", _G.LFDParentFrame)
+	PVEFrame_ToggleFrame('GroupFinderFrame', _G.LFDParentFrame)
 end
 
 local function ValueColorUpdate(hex)
-	NOBONUSREWARDS = BATTLEGROUND_HOLIDAY..": "..hex.."N/A|r"
+	displayString = strjoin('', E.global.datatexts.settings.CallToArms.NoLabel and '' or '%s', hex, '%s|r')
 
-	if lastPanel ~= nil then
-		OnEvent(lastPanel)
-	end
+	if lastPanel then OnEvent(lastPanel) end
 end
 E.valueColorUpdateFuncs[ValueColorUpdate] = true
 
-local function OnEnter(self)
-	if not enteredFrame then
-		enteredFrame = true
-	end
+local function OnEnter()
+	DT.tooltip:ClearLines()
+	enteredFrame = true
 
-	DT:SetupTooltip(self)
 	local numCTA = 0
-	local addTooltipHeader = true
-	for i=1, GetNumRandomDungeons() do
+	local addTooltipHeader, addTooltipSeparator = true
+	for i = 1, GetNumRandomDungeons() do
 		local id, name = GetLFGRandomDungeonInfo(i)
 		local tankReward = false
 		local healerReward = false
 		local dpsReward = false
 		local unavailable = true
-		for x=1, LFG_ROLE_NUM_SHORTAGE_TYPES do
+		for x = 1, LFG_ROLE_NUM_SHORTAGE_TYPES do
 			local eligible, forTank, forHealer, forDamage, itemCount = GetLFGRoleShortageRewards(id, x)
 			if eligible then unavailable = false end
 			if eligible and forTank and itemCount > 0 then tankReward = true end
@@ -109,12 +105,13 @@ local function OnEnter(self)
 
 		if not unavailable then
 			local rolesString = MakeIconString(tankReward, healerReward, dpsReward)
-			if rolesString ~= ""  then
+			if rolesString ~= ''  then
 				if addTooltipHeader then
 					DT.tooltip:AddLine(DUNGEONS)
 					addTooltipHeader = false
+					addTooltipSeparator = true
 				end
-				DT.tooltip:AddDoubleLine(name..":", rolesString, 1, 1, 1)
+				DT.tooltip:AddDoubleLine(name..':', rolesString, 1, 1, 1)
 			end
 			if tankReward or healerReward or dpsReward then numCTA = numCTA + 1 end
 		end
@@ -138,13 +135,13 @@ local function OnEnter(self)
 
 		if not unavailable then
 			local rolesString = MakeIconString(tankReward, healerReward, dpsReward)
-			if rolesString ~= ""  then
+			if rolesString ~= ''  then
 				if addTooltipHeader then
-					DT.tooltip:AddLine(" ")
+					if addTooltipSeparator then DT.tooltip:AddLine(' ') end
 					DT.tooltip:AddLine(RAID_FINDER)
 					addTooltipHeader = false
 				end
-				DT.tooltip:AddDoubleLine(name..":", rolesString, 1, 1, 1)
+				DT.tooltip:AddDoubleLine(name..':', rolesString, 1, 1, 1)
 			end
 			if tankReward or healerReward or dpsReward then numCTA = numCTA + 1 end
 		end
@@ -169,8 +166,7 @@ local function Update(self, elapsed)
 end
 
 local function OnLeave()
-	DT.tooltip:Hide()
 	enteredFrame = false
 end
 
-DT:RegisterDatatext('Call to Arms', {"LFG_UPDATE_RANDOM_INFO"}, OnEvent, Update, OnClick, OnEnter, OnLeave, BATTLEGROUND_HOLIDAY)
+DT:RegisterDatatext('CallToArms', nil, {"LFG_UPDATE_RANDOM_INFO"}, OnEvent, Update, OnClick, OnEnter, OnLeave, BATTLEGROUND_HOLIDAY, nil, ValueColorUpdate)

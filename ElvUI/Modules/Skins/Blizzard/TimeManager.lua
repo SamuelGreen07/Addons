@@ -1,10 +1,8 @@
 local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local S = E:GetModule('Skins')
 
---Lua functions
 local _G = _G
 local unpack = unpack
---WoW API / Variables
 local hooksecurefunc = hooksecurefunc
 
 local function SetPlayTexture()
@@ -18,7 +16,7 @@ function S:Blizzard_TimeManager()
 	if not (E.private.skins.blizzard.enable and E.private.skins.blizzard.timemanager) then return end
 
 	local TimeManagerFrame = _G.TimeManagerFrame
-	S:HandlePortraitFrame(TimeManagerFrame, true)
+	S:HandlePortraitFrame(TimeManagerFrame)
 
 	S:HandleDropDownBox(_G.TimeManagerAlarmHourDropDown, 80)
 	S:HandleDropDownBox(_G.TimeManagerAlarmMinuteDropDown, 80)
@@ -31,21 +29,21 @@ function S:Blizzard_TimeManager()
 
 	local TimeManagerStopwatchCheck = _G.TimeManagerStopwatchCheck
 	_G.TimeManagerStopwatchFrame:StripTextures()
-	TimeManagerStopwatchCheck:SetTemplate()
+	TimeManagerStopwatchCheck:CreateBackdrop()
 	TimeManagerStopwatchCheck:GetNormalTexture():SetTexCoord(unpack(E.TexCoords))
 	TimeManagerStopwatchCheck:GetNormalTexture():SetInside()
 
 	local hover = TimeManagerStopwatchCheck:CreateTexture() -- hover
 	hover:SetColorTexture(1,1,1,0.3)
-	hover:Point("TOPLEFT",TimeManagerStopwatchCheck,2,-2)
-	hover:Point("BOTTOMRIGHT",TimeManagerStopwatchCheck,-2,2)
+	hover:Point('TOPLEFT',TimeManagerStopwatchCheck,2,-2)
+	hover:Point('BOTTOMRIGHT',TimeManagerStopwatchCheck,-2,2)
 	TimeManagerStopwatchCheck:SetHighlightTexture(hover)
 
 	local StopwatchFrame = _G.StopwatchFrame
 	StopwatchFrame:StripTextures()
-	StopwatchFrame:CreateBackdrop("Transparent")
-	StopwatchFrame.backdrop:Point("TOPLEFT", 0, -17)
-	StopwatchFrame.backdrop:Point("BOTTOMRIGHT", 0, 2)
+	StopwatchFrame:CreateBackdrop('Transparent')
+	StopwatchFrame.backdrop:Point('TOPLEFT', 0, -17)
+	StopwatchFrame.backdrop:Point('BOTTOMRIGHT', 0, 2)
 
 	_G.StopwatchTabFrame:StripTextures()
 	S:HandleCloseButton(_G.StopwatchCloseButton)
@@ -56,19 +54,19 @@ function S:Blizzard_TimeManager()
 	StopwatchPlayPauseButton:CreateBackdrop(nil, true)
 	StopwatchPlayPauseButton:Size(12, 12)
 	StopwatchPlayPauseButton:SetNormalTexture(E.Media.Textures.Play)
-	StopwatchPlayPauseButton:SetHighlightTexture("")
+	StopwatchPlayPauseButton:SetHighlightTexture('')
 	StopwatchPlayPauseButton.backdrop:SetOutside(StopwatchPlayPauseButton, 2, 2)
 	StopwatchPlayPauseButton:HookScript('OnEnter', S.SetModifiedBackdrop)
 	StopwatchPlayPauseButton:HookScript('OnLeave', S.SetOriginalBackdrop)
-	StopwatchPlayPauseButton:Point("RIGHT", StopwatchResetButton, "LEFT", -4, 0)
+	StopwatchPlayPauseButton:Point('RIGHT', StopwatchResetButton, 'LEFT', -4, 0)
 	S:HandleButton(StopwatchResetButton)
 	StopwatchResetButton:Size(16,16)
 	StopwatchResetButton:SetNormalTexture(E.Media.Textures.Reset)
-	StopwatchResetButton:Point("BOTTOMRIGHT", StopwatchFrame, "BOTTOMRIGHT", -4, 6)
+	StopwatchResetButton:Point('BOTTOMRIGHT', StopwatchFrame, 'BOTTOMRIGHT', -4, 6)
 
-	hooksecurefunc("Stopwatch_Play", SetPauseTexture)
-	hooksecurefunc("Stopwatch_Pause", SetPlayTexture)
-	hooksecurefunc("Stopwatch_Clear", SetPlayTexture)
+	hooksecurefunc('Stopwatch_Play', SetPauseTexture)
+	hooksecurefunc('Stopwatch_Pause', SetPlayTexture)
+	hooksecurefunc('Stopwatch_Clear', SetPlayTexture)
 end
 
 S:AddCallbackForAddon('Blizzard_TimeManager')

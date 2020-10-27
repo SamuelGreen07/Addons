@@ -2,11 +2,10 @@ local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, Private
 local M = E:GetModule('Misc')
 local Bags = E:GetModule('Bags')
 
---Lua functions
 local _G = _G
 local select = select
 local format = format
---WoW API / Variables
+
 local CreateFrame = CreateFrame
 local AcceptGroup = AcceptGroup
 local C_FriendList_IsFriend = C_FriendList.IsFriend
@@ -43,6 +42,12 @@ local UnitInRaid = UnitInRaid
 local UnitName = UnitName
 local IsInGuild = IsInGuild
 local PlaySound = PlaySound
+local GetNumFactions = GetNumFactions
+local GetFactionInfo = GetFactionInfo
+local GetWatchedFactionInfo = GetWatchedFactionInfo
+local ExpandAllFactionHeaders = ExpandAllFactionHeaders
+local SetWatchedFactionIndex = SetWatchedFactionIndex
+local GetCurrentCombatTextEventInfo = GetCurrentCombatTextEventInfo
 
 local C_PartyInfo_LeaveParty = C_PartyInfo.LeaveParty
 local C_BattleNet_GetGameAccountInfoByGUID = C_BattleNet.GetGameAccountInfoByGUID
@@ -68,13 +73,13 @@ function M:COMBAT_LOG_EVENT_UNFILTERED()
 	if not inGroup then return end
 
 	local _, event, _, sourceGUID, _, _, _, destGUID, destName, _, _, _, _, _, spellID, spellName = CombatLogGetCurrentEventInfo()
-	local announce = event == "SPELL_INTERRUPT" and (sourceGUID == E.myguid or sourceGUID == UnitGUID('pet')) and destGUID ~= E.myguid
+	local announce = event == 'SPELL_INTERRUPT' and (sourceGUID == E.myguid or sourceGUID == UnitGUID('pet')) and destGUID ~= E.myguid
 	if not announce then return end -- No announce-able interrupt from player or pet, exit.
 	local inRaid, inPartyLFG = IsInRaid(), IsPartyLFG()
 
-	--Skirmish/non-rated arenas need to use INSTANCE_CHAT but IsPartyLFG() returns "false"
+	--Skirmish/non-rated arenas need to use INSTANCE_CHAT but IsPartyLFG() returns 'false'
 	local _, instanceType = GetInstanceInfo()
-	if instanceType == "arena" then
+	if instanceType == 'arena' then
 		local skirmish = IsArenaSkirmish()
 		local _, isRegistered = IsActiveBattlefieldArena()
 		if skirmish or not isRegistered then
@@ -84,25 +89,43 @@ function M:COMBAT_LOG_EVENT_UNFILTERED()
 	end
 
 	local channel, msg = E.db.general.interruptAnnounce, format(INTERRUPT_MSG, destName, spellID, spellName)
-	if channel == "PARTY" then
-		SendChatMessage(msg, inPartyLFG and "INSTANCE_CHAT" or "PARTY")
-	elseif channel == "RAID" then
-		SendChatMessage(msg, inPartyLFG and "INSTANCE_CHAT" or (inRaid and "RAID" or "PARTY"))
-	elseif channel == "RAID_ONLY" and inRaid then
-		SendChatMessage(msg, inPartyLFG and "INSTANCE_CHAT" or "RAID")
-	elseif channel == "SAY" and instanceType ~= 'none' then
-		SendChatMessage(msg, "SAY")
-	elseif channel == "YELL" and instanceType ~= 'none' then
-		SendChatMessage(msg, "YELL")
-	elseif channel == "EMOTE" then
-		SendChatMessage(msg, "EMOTE")
+	if channel == 'PARTY' then
+		SendChatMessage(msg, inPartyLFG and 'INSTANCE_CHAT' or 'PARTY')
+	elseif channel == 'RAID' then
+		SendChatMessage(msg, inPartyLFG and 'INSTANCE_CHAT' or (inRaid and 'RAID' or 'PARTY'))
+	elseif channel == 'RAID_ONLY' and inRaid then
+		SendChatMessage(msg, inPartyLFG and 'INSTANCE_CHAT' or 'RAID')
+	elseif channel == 'SAY' and instanceType ~= 'none' then
+		SendChatMessage(msg, 'SAY')
+	elseif channel == 'YELL' and instanceType ~= 'none' then
+		SendChatMessage(msg, 'YELL')
+	elseif channel == 'EMOTE' then
+		SendChatMessage(msg, 'EMOTE')
+	end
+end
+
+function M:COMBAT_TEXT_UPDATE(_, messagetype)
+	if not E.db.general.autoTrackReputation then return end
+
+	if messagetype == 'FACTION' then
+		local faction = GetCurrentCombatTextEventInfo()
+		if faction ~= 'Guild' and faction ~= GetWatchedFactionInfo() then
+			ExpandAllFactionHeaders()
+
+			for i = 1, GetNumFactions() do
+				if faction == GetFactionInfo(i) then
+					SetWatchedFactionIndex(i)
+					break
+				end
+			end
+		end
 	end
 end
 
 do -- Auto Repair Functions
 	local STATUS, TYPE, COST, POSS
 	function M:AttemptAutoRepair(playerOverride)
-		STATUS, TYPE, COST, POSS = "", E.db.general.autoRepair, GetRepairAllCost()
+		STATUS, TYPE, COST, POSS = '', E.db.general.autoRepair, GetRepairAllCost()
 
 		if POSS and COST > 0 then
 			--This check evaluates to true even if the guild bank has 0 gold, so we add an override
@@ -119,33 +142,33 @@ do -- Auto Repair Functions
 
 	function M:AutoRepairOutput()
 		if TYPE == 'GUILD' then
-			if STATUS == "GUILD_REPAIR_FAILED" then
+			if STATUS == 'GUILD_REPAIR_FAILED' then
 				M:AttemptAutoRepair(true) --Try using player money instead
 			else
-				E:Print(L["Your items have been repaired using guild bank funds for: "]..E:FormatMoney(COST, "SMART", true)) --Amount, style, textOnly
+				E:Print(L["Your items have been repaired using guild bank funds for: "]..E:FormatMoney(COST, 'SMART', true)) --Amount, style, textOnly
 			end
-		elseif TYPE == "PLAYER" then
-			if STATUS == "PLAYER_REPAIR_FAILED" then
+		elseif TYPE == 'PLAYER' then
+			if STATUS == 'PLAYER_REPAIR_FAILED' then
 				E:Print(L["You don't have enough money to repair."])
 			else
-				E:Print(L["Your items have been repaired for: "]..E:FormatMoney(COST, "SMART", true)) --Amount, style, textOnly
+				E:Print(L["Your items have been repaired for: "]..E:FormatMoney(COST, 'SMART', true)) --Amount, style, textOnly
 			end
 		end
 	end
 
 	function M:UI_ERROR_MESSAGE(_, messageType)
 		if messageType == LE_GAME_ERR_GUILD_NOT_ENOUGH_MONEY then
-			STATUS = "GUILD_REPAIR_FAILED"
+			STATUS = 'GUILD_REPAIR_FAILED'
 		elseif messageType == LE_GAME_ERR_NOT_ENOUGH_MONEY then
-			STATUS = "PLAYER_REPAIR_FAILED"
+			STATUS = 'PLAYER_REPAIR_FAILED'
 		end
 	end
 end
 
 function M:MERCHANT_CLOSED()
-	self:UnregisterEvent("UI_ERROR_MESSAGE")
-	self:UnregisterEvent("UPDATE_INVENTORY_DURABILITY")
-	self:UnregisterEvent("MERCHANT_CLOSED")
+	self:UnregisterEvent('UI_ERROR_MESSAGE')
+	self:UnregisterEvent('UPDATE_INVENTORY_DURABILITY')
+	self:UnregisterEvent('MERCHANT_CLOSED')
 end
 
 function M:MERCHANT_SHOW()
@@ -153,11 +176,11 @@ function M:MERCHANT_SHOW()
 
 	if E.db.general.autoRepair == 'NONE' or IsShiftKeyDown() or not CanMerchantRepair() then return end
 
-	--Prepare to catch "not enough money" messages
-	self:RegisterEvent("UI_ERROR_MESSAGE")
+	--Prepare to catch 'not enough money' messages
+	self:RegisterEvent('UI_ERROR_MESSAGE')
 
 	--Use this to unregister events afterwards
-	self:RegisterEvent("MERCHANT_CLOSED")
+	self:RegisterEvent('MERCHANT_CLOSED')
 
 	M:AttemptAutoRepair()
 end
@@ -165,7 +188,7 @@ end
 function M:DisbandRaidGroup()
 	if InCombatLockdown() then return end -- Prevent user error in combat
 
-	if UnitInRaid("player") then
+	if UnitInRaid('player') then
 		for i = 1, GetNumGroupMembers() do
 			local name, _, _, _, _, _, _, online = GetRaidRosterInfo(i)
 			if online and name ~= E.myname then
@@ -174,8 +197,8 @@ function M:DisbandRaidGroup()
 		end
 	else
 		for i = MAX_PARTY_MEMBERS, 1, -1 do
-			if UnitExists("party"..i) then
-				UninviteUnit(UnitName("party"..i))
+			if UnitExists('party'..i) then
+				UninviteUnit(UnitName('party'..i))
 			end
 		end
 	end
@@ -195,17 +218,17 @@ local hideStatic
 function M:AutoInvite(event, _, _, _, _, _, _, inviterGUID)
 	if not E.db.general.autoAcceptInvite then return end
 
-	if event == "PARTY_INVITE_REQUEST" then
+	if event == 'PARTY_INVITE_REQUEST' then
 		-- Prevent losing que inside LFD if someone invites you to group
-		if _G.QueueStatusMinimapButton:IsShown() or IsInGroup() or (not inviterGUID or inviterGUID == "") then return end
+		if _G.QueueStatusMinimapButton:IsShown() or IsInGroup() or (not inviterGUID or inviterGUID == '') then return end
 
 		if C_BattleNet_GetGameAccountInfoByGUID(inviterGUID) or C_FriendList_IsFriend(inviterGUID) or IsGuildMember(inviterGUID) then
 			hideStatic = true
 			AcceptGroup()
 		end
-	elseif event == "GROUP_ROSTER_UPDATE" and hideStatic then
+	elseif event == 'GROUP_ROSTER_UPDATE' and hideStatic then
 		StaticPopupSpecial_Hide(_G.LFGInvitePopup) --New LFD popup when invited in custom created group
-		StaticPopup_Hide("PARTY_INVITE")
+		StaticPopup_Hide('PARTY_INVITE')
 		hideStatic = nil
 	end
 end
@@ -239,17 +262,17 @@ local function ChallengeModeTimer_Update(timerID, elapsedTime, timeLimit)
 end
 
 function M:SetupChallengeTimer()
-	local bar = CreateFrame("StatusBar", "ElvUI_ChallengeModeTimer", E.UIParent)
+	local bar = CreateFrame('StatusBar', 'ElvUI_ChallengeModeTimer', E.UIParent)
 	bar:Size(250, 20)
-	bar:Point("TOPLEFT", E.UIParent, "TOPLEFT", 10, -10)
-	bar:CreateBackdrop("Transparent")
+	bar:Point('TOPLEFT', E.UIParent, 'TOPLEFT', 10, -10)
+	bar:CreateBackdrop('Transparent')
 	bar:SetStatusBarTexture(E.media.normTex)
-	bar.text = bar:CreateFontString(nil, "OVERLAY")
-	bar.text:Point("CENTER")
+	bar.text = bar:CreateFontString(nil, 'OVERLAY')
+	bar.text:Point('CENTER')
 	bar.text:FontTemplate()
 
-	_G.ScenarioChallengeModeBlock.StatusBar:HookScript("OnValueChanged", OnValueChanged)
-	hooksecurefunc("Scenario_ChallengeMode_ShowBlock", ChallengeModeTimer_Update)
+	_G.ScenarioChallengeModeBlock.StatusBar:HookScript('OnValueChanged', OnValueChanged)
+	hooksecurefunc('Scenario_ChallengeMode_ShowBlock', ChallengeModeTimer_Update)
 end]]
 
 function M:RESURRECT_REQUEST()
@@ -259,9 +282,9 @@ function M:RESURRECT_REQUEST()
 end
 
 function M:ADDON_LOADED(_, addon)
-	if addon == "Blizzard_InspectUI" then
+	if addon == 'Blizzard_InspectUI' then
 		M:SetupInspectPageInfo()
-	--[[elseif addon == "Blizzard_ObjectiveTracker" then
+	--[[elseif addon == 'Blizzard_ObjectiveTracker' then
 		M:SetupChallengeTimer()]]
 	end
 end
@@ -276,12 +299,12 @@ function M:QUEST_COMPLETE()
 	local numQuests = GetNumQuestChoices()
 
 	if not self.QuestRewardGoldIconFrame then
-		local frame = CreateFrame("Frame", nil, firstItem)
-		frame:SetFrameStrata("HIGH")
+		local frame = CreateFrame('Frame', nil, firstItem)
+		frame:SetFrameStrata('HIGH')
 		frame:Size(20)
-		frame.Icon = frame:CreateTexture(nil, "OVERLAY")
+		frame.Icon = frame:CreateTexture(nil, 'OVERLAY')
 		frame.Icon:SetAllPoints(frame)
-		frame.Icon:SetTexture("Interface\\MONEYFRAME\\UI-GoldIcon")
+		frame.Icon:SetTexture([[Interface\MONEYFRAME\UI-GoldIcon]])
 		self.QuestRewardGoldIconFrame = frame
 	end
 
@@ -307,7 +330,7 @@ function M:QUEST_COMPLETE()
 		local btn = _G['QuestInfoRewardsFrameQuestInfoItem'..bestItem]
 		if btn and btn.type == 'choice' then
 			self.QuestRewardGoldIconFrame:ClearAllPoints()
-			self.QuestRewardGoldIconFrame:Point("TOPRIGHT", btn, "TOPRIGHT", -2, -2)
+			self.QuestRewardGoldIconFrame:Point('TOPRIGHT', btn, 'TOPRIGHT', -2, -2)
 			self.QuestRewardGoldIconFrame:Show()
 		end
 	end
@@ -330,6 +353,7 @@ function M:Initialize()
 	self:RegisterEvent('PARTY_INVITE_REQUEST', 'AutoInvite')
 	self:RegisterEvent('GROUP_ROSTER_UPDATE', 'AutoInvite')
 	self:RegisterEvent('CVAR_UPDATE', 'ForceCVars')
+	self:RegisterEvent('COMBAT_TEXT_UPDATE')
 	self:RegisterEvent('PLAYER_ENTERING_WORLD')
 	self:RegisterEvent('QUEST_COMPLETE')
 

@@ -34,17 +34,8 @@ function mod:OnRegister()
 end
 
 function mod:OnBossEnable()
-	self:RegisterEvent("ENCOUNTER_START")
-
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 	self:Log("SPELL_CAST_START", "TaintedPolymorph", 309648)
-end
-
--- There are no boss frames to trigger the engage
-function mod:ENCOUNTER_START(_, encounterId)
-	if encounterId == self.engageId then
-		self:Engage()
-	end
 end
 
 --------------------------------------------------------------------------------
@@ -65,6 +56,6 @@ do
 end
 
 function mod:TaintedPolymorph(args)
-	self:Message2(args.spellId, "orange")
+	self:Message2(args.spellId, "orange", CL.casting:format(args.spellName))
 	self:PlaySound(args.spellId, "alert")
 end

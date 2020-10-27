@@ -27,7 +27,7 @@ Database:AddChain(Chain.Chain01, {
     questline = 1030,
     category = CATEGORY_ID,
     expansion = EXPANSION_ID,
-    range = {120,120},
+    range = {120,50},
     alternatives = {
         Chain.Chain02,
     },
@@ -35,7 +35,7 @@ Database:AddChain(Chain.Chain01, {
     prerequisites = {
         {
             type = "level",
-            level = 120,
+            level = 50,
         },
         {
             type = "quest",
@@ -59,21 +59,6 @@ Database:AddChain(Chain.Chain01, {
     completed = {
         type = "quest",
         id = 58506,
-    },
-    rewards = {
-        {
-            type = "money",
-            amounts = {
-                93600,
-            },
-            minLevel = 120,
-            maxLevel = 120,
-        },
-        {
-            type = "reputation",
-            id = 2164,
-            amount = 360,
-        },
     },
     items = {
         {
@@ -125,7 +110,7 @@ Database:AddChain(Chain.Chain02, {
     questline = 1030,
     category = CATEGORY_ID,
     expansion = EXPANSION_ID,
-    range = {120,120},
+    range = {120,50},
     alternatives = {
         Chain.Chain01,
     },
@@ -133,7 +118,7 @@ Database:AddChain(Chain.Chain02, {
     prerequisites = {
         {
             type = "level",
-            level = 120,
+            level = 50,
         },
         {
             type = "quest",
@@ -157,21 +142,6 @@ Database:AddChain(Chain.Chain02, {
     completed = {
         type = "quest",
         id = 58506,
-    },
-    rewards = {
-        {
-            type = "money",
-            amounts = {
-                70200,
-            },
-            minLevel = 120,
-            maxLevel = 120,
-        },
-        {
-            type = "reputation",
-            id = 2164,
-            amount = 360,
-        },
     },
     items = {
         {
@@ -214,11 +184,11 @@ Database:AddChain(Chain.Chain03, {
     questline = 950,
     category = CATEGORY_ID,
     expansion = EXPANSION_ID,
-    range = {120,120},
+    range = {120,50},
     prerequisites = {
         {
             type = "level",
-            level = 120,
+            level = 50,
         },
         {
             type = "quest",
@@ -288,27 +258,9 @@ Database:AddChain(Chain.Chain03, {
             rank = 1,
         },
         {
-            type = "money",
-            amounts = {
-                1029600,
-            },
-            minLevel = 120,
-            maxLevel = 120,
-        },
-        {
             type = "currency",
             id = 1553,
             amount = 1500,
-        },
-        {
-            type = "reputation",
-            id = 2164,
-            amount = 710,
-        },
-        {
-            type = "reputation",
-            id = 2417,
-            amount = 850,
         },
     },
     items = {
@@ -395,11 +347,11 @@ Database:AddChain(Chain.Chain04, {
     questline = 983,
     category = CATEGORY_ID,
     expansion = EXPANSION_ID,
-    range = {120,120},
+    range = {120,50},
     prerequisites = {
         {
             type = "level",
-            level = 120,
+            level = 50,
         },
         {
             type = "quest",
@@ -501,27 +453,9 @@ Database:AddChain(Chain.Chain04, {
             },
         },
         {
-            type = "money",
-            amounts = {
-                1778400,
-            },
-            minLevel = 120,
-            maxLevel = 120,
-        },
-        {
             type = "currency",
             id = 1553,
             amount = 1500,
-        },
-        {
-            type = "reputation",
-            id = 2164,
-            amount = 600,
-        },
-        {
-            type = "reputation",
-            id = 2415,
-            amount = 850,
         },
     },
     items = {
@@ -624,11 +558,11 @@ Database:AddChain(Chain.Chain05, {
     questline = 1012,
     category = CATEGORY_ID,
     expansion = EXPANSION_ID,
-    range = {120,120},
+    range = {120,50},
     prerequisites = {
         {
             type = "level",
-            level = 120,
+            level = 50,
         },
         {
             type = "quest",
@@ -704,14 +638,6 @@ Database:AddChain(Chain.Chain05, {
     },
     rewards = {
         {
-            type = "money",
-            amounts = {
-                3569000,
-            },
-            minLevel = 120,
-            maxLevel = 120,
-        },
-        {
             type = "currency",
             id = 1553,
             amount = 5000,
@@ -724,22 +650,7 @@ Database:AddChain(Chain.Chain05, {
         {
             type = "currency",
             id = 1755,
-            amount = 30000,
-        },
-        {
-            type = "reputation",
-            id = 2164,
-            amount = 3790,
-        },
-        {
-            type = "reputation",
-            id = 2415,
-            amount = 1000,
-        },
-        {
-            type = "reputation",
-            id = 2417,
-            amount = 1000,
+            amount = 20000,
         },
     },
     items = {
@@ -846,11 +757,11 @@ Database:AddChain(Chain.Chain06, {
     questline = 1028,
     category = CATEGORY_ID,
     expansion = EXPANSION_ID,
-    range = {120,120},
+    range = {120,50},
     prerequisites = {
         {
             type = "level",
-            level = 120,
+            level = 50,
         },
     },
     active = {
@@ -864,37 +775,9 @@ Database:AddChain(Chain.Chain06, {
     },
     rewards = {
         {
-            type = "money",
-            amounts = {
-                1427400,
-            },
-            minLevel = 120,
-            maxLevel = 120,
-        },
-        {
             type = "currency",
             id = 1553,
             amount = 3000,
-        },
-        {
-            type = "currency",
-            id = 1755,
-            amount = 10000,
-        },
-        {
-            type = "reputation",
-            id = 2164,
-            amount = 1510,
-        },
-        {
-            type = "reputation",
-            id = 2415,
-            amount = 1000,
-        },
-        {
-            type = "reputation",
-            id = 2417,
-            amount = 1000,
         },
     },
     items = {
@@ -930,11 +813,11 @@ Database:AddChain(Chain.Chain07, {
     questline = 1029,
     category = CATEGORY_ID,
     expansion = EXPANSION_ID,
-    range = {120,120},
+    range = {120,50},
     prerequisites = {
         {
             type = "level",
-            level = 120,
+            level = 50,
         },
         {
             type = "quest",
@@ -1011,22 +894,9 @@ Database:AddChain(Chain.Chain07, {
     },
     rewards = {
         {
-            type = "money",
-            amounts = {
-                1567800,
-            },
-            minLevel = 120,
-            maxLevel = 120,
-        },
-        {
             type = "currency",
             id = 1553,
             amount = 1500,
-        },
-        {
-            type = "reputation",
-            id = 2417,
-            amount = 1000,
         },
     },
     items = {
@@ -1117,11 +987,11 @@ Database:AddChain(Chain.Chain08, {
     questline = 992,
     category = CATEGORY_ID,
     expansion = EXPANSION_ID,
-    range = {120,120},
+    range = {120,50},
     prerequisites = {
         {
             type = "level",
-            level = 120,
+            level = 50,
         },
         {
             type = "quest",
@@ -1203,22 +1073,9 @@ Database:AddChain(Chain.Chain08, {
     },
     rewards = {
         {
-            type = "money",
-            amounts = {
-                1731600,
-            },
-            minLevel = 120,
-            maxLevel = 120,
-        },
-        {
             type = "currency",
             id = 1553,
             amount = 1500,
-        },
-        {
-            type = "reputation",
-            id = 2415,
-            amount = 1250,
         },
     },
     items = {
@@ -1308,11 +1165,11 @@ Database:AddChain(Chain.Chain09, {
     questline = 1009,
     category = CATEGORY_ID,
     expansion = EXPANSION_ID,
-    range = {120,120},
+    range = {120,50},
     prerequisites = {
         {
             type = "level",
-            level = 120,
+            level = 50,
         },
         {
             type = "quest",
@@ -1394,22 +1251,9 @@ Database:AddChain(Chain.Chain09, {
     },
     rewards = {
         {
-            type = "money",
-            amounts = {
-                2386800,
-            },
-            minLevel = 120,
-            maxLevel = 120,
-        },
-        {
             type = "currency",
             id = 1553,
             amount = 1500,
-        },
-        {
-            type = "reputation",
-            id = 2415,
-            amount = 1000,
         },
     },
     items = {
@@ -1499,11 +1343,11 @@ Database:AddChain(Chain.Chain10, {
     questline = 1016,
     category = CATEGORY_ID,
     expansion = EXPANSION_ID,
-    range = {120,120},
+    range = {120,50},
     prerequisites = {
         {
             type = "level",
-            level = 120,
+            level = 50,
         },
         {
             type = "quest",
@@ -1580,24 +1424,11 @@ Database:AddChain(Chain.Chain10, {
     },
     rewards = {
         {
-            type = "money",
-            amounts = {
-                2691000,
-            },
-            minLevel = 120,
-            maxLevel = 120,
-        },
-        {
             type = "currency",
             id = 1553,
             amount = 1500,
         },
-        {
-            type = "reputation",
-            id = 2417,
-            amount = 1250,
-        },
-    },    
+    },
     items = {
         {
             type = "npc",

@@ -4,18 +4,18 @@ local S = E:GetModule('Skins')
 local _G = _G
 
 function S:Blizzard_AzeriteRespecUI()
-	if not (E.private.skins.blizzard.enable and E.private.skins.blizzard.AzeriteRespec) then return end
+	if not (E.private.skins.blizzard.enable and E.private.skins.blizzard.azeriteRespec) then return end
 
 	local AzeriteRespecFrame = _G.AzeriteRespecFrame
 	AzeriteRespecFrame:SetClipsChildren(true)
 	AzeriteRespecFrame.Background:Hide()
 	AzeriteRespecFrame:StripTextures()
-	AzeriteRespecFrame:SetTemplate("Transparent")
+	AzeriteRespecFrame:CreateBackdrop('Transparent')
 
-	local Lines = AzeriteRespecFrame:CreateTexture(nil, "BACKGROUND")
+	local Lines = AzeriteRespecFrame:CreateTexture(nil, 'BACKGROUND')
 	Lines:ClearAllPoints()
-	Lines:Point("TOPLEFT", -50, 25)
-	Lines:Point("BOTTOMRIGHT")
+	Lines:Point('TOPLEFT', -50, 25)
+	Lines:Point('BOTTOMRIGHT')
 	Lines:SetTexture([[Interface\Transmogrify\EtherealLines]], true, true)
 	Lines:SetHorizTile(true)
 	Lines:SetVertTile(true)
@@ -23,11 +23,11 @@ function S:Blizzard_AzeriteRespecUI()
 
 	local ItemSlot = AzeriteRespecFrame.ItemSlot
 	ItemSlot:Size(64, 64)
-	ItemSlot:Point("CENTER", AzeriteRespecFrame)
+	ItemSlot:Point('CENTER', AzeriteRespecFrame)
 	ItemSlot.Icon:SetInside()
 	ItemSlot.GlowOverlay:SetAlpha(0)
 
-	ItemSlot:CreateBackdrop("Transparent")
+	ItemSlot:CreateBackdrop('Transparent')
 	ItemSlot.backdrop:SetBackdropColor(.6, 0, .6, .5)
 	S:HandleIcon(ItemSlot.Icon)
 
@@ -38,8 +38,7 @@ function S:Blizzard_AzeriteRespecUI()
 
 	ButtonFrame.MoneyFrameEdge:Hide()
 	ButtonFrame.MoneyFrame:ClearAllPoints()
-	ButtonFrame.MoneyFrame:Point("BOTTOMRIGHT", ButtonFrame.MoneyFrameEdge, 7, 5)
-
+	ButtonFrame.MoneyFrame:Point('BOTTOMRIGHT', ButtonFrame.MoneyFrameEdge, 7, 5)
 
 	S:HandleButton(ButtonFrame.AzeriteRespecButton, true)
 	S:HandleCloseButton(AzeriteRespecFrame.CloseButton)

@@ -9,7 +9,9 @@ local unpack = unpack
 local CreateFrame = CreateFrame
 
 function NP:Construct_Auras(nameplate)
-	local Buffs = CreateFrame('Frame', nameplate:GetDebugName()..'Buffs', nameplate)
+	local frameName = nameplate:GetName()
+
+	local Buffs = CreateFrame('Frame', frameName..'Buffs', nameplate)
 	Buffs:SetFrameStrata(nameplate:GetFrameStrata())
 	Buffs:SetFrameLevel(5)
 	Buffs:Size(300, 27)
@@ -24,7 +26,7 @@ function NP:Construct_Auras(nameplate)
 	Buffs.type = 'buffs'
 	Buffs.forceShow = nameplate == _G.ElvNP_Test
 
-	local Debuffs = CreateFrame('Frame', nameplate:GetDebugName()..'Debuffs', nameplate)
+	local Debuffs = CreateFrame('Frame', frameName..'Debuffs', nameplate)
 	Debuffs:SetFrameStrata(nameplate:GetFrameStrata())
 	Debuffs:SetFrameLevel(5)
 	Debuffs:Size(300, 27)
@@ -81,8 +83,8 @@ function NP:Configure_Auras(nameplate, auras, db)
 	auras.num = db.numAuras
 	auras.onlyShowPlayer = false
 	auras.spacing = db.spacing
-	auras["growth-y"] = db.growthY
-	auras["growth-x"] = db.growthX
+	auras['growth-y'] = db.growthY
+	auras['growth-x'] = db.growthX
 	auras.initialAnchor = E.InversePoints[db.anchorPoint]
 
 	local index = 1
@@ -102,15 +104,14 @@ function NP:Configure_Auras(nameplate, auras, db)
 	auras:Point(E.InversePoints[db.anchorPoint] or 'TOPRIGHT', db.attachTo == 'BUFFS' and nameplate.Buffs or nameplate, db.anchorPoint or 'TOPRIGHT', db.xOffset, db.yOffset)
 end
 
-function NP:Update_Auras(nameplate, forceUpdate)
-	local db = NP.db.units[nameplate.frameType]
+function NP:Update_Auras(nameplate)
+	local db = NP:PlateDB(nameplate)
 
 	if db.debuffs.enable or db.buffs.enable then
 		nameplate:SetAuraUpdateMethod(E.global.nameplate.effectiveAura)
 		nameplate:SetAuraUpdateSpeed(E.global.nameplate.effectiveAuraSpeed)
 
-		local wasDisabled = not nameplate:IsElementEnabled('Auras')
-		if wasDisabled then
+		if not nameplate:IsElementEnabled('Auras') then
 			nameplate:EnableElement('Auras')
 		end
 
@@ -118,10 +119,7 @@ function NP:Update_Auras(nameplate, forceUpdate)
 			nameplate.Debuffs = nameplate.Debuffs_
 			NP:Configure_Auras(nameplate, nameplate.Debuffs, db.debuffs)
 			nameplate.Debuffs:Show()
-
-			if wasDisabled and forceUpdate then
-				nameplate.Debuffs:ForceUpdate()
-			end
+			nameplate.Debuffs:ForceUpdate()
 		elseif nameplate.Debuffs then
 			nameplate.Debuffs:Hide()
 			nameplate.Debuffs = nil
@@ -131,18 +129,13 @@ function NP:Update_Auras(nameplate, forceUpdate)
 			nameplate.Buffs = nameplate.Buffs_
 			NP:Configure_Auras(nameplate, nameplate.Buffs, db.buffs)
 			nameplate.Buffs:Show()
-
-			if wasDisabled and forceUpdate then
-				nameplate.Buffs:ForceUpdate()
-			end
+			nameplate.Buffs:ForceUpdate()
 		elseif nameplate.Buffs then
 			nameplate.Buffs:Hide()
 			nameplate.Buffs = nil
 		end
-	else
-		if nameplate:IsElementEnabled('Auras') then
-			nameplate:DisableElement('Auras')
-		end
+	elseif nameplate:IsElementEnabled('Auras') then
+		nameplate:DisableElement('Auras')
 	end
 end
 

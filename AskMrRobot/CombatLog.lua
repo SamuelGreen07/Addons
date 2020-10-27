@@ -313,6 +313,14 @@ local function updateAutoLogging(force, noWait)
 	end
 end
 
+-- sometimes the game doesn't repaint checkboxes when it should... doing this forces it to do so
+local function setCheckboxChecked(chk, val)
+	chk:SetChecked(val)
+	chk:SetChecked(not val)
+	chk:SetChecked(val)
+	chk:SetText(chk:GetText())
+end
+
 -- refresh the state of the tab based on current settings
 function Amr:RefreshLogUi()
 	if not _btnToggle then return end
@@ -334,6 +342,7 @@ function Amr:RefreshLogUi()
 	end
 	
 	local all = isAllAutoLoggingEnabled()
+	--setCheckboxChecked(_chkAutoAll, all)
 	_chkAutoAll:SetChecked(all)
 	
 	for i, instanceId in ipairs(Amr.InstanceIdsOrdered) do
@@ -341,7 +350,8 @@ function Amr:RefreshLogUi()
 			Amr.db.profile.Logging.Auto[instanceId] = {}
 		end
 		for k, difficultyId in pairs(Amr.Difficulties) do
-			_autoChecks[instanceId][difficultyId]:SetChecked(Amr.db.profile.Logging.Auto[instanceId][difficultyId])
+			setCheckboxChecked(_autoChecks[instanceId][difficultyId], Amr.db.profile.Logging.Auto[instanceId][difficultyId])
+			--_autoChecks[instanceId][difficultyId]:SetChecked(Amr.db.profile.Logging.Auto[instanceId][difficultyId])
 		end
 	end
 end

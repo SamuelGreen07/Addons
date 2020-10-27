@@ -7,10 +7,13 @@ local L = cBnivL
 local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 
+local BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate" or nil
+
 local mediaPath = [[Interface\AddOns\cargBags_Nivaya\media\]]
 local Textures = {
 	Background =	mediaPath .. "texture",
 	Search =		mediaPath .. "Search",
+	Keyring =		mediaPath .. "Keyring",
 	BagToggle =		mediaPath .. "BagToggle",
 	ResetNew =		mediaPath .. "ResetNew",
 	Restack =		mediaPath .. "Restack",
@@ -434,12 +437,12 @@ local UpdateDimensions = function(self)
 	end
 	if self.bagToggle then
 		local tBag = (self.name == "cBniv_Bag")
-		local fheight = (RealUI and (RealUI.media.font.pixel.small[2]  + 4)) or (ns.options.fonts.standard[2] + 4)
+		local fheight = ns.options.fonts.standard[2] + 4
 		local extraHeight = (tBag and self.hintShown) and (fheight + 4) or 0
 		height = height + 24 + extraHeight
 	end
 	if self.Caption then		-- Space for captions
-		local fheight = (RealUI and (RealUI.media.font.pixel.small[2] + 12)) or (ns.options.fonts.standard[2] + 12)
+		local fheight = ns.options.fonts.standard[2] + 12
 		height = height + fheight
 	end
 	self:SetHeight(self.ContainerHeight + height)
@@ -535,11 +538,7 @@ local createIconButton = function (name, parent, texture, point, hint, isBag)
 	
 	button.tooltip = button:CreateFontString()
 	-- button.tooltip:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", isBag and -76 or -59, 4.5)
-	if RealUI then
-		button.tooltip:SetFontObject(RealUIFont_PixelSmall)
-	else
-		button.tooltip:SetFont(unpack(ns.options.fonts.standard))
-	end
+	button.tooltip:SetFont(unpack(ns.options.fonts.standard))
 	button.tooltip:SetJustifyH("RIGHT")
 	button.tooltip:SetText(hint)
 	button.tooltip:SetTextColor(0.8, 0.8, 0.8)
@@ -643,16 +642,16 @@ function MyContainer:OnCreate(name, settings)
 
 	-- The frame background
 	local tBankCustom = (tBankBags and not cBnivCfg.BankBlack)
-	local color_rb = (RealUI and RealUI.media.window[1]) or ns.options.colors.background[1]
-	local color_gb = tBankCustom and .2 or (RealUI and RealUI.media.window[2]) or ns.options.colors.background[2]
-	local color_bb = tBankCustom and .3 or (RealUI and RealUI.media.window[3]) or ns.options.colors.background[3]
-	local alpha_fb = (RealUI and RealUI.media.window[4]) or ns.options.colors.background[4]
+	local color_rb = ns.options.colors.background[1]
+	local color_gb = tBankCustom and .2 or ns.options.colors.background[2]
+	local color_bb = tBankCustom and .3 or ns.options.colors.background[3]
+	local alpha_fb = ns.options.colors.background[4]
 
 	-- The frame background
-	local background = CreateFrame("Frame", nil, self)
+	local background = CreateFrame("Frame", nil, self, BackdropTemplate)
 	background:SetBackdrop{
-		bgFile = (RealUI and RealUI.media.textures.plain) or Textures.Background,
-		edgeFile = (RealUI and RealUI.media.textures.plain) or Textures.Background,
+		bgFile = Textures.Background,
+		edgeFile = Textures.Background,
 		tile = true, tileSize = 16, edgeSize = 1,
 		insets = {left = 1, right = 1, top = 1, bottom = 1},
 	}
@@ -665,17 +664,10 @@ function MyContainer:OnCreate(name, settings)
 	background:SetPoint("BOTTOMRIGHT", 4, -4)
 
 	-- Stripes
-	if RealUI then
-		background.tex = RealUI:AddStripeTex(background)
-	end
 
 	-- Caption, close button
 	local caption = background:CreateFontString(background, "OVERLAY", nil)
-	if RealUI then
-		caption:SetFontObject(RealUIFont_PixelSmall)
-	else
-		caption:SetFont(unpack(ns.options.fonts.standard))
-	end
+	caption:SetFont(unpack(ns.options.fonts.standard))
 	if(caption) then
 		local t = L.bagCaptions[self.name] or (tBankBags and strsub(self.name, 5))
 		if not t then t = self.name end
@@ -775,9 +767,51 @@ function MyContainer:OnCreate(name, settings)
 		-- main window gets a fake bag button for toggling key ring
 		self.BagBar = bagButtons
 		
+		-- keyring button
+		if isClassic and tBag then
+			self.keyRing = createIconButton("Keyring", self, Textures.Keyring, "BOTTOMRIGHT", KEYRING, tBag)
+			self.keyRing:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", 0, 0)
+			self.keyRing:SetScript("OnClick", function()
+				if (CursorHasItem()) then
+					PutKeyInKeyRing()
+				else
+					if IsModifierKeyDown() then
+						for bagID = 0, 4 do
+							local slots = GetContainerNumSlots(bagID)
+							for slotID = 1,slots do
+								local itemLink = GetContainerItemLink(bagID, slotID)
+								if itemLink then
+									local itemID, itemType, itemSubType, itemEquipLoc, icon, itemClassID, itemSubClassID = GetItemInfoInstant(itemLink)
+									if itemClassID == LE_ITEM_CLASS_KEY then
+										ClearCursor()
+										PickupContainerItem(bagID, slotID)
+										PutKeyInKeyRing()
+									end
+								end
+							end
+						end
+					else
+						local f = NivayacBniv_Keyring
+						if f then
+							if f:IsShown() then
+								f:Hide()
+							else
+								f:Show()
+							end
+						end
+					end
+				end	
+			end)
+			self.keyRing:SetScript("OnReceiveDrag", function()
+				if (CursorHasItem()) then
+					PutKeyInKeyRing()
+				end	
+			end)
+		end
+		
 		-- We don't need the bag bar every time, so let's create a toggle button for them to show
 		self.bagToggle = createIconButton("Bags", self, Textures.BagToggle, "BOTTOMRIGHT", "Toggle Bags", tBag)
-		self.bagToggle:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", 0, 0)
+		self.bagToggle:SetPoint("BOTTOMRIGHT", self.keyRing and self.keyRing or self, self.keyRing and "BOTTOMLEFT" or "BOTTOMRIGHT", 0, 0)
 		self.bagToggle:SetScript("OnClick", function()
 			if(self.BagBar:IsShown()) then 
 				self.BagBar:Hide()
@@ -866,6 +900,7 @@ function MyContainer:OnCreate(name, settings)
 		-- Tooltip positions
 		local numButtons = 1
 		local btnTable = {self.bagToggle}
+		if self.keyRing then table.insert(btnTable, 1, self.keyRing) numButtons = numButtons + 1 end
 		if self.optionsBtn then numButtons = numButtons + 1; tinsert(btnTable, self.optionsBtn) end
 		if self.restackBtn then numButtons = numButtons + 1; tinsert(btnTable, self.restackBtn) end
 		if tBag then
@@ -895,7 +930,7 @@ function MyContainer:OnCreate(name, settings)
 		local dtNT = _G[self.DropTarget:GetName().."NormalTexture"]
 		if dtNT then dtNT:SetTexture(nil) end
 		
-		self.DropTarget.bg = CreateFrame("Frame", nil, self.DropTarget)
+		self.DropTarget.bg = CreateFrame("Frame", nil, self.DropTarget, BackdropTemplate)
 		self.DropTarget.bg:SetAllPoints()
 		self.DropTarget.bg:SetBackdrop({
 			bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
@@ -917,11 +952,7 @@ function MyContainer:OnCreate(name, settings)
 		self.DropTarget:SetScript("OnReceiveDrag", DropTargetProcessItem)
 		
 		local fs = self:CreateFontString(nil, "OVERLAY")
-		if RealUI then
-			fs:SetFontObject(RealUIFont_PixelSmall)
-		else
-			fs:SetFont(unpack(ns.options.fonts.standard))
-		end
+		fs:SetFont(unpack(ns.options.fonts.standard))
 		fs:SetJustifyH("LEFT")
 		fs:SetPoint("BOTTOMRIGHT", self.DropTarget, "BOTTOMRIGHT", 1.5, 1.5)
 		self.EmptySlotCounter = fs
@@ -956,11 +987,7 @@ function MyContainer:OnCreate(name, settings)
 		-- Hint
 		self.hint = background:CreateFontString(nil, "OVERLAY", nil)
 		self.hint:SetPoint("BOTTOMLEFT", infoFrame, -0.5, 31.5)
-		if RealUI then
-			self.hint:SetFontObject(RealUIFont_PixelSmall)
-		else
-			self.hint:SetFont(unpack(ns.options.fonts.standard))
-		end
+		self.hint:SetFont(unpack(ns.options.fonts.standard))
 		self.hint:SetTextColor(1, 1, 1, 0.4)
 		self.hint:SetText("Ctrl + Alt + Right Click an item to assign category")
 		self.hintShown = true
@@ -968,11 +995,7 @@ function MyContainer:OnCreate(name, settings)
 		-- The money display
 		local money = self:SpawnPlugin("TagDisplay", "[money]", self)
 		money:SetPoint("TOPRIGHT", self, Aurora and -28.5 or -26.5, -2.5)
-		if RealUI then
-			money:SetFontObject(RealUIFont_PixelSmall)
-		else
-			money:SetFont(unpack(ns.options.fonts.standard))
-		end
+		money:SetFont(unpack(ns.options.fonts.standard))
 		money:SetJustifyH("RIGHT")
 		money:SetShadowColor(0, 0, 0, 0)
 	end

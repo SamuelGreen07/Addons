@@ -1,10 +1,8 @@
 local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local S = E:GetModule('Skins')
 
---Lua functions
 local _G = _G
-local pairs, select = pairs, select
---WoW API / Variables
+local pairs, ipairs, select = pairs, ipairs, select
 local hooksecurefunc = hooksecurefunc
 
 --[[
@@ -46,7 +44,10 @@ local function HandleListIcon(frame)
 				if cell and cell.Icon then
 					if not cell.IsSkinned then
 						S:HandleIcon(cell.Icon)
-						if cell.IconBorder then cell.IconBorder:SetAlpha(0) end
+
+						if cell.IconBorder then
+							cell.IconBorder:Kill()
+						end
 
 						cell.IsSkinned = true
 					end
@@ -65,7 +66,7 @@ local function HandleSummaryIcons(frame)
 				S:HandleIcon(child.Icon)
 
 				if child.IconBorder then
-					child.IconBorder:SetAlpha(0)
+					child.IconBorder:Kill()
 				end
 
 				child.IsSkinned = true
@@ -77,9 +78,9 @@ end
 local function SkinItemDisplay(frame)
 	local ItemDisplay = frame.ItemDisplay
 	ItemDisplay:StripTextures()
-	ItemDisplay:CreateBackdrop("Transparent")
-	ItemDisplay.backdrop:Point("TOPLEFT", 3, -3)
-	ItemDisplay.backdrop:Point("BOTTOMRIGHT", -3, 0)
+	ItemDisplay:CreateBackdrop('Transparent')
+	ItemDisplay.backdrop:Point('TOPLEFT', 3, -3)
+	ItemDisplay.backdrop:Point('BOTTOMRIGHT', -3, 0)
 
 	local ItemButton = ItemDisplay.ItemButton
 	ItemButton.CircleMask:Hide()
@@ -95,16 +96,16 @@ local function HandleHeaders(frame)
 	for i = 1, maxHeaders do
 		local header = select(i, frame.HeaderContainer:GetChildren())
 		if header and not header.IsSkinned then
-			header:DisableDrawLayer("BACKGROUND")
+			header:DisableDrawLayer('BACKGROUND')
 			if not header.backdrop then
-				header:CreateBackdrop("Transparent")
+				header:CreateBackdrop('Transparent')
 			end
 
 			header.IsSkinned = true
 		end
 
 		if header.backdrop then
-			header.backdrop:Point("BOTTOMRIGHT", i < maxHeaders and -5 or 0, -2)
+			header.backdrop:Point('BOTTOMRIGHT', i < maxHeaders and -5 or 0, -2)
 		end
 	end
 
@@ -121,21 +122,18 @@ local function HandleSellFrame(frame)
 
 	local ItemDisplay = frame.ItemDisplay
 	ItemDisplay:StripTextures()
-	ItemDisplay:CreateBackdrop("Transparent")
+	ItemDisplay:CreateBackdrop('Transparent')
 
 	local ItemButton = ItemDisplay.ItemButton
 	if ItemButton.IconMask then ItemButton.IconMask:Hide() end
-	if ItemButton.IconBorder then ItemButton.IconBorder:SetAlpha(0) end
+	if ItemButton.IconBorder then ItemButton.IconBorder:Kill() end
 
 	ItemButton.EmptyBackground:Hide()
-	ItemButton:SetPushedTexture("")
+	ItemButton:SetPushedTexture('')
 	ItemButton.Highlight:SetColorTexture(1, 1, 1, .25)
 	ItemButton.Highlight:SetAllPoints(ItemButton.Icon)
 
 	S:HandleIcon(ItemButton.Icon, true)
-	hooksecurefunc(ItemButton.IconBorder, "SetVertexColor", function(_, r, g, b) ItemButton.Icon.backdrop:SetBackdropBorderColor(r, g, b) end)
-	hooksecurefunc(ItemButton.IconBorder, "Hide", function() ItemButton.Icon.backdrop:SetBackdropBorderColor(0, 0, 0) end)
-
 	S:HandleEditBox(frame.QuantityInput.InputBox)
 	S:HandleButton(frame.QuantityInput.MaxButton)
 	S:HandleEditBox(frame.PriceInput.MoneyInputFrame.GoldBox)
@@ -160,26 +158,24 @@ local function HandleTokenSellFrame(frame)
 
 	local ItemDisplay = frame.ItemDisplay
 	ItemDisplay:StripTextures()
-	ItemDisplay:CreateBackdrop("Transparent")
+	ItemDisplay:CreateBackdrop('Transparent')
 
 	local ItemButton = ItemDisplay.ItemButton
 	if ItemButton.IconMask then ItemButton.IconMask:Hide() end
-	if ItemButton.IconBorder then ItemButton.IconBorder:SetAlpha(0) end
+	if ItemButton.IconBorder then ItemButton.IconBorder:Kill() end
 
 	ItemButton.EmptyBackground:Hide()
-	ItemButton:SetPushedTexture("")
+	ItemButton:SetPushedTexture('')
 	ItemButton.Highlight:SetColorTexture(1, 1, 1, .25)
 	ItemButton.Highlight:SetAllPoints(ItemButton.Icon)
 
 	S:HandleIcon(ItemButton.Icon, true)
-	hooksecurefunc(ItemButton.IconBorder, "SetVertexColor", function(_, r, g, b) ItemButton.Icon.backdrop:SetBackdropBorderColor(r, g, b) end)
-	hooksecurefunc(ItemButton.IconBorder, "Hide", function() ItemButton.Icon.backdrop:SetBackdropBorderColor(0, 0, 0) end)
 
 	S:HandleButton(frame.PostButton)
 	HandleAuctionButtons(frame.DummyRefreshButton)
 
 	frame.DummyItemList:StripTextures()
-	frame.DummyItemList:CreateBackdrop("Transparent")
+	frame.DummyItemList:CreateBackdrop('Transparent')
 	HandleAuctionButtons(frame.DummyRefreshButton)
 	S:HandleScrollBar(frame.DummyItemList.DummyScrollBar)
 end
@@ -194,10 +190,10 @@ local function HandleSellList(frame, hasHeader)
 	S:HandleScrollBar(frame.ScrollFrame.scrollBar)
 
 	if hasHeader then
-		frame.ScrollFrame:CreateBackdrop("Transparent")
-		hooksecurefunc(frame, "RefreshScrollFrame", HandleHeaders)
+		frame.ScrollFrame:CreateBackdrop('Transparent')
+		hooksecurefunc(frame, 'RefreshScrollFrame', HandleHeaders)
 	else
-		hooksecurefunc(frame, "RefreshScrollFrame", HandleSummaryIcons)
+		hooksecurefunc(frame, 'RefreshListDisplay', HandleSummaryIcons)
 	end
 end
 
@@ -221,7 +217,7 @@ local function LoadSkin()
 	end
 
 	_G.AuctionHouseFrameBuyTab:ClearAllPoints()
-	_G.AuctionHouseFrameBuyTab:Point("BOTTOMLEFT", Frame, "BOTTOMLEFT", 0, -32)
+	_G.AuctionHouseFrameBuyTab:Point('BOTTOMLEFT', Frame, 'BOTTOMLEFT', 0, -32)
 
 	-- SearchBar Frame
 	HandleSearchBarFrame(Frame.SearchBar)
@@ -246,7 +242,7 @@ local function LoadSkin()
 		button.SelectedTexture:SetInside(button)
 	end
 
-	hooksecurefunc("AuctionFrameFilters_UpdateCategories", function(categoriesList, _)
+	hooksecurefunc('AuctionFrameFilters_UpdateCategories', function(categoriesList, _)
 		for _, button in ipairs(categoriesList.FilterButtons) do
 			button.SelectedTexture:SetAtlas(nil)
 			button.SelectedTexture:SetColorTexture(0.7, 0.7, 0.7, 0.4)
@@ -258,7 +254,7 @@ local function LoadSkin()
 
 	local ItemList = Browse.ItemList
 	ItemList:StripTextures()
-	hooksecurefunc(ItemList, "RefreshScrollFrame", HandleHeaders)
+	hooksecurefunc(ItemList, 'RefreshScrollFrame', HandleHeaders)
 
 	S:HandleScrollBar(ItemList.ScrollFrame.scrollBar)
 
@@ -269,7 +265,7 @@ local function LoadSkin()
 
 	local ItemList = Frame.CommoditiesBuyFrame.ItemList
 	ItemList:StripTextures()
-	ItemList:CreateBackdrop("Transparent")
+	ItemList:CreateBackdrop('Transparent')
 	S:HandleButton(ItemList.RefreshFrame.RefreshButton)
 	S:HandleScrollBar(ItemList.ScrollFrame.scrollBar)
 
@@ -288,10 +284,10 @@ local function LoadSkin()
 
 	local ItemList = ItemBuyFrame.ItemList
 	ItemList:StripTextures()
-	ItemList:CreateBackdrop("Transparent")
+	ItemList:CreateBackdrop('Transparent')
 	S:HandleScrollBar(ItemList.ScrollFrame.scrollBar)
 	S:HandleButton(ItemList.RefreshFrame.RefreshButton)
-	hooksecurefunc(ItemList, "RefreshScrollFrame", HandleHeaders)
+	hooksecurefunc(ItemList, 'RefreshScrollFrame', HandleHeaders)
 
 	local EditBoxes = {
 		_G.AuctionHouseFrameGold,
@@ -300,12 +296,12 @@ local function LoadSkin()
 
 	for _, EditBox in pairs(EditBoxes) do
 		S:HandleEditBox(EditBox)
-		EditBox:SetTextInsets(1, 1, -1, 1)
+		--EditBox:SetTextInsets(1, 1, -1, 1)
 	end
 
 	S:HandleButton(ItemBuyFrame.BidFrame.BidButton)
 	ItemBuyFrame.BidFrame.BidButton:ClearAllPoints()
-	ItemBuyFrame.BidFrame.BidButton:Point("LEFT", ItemBuyFrame.BidFrame.BidAmount, "RIGHT", 2, -2)
+	ItemBuyFrame.BidFrame.BidButton:Point('LEFT', ItemBuyFrame.BidFrame.BidAmount, 'RIGHT', 2, -2)
 	S:HandleButton(ItemBuyFrame.BidFrame.BidButton)
 
 	--[[ Item Sell Frame | TAB 2 ]]--
@@ -374,18 +370,18 @@ local function LoadSkin()
 
 	local Token = TokenFrame.TokenDisplay
 	Token:StripTextures()
-	Token:CreateBackdrop("Transparent")
+	Token:CreateBackdrop('Transparent')
 
 	local ItemButton = Token.ItemButton
 	S:HandleIcon(ItemButton.Icon, true)
 	ItemButton.Icon.backdrop:SetBackdropBorderColor(0, .8, 1)
-	ItemButton.IconBorder:SetAlpha(0)
+	ItemButton.IconBorder:Kill()
 
 	--WoW Token Tutorial Frame
 	local WowTokenGameTimeTutorial = Frame.WoWTokenResults.GameTimeTutorial
 	WowTokenGameTimeTutorial.NineSlice:Hide()
 	WowTokenGameTimeTutorial.TitleBg:SetAlpha(0)
-	WowTokenGameTimeTutorial:CreateBackdrop("Transparent")
+	WowTokenGameTimeTutorial:CreateBackdrop('Transparent')
 	S:HandleCloseButton(WowTokenGameTimeTutorial.CloseButton)
 	S:HandleButton(WowTokenGameTimeTutorial.RightDisplay.StoreButton)
 	WowTokenGameTimeTutorial.Bg:SetAlpha(0)
@@ -396,9 +392,9 @@ local function LoadSkin()
 
 	--[[ Dialogs ]]--
 	Frame.BuyDialog:StripTextures()
-	Frame.BuyDialog:CreateBackdrop("Transparent")
+	Frame.BuyDialog:CreateBackdrop('Transparent')
 	S:HandleButton(Frame.BuyDialog.BuyNowButton)
 	S:HandleButton(Frame.BuyDialog.CancelButton)
 end
 
-S:AddCallbackForAddon("Blizzard_AuctionHouseUI", "AuctionHouse", LoadSkin)
+S:AddCallbackForAddon('Blizzard_AuctionHouseUI', 'AuctionHouse', LoadSkin)

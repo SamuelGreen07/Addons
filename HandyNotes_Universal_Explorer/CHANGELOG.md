@@ -9,4 +9,6 @@
 ## Changes in 8.3
 * Updated for 8.3
 * Added Coordinates for Nazjatar
-
+## Changes in 8.3.1
+* Bugfix 
+  thanks to r15ch13 

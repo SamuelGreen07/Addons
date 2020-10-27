@@ -2,12 +2,11 @@ local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, Private
 local B = E:GetModule('Bags')
 local Search = E.Libs.ItemSearch
 
---Lua functions
 local ipairs, pairs, select, unpack, pcall = ipairs, pairs, select, unpack, pcall
 local strmatch, gmatch, strfind = strmatch, gmatch, strfind
 local tinsert, tremove, sort, wipe = tinsert, tremove, sort, wipe
 local tonumber, floor, band = tonumber, floor, bit.band
---WoW API / Variables
+
 local ContainerIDToInventoryID = ContainerIDToInventoryID
 local GetContainerItemID = GetContainerItemID
 local GetContainerItemInfo = GetContainerItemInfo
@@ -130,8 +129,8 @@ local safe = {
 local WAIT_TIME = 0.05
 do
 	local t = 0
-	local frame = CreateFrame("Frame")
-	frame:SetScript("OnUpdate", function(_, elapsed)
+	local frame = CreateFrame('Frame')
+	frame:SetScript('OnUpdate', function(_, elapsed)
 		t = t + (elapsed or 0.01)
 		if t > WAIT_TIME then
 			t = 0
@@ -147,7 +146,7 @@ local function IsGuildBankBag(bagid)
 end
 
 local function UpdateLocation(from, to)
-	if (bagIDs[from] == bagIDs[to]) and (bagStacks[to] < bagMaxStacks[to]) then
+	if bagIDs[from] == bagIDs[to] and (bagStacks[to] < bagMaxStacks[to]) then
 		local stackSize = bagMaxStacks[to]
 		if (bagStacks[to] + bagStacks[from]) > stackSize then
 			bagStacks[from] = bagStacks[from] - (stackSize - bagStacks[to])
@@ -187,7 +186,7 @@ local function DefaultSort(a, b)
 	local aID = bagIDs[a]
 	local bID = bagIDs[b]
 
-	if (not aID) or (not bID) then return aID end
+	if not aID or not bID then return aID end
 
 	if bagPetIDs[a] and bagPetIDs[b] then
 		local aName, _, aType = C_PetJournalGetPetInfoBySpeciesID(aID)
@@ -254,7 +253,7 @@ local function DefaultSort(a, b)
 			return aEquipLoc < bEquipLoc
 		end
 	end
-	if (aItemClassId == bItemClassId) and (aItemSubClassId == bItemSubClassId) then
+	if aItemClassId == bItemClassId and (aItemSubClassId == bItemSubClassId) then
 		return PrimarySort(a, b)
 	end
 
@@ -339,7 +338,7 @@ end
 function B:GetItemID(bag, slot)
 	if IsGuildBankBag(bag) then
 		local link = B:GetItemLink(bag, slot)
-		return link and tonumber(strmatch(link, "item:(%d+)"))
+		return link and tonumber(strmatch(link, 'item:(%d+)'))
 	else
 		return GetContainerItemID(bag, slot)
 	end
@@ -385,13 +384,13 @@ end
 function B:ConvertLinkToID(link)
 	if not link then return end
 
-	local item = strmatch(link, "item:(%d+)")
+	local item = strmatch(link, 'item:(%d+)')
 	if item then return tonumber(item) end
 
-	local ks = strmatch(link, "keystone:(%d+)")
+	local ks = strmatch(link, 'keystone:(%d+)')
 	if ks then return tonumber(ks), nil, true end
 
-	local bp = strmatch(link, "battlepet:(%d+)")
+	local bp = strmatch(link, 'battlepet:(%d+)')
 	if bp then return tonumber(bp), true end
 end
 
@@ -461,7 +460,7 @@ function B:IsSpecialtyBag(bagID)
 	local inventorySlot = ContainerIDToInventoryID(bagID)
 	if not inventorySlot then return false end
 
-	local bag = GetInventoryItemLink("player", inventorySlot)
+	local bag = GetInventoryItemLink('player', inventorySlot)
 	if not bag then return false end
 
 	local family = GetItemFamily(bag)
@@ -477,7 +476,7 @@ function B:CanItemGoInBag(bag, slot, targetBag)
 	local itemFamily = GetItemFamily(item)
 	if itemFamily and itemFamily > 0 then
 		local equipSlot = select(9, GetItemInfo(item))
-		if equipSlot == "INVTYPE_BAG" then
+		if equipSlot == 'INVTYPE_BAG' then
 			itemFamily = 1
 		end
 	end
@@ -490,7 +489,7 @@ function B:CanItemGoInBag(bag, slot, targetBag)
 end
 
 function B.Compress(...)
-	for i=1, select("#", ...) do
+	for i=1, select('#', ...) do
 		local bags = select(i, ...)
 		B.Stack(bags, bags, B.IsPartial)
 	end
@@ -498,7 +497,7 @@ end
 
 function B.Stack(sourceBags, targetBags, canMove)
 	if not canMove then canMove = DefaultCanMove end
-	for _, bag, slot in B:IterateBags(targetBags, nil, "deposit") do
+	for _, bag, slot in B:IterateBags(targetBags, nil, 'deposit') do
 		local bagSlot = B:Encode_BagSlot(bag, slot)
 		local itemID = bagIDs[bagSlot]
 
@@ -508,7 +507,7 @@ function B.Stack(sourceBags, targetBags, canMove)
 		end
 	end
 
-	for _, bag, slot in B:IterateBags(sourceBags, true, "withdraw") do
+	for _, bag, slot in B:IterateBags(sourceBags, true, 'withdraw') do
 		local sourceSlot = B:Encode_BagSlot(bag, slot)
 		local itemID = bagIDs[sourceSlot]
 		if itemID and targetItems[itemID] and canMove(itemID, bag, slot) then
@@ -545,10 +544,10 @@ function B:BuildBlacklist(...)
 
 		if itemName then
 			blackList[itemName] = true
-		elseif entry ~= "" then
-			if strfind(entry, "%[") and strfind(entry, "%]") then
+		elseif entry ~= '' then
+			if strfind(entry, '%[') and strfind(entry, '%]') then
 				--For some reason the entry was not treated as a valid item. Extract the item name.
-				entry = strmatch(entry, "%[(.*)%]")
+				entry = strmatch(entry, '%[(.*)%]')
 			end
 			blackListQueries[#blackListQueries+1] = entry
 		end
@@ -656,14 +655,14 @@ function B.Fill(sourceBags, targetBags, reverse, canMove)
 	B:BuildBlacklist(B.db.ignoredItems)
 	B:BuildBlacklist(E.global.bags.ignoredItems)
 
-	for _, bag, slot in B:IterateBags(targetBags, reverse, "deposit") do
+	for _, bag, slot in B:IterateBags(targetBags, reverse, 'deposit') do
 		local bagSlot = B:Encode_BagSlot(bag, slot)
 		if not bagIDs[bagSlot] then
 			tinsert(emptySlots, bagSlot)
 		end
 	end
 
-	for _, bag, slot in B:IterateBags(sourceBags, not reverse, "withdraw") do
+	for _, bag, slot in B:IterateBags(sourceBags, not reverse, 'withdraw') do
 		if #emptySlots == 0 then break end
 		local bagSlot = B:Encode_BagSlot(bag, slot)
 		local targetBag = B:Decode_BagSlot(emptySlots[1])
@@ -681,7 +680,7 @@ function B.Fill(sourceBags, targetBags, reverse, canMove)
 end
 
 function B.SortBags(...)
-	for i=1, select("#", ...) do
+	for i=1, select('#', ...) do
 		local bags = select(i, ...)
 		for _, slotNum in ipairs(bags) do
 			local bagType = B:IsSpecialtyBag(slotNum)
@@ -732,8 +731,8 @@ function B:RegisterUpdateDelayed()
 		if bagFrame.registerUpdate then
 			B:UpdateAllSlots(bagFrame)
 
-			bagFrame:RegisterEvent("BAG_UPDATE")
-			bagFrame:RegisterEvent("BAG_UPDATE_COOLDOWN")
+			bagFrame:RegisterEvent('BAG_UPDATE')
+			bagFrame:RegisterEvent('BAG_UPDATE_COOLDOWN')
 
 			for _, event in pairs(bagFrame.events) do
 				bagFrame:RegisterEvent(event)
@@ -768,7 +767,7 @@ function B:StopStacking(message, noUpdate)
 end
 
 function B:DoMove(move)
-	if GetCursorInfo() == "item" then
+	if GetCursorInfo() == 'item' then
 		return false, 'cursorhasitem'
 	end
 
@@ -795,13 +794,13 @@ function B:DoMove(move)
 	end
 
 	local stackSize = select(8, GetItemInfo(sourceItemID))
-	if (sourceItemID == targetItemID) and (targetCount ~= stackSize) and ((targetCount + sourceCount) > stackSize) then
+	if sourceItemID == targetItemID and (targetCount ~= stackSize) and ((targetCount + sourceCount) > stackSize) then
 		B:SplitItem(sourceBag, sourceSlot, stackSize - targetCount)
 	else
 		B:PickupItem(sourceBag, sourceSlot)
 	end
 
-	if GetCursorInfo() == "item" then
+	if GetCursorInfo() == 'item' then
 		B:PickupItem(targetBag, targetSlot)
 	end
 
@@ -824,7 +823,7 @@ function B:DoMoves()
 	end
 
 	local cursorType, cursorItemID = GetCursorInfo()
-	if cursorType == "item" and cursorItemID then
+	if cursorType == 'item' and cursorItemID then
 		if lastItemID ~= cursorItemID then
 			return B:StopStacking(L["Confused.. Try Again!"])
 		end
@@ -861,9 +860,9 @@ function B:DoMoves()
 						moveTracker[moveSource] = targetID
 						moveTracker[moveTarget] = moveID
 						lastDestination = moveTarget
-						-- lastMove = moves[i] --Where does "i" come from???
+						-- lastMove = moves[i] --Where does 'i' come from???
 						lastItemID = moveID
-						-- tremove(moves, i) --Where does "i" come from???
+						-- tremove(moves, i) --Where does 'i' come from???
 						return
 					end
 
@@ -905,9 +904,9 @@ function B:DoMoves()
 end
 
 function B:GetGroup(id)
-	if strmatch(id, "^[-%d,]+$") then
+	if strmatch(id, '^[-%d,]+$') then
 		local bags = {}
-		for b in gmatch(id, "-?%d+") do
+		for b in gmatch(id, '-?%d+') do
 			tinsert(bags, tonumber(b))
 		end
 		return bags
@@ -926,8 +925,8 @@ function B:CommandDecorator(func, groupsDefaults)
 		if not groups or #groups == 0 then
 			groups = groupsDefaults
 		end
-		for bags in (groups or ""):gmatch("%S+") do
-			if bags == "guild" then
+		for bags in (groups or ''):gmatch('%S+') do
+			if bags == 'guild' then
 				bags = B:GetGroup(bags)
 				if bags then
 					tinsert(bagGroups, {bags[GetCurrentGuildBankTab()]})

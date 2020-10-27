@@ -47,9 +47,7 @@ function AS:RGBToHex(r, g, b, header)
 end
 
 function AS:GetClassColor(class)
-	if not class then return end
-
-	local color = (_G.CUSTOM_CLASS_COLORS and _G.CUSTOM_CLASS_COLORS[class]) or _G.RAID_CLASS_COLORS[class]
+	local color = (_G.CUSTOM_CLASS_COLORS and _G.CUSTOM_CLASS_COLORS[class]) or _G.RAID_CLASS_COLORS[class or 'PRIEST']
 	if type(color) ~= 'table' then return end
 
 	if not color.colorStr then
@@ -291,10 +289,6 @@ function AS:StartSkinning()
 	end
 
 	for addonName, funcs in AS:OrderedPairs(AS.skins) do
-		if AS:CheckAddOn('ElvUI') and AS:GetElvUIBlizzardSkinOption(addonName) then
-			AS:SetOption(addonName, false)
-		end
-
 		-- Check Blizzard
 		if AS:CheckOption(addonName) and strfind(addonName, 'Blizzard_') then
 			for _, func in ipairs(funcs) do

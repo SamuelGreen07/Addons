@@ -4,6 +4,8 @@ local cargBags = ns.cargBags
 local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 
+local BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate" or nil
+
 cargBags_Nivaya = CreateFrame('Frame', 'cargBags_Nivaya', UIParent)
 cargBags_Nivaya:SetScript('OnEvent', function(self, event, ...) self[event](self, event, ...) end)
 cargBags_Nivaya:RegisterEvent("ADDON_LOADED")
@@ -17,7 +19,7 @@ do	--Replacement for UIDropDownMenu
 	local defaultWidth = 120
 	local frameInset = 16
 
-	local f = cbNivCatDropDown or CreateFrame("Frame", "cbNivCatDropDown", UIParent)
+	local f = cbNivCatDropDown or CreateFrame("Frame", "cbNivCatDropDown", UIParent, BackdropTemplate)
 	f.ActiveButtons = 0
 	f.Buttons = {}
 	
@@ -30,7 +32,7 @@ do	--Replacement for UIDropDownMenu
 		edgeFile = "Interface\\Buttons\\WHITE8x8", 
 		tile = true, tileSize = 16, edgeSize = 1, 
 		insets = { left = inset, right = inset, top = inset, bottom = inset }})
-	local colors = (RealUI and RealUI.media.window) or ns.options.colors.background
+	local colors = ns.options.colors.background
 	f:SetBackdropColor(unpack(colors))
 	f:SetBackdropBorderColor(0, 0, 0)
 
@@ -43,11 +45,7 @@ do	--Replacement for UIDropDownMenu
 		local fstr = button:CreateFontString()
 		fstr:SetJustifyH("LEFT")
 		fstr:SetJustifyV("MIDDLE")
-		if RealUI then
-			fstr:SetFontObject(RealUIFont_PixelSmall)
-		else
-			fstr:SetFont(unpack(ns.options.fonts.dropdown))
-		end
+		fstr:SetFont(unpack(ns.options.fonts.dropdown))
 		fstr:SetPoint("LEFT", button, "LEFT", 0, 0)
 		button.Text = fstr
 		

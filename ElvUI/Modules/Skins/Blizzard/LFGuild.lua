@@ -1,26 +1,24 @@
 local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local S = E:GetModule('Skins')
 
---Lua functions
 local _G = _G
 local pairs = pairs
---WoW API / Variables
 local hooksecurefunc = hooksecurefunc
 
 function S:LookingForGuildFrame()
 	if not (E.private.skins.blizzard.enable and E.private.skins.blizzard.lfguild) then return end
 
 	local LookingForGuildFrame = _G.LookingForGuildFrame
-	S:HandlePortraitFrame(LookingForGuildFrame, true)
+	S:HandlePortraitFrame(LookingForGuildFrame)
 
 	local checkbox = {
-		"LookingForGuildPvPButton",
-		"LookingForGuildWeekendsButton",
-		"LookingForGuildWeekdaysButton",
-		"LookingForGuildRPButton",
-		"LookingForGuildRaidButton",
-		"LookingForGuildQuestButton",
-		"LookingForGuildDungeonButton",
+		'LookingForGuildPvPButton',
+		'LookingForGuildWeekendsButton',
+		'LookingForGuildWeekdaysButton',
+		'LookingForGuildRPButton',
+		'LookingForGuildRaidButton',
+		'LookingForGuildQuestButton',
+		'LookingForGuildDungeonButton',
 	}
 
 	-- skin checkboxes
@@ -42,17 +40,17 @@ function S:LookingForGuildFrame()
 
 	-- skin container buttons on browse and request page
 	for i = 1, 5 do
-		_G["LookingForGuildBrowseFrameContainerButton"..i]:SetBackdrop(nil)
-		_G["LookingForGuildAppsFrameContainerButton"..i]:SetBackdrop(nil)
+		_G['LookingForGuildBrowseFrameContainerButton'..i]:SetBackdrop()
+		_G['LookingForGuildAppsFrameContainerButton'..i]:SetBackdrop()
 	end
 
 	-- skin tabs
 	for i= 1, 3 do
-		S:HandleTab(_G["LookingForGuildFrameTab"..i])
+		S:HandleTab(_G['LookingForGuildFrameTab'..i])
 	end
 
 	_G.GuildFinderRequestMembershipFrame:StripTextures(true)
-	_G.GuildFinderRequestMembershipFrame:SetTemplate("Transparent")
+	_G.GuildFinderRequestMembershipFrame:SetTemplate('Transparent')
 	S:HandleButton(_G.GuildFinderRequestMembershipFrameAcceptButton)
 	S:HandleButton(_G.GuildFinderRequestMembershipFrameCancelButton)
 	_G.GuildFinderRequestMembershipFrameInputFrame:StripTextures()

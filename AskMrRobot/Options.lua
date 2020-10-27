@@ -132,25 +132,37 @@ function Amr:ReleaseTabOptions()
 	_txtScale = nil
 end
 
+-- sometimes the game doesn't repaint checkboxes when it should... doing this forces it to do so
+local function setCheckboxChecked(chk, val)
+	chk:SetChecked(val)
+	chk:SetChecked(not val)
+	chk:SetChecked(val)
+end
+
 function Amr:RefreshOptionsUi()
 
 	if _chkMinimap then
+		--setCheckboxChecked(_chkMinimap, self.db.profile.minimap.hide)
 		_chkMinimap:SetChecked(self.db.profile.minimap.hide)
 	end
 	
 	if _chkAutoGear then
+		--setCheckboxChecked(_chkAutoGear, self.db.profile.options.autoGear)
 		_chkAutoGear:SetChecked(self.db.profile.options.autoGear)
 	end
 
 	if _chkJunk then
+		--setCheckboxChecked(_chkJunk, self.db.profile.options.junkVendor)
 		_chkJunk:SetChecked(self.db.profile.options.junkVendor)
 	end
 
 	if _chkAh then
+		--setCheckboxChecked(_chkAh, self.db.profile.options.shopAh)
 		_chkAh:SetChecked(self.db.profile.options.shopAh)
 	end
 	
 	if _chkEm then
+		--setCheckboxChecked(_chkEm, self.db.profile.options.disableEm)
 		_chkEm:SetChecked(self.db.profile.options.disableEm)
 	end
 	

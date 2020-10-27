@@ -1,24 +1,23 @@
 local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local S = E:GetModule('Skins')
 
---Lua functions
 local _G = _G
 local unpack, select = unpack, select
 local pairs, ipairs, type = pairs, ipairs, type
---WoW API / Variables
-local EquipmentManager_UnpackLocation = EquipmentManager_UnpackLocation
+
+local EquipmentManager_GetItemInfoByLocation = EquipmentManager_GetItemInfoByLocation
 local FauxScrollFrame_GetOffset = FauxScrollFrame_GetOffset
-local GetContainerItemLink = GetContainerItemLink
-local GetInventoryItemLink = GetInventoryItemLink
 local GetFactionInfo = GetFactionInfo
 local GetNumFactions = GetNumFactions
 local hooksecurefunc = hooksecurefunc
 local IsAddOnLoaded = IsAddOnLoaded
-local IsCorruptedItem = IsCorruptedItem
+local ITEM_QUALITY_COLORS = ITEM_QUALITY_COLORS
 
-local PLACEINBAGS_LOCATION = 0xFFFFFFFF
-local IGNORESLOT_LOCATION = 0xFFFFFFFE
-local UNIGNORESLOT_LOCATION = 0xFFFFFFFD
+local FLYOUT_LOCATIONS = {
+	[0xFFFFFFFF] = 'PLACEINBAGS',
+	[0xFFFFFFFE] = 'IGNORESLOT',
+	[0xFFFFFFFD] = 'UNIGNORESLOT'
+}
 
 local function UpdateAzeriteItem(self)
 	if not self.styled then
@@ -26,106 +25,98 @@ local function UpdateAzeriteItem(self)
 
 		self.AzeriteTexture:SetAlpha(0)
 		self.RankFrame.Texture:SetTexture()
-		self.RankFrame.Label:FontTemplate(nil, nil, "OUTLINE")
+		self.RankFrame.Label:FontTemplate(nil, nil, 'OUTLINE')
 	end
 end
 
 local function UpdateAzeriteEmpoweredItem(self)
-	self.AzeriteTexture:SetAtlas("AzeriteIconFrame")
+	self.AzeriteTexture:SetAtlas('AzeriteIconFrame')
 	self.AzeriteTexture:SetInside()
 	self.AzeriteTexture:SetTexCoord(unpack(E.TexCoords))
-	self.AzeriteTexture:SetDrawLayer("BORDER", 1)
+	self.AzeriteTexture:SetDrawLayer('BORDER', 1)
 end
 
 local function ColorizeStatPane(frame)
 	if frame.leftGrad then return end
 
 	local r, g, b = 0.8, 0.8, 0.8
-	frame.leftGrad = frame:CreateTexture(nil, "BORDER")
-	frame.leftGrad:Width(80)
-	frame.leftGrad:Height(frame:GetHeight())
-	frame.leftGrad:Point("LEFT", frame, "CENTER")
+	frame.leftGrad = frame:CreateTexture(nil, 'BORDER')
+	frame.leftGrad:Size(80, frame:GetHeight())
+	frame.leftGrad:Point('LEFT', frame, 'CENTER')
 	frame.leftGrad:SetTexture(E.Media.Textures.White8x8)
-	frame.leftGrad:SetGradientAlpha("Horizontal", r, g, b, 0.25, r, g, b, 0)
+	frame.leftGrad:SetGradientAlpha('Horizontal', r, g, b, 0.25, r, g, b, 0)
 
-	frame.rightGrad = frame:CreateTexture(nil, "BORDER")
-	frame.rightGrad:Width(80)
-	frame.rightGrad:Height(frame:GetHeight())
-	frame.rightGrad:Point("RIGHT", frame, "CENTER")
+	frame.rightGrad = frame:CreateTexture(nil, 'BORDER')
+	frame.rightGrad:Size(80, frame:GetHeight())
+	frame.rightGrad:Point('RIGHT', frame, 'CENTER')
 	frame.rightGrad:SetTexture(E.Media.Textures.White8x8)
-	frame.rightGrad:SetGradientAlpha("Horizontal", r, g, b, 0, r, g, b, 0.25)
+	frame.rightGrad:SetGradientAlpha('Horizontal', r, g, b, 0, r, g, b, 0.25)
 end
 
 local function StatsPane(which)
 	local CharacterStatsPane = _G.CharacterStatsPane
 	CharacterStatsPane[which]:StripTextures()
-	CharacterStatsPane[which]:CreateBackdrop("Transparent")
+	CharacterStatsPane[which]:CreateBackdrop('Transparent')
 	CharacterStatsPane[which].backdrop:ClearAllPoints()
-	CharacterStatsPane[which].backdrop:Point("CENTER")
-	CharacterStatsPane[which].backdrop:Width(150)
-	CharacterStatsPane[which].backdrop:Height(18)
+	CharacterStatsPane[which].backdrop:Point('CENTER')
+	CharacterStatsPane[which].backdrop:Size(150, 18)
 end
 
-local function SkinItemFlyouts()
-	local flyout = _G.EquipmentFlyoutFrame
-	local buttons = flyout.buttons
-	local buttonAnchor = flyout.buttonFrame
-
-	if not buttonAnchor.template then
-		buttonAnchor:StripTextures()
-		buttonAnchor:SetTemplate("Transparent")
+local function EquipmentUpdateItems()
+	local anchor = _G.EquipmentFlyoutFrame.buttonFrame
+	if not anchor.backdrop then
+		anchor:StripTextures()
+		anchor:CreateBackdrop('Transparent')
 	end
 
-	for i, button in ipairs(buttons) do
-		if buttonAnchor["bg"..i] and buttonAnchor["bg"..i]:GetTexture() ~= nil then
-			buttonAnchor["bg"..i]:SetTexture()
+	local width, height = anchor:GetSize()
+	anchor:Size(width+3, height)
+end
+
+local function EquipmentDisplayButton(button)
+	local location, border = button.location, button.IconBorder
+	if not location or not border then return end
+
+	local id = button.id or button:GetID()
+	if not id then return end
+
+	if not button.isHooked then
+		local oldTex = button.icon:GetTexture()
+		button:StripTextures()
+		button:StyleButton(false)
+		button:GetNormalTexture():SetTexture()
+
+		button.icon:SetInside()
+		button.icon:SetTexCoord(unpack(E.TexCoords))
+		button.icon:SetTexture(oldTex)
+
+		if not button.backdrop then
+			button:CreateBackdrop()
+			button.backdrop:SetAllPoints()
+
+			S:HandleIconBorder(button.IconBorder)
 		end
 
-		if not button.isHooked then
-			button.isHooked = true
-			button:StyleButton(false)
-			button:GetNormalTexture():SetTexture()
-
-			button.icon:SetInside()
-			button.icon:SetTexCoord(unpack(E.TexCoords))
-
-			if not button.backdrop then
-				button:SetFrameLevel(buttonAnchor:GetFrameLevel()+2)
-				button:CreateBackdrop()
-				button.backdrop:SetAllPoints()
-
-				if i ~= 1 then -- dont call this intially on placeInBags button
-					button.backdrop:SetBackdropBorderColor(button.IconBorder:GetVertexColor())
-				end
-
-				if i == 1 or i == 2 then
-					hooksecurefunc(button.icon, 'SetTexture', function(self)
-						local loc = self:GetParent().location
-						if (loc == PLACEINBAGS_LOCATION) or (loc == IGNORESLOT_LOCATION) or (loc == UNIGNORESLOT_LOCATION) then
-							self:GetParent().backdrop:SetBackdropBorderColor(unpack(E.media.bordercolor))
-						end
-					end)
-				end
-
-				button.IconBorder:SetTexture()
-				hooksecurefunc(button.IconBorder, 'SetVertexColor', function(self, r, g, b)
-					self:GetParent().backdrop:SetBackdropBorderColor(r, g, b)
-					self:SetTexture()
-				end)
-				hooksecurefunc(button.IconBorder, 'Hide', function(self)
-					self:GetParent().backdrop:SetBackdropBorderColor(unpack(E.media.bordercolor))
-				end)
-			end
-		end
+		button.isHooked = true
 	end
 
-	local width, height = buttonAnchor:GetSize()
-	buttonAnchor:Size(width+3, height)
+	local r, g, b, a = unpack(E.media.bordercolor)
+	if FLYOUT_LOCATIONS[location] then -- special slots
+		button.backdrop:SetBackdropBorderColor(r, g, b, a)
+	else
+		local quality = select(13, EquipmentManager_GetItemInfoByLocation(location))
+		if not quality or quality == 0 then
+			button.backdrop:SetBackdropBorderColor(r, g, b, a)
+		else
+			local color = ITEM_QUALITY_COLORS[quality]
+			button.backdrop:SetBackdropBorderColor(color.r, color.g, color.b)
+		end
+	end
 end
 
 local function FixSidebarTabCoords()
 	for i=1, #_G.PAPERDOLL_SIDEBARS do
-		local tab = _G["PaperDollSidebarTab"..i]
+		local tab = _G['PaperDollSidebarTab'..i]
 
 		if tab and not tab.backdrop then
 			tab:CreateBackdrop()
@@ -134,7 +125,7 @@ local function FixSidebarTabCoords()
 			tab.Highlight:SetAllPoints()
 
 			-- Check for DejaCharacterStats. Lets hide the Texture if the AddOn is loaded.
-			if IsAddOnLoaded("DejaCharacterStats") then
+			if IsAddOnLoaded('DejaCharacterStats') then
 				tab.Hider:SetTexture()
 			else
 				tab.Hider:SetColorTexture(0, 0, 0, 0.8)
@@ -146,7 +137,7 @@ local function FixSidebarTabCoords()
 				for x=1, tab:GetNumRegions() do
 					local region = select(x, tab:GetRegions())
 					region:SetTexCoord(0.16, 0.86, 0.16, 0.86)
-					hooksecurefunc(region, "SetTexCoord", function(self, x1)
+					hooksecurefunc(region, 'SetTexCoord', function(self, x1)
 						if x1 ~= 0.16001 then
 							self:SetTexCoord(0.16001, 0.86, 0.16, 0.86)
 						end
@@ -165,8 +156,8 @@ local function UpdateFactionSkins()
 	local numFactions = GetNumFactions()
 
 	for i = 1, _G.NUM_FACTIONS_DISPLAYED, 1 do
-		local statusbar = _G["ReputationBar"..i.."ReputationBar"]
-		local button = _G["ReputationBar"..i.."ExpandOrCollapseButton"]
+		local statusbar = _G['ReputationBar'..i..'ReputationBar']
+		local button = _G['ReputationBar'..i..'ExpandOrCollapseButton']
 		local factionIndex = factionOffset + i
 		local _, _, _, _, _, _, _, _, _, isCollapsed = GetFactionInfo(factionIndex)
 		if factionIndex <= numFactions then
@@ -187,22 +178,22 @@ local function UpdateFactionSkins()
 				E:RegisterStatusBar(statusbar)
 			end
 
-			_G["ReputationBar"..i.."Background"]:SetTexture()
-			_G["ReputationBar"..i.."ReputationBarHighlight1"]:SetTexture()
-			_G["ReputationBar"..i.."ReputationBarHighlight2"]:SetTexture()
-			_G["ReputationBar"..i.."ReputationBarAtWarHighlight1"]:SetTexture()
-			_G["ReputationBar"..i.."ReputationBarAtWarHighlight2"]:SetTexture()
-			_G["ReputationBar"..i.."ReputationBarLeftTexture"]:SetTexture()
-			_G["ReputationBar"..i.."ReputationBarRightTexture"]:SetTexture()
+			_G['ReputationBar'..i..'Background']:SetTexture()
+			_G['ReputationBar'..i..'ReputationBarHighlight1']:SetTexture()
+			_G['ReputationBar'..i..'ReputationBarHighlight2']:SetTexture()
+			_G['ReputationBar'..i..'ReputationBarAtWarHighlight1']:SetTexture()
+			_G['ReputationBar'..i..'ReputationBarAtWarHighlight2']:SetTexture()
+			_G['ReputationBar'..i..'ReputationBarLeftTexture']:SetTexture()
+			_G['ReputationBar'..i..'ReputationBarRightTexture']:SetTexture()
 		end
 	end
 
 	local ReputationDetailFrame = _G.ReputationDetailFrame
 	ReputationDetailFrame:StripTextures()
 	ReputationDetailFrame:ClearAllPoints()
-	ReputationDetailFrame:Point("TOPLEFT", _G.ReputationFrame, "TOPRIGHT", 4, -28)
+	ReputationDetailFrame:Point('TOPLEFT', _G.ReputationFrame, 'TOPRIGHT', 4, -28)
 	if not ReputationDetailFrame.backdrop then
-		ReputationDetailFrame:CreateBackdrop("Transparent")
+		ReputationDetailFrame:CreateBackdrop('Transparent')
 	end
 end
 
@@ -212,9 +203,9 @@ local function UpdateCurrencySkins()
 	if TokenFramePopup then
 		TokenFramePopup:StripTextures()
 		TokenFramePopup:ClearAllPoints()
-		TokenFramePopup:Point("TOPLEFT", _G.TokenFrame, "TOPRIGHT", 4, -28)
+		TokenFramePopup:Point('TOPLEFT', _G.TokenFrame, 'TOPRIGHT', 4, -28)
 		if not TokenFramePopup.backdrop then
-			TokenFramePopup:CreateBackdrop("Transparent")
+			TokenFramePopup:CreateBackdrop('Transparent')
 		end
 	end
 
@@ -239,14 +230,14 @@ local function UpdateCurrencySkins()
 
 			if button.expandIcon then
 				if not button.highlightTexture then
-					button.highlightTexture = button:CreateTexture(button:GetName().."HighlightTexture", "HIGHLIGHT")
-					button.highlightTexture:SetTexture("Interface\\Buttons\\UI-PlusButton-Hilight")
-					button.highlightTexture:SetBlendMode("ADD")
+					button.highlightTexture = button:CreateTexture(button:GetName()..'HighlightTexture', 'HIGHLIGHT')
+					button.highlightTexture:SetTexture([[Interface\Buttons\UI-PlusButton-Hilight]])
+					button.highlightTexture:SetBlendMode('ADD')
 					button.highlightTexture:SetInside(button.expandIcon)
 
 					-- these two only need to be called once
 					-- adding them here will prevent additional calls
-					button.expandIcon:Point("LEFT", 4, 0)
+					button.expandIcon:Point('LEFT', 4, 0)
 					button.expandIcon:Size(15, 15)
 				end
 
@@ -268,34 +259,12 @@ local function UpdateCurrencySkins()
 	end
 end
 
-local function CorruptionIcon(self)
-	local itemLink = GetInventoryItemLink("player", self:GetID())
-	self.IconOverlay:SetShown(itemLink and IsCorruptedItem(itemLink))
-end
-
-local function UpdateCorruption(button, location)
-	local _, _, bags, voidStorage, slot, bag = EquipmentManager_UnpackLocation(location)
-	if voidStorage then
-		button.Eye:Hide()
-		return
-	end
-
-	local itemLink
-	if bags then
-		itemLink = GetContainerItemLink(bag, slot)
-	else
-		itemLink = GetInventoryItemLink("player", slot)
-	end
-	button.Eye:SetShown(itemLink and IsCorruptedItem(itemLink))
-end
-
 function S:CharacterFrame()
 	if not (E.private.skins.blizzard.enable and E.private.skins.blizzard.character) then return end
 
 	-- General
 	local CharacterFrame = _G.CharacterFrame
 	S:HandlePortraitFrame(CharacterFrame)
-
 	S:HandleScrollBar(_G.ReputationListScrollFrameScrollBar)
 	S:HandleScrollBar(_G.TokenFrameContainerScrollBar)
 	S:HandleScrollBar(_G.GearManagerDialogPopupScrollFrameScrollBar)
@@ -304,14 +273,14 @@ function S:CharacterFrame()
 		if Slot:IsObjectType('Button') or Slot:IsObjectType('ItemButton') then
 			S:HandleIcon(Slot.icon)
 			Slot:StripTextures()
-			Slot:SetTemplate()
+			Slot:CreateBackdrop()
+			Slot.backdrop:SetAllPoints()
+			Slot.backdrop:SetFrameLevel(Slot:GetFrameLevel())
 			Slot:StyleButton(Slot)
 			Slot.icon:SetInside()
 			Slot.ignoreTexture:SetTexture([[Interface\PaperDollInfoFrame\UI-GearManager-LeaveItem-Transparent]])
-			Slot.CorruptedHighlightTexture:SetAtlas('Nzoth-charactersheet-item-glow')
-			Slot.IconOverlay:SetAtlas('Nzoth-inventory-icon')
-			Slot.IconOverlay:SetInside()
-			Slot.IconBorder:SetAlpha(0)
+
+			S:HandleIconBorder(Slot.IconBorder)
 
 			if Slot.popoutButton:GetPoint() == 'TOP' then
 				Slot.popoutButton:Point('TOP', Slot, 'BOTTOM', 0, 2)
@@ -322,11 +291,6 @@ function S:CharacterFrame()
 			E:RegisterCooldown(_G[Slot:GetName()..'Cooldown'])
 			hooksecurefunc(Slot, 'DisplayAsAzeriteItem', UpdateAzeriteItem)
 			hooksecurefunc(Slot, 'DisplayAsAzeriteEmpoweredItem', UpdateAzeriteEmpoweredItem)
-			hooksecurefunc(Slot.IconBorder, 'SetVertexColor', function(_, r, g, b) Slot:SetBackdropBorderColor(r, g, b) end)
-			hooksecurefunc(Slot.IconBorder, 'Hide', function() Slot:SetBackdropBorderColor(unpack(E.media.bordercolor)) end)
-
-			Slot:HookScript('OnShow', CorruptionIcon)
-			Slot:HookScript('OnEvent', CorruptionIcon)
 		end
 	end
 
@@ -338,12 +302,12 @@ function S:CharacterFrame()
 	end)
 
 	--Give character frame model backdrop it's color back
-	for _, corner in pairs({"TopLeft","TopRight","BotLeft","BotRight"}) do
-		local bg = _G["CharacterModelFrameBackground"..corner];
+	for _, corner in pairs({'TopLeft','TopRight','BotLeft','BotRight'}) do
+		local bg = _G['CharacterModelFrameBackground'..corner];
 		if bg then
 			bg:SetDesaturated(false);
 			bg.ignoreDesaturated = true; -- so plugins can prevent this if they want.
-			hooksecurefunc(bg, "SetDesaturated", function(bckgnd, value)
+			hooksecurefunc(bg, 'SetDesaturated', function(bckgnd, value)
 				if value and bckgnd.ignoreDesaturated then
 					bckgnd:SetDesaturated(false);
 				end
@@ -356,12 +320,8 @@ function S:CharacterFrame()
 	_G.CharacterStatsPane.ItemLevelFrame.Background:SetAlpha(0)
 	ColorizeStatPane(_G.CharacterStatsPane.ItemLevelFrame)
 
-	--Corruption 8.3
-	_G.CharacterStatsPane.ItemLevelFrame.Corruption:ClearAllPoints()
-	_G.CharacterStatsPane.ItemLevelFrame.Corruption:Point("RIGHT", _G.CharacterStatsPane.ItemLevelFrame, "RIGHT", 22, -8)
-
-	hooksecurefunc("PaperDollFrame_UpdateStats", function()
-		if IsAddOnLoaded("DejaCharacterStats") then return end
+	hooksecurefunc('PaperDollFrame_UpdateStats', function()
+		if IsAddOnLoaded('DejaCharacterStats') then return end
 
 		for _, Table in ipairs({_G.CharacterStatsPane.statsFramePool:EnumerateActive()}) do
 			if type(Table) == 'table' then
@@ -379,20 +339,20 @@ function S:CharacterFrame()
 		end
 	end)
 
-	if not IsAddOnLoaded("DejaCharacterStats") then
-		StatsPane("EnhancementsCategory")
-		StatsPane("ItemLevelCategory")
-		StatsPane("AttributesCategory")
+	if not IsAddOnLoaded('DejaCharacterStats') then
+		StatsPane('EnhancementsCategory')
+		StatsPane('ItemLevelCategory')
+		StatsPane('AttributesCategory')
 	end
 
 	--Strip Textures
 	local charframe = {
-		"CharacterModelFrame",
-		"CharacterFrameInset",
-		"CharacterStatsPane",
-		"CharacterFrameInsetRight",
-		"PaperDollSidebarTabs",
-		"PaperDollEquipmentManagerPane",
+		'CharacterModelFrame',
+		'CharacterFrameInset',
+		'CharacterStatsPane',
+		'CharacterFrameInsetRight',
+		'PaperDollSidebarTabs',
+		'PaperDollEquipmentManagerPane',
 	}
 
 	S:HandleCloseButton(_G.ReputationDetailCloseButton)
@@ -401,50 +361,30 @@ function S:CharacterFrame()
 	S:HandleCheckBox(_G.ReputationDetailAtWarCheckBox)
 	S:HandleCheckBox(_G.ReputationDetailMainScreenCheckBox)
 	S:HandleCheckBox(_G.ReputationDetailInactiveCheckBox)
-	S:HandleCheckBox(_G.ReputationDetailLFGBonusReputationCheckBox)
+	--S:HandleCheckBox(_G.ReputationDetailLFGBonusReputationCheckBox)
 	S:HandleCheckBox(_G.TokenFramePopupInactiveCheckBox)
 	S:HandleCheckBox(_G.TokenFramePopupBackpackCheckBox)
 
-	_G.EquipmentFlyoutFrameHighlight:Kill()
+	_G.EquipmentFlyoutFrameHighlight:StripTextures()
+	_G.EquipmentFlyoutFrameButtons.bg1:SetAlpha(0)
+	_G.EquipmentFlyoutFrameButtons:DisableDrawLayer('ARTWORK')
 	_G.EquipmentFlyoutFrame.NavigationFrame:StripTextures()
-	_G.EquipmentFlyoutFrame.NavigationFrame:SetTemplate("Transparent")
-	_G.EquipmentFlyoutFrame.NavigationFrame:Point("TOPLEFT", _G.EquipmentFlyoutFrameButtons, "BOTTOMLEFT", 0, -E.Border - E.Spacing)
-	_G.EquipmentFlyoutFrame.NavigationFrame:Point("TOPRIGHT", _G.EquipmentFlyoutFrameButtons, "BOTTOMRIGHT", 0, -E.Border - E.Spacing)
+	_G.EquipmentFlyoutFrame.NavigationFrame:CreateBackdrop('Transparent')
+	_G.EquipmentFlyoutFrame.NavigationFrame:Point('TOPLEFT', _G.EquipmentFlyoutFrameButtons, 'BOTTOMLEFT', 0, -E.Border - E.Spacing)
+	_G.EquipmentFlyoutFrame.NavigationFrame:Point('TOPRIGHT', _G.EquipmentFlyoutFrameButtons, 'BOTTOMRIGHT', 0, -E.Border - E.Spacing)
 	S:HandleNextPrevButton(_G.EquipmentFlyoutFrame.NavigationFrame.PrevButton)
 	S:HandleNextPrevButton(_G.EquipmentFlyoutFrame.NavigationFrame.NextButton)
 
 	--Swap item flyout frame (shown when holding alt over a slot)
-	hooksecurefunc("EquipmentFlyout_UpdateItems", SkinItemFlyouts)
-	hooksecurefunc("EquipmentFlyout_CreateButton", function()
-		local button = _G.EquipmentFlyoutFrame.buttons[#_G.EquipmentFlyoutFrame.buttons]
-
-		if not button.Eye then
-			button.Eye = button:CreateTexture()
-			button.Eye:SetAtlas("Nzoth-inventory-icon")
-			button.Eye:SetInside()
-		end
-	end)
-
-	hooksecurefunc("EquipmentFlyout_DisplayButton", function(button)
-		local location = button.location
-		local border = button.IconBorder
-		if not location or not border then return end
-
-		if location >= _G.EQUIPMENTFLYOUT_FIRST_SPECIAL_LOCATION then
-			border:Hide()
-		else
-			border:Show()
-		end
-
-		UpdateCorruption(button, location)
-	end)
+	hooksecurefunc('EquipmentFlyout_UpdateItems', EquipmentUpdateItems)
+	hooksecurefunc('EquipmentFlyout_DisplayButton', EquipmentDisplayButton)
 
 	--Icon in upper right corner of character frame
 	_G.CharacterFramePortrait:Kill()
 
 	local scrollbars = {
-		"PaperDollTitlesPaneScrollBar",
-		"PaperDollEquipmentManagerPaneScrollBar",
+		'PaperDollTitlesPaneScrollBar',
+		'PaperDollEquipmentManagerPaneScrollBar',
 	}
 
 	for _, scrollbar in pairs(scrollbars) do
@@ -456,13 +396,27 @@ function S:CharacterFrame()
 	end
 
 	--Re-add the overlay texture which was removed right above via StripTextures
-	_G.CharacterModelFrameBackgroundOverlay:SetColorTexture(0,0,0)
+	_G.CharacterModelFrameBackgroundOverlay:SetColorTexture(0, 0, 0)
 	_G.CharacterModelFrame:CreateBackdrop()
-	_G.CharacterModelFrame.backdrop:Point("TOPLEFT", E.PixelMode and -1 or -2, E.PixelMode and 1 or 2)
-	_G.CharacterModelFrame.backdrop:Point("BOTTOMRIGHT", E.PixelMode and 1 or 2, E.PixelMode and -2 or -3)
+	_G.CharacterModelFrame.backdrop:Point('TOPLEFT', E.PixelMode and -1 or -2, E.PixelMode and 1 or 2)
+	_G.CharacterModelFrame.backdrop:Point('BOTTOMRIGHT', E.PixelMode and 1 or 2, E.PixelMode and -2 or -3)
+
+	local controlButtons = {
+		'CharacterModelFrameControlFrameZoomInButton',
+		'CharacterModelFrameControlFrameZoomOutButton',
+		'CharacterModelFrameControlFrameRotateLeftButton',
+		'CharacterModelFrameControlFrameRotateRightButton',
+		'CharacterModelFrameControlFrameRotateResetButton',
+	}
+
+	_G.CharacterModelFrameControlFrame:StripTextures()
+
+	for _, button in pairs(controlButtons) do
+		S:HandleButton(_G[button])
+	end
 
 	--Titles
-	_G.PaperDollTitlesPane:HookScript("OnShow", function()
+	_G.PaperDollTitlesPane:HookScript('OnShow', function()
 		for _, object in pairs(_G.PaperDollTitlesPane.buttons) do
 			object.BgTop:SetTexture()
 			object.BgBottom:SetTexture()
@@ -472,7 +426,7 @@ function S:CharacterFrame()
 			if not object.text.hooked then
 				object.text.hooked = true
 
-				hooksecurefunc(object.text, "SetFont", function(txt, font)
+				hooksecurefunc(object.text, 'SetFont', function(txt, font)
 					if font ~= E.media.normFont then
 						txt:FontTemplate()
 					end
@@ -486,8 +440,8 @@ function S:CharacterFrame()
 	S:HandleButton(_G.PaperDollEquipmentManagerPaneSaveSet)
 	_G.PaperDollEquipmentManagerPaneEquipSet:Width(_G.PaperDollEquipmentManagerPaneEquipSet:GetWidth() - 8)
 	_G.PaperDollEquipmentManagerPaneSaveSet:Width(_G.PaperDollEquipmentManagerPaneSaveSet:GetWidth() - 8)
-	_G.PaperDollEquipmentManagerPaneEquipSet:Point("TOPLEFT", _G.PaperDollEquipmentManagerPane, "TOPLEFT", 8, 0)
-	_G.PaperDollEquipmentManagerPaneSaveSet:Point("LEFT", _G.PaperDollEquipmentManagerPaneEquipSet, "RIGHT", 4, 0)
+	_G.PaperDollEquipmentManagerPaneEquipSet:Point('TOPLEFT', _G.PaperDollEquipmentManagerPane, 'TOPLEFT', 8, 0)
+	_G.PaperDollEquipmentManagerPaneSaveSet:Point('LEFT', _G.PaperDollEquipmentManagerPaneEquipSet, 'RIGHT', 4, 0)
 
 	--Itemset buttons
 	for _, object in pairs(_G.PaperDollEquipmentManagerPane.buttons) do
@@ -498,13 +452,13 @@ function S:CharacterFrame()
 		object.icon:SetTexCoord(unpack(E.TexCoords))
 
 		--Making all icons the same size and position because otherwise BlizzardUI tries to attach itself to itself when it refreshes
-		object.icon:Point("LEFT", object, "LEFT", 4, 0)
-		hooksecurefunc(object.icon, "SetPoint", function(icn, _, _, _, _, _, forced)
+		object.icon:Point('LEFT', object, 'LEFT', 4, 0)
+		hooksecurefunc(object.icon, 'SetPoint', function(icn, _, _, _, _, _, forced)
 			if forced ~= true then
-				icn:Point("LEFT", object, "LEFT", 4, 0, true)
+				icn:Point('LEFT', object, 'LEFT', 4, 0, true)
 			end
 		end)
-		hooksecurefunc(object.icon, "SetSize", function(icn, width, height)
+		hooksecurefunc(object.icon, 'SetSize', function(icn, width, height)
 			if width == 30 or height == 30 then
 				icn:Size(36, 36)
 			end
@@ -512,50 +466,26 @@ function S:CharacterFrame()
 	end
 
 	--Icon selection frame
-	S:HandleIconSelectionFrame(_G.GearManagerDialogPopup, _G.NUM_GEARSET_ICONS_SHOWN, "GearManagerDialogPopupButton")
+	S:HandleIconSelectionFrame(_G.GearManagerDialogPopup, _G.NUM_GEARSET_ICONS_SHOWN, 'GearManagerDialogPopupButton')
 	S:HandleButton(_G.GearManagerDialogPopupOkay)
 	S:HandleButton(_G.GearManagerDialogPopupCancel)
 	S:HandleEditBox(_G.GearManagerDialogPopupEditBox)
 
 	--Handle Tabs at bottom of character frame
 	for i=1, 4 do
-		S:HandleTab(_G["CharacterFrameTab"..i])
+		S:HandleTab(_G['CharacterFrameTab'..i])
 	end
+
+	hooksecurefunc('ExpandFactionHeader', UpdateFactionSkins)
+	hooksecurefunc('CollapseFactionHeader', UpdateFactionSkins)
+	hooksecurefunc('ReputationFrame_Update', UpdateFactionSkins)
 
 	--Buttons used to toggle between equipment manager, titles, and character stats
-	hooksecurefunc("PaperDollFrame_UpdateSidebarTabs", FixSidebarTabCoords)
-
-	hooksecurefunc("ExpandFactionHeader", UpdateFactionSkins)
-	hooksecurefunc("CollapseFactionHeader", UpdateFactionSkins)
-	hooksecurefunc("ReputationFrame_Update", UpdateFactionSkins)
-
-	--Reputation Paragon Tooltip
-	if E.private.skins.blizzard.tooltip then
-		local tooltip = _G.EmbeddedItemTooltip
-		local reward = tooltip.ItemTooltip
-		local icon = reward.Icon
-		tooltip:SetTemplate("Transparent")
-		if icon then
-			S:HandleIcon(icon, true)
-			hooksecurefunc(reward.IconBorder, "SetVertexColor", function(icnBdr, r, g, b)
-				icnBdr:GetParent().Icon.backdrop:SetBackdropBorderColor(r, g, b)
-				icnBdr:SetTexture()
-			end)
-			hooksecurefunc(reward.IconBorder, "Hide", function(icnBdr)
-				icnBdr:GetParent().Icon.backdrop:SetBackdropBorderColor(unpack(E.media.bordercolor))
-			end)
-		end
-		tooltip:HookScript("OnShow", function(tt)
-			tt:SetTemplate("Transparent")
-		end)
-	end
+	hooksecurefunc('PaperDollFrame_UpdateSidebarTabs', FixSidebarTabCoords)
 
 	--Currency
-	hooksecurefunc("TokenFrame_Update", UpdateCurrencySkins)
-	hooksecurefunc(_G.TokenFrameContainer, "update", UpdateCurrencySkins)
-
-	-- Tutorials have a look for the new name on PTR 8.2.5
-	-- S:HandleCloseButton(_G.PaperDollItemsFrame.HelpTipBox.CloseButton)
+	hooksecurefunc('TokenFrame_Update', UpdateCurrencySkins)
+	hooksecurefunc(_G.TokenFrameContainer, 'update', UpdateCurrencySkins)
 end
 
 S:AddCallback('CharacterFrame')

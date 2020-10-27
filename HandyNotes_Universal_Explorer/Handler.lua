@@ -8,6 +8,7 @@ local IMAGES_FOLDER		= "Interface\\Addons\\" .. FOLDER_NAME .. "\\Images\\"
 -- ----------------------------------------------------------------------------
 local HandyNotes = LibStub("AceAddon-3.0"):GetAddon("HandyNotes")
 local HL = LibStub("AceAddon-3.0"):NewAddon(FOLDER_NAME, "AceEvent-3.0")
+      plugin.HL = HL
 --	-------------------------------------------------------------------------------------------
 --	Plugin Handlers to HandyNotes
 --	-------------------------------------------------------------------------------------------
@@ -161,8 +162,10 @@ do
 --	Create ICON
 --      -------------------------------------------------------------------------------------------
 		local icon, alpha, scale
-			scale = value.scale or 1
-			alpha = value.alpha or 1
+			scale = (value.scale or 1) * plugin.db.icon_scale
+			alpha = (value.alpha or 1) * plugin.db.icon_alpha
+	--		scale = value.scale or 1
+	--		alpha = value.alpha or 1
 			if value.achievement then
 				if (UnitName("player") ~= select ( 6, GetAchievementCriteriaInfoByID (value.achievement, value.criteria) ) ) then
 				icon = "Interface\\Addons\\" .. FOLDER_NAME .. "\\Images\\Explorer Coord" 

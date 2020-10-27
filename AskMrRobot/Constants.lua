@@ -24,7 +24,7 @@ Amr.IsSupportedInstance = Amr.Serializer.IsSupportedInstance
 --Amr.GetItemTooltip = Amr.Serializer.GetItemTooltip
 --Amr.GetItemLevel = Amr.Serializer.GetItemLevel
 Amr.GetItemUniqueId = Amr.Serializer.GetItemUniqueId
-Amr.ReadAzeritePowers = Amr.Serializer.ReadAzeritePowers
+--Amr.ReadAzeritePowers = Amr.Serializer.ReadAzeritePowers
 Amr.ProfessionSkillLineToName = Amr.Serializer.ProfessionSkillLineToName
 
 
@@ -107,7 +107,7 @@ Amr.SpecIcons = {
 }
 
 -- instance IDs ordered in preferred display order
-Amr.InstanceIdsOrdered = { 1861, 2070, 2096, 2164, 2217 }
+Amr.InstanceIdsOrdered = { 1861, 2070, 2096, 2164, 2217, 2296 }
 
 Amr.Difficulties = {
 	Lfr = 17,
@@ -158,14 +158,7 @@ function Amr.CreateItemLink(itemObj)
 	local specId = GetSpecializationInfo(GetSpecialization())
 	table.insert(parts,  specId)
 
-	-- this indicates what kind of modifier appears after the bonus IDs
-	if itemObj.upgradeId and itemObj.upgradeId ~= 0 then
-		table.insert(parts, 4)
-	elseif itemObj.level and itemObj.level ~= 0 then
-		table.insert(parts, 512)
-	else
-		table.insert(parts, 0)
-	end
+    table.insert(parts, 0) -- not sure what this is anymore
 
     table.insert(parts, 0) -- difficulty id, doesn't matter
     
@@ -177,17 +170,17 @@ function Amr.CreateItemLink(itemObj)
 	else
 		table.insert(parts, 0) -- no bonus ids
     end
-	
-	-- upgrade id or level comes after bonuses
-	if itemObj.upgradeId and itemObj.upgradeId ~= 0 then
-		table.insert(parts, itemObj.upgradeId)
-	elseif itemObj.level and itemObj.level ~= 0 then
-		table.insert(parts, itemObj.level)
-	else
-		table.insert(parts, 0)
-	end
+    
+    if itemObj.level and itemObj.level ~= 0 then
+        table.insert(parts, 2) -- not sure if this is always 2 or not...
+        table.insert(parts, 9) -- not sure if this is always 9 or not...
+        table.insert(parts, itemObj.level)
+    elseif itemObj.upgradeId and itemObj.upgradeId ~= 0 then
+        -- figure this out (if we still care)
+    end
     
     -- we don't bother with relic bonus ids anymore when generating links
+    table.insert(parts, 0)
     table.insert(parts, 0)
     table.insert(parts, 0)
     table.insert(parts, 0)

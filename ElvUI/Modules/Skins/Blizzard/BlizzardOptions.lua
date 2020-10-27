@@ -1,15 +1,14 @@
 local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local S = E:GetModule('Skins')
 
---Lua functions
 local _G = _G
 local select = select
 local ipairs = ipairs
 local pairs = pairs
---WoW API / Variables
+
 local hooksecurefunc = hooksecurefunc
-local UnitIsUnit = UnitIsUnit
 local InCombatLockdown = InCombatLockdown
+local UnitIsUnit = UnitIsUnit
 
 local function HandlePushToTalkButton(button)
 	button:Size(button:GetSize())
@@ -23,11 +22,11 @@ local function HandlePushToTalkButton(button)
 	button.MiddleRight:Hide()
 	button.BottomMiddle:Hide()
 	button.MiddleMiddle:Hide()
-	button:SetHighlightTexture("")
+	button:SetHighlightTexture('')
 
-	button:SetTemplate(nil, true)
-	button:HookScript("OnEnter", S.SetModifiedBackdrop)
-	button:HookScript("OnLeave", S.SetOriginalBackdrop)
+	button:CreateBackdrop(nil, true)
+	button:HookScript('OnEnter', S.SetModifiedBackdrop)
+	button:HookScript('OnLeave', S.SetOriginalBackdrop)
 end
 
 function S.AudioOptionsVoicePanel_InitializeCommunicationModeUI(btn)
@@ -35,9 +34,9 @@ function S.AudioOptionsVoicePanel_InitializeCommunicationModeUI(btn)
 end
 
 function S:BlizzardOptions()
-	if not (E.private.skins.blizzard.enable and E.private.skins.blizzard.BlizzardOptions) then return end
+	if not (E.private.skins.blizzard.enable and E.private.skins.blizzard.blizzardOptions) then return end
 
-	-- here we reskin all "normal" buttons
+	-- here we reskin all 'normal' buttons
 	S:HandleButton(_G.ReadyCheckFrameYesButton)
 	S:HandleButton(_G.ReadyCheckFrameNoButton)
 	S:HandleButton(_G.RolePollPopupAcceptButton)
@@ -49,32 +48,34 @@ function S:BlizzardOptions()
 	_G.ReadyCheckFrameNoButton:SetParent(ReadyCheckFrame)
 	_G.ReadyCheckFrameYesButton:ClearAllPoints()
 	_G.ReadyCheckFrameNoButton:ClearAllPoints()
-	_G.ReadyCheckFrameYesButton:Point("TOPRIGHT", ReadyCheckFrame, "CENTER", -3, -5)
-	_G.ReadyCheckFrameNoButton:Point("TOPLEFT", ReadyCheckFrame, "CENTER", 3, -5)
+	_G.ReadyCheckFrameYesButton:Point('TOPRIGHT', ReadyCheckFrame, 'CENTER', -3, -5)
+	_G.ReadyCheckFrameNoButton:Point('TOPLEFT', ReadyCheckFrame, 'CENTER', 3, -5)
 	_G.ReadyCheckFrameText:SetParent(ReadyCheckFrame)
 	_G.ReadyCheckFrameText:ClearAllPoints()
-	_G.ReadyCheckFrameText:Point("TOP", 0, -15)
+	_G.ReadyCheckFrameText:Point('TOP', 0, -15)
 
 	_G.ReadyCheckListenerFrame:SetAlpha(0)
-	ReadyCheckFrame:HookScript("OnShow", function(rcf)
+	ReadyCheckFrame:HookScript('OnShow', function(rcf)
 		-- bug fix, don't show it if player is initiator
-		if rcf.initiator and UnitIsUnit("player", rcf.initiator) then
+		if rcf.initiator and UnitIsUnit('player', rcf.initiator) then
 			rcf:Hide()
 		end
 	end)
 
-	_G.RolePollPopup:SetTemplate("Transparent")
+	_G.RolePollPopup:StripTextures()
+	_G.RolePollPopup:CreateBackdrop('Transparent')
+	S:HandleCloseButton(_G.RolePollPopupCloseButton)
 
 	_G.InterfaceOptionsFrame:SetClampedToScreen(true)
 	_G.InterfaceOptionsFrame:SetMovable(true)
 	_G.InterfaceOptionsFrame:EnableMouse(true)
-	_G.InterfaceOptionsFrame:RegisterForDrag("LeftButton", "RightButton")
-	_G.InterfaceOptionsFrame:SetScript("OnDragStart", function(iof)
+	_G.InterfaceOptionsFrame:RegisterForDrag('LeftButton', 'RightButton')
+	_G.InterfaceOptionsFrame:SetScript('OnDragStart', function(iof)
 		if InCombatLockdown() then return end
 		iof:StartMoving()
 		iof.isMoving = true
 	end)
-	_G.InterfaceOptionsFrame:SetScript("OnDragStop", function(iof)
+	_G.InterfaceOptionsFrame:SetScript('OnDragStop', function(iof)
 		iof:StopMovingOrSizing()
 		iof.isMoving = false
 	end)
@@ -83,9 +84,9 @@ function S:BlizzardOptions()
 	local ChatConfigFrame = _G.ChatConfigFrame
 	ChatConfigFrame.Header = ChatConfigFrame.Header
 	ChatConfigFrame.Header:StripTextures()
-	ChatConfigFrame.Header:Point("TOP", ChatConfigFrame, 0, 0)
+	ChatConfigFrame.Header:Point('TOP', ChatConfigFrame, 0, 0)
 
-	hooksecurefunc(_G.ChatConfigFrameChatTabManager, "UpdateWidth", function(tm)
+	hooksecurefunc(_G.ChatConfigFrameChatTabManager, 'UpdateWidth', function(tm)
 		for tab in tm.tabPool:EnumerateActive() do
 			if not tab.IsSkinned then
 				tab:StripTextures()
@@ -156,7 +157,7 @@ function S:BlizzardOptions()
 
 	for _, Frame in pairs(ChatFrames) do
 		Frame:StripTextures()
-		Frame:SetTemplate('Transparent')
+		Frame:CreateBackdrop('Transparent')
 	end
 
 	for _, CheckBox in pairs(ChatCheckBoxs) do
@@ -168,43 +169,43 @@ function S:BlizzardOptions()
 	end
 
 	for i in pairs(_G.COMBAT_CONFIG_TABS) do
-		S:HandleTab(_G["CombatConfigTab"..i])
-		_G["CombatConfigTab"..i].backdrop:Point("TOPLEFT", 0, -10)
-		_G["CombatConfigTab"..i].backdrop:Point("BOTTOMRIGHT", -2, 3)
-		_G["CombatConfigTab"..i.."Text"]:Point("BOTTOM", 0, 10)
+		S:HandleTab(_G['CombatConfigTab'..i])
+		_G['CombatConfigTab'..i].backdrop:Point('TOPLEFT', 0, -10)
+		_G['CombatConfigTab'..i].backdrop:Point('BOTTOMRIGHT', -2, 3)
+		_G['CombatConfigTab'..i..'Text']:Point('BOTTOM', 0, 10)
 	end
 
 	_G.CombatConfigTab1:ClearAllPoints()
-	_G.CombatConfigTab1:Point("BOTTOMLEFT", _G.ChatConfigBackgroundFrame, "TOPLEFT", 6, -2)
+	_G.CombatConfigTab1:Point('BOTTOMLEFT', _G.ChatConfigBackgroundFrame, 'TOPLEFT', 6, -2)
 
 	S:HandleEditBox(_G.CombatConfigSettingsNameEditBox)
 	S:HandleNextPrevButton(_G.ChatConfigMoveFilterUpButton)
 	S:HandleNextPrevButton(_G.ChatConfigMoveFilterDownButton)
 	_G.ChatConfigMoveFilterUpButton:Size(19, 19)
 	_G.ChatConfigMoveFilterDownButton:Size(19, 19)
-	_G.ChatConfigMoveFilterUpButton:Point("TOPLEFT", "$parent", "BOTTOMLEFT", 0, -3)
-	_G.ChatConfigMoveFilterDownButton:Point("LEFT", _G.ChatConfigMoveFilterUpButton, "RIGHT", 3, 0)
+	_G.ChatConfigMoveFilterUpButton:Point('TOPLEFT', '$parent', 'BOTTOMLEFT', 0, -3)
+	_G.ChatConfigMoveFilterDownButton:Point('LEFT', _G.ChatConfigMoveFilterUpButton, 'RIGHT', 3, 0)
 
-	_G.ChatConfigFrameOkayButton:Point("RIGHT", "$parentCancelButton", "RIGHT", -1, -3)
-	_G.ChatConfigFrameDefaultButton:Point("BOTTOMLEFT", 12, 10)
-	_G.ChatConfigCombatSettingsFiltersDeleteButton:Point("TOPRIGHT", "$parent", "BOTTOMRIGHT", -3, -1)
-	_G.ChatConfigCombatSettingsFiltersAddFilterButton:Point("RIGHT", "$parentDeleteButton", "LEFT", -2, 0)
-	_G.ChatConfigCombatSettingsFiltersCopyFilterButton:Point("RIGHT", "$parentAddFilterButton", "LEFT", -2, 0)
+	_G.ChatConfigFrameOkayButton:Point('RIGHT', '$parentCancelButton', 'RIGHT', -1, -3)
+	_G.ChatConfigFrameDefaultButton:Point('BOTTOMLEFT', 12, 10)
+	_G.ChatConfigCombatSettingsFiltersDeleteButton:Point('TOPRIGHT', '$parent', 'BOTTOMRIGHT', -3, -1)
+	_G.ChatConfigCombatSettingsFiltersAddFilterButton:Point('RIGHT', '$parentDeleteButton', 'LEFT', -2, 0)
+	_G.ChatConfigCombatSettingsFiltersCopyFilterButton:Point('RIGHT', '$parentAddFilterButton', 'LEFT', -2, 0)
+	S:HandleScrollBar(_G.ChatConfigCombatSettingsFiltersScrollFrameScrollBar)
 
 	hooksecurefunc('ChatConfig_UpdateCheckboxes', function(frame)
-		if ( not _G.FCF_GetCurrentChatFrame() ) then
-			return
-		end
+		if not _G.FCF_GetCurrentChatFrame() then return end
+
 		for index in ipairs(frame.checkBoxTable) do
-			local checkBoxNameString = frame:GetName().."CheckBox"
+			local checkBoxNameString = frame:GetName()..'CheckBox'
 			local checkBoxName = checkBoxNameString..index
 			local checkBox = _G[checkBoxName]
-			local check = _G[checkBoxName.."Check"]
+			local check = _G[checkBoxName..'Check']
 			if checkBox and not checkBox.isSkinned then
 				checkBox:StripTextures()
 				S:HandleCheckBox(check)
-				if _G[checkBoxName.."ColorClasses"] then
-					S:HandleCheckBox(_G[checkBoxName.."ColorClasses"])
+				if _G[checkBoxName..'ColorClasses'] then
+					S:HandleCheckBox(_G[checkBoxName..'ColorClasses'])
 				end
 				checkBox.isSkinned = true
 			end
@@ -213,23 +214,22 @@ function S:BlizzardOptions()
 
 	hooksecurefunc('ChatConfig_UpdateTieredCheckboxes', function(frame, index)
 		local group = frame.checkBoxTable[index]
-		local checkBox = _G[frame:GetName().."CheckBox"..index]
-		if ( checkBox ) then
+		local checkBox = _G[frame:GetName()..'CheckBox'..index]
+		if checkBox then
 			S:HandleCheckBox(checkBox)
 		end
-		if ( group.subTypes ) then
+		if group.subTypes then
 			for k in ipairs(group.subTypes) do
-				S:HandleCheckBox(_G[frame:GetName().."CheckBox"..index.."_"..k])
+				S:HandleCheckBox(_G[frame:GetName()..'CheckBox'..index..'_'..k])
 			end
 		end
 	end)
 
 	hooksecurefunc('ChatConfig_UpdateSwatches', function(frame)
-		if ( not _G.FCF_GetCurrentChatFrame() ) then
-			return
-		end
+		if not _G.FCF_GetCurrentChatFrame() then return end
+
 		for index in ipairs(frame.swatchTable) do
-			_G[frame:GetName().."Swatch"..index]:StripTextures()
+			_G[frame:GetName()..'Swatch'..index]:StripTextures()
 		end
 	end)
 
@@ -280,19 +280,19 @@ function S:BlizzardOptions()
 
 	for _, Frame in pairs(OptionsFrames) do
 		Frame:StripTextures()
-		Frame:SetTemplate('Transparent')
+		Frame:CreateBackdrop('Transparent')
 	end
 
 	local InterfaceOptionsFrame = _G.InterfaceOptionsFrame
 	InterfaceOptionsFrame.Header = InterfaceOptionsFrame.Header
 	InterfaceOptionsFrame.Header:StripTextures()
 	InterfaceOptionsFrame.Header:ClearAllPoints()
-	InterfaceOptionsFrame.Header:Point("TOP", InterfaceOptionsFrame, 0, 0)
+	InterfaceOptionsFrame.Header:Point('TOP', InterfaceOptionsFrame, 0, 0)
 
 	local VideoOptionsFrame = _G.VideoOptionsFrame
 	VideoOptionsFrame.Header:StripTextures()
 	VideoOptionsFrame.Header:ClearAllPoints()
-	VideoOptionsFrame.Header:Point("TOP", VideoOptionsFrame, 0, 0)
+	VideoOptionsFrame.Header:Point('TOP', VideoOptionsFrame, 0, 0)
 
 	for _, Frame in pairs(OptionsFrameBackdrops) do
 		Frame:StripTextures()
@@ -323,14 +323,16 @@ function S:BlizzardOptions()
 	end
 
 	_G.InterfaceOptionsFrameTab1:Point('BOTTOMLEFT', _G.InterfaceOptionsFrameCategories, 'TOPLEFT', 6, 1)
+	_G.InterfaceOptionsFrameTab1:StripTextures()
 	_G.InterfaceOptionsFrameTab2:Point('TOPLEFT', _G.InterfaceOptionsFrameTab1, 'TOPRIGHT', 1, 0)
-	_G.InterfaceOptionsSocialPanel.EnableTwitter.Logo:SetAtlas("WoWShare-TwitterLogo")
+	_G.InterfaceOptionsFrameTab2:StripTextures()
+	_G.InterfaceOptionsSocialPanel.EnableTwitter.Logo:SetAtlas('WoWShare-TwitterLogo')
 
 	--Create New Raid Profle
 	local newProfileDialog = _G.CompactUnitFrameProfilesNewProfileDialog
 	if newProfileDialog then
 		newProfileDialog:StripTextures()
-		newProfileDialog:SetTemplate('Transparent')
+		newProfileDialog:CreateBackdrop('Transparent')
 
 		S:HandleDropDownBox(_G.CompactUnitFrameProfilesNewProfileDialogBaseProfileSelector)
 		S:HandleButton(_G.CompactUnitFrameProfilesNewProfileDialogCreateButton)
@@ -346,7 +348,7 @@ function S:BlizzardOptions()
 	local deleteProfileDialog = _G.CompactUnitFrameProfilesDeleteProfileDialog
 	if deleteProfileDialog then
 		deleteProfileDialog:StripTextures()
-		deleteProfileDialog:SetTemplate('Transparent')
+		deleteProfileDialog:CreateBackdrop('Transparent')
 
 		S:HandleButton(_G.CompactUnitFrameProfilesDeleteProfileDialogDeleteButton)
 		S:HandleButton(_G.CompactUnitFrameProfilesDeleteProfileDialogCancelButton)
@@ -356,27 +358,27 @@ function S:BlizzardOptions()
 	AudioOptionsFrame.Header = AudioOptionsFrame.Header
 	AudioOptionsFrame.Header:SetAlpha(0)
 	AudioOptionsFrame.Header:ClearAllPoints()
-	AudioOptionsFrame.Header:Point("TOP", AudioOptionsFrame, 0, 0)
+	AudioOptionsFrame.Header:Point('TOP', AudioOptionsFrame, 0, 0)
 
 	-- Toggle Test Audio Button - Wow 8.0
 	S:HandleButton(_G.AudioOptionsVoicePanel.TestInputDevice.ToggleTest)
 
 	local VUMeter = _G.AudioOptionsVoicePanelTestInputDevice.VUMeter
-	VUMeter:SetBackdrop(nil)
+	VUMeter:SetBackdrop()
 	VUMeter.Status:CreateBackdrop()
 	VUMeter.Status:SetStatusBarTexture(E.media.normTex)
 	E:RegisterStatusBar(VUMeter.Status)
 
 	-- PushToTalk KeybindButton - Wow 8.0
-	hooksecurefunc("AudioOptionsVoicePanel_InitializeCommunicationModeUI", S.AudioOptionsVoicePanel_InitializeCommunicationModeUI)
+	hooksecurefunc('AudioOptionsVoicePanel_InitializeCommunicationModeUI', S.AudioOptionsVoicePanel_InitializeCommunicationModeUI)
 
 	--What's New
 	local SplashFrame = _G.SplashFrame
-	SplashFrame:CreateBackdrop("Transparent")
+	SplashFrame:CreateBackdrop('Transparent')
 	SplashFrame.Header:FontTemplate(nil, 22)
-	SplashFrame.RightTitle:FontTemplate(nil, 30)
 	S:HandleButton(SplashFrame.BottomCloseButton)
 	S:HandleCloseButton(SplashFrame.TopCloseButton)
+	SplashFrame.BottomCloseButton:SetFrameLevel(SplashFrame.BottomCloseButton:GetFrameLevel() + 1)
 
 	-- New Voice Sliders
 	S:HandleSliderFrame(_G.UnitPopupVoiceSpeakerVolume.Slider)

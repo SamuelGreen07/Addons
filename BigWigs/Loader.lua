@@ -1,3 +1,4 @@
+local _,_,_,toc = GetBuildInfo() -- XXX Remove after beta
 
 if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
 	local L = BigWigsAPI:GetLocale("BigWigs")
@@ -19,7 +20,7 @@ local ldbi = LibStub("LibDBIcon-1.0")
 -- Generate our version variables
 --
 
-local BIGWIGS_VERSION = 184
+local BIGWIGS_VERSION = 185
 local BIGWIGS_RELEASE_STRING, BIGWIGS_VERSION_STRING = "", ""
 local versionQueryString, versionResponseString = "Q^%d^%s", "V^%d^%s"
 
@@ -30,12 +31,12 @@ do
 	local RELEASE = "RELEASE"
 
 	local releaseType = RELEASE
-	local myGitHash = "b79a38c" -- The ZIP packager will replace this with the Git hash.
+	local myGitHash = "14950ac" -- The ZIP packager will replace this with the Git hash.
 	local releaseString = ""
-	--[===[@alpha@
+	--@alpha@
 	-- The following code will only be present in alpha ZIPs.
 	releaseType = ALPHA
-	--@end-alpha@]===]
+	--@end-alpha@
 
 	-- If we find "@" then we're running from Git directly.
 	if myGitHash:find("@", nil, true) then
@@ -108,6 +109,7 @@ do
 	local wod = "BigWigs_WarlordsOfDraenor"
 	local l = "BigWigs_Legion"
 	local bfa = "BigWigs_BattleForAzeroth"
+	local s = "BigWigs_Shadowlands"
 	local lw_c = "LittleWigs_Classic"
 	local lw_bc = "LittleWigs_BurningCrusade"
 	local lw_wotlk = "LittleWigs_WrathOfTheLichKing"
@@ -116,6 +118,7 @@ do
 	local lw_wod = "LittleWigs_WarlordsOfDraenor"
 	local lw_l = "LittleWigs_Legion"
 	local lw_bfa = "LittleWigs_BattleForAzeroth"
+	local lw_s = "LittleWigs_Shadowlands"
 
 	public.zoneTbl = {
 		--[[ BigWigs: Classic ]]--
@@ -177,6 +180,8 @@ do
 		[2096] = bfa, -- Crucible of Storms
 		[2164] = bfa, -- The Eternal Palace
 		[2217] = bfa, -- Ny'alotha, the Waking City
+		--[[ BigWigs: Shadowlands ]]--
+		[2296] = s, -- Castle Nathria
 
 		--[[ LittleWigs: Classic ]]--
 		[33] = lw_c, -- Shadowfang Keep
@@ -274,6 +279,15 @@ do
 		[2097] = lw_bfa, -- Operation: Mechagon
 		[2212] = lw_bfa, -- Horrific Vision of Orgrimmar
 		[2213] = lw_bfa, -- Horrific Vision of Stormwind
+		--[[ LittleWigs: Shadowlands ]]--
+		[2284] = lw_s, -- Sanguine Depths
+		[2285] = lw_s, -- Spires of Ascension
+		[2286] = lw_s, -- The Necrotic Wake
+		[2287] = lw_s, -- Halls of Atonement
+		[2289] = lw_s, -- Plaguefall
+		[2290] = lw_s, -- Mists of Tirna Scithe
+		[2291] = lw_s, -- De Other Side
+		[2293] = lw_s, -- Theater of Pain
 	}
 
 	public.zoneTblWorld = {
@@ -976,9 +990,9 @@ end
 
 do
 	-- This is a crapfest mainly because DBM's actual handling of versions is a crapfest, I'll try explain how this works...
-	local DBMdotRevision = "20200225040315" -- The changing version of the local client, changes with every alpha revision using an SVN keyword.
-	local DBMdotDisplayVersion = "8.3.15" -- "N.N.N" for a release and "N.N.N alpha" for the alpha duration. Unless they fuck up their release and leave the alpha text in it.
-	local DBMdotReleaseRevision = "20200224000000" -- This is manually changed by them every release, they use it to track the highest release version, a new DBM release is the only time it will change.
+	local DBMdotRevision = "20201013224412" -- The changing version of the local client, changes with every alpha revision using an SVN keyword.
+	local DBMdotDisplayVersion = "9.0.1" -- "N.N.N" for a release and "N.N.N alpha" for the alpha duration. Unless they fuck up their release and leave the alpha text in it.
+	local DBMdotReleaseRevision = "20201013010000" -- This is manually changed by them every release, they use it to track the highest release version, a new DBM release is the only time it will change.
 
 	local timer, prevUpgradedUser = nil, nil
 	local function sendMsg()
@@ -1320,7 +1334,7 @@ do
 		-- Lacking zone modules
 		if (BigWigs and BigWigs.db.profile.showZoneMessages == false) or self.isShowingZoneMessages == false then return end
 		local zoneAddon = public.zoneTbl[id]
-		if zoneAddon and zoneAddon ~= "BigWigs_BattleForAzeroth" then
+		if zoneAddon and zoneAddon ~= (toc > 90001 and "BigWigs_Shadowlands" or "BigWigs_BattleForAzeroth") then -- XXX Cleanup after beta
 			if zoneAddon:find("LittleWigs_", nil, true) then zoneAddon = "LittleWigs" end -- Collapse into one addon
 			if id > 0 and not fakeZones[id] and not warnedThisZone[id] and not IsAddOnEnabled(zoneAddon) then
 				warnedThisZone[id] = true

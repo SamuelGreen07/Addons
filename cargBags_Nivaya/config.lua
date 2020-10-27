@@ -22,10 +22,6 @@ sizes = {
 },
 
 
---------------------------------------------------------------
--- Anything below this is only effective when not using RealUI
---------------------------------------------------------------
-
 fonts = {
 	-- Font to use for bag captions and other strings
 	standard = {

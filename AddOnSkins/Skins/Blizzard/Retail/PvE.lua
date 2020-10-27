@@ -49,10 +49,12 @@ function AS:Blizzard_PvE()
 		AS:SkinTab(PVEFrame['tab'..i])
 	end
 
-	for i = 1, 4 do
+	for i = 1, 3 do
 		local Button = GroupFinderFrame["groupButton"..i]
 
-		AS:SkinFrame(Button)
+		AS:SetTemplate(Button)
+		Button.bg:SetAlpha(0)
+		Button.ring:SetAlpha(0)
 		Button:SetHighlightTexture('')
 
 		AS:SkinTexture(Button.icon, true)
@@ -76,13 +78,8 @@ function AS:Blizzard_PvE()
 		end)
 	end
 
-	GroupFinderFrameGroupButton1.icon:SetTexture("Interface\\Icons\\INV_Helmet_08")
-	GroupFinderFrameGroupButton2.icon:SetTexture("Interface\\Icons\\Icon_Scenarios")
-	GroupFinderFrameGroupButton3.icon:SetTexture("Interface\\Icons\\inv_helmet_06")
-	GroupFinderFrameGroupButton4.icon:SetTexture("Interface\\Icons\\Achievement_General_StayClassy")
-
 	hooksecurefunc('GroupFinderFrame_SelectGroupButton', function()
-		for i = 1, 4 do
+		for i = 1, 3 do
 			local Button = GroupFinderFrame["groupButton"..i]
 			if GroupFinderFrame.selectionIndex == Button:GetID() then
 				Button:SetBackdropBorderColor(unpack(AS.Color))
@@ -129,7 +126,6 @@ function AS:Blizzard_PvE()
 	end)
 
 	AS:SkinScrollBar(LFDQueueFrameRandomScrollFrame.ScrollBar)
-	AS:SkinButton(LFDQueueFrameRandomScrollFrameChildFrameBonusRepFrame.ChooseButton)
 
 	hooksecurefunc('LFGDungeonReadyDialog_UpdateRewards', function()
 		for i = 1, LFG_ROLE_NUM_SHORTAGE_TYPES do
@@ -184,16 +180,6 @@ function AS:Blizzard_PvE()
 			_G[Button..Role].checkButton:SetFrameLevel(_G[Button..Role].checkButton:GetFrameLevel() + 1)
 		end
 	end
-
-	AS:StripTextures(ScenarioFinderFrame)
-
-	AS:StripTextures(ScenarioFinderFrame.Queue, true)
-	AS:SkinDropDownBox(ScenarioFinderFrame.Queue.Dropdown)
-	ScenarioFinderFrame.Queue.Dropdown:SetPoint('TOPLEFT', ScenarioFinderFrame.Queue, 'TOPLEFT', 87, -40)
-	AS:StripTextures(ScenarioFinderFrame.Queue.Specific.ScrollFrame, true)
-	AS:SkinScrollBar(ScenarioFinderFrame.Queue.Specific.ScrollFrame.ScrollBar)
-
-	AS:SkinButton(ScenarioQueueFrameFindGroupButton, true)
 
 	AS:StripTextures(LFGListFrame.CategorySelection.Inset)
 	AS:SkinButton(LFGListFrame.CategorySelection.StartGroupButton, true)
