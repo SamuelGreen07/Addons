@@ -28,7 +28,7 @@ end
 local L = BigWigsAPI:GetLocale("BigWigs: Common")
 local UnitAffectingCombat, UnitIsPlayer, UnitGUID, UnitPosition, UnitIsConnected = UnitAffectingCombat, UnitIsPlayer, UnitGUID, UnitPosition, UnitIsConnected
 local C_EncounterJournal_GetSectionInfo, GetSpellInfo, GetSpellTexture, GetTime, IsSpellKnown = C_EncounterJournal.GetSectionInfo, GetSpellInfo, GetSpellTexture, GetTime, IsSpellKnown
-local UnitGroupRolesAssigned = UnitGroupRolesAssigned
+local EJ_GetEncounterInfo, UnitGroupRolesAssigned = EJ_GetEncounterInfo, UnitGroupRolesAssigned
 local SendChatMessage, GetInstanceInfo, Timer = BigWigsLoader.SendChatMessage, BigWigsLoader.GetInstanceInfo, BigWigsLoader.CTimerAfter
 local format, find, gsub, band, tremove, wipe = string.format, string.find, string.gsub, bit.band, table.remove, table.wipe
 local select, type, next, tonumber = select, type, next, tonumber
@@ -150,6 +150,19 @@ local spells = setmetatable({}, {__index =
 		end
 		self[key] = value
 		return value
+	end
+})
+local bossNames = setmetatable({}, {__index =
+	function(self, key)
+		local name = EJ_GetEncounterInfo(key)
+		if name then
+			self[key] = name
+			return name
+		else
+			core:Print(format("An invalid boss name id (%d) is being used in a boss module.", key))
+			self[key] = ""
+			return ""
+		end
 	end
 })
 
@@ -425,7 +438,7 @@ do
 	--- [DEPRECATED] Register a callback for CHAT_MSG_MONSTER_YELL that matches text.
 	-- @param func callback function, passed (module, message, sender, language, channel, target, [standard CHAT_MSG args]...)
 	-- @param ... any number of strings to match
-	function boss:Yell(func, ...)
+	function boss:BossYell(func, ...)
 		if not func then core:Print(format(missingArgument, self.moduleName)) return end
 		if not self[func] then core:Print(format(missingFunction, self.moduleName, func)) return end
 		if not eventMap[self].CHAT_MSG_MONSTER_YELL then eventMap[self].CHAT_MSG_MONSTER_YELL = {} end
@@ -1073,10 +1086,18 @@ function boss:MobId(guid)
 	return tonumber(id) or 1
 end
 
---- Get a localized name from an id. Positive ids for spells (GetSpellInfo) and negative ids for journal entries (C_EncounterJournal.GetSectionInfo).
+--- Get a localized name from an id. Positive ids for spells (GetSpellInfo) and negative ids for journal-based section entries (C_EncounterJournal.GetSectionInfo).
+-- @number spellIdOrSectionId The spell id or the journal-based section id (as a negative number)
 -- @return spell name
-function boss:SpellName(spellId)
-	return spells[spellId]
+function boss:SpellName(spellIdOrSectionId)
+	return spells[spellIdOrSectionId]
+end
+
+--- Get a localized boss name from a journal-based encounter id. (EJ_GetEncounterInfo)
+-- @number journalEncounterId The journal-based encounter id
+-- @return localized boss name
+function boss:BossName(journalEncounterId)
+	return bossNames[journalEncounterId]
 end
 
 --- Check if a GUID is you.
@@ -1208,18 +1229,26 @@ do
 	local GetOptions = C_GossipInfo.GetOptions
 	local SelectOption = C_GossipInfo.SelectOption
 	--- Request the gossip options of the selected NPC
-	-- @return table
+	-- @return a separate string for every selectable text option
 	function boss:GetGossipOptions()
-		local tbl = GetOptions()
-		if tbl[1] then
-			return tbl
+		local gossipTbl = GetOptions()
+		if gossipTbl[2] then
+			local tbl = {}
+			for i = 1, #gossipTbl do
+				local text = gossipTbl[i].name
+				if text then
+					tbl[#tbl+1] = text
+				end
+			end
+			return tbl[1], tbl[2], tbl[3], tbl[4], tbl[5] -- This is fine
+		elseif gossipTbl[1] then
+			return gossipTbl[1].name
 		end
 	end
 
 	--- Select a specific NPC gossip option
 	-- @number optionNumber The number of the specific option to be selected
 	-- @bool[opt] skipConfirmDialogBox If the pop up confirmation dialog box should be skipped
-	-- @return args
 	function boss:SelectGossipOption(optionNumber, skipConfirmDialogBox)
 		SelectOption(optionNumber, "", skipConfirmDialogBox) -- Don't think the text arg is something we will ever need
 	end
@@ -1313,27 +1342,14 @@ end)
 
 do
 	local offDispel, defDispel = {}, {}
-	local _, class = UnitClass("player")
-	local function petCanDispel()
-		if class == "HUNTER" then
-			return IsSpellKnown(264266, true) -- Nature's Grace (Stag)
-				or IsSpellKnown(264265, true) -- Spirit Shock (Spirit Beast)
-				or IsSpellKnown(264264, true) -- Nether Shock (Nether Ray)
-				or IsSpellKnown(264263, true) -- Sonic Blast (Bat)
-				or IsSpellKnown(264262, true) -- Soothing Water (Water Strider)
-				or IsSpellKnown(264056, true) -- Spore Cloud (Sporebat)
-				or IsSpellKnown(264055, true) -- Serenity Dust (Moth)
-				or IsSpellKnown(264028, true) -- Chi-Ji's Tranquility (Crane)
-		end
-	end
 	function UpdateDispelStatus()
 		offDispel, defDispel = {}, {}
-		if IsSpellKnown(32375) or IsSpellKnown(528) or IsSpellKnown(370) or IsSpellKnown(30449) or IsSpellKnown(278326) or IsSpellKnown(19505, true) or petCanDispel() then
-			-- Mass Dispel (Priest), Dispel Magic (Priest), Purge (Shaman), Spellsteal (Mage), Consume Magic (Demon Hunter), Devour Magic (Warlock Felhunter), Hunter pet
+		if IsSpellKnown(32375) or IsSpellKnown(528) or IsSpellKnown(370) or IsSpellKnown(30449) or IsSpellKnown(278326) or IsSpellKnown(19505, true) or IsSpellKnown(19801) then
+			-- Mass Dispel (Priest), Dispel Magic (Priest), Purge (Shaman), Spellsteal (Mage), Consume Magic (Demon Hunter), Devour Magic (Warlock Felhunter), Tranquilizing Shot (Hunter)
 			offDispel.magic = true
 		end
-		if IsSpellKnown(2908) or petCanDispel() then
-			-- Soothe (Druid), Hunter pet
+		if IsSpellKnown(2908) or IsSpellKnown(19801) then
+			-- Soothe (Druid), Tranquilizing Shot (Hunter)
 			offDispel.enrage = true
 		end
 		if IsSpellKnown(527) or IsSpellKnown(77130) or IsSpellKnown(115450) or IsSpellKnown(4987) or IsSpellKnown(88423) then -- XXX Add DPS priest mass dispel?
@@ -1693,7 +1709,7 @@ function boss:DelayedMessage(key, delay, color, text, icon, sound)
 	if checkFlag(self, key, C.MESSAGE) then
 		self:CancelDelayedMessage(text or key)
 		if not self.scheduledMessages then self.scheduledMessages = {} end
-		self.scheduledMessages[text or key] = self:ScheduleTimer("Message", delay, key, color, sound, text, icon or false)
+		self.scheduledMessages[text or key] = self:ScheduleTimer("MessageOld", delay, key, color, sound, text, icon or false)
 	end
 end
 
@@ -1703,7 +1719,7 @@ end
 -- @string[opt] sound the message sound
 -- @param[opt] text the message text (if nil, key is used)
 -- @param[opt] icon the message icon (spell id or texture name)
-function boss:Message(key, color, sound, text, icon)
+function boss:MessageOld(key, color, sound, text, icon)
 	if checkFlag(self, key, C.MESSAGE) then
 		local textType = type(text)
 
@@ -1724,7 +1740,7 @@ function boss:Message(key, color, sound, text, icon)
 	end
 end
 
-function boss:Message2(key, color, text, icon)
+function boss:Message(key, color, text, icon)
 	if checkFlag(self, key, C.MESSAGE) then
 		local isEmphasized = band(self.db.profile[key], C.EMPHASIZE) == C.EMPHASIZE
 		self:SendMessage("BigWigs_Message", self, key, type(text) == "string" and text or spells[text or key], color, icon ~= false and icons[icon or key], isEmphasized)
@@ -1830,7 +1846,7 @@ do
 	-- @param[opt] text the message text (if nil, key is used)
 	-- @param[opt] icon the message icon (spell id or texture name)
 	-- @bool[opt] alwaysPlaySound if true, play the sound even if player is not you
-	function boss:TargetMessage(key, player, color, sound, text, icon, alwaysPlaySound)
+	function boss:TargetMessageOld(key, player, color, sound, text, icon, alwaysPlaySound)
 		local textType = type(text)
 		local msg = textType == "string" and text or spells[text or key]
 		local texture = icon ~= false and icons[icon or textType == "number" and text or key]
@@ -2005,7 +2021,7 @@ do
 	-- @string player the player name
 	-- @param[opt] text the message text (if nil, key is used)
 	-- @param[opt] icon the message icon (spell id or texture name, key is used if nil)
-	function boss:TargetMessage2(key, color, player, text, icon)
+	function boss:TargetMessage(key, color, player, text, icon)
 		local textType = type(text)
 		local msg = textType == "string" and text or spells[text or key]
 		local texture = icon ~= false and icons[icon or textType == "number" and text or key]
@@ -2416,7 +2432,7 @@ end
 -- @param key the option key
 -- @param msg the message to yell (if nil, key is used)
 -- @bool[opt] directPrint if true, skip formatting the message and print the string directly to chat.
-function boss:Yell2(key, msg, directPrint) -- XXX fixme
+function boss:Yell(key, msg, directPrint)
 	if not checkFlag(self, key, C.SAY) then return end
 	if directPrint then
 		SendChatMessage(msg, "YELL")
@@ -2582,7 +2598,7 @@ function boss:Berserk(seconds, noEngageMessage, customBoss, customBerserk, custo
 
 	if not noEngageMessage then
 		-- Engage warning with minutes to enrage
-		self:Message(key, "yellow", nil, format(L.custom_start, name, berserk, seconds / 60), false)
+		self:MessageOld(key, "yellow", nil, format(L.custom_start, name, berserk, seconds / 60), false)
 	end
 
 	-- Half-way to enrage warning.

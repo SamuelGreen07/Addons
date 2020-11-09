@@ -1,7 +1,6 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("NameplateCooldowns", "koKR");
 L = L or {}
 --@non-debug@
-L["Always display CD icons at full opacity (ReloadUI is needed)"] = "CD 아이콘을 항상 최대 불투명도로 표시합니다 (UI 다시 불러오기 필요)"
 --[[Translation missing --]]
 L["anchor-point:bottom"] = "Bottom"
 --[[Translation missing --]]

@@ -890,6 +890,12 @@ function BtWQuestsMixin:OnShow()
             self:DisplayCurrentExpansion()
         end
 
+        -- Quick fix for AddOnSkins issue
+        if self.Chain.Scroll.ScrollBar.ThumbTexture.Backdrop then
+            self.Chain.Scroll.ScrollBar.ThumbTexture.Backdrop:SetFrameLevel(self.Chain.Scroll.ScrollBar.Backdrop:GetFrameLevel())
+            self.Category.Scroll.ScrollBar.ThumbTexture.Backdrop:SetFrameLevel(self.Category.Scroll.ScrollBar.Backdrop:GetFrameLevel())
+        end
+
         self.initialized = true
     else
         if self:GetChain() ~= nil then

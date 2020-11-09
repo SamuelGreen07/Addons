@@ -1,6 +1,6 @@
 ## Interface: 90001
 ## Title: BtWQuests: Battle for Azeroth
-## Version: 53.2
+## Version: 53.3
 ## Notes: Battle for Azeroth quest data for BtWQuests
 ## Author: Breen
 ## Dependencies: BtWQuests

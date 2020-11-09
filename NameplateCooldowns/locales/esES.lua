@@ -1,7 +1,6 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("NameplateCooldowns", "esES");
 L = L or {}
 --@non-debug@
-L["Always display CD icons at full opacity (ReloadUI is needed)"] = "Mostrar siempre los iconos de CD con opacidad al máximo (es necesario /reloadui)"
 --[[Translation missing --]]
 L["anchor-point:bottom"] = "Bottom"
 --[[Translation missing --]]
@@ -29,7 +28,7 @@ L["chat:addon-is-disabled-note"] = "Tenga en cuenta que este addon está deshabi
 L["chat:addon-is-enabled"] = "Addon habilitado"
 L["chat:default-spell-is-added-to-ignore-list"] = "Por defecto, este hechizo está en la lista de ignorados: %s. No verás ninguna actualización relativa a la reutilización de este hechizo."
 L["chat:enable-only-for-target-nameplate"] = "Los CSs (tiempo de reutilización) se mostrarán únicamente en las barras de nombre."
-L["chat:print-updated-spells"] = "%S: Reutilización: % segundos, nuevo: %s s."
+L["chat:print-updated-spells"] = "%s: Reutilización: %s segundos, nuevo: %s s."
 L["Click on icon to enable/disable tracking"] = "Haz click en el icono para activar/desactivar seguimiento."
 L["Copy"] = "Copiar"
 L["Copy other profile to current profile:"] = "Copiar otro perfil al perfil actual:"
@@ -111,33 +110,21 @@ L["options:spells:cooldown-time"] = "Tiempo de reutilización"
 L["options:spells:delete-all-spells"] = "Borrar todos los hechizos"
 L["options:spells:delete-all-spells-confirmation"] = "¿De verdad quieres borrar TODOS los hechizos?"
 L["options:spells:delete-spell"] = "Borrar hechizo"
---[[Translation missing --]]
-L["options:spells:disable-all-spells"] = "Disable all spells"
---[[Translation missing --]]
-L["options:spells:enable-all-spells"] = "Enable all spells"
+L["options:spells:disable-all-spells"] = "Deshabilitar todos los hechizos"
+L["options:spells:enable-all-spells"] = "Habilitar todos los hechizos"
 L["options:spells:enable-tracking-of-this-spell"] = "Habilitar seguimiento de este hechizo"
 L["options:spells:icon-glow"] = "El brillo del icono está desactivado."
 L["options:spells:icon-glow-always"] = "El icono siempre brilla si el hechizo está en cooldown."
 L["options:spells:icon-glow-threshold"] = "El hechizo brillará solamente si el tiempo de reutilización es menor que"
---[[Translation missing --]]
-L["options:spells:please-push-once-more"] = "Please push once more"
+L["options:spells:please-push-once-more"] = "Por favor presione una vez más"
 L["options:spells:track-only-this-spellid"] = "Seguir solamente estos hechizos (ID de los hechizos separadas por coma)"
---[[Translation missing --]]
-L["options:text:anchor-point"] = "Anchor point"
---[[Translation missing --]]
-L["options:text:anchor-to-icon"] = "Anchor to icon"
---[[Translation missing --]]
-L["options:text:color"] = "Text color"
---[[Translation missing --]]
-L["options:text:font"] = "Font"
---[[Translation missing --]]
-L["options:text:font-scale"] = "Font scale"
---[[Translation missing --]]
-L["options:text:font-size"] = "Font size"
---[[Translation missing --]]
-L["options:timer-text:scale-font-size"] = [=[Scale font size
-according to
-icon size]=]
+L["options:text:anchor-point"] = "Punto de anclaje"
+L["options:text:anchor-to-icon"] = "Anclar al ícono"
+L["options:text:color"] = "Color de texto"
+L["options:text:font"] = "Fuente"
+L["options:text:font-scale"] = "Escala de la fuente"
+L["options:text:font-size"] = "Tamaño de fuente"
+L["options:timer-text:scale-font-size"] = "Escalar fuente de acuerdo al tamaño del ícono"
 L["Profile '%s' has been successfully deleted"] = "Perfil \"%s\" ha sido borrado con exito"
 L["Profiles"] = "Perfiles"
 L["Show border around interrupts"] = "Mostrar bordes alrededor de interrupciones"

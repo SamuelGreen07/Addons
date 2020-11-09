@@ -1,7 +1,6 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("NameplateCooldowns", "esMX");
 L = L or {}
 --@non-debug@
-L["Always display CD icons at full opacity (ReloadUI is needed)"] = "Mostrar siempre iconos con opacidad completa (Se requiere recargar UI)"
 --[[Translation missing --]]
 L["anchor-point:bottom"] = "Bottom"
 --[[Translation missing --]]

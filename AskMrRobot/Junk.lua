@@ -51,11 +51,11 @@ local function scanBag(bagId, matchItem, usedItems)
                         itemData.bagId = bagId
                         itemData.slotId = slotId
                         return itemData
-                    elseif diffs < 10000 then                        
+                    elseif diffs < 100000 then                        
                         if itemData.azerite and #itemData.azerite > 0 then
-                            threshold = 100
+                            threshold = 1000
                         else
-                            threshold = 10000
+                            threshold = 100000
                         end
                         if diffs < threshold and diffs < bestMatchDiffs then
                             -- closest match we could find
@@ -454,11 +454,11 @@ local function findMatchingNonBagItem(matchItem, usedItems)
                         itemData.bagId = bagId
                         itemData.slotId = i
                         return itemData
-                    elseif diffs < 10000 then                        
+                    elseif diffs < 100000 then                        
                         if itemData.azerite and #itemData.azerite > 0 then
-                            threshold = 100
+                            threshold = 1000
                         else
-                            threshold = 10000
+                            threshold = 100000
                         end
                         if diffs < threshold and diffs < bestMatchDiffs then
                             -- closest match we could find

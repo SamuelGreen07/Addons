@@ -115,12 +115,20 @@ local _bankOpen = false
 
 local function scanBag(bagId, isBank, bagTable, bagItemsWithCount)
 	local numSlots = GetContainerNumSlots(bagId)
-	local loc = ItemLocation.CreateEmpty()
+	--local loc = ItemLocation.CreateEmpty()
+	local item
 	for slotId = 1, numSlots do
 		local _, itemCount, _, _, _, _, itemLink = GetContainerItemInfo(bagId, slotId)
 		if itemLink ~= nil then
 			local itemData = Amr.Serializer.ParseItemLink(itemLink)
 			if itemData ~= nil then
+				item = Item:CreateFromBagAndSlot(bagId, slotId)
+
+				-- seems to be of the form Item-1147-0-4000000XXXXXXXXX, so we take just the last 9 digits
+				itemData.guid = item:GetItemGUID()
+				if itemData.guid and strlen(itemData.guid) > 9 then
+					itemData.guid = strsub(itemData.guid, -9)
+				end
 
 				-- see if this is an azerite item and read azerite power ids
 				--[[loc:SetBagAndSlot(bagId, slotId)

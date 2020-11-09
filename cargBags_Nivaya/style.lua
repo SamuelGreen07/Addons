@@ -117,7 +117,7 @@ function MyContainer:OnContentsChanged(forced)
 
 	local buttonIDs = {}
   	for i, button in pairs(self.buttons) do
-		local item = cbNivaya:GetItemInfo(button.bagID, button.slotID)
+		local item = cbNivaya:GetCustomItemInfo(button.bagID, button.slotID)
 		if item.link then
 			buttonIDs[i] = { item.id, item.rarity, button, item.count }
 		else
@@ -234,7 +234,7 @@ local function SellJunk()
 
 	for BagID = 0, 4 do
 		for BagSlot = 1, GetContainerNumSlots(BagID) do
-			item = cbNivaya:GetItemInfo(BagID, BagSlot)
+			item = cbNivaya:GetCustomItemInfo(BagID, BagSlot)
 			if item then
 				if item.rarity == 0 and item.sellPrice ~= 0 then
 					Profit = Profit + (item.sellPrice * item.count)
@@ -409,7 +409,7 @@ local resetNewItems = function(self)
 		local tNumSlots = GetContainerNumSlots(bag)
 		if tNumSlots > 0 then
 			for slot = 1, tNumSlots do
-				local item = cbNivaya:GetItemInfo(bag, slot)
+				local item = cbNivaya:GetCustomItemInfo(bag, slot)
 				--print("resetNewItems", item.id)
 				if item.id then
 					if cB_KnownItems[item.id] then

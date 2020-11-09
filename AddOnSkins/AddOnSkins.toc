@@ -4,5 +4,8 @@
 ## Author: Azilroka, NihilisticPandemonium
 ## SavedVariables: AddOnSkinsDB, AddOnSkinsDS
 ## OptionalDeps: ElvUI
+## X-Tukui-ProjectID: 3
+## X-Tukui-ProjectFolders: AddOnSkins
 
 Load_AddOnSkins.xml
+

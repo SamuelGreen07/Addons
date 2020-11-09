@@ -31,7 +31,7 @@ do
 	local RELEASE = "RELEASE"
 
 	local releaseType = RELEASE
-	local myGitHash = "14950ac" -- The ZIP packager will replace this with the Git hash.
+	local myGitHash = "a682125" -- The ZIP packager will replace this with the Git hash.
 	local releaseString = ""
 	--@alpha@
 	-- The following code will only be present in alpha ZIPs.
@@ -136,6 +136,7 @@ do
 		[534] = bc, -- The Battle for Mount Hyjal
 		[564] = bc, -- Black Temple
 		[560] = bc, -- The Escape from Durnholde
+		[580] = bc, -- The Sunwell
 		--[[ BigWigs: Wrath of the Lich King ]]--
 		[533] = wotlk, -- Naxxramas
 		[616] = wotlk, -- The Eye of Eternity
@@ -299,16 +300,13 @@ do
 	}
 end
 
--- GLOBALS: _G, ADDON_LOAD_FAILED, BigWigs, BigWigs3DB, BigWigsIconDB, BigWigsLoader, BigWigsOptions, ChatFrame_ImportAllListsToHash, ChatTypeInfo, CreateFrame, CUSTOM_CLASS_COLORS, DEFAULT_CHAT_FRAME, error
--- GLOBALS: GetAddOnEnableState, GetAddOnInfo, GetAddOnMetadata, GetLocale, GetNumGroupMembers, GetRealmName, GetSpecialization, GetSpecializationRole, GetTime, GRAY_FONT_COLOR, hash_SlashCmdList, InCombatLockdown
--- GLOBALS: IsAddOnLoaded, IsAltKeyDown, IsControlKeyDown, IsEncounterInProgress, IsInGroup, IsInRaid, IsLoggedIn, IsPartyLFG, IsSpellKnown, LFGDungeonReadyPopup
--- GLOBALS: LibStub, LoadAddOn, message, PlaySound, print, RAID_CLASS_COLORS, RaidNotice_AddMessage, RaidWarningFrame, RegisterAddonMessagePrefix, RolePollPopup, select, StopSound
--- GLOBALS: tostring, tremove, type, UnitAffectingCombat, UnitClass, UnitGroupRolesAssigned, UnitIsConnected, UnitIsDeadOrGhost, UnitSetRole, unpack, SLASH_BigWigs1, SLASH_BigWigs2
--- GLOBALS: SLASH_BigWigsVersion1, wipe
-
 -----------------------------------------------------------------------
 -- Utility
 --
+
+local EnableAddOn, GetAddOnEnableState, GetAddOnInfo, IsAddOnLoaded, LoadAddOn = EnableAddOn, GetAddOnEnableState, GetAddOnInfo, IsAddOnLoaded, LoadAddOn
+local GetAddOnMetadata, IsInGroup, IsInRaid, UnitAffectingCombat, UnitGroupRolesAssigned = GetAddOnMetadata, IsInGroup, IsInRaid, UnitAffectingCombat, UnitGroupRolesAssigned
+local GetSpecialization, GetSpecializationRole, IsPartyLFG, UnitIsDeadOrGhost, UnitSetRole = GetSpecialization, GetSpecializationRole, IsPartyLFG, UnitIsDeadOrGhost, UnitSetRole
 
 local function IsAddOnEnabled(addon)
 	local character = UnitName("player")
@@ -1360,8 +1358,8 @@ do
 		elseif grouped and not groupType then
 			grouped = nil
 			ResetVersionWarning()
-			wipe(usersVersion)
-			wipe(usersHash)
+			usersVersion = {}
+			usersHash = {}
 			self:ZONE_CHANGED_NEW_AREA()
 		end
 	end

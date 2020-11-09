@@ -1,10 +1,10 @@
-lightweight tag e30ea6729dec511f0faf2525f47608a9fb68f72b v9.0.1.405
+lightweight tag e0855bdb7a5d36e45098c407ea7f11dbdd9db6c8 v9.0.1.406
 Author:	Tercio Jose <terciob19@hotmail.com>
-Date:	Mon Oct 26 17:14:07 2020 -0300
+Date:	Wed Oct 28 10:11:01 2020 -0300
 
-commit e30ea6729dec511f0faf2525f47608a9fb68f72b
+commit e0855bdb7a5d36e45098c407ea7f11dbdd9db6c8
 Author: Tercio Jose <terciob19@hotmail.com>
-Date:   Mon Oct 26 17:14:07 2020 -0300
+Date:   Wed Oct 28 10:11:01 2020 -0300
 
-    General fixes for 9.0.1
+    Fixed an issue where openening the map would change the zone to a capiital city.
 

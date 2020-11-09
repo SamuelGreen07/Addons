@@ -1,29 +1,17 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("NameplateCooldowns", "deDE");
 L = L or {}
 --@non-debug@
-L["Always display CD icons at full opacity (ReloadUI is needed)"] = "CD-Symbole immer mit voller Deckkraft anzeigen (UI neu laden erf.)"
---[[Translation missing --]]
-L["anchor-point:bottom"] = "Bottom"
---[[Translation missing --]]
-L["anchor-point:bottomleft"] = "Bottom left"
---[[Translation missing --]]
-L["anchor-point:bottomright"] = "Bottom right"
---[[Translation missing --]]
-L["anchor-point:center"] = "Center"
---[[Translation missing --]]
-L["anchor-point:left"] = "Left"
---[[Translation missing --]]
-L["anchor-point:right"] = "Right"
---[[Translation missing --]]
-L["anchor-point:top"] = "Top"
---[[Translation missing --]]
-L["anchor-point:topleft"] = "Top left"
---[[Translation missing --]]
-L["anchor-point:topright"] = "Top right"
---[[Translation missing --]]
-L["anchor-point:x-offset"] = "X offset"
---[[Translation missing --]]
-L["anchor-point:y-offset"] = "Y offset"
+L["anchor-point:bottom"] = "Unten"
+L["anchor-point:bottomleft"] = "Unten links"
+L["anchor-point:bottomright"] = "Unten rechts"
+L["anchor-point:center"] = "Mitte"
+L["anchor-point:left"] = "Links"
+L["anchor-point:right"] = "Rechts"
+L["anchor-point:top"] = "Oben"
+L["anchor-point:topleft"] = "Oben links"
+L["anchor-point:topright"] = "Oben rechts"
+L["anchor-point:x-offset"] = "X-Versatz"
+L["anchor-point:y-offset"] = "Y-Versatz"
 L["chat:addon-is-disabled"] = "Addon ist deaktiviert"
 L["chat:addon-is-disabled-note"] = "Bitte beachte: Dieses Addon ist deaktiviert. Du kannst es in den Optionen aktivieren (/nc) "
 L["chat:addon-is-enabled"] = "Addon ist aktiviert"
@@ -47,14 +35,10 @@ L["general.sort-mode"] = "Sortieren nach:"
 L["Icon size"] = "Symbolgröße "
 L["Icon X-coord offset"] = "X-Position des Symbols"
 L["Icon Y-coord offset"] = "Y-Position des Symbols"
---[[Translation missing --]]
-L["icon-grow-direction:down"] = "Down"
---[[Translation missing --]]
-L["icon-grow-direction:left"] = "Left"
---[[Translation missing --]]
-L["icon-grow-direction:right"] = "Right"
---[[Translation missing --]]
-L["icon-grow-direction:up"] = "Up"
+L["icon-grow-direction:down"] = "Nach unten"
+L["icon-grow-direction:left"] = "Nach links"
+L["icon-grow-direction:right"] = "Nach rechts"
+L["icon-grow-direction:up"] = "Nach oben"
 L["instance-type:arena"] = "Arenen"
 L["instance-type:none"] = "Offene Welt"
 L["instance-type:party"] = "5-Mann-Dungeons"
@@ -69,13 +53,10 @@ L["New spell has been added: %s"] = "Ein neuer Zauber wurde hinzugefügt: %s"
 L["Options are not available in combat!"] = "Einstellungen sind nicht im Kampf verfügbar"
 --[[Translation missing --]]
 L["options:borders:show-blizz-borders"] = "Show Blizzard's borders around icons"
---[[Translation missing --]]
-L["options:category:borders"] = "Borders"
+L["options:category:borders"] = "Rahmen"
 L["options:category:spells"] = "Zauber"
---[[Translation missing --]]
 L["options:category:text"] = "Text"
---[[Translation missing --]]
-L["options:general:anchor-point"] = "Anchor point"
+L["options:general:anchor-point"] = "Ankerpunkt"
 --[[Translation missing --]]
 L["options:general:anchor-point-to-parent"] = "Anchor point (to parent)"
 L["options:general:disable-addon-btn"] = "Addon deaktivieren"
@@ -87,10 +68,8 @@ L["options:general:full-opacity-always"] = "Icons are always completely opaque"
 L["options:general:full-opacity-always:tooltip"] = [=[If this option is enabled, the icons will 
 always be completely opaque. If not, the opacity
 will be the same as the health bar]=]
---[[Translation missing --]]
-L["options:general:icon-grow-direction"] = "Icons' growth direction"
---[[Translation missing --]]
-L["options:general:ignore-nameplate-scale"] = "Ignore nameplate scale"
+L["options:general:icon-grow-direction"] = "Die Wuchsrichtung der Symbole"
+L["options:general:ignore-nameplate-scale"] = "Namensplakettenskalierung ignorieren"
 --[[Translation missing --]]
 L["options:general:ignore-nameplate-scale:tooltip"] = [=[If this option is checked, icon size will not
 change accordingly to nameplate scale
@@ -120,18 +99,13 @@ L["options:spells:icon-glow-threshold"] = "Symbol wird leuchten, falls die verbl
 L["options:spells:please-push-once-more"] = "Bitte drücke noch einmal"
 L["options:spells:track-only-this-spellid"] = [=[Nur diese Zauber-IDs verfolgen
 (kommasepariert)]=]
---[[Translation missing --]]
-L["options:text:anchor-point"] = "Anchor point"
+L["options:text:anchor-point"] = "Ankerpunkt"
 --[[Translation missing --]]
 L["options:text:anchor-to-icon"] = "Anchor to icon"
---[[Translation missing --]]
-L["options:text:color"] = "Text color"
---[[Translation missing --]]
-L["options:text:font"] = "Font"
---[[Translation missing --]]
-L["options:text:font-scale"] = "Font scale"
---[[Translation missing --]]
-L["options:text:font-size"] = "Font size"
+L["options:text:color"] = "Schriftfarbe"
+L["options:text:font"] = "Schriftart"
+L["options:text:font-scale"] = "Schriftskalierung"
+L["options:text:font-size"] = "Schriftgröße"
 --[[Translation missing --]]
 L["options:timer-text:scale-font-size"] = [=[Scale font size
 according to

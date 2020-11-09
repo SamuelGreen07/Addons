@@ -1,16 +1,10 @@
-lightweight tag 43b20f5c455e8f1e586ff7b19a2eefd94f0a3291 v202010270600
+lightweight tag 86152002855e23ad0a6fe384ed3cc7749eeab0bc v202011080600
 Author:	Jah Raphael <jahraphael@yahoo.com>
-Date:	Tue Oct 27 08:15:46 2020 +0000
+Date:	Sun Nov 8 07:53:22 2020 +0000
 
-commit 43b20f5c455e8f1e586ff7b19a2eefd94f0a3291
+commit 86152002855e23ad0a6fe384ed3cc7749eeab0bc
 Author: Jah Raphael <jahraphael@yahoo.com>
-Date:   Tue Oct 27 08:15:46 2020 +0000
+Date:   Sun Nov 8 07:53:22 2020 +0000
 
     [Raider.IO] Database Refresh
-
-commit c79b11692864a29f9d713306062d6ac132147346
-Author: François "Isak" W <wroblewski.francois@gmail.com>
-Date:   Mon Oct 26 23:07:44 2020 +0100
-
-    Isak: Changing realm (and name)
 

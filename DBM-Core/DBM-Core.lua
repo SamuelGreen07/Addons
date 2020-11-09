@@ -70,9 +70,9 @@ local function showRealDate(curseDate)
 end
 
 DBM = {
-	Revision = parseCurseDate("20201026234750"),
-	DisplayVersion = "9.0.3 alpha", -- the string that is shown as version
-	ReleaseRevision = releaseDate(2020, 10, 20) -- the date of the latest stable version that is available, optionally pass hours, minutes, and seconds for multiple releases in one day
+	Revision = parseCurseDate("20201108211229"),
+	DisplayVersion = "9.0.4 alpha", -- the string that is shown as version
+	ReleaseRevision = releaseDate(2020, 11, 1) -- the date of the latest stable version that is available, optionally pass hours, minutes, and seconds for multiple releases in one day
 }
 DBM.HighestRelease = DBM.ReleaseRevision --Updated if newer version is detected, used by update nags to reflect critical fixes user is missing on boss pulls
 
@@ -100,8 +100,8 @@ function DBM:GetTOC()
 	return wowTOC, testBuild, wowVersionString, wowBuild
 end
 
-function DBM:IsDev()
-	return self:GetTOC() >= 90100 -- 9.1.x
+function DBM:IsShadowlands()
+	return self:GetTOC() >= 90001 -- 9.0.x
 end
 
 -- dual profile setup
@@ -280,6 +280,7 @@ DBM.DefaultOptions = {
 	DontShowSpecialWarningText = false,
 	DontShowSpecialWarningFlash = false,
 	DontPlaySpecialWarningSound = false,
+	DontPlayTrivialSpecialWarningSound = true,
 	DontShowBossTimers = false,
 	DontShowUserTimers = false,
 	DontShowFarWarnings = true,
@@ -491,6 +492,39 @@ local bannedMods = { -- a list of "banned" (meaning they are replaced by another
 	"DBM-Suramar",--Renamed to DBM-Nighthold
 	"DBM-KulTiras",--Merged to DBM-Azeroth-BfA
 	"DBM-Zandalar",--Merged to DBM-Azeroth-BfA
+	"DBM-Azeroth",--Merged into DBM-Core events mod.
+}
+
+--[InstanceID]={level,zoneType}
+--zoneType: 1 = outdoor, 2 = dungeon, 3 = raid
+local instanceDifficultyBylevel = {
+	--World
+	[0]={50,1},[1]={50, 1},--Eastern Kingdoms and Azeroth world events. These would be warfront and aniversery world bosses, so they'd be set to 50 for now. Likely 60 next year
+	[530]={30, 1},--Outlands World Bosses
+	[870]={30, 1},[1064]={30, 1},--MoP World Bosses
+	[1116]={40, 1},[1159]={40, 1},[1331]={40, 1},[1158]={40, 1},[1153]={40, 1},[1152]={40, 1},[1330]={40, 1},[1160]={40, 1},[1154]={40, 1},[1464]={40, 1},--Wod World and Garrison Bosses
+	[1220]={45, 1},[1779]={45, 1},--Legion World bosses
+	[1643]={50, 1},[1642]={50, 1},[1718]={50, 1},[1943]={50, 1},[1876]={50, 1},[2105]={50, 1},[2111]={50, 1},[2275]={50, 1},--Bfa World bosses and warfronts
+	--Raids
+	[509]={30, 3},[531]={30, 3},[469]={30, 3},[409]={30, 3},--Classic Raids
+	[564]=30,[534]={30, 3},[532]={30, 3},[565]={30, 3},[544]={30, 3},[548]={30, 3},[580]={30, 3},[550]={30, 3},--BC Raids
+	[615]={30, 3},[724]={30, 3},[649]={30, 3},[616]={30, 3},[631]={30, 3},[533]={30, 3},[249]={30, 3},[603]={30, 3},[624]={30, 3},--Wrath Raids
+	[757]={35, 3},[671]={35, 3},[669]={35, 3},[967]={35, 3},[720]={35, 3},[951]={35, 3},[754]={35, 3},--Cata Raids
+	[1009]={35, 3},[1008]={35, 3},[1136]={35, 3},[996]={35, 3},[1098]={35, 3},--MoP Raids
+	[1205]={40, 3},[1448]={40, 3},[1228]={40, 3},--WoD Raids (yes, only 3 kekw)
+	[1712]={50, 3},[1520]={50, 3},[1530]={50, 3},[1676]={50, 3},[1648]={50, 3},--Legion Raids (Set to 50 because 45 tuning makes them difficult even at 50)
+	[1861]={50, 3},[2070]={50, 3},[2096]={50, 3},[2164]={50, 3},[2217]={50, 3},--BfA Raids
+	[2296]={60, 3},--Shadowlands Raids
+	--Dungeons
+	[48]={30, 2},[230]={30, 2},[429]={30, 2},[389]={30, 2},[34]={30, 2},--Classic Dungeons
+	[540]={30, 2},[558]={30, 2},[556]={30, 2},[555]={30, 2},[542]={30, 2},[546]={30, 2},[545]={30, 2},[547]={30, 2},[553]={30, 2},[554]={30, 2},[552]={30, 2},[557]={30, 2},[269]={30, 2},[560]={30, 2},[543]={30, 2},[585]={30, 2},--BC Dungeons
+	[619]={30, 2},[601]={30, 2},[595]={30, 2},[600]={30, 2},[604]={30, 2},[602]={30, 2},[599]={30, 2},[576]={30, 2},[578]={30, 2},[574]={30, 2},[575]={30, 2},[608]={30, 2},[658]={30, 2},[632]={30, 2},[668]={30, 2},[650]={30, 2},--Wrath Dungeons
+	[755]={35, 2},[645]={35, 2},[36]={35, 2},[670]={35, 2},[644]={35, 2},[33]={35, 2},[643]={35, 2},[725]={35, 2},[657]={35, 2},[309]={35, 2},[859]={35, 2},[568]={35, 2},[938]={35, 2},[940]={35, 2},[939]={35, 2},[646]={35, 2},--Cata Dungeons
+	[960]={35, 2},[961]={35, 2},[959]={35, 2},[962]={35, 2},[994]={35, 2},[1011]={35, 2},[1007]={35, 2},[1001]={35, 2},[1004]={35, 2},--MoP Dungeons
+	[1182]={40, 2},[1175]={40, 2},[1208]={40, 2},[1195]={40, 2},[1279]={40, 2},[1176]={40, 2},[1209]={40, 2},[1358]={40, 2},--WoD Dungeons
+	[1501]={45, 2},[1466]={45, 2},[1456]={45, 2},[1477]={45, 2},[1458]={45, 2},[1516]={45, 2},[1571]={45, 2},[1492]={45, 2},[1544]={45, 2},[1493]={45, 2},[1651]={45, 2},[1677]={45, 2},[1753]={45, 2},--Legion Dungeons
+	[1763]={50, 2},[1754]={50, 2},[1762]={50, 2},[1864]={50, 2},[1822]={50, 2},[1877]={50, 2},[1594]={50, 2},[1841]={50, 2},[1771]={50, 2},[1862]={50, 2},[2097]={50, 2},--Bfa Dungeons
+	[2286]={60, 2},[2289]={60, 2},[2290]={60, 2},[2287]={60, 2},[2285]={60, 2},[2293]={60, 2},[2291]={60, 2},[2284]={60, 2}--Shadowlands Dungeons
 }
 
 
@@ -2692,7 +2726,7 @@ do
 	local ignore, cancel
 	local popuplevel = 0
 	local function showPopupConfirmIgnore(ignore, cancel)
-		local popup = CreateFrame("Frame", "DBMHyperLinks", UIParent, "BackdropTemplate")
+		local popup = CreateFrame("Frame", "DBMHyperLinks", UIParent, DBM:IsShadowlands() and "BackdropTemplate")
 		popup.backdropInfo = {
 			bgFile		= "Interface\\DialogFrame\\UI-DialogBox-Background-Dark", -- 312922
 			edgeFile	= "Interface\\DialogFrame\\UI-DialogBox-Border", -- 131072
@@ -2701,7 +2735,11 @@ do
 			edgeSize	= 16,
 			insets		= { left = 1, right = 1, top = 1, bottom = 1 }
 		}
-		popup:ApplyBackdrop()
+		if not DBM:IsShadowlands() then
+			popup:SetBackdrop(popup.backdropInfo)
+		else
+			popup:ApplyBackdrop()
+		end
 		popup:SetSize(500, 80)
 		popup:SetPoint("TOP", UIParent, "TOP", 0, -200)
 		popup:SetFrameStrata("DIALOG")
@@ -3375,6 +3413,27 @@ function DBM:CheckNearby(range, targetname)
 	return false
 end
 
+function DBM:IsTrivial(customLevel)
+	--if timewalking or chromie time, it's always non trivial content
+	if C_PlayerInfo.IsPlayerInChromieTime() or difficultyIndex == 24 or difficultyIndex == 33 then
+		return false
+	end
+	--if custom level passed, we always hard check that level for trivial vs non trivial
+	if customLevel then--Custom level parameter
+		if playerLevel >= customLevel then
+			return true
+		end
+	else
+		--First, auto bail and return non trivial if it's an instancce not in table to prevent nil error
+		if not instanceDifficultyBylevel[LastInstanceMapID] then return false end
+		--Content is trivial if player level is 10 higher than content involved
+		if playerLevel >= (instanceDifficultyBylevel[LastInstanceMapID][1]+10) then
+			return true
+		end
+	end
+	return false
+end
+
 ---------------
 --  Options  --
 ---------------
@@ -4016,10 +4075,11 @@ do
 	local classicZones = {[509]=true,[531]=true,[469]=true,[409]=true}
 	local bcZones = {[564]=true,[534]=true,[532]=true,[565]=true,[544]=true,[548]=true,[580]=true,[550]=true}
 	local wrathZones = {[615]=true,[724]=true,[649]=true,[616]=true,[631]=true,[533]=true,[249]=true,[603]=true,[624]=true}
-	local cataZones = {[757]=true,[671]=true,[669]=true,[967]=true,[720]=true,[951]=true,[754]=true}--951 is a second but unused mapID for firelands, likely the ID of TW/scaling version that will replace 10/25 at some point
+	local cataZones = {[757]=true,[671]=true,[669]=true,[967]=true,[720]=true,[951]=true,[754]=true}
 	local mopZones = {[1009]=true,[1008]=true,[1136]=true,[996]=true,[1098]=true}
 	local wodZones = {[1205]=true,[1448]=true,[1228]=true}
 	local legionZones = {[1712]=true,[1520]=true,[1530]=true,[1676]=true,[1648]=true}
+	local bfaZones = {[1861]=true,[2070]=true,[2096]=true,[2164]=true,[2217]=true}
 	local challengeScenarios = {[1148]=true,[1698]=true,[1710]=true,[1703]=true,[1702]=true,[1684]=true,[1673]=true,[1616]=true,[2215]=true}
 	local pvpZones = {[30]=true,[489]=true,[529]=true,[559]=true,[562]=true,[566]=true,[572]=true,[617]=true,[618]=true,[628]=true,[726]=true,[727]=true,[761]=true,[968]=true,[980]=true,[998]=true,[1105]=true,[1134]=true,[1681]=true,[1803]=true,[2107]=true,[2118]=true,[2177]=true,[2197]=true}
 	local oldDungeons = {
@@ -4030,33 +4090,37 @@ do
 		[960]=true,[961]=true,[959]=true,[962]=true,[994]=true,[1011]=true,[1007]=true,[1001]=true,[1004]=true,--MoP
 		[1182]=true,[1175]=true,[1208]=true,[1195]=true,[1279]=true,[1176]=true,[1209]=true,[1358]=true,--WoD
 		[1501]=true,[1466]=true,[1456]=true,[1477]=true,[1458]=true,[1516]=true,[1571]=true,[1492]=true,[1544]=true,[1493]=true,[1651]=true,[1677]=true,[1753]=true--Legion
+		--[1763]=true,[1754]=true,[1762]=true,[1864]=true,[1822]=true,[1877]=true,[1594]=true,[1841]=true,[1771]=true,[1862]=true,[2097]=true--BfA Dungeons
 	}
 	--This never wants to spam you to use mods for trivial content you don't need mods for.
 	--It's intended to suggest mods for content that's relevant to your level (TW, leveling up in dungeons, or even older raids you can't just shit on)
 	function DBM:CheckAvailableMods()
 		if _G["BigWigs"] or modAdvertisementShown then return end--If they are running two boss mods at once, lets assume they are only using DBM for a specific feature (such as brawlers) and not nag
-		local timeWalking = difficultyIndex == 24 or difficultyIndex == 33 or false
-		if oldDungeons[LastInstanceMapID] and (timeWalking or playerLevel < 110) and not GetAddOnInfo("DBM-Party-BC") then
+		local timeWalking = C_PlayerInfo.IsPlayerInChromieTime() and true or difficultyIndex == 24 or difficultyIndex == 33 or false
+		if oldDungeons[LastInstanceMapID] and (timeWalking or playerLevel < 50) and not GetAddOnInfo("DBM-Party-BC") then
 			AddMsg(self, L.MOD_AVAILABLE:format("DBM Old Dungeon mods"))
 			modAdvertisementShown = true
-		elseif (classicZones[LastInstanceMapID] or bcZones[LastInstanceMapID]) and (timeWalking or playerLevel < 71) and not GetAddOnInfo("DBM-BlackTemple") then
+		elseif (classicZones[LastInstanceMapID] or bcZones[LastInstanceMapID]) and (timeWalking or playerLevel < 31) and not GetAddOnInfo("DBM-BlackTemple") then
 			AddMsg(self, L.MOD_AVAILABLE:format("DBM BC/Vanilla mods"))
 			modAdvertisementShown = true
-		elseif wrathZones[LastInstanceMapID] and (timeWalking or playerLevel < 86) and not GetAddOnInfo("DBM-Ulduar") then
+		elseif wrathZones[LastInstanceMapID] and (timeWalking or playerLevel < 31) and not GetAddOnInfo("DBM-Ulduar") then
 			AddMsg(self, L.MOD_AVAILABLE:format("DBM Wrath of the Lich King mods"))
 			modAdvertisementShown = true
-		elseif cataZones[LastInstanceMapID] and (timeWalking or playerLevel < 91) and not GetAddOnInfo("DBM-Firelands") then
+		elseif cataZones[LastInstanceMapID] and (timeWalking or playerLevel < 36) and not GetAddOnInfo("DBM-Firelands") then
 			AddMsg(self, L.MOD_AVAILABLE:format("DBM Cataclysm mods"))
 			modAdvertisementShown = true
-		elseif mopZones[LastInstanceMapID] and (timeWalking or playerLevel < 101) and not GetAddOnInfo("DBM-SiegeOfOrgrimmarV2") then
+		elseif mopZones[LastInstanceMapID] and (timeWalking or playerLevel < 36) and not GetAddOnInfo("DBM-SiegeOfOrgrimmarV2") then
 			AddMsg(self, L.MOD_AVAILABLE:format("DBM Mists of Pandaria mods"))
 			modAdvertisementShown = true
-		elseif wodZones[LastInstanceMapID] and (timeWalking or playerLevel < 111) and not GetAddOnInfo("DBM-HellfireCitadel") then
+		elseif wodZones[LastInstanceMapID] and (timeWalking or playerLevel < 41) and not GetAddOnInfo("DBM-HellfireCitadel") then
 			AddMsg(self, L.MOD_AVAILABLE:format("DBM Warlords of Draenor mods"))
 			modAdvertisementShown = true
-		elseif legionZones[LastInstanceMapID] and (timeWalking or playerLevel < 121) and not GetAddOnInfo("DBM-AntorusBurningThrone") then
+		elseif legionZones[LastInstanceMapID] and (timeWalking or playerLevel < 51) and not GetAddOnInfo("DBM-AntorusBurningThrone") then--Technically 45 level with quish, but because of tuning you need need mods even at 50
 			AddMsg(self, L.MOD_AVAILABLE:format("DBM Legion mods"))
 			modAdvertisementShown = true
+--		elseif bfaZones[LastInstanceMapID] and (timeWalking or playerLevel < 61) and not GetAddOnInfo("DBM-Nyalotha") then--Technically 50, but tuning and huge loss of player power, zones are even HARDER at 60
+--			AddMsg(self, L.MOD_AVAILABLE:format("DBM Battle for Azeroth mods"))
+--			modAdvertisementShown = true
 		elseif challengeScenarios[LastInstanceMapID] and not GetAddOnInfo("DBM-Challenges") then
 			AddMsg(self, L.MOD_AVAILABLE:format("DBM-Challenges"))
 			modAdvertisementShown = true
@@ -4808,7 +4872,7 @@ do
 		local accessList = {}
 		local savedSender
 
-		local inspopup = CreateFrame("Frame", "DBMPopupLockout", UIParent, "BackdropTemplate")
+		local inspopup = CreateFrame("Frame", "DBMPopupLockout", UIParent, DBM:IsShadowlands() and "BackdropTemplate")
 		inspopup.backdropInfo = {
 			bgFile		= "Interface\\DialogFrame\\UI-DialogBox-Background-Dark", -- 312922
 			edgeFile	= "Interface\\DialogFrame\\UI-DialogBox-Border", -- 131072
@@ -4817,7 +4881,11 @@ do
 			edgeSize	= 16,
 			insets		= { left = 1, right = 1, top = 1, bottom = 1 }
 		}
-		inspopup:ApplyBackdrop()
+		if not DBM:IsShadowlands() then
+			inspopup:SetBackdrop(inspopup.backdropInfo)
+		else
+			inspopup:ApplyBackdrop()
+		end
 		inspopup:SetSize(500, 120)
 		inspopup:SetPoint("TOP", UIParent, "TOP", 0, -200)
 		inspopup:SetFrameStrata("DIALOG")
@@ -5347,7 +5415,7 @@ do
 	local frame, fontstring, fontstringFooter, editBox, urlText
 
 	local function createFrame()
-		frame = CreateFrame("Frame", "DBMUpdateReminder", UIParent, "BackdropTemplate")
+		frame = CreateFrame("Frame", "DBMUpdateReminder", UIParent, DBM:IsShadowlands() and "BackdropTemplate")
 		frame:SetFrameStrata("FULLSCREEN_DIALOG") -- yes, this isn't a fullscreen dialog, but I want it to be in front of other DIALOG frames (like DBM GUI which might open this frame...)
 		frame:SetWidth(430)
 		frame:SetHeight(140)
@@ -5360,7 +5428,11 @@ do
 			edgeSize	= 32,
 			insets		= { left = 11, right = 12, top = 12, bottom = 11 },
 		}
-		frame:ApplyBackdrop()
+		if not DBM:IsShadowlands() then
+			frame:SetBackdrop(frame.backdropInfo)
+		else
+			frame:ApplyBackdrop()
+		end
 		fontstring = frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
 		fontstring:SetWidth(410)
 		fontstring:SetHeight(0)
@@ -5445,7 +5517,7 @@ do
 	local frame, fontstring, fontstringFooter, editBox, button3
 
 	local function createFrame()
-		frame = CreateFrame("Frame", "DBMNotesEditor", UIParent, "BackdropTemplate")
+		frame = CreateFrame("Frame", "DBMNotesEditor", UIParent, DBM:IsShadowlands() and "BackdropTemplate")
 		frame:SetFrameStrata("FULLSCREEN_DIALOG") -- yes, this isn't a fullscreen dialog, but I want it to be in front of other DIALOG frames (like DBM GUI which might open this frame...)
 		frame:SetWidth(430)
 		frame:SetHeight(140)
@@ -5458,7 +5530,11 @@ do
 			edgeSize	= 32,
 			insets		= { left = 11, right = 12, top = 12, bottom = 11 }
 		}
-		frame:ApplyBackdrop()
+		if not DBM:IsShadowlands() then
+			frame:SetBackdrop(frame.backdropInfo)
+		else
+			frame:ApplyBackdrop()
+		end
 		fontstring = frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
 		fontstring:SetWidth(410)
 		fontstring:SetHeight(0)
@@ -5796,6 +5872,7 @@ do
 		for i = #inCombat, 1, -1 do
 			local v = inCombat[i]
 			if not v.combatInfo then return end
+			if v.noBKDetection then return end
 			if v.multiEncounterPullDetection then
 				for _, eId in ipairs(v.multiEncounterPullDetection) do
 					if encounterID == eId then
@@ -6604,7 +6681,7 @@ do
 	local autoTLog = false
 
 	local function isCurrentContent()
-		if LastInstanceMapID == 1861 or LastInstanceMapID == 2070 or LastInstanceMapID == 2096 or LastInstanceMapID == 2164 or LastInstanceMapID == 2217 or LastInstanceMapID == 2296 or (difficultyModifier or 0) > 0 then--BfA/Shadowlands raids and any M+ dungeon
+		if instanceDifficultyBylevel[LastInstanceMapID] and (instanceDifficultyBylevel[LastInstanceMapID][1] >= playerLevel) and (instanceDifficultyBylevel[LastInstanceMapID][2] == 3) or (difficultyModifier or 0) > 0 then--current player level raid or any M+ dungeon
 			return true
 		end
 		return false
@@ -6844,11 +6921,15 @@ end
 function DBM:GetSpellInfo(spellId)
 	local name, rank, icon, castingTime, minRange, maxRange, returnedSpellId  = GetSpellInfo(spellId)
 	if not returnedSpellId then--Bad request all together
-		if spellId > 4 then
-			if self.Options.BadIDAlert then
-				self:AddMsg("|cffff0000Invalid call to GetSpellInfo for spellID: |r"..spellId..". Please report this bug")
-			else
-				self:Debug("|cffff0000Invalid call to GetSpellInfo for spellID: |r"..spellId)
+		if type(spellId) == "string" then
+			self:Debug("|cffff0000Invalid call to GetSpellInfo for spellID: |r"..spellId.." as a string!")
+		else
+			if spellId > 4 then
+				if self.Options.BadIDAlert then
+					self:AddMsg("|cffff0000Invalid call to GetSpellInfo for spellID: |r"..spellId..". Please report this bug")
+				else
+					self:Debug("|cffff0000Invalid call to GetSpellInfo for spellID: |r"..spellId)
+				end
 			end
 		end
 		return nil
@@ -7328,7 +7409,13 @@ function DBM:Debug(text, level)
 		local frame = _G[tostring(DBM.Options.ChatFrame)]
 		frame = frame and frame:IsShown() and frame or DEFAULT_CHAT_FRAME
 		frame:AddMessage("|cffff7d0aDBM Debug:|r "..text, 1, 1, 1)
+		--Debug mode is on, respect users debug logging level for callbacks
 		fireEvent("DBM_Debug", text, level)
+	else--Debug mode is off
+		--But we still want to generate callbacks for level 1 and 2 events
+		if (level or 1) < 3 then
+			fireEvent("DBM_Debug", text, level)
+		end
 	end
 end
 
@@ -7870,14 +7957,6 @@ function bossModPrototype:IsScenario()
 	return false
 end
 
-function bossModPrototype:IsTrivial(level)
-	if difficultyIndex == 24 then return false end--Timewalker dungeon, ignore level and return false for trivial
-	if playerLevel >= level then
-		return true
-	end
-	return false
-end
-
 function bossModPrototype:IsValidWarning(sourceGUID, customunitID)
 	if customunitID then
 		if UnitExists(customunitID) and UnitGUID(customunitID) == sourceGUID and UnitAffectingCombat(customunitID) then return true end
@@ -7960,6 +8039,7 @@ bossModPrototype.GetCIDFromGUID = DBM.GetCIDFromGUID
 bossModPrototype.IsCreatureGUID = DBM.IsCreatureGUID
 bossModPrototype.GetUnitIdFromGUID = DBM.GetUnitIdFromGUID
 bossModPrototype.CheckNearby = DBM.CheckNearby
+bossModPrototype.IsTrivial = DBM.IsTrivial
 
 do
 	local bossTargetuIds = {
@@ -8327,6 +8407,14 @@ do
 			["HasImmunity"] = true,
 			["RemoveCurse"] = true,
 		},
+		[1449] = {	--Initial Mage (used in exiles reach tutorial mode). Treated as hybrid. Utility disabled because that'd require checking tutorial progress
+			["Dps"] = true,
+			["Ranged"] = true,
+			["RangedDps"] = true,
+			["ManaUser"] = true,
+			["SpellCaster"] = true,
+			["CasterDps"] = true,
+		},
 		[65] = {	--Holy Paladin
 			["Healer"] = true,
 			["Ranged"] = true,
@@ -8359,6 +8447,16 @@ do
 			["HasInterrupt"] = true,
 			["HasImmunity"] = true,
 		},
+		[1451] = {	--Initial Paladin (used in exiles reach tutorial mode). Treated as hybrid. Utility disabled because that'd require checking tutorial progress
+			["Healer"] = true,
+			["Tank"] = true,
+			["Dps"] = true,
+			["Melee"] = true,
+			["MeleeDps"] = true,
+			["ManaUser"] = true,
+			["Physical"] = true,
+			["SpellCaster"] = true,
+		},
 		[71] = {	--Arms Warrior
 			["Dps"] = true,
 			["Melee"] = true,
@@ -8375,6 +8473,13 @@ do
 			["HasInterrupt"] = true,
 			["RaidCooldown"] = true,--Rallying Cry
 			["ImmunityDispeller"] = true,
+		},
+		[1446] = {	--Initial Warrior (used in exiles reach tutorial mode). Treated as hybrid. Utility disabled because that'd require checking tutorial progress
+			["Tank"] = true,
+			["Dps"] = true,
+			["Melee"] = true,
+			["MeleeDps"] = true,
+			["Physical"] = true,
 		},
 		[102] = {	--Balance Druid
 			["Dps"] = true,
@@ -8417,6 +8522,17 @@ do
 			["RemoveEnrage"] = true,
 			["RemoveMagic"] = true,
 		},
+		[1447] = {	-- Initial Druid (used in exiles reach tutorial mode). Treated as hybrid. Utility disabled because that'd require checking tutorial progress
+			["Tank"] = true,
+			["Melee"] = true,
+			["MeleeDps"] = true,
+			["Physical"] = true,
+			["Healer"] = true,
+			["Ranged"] = true,
+			["RangedDps"] = true,
+			["ManaUser"] = true,
+			["SpellCaster"] = true,
+		},
 		[250] = {	--Blood DK
 			["Tank"] = true,
 			["Melee"] = true,
@@ -8429,6 +8545,13 @@ do
 			["MeleeDps"] = true,
 			["Physical"] = true,
 			["HasInterrupt"] = true,
+		},
+		[1455] = {	--Initial DK (used in exiles reach tutorial mode). Treated as hybrid. Utility disabled because that'd require checking tutorial progress
+			["Tank"] = true,
+			["Dps"] = true,
+			["Melee"] = true,
+			["MeleeDps"] = true,
+			["Physical"] = true,
 		},
 		[253] = {	--Beastmaster Hunter
 			["Dps"] = true,
@@ -8454,6 +8577,12 @@ do
 			["HasInterrupt"] = true,
 			["RemoveEnrage"] = true,
 		},
+		[1448] = {	--Initial Hunter (used in exiles reach tutorial mode). Treated as hybrid. Utility disabled because that'd require checking tutorial progress
+			["Dps"] = true,
+			["Ranged"] = true,
+			["RangedDps"] = true,
+			["Physical"] = true,
+		},
 		[256] = {	--Discipline Priest
 			["Healer"] = true,
 			["Ranged"] = true,
@@ -8478,6 +8607,15 @@ do
 			["HasInterrupt"] = true,
 			["RemoveDisease"] = true,
 		},
+		[1452] = {	--Initial Priest (used in exiles reach tutorial mode). Treated as hybrid. Utility disabled because that'd require checking tutorial progress
+			["Dps"] = true,
+			["Healer"] = true,
+			["Ranged"] = true,
+			["RangedDps"] = true,
+			["ManaUser"] = true,
+			["SpellCaster"] = true,
+			["CasterDps"] = true,
+		},
 		[259] = {	--Assassination Rogue
 			["Dps"] = true,
 			["Melee"] = true,
@@ -8485,6 +8623,12 @@ do
 			["Physical"] = true,
 			["HasInterrupt"] = true,
 			["HasImmunity"] = true,
+		},
+		[1453] = {	--Initial Rogue (used in exiles reach tutorial mode). Treated as hybrid. Utility disabled because that'd require checking tutorial progress
+			["Dps"] = true,
+			["Melee"] = true,
+			["MeleeDps"] = true,
+			["Physical"] = true,
 		},
 		[262] = {	--Elemental Shaman
 			["Dps"] = true,
@@ -8519,6 +8663,17 @@ do
 			["MagicDispeller"] = true,
 			["HasInterrupt"] = true,
 		},
+		[1444] = {	--Initial Shaman (used in exiles reach tutorial mode). Treated as hybrid. Utility disabled because that'd require checking tutorial progress
+			["Healer"] = true,
+			["Dps"] = true,
+			["Melee"] = true,
+			["MeleeDps"] = true,
+			["Ranged"] = true,
+			["RangedDps"] = true,
+			["ManaUser"] = true,
+			["SpellCaster"] = true,
+			["Physical"] = true,
+		},
 		[265] = {	--Affliction Warlock
 			["Dps"] = true,
 			["Ranged"] = true,
@@ -8526,6 +8681,14 @@ do
 			["ManaUser"] = true,
 			["SpellCaster"] = true,
 			["RemoveMagic"] = true,--Singe Magic (Imp)
+			["CasterDps"] = true,
+		},
+		[1454] = {	--Initial Warlock (used in exiles reach tutorial mode). Treated as hybrid. Utility disabled because that'd require checking tutorial progress
+			["Dps"] = true,
+			["Ranged"] = true,
+			["RangedDps"] = true,
+			["ManaUser"] = true,
+			["SpellCaster"] = true,
 			["CasterDps"] = true,
 		},
 		[268] = {	--Brewmaster Monk
@@ -8556,6 +8719,17 @@ do
 			["RemoveDisease"] = true,
 			["RemoveMagic"] = true,
 		},
+		[1450] = {	--Initial Monk (used in exiles reach tutorial mode). Treated as hybrid. Utility disabled because that'd require checking tutorial progress
+			["Tank"] = true,
+			["Healer"] = true,
+			["Dps"] = true,
+			["Melee"] = true,
+			["MeleeDps"] = true,
+			["Physical"] = true,
+			["Ranged"] = true,
+			["ManaUser"] = true,
+			["SpellCaster"] = true,
+		},
 		[577] = {	--Havok Demon Hunter
 			["Dps"] = true,
 			["Melee"] = true,
@@ -8570,6 +8744,12 @@ do
 			["Physical"] = true,
 			["HasInterrupt"] = true,
 			["MagicDispeller"] = true,
+		},
+		[1456] = {	--Initial Demon Hunter (used in exiles reach tutorial mode). Treated as hybrid. Utility disabled because that'd require checking tutorial progress
+			["Tank"] = true,
+			["Melee"] = true,
+			["MeleeDps"] = true,
+			["Physical"] = true,
 		},
 	}
 	specRoleTable[63] = specRoleTable[62]--Frost Mage same as arcane
@@ -10506,8 +10686,13 @@ do
 		end
 	end
 
-	function DBM:PlaySpecialWarningSound(soundId)
-		local sound = type(soundId) == "number" and self.Options["SpecialWarningSound" .. (soundId == 1 and "" or soundId)] or soundId or self.Options.SpecialWarningSound
+	function DBM:PlaySpecialWarningSound(soundId, force)
+		local sound
+		if not force and DBM:IsTrivial() and DBM.Options.DontPlayTrivialSpecialWarningSound then
+			sound = self.Options.RaidWarningSound
+		else
+			sound = type(soundId) == "number" and self.Options["SpecialWarningSound" .. (soundId == 1 and "" or soundId)] or soundId or self.Options.SpecialWarningSound
+		end
 		self:PlaySoundFile(sound, nil, true)
 	end
 
@@ -10515,7 +10700,7 @@ do
 		frame:SetFrameStrata("HIGH")
 	end
 
-	function DBM:ShowTestSpecialWarning(text, number, noSound)
+	function DBM:ShowTestSpecialWarning(text, number, noSound, force)
 		if moving then
 			return
 		end
@@ -10524,7 +10709,7 @@ do
 		self:Unschedule(testWarningEnd)
 		self:Schedule(self.Options.SpecialWarningDuration2 * 1.3, testWarningEnd)
 		if number and not noSound then
-			self:PlaySpecialWarningSound(number)
+			self:PlaySpecialWarningSound(number, force)
 		end
 		if number and DBM.Options["SpecialWarningFlash"..number] then
 			local flashColor = self.Options["SpecialWarningFlashCol"..number]
@@ -11704,6 +11889,9 @@ function bossModPrototype:RegisterCombat(cType, ...)
 	if self.noEEDetection then
 		info.noEEDetection = self.noEEDetection
 	end
+	if self.noBKDetection then
+		info.noBKDetection = self.noBKDetection
+	end
 	if self.noFriendlyEngagement then
 		info.noFriendlyEngagement = self.noFriendlyEngagement
 	end
@@ -11810,6 +11998,13 @@ function bossModPrototype:DisableEEKillDetection()
 	end
 end
 
+function bossModPrototype:DisableBKKillDetection()
+	self.noBKDetection = true
+	if self.combatInfo then
+		self.combatInfo.noBKDetection = true
+	end
+end
+
 function bossModPrototype:DisableFriendlyDetection()
 	self.noFriendlyEngagement = true
 	if self.combatInfo then
@@ -11910,7 +12105,7 @@ end
 
 function bossModPrototype:SetRevision(revision)
 	revision = parseCurseDate(revision or "")
-	if not revision or revision == "20201026234750" then
+	if not revision or revision == "20201108211229" then
 		-- bad revision: either forgot the svn keyword or using github
 		revision = DBM.Revision
 	end

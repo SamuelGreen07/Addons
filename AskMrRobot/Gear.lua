@@ -29,17 +29,17 @@ local function countItemDifferences(item1, item2)
 	
 	-- one nil and other not, or different id, totally different
 	if (not item1 and item2) or (item1 and not item2) or item1.id ~= item2.id then 
-		return 100000 
+		return 1000000 
 	end
 	
     -- different versions of same item (id + bonus ids + suffix + drop level, constitutes a different physical drop)
     if Amr.GetItemUniqueId(item1, true, true) ~= Amr.GetItemUniqueId(item2, true, true) then
-		return 10000
+		return 100000
     end
     
     -- different upgrade levels of the same item
     if item1.upgradeId ~= item2.upgradeId then
-        return 1000
+        return 10000
 	end
 	
 	-- a change that requires reforging is considered more different than a change that does not;
@@ -51,7 +51,7 @@ local function countItemDifferences(item1, item2)
 		-- azerite that needs to be reforged
 		if item2.azerite and not item1.azerite then
 			-- kind of a dumb case... but we would need to blank all azerite on item2 to match item1
-			aztReforges = #item2.azerite * 100
+			aztReforges = #item2.azerite * 1000
 		elseif item2.azerite then
 			-- count up azerite on item2 but not on item1, these would need to be reforged
 			for i = 1, #item2.azerite do
@@ -62,7 +62,7 @@ local function countItemDifferences(item1, item2)
 					end
 				end
 				if missing then
-					aztReforges = aztReforges + 100
+					aztReforges = aztReforges + 1000
 				end
 			end
 		end
@@ -70,7 +70,7 @@ local function countItemDifferences(item1, item2)
 		-- azerite that needs to be selected
 		if item1.azerite and not item2.azerite then
 			-- item2 is blank, so just need to choose all the right ones
-			aztSelects = #item1.azerite * 10
+			aztSelects = #item1.azerite * 100
 		elseif item1.azerite then
 			-- count up azerite on item1 but not on item2, these would need to be selected
 			for i = 1, #item1.azerite do				
@@ -81,7 +81,7 @@ local function countItemDifferences(item1, item2)
 					end
 				end
 				if missing then
-					aztSelects = aztSelects + 10
+					aztSelects = aztSelects + 100
 				end
 			end
 		end		
@@ -91,17 +91,23 @@ local function countItemDifferences(item1, item2)
     local gemDiffs = 0
     for i = 1, 3 do
         if item1.gemIds[i] ~= item2.gemIds[i] then
-            gemDiffs = gemDiffs + 1
+            gemDiffs = gemDiffs + 10
         end
     end
     
 	-- different enchants
     local enchantDiff = 0
     if item1.enchantId ~= item2.enchantId then
-        enchantDiff = 1
+        enchantDiff = 10
     end
-    
-    return aztReforges + aztSelects + gemDiffs + enchantDiff
+	
+	-- different guid
+	local guidDiff = 0
+	if item1.guid and item2.guid and item1.guid ~= item2.guid then
+		guidDiff = 1
+	end
+
+    return aztReforges + aztSelects + gemDiffs + enchantDiff + guidDiff
 end
 
 -- given a table of items (keyed or indexed doesn't matter) find closest match to item, or nil if none are a match
@@ -134,14 +140,14 @@ function Amr:FindMatchingItem(item, player, usedItems)
 	if not item then return nil end
 
 	local equipped = player.Equipped and player.Equipped[player.ActiveSpec] or nil
-	local bestItem, bestDiff, bestLoc = findMatchingItemFromTable(item, equipped, nil, 100000, nil, usedItems, "equip")
+	local bestItem, bestDiff, bestLoc = findMatchingItemFromTable(item, equipped, nil, 1000000, nil, usedItems, "equip")
 	bestItem, bestDiff, bestLoc = findMatchingItemFromTable(item, player.BagItems, bestItem, bestDiff, bestLoc, usedItems, "bag")
 	if player.BankItems then
 		bestItem, bestDiff, bestLoc = findMatchingItemFromTable(item, player.BankItems, bestItem, bestDiff, bestLoc, usedItems, "bank")		
 	end	
 
-	if bestDiff >= 100000 then
-		return nil, 100000
+	if bestDiff >= 1000000 then
+		return nil, 1000000
 	else
 		usedItems[bestLoc] = true
 		return bestItem, bestDiff
@@ -302,14 +308,18 @@ local function renderGear(setupId, container)
 			local isEquipped = false			
 			if equippedItem and optimalItem and Amr.GetItemUniqueId(equippedItem, false, true) == Amr.GetItemUniqueId(optimalItem, false, true) then
 
-				if slotId == 1 or slotId == 3 or slotId == 5 then
-					-- show the item as not equipped if azerite doesn't match... might mean they have to switch to another version of same item
-					local aztDiff = countItemDifferences(optimalItem, equippedItem)
-					if aztDiff < 10 then
-						isEquipped = true
-					end
+				if optimalItem.guid then						
+					isEquipped = optimalItem.guid == equippedItem.guid
 				else
-					isEquipped = true
+					--[[if slotId == 1 or slotId == 3 or slotId == 5 then					
+						-- show the item as not equipped if azerite doesn't match... might mean they have to switch to another version of same item
+						local aztDiff = countItemDifferences(optimalItem, equippedItem)
+						if aztDiff < 100 then
+							isEquipped = true
+						end
+					else]]
+						isEquipped = true
+					--end
 				end
 			end
 

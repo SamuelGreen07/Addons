@@ -8,6 +8,7 @@
   + [ColorPicker](#colorpickerdesc)
   + [Button](#buttondesc)
   + [Slider](#sliderdesc)
+  + [Tooltip](#tooltipdesc)
 + [Examples](#example1) 
  
 <a name="about" />
@@ -83,11 +84,12 @@ local colorPicker = libRedDropdown.CreateColorPicker();
 ### Methods
 | Method | Description |
 |--------|-------------|
-| colorPicker:GetTextObject()                                          | Returns text object of label (_FontString_). [Example](#example6)       |
-| colorPicker:SetText(_string_ text)                                   | Sets text of label. [Example](#example6)                                          |
-| colorPicker:GetText()                                                | Returns text of label (_string_). [Example](#example6)                            |
-| colorPicker:SetColor(_number_ red, _number_ green, _number_ blue)    | Sets color. Color values are between 0.0 and 1.0 [Example](#example6)             |
-| colorPicker:GetColor()                                               | Returns color (_number_ red, _number_ green, _number_ blue). [Example](#example6) |
+| colorPicker:GetTextObject()                                                          | Returns text object of label (_FontString_). [Example](#example6)                                                                                                           |
+| colorPicker:SetText(_string_ text)                                                   | Sets text of label. [Example](#example6)                                                                                                                                    |
+| colorPicker:GetText()                                                                | Returns text of label (_string_). [Example](#example6)                                                                                                                      |
+| colorPicker:SetColor(_number_ red, _number_ green, _number_ blue, _number_ alpha)    | Sets color. Color values are between 0.0 and 1.0. If *alpha* is nil, it will be interpreted as 1.0 [Example](#example6)                                                     |
+| colorPicker:GetColor()                                                               | Returns color (_number_ red, _number_ green, _number_ blue). [Example](#example6)                                                                                           |
+| colorPicker.func                                                                     | You should assign `function(self, r, g, b, a)` to this variable. This function will be executed when any value (red, green, blue, or alpha) is changed [Example](#example6) |
   
 <br /><a name="buttondesc" /><br />
 ## > Button
@@ -128,6 +130,20 @@ local slider = libRedDropdown.CreateSlider();
 | slider:GetEditboxObject()    | Returns editbox object (_EditBox_).                           |
 | slider:GetLowTextObject()    | Returns text object of label of minimum value (_FontString_). |
 | slider:GetHighTextObject()   | Returns text object of label of maximum value (_FontString_). |
+
+<br /><a name="tooltipdesc" /><br />
+## > Tooltip
+Very simple text tooltip. [Example](#example_tooltip)
+### Constructor
+``` lua
+local tooltip = libRedDropdown.CreateTooltip();
+```
+### Methods
+| Method | Description |
+|--------|-------------|
+| tooltip:SetText(_string_ text, _number_ textureID)       | Sets text (and optionally icon) of tooltip.  |
+| tooltip:GetTextObject()                                  | Returns text object of label (_FontString_). |
+| tooltip:SetSpellById(_number_ spellid)                   | Sets spell as info for tooltip.              |
   
 <br /><br /><a name="example1" /><br />
 # Examples  
@@ -146,7 +162,8 @@ _table entites_: it is a table with information about buttons that DropdownMenu 
   * .checkBoxEnabled: set to true to enable button's internal checkbox (boolean) 
   * .onCheckBoxClick: handler for checkbox-checked event (function) 
   * .checkBoxState: state (checked/unchecked) of button's internal checkbox (boolean) 
-  * .onCloseButtonClick: if not nil, than there will be a small "X" buttons at the right of buttons in the list. This callback will be called on press on this button (function) 
+  * .onCloseButtonClick: if not nil, then there will be a small "X" buttons at the right of buttons in the list. This callback will be called on press on this button (function) 
+  * .buttonColor: if not nil, then button will have this color. Format: { red (0.0 - 1.0), green (0.0 - 1.0), blue (0.0 - 1.0), alpha (0.0 - 1.0) }
 
 _boolean dontUpdateInternalList_: prevents this method from changing internal list of buttons. Used internally by searchbox.  
 ``` lua
@@ -170,6 +187,7 @@ for i = 1, 100 do
       end
     end,
     checkBoxState = false,
+	buttonColor = {1, 1, 0, 1},
   });
 end
 dropdownMenu:SetList(t);
@@ -209,32 +227,15 @@ triStateCheckbox:SetTriState(1); -- Set to "Enabled#1"
 
 ### ColorPicker
 ``` lua
-local SOME_VALUE = { 1, 1, 0 };
 local colorPicker = libRedDropdown.CreateColorPicker();
 colorPicker:SetParent(UIParent);
 colorPicker:SetPoint("CENTER", 0, 0);
 colorPicker:SetText("Label");
-colorPicker:SetColor(1, 0, 0);
-colorPicker:SetScript("OnClick", function()
-  ColorPickerFrame:Hide();
-  local function callback(restore)
-    local r, g, b;
-    if (restore) then
-      r, g, b = unpack(restore);
-    else
-      r, g, b = ColorPickerFrame:GetColorRGB();
-    end
-    colorPicker:SetColor(r, g, b);
-    local red, green, blue = colorPicker:GetColor();
-    SOME_VALUE = { red, green, blue };
-  end
-  ColorPickerFrame.func, ColorPickerFrame.opacityFunc, ColorPickerFrame.cancelFunc =  
-      callback, callback, callback;
-  ColorPickerFrame:SetColorRGB(unpack(SOME_VALUE));
-  ColorPickerFrame.hasOpacity = false;
-  ColorPickerFrame.previousValues = SOME_VALUE;
-  ColorPickerFrame:Show();
-end);
+colorPicker:SetColor(1, 1, 0, 1);
+colorPicker.func = function(self, r, g, b, a)
+	-- some code that handles new value of r, g, b, a
+end
+colorPicker:Show();
 ```
 ***
 <a name="example7" />
@@ -290,5 +291,43 @@ slider:GetEditboxObject():SetScript("OnEnterPressed", function(self, value)
 end);
 slider.lowtext:SetText(tostring(minValue));
 slider.hightext:SetText(tostring(maxValue));
+```
+***
+<a name="example_tooltip" />
+
+### Tooltip
+``` lua
+-- self-initialized
+local button = libRedDropdown.CreateButton();
+button:SetParent(UIParent);
+button:SetText("Click me!");
+button:SetWidth(110);
+button:SetHeight(20);
+button:SetPoint("CENTER", 0, 0);
+button:SetScript("OnClick", function(self, ...)
+  print(string.format("Button with label '%s' is clicked!", self:GetText()));
+end);
+libRedDropdown.SetTooltip(button, "I'm tooltip!", "LEFT"); -- the last argument is justification of text
+
+-- manual
+local button = libRedDropdown.CreateButton();
+button:SetParent(UIParent);
+button:SetText("Click me!");
+button:SetWidth(110);
+button:SetHeight(20);
+button:SetPoint("CENTER", 0, 0);
+button:SetScript("OnClick", function(self, ...)
+  print(string.format("Button with label '%s' is clicked!", self:GetText()));
+end);
+local tooltip = libRedDropdown.CreateTooltip();
+button:HookScript("OnEnter", function(self, ...)
+	tooltip:ClearAllPoints();
+	tooltip:SetPoint("BOTTOM", button, "TOP", 0, 0);
+	tooltip:SetText("I'm tooltip!");
+	tooltip:Show();
+end);
+button:HookScript("OnLeave", function(self, ...)
+	tooltip:Hide();
+end);
 ```
 ***

@@ -1,6 +1,6 @@
 -- AskMrRobot-Serializer will serialize and communicate character data between users.
 
-local MAJOR, MINOR = "AskMrRobot-Serializer", 92
+local MAJOR, MINOR = "AskMrRobot-Serializer", 93
 local Amr, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not Amr then return end -- already loaded by something else
@@ -429,13 +429,22 @@ end
 -- get currently equipped items, store with currently active spec
 local function readEquippedItems(ret)
 	local equippedItems = {};
-	local loc = ItemLocation.CreateEmpty()
+	--local loc = ItemLocation.CreateEmpty()
+	local item
 	for slotNum = 1, #Amr.SlotIds do
 		local slotId = Amr.SlotIds[slotNum]
 		local itemLink = GetInventoryItemLink("player", slotId)
 		if itemLink then
 			local itemData = Amr.ParseItemLink(itemLink)
 			if itemData then
+				item = Item:CreateFromEquipmentSlot(slotId)
+
+				-- seems to be of the form Item-1147-0-4000000XXXXXXXXX, so we take just the last 9 digits
+				itemData.guid = item:GetItemGUID()
+				if itemData.guid and strlen(itemData.guid) > 9 then
+					itemData.guid = strsub(itemData.guid, -9)
+				end
+
 				--[[
 				-- see if this is an azerite item and read azerite power ids
 				loc:SetEquipmentSlot(slotId)
@@ -573,6 +582,7 @@ local function appendItemsToExport(fields, itemObjects)
 	local prevLevel = 0
 	--local prevAzeriteId = 0
 	local prevRelicBonusId = 0
+
     for i, itemData in ipairs(itemObjects) do
         local itemParts = {}
         
@@ -642,6 +652,10 @@ local function appendItemsToExport(fields, itemObjects)
                 table.insert(itemParts, "r" .. (bValue - prevRelicBonusId))
                 prevRelicBonusId = bValue
             end
+		end
+
+		if itemData.guid then
+			table.insert(itemParts, "!" .. itemData.guid)
 		end
 		
         table.insert(fields, table.concat(itemParts, ""))

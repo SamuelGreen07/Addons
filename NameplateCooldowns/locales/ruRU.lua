@@ -1,8 +1,6 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("NameplateCooldowns", "ruRU");
 L = L or {}
 --@non-debug@
-L["Always display CD icons at full opacity (ReloadUI is needed)"] = [=[Иконки заклинаний всегда полностью непрозрачны
-(Необходима перезагрузка интерфейса)]=]
 L["anchor-point:bottom"] = "Снизу"
 L["anchor-point:bottomleft"] = "Снизу слева"
 L["anchor-point:bottomright"] = "Снизу справа"
@@ -58,26 +56,16 @@ L["options:borders:show-blizz-borders"] = "Показывать стандарт
 L["options:category:borders"] = "Границы"
 L["options:category:spells"] = "Заклинания"
 L["options:category:text"] = "Текст"
---[[Translation missing --]]
-L["options:general:anchor-point"] = "Anchor point"
---[[Translation missing --]]
-L["options:general:anchor-point-to-parent"] = "Anchor point (to parent)"
+L["options:general:anchor-point"] = "Точка привязки (якорь)"
+L["options:general:anchor-point-to-parent"] = "Точка привязки (якорь) относительно родительского контейнера"
 L["options:general:disable-addon-btn"] = "Отключить аддон"
 L["options:general:enable-addon-btn"] = "Включить аддон"
 L["options:general:enable-only-for-target-nameplate"] = "Показывать КД только на нэймплэйте цели"
---[[Translation missing --]]
-L["options:general:full-opacity-always"] = "Icons are always completely opaque"
---[[Translation missing --]]
-L["options:general:full-opacity-always:tooltip"] = [=[If this option is enabled, the icons will 
-always be completely opaque. If not, the opacity
-will be the same as the health bar]=]
+L["options:general:full-opacity-always"] = "Иконки всегда непрозрачны"
+L["options:general:full-opacity-always:tooltip"] = "Если эта опция включена, иконки всегда будут полностью непрозрачными. Если нет, прозрачность будет соответствовать полосе здоровья"
 L["options:general:icon-grow-direction"] = "Направление роста значков"
---[[Translation missing --]]
-L["options:general:ignore-nameplate-scale"] = "Ignore nameplate scale"
---[[Translation missing --]]
-L["options:general:ignore-nameplate-scale:tooltip"] = [=[If this option is checked, icon size will not
-change accordingly to nameplate scale
-(for example, if nameplate of your target becomes bigger)]=]
+L["options:general:ignore-nameplate-scale"] = "Игнорировать масштаб неймплейта"
+L["options:general:ignore-nameplate-scale:tooltip"] = "Если эта опция включена, размер иконки не будет меняться в соответствии с масштабом неймплейта (например, когда неймплейт вашей цели увеличивается)"
 L["options:general:show-cd-on-allies"] = "Показывать КД на полосках ХП союзников"
 L["options:general:show-inactive-cd"] = "Показывать неактивные кулдауны"
 L["options:general:show-inactive-cd:tooltip"] = [=[Обратите внимание: вы не будете видеть все доступные кулдауны!
@@ -91,10 +79,8 @@ L["options:spells:cooldown-time"] = "Значение кулдауна"
 L["options:spells:delete-all-spells"] = "Удалить все заклинания"
 L["options:spells:delete-all-spells-confirmation"] = "Вы действительно хотите удалить ВСЕ заклинания?"
 L["options:spells:delete-spell"] = "Удалить заклинание"
---[[Translation missing --]]
-L["options:spells:disable-all-spells"] = "Disable all spells"
---[[Translation missing --]]
-L["options:spells:enable-all-spells"] = "Enable all spells"
+L["options:spells:disable-all-spells"] = "Отключить все способности"
+L["options:spells:enable-all-spells"] = "Включить все способности"
 L["options:spells:enable-tracking-of-this-spell"] = "Включить отслеживание этого заклинания"
 L["options:spells:icon-glow"] = "Подсветка иконки выключена"
 L["options:spells:icon-glow-always"] = "Подсветка иконки включена постоянно"

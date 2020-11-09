@@ -7,7 +7,7 @@ local Trinkets = addonTable.Trinkets;
 local Reductions = addonTable.Reductions;
 
 --@non-debug@
-local buildTimestamp = "80300.13-release";
+local buildTimestamp = "90001.1-release";
 --@end-non-debug@
 
 local L = LibStub("AceLocale-3.0"):GetLocale("NameplateCooldowns");

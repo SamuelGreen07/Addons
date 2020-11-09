@@ -1,14 +1,14 @@
-## Interface: 80000
+## Interface: 90001
 ## Title: |cff1784d1ElvUI |rExtraDataTexts
 ## Author: Caedis
-## URL: http://www.tukui.org/forums/topic.php?id=66
-## Version: 1.8
+## URL: https://www.curseforge.com/wow/addons/elvui_extradatatexts
+## URL: https://www.tukui.org/addons.php?id=66
+## Version: 2.1.4
 ## RequiredDeps: ElvUI
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
+## X-Tukui-ProjectID: 66
+## X-Tukui-ProjectFolders: ElvUI_ExtraDataTexts
 
-Core.lua
-oUFTags\load_ouftags.xml
 Datatexts\load_datatexts.xml
-Datatexts\stats\load_stats.xml
-Misc\load_misc.xml
+

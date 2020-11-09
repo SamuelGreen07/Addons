@@ -22,7 +22,7 @@
 ## Notes-itIT: BigWigs Uldir Modules
 ## Notes-ptBR: BigWigs Uldir Modules
 ## Notes-koKR: BigWigs Uldir Modules
-## Version: v185.4-4-g14950ac
+## Version: v185.4-36-ga682125
 
 ## LoadOnDemand: 1
 ## Dependencies: BigWigs

@@ -1,7 +1,6 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("NameplateCooldowns", "zhTW");
 L = L or {}
 --@non-debug@
-L["Always display CD icons at full opacity (ReloadUI is needed)"] = "圖示完全不透明 (需要重新載入介面)"
 L["anchor-point:bottom"] = "下"
 L["anchor-point:bottomleft"] = "左下"
 L["anchor-point:bottomright"] = "右下"

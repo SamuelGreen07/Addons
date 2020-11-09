@@ -332,7 +332,7 @@ local function GetContainerItemLevel(link, bagID, slotID)
 	return itemDB[link]
 end]]
 
-function Implementation:GetItemInfo(bagID, slotID, i)
+function Implementation:GetCustomItemInfo(bagID, slotID, i)
 	i = i or defaultItem
 	for k in pairs(i) do i[k] = nil end
 
@@ -410,7 +410,7 @@ end
 ]]
 local function nope() end
 function Implementation:UpdateSlot(bagID, slotID)
-	local item = self:GetItemInfo(bagID, slotID)
+	local item = self:GetCustomItemInfo(bagID, slotID)
 	local button = self:GetButton(bagID, slotID)
 	local container = self:GetContainerForItem(item, button)
 
@@ -500,14 +500,14 @@ function Implementation:BAG_UPDATE_COOLDOWN(event, bagID)
 		for slotID=1, GetContainerNumSlots(bagID) do
 			local button = self:GetButton(bagID, slotID)
 			if(button) then
-				local item = self:GetItemInfo(bagID, slotID)
+				local item = self:GetCustomItemInfo(bagID, slotID)
 				button:UpdateCooldown(item)
 			end
 		end
 	else
 		for id, container in pairs(self.contByID) do
 			for i, button in pairs(container.buttons) do
-				local item = self:GetItemInfo(button.bagID, button.slotID)
+				local item = self:GetCustomItemInfo(button.bagID, button.slotID)
 				button:UpdateCooldown(item)
 			end
 		end
@@ -524,7 +524,7 @@ function Implementation:ITEM_LOCK_CHANGED(event, bagID, slotID)
 
 	local button = self:GetButton(bagID, slotID)
 	if(button) then
-		local item = self:GetItemInfo(bagID, slotID)
+		local item = self:GetCustomItemInfo(bagID, slotID)
 		button:UpdateLock(item)
 	end
 end
@@ -564,7 +564,7 @@ end
 function Implementation:UNIT_QUEST_LOG_CHANGED(event)
 	for id, container in pairs(self.contByID) do
 		for i, button in pairs(container.buttons) do
-			local item = self:GetItemInfo(button.bagID, button.slotID)
+			local item = self:GetCustomItemInfo(button.bagID, button.slotID)
 			button:UpdateQuest(item)
 		end
 	end

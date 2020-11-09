@@ -22,7 +22,7 @@
 ## Notes-itIT: BigWigs Battle of Dazar'alor Modules
 ## Notes-ptBR: BigWigs Battle of Dazar'alor Modules
 ## Notes-koKR: BigWigs Battle of Dazar'alor Modules
-## Version: v185.4-4-g14950ac
+## Version: v185.4-36-ga682125
 
 ## LoadOnDemand: 1
 ## Dependencies: BigWigs

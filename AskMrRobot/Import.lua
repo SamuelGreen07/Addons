@@ -161,7 +161,9 @@ local function parseItemList(parts, startPos, endToken, hasSlot)
             local token = ""
             local prop = "i"
             local tokenComplete = false
-            for j = 1, string.len(itemString) do
+            local guid = nil
+
+            for j = 1, string.len(itemString) do                
                 local c = string.sub(itemString, j, j)
                 if digits[c] == nil then
                     tokenComplete = true
@@ -210,6 +212,12 @@ local function parseItemList(parts, startPos, endToken, hasSlot)
                     -- we have moved on to the next token
                     prop = c
                 end
+
+                if prop == "!" then
+                    -- guid is always at the end, if present
+                    guid = strsub(itemString, j + 1)
+                    break
+                end
             end
             
             local obj = {}
@@ -237,6 +245,10 @@ local function parseItemList(parts, startPos, endToken, hasSlot)
                 obj.bonusIds = bonusIds
             end
             
+            if guid then
+                obj.guid = guid
+            end
+
             --if hasAzerites then
             --    obj.azerite = azerite
             --end

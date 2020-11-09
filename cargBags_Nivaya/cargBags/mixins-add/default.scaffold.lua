@@ -137,7 +137,7 @@ end
 
 --[[!
 	Update the button with new item-information
-	@param item <table> The itemTable holding information, see Implementation:GetItemInfo()
+	@param item <table> The itemTable holding information, see Implementation:GetCustomItemInfo()
 	@callback OnUpdate(item)
 ]]
 local L = cargBags:GetLocalizedTypes()
@@ -205,7 +205,7 @@ end
 
 --[[!
 	Updates the buttons cooldown with new item-information
-	@param item <table> The itemTable holding information, see Implementation:GetItemInfo()
+	@param item <table> The itemTable holding information, see Implementation:GetCustomItemInfo()
 	@callback OnUpdateCooldown(item)
 ]]
 local function ItemButton_UpdateCooldown(self, item)
@@ -221,7 +221,7 @@ end
 
 --[[!
 	Updates the buttons lock with new item-information
-	@param item <table> The itemTable holding information, see Implementation:GetItemInfo()
+	@param item <table> The itemTable holding information, see Implementation:GetCustomItemInfo()
 	@callback OnUpdateLock(item)
 ]]
 local function ItemButton_UpdateLock(self, item)
@@ -232,7 +232,7 @@ end
 
 --[[!
 	Updates the buttons quest texture with new item information
-	@param item <table> The itemTable holding information, see Implementation:GetItemInfo()
+	@param item <table> The itemTable holding information, see Implementation:GetCustomItemInfo()
 	@callback OnUpdateQuest(item)
 ]]
 local function ItemButton_UpdateQuest(self, item)
