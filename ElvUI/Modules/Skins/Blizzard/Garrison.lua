@@ -278,6 +278,7 @@ function S:Blizzard_GarrisonUI()
 	S:HandleCloseButton(MissionPage.CloseButton)
 	MissionPage.CloseButton:SetFrameLevel(MissionPage:GetFrameLevel() + 2)
 	S:HandleButton(MissionList.CompleteDialog.BorderFrame.ViewButton)
+	MissionList.CompleteDialog.BorderFrame.ViewButton.backdrop:SetFrameLevel(MissionList.CompleteDialog.BorderFrame.ViewButton:GetFrameLevel())
 	S:HandleButton(MissionPage.StartMissionButton)
 	S:HandleButton(GarrisonMissionFrame.MissionComplete.NextMissionButton)
 
@@ -427,6 +428,7 @@ function S:Blizzard_GarrisonUI()
 	S:HandleCloseButton(MissionPage.CloseButton)
 	MissionPage.CloseButton:SetFrameLevel(MissionPage.CloseButton:GetFrameLevel() + 2)
 	S:HandleButton(MissionList.CompleteDialog.BorderFrame.ViewButton)
+	MissionList.CompleteDialog.BorderFrame.ViewButton.backdrop:SetFrameLevel(MissionList.CompleteDialog.BorderFrame.ViewButton:GetFrameLevel())
 	S:HandleButton(GarrisonShipyardFrame.MissionComplete.NextMissionButton)
 	MissionList.CompleteDialog:SetAllPoints(MissionList.MapTexture)
 	GarrisonShipyardFrame.MissionCompleteBackground:SetAllPoints(MissionList.MapTexture)
@@ -490,7 +492,7 @@ function S:Blizzard_GarrisonUI()
 	-- Followers
 	local Follower = _G.OrderHallMissionFrameFollowers
 	FollowerList = OrderHallMissionFrame.FollowerList -- swap
-	local FollowerTab = OrderHallMissionFrame.FollowerTab
+	FollowerTab = OrderHallMissionFrame.FollowerTab -- swap
 	Follower:StripTextures()
 	Follower:CreateBackdrop('Transparent')
 	FollowerList:StripTextures()
@@ -586,10 +588,12 @@ function S:Blizzard_GarrisonUI()
 	-- Shadowlands Mission
 	local CovenantMissionFrame = _G.CovenantMissionFrame
 	SkinMissionFrame(CovenantMissionFrame) -- currently dont use StripTextures here, cause it seems blizzard fucks this up /shurg
+	S:HandleIcon(_G.CovenantMissionFrameMissions.MaterialFrame.Icon)
 	_G.CovenantMissionFrameMissions.RaisedFrameEdges:SetAlpha(0)
 
-	S:HandleIcon(_G.CovenantMissionFrameMissions.MaterialFrame.Icon)
-	--S:HandleScrollBar(_G.CovenantMissionFrameMissionsListScrollFrameScrollBar) -- Dont skin it, the "NEW" default ones looks amazing
+	if CovenantMissionFrame.RaisedBorder then
+		CovenantMissionFrame.RaisedBorder:SetAlpha(0)
+	end
 
 	-- Complete Missions
 	_G.CombatLog.CombatLogMessageFrame:StripTextures()
