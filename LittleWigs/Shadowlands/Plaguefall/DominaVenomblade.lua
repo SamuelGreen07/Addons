@@ -44,7 +44,7 @@ end
 --
 
 function mod:BroodAssassins(args)
-	self:Message2(args.spellId, "cyan")
+	self:Message(args.spellId, "cyan")
 	self:PlaySound(args.spellId, "long")
 	self:Bar(args.spellId, 36)
 end
@@ -54,12 +54,12 @@ function mod:CytotoxicSlash(args)
 end
 
 function mod:CytotoxicSlashApplied(args) -- XXX Only for tanks, healers, poison dispellers?
-	self:TargetMessage2(args.spellId, "purple", args.destName)
+	self:TargetMessage(args.spellId, "purple", args.destName)
 	self:PlaySound(args.spellId, "alert")
 end
 
 function mod:ShadowwhirlApplied(args)
-	self:TargetMessage2(325245, "yellow", args.destName)
+	self:TargetMessage(325245, "yellow", args.destName)
 	self:Bar(325245, 22)
 	if self:Me(args.destGUID) then
 		self:PlaySound(325245, "warning")

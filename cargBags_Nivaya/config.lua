@@ -4,7 +4,7 @@ local defaultFont = GetLocale() == "ruRU" and [[Interface\AddOns\cargBags_Nivaya
 
 ns.options = {
 
-filterArtifactPower = true, --set to 'false' to disable the category for items that give Artifact Power
+filterArtifactPower = true, --set to 'false' to disable the category for items that give Artifact Power / Anima
 
 itemSlotSize = 32,	-- Size of item slots
 

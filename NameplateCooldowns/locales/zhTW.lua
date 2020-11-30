@@ -1,6 +1,8 @@
+-- luacheck: no max line length
+-- luacheck: globals LibStub
+
 local L = LibStub("AceLocale-3.0"):NewLocale("NameplateCooldowns", "zhTW");
 L = L or {}
---@non-debug@
 L["anchor-point:bottom"] = "下"
 L["anchor-point:bottomleft"] = "左下"
 L["anchor-point:bottomright"] = "右下"
@@ -100,5 +102,3 @@ L["Show border around interrupts"] = "斷法技能顯示邊框"
 L["Show border around trinkets"] = "飾品圖示顯示邊框"
 L["Unknown spell: %s"] = "未知的法術：%s"
 L["Value must be a number"] = "必須填寫數字"
-
---@end-non-debug@

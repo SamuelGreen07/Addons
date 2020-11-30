@@ -42,7 +42,7 @@ end
 
 do
 	local function printTarget(self, name, guid)
-		self:TargetMessage2(320596, "red", name)
+		self:TargetMessage(320596, "red", name)
 		if self:Me(guid) then
 			self:PlaySound(320596, "warning")
 			self:Flash(320596)
@@ -65,13 +65,13 @@ function mod:BloodGorgeApplied(args)
 end
 
 function mod:FetidGas(args)
-	self:Message2(args.spellId, "yellow")
+	self:Message(args.spellId, "yellow")
 	self:PlaySound(args.spellId, "long")
 	self:Bar(args.spellId, 25)
 end
 
 function mod:Crunch(args)
-	self:Message2(args.spellId, "purple")
+	self:Message(args.spellId, "purple")
 	self:PlaySound(args.spellId, "alert")
 	self:Bar(args.spellId, 12.5)
 end

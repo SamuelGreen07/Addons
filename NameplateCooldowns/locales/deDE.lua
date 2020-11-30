@@ -1,6 +1,8 @@
+-- luacheck: no max line length
+-- luacheck: globals LibStub
+
 local L = LibStub("AceLocale-3.0"):NewLocale("NameplateCooldowns", "deDE");
 L = L or {}
---@non-debug@
 L["anchor-point:bottom"] = "Unten"
 L["anchor-point:bottomleft"] = "Unten links"
 L["anchor-point:bottomright"] = "Unten rechts"
@@ -65,9 +67,7 @@ L["options:general:enable-only-for-target-nameplate"] = "Die Abklingzeit nur auf
 --[[Translation missing --]]
 L["options:general:full-opacity-always"] = "Icons are always completely opaque"
 --[[Translation missing --]]
-L["options:general:full-opacity-always:tooltip"] = [=[If this option is enabled, the icons will 
-always be completely opaque. If not, the opacity
-will be the same as the health bar]=]
+L["options:general:full-opacity-always:tooltip"] = [=[If this option is enabled, the icons will always be completely opaque. If not, the opacity will be the same as the health bar]=]
 L["options:general:icon-grow-direction"] = "Die Wuchsrichtung der Symbole"
 L["options:general:ignore-nameplate-scale"] = "Namensplakettenskalierung ignorieren"
 --[[Translation missing --]]
@@ -117,4 +117,3 @@ L["Show border around trinkets"] = "Rahmen um Schmuckstücke anzeigen"
 L["Unknown spell: %s"] = "Unbekannter Zauber: %s"
 L["Value must be a number"] = "Der Wert muss eine Zahl sein."
 
---@end-non-debug@

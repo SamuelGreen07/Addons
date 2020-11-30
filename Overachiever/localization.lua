@@ -149,6 +149,7 @@ School of %s
 	OPT_CRITERIATOAST_SUGGEST = "Add to Recent Reminders (Suggestions)";
 	OPT_CRITERIATOAST_SUGGEST_TIP = 'When the "Achievement Progress" toast appears, temporarily add the achievement to the Suggestions tab as a "Recent Reminder."';
 
+	OPT_LABEL_LOVECRITTER = '/Love Critter Achievements ("%s," "%s," etc.)';
 	OPT_CRITTERTIPS = "Critter /loved?";
 	OPT_CRITTERTIPS_TIP = "If this achievement is incomplete, add a line to the tooltips of critters that are part of its criteria to indicate whether you still need to /love that type of critter.";
 	OPT_PESTCONTROLTIPS = "Pest exterminated?";
@@ -195,7 +196,6 @@ School of %s
 	OPT_KILLCREATURETIPS_TIP = "Add a line to the tooltips of creatures (excluding critters) indicating whether you need to kill them for an achievement.";
 	OPT_KILLCREATURETIPS_TIP2 = "|nNote: This relies on achievements providing mob IDs. Many kill-achievements do, but not all. Creatures needed for those that don't will not have updated tooltips, with a few exceptions where the data has been manually entered into Overachiever.";
 	OPT_KILLCREATURETIPS_WHENCOMPLETE = "Show even if achievement is complete";
-
 	OPT_KILLCREATURETIPS_EXCLUDE_GUILD = "Exclude guild achievements";
 
 	OPT_LABEL_MAINUI = "Main Achievement UI Modifications";

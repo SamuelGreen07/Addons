@@ -15,7 +15,7 @@ local node_ids = {
 	["Fishing"] = {
 		[NL["Floating Wreckage"]] 				= 101, -- treasure.tga
 		--[NL["Patch of Elemental Water"]] 		= 102, -- purewater.tga
-		[NL["Floating Debris"]]			= 103, -- debris.tga
+		[NL["Floating Debris"]]					= 103, -- debris.tga
 		--[NL["Oil Spill"]] 					= 104, -- oilspill.tga
 		[NL["Firefin Snapper School"]] 			= 105, -- firefin.tga
 		[NL["Greater Sagefish School"]] 		= 106, -- greatersagefish.tga
@@ -24,6 +24,7 @@ local node_ids = {
 		[NL["School of Deviate Fish"]] 			= 109, -- firefin.tga
 		[NL["Stonescale Eel Swarm"]] 			= 110, -- eel.tga
 		--[NL["Muddy Churning Water"]] 			= 111, -- ZG only fishing node
+		-- BC pools
 		[NL["Highland Mixed School"]] 			= 112, -- fishhook.tga
 		[NL["Pure Water"]] 						= 113, -- purewater.tga
 		[NL["Bluefish School"]] 				= 114, -- bluefish,tga
@@ -34,6 +35,7 @@ local node_ids = {
 		[NL["Sporefish School"]] 				= 118, -- sporefish.tga
 		[NL["Steam Pump Flotsam"]] 				= 119, -- steampump.tga
 		[NL["School of Tastyfish"]] 			= 120, -- net.tga
+		-- WotLK Pools
 		[NL["Borean Man O' War School"]]        = 121,
 		[NL["Deep Sea Monsterbelly School"]]	= 122,
 		[NL["Dragonfin Angelfish School"]]		= 123,
@@ -149,6 +151,7 @@ local node_ids = {
 		[NL["Lesser Bloodstone Deposit"]] 		= 218,
 		[NL["Incendicite Mineral Vein"]] 		= 219,
 		[NL["Indurium Mineral Vein"]]			= 220,
+-- bc nodes
 		[NL["Fel Iron Deposit"]] 				= 221,
 		[NL["Adamantite Deposit"]] 				= 222,
 		[NL["Rich Adamantite Deposit"]] 		= 223,
@@ -156,6 +159,7 @@ local node_ids = {
 		[NL["Large Obsidian Chunk"]] 			= 225, -- found only in AQ20/40
 		[NL["Small Obsidian Chunk"]] 			= 226, -- found only in AQ20/40
 		[NL["Nethercite Deposit"]] 				= 227,
+-- wrath nodes
 		[NL["Cobalt Deposit"]]					= 228,
 		[NL["Rich Cobalt Deposit"]]				= 229,
 		[NL["Titanium Vein"]]					= 230,
@@ -213,14 +217,14 @@ local node_ids = {
 		[NL["Rich Phaedrum Deposit"]]			= 276,
 		[NL["Oxxein Deposit"]]					= 277,
 		[NL["Rich Oxxein Deposit"]]				= 278,
-		[NL["Monolithic Oxxein Deposit"]]		= 279,
+		--[NL["Monolithic Oxxein Deposit"]]		= 279,
 		[NL["Elethium Deposit"]]				= 280,
 		[NL["Rich Elethium Deposit"]]			= 281,
 		[NL["Solenium Deposit"]]				= 282,
 		[NL["Rich Solenium Deposit"]]			= 283,
 		[NL["Sinvyr Deposit"]]					= 284,
 		[NL["Rich Sinvyr Deposit"]]				= 285,
-		[NL["Menacing Sinvyr Deposit"]]			= 286,
+		--[NL["Menacing Sinvyr Deposit"]]			= 286,
 	},
 	["Extract Gas"] = {
 		[NL["Windy Cloud"]] 					= 301,
@@ -263,6 +267,7 @@ local node_ids = {
 		[NL["Icecap"]] 							= 429,
 		--[NL["Bloodvine"]] 					= 430, -- zg bush loot
 		[NL["Black Lotus"]] 					= 431,
+-- bc nodes
 		[NL["Felweed"]] 						= 432,
 		[NL["Dreaming Glory"]] 					= 433,
 		[NL["Terocone"]] 						= 434,
@@ -274,6 +279,7 @@ local node_ids = {
 		[NL["Ragveil"]] 						= 440,
 		[NL["Flame Cap"]] 						= 441,
 		[NL["Netherdust Bush"]] 				= 442,
+-- wotlk nodes
 		[NL["Adder's Tongue"]]					= 443,
 		--[NL["Constrictor Grass"]]				= 444, -- drop form others
 		--[NL["Deadnettle"]]					= 445, --looted from other plants
@@ -492,14 +498,16 @@ local rare_spawns = {
 	[486] = {[485]=true,[487]=true,[488]=true,[491]=true,[492]=true}, -- anchor weed
 	[271] = {[270]=true}, -- rich osmenite deposit
 	[564] = {[563]=true}, -- large jelly deposit
-	[274] = {[273]=true}, -- rich laestrite deposit
+	[273] = {[275]=true,[276]=true,[277]=true,[278]=true,[282]=true,[283]=true,[284]=true,[285]=true}, -- laestrite deposit
+	[274] = {[273]=true,[275]=true,[276]=true,[277]=true,[278]=true,[282]=true,[283]=true,[284]=true,[285]=true}, -- rich laestrite deposit
 	[276] = {[275]=true}, -- rich phaedrum deposit
-	[278] = {[277]=true,[279]=true}, -- rich oxxein deposit
-	[279] = {[277]=true,[278]=true}, -- monolithic oxxein deposit
-	[281] = {[280]=true}, -- rich elethium deposit
+	[278] = {[277]=true}, -- rich oxxein deposit
+	[280] = {[273]=true,[274]=true,[275]=true,[276]=true,[277]=true,[278]=true,[282]=true,[283]=true,[284]=true,[285]=true}, -- elethium deposit
+	[281] = {[280]=true,[273]=true,[274]=true,[275]=true,[276]=true,[277]=true,[278]=true,[282]=true,[283]=true,[284]=true,[285]=true}, -- rich elethium deposit
 	[283] = {[282]=true}, -- rich solenium deposit
-	[285] = {[284]=true,[286]=true}, -- rich sinvyr deposit
-	[286] = {[284]=true,[285]=true}, -- menacing sinvyr deposit
+	[285] = {[284]=true}, -- rich sinvyr deposit
+	[494] = {[493]=true,[495]=true,[496]=true,[497]=true,[498]=true}, -- nightshade
+	[493] = {[495]=true,[496]=true,[497]=true,[498]=true}, -- death blossom shares spawn with zone-specific herbs
 }
 Collector.rareNodes = rare_spawns
 -- Format zone = { "Database", "new node id"}
@@ -633,12 +641,12 @@ local node_textures = {
 		[198] = icon_path.."Fish\\viperfish.tga",
 		[199] = icon_path.."Fish\\ionizedminnow.tga",
 		[1101] = icon_path.."Fish\\sentryfish.tga",
-		[1102] = icon_path.."Fish\\fish_hook.tga", -- TODO
-		[1103] = icon_path.."Fish\\fish_hook.tga", -- TODO
-		[1104] = icon_path.."Fish\\fish_hook.tga", -- TODO
-		[1105] = icon_path.."Fish\\fish_hook.tga", -- TODO
-		[1106] = icon_path.."Fish\\fish_hook.tga", -- TODO
-		[1107] = icon_path.."Fish\\fish_hook.tga", -- TODO
+		[1102] = icon_path.."Fish\\iridescentamberjack.tga",
+		[1103] = icon_path.."Fish\\pockedbonefish.tga",
+		[1104] = icon_path.."Fish\\silvergillpike.tga",
+		[1105] = icon_path.."Fish\\elysianthade.tga",
+		[1106] = icon_path.."Fish\\lostsole.tga",
+		[1107] = icon_path.."Fish\\spinefinpiranha.tga",
 	},
 	["Mining"] = {
 		[201] = icon_path.."Mine\\copper.tga",
@@ -665,9 +673,9 @@ local node_textures = {
 		[222] = icon_path.."Mine\\adamantium.tga",
 		[223] = icon_path.."Mine\\rich_adamantium.tga",
 		[224] = icon_path.."Mine\\khorium.tga",
-		[225] = icon_path.."Mine\\ethernium.tga",
-		[226] = icon_path.."Mine\\ethernium.tga",
-		[227] = icon_path.."Mine\\ethernium.tga",
+		[225] = icon_path.."Mine\\nethercite.tga",
+		[226] = icon_path.."Mine\\nethercite.tga",
+		[227] = icon_path.."Mine\\nethercite.tga",
 		[228] = icon_path.."Mine\\cobalt.tga",
 		[229] = icon_path.."Mine\\cobalt.tga",
 		[230] = icon_path.."Mine\\titanium.tga",
@@ -713,20 +721,20 @@ local node_textures = {
 		[270] = icon_path.."Mine\\osmenite.tga",
 		[271] = icon_path.."Mine\\osmenite.tga",
 		[272] = icon_path.."Mine\\osmenite.tga",
-		[273] = icon_path.."Mine\\copper.tga", -- TODO
-		[274] = icon_path.."Mine\\copper.tga", -- TODO
-		[275] = icon_path.."Mine\\copper.tga", -- TODO
-		[276] = icon_path.."Mine\\copper.tga", -- TODO
-		[277] = icon_path.."Mine\\copper.tga", -- TODO
-		[278] = icon_path.."Mine\\copper.tga", -- TODO
-		[279] = icon_path.."Mine\\copper.tga", -- TODO
-		[280] = icon_path.."Mine\\copper.tga", -- TODO
-		[281] = icon_path.."Mine\\copper.tga", -- TODO
-		[282] = icon_path.."Mine\\copper.tga", -- TODO
-		[283] = icon_path.."Mine\\copper.tga", -- TODO
-		[284] = icon_path.."Mine\\copper.tga", -- TODO
-		[285] = icon_path.."Mine\\copper.tga", -- TODO
-		[286] = icon_path.."Mine\\copper.tga", -- TODO
+		[273] = icon_path.."Mine\\laestrite.tga",
+		[274] = icon_path.."Mine\\laestrite.tga",
+		[275] = icon_path.."Mine\\phaedrite.tga",
+		[276] = icon_path.."Mine\\phaedrite.tga",
+		[277] = icon_path.."Mine\\oxxein.tga",
+		[278] = icon_path.."Mine\\oxxein.tga",
+		[279] = icon_path.."Mine\\oxxein.tga",
+		[280] = icon_path.."Mine\\elethium.tga",
+		[281] = icon_path.."Mine\\elethium.tga",
+		[282] = icon_path.."Mine\\solenium.tga",
+		[283] = icon_path.."Mine\\solenium.tga",
+		[284] = icon_path.."Mine\\sinvyr.tga",
+		[285] = icon_path.."Mine\\sinvyr.tga",
+		[286] = icon_path.."Mine\\sinvyr.tga",
 	},
 	["Extract Gas"] = {
 		[301] = icon_path.."Gas\\windy_cloud.tga",
@@ -830,12 +838,12 @@ local node_textures = {
 		[490] = icon_path.."Herb\\star_moss.tga",
 		[491] = icon_path.."Herb\\winters_kiss.tga",
 		[492] = icon_path.."Herb\\zinanthid.tga",
-		[493] = icon_path.."Herb\\peacebloom.tga", -- TODO
-		[494] = icon_path.."Herb\\peacebloom.tga", -- TODO
-		[495] = icon_path.."Herb\\peacebloom.tga", -- TODO
-		[496] = icon_path.."Herb\\peacebloom.tga", -- TODO
-		[497] = icon_path.."Herb\\peacebloom.tga", -- TODO
-		[498] = icon_path.."Herb\\peacebloom.tga", -- TODO
+		[493] = icon_path.."Herb\\deathblossom.tga",
+		[494] = icon_path.."Herb\\nightshade.tga",
+		[495] = icon_path.."Herb\\marrowroot.tga",
+		[496] = icon_path.."Herb\\vigilstorch.tga",
+		[497] = icon_path.."Herb\\risingglory.tga",
+		[498] = icon_path.."Herb\\widowbloom.tga",
 	},
 	["Treasure"] = {
 		[501] = icon_path.."Treasure\\clam.tga",

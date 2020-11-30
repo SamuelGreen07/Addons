@@ -392,6 +392,10 @@ local CritterAch = {
   LoveCritters2 = { "CritterTip_loved", L.ACH_LOVECRITTERS_COMPLETE, L.ACH_LOVECRITTERS_INCOMPLETE },
   LoveCritters3 = { "CritterTip_loved", L.ACH_LOVECRITTERS_COMPLETE, L.ACH_LOVECRITTERS_INCOMPLETE },
   LoveCritters4 = { "CritterTip_loved", L.ACH_LOVECRITTERS_COMPLETE, L.ACH_LOVECRITTERS_INCOMPLETE },
+  LoveCritters5 = { "CritterTip_loved", L.ACH_LOVECRITTERS_COMPLETE, L.ACH_LOVECRITTERS_INCOMPLETE },
+  LoveCritters6 = { "CritterTip_loved", L.ACH_LOVECRITTERS_COMPLETE, L.ACH_LOVECRITTERS_INCOMPLETE },
+  LoveCritters7 = { "CritterTip_loved", L.ACH_LOVECRITTERS_COMPLETE, L.ACH_LOVECRITTERS_INCOMPLETE },
+  LoveCritters8 = { "CritterTip_loved", L.ACH_LOVECRITTERS_COMPLETE, L.ACH_LOVECRITTERS_INCOMPLETE },
   PestControl = { "CritterTip_killed", L.KILL_COMPLETE, L.KILL_INCOMPLETE },
 };
 
@@ -1157,7 +1161,7 @@ function Overachiever.ExamineItem(tooltip)
     local _, _, itemID  = strfind(link, "item:(%d+)")
     itemID = tonumber(itemID)
     if (not itemID) then  return;  end  -- Ignores special objects not classified as normal items, like battlepets
-
+	
     local id, text, complete, achcomplete
 	local idPrev, textPrev, completePrev, achcomplete
     for key,tab in pairs(ConsumeItemAch) do
@@ -1568,7 +1572,7 @@ if (SharedMedia) then
   ["Sound\\Interface\\UI_Garrison_Toast_InvasionAlert.ogg"] = L.SOUND_GARRISON_INVASION,
   --]]
   --[[ don't work for some reason
-
+  
   ["Sound\\Interface\\GLUECREATECHARACTERBUTTON.mp3"] = "Create Character",
   ["Sound\\Interface\\UI_igStore_PurchaseDelivered_Toast_01.ogg"] = "Store Delivered",
   ["Sound\\Interface\\Deathbind Sound.ogg"] = "Deathbind",

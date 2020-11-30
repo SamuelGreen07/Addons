@@ -1,6 +1,8 @@
+-- luacheck: no max line length
+-- luacheck: globals LibStub
+
 local L = LibStub("AceLocale-3.0"):NewLocale("NameplateCooldowns", "zhCN");
 L = L or {}
---@non-debug@
 --[[Translation missing --]]
 L["anchor-point:bottom"] = "Bottom"
 --[[Translation missing --]]
@@ -83,9 +85,7 @@ L["options:general:enable-only-for-target-nameplate"] = "只在当前目标的�
 --[[Translation missing --]]
 L["options:general:full-opacity-always"] = "Icons are always completely opaque"
 --[[Translation missing --]]
-L["options:general:full-opacity-always:tooltip"] = [=[If this option is enabled, the icons will 
-always be completely opaque. If not, the opacity
-will be the same as the health bar]=]
+L["options:general:full-opacity-always:tooltip"] = [=[If this option is enabled, the icons will always be completely opaque. If not, the opacity will be the same as the health bar]=]
 --[[Translation missing --]]
 L["options:general:icon-grow-direction"] = "Icons' growth direction"
 --[[Translation missing --]]
@@ -144,5 +144,3 @@ L["Show border around interrupts"] = "为打断技能显示边框"
 L["Show border around trinkets"] = "为饰品显示边框"
 L["Unknown spell: %s"] = "未知的法术：%s"
 L["Value must be a number"] = "值必须是数字"
-
---@end-non-debug@

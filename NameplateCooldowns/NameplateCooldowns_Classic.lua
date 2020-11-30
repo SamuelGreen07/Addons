@@ -1,3 +1,5 @@
+-- luacheck: ignore
+
 if (select(4, GetBuildInfo()) > 20000) then return end
 
 local _, addonTable = ...;
@@ -7,7 +9,7 @@ local Trinkets = addonTable.Trinkets;
 local Reductions = addonTable.Reductions;
 
 --@non-debug@
-local buildTimestamp = "90001.1-release";
+local buildTimestamp = "90002.0-release";
 --@end-non-debug@
 
 local L = LibStub("AceLocale-3.0"):GetLocale("NameplateCooldowns");

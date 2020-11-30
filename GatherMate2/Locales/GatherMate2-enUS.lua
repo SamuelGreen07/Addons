@@ -3,9 +3,9 @@
 -- http://www.wowace.com/projects/gathermate2/localization/
 
 local debug = false
---[===[@debug@
+--[==[@debug@
 debug = true
---@end-debug@]===]
+--@end-debug@]==]
 
 local L = LibStub("AceLocale-3.0"):NewLocale("GatherMate2", "enUS", true, debug)
 
@@ -411,13 +411,11 @@ NL["Maplewood Treasure Chest"] = true
 NL["Marrowroot"] = true
 NL["Mauve Stinger School"] = true
 NL["Mechanized Chest"] = true
-NL["Menacing Sinvyr Deposit"] = true
 NL["Mithril Deposit"] = true
 NL["Mixed Ocean School"] = true
 NL["Mogu Archaeology Find"] = true
 NL["Monelite Deposit"] = true
 NL["Monelite Seam"] = true
-NL["Monolithic Oxxein Deposit"] = true
 NL["Moonglow Cuttlefish School"] = true
 NL["Mossgill Perch School"] = true
 NL["Mossy Footlocker"] = true

@@ -92,19 +92,19 @@ function mod:PlatinumPlatingRemoved(args)
 end
 
 function mod:WhirlingEdge(args)
-	self:Message2(args.spellId, "red")
+	self:Message(args.spellId, "red")
 	self:PlaySound(args.spellId, "alert")
 	self:Bar(args.spellId, 32.8)
 end
 
 function mod:LayMine(args)
-	self:Message2(args.spellId, "orange")
+	self:Message(args.spellId, "orange")
 	self:PlaySound(args.spellId, "info")
 end
 
 do
 	local function printTarget(self, name, guid)
-		self:TargetMessage2(285152, "yellow", name)
+		self:TargetMessage(285152, "yellow", name)
 		self:PlaySound(285152, "alert", nil, name)
 		if self:Me(guid) then
 			self:Say(285152)
@@ -118,7 +118,7 @@ do
 end
 
 function mod:VentJets(args)
-	self:Message2(args.spellId, "red")
+	self:Message(args.spellId, "red")
 	self:PlaySound(args.spellId, "alarm")
 	self:Bar(args.spellId, 43.7)
 end
@@ -129,7 +129,7 @@ end
 
 do
 	local function printTarget(self, name, guid)
-		self:TargetMessage2(283422, "yellow", name)
+		self:TargetMessage(283422, "yellow", name)
 		self:PlaySound(283422, "alert", nil, name)
 		if self:Me(guid) then
 			self:Say(283422)

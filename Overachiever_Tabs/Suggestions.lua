@@ -57,6 +57,17 @@ local function GetZoneSpecialOverride()
   return false
 end
 
+local function copytab(from, to)
+  for k,v in pairs(from) do
+    if(type(v) == "table") then
+      to[k] = {}
+      copytab(v, to[k]);
+    else
+      to[k] = v;
+    end
+  end
+end
+
 
 
 -- ZONE-SPECIFIC ACHIEVEMENTS
@@ -2097,6 +2108,114 @@ local TradeskillSuggestions
 
 local Refresh_lastcount, Refresh_stoploop = 0
 
+local function getLocationSuggestions(retTab, zone, subzone, textoverride, instype, heroicD, heroicR, twentyfive, mythicD, mythicR)
+	local prevSuggested
+	if (retTab) then
+		prevSuggested = {}
+		copytab(suggested, prevSuggested)
+		wipe(suggested)
+	end
+
+	CurrentSubzone = subzone
+
+	if (instype and not textoverride) then  -- If in an instance:
+		Refresh_Add(ACHID_INSTANCES[zone])
+		if (instype == "pvp") then  -- If in a battleground:
+			Refresh_Add(ACHID_BATTLEGROUNDS)
+		end
+
+		if (heroicD or heroicR) then
+			if (twentyfive) then
+				Refresh_Add(ACHID_INSTANCES_HEROIC[zone], ACHID_INSTANCES_HEROIC_PLUS[zone], ACHID_INSTANCES_25[zone], ACHID_INSTANCES_25_HEROIC[zone])
+			else
+				Refresh_Add(ACHID_INSTANCES_HEROIC[zone], ACHID_INSTANCES_HEROIC_PLUS[zone], ACHID_INSTANCES_10[zone], ACHID_INSTANCES_10_HEROIC[zone])
+			end
+		else
+			if (twentyfive) then
+				Refresh_Add(ACHID_INSTANCES_NORMAL[zone], ACHID_INSTANCES_25[zone], ACHID_INSTANCES_25_NORMAL[zone])
+			else
+				Refresh_Add(ACHID_INSTANCES_NORMAL[zone], ACHID_INSTANCES_10[zone], ACHID_INSTANCES_10_NORMAL[zone])
+			end
+		end
+
+		if (mythicD or mythicR) then
+			Refresh_Add(ACHID_INSTANCES_MYTHIC[zone], ACHID_INSTANCES_HEROIC_PLUS[zone])
+			-- No need to check twentyfive; that's a legacy classification and the dungeons/raids with mythic-only achievements don't use it.
+		end
+
+	else
+		Refresh_Add(Overachiever.ExploreZoneIDLookup(zone), ACHID_ZONE_NUMQUESTS[zone], ACHID_ZONE_MISC[zone])
+		-- Also look for instance achievements for an instance you're near if we can look it up easily (since many zones
+		-- have subzones with the instance name when you're near the instance entrance and some instance entrances are
+		-- actually in their own "zone" using the instance's zone name):
+		Refresh_Add(ACHID_INSTANCES[subzone] or ACHID_INSTANCES[zone])
+
+		local ach10, ach25 = ACHID_INSTANCES_10[subzone] or ACHID_INSTANCES_10[zone], ACHID_INSTANCES_25[subzone] or ACHID_INSTANCES_25[zone]
+		local achH10, achH25 = ACHID_INSTANCES_10_HEROIC[subzone] or ACHID_INSTANCES_10_HEROIC[zone], ACHID_INSTANCES_25_HEROIC[subzone] or ACHID_INSTANCES_25_HEROIC[zone]
+		local achN10, achN25 = ACHID_INSTANCES_10_NORMAL[subzone] or ACHID_INSTANCES_10_NORMAL[zone], ACHID_INSTANCES_25_NORMAL[subzone] or ACHID_INSTANCES_25_NORMAL[zone]
+
+		if (ach10 or ach25 or achH10 or achH25 or achN10 or achN25) then
+		-- If there are 10-man or 25-man specific achievements, this is a raid:
+			if (heroicR) then
+				if (twentyfive) then
+					Refresh_Add(ACHID_INSTANCES_HEROIC[subzone] or ACHID_INSTANCES_HEROIC[zone],
+					ACHID_INSTANCES_HEROIC_PLUS[subzone] or ACHID_INSTANCES_HEROIC_PLUS[zone],
+					ach25, achH25)
+				else
+					Refresh_Add(ACHID_INSTANCES_HEROIC[subzone] or ACHID_INSTANCES_HEROIC[zone],
+					ACHID_INSTANCES_HEROIC_PLUS[subzone] or ACHID_INSTANCES_HEROIC_PLUS[zone],
+					ach10, achH10)
+				end
+			else
+				if (twentyfive) then
+					Refresh_Add(ACHID_INSTANCES_NORMAL[subzone] or ACHID_INSTANCES_NORMAL[zone], ach25, achN25)
+				else
+					Refresh_Add(ACHID_INSTANCES_NORMAL[subzone] or ACHID_INSTANCES_NORMAL[zone], ach10, achN10)
+				end
+			end
+		-- Not a raid (or at least no 10-man vs 25-man specific suggestions):
+		elseif (heroicD) then
+			Refresh_Add(ACHID_INSTANCES_HEROIC[subzone] or ACHID_INSTANCES_HEROIC[zone],
+			ACHID_INSTANCES_HEROIC_PLUS[subzone] or ACHID_INSTANCES_HEROIC_PLUS[zone])
+		else
+			Refresh_Add(ACHID_INSTANCES_NORMAL[subzone] or ACHID_INSTANCES_NORMAL[zone])
+		end
+
+		if (mythicD or mythicR) then
+			Refresh_Add(ACHID_INSTANCES_MYTHIC[subzone] or ACHID_INSTANCES_MYTHIC[zone],
+			ACHID_INSTANCES_HEROIC_PLUS[subzone] or ACHID_INSTANCES_HEROIC_PLUS[zone])
+		end
+	end
+
+	if (textoverride) then
+		Refresh_Add(ACHID_HOLIDAY[zone])
+	end
+
+	if (retTab) then
+		local tab = {}
+		copytab(suggested, tab)
+		wipe(suggested)
+		copytab(prevSuggested, suggested)
+		return tab
+	end
+end
+
+local function getCurrentLocationSuggestions()
+	local subzone = ZoneLookup(GetSubZoneText(), true)
+	local zone = GetZoneSpecialOverride()
+	if (not zone and IsInInstance()) then
+		zone = ZoneLookup(GetInstanceInfo(), nil, subzone)
+	end
+	if (not zone) then
+		zone = ZoneLookup(GetRealZoneText(), nil, subzone)
+	end
+
+	local textoverride = false
+	local instype, heroicD, mythicD, challenge, twentyfive, heroicR, mythicR = Overachiever.GetDifficulty()
+
+	return getLocationSuggestions(true, zone, subzone, textoverride, instype, heroicD, heroicR, twentyfive, mythicD, mythicR)
+end
+
 local function Refresh(self, instanceRetry)
   if (not frame:IsVisible() or Refresh_stoploop) then  return;  end
   if (self == RefreshBtn or self == EditZoneOverride) then  PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);  end
@@ -2117,21 +2236,21 @@ local function Refresh(self, instanceRetry)
     if (self ~= subzdrop) then  subzdrop_Update(zone);  end
     local subz = subzdrop:GetSelectedValue()
     if (subz ~= 0) then
-	  CurrentSubzone = SUBZONES_REV[subz] or subz
-	end
+		  CurrentSubzone = SUBZONES_REV[subz] or subz
+		end
   else
     if (instanceRetry ~= true) then -- check specifically against true because it could be "LeftButton"
       zone = GetZoneSpecialOverride()
       if (not zone and IsInInstance()) then
-	    instanceTry = true
-	    zone = ZoneLookup(GetInstanceInfo(), nil, CurrentSubzone)
-		--zone = "fake place force retry"
-	  end
-	end
+		    instanceTry = true
+		    zone = ZoneLookup(GetInstanceInfo(), nil, CurrentSubzone)
+			--zone = "fake place force retry"
+		  end
+		end
     if (not zone) then
-	  instanceTry = false
-	  zone = ZoneLookup(GetRealZoneText(), nil, CurrentSubzone)
-	end
+		  instanceTry = false
+		  zone = ZoneLookup(GetRealZoneText(), nil, CurrentSubzone)
+		end
     if (inputtext and inputtext ~= "") then  EditZoneOverride:SetTextColor(0.75, 0.1, 0.1);  end
     --Refresh_stoploop = true
     subzdrop:SetMenu(subzdrop_menu)
@@ -2171,9 +2290,16 @@ local function Refresh(self, instanceRetry)
     if (instype == "pvp") then  -- If in a battleground:
       Refresh_Add(ACHID_TRADESKILL_BG[tradeskill])
     end
+
   elseif (textoverride and zone == L.SUGGESTIONS_HIDDENLOCATION) then
     if (VARS_CHAR.SuggestionsHidden) then
       for id in pairs(VARS_CHAR.SuggestionsHidden) do
+        suggested[id] = true
+      end
+    end
+	elseif (textoverride and zone == L.SUGGESTIONS_AUTOTRACKEDLOCATION) then
+		if (VARS.SuggestionsAutoTracking) then
+      for id in pairs(VARS.SuggestionsAutoTracking) do
         suggested[id] = true
       end
     end
@@ -2182,78 +2308,7 @@ local function Refresh(self, instanceRetry)
     TradeskillSuggestions = nil
 
   -- Suggestions for your location:
-    if (instype and not textoverride) then  -- If in an instance:
-      Refresh_Add(ACHID_INSTANCES[zone])
-      if (instype == "pvp") then  -- If in a battleground:
-        Refresh_Add(ACHID_BATTLEGROUNDS)
-      end
-
-      if (heroicD or heroicR) then
-        if (twentyfive) then
-          Refresh_Add(ACHID_INSTANCES_HEROIC[zone], ACHID_INSTANCES_HEROIC_PLUS[zone], ACHID_INSTANCES_25[zone], ACHID_INSTANCES_25_HEROIC[zone])
-        else
-          Refresh_Add(ACHID_INSTANCES_HEROIC[zone], ACHID_INSTANCES_HEROIC_PLUS[zone], ACHID_INSTANCES_10[zone], ACHID_INSTANCES_10_HEROIC[zone])
-        end
-      else
-        if (twentyfive) then
-          Refresh_Add(ACHID_INSTANCES_NORMAL[zone], ACHID_INSTANCES_25[zone], ACHID_INSTANCES_25_NORMAL[zone])
-        else
-          Refresh_Add(ACHID_INSTANCES_NORMAL[zone], ACHID_INSTANCES_10[zone], ACHID_INSTANCES_10_NORMAL[zone])
-        end
-      end
-
-      if (mythicD or mythicR) then
-        Refresh_Add(ACHID_INSTANCES_MYTHIC[zone], ACHID_INSTANCES_HEROIC_PLUS[zone])
-        -- No need to check twentyfive; that's a legacy classification and the dungeons/raids with mythic-only achievements don't use it.
-      end
-
-    else
-      Refresh_Add(Overachiever.ExploreZoneIDLookup(zone), ACHID_ZONE_NUMQUESTS[zone], ACHID_ZONE_MISC[zone])
-      -- Also look for instance achievements for an instance you're near if we can look it up easily (since many zones
-      -- have subzones with the instance name when you're near the instance entrance and some instance entrances are
-      -- actually in their own "zone" using the instance's zone name):
-      Refresh_Add(ACHID_INSTANCES[CurrentSubzone] or ACHID_INSTANCES[zone])
-
-      local ach10, ach25 = ACHID_INSTANCES_10[CurrentSubzone] or ACHID_INSTANCES_10[zone], ACHID_INSTANCES_25[CurrentSubzone] or ACHID_INSTANCES_25[zone]
-      local achH10, achH25 = ACHID_INSTANCES_10_HEROIC[CurrentSubzone] or ACHID_INSTANCES_10_HEROIC[zone], ACHID_INSTANCES_25_HEROIC[CurrentSubzone] or ACHID_INSTANCES_25_HEROIC[zone]
-      local achN10, achN25 = ACHID_INSTANCES_10_NORMAL[CurrentSubzone] or ACHID_INSTANCES_10_NORMAL[zone], ACHID_INSTANCES_25_NORMAL[CurrentSubzone] or ACHID_INSTANCES_25_NORMAL[zone]
-
-      if (ach10 or ach25 or achH10 or achH25 or achN10 or achN25) then
-      -- If there are 10-man or 25-man specific achievements, this is a raid:
-        if (heroicR) then
-          if (twentyfive) then
-            Refresh_Add(ACHID_INSTANCES_HEROIC[CurrentSubzone] or ACHID_INSTANCES_HEROIC[zone],
-				ACHID_INSTANCES_HEROIC_PLUS[CurrentSubzone] or ACHID_INSTANCES_HEROIC_PLUS[zone],
-				ach25, achH25)
-          else
-            Refresh_Add(ACHID_INSTANCES_HEROIC[CurrentSubzone] or ACHID_INSTANCES_HEROIC[zone],
-				ACHID_INSTANCES_HEROIC_PLUS[CurrentSubzone] or ACHID_INSTANCES_HEROIC_PLUS[zone],
-				ach10, achH10)
-          end
-        else
-          if (twentyfive) then
-            Refresh_Add(ACHID_INSTANCES_NORMAL[CurrentSubzone] or ACHID_INSTANCES_NORMAL[zone], ach25, achN25)
-          else
-            Refresh_Add(ACHID_INSTANCES_NORMAL[CurrentSubzone] or ACHID_INSTANCES_NORMAL[zone], ach10, achN10)
-          end
-        end
-      -- Not a raid (or at least no 10-man vs 25-man specific suggestions):
-      elseif (heroicD) then
-        Refresh_Add(ACHID_INSTANCES_HEROIC[CurrentSubzone] or ACHID_INSTANCES_HEROIC[zone],
-			ACHID_INSTANCES_HEROIC_PLUS[CurrentSubzone] or ACHID_INSTANCES_HEROIC_PLUS[zone])
-      else
-        Refresh_Add(ACHID_INSTANCES_NORMAL[CurrentSubzone] or ACHID_INSTANCES_NORMAL[zone])
-      end
-
-      if (mythicD or mythicR) then
-	    Refresh_Add(ACHID_INSTANCES_MYTHIC[CurrentSubzone] or ACHID_INSTANCES_MYTHIC[zone],
-			ACHID_INSTANCES_HEROIC_PLUS[CurrentSubzone] or ACHID_INSTANCES_HEROIC_PLUS[zone])
-      end
-    end
-
-    if (textoverride) then
-      Refresh_Add(ACHID_HOLIDAY[zone])
-    end
+    getLocationSuggestions(false, zone, CurrentSubzone, textoverride, instype, heroicD, heroicR, twentyfive, mythicD, mythicR)
 
   end
 
@@ -2486,7 +2541,9 @@ do
   locallookup = nil
   addtolist = nil
 
-  places[L.SUGGESTIONS_HIDDENLOCATION] = true  -- Add another special location, this for Hidden suggestions
+	-- Additional special "locations":
+  places[L.SUGGESTIONS_HIDDENLOCATION] = true  -- Hidden suggestions
+	places[L.SUGGESTIONS_AUTOTRACKEDLOCATION] = true  -- Auto-Tracked suggestions
 
   -- Arrange into alphabetically-sorted array:
   local count = 0
@@ -2573,7 +2630,8 @@ EditZoneOverride:SetScript("OnTabPressed", function(self)
 end)
 
 EditZoneOverride:SetScript("OnEnter", function(self)
-  GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+  GameTooltip:SetOwner(self, "ANCHOR_NONE");
+	GameTooltip:SetPoint("TOPLEFT", self, "TOPRIGHT", 4, 32)
   GameTooltip:AddLine(L.SUGGESTIONS_LOCATION_TIP, 1, 1, 1)
   GameTooltip:AddLine(L.SUGGESTIONS_LOCATION_TIP2, nil, nil, nil, 1)
   GameTooltip:Show()
@@ -2729,22 +2787,74 @@ function Overachiever.OpenSuggestionsTab(text)
 	end
 end
 
+function Overachiever.GetLocalAutoTrackedSuggestions(incompleteOnly)
+	local tracking = VARS.SuggestionsAutoTracking
+	if (tracking) then
+		local sug = getCurrentLocationSuggestions()
+		local n = 0
+		for id in pairs(sug) do
+			local ok = false
+			if (tracking[id]) then
+				if (incompleteOnly) then
+					local _, complete
+					_, _, _, complete = GetAchievementInfo(id)
+					if (not complete) then  ok = true;  end
+				else
+					ok = true
+				end
+			end
+			if (ok) then
+				n = n + 1
+			else
+				sug[id] = nil
+			end
+		end
+		if (n == 0) then  return nil;  end
+		return sug
+	end
+	return nil
+end
+
 function frame.ShouldCrossOut(id)
 	return VARS_CHAR.SuggestionsHidden and VARS_CHAR.SuggestionsHidden[id]
 end
 
-function frame.HandleRightClick(id)
-	if (not IsShiftKeyDown()) then  return;  end
-	if (VARS_CHAR.SuggestionsHidden and VARS_CHAR.SuggestionsHidden[id]) then
-		VARS_CHAR.SuggestionsHidden[id] = nil
-		if (next(VARS_CHAR.SuggestionsHidden) == nil) then -- Is the table empty?
-			VARS_CHAR.SuggestionsHidden = nil
+function frame.ShouldAutoTrack(id)
+	return VARS.SuggestionsAutoTracking and VARS.SuggestionsAutoTracking[id]
+end
+
+function frame.HandleAchBtnClick(self, button, ignoreModifiers)
+	local id = self.id
+	if (button == "RightButton") then
+		if (IsShiftKeyDown() and not IsAltKeyDown()) then
+			if (VARS_CHAR.SuggestionsHidden and VARS_CHAR.SuggestionsHidden[id]) then
+				VARS_CHAR.SuggestionsHidden[id] = nil
+				if (next(VARS_CHAR.SuggestionsHidden) == nil) then -- Is the table empty?
+					VARS_CHAR.SuggestionsHidden = nil
+				end
+			else
+				if (not VARS_CHAR.SuggestionsHidden) then  VARS_CHAR.SuggestionsHidden = {};  end
+				VARS_CHAR.SuggestionsHidden[id] = true
+			end
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+			Refresh(panel)
+			return true
 		end
-	else
-		if (not VARS_CHAR.SuggestionsHidden) then  VARS_CHAR.SuggestionsHidden = {};  end
-		VARS_CHAR.SuggestionsHidden[id] = true
+	elseif (IsShiftKeyDown() and IsAltKeyDown()) then
+		if (VARS.SuggestionsAutoTracking and VARS.SuggestionsAutoTracking[id]) then
+			VARS.SuggestionsAutoTracking[id] = nil
+			if (next(VARS.SuggestionsAutoTracking) == nil) then -- Is the table empty?
+				VARS.SuggestionsAutoTracking = nil
+			end
+		else
+			if (not VARS.SuggestionsAutoTracking) then  VARS.SuggestionsAutoTracking = {};  end
+			VARS.SuggestionsAutoTracking[id] = true
+		end
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		Refresh(panel)
+		Overachiever.AutoTrackingSettingUpdated()
+		return true
 	end
-	Refresh(panel)
 end
 
 --[[

@@ -23,6 +23,17 @@ local cargBags = ns.cargBags
 local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 
+local animaSpells = {
+	[336327] = true,
+	[336456] = true,
+	[345706] = true,
+	[347555] = true,
+}
+local function IsAnimaItem(itemId)
+	local n,spellId = GetItemSpell(itemId or 0)
+	return spellId and animaSpells[spellId]
+end
+
 --[[!
 	@class Implementation
 		The Implementation-class serves as the basis for your cargBags-instance, handling
@@ -373,8 +384,8 @@ function Implementation:GetCustomItemInfo(bagID, slotID, i)
 			end
 		end
 		-- get the item spell to determine if the item is an Artifact Power boosting item
-		if isRetail and ns.options.filterArtifactPower and IsArtifactPowerItem(i.id) then
-			i.type = ARTIFACT_POWER
+		if isRetail and ns.options.filterArtifactPower and IsAnimaItem(i.id) then	--IsArtifactPowerItem(i.id) then
+			i.type = ANIMA
 		end
 		-- texture
 		i.texture = i.texture or texture

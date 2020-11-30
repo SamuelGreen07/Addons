@@ -11,6 +11,8 @@ Edited: Foxylittlething, aNNiPAk, Yarko
 -Button Bar for openning chat messages of each type.
 
 Change Log:
+v 3.17.1b (Foxylittlething)
+- fixed errors, caused by new LUA. Thanks to aNNiPAk and dartraiden
 v 3.16.1b (Foxylittlething)
 - merged with Yarko's version. now button flashing feature must work correctly
 - some change of skin's feature
@@ -136,7 +138,7 @@ v1.2
 v1.1
 -Addon Channels Hidden added GuildMap
 -Text has been made Localizable
--Officer chat shows up if you CanEditOfficerNote()
+-Officer chat shows up if you C_GuildInfo.CanEditOfficerNote()
 -Buttons now correctly update when raid, party, and guild changes
 -Hide Text now correctly says Show Text
 -Fixed button for channel 8 to diplay and tooltip correctly
@@ -392,7 +394,7 @@ ChatBar_ChatTypes = {
 		blockable = true,
 		chatGroup = "GUILD_OFFICER",
 		show = function()
-			return CanEditOfficerNote() and (not ChatBar_HiddenButtons[CHAT_MSG_OFFICER]);
+			return C_GuildInfo.CanEditOfficerNote() and (not ChatBar_HiddenButtons[CHAT_MSG_OFFICER]);
 		end
 	},
 	{
@@ -1435,6 +1437,7 @@ function ChatBar_UpdateArt()
 		ChatBar_UpdateButtonArt(buttonIndex, artDir);
 	end);
 	
+	Mixin(ChatBarFrameBackground, BackdropTemplateMixin);
 	ChatBarFrameBackground:SetBackdrop({
 		edgeFile = "Interface\\AddOns\\ChatBar Classic\\Skins\\"..artDir.."\\ChatBarBorder";
 		bgFile = "Interface\\AddOns\\ChatBar Classic\\Skins\\"..artDir.."\\BlackBg";

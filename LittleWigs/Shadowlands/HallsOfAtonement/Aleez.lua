@@ -40,18 +40,18 @@ end
 --
 
 function mod:BoltofPower(args)
-	self:Message2(args.spellId, "yellow")
+	self:Message(args.spellId, "yellow")
 	self:PlaySound(args.spellId, "alert")
 end
 
 function mod:VolleyofPower(args)
-	self:Message2(args.spellId, "yellow")
+	self:Message(args.spellId, "yellow")
 	self:PlaySound(args.spellId, "warning")
 	self:CDBar(args.spellId, 14.5)
 end
 
 function mod:HauntingFixation(args)
-	self:TargetMessage2(args.spellId, "cyan", args.destName)
+	self:TargetMessage(args.spellId, "cyan", args.destName)
 	if self:Me(args.destGUID) then
 		self:PlaySound(args.spellId, "warning")
 		self:Flash(args.spellId)
@@ -60,7 +60,7 @@ function mod:HauntingFixation(args)
 end
 
 function mod:AnimaFountain(args)
-	self:Message2(args.spellId, "red")
+	self:Message(args.spellId, "red")
 	self:PlaySound(args.spellId, "alarm")
 	self:CDBar(args.spellId, 25)
 end

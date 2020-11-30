@@ -21,13 +21,13 @@ L.BossModLoad_now 			= [[보스 모드가 로딩되지 않았습니다.
 해당 인스턴스에 진입하면 로딩됩니다.
 아래 버튼을 클릭해서 모드를 직접 로딩할 수도 있습니다.]]
 
-L.PosX						= '위치 X'
-L.PosY						= '위치 Y'
+L.PosX						= "위치 X"
+L.PosY						= "위치 Y"
 
-L.MoveMe 					= '위치 이동'
-L.Button_OK					= '확인'
-L.Button_Cancel				= '취소'
-L.Button_LoadMod			= '애드온 로드'
+L.MoveMe 					= "위치 이동"
+L.Button_OK					= "확인"
+L.Button_Cancel				= "취소"
+L.Button_LoadMod			= "애드온 로드"
 L.Mod_Enabled				= "보스 모드 활성화"
 L.Mod_Reset					= "설정 기본값 로드"
 L.Reset						= "초기화"
@@ -335,6 +335,7 @@ L.SpamBlockNoShowTgtAnnounce = "대상 관련 알림 및 효과음만 재생 안
 L.SpamBlockNoSpecWarnText	= "특수 알림 텍스트 표시 안함"
 L.SpamBlockNoSpecWarnFlash	= "특수 알림에 화면 점멸 사용 안함"
 L.SpamBlockNoSpecWarnSound	= "특수 알림 효과음 재생 안함 (음성 경고 메뉴에서 설정했다면 음성팩은 계속 작동)"
+L.SpamBlockNoTrivialSpecWarnSound	= "현재 레벨에 맞는 콘텐츠 이외에는 특수 알림 효과음 재생 안함 (대신 사용자가 선택한 정규 알림 효과음 재생)"
 
 L.Area_SpamFilter_Timers	= "타이머 관련 기능 끄기 및 필터 설정"
 L.SpamBlockNoShowTimers		= "모드 타이머 표시 안함 (보스 모드/도전모드/파티찾기/재생성)"

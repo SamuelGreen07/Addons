@@ -688,13 +688,23 @@ end
 -- scan a bag for the best matching item
 local function scanBagForItem(item, bagId, bestItem, bestDiff, bestLink)
 	local numSlots = GetContainerNumSlots(bagId)
-	local loc = ItemLocation.CreateEmpty()
+	--local loc = ItemLocation.CreateEmpty()
+	local blizzItem
 	for slotId = 1, numSlots do
 		local _, _, _, _, _, _, itemLink = GetContainerItemInfo(bagId, slotId)
         -- we skip any stackable item, as far as we know, there is no equippable gear that can be stacked
 		if itemLink then
 			local bagItem = Amr.ParseItemLink(itemLink)
 			if bagItem ~= nil then
+
+				blizzItem = Item:CreateFromBagAndSlot(bagId, slotId)
+
+				-- seems to be of the form Item-1147-0-4000000XXXXXXXXX, so we take just the last 9 digits
+				bagItem.guid = blizzItem:GetItemGUID()
+				if bagItem.guid and strlen(bagItem.guid) > 9 then
+					bagItem.guid = strsub(bagItem.guid, -9)
+				end
+
 				-- see if this is an azerite item and read azerite power ids
 				--[[loc:SetBagAndSlot(bagId, slotId)
 				if C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItem(loc) then
@@ -1140,11 +1150,11 @@ function beginEquipGearSet(setupId, passes)
 
 				-- find the best matching item anywhere in the player's gear
 				local bestItem, bestDiff = Amr:FindMatchingItem(new, player, usedItems)
+				
 				new = bestItem
-
 				local diff = countItemDifferences(new, old)				
 
-				if diff > 0 then	
+				if diff > 0 then
 					list[slotId] = new
 					if list == itemsToEquip.mh or list == itemsToEquip.oh then
 						itemsToEquip.weapons[slotId] = {}

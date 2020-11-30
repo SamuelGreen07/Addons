@@ -1,19 +1,21 @@
 ------------------------------------------------------------------------
-r254 | tuhljin | 2020-10-20 09:37:09 +0000 (Tue, 20 Oct 2020) | 3 lines
+r262 | tuhljin | 2020-11-23 11:19:02 +0000 (Mon, 23 Nov 2020) | 1 line
 Changed paths:
-   M /trunk/AchieveID.lua
-   M /trunk/GameTip.lua
+   M /trunk/readme.txt
+
+- Fix readme.txt version.
+------------------------------------------------------------------------
+r261 | tuhljin | 2020-11-23 11:00:07 +0000 (Mon, 23 Nov 2020) | 1 line
+Changed paths:
+   M /trunk/AchieveTracking.lua
+   M /trunk/Overachiever.lua
    M /trunk/Overachiever.toc
    M /trunk/Overachiever_Cache/Overachiever_Cache.toc
-   M /trunk/Overachiever_Tabs/CalendarNotice.lua
    M /trunk/Overachiever_Tabs/Overachiever_Tabs.toc
    M /trunk/Overachiever_Tabs/Suggestions.lua
    M /trunk/Overachiever_Trade/Overachiever_Trade.toc
-   M /trunk/libs/TjCalendar.lua
    M /trunk/readme.txt
 
-- Fixed an error that appeared when the cursor was over a graphical notice for an active holiday.
-- Suggestions tab: Added suggestions for the raids Uldir, Battle of Dazar'alor, Crucible of Storms, and Ny'alotha, the Waking City.
-- Updated readme.txt to reflect previous slash command changes (directing to Search tab).
+- Fixed an error where auto-tracking tried to track a completed achievement.
 ------------------------------------------------------------------------
 

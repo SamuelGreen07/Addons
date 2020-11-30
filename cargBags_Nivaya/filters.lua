@@ -65,7 +65,7 @@ function cbNivaya:ClassifyItem(item)
 		elseif	(item.type == L.Quest)								then cB_ItemClass[item.id] = "Quest"; return true
 		elseif	(item.type == L.Trades)								then cB_ItemClass[item.id] = "TradeGoods"; return true
 		elseif	(item.type == L.Consumables)						then cB_ItemClass[item.id] = "Consumables"; return true
-		elseif	(item.type == ARTIFACT_POWER)						then cB_ItemClass[item.id] = "ArtifactPower"; return true
+		elseif	(item.type == ANIMA)						then cB_ItemClass[item.id] = "ArtifactPower"; return true
 		elseif	(item.type == L.BattlePet)							then cB_ItemClass[item.id] = "BattlePet"; return true
 		end
 	end

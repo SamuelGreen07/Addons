@@ -1,6 +1,8 @@
+-- luacheck: no max line length
+-- luacheck: globals LibStub
+
 local L = LibStub("AceLocale-3.0"):NewLocale("NameplateCooldowns", "koKR");
 L = L or {}
---@non-debug@
 --[[Translation missing --]]
 L["anchor-point:bottom"] = "Bottom"
 --[[Translation missing --]]
@@ -105,9 +107,7 @@ L["options:general:enable-only-for-target-nameplate"] = "Show the cooldowns on t
 --[[Translation missing --]]
 L["options:general:full-opacity-always"] = "Icons are always completely opaque"
 --[[Translation missing --]]
-L["options:general:full-opacity-always:tooltip"] = [=[If this option is enabled, the icons will 
-always be completely opaque. If not, the opacity
-will be the same as the health bar]=]
+L["options:general:full-opacity-always:tooltip"] = [=[If this option is enabled, the icons will always be completely opaque. If not, the opacity will be the same as the health bar]=]
 --[[Translation missing --]]
 L["options:general:icon-grow-direction"] = "Icons' growth direction"
 --[[Translation missing --]]
@@ -180,5 +180,3 @@ L["Show border around interrupts"] = "방해 주위에 테두리 표시"
 L["Show border around trinkets"] = "장신구 주위에 테두리 표시"
 L["Unknown spell: %s"] = "알 수 없는 주문: %s"
 L["Value must be a number"] = "값은 반드시 숫자여야 합니다"
-
---@end-non-debug@

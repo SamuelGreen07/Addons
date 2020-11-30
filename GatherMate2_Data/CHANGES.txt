@@ -1,14 +1,9 @@
 ------------------------------------------------------------------------
-r472 | nevcairiel | 2019-10-08 07:19:42 +0000 (Tue, 08 Oct 2019) | 1 line
+r481 | nevcairiel | 2020-11-28 09:06:39 +0000 (Sat, 28 Nov 2020) | 1 line
 Changed paths:
-   M /trunk/GatherMate2_Data.toc
+   M /trunk/HerbalismData.lua
+   M /trunk/MiningData.lua
 
-Update TOC
-------------------------------------------------------------------------
-r471 | nevcairiel | 2019-10-08 07:19:28 +0000 (Tue, 08 Oct 2019) | 1 line
-Changed paths:
-   M /trunk/TreasureData.lua
-
-Add Jelly nodes
+Update Shadowlands Data
 ------------------------------------------------------------------------
 

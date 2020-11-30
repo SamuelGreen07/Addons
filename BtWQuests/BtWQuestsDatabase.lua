@@ -2223,7 +2223,7 @@ end
 function FriendshipItemMixin:IsCompleted(database, item, character)
     local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold = character:GetFriendshipReputation(item.id)
     
-    return friendRep >= item.amount
+    return (friendRep or 0) >= item.amount
 end
 
 local AchievementItemMixin = CreateFromMixins(ItemMixin);
@@ -3602,6 +3602,7 @@ Database:RegisterItemType("questline", QuestLineItemMixin);
 Database:RegisterItemType("follower", FollowerItemMixin);
 Database:RegisterItemType("garrisontalenttree", GarrisonTalentTreeItemMixin);
 Database:RegisterItemType("campaign", CampaignItemMixin);
+Database:RegisterItemType("spell", ItemMixin); -- Is just used to track with rewards spells are used
 
 Database:AddCondition(923, { type = "faction", id = "Horde" });
 Database:AddCondition(924, { type = "faction", id = "Alliance" });

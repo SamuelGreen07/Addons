@@ -299,7 +299,7 @@ local function scanSoulbinds()
 		for i, soulbindId in ipairs(covenantData.soulbindIDs) do
 			local soulbindData = soulbindId and C_Soulbinds.GetSoulbindData(soulbindId)
 			local nodes = {}
-			local unlockedTier = 0
+			local unlockedTier = -1
 
 			if soulbindData and soulbindData.tree and soulbindData.tree.nodes then
 				for i, node in ipairs(soulbindData.tree.nodes) do

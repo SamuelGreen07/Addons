@@ -71,7 +71,7 @@ function mod:Warmup(event, msg)
 end
 
 function mod:VoidBolt(args)
-	self:Message2(args.spellId, "yellow")
+	self:Message(args.spellId, "yellow")
 	if self:Interrupter() then
 		self:PlaySound(args.spellId, "alert")
 	end
@@ -79,7 +79,7 @@ function mod:VoidBolt(args)
 end
 
 function mod:WakentheVoid(args)
-	self:Message2(args.spellId, "orange")
+	self:Message(args.spellId, "orange")
 	self:PlaySound(args.spellId, "alarm")
 	self:CDBar(args.spellId, 43.5)
 end
@@ -89,7 +89,7 @@ function mod:AncientMindbender(args)
 end
 
 function mod:AncientMindbenderApplied(args)
-	self:TargetMessage2(args.spellId, "red", args.destName)
+	self:TargetMessage(args.spellId, "red", args.destName)
 	self:TargetBar(args.spellId, 20, args.destName, 269242) -- Surrender to the Void
 	self:PlaySound(args.spellId, "warning", nil, args.destName)
 end
@@ -97,7 +97,7 @@ end
 function mod:AncientMindbenderRemoved(args)
 	self:StopBar(269242, args.destName) -- Surrender to the Void
 	if self:Me(args.destGUID) then
-		self:Message2(args.spellId, "green", CL.removed:format(args.spellName))
+		self:Message(args.spellId, "green", CL.removed:format(args.spellName))
 		self:PlaySound(args.spellId, "info")
 	end
 end
@@ -118,7 +118,7 @@ end
 
 function mod:MindRendApplied(args)
 	if self:Dispeller("magic", nil, args.spellId) or self:Me(args.destGUID) then
-		self:TargetMessage2(args.spellId, "orange", args.destName)
+		self:TargetMessage(args.spellId, "orange", args.destName)
 		self:PlaySound(args.spellId, "alert", nil, args.destName)
 	end
 end

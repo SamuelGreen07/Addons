@@ -5,7 +5,6 @@ BigWigs:AddSounds("Shriekwing", {
 	[328921] = "long",
 	[329362] = "info",
 	[330711] = "long",
-	[340047] = "warning",
 	[340324] = "alarm",
 	[341489] = "info",
 	[341684] = {"info","warning"},
@@ -53,11 +52,11 @@ BigWigs:AddSounds("Artificer Xy'mox", {
 })
 
 BigWigs:AddSounds("Sun King's Salvation", {
-	[-22082] = "Info",
-	[-21993] = "Info",
-	[-21954] = "Info",
-	[-21953] = "Info",
-	[-21952] = "Info",
+	[-22082] = "info",
+	[-21993] = "info",
+	[-21954] = "info",
+	[-21953] = "info",
+	[-21952] = "info",
 	[325440] = "alert",
 	[325442] = "alarm",
 	[325506] = "alarm",
@@ -92,23 +91,17 @@ BigWigs:AddSounds("Lady Inerva Darkvein", {
 })
 
 BigWigs:AddSounds("The Council of Blood", {
-	[327465] = "alert",
 	[327497] = "alarm",
-	[327619] = "long",
-	[327773] = {"alert","info"},
-	[328334] = "warning",
 	[330848] = "info",
 	[330959] = "long",
-	[330964] = "long",
-	[330965] = "info",
-	[330967] = "warning",
-	[330978] = "info",
 	[331634] = {"info","warning"},
-	[331706] = "long",
-	[334948] = "long",
-	[335776] = "long",
 	[337110] = "alarm",
-	[342859] = "warning",
+	[346651] = "alarm",
+	[346657] = "warning",
+	[346690] = "alarm",
+	[346698] = "long",
+	[346800] = "long",
+	[347350] = "warning",
 })
 
 BigWigs:AddSounds("Sludgefist", {
@@ -120,6 +113,7 @@ BigWigs:AddSounds("Sludgefist", {
 	[335361] = "alarm",
 	[335470] = "warning",
 	[340817] = "long",
+	[341250] = "alert",
 })
 
 BigWigs:AddSounds("Stone Legion Generals", {

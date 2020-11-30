@@ -1,33 +1,20 @@
 # Deadly Boss Mods Core
 
-## [9.0.3-23-g46c9c17](https://github.com/DeadlyBossMods/DeadlyBossMods/tree/46c9c170ff35e7994385e2254f1aa02ee44e60a9) (2020-11-08)
-[Full Changelog](https://github.com/DeadlyBossMods/DeadlyBossMods/compare/9.0.3...46c9c170ff35e7994385e2254f1aa02ee44e60a9) [Previous Releases](https://github.com/DeadlyBossMods/DeadlyBossMods/releases)
+## [9.0.6-12-g050b46a](https://github.com/DeadlyBossMods/DeadlyBossMods/tree/050b46ac41bd4e4117a4a7e196d85e33446d8bcd) (2020-11-30)
+[Full Changelog](https://github.com/DeadlyBossMods/DeadlyBossMods/compare/9.0.6...050b46ac41bd4e4117a4a7e196d85e33446d8bcd) [Previous Releases](https://github.com/DeadlyBossMods/DeadlyBossMods/releases)
 
-- Update zhTW (#381)  
-- Small council timer fix  
-- tweak Emeriss timer  
-- Significant updates to council post mythic testing. if heroic and normal aren't retested than it's possible those mods will not be perfect on launch, but mythic should be in fairly good shape, at least for most common boss orders. Literally no one in testing left Freida or Nik for last, so their 3 abilities are not corrected yet.  
-- Fixed trivial check to make content trivial if player is 10 levels higher than content tuning, not 10 levels under it. :D  
-- Missed a table  
-- Simplify chain link code on sludgefist  
-    Fixed chain links pairs 9 and 10 not having valid say bubbles  
-    Fixed a regression that caused options with invalid spellIds to error out and fail instead of reporting out and allowing mod to continue to load  
-- Fix a few changed/invalid spellId calls  
-- Fixed bug causing crystalize timer not to start  
-- Bug tweak last to avoid spam. if debug mode is off, cap logging level to 1 and 2, 3 should only be logged explictely if user enables it  
-- Always fire debug callback even if it's not enabled, produce better transcriptor logs without needing users to actually turn debug on.  
-- Miner timer adustments  
-- Ensure that the option GUI never gets trivial filtered  
-- Added new feature to automatically download all special anounce sounds on global level to regular announce sounds for content that is trivial for your level (on by default). Closes #379  
-- comma  
-- Update how istrivial works with a table that took annoying long to make. this table will applied to more features soon™  
-- Update localization.tw.lua (#378)  
-- Work around a new bug in GUI that didn't used to be there, but is there now. mod names can't be same as frame names or they refuse to load.  
-- Minor adjustments to Ysondre  
-- KR Update (#375)  
-    Co-authored-by: Adam <MysticalOS@users.noreply.github.com>  
-- Update DBM-Party-Shadowlands.toc (#377)  
-    Correct title errors.  
-- Update DBM-Shadowlands.toc (#376)  
-    Add zh-TW Title.  
-- Bump alpha for new test cycle  
+- Apply affecting combat filters to plaguefall trash warnings  
+- Improved interrupt filter to automatically return false if channel info shows spell is not interruptable. Required for places like torghast where multiple enemies use same spells, and some are interrupt immune and some arent.  
+- revert one that was missed in PR  
+- Spanish Translates (#403)  
+- tweak IsValidWarning for solo runs, where the check might not want to be as strict for certain spell casts  
+- Applied combat filters to all trash warnings in Mists of Tirna to avoid situations where mobs in combat with other npcs nearby don't trigger trash warnings.  
+- Easier to find move button (#399)  
+    * Easier to find move button  
+    * And the GUI options come in 2 x 2, hurrahh, hurrah  
+- Fix variable name  
+-  - Reworked the melee check prototypes to be more shadowlands robust in identifying what players are melee during encounter mechanics only real failure is survival hunters, no way to identify theme without inspecting, which won't work when all actions require info from same onupdate frame (can't quiry and wait for server reply for inspect requests mid fight, especially over and over again.  
+     - Reworked miasma icons on Hungering too prioritize giving star to melee targets  
+- Update localization.cn.lua (#398)  
+- Update zhTW (#395)  
+- Prep next dev cycle  

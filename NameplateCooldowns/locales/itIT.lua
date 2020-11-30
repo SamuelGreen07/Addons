@@ -1,6 +1,8 @@
+-- luacheck: no max line length
+-- luacheck: globals LibStub
+
 local L = LibStub("AceLocale-3.0"):NewLocale("NameplateCooldowns", "itIT");
 L = L or {}
---@non-debug@
 --[[Translation missing --]]
 L["anchor-point:bottom"] = "Bottom"
 --[[Translation missing --]]
@@ -89,9 +91,7 @@ L["options:general:enable-only-for-target-nameplate"] = "Show the cooldowns on t
 --[[Translation missing --]]
 L["options:general:full-opacity-always"] = "Icons are always completely opaque"
 --[[Translation missing --]]
-L["options:general:full-opacity-always:tooltip"] = [=[If this option is enabled, the icons will 
-always be completely opaque. If not, the opacity
-will be the same as the health bar]=]
+L["options:general:full-opacity-always:tooltip"] = [=[If this option is enabled, the icons will always be completely opaque. If not, the opacity will be the same as the health bar]=]
 --[[Translation missing --]]
 L["options:general:icon-grow-direction"] = "Icons' growth direction"
 --[[Translation missing --]]
@@ -166,5 +166,3 @@ L["Show border around interrupts"] = "Show border around interrupts"
 L["Show border around trinkets"] = "Show border around trinkets"
 L["Unknown spell: %s"] = "Magia sconosciuta: %s"
 L["Value must be a number"] = "Il valore deve essere un numero"
-
---@end-non-debug@
