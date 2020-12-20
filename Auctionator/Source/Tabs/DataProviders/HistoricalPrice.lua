@@ -8,6 +8,22 @@ local HISTORICAL_PRICE_PROVIDER_LAYOUT ={
   },
   {
     headerTemplate = "AuctionatorStringColumnHeaderTemplate",
+    headerText = AUCTIONATOR_L_UPPER_UNIT_PRICE,
+    headerParameters = { "maxSeen" },
+    cellTemplate = "AuctionatorPriceCellTemplate",
+    cellParameters = { "maxSeen" },
+    defaultHide = true
+  },
+  {
+    headerTemplate = "AuctionatorStringColumnHeaderTemplate",
+    headerText = AUCTIONATOR_L_RESULTS_AVAILABLE_COLUMN,
+    headerParameters = { "available" },
+    cellTemplate = "AuctionatorStringCellTemplate",
+    cellParameters = { "availableFormatted" },
+    width = 100
+  },
+  {
+    headerTemplate = "AuctionatorStringColumnHeaderTemplate",
     headerText = AUCTIONATOR_L_DATE,
     headerParameters = { "rawDay" },
     cellTemplate = "AuctionatorStringCellTemplate",
@@ -34,12 +50,24 @@ function AuctionatorHistoricalPriceProviderMixin:SetItem(itemKey)
   self.onSearchStarted()
 
   local dbKey = Auctionator.Utilities.ItemKeyFromBrowseResult({ itemKey = itemKey })
+  local entries = Auctionator.Database:GetPriceHistory(dbKey)
 
-  self:AppendEntries(Auctionator.Database.GetPriceHistory(dbKey), true)
+  for _, entry in ipairs(entries) do
+    if entry.available then
+      entry.availableFormatted = Auctionator.Utilities.DelimitThousands(entry.available)
+    else
+      entry.availableFormatted = ""
+    end
+  end
+
+  self:AppendEntries(entries, true)
 end
 
 function AuctionatorHistoricalPriceProviderMixin:GetTableLayout()
   return HISTORICAL_PRICE_PROVIDER_LAYOUT
+end
+function AuctionatorHistoricalPriceProviderMixin:GetColumnHideStates()
+  return Auctionator.Config.Get(Auctionator.Config.Options.COLUMNS_HISTORICAL_PRICES)
 end
 
 function AuctionatorHistoricalPriceProviderMixin:ReceiveEvent(event, itemInfo)
@@ -54,6 +82,7 @@ end
 
 local COMPARATORS = {
   minSeen = Auctionator.Utilities.NumberComparator,
+  available = Auctionator.Utilities.NumberComparator,
   rawDay = Auctionator.Utilities.StringComparator
 }
 

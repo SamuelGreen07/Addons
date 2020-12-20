@@ -12,3 +12,6 @@
 ## Changes in 8.3.1
 * Bugfix 
   thanks to r15ch13 
+## Changes in 9.0.2
+* Updated for 9.0.2
+* Added Coordinates for Shadowlands

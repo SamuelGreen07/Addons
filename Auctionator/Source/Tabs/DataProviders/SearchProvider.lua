@@ -20,7 +20,7 @@ local SEARCH_PROVIDER_LAYOUT = {
     headerText = AUCTIONATOR_L_RESULTS_AVAILABLE_COLUMN,
     headerParameters = { "quantity" },
     cellTemplate = "AuctionatorStringCellTemplate",
-    cellParameters = { "quantity" },
+    cellParameters = { "quantityFormatted" },
   },
   {
     headerTemplate = "AuctionatorStringColumnHeaderTemplate",
@@ -28,6 +28,14 @@ local SEARCH_PROVIDER_LAYOUT = {
     headerParameters = { "level" },
     cellTemplate = "AuctionatorStringCellTemplate",
     cellParameters = { "level" },
+  },
+  {
+    headerTemplate = "AuctionatorStringColumnHeaderTemplate",
+    headerParameters = { "timeLeftRaw" },
+    headerText = AUCTIONATOR_L_TIME_LEFT_H,
+    cellTemplate = "AuctionatorStringCellTemplate",
+    cellParameters = { "timeLeft" },
+    defaultHide = true,
   },
   {
     headerTemplate = "AuctionatorStringColumnHeaderTemplate",
@@ -76,11 +84,16 @@ function AuctionatorSearchDataProviderMixin:GetTableLayout()
   return SEARCH_PROVIDER_LAYOUT
 end
 
+function AuctionatorSearchDataProviderMixin:GetColumnHideStates()
+  return Auctionator.Config.Get(Auctionator.Config.Options.COLUMNS_SELLING_SEARCH)
+end
+
 local COMPARATORS = {
   price = Auctionator.Utilities.NumberComparator,
   bidPrice = Auctionator.Utilities.NumberComparator,
   quantity = Auctionator.Utilities.NumberComparator,
   level = Auctionator.Utilities.NumberComparator,
+  timeLeftRaw = Auctionator.Utilities.NumberComparator,
   owned = Auctionator.Utilities.StringComparator,
 }
 
@@ -128,7 +141,10 @@ function AuctionatorSearchDataProviderMixin:ProcessCommodityResults(itemID)
       bidPrice = nil,
       owners = resultInfo.owners,
       quantity = resultInfo.quantity,
+      quantityFormatted = Auctionator.Utilities.DelimitThousands(resultInfo.quantity),
       level = "0",
+      timeLeft = Auctionator.Utilities.RoundTime(resultInfo.timeLeftSeconds or 0),
+      timeLeftRaw = resultInfo.timeLeftSeconds or 0,
       auctionID = resultInfo.auctionID,
       itemID = itemID,
       itemType = Auctionator.Constants.ITEM_TYPES.COMMODITY,
@@ -166,6 +182,21 @@ local function cancelShortcutEnabled()
   return Auctionator.Config.Get(Auctionator.Config.Options.SELLING_CANCEL_SHORTCUT) ~= Auctionator.Config.Shortcuts.NONE
 end
 
+local function TimeLeftBandToHours(timeLeftBand)
+  if timeLeftBand == Enum.AuctionHouseTimeLeftBand.Short then
+    return "0 - 2"
+  elseif timeLeftBand == Enum.AuctionHouseTimeLeftBand.Medium then
+    return "2 - 12"
+  elseif timeLeftBand == Enum.AuctionHouseTimeLeftBand.Long then
+    return "12 - 24"
+  elseif timeLeftBand == Enum.AuctionHouseTimeLeftBand.VeryLong then
+    return "24 - 48"
+  else
+    Auctionator.Debug.Message("Missing auction time left band")
+    return ""
+  end
+end
+
 function AuctionatorSearchDataProviderMixin:ProcessItemResults(itemKey)
   local entries = {}
   local anyOwnedNotLoaded = false
@@ -177,8 +208,10 @@ function AuctionatorSearchDataProviderMixin:ProcessItemResults(itemKey)
       bidPrice = resultInfo.bidAmount,
       level = tostring(resultInfo.itemKey.itemLevel or 0),
       owners = resultInfo.owners,
-      timeLeft = resultInfo.timeLeft,
+      timeLeft = TimeLeftBandToHours(resultInfo.timeLeft),
+      timeLeftRaw =  resultInfo.timeLeft,
       quantity = resultInfo.quantity,
+      quantityFormatted = Auctionator.Utilities.DelimitThousands(resultInfo.quantity),
       itemLink = resultInfo.itemLink,
       auctionID = resultInfo.auctionID,
       itemType = Auctionator.Constants.ITEM_TYPES.ITEM,

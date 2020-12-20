@@ -2,8 +2,7 @@ local PA = _G.ProjectAzilroka
 local MA = PA:NewModule('MouseoverAuras', 'AceEvent-3.0', 'AceTimer-3.0')
 PA.MA = MA
 
-MA.Title = 'MouseoverAuras'
-MA.Header = PA.ACL['|cFF16C3F2Mouseover|r|cFFFFFFFFAuras|r']
+MA.Title = PA.ACL['|cFF16C3F2Mouseover|r|cFFFFFFFFAuras|r']
 MA.Description = PA.ACL['Auras for your mouseover target']
 MA.Authors = 'Azilroka'
 MA.isEnabled = false
@@ -50,9 +49,9 @@ function MA:CreateAuraIcon(index)
 end
 
 function MA:CustomFilter(unit, button, name, texture, count, debuffType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer)
-	local isPlayer = (caster == 'player' or caster == 'vehicle')
+	local isPlayer = (caster == 'player' or caster == 'vehicle' or caster == 'pet')
 
-	if (isPlayer or casterIsPlayer) and (duration ~= 0) then
+	if (isPlayer) and (duration ~= 0) then
 		return true
 	else
 		return false
@@ -207,10 +206,10 @@ function MA:GetOptions()
 		get = function(info) return MA.db[info[#info]] end,
 		set = function(info, value) MA.db[info[#info]] = value MA:SetPosition() end,
 		args = {
-			Header = {
+			Description = {
 				order = 0,
-				type = 'header',
-				name = MA.Header,
+				type = 'description',
+				name = MA.Description,
 			},
 			Enable = {
 				order = 1,
@@ -229,7 +228,7 @@ function MA:GetOptions()
 				order = 2,
 				type = 'group',
 				name = PA.ACL['General'],
-				guiInline = true,
+				inline = true,
 				args = {
 					Size = {
 						order = 1,
@@ -265,12 +264,16 @@ function MA:BuildProfile()
 		Enable = true,
 		Size = 16,
 		Spacing = 1,
-		cooldown = CopyTable(PA.Defaults.profile.cooldown),
+		cooldown = CopyTable(PA.Defaults.profile.Cooldown),
 	}
 end
 
-function MA:Initialize()
+function MA:UpdateSettings()
 	MA.db = PA.db.MouseoverAuras
+end
+
+function MA:Initialize()
+	MA:UpdateSettings()
 
 	if MA.db.Enable ~= true then
 		return

@@ -4,8 +4,7 @@ if PA.Classic then return end
 local BB = PA:NewModule('BigButtons', 'AceEvent-3.0')
 PA.BB, _G.BigButtons = BB, BB
 
-BB.Title = 'BigButtons'
-BB.Header = PA.ACL['|cFF16C3F2Big|r|cFFFFFFFFButtons|r']
+BB.Title = PA.ACL['|cFF16C3F2Big|r |cFFFFFFFFButtons|r']
 BB.Description = PA.ACL['A farm tool for Sunsong Ranch.']
 BB.Authors = 'Azilroka    NihilisticPandemonium'
 BB.isEnabled = false
@@ -213,6 +212,7 @@ function BB:CreateSeedButton(ItemID)
 	}
 	local xOffset = 4 + (34*(SeedX-1))
 
+	Button:ClearAllPoints()
 	Button:SetPoint(yTable[SeedY].point, xOffset, yTable[SeedY].offset)
 
 	PA:CreateShadow(Button)
@@ -236,82 +236,30 @@ function BB:DropTools()
 end
 
 function BB:GetOptions()
-	PA.Options.args.BigButtons = {
-		type = 'group',
-		name = BB.Title,
-		desc = BB.Description,
-		get = function(info) return BB.db[info[#info]] end,
-		args = {
-			Header = {
-				order = 0,
-				type = 'header',
-				name = BB.Header,
-			},
-			Enable = {
-				order = 1,
-				type = 'toggle',
-				name = PA.ACL['Enable'],
-				set = function(info, value)
-					BB.db[info[#info]] = value
-					if not BB.isEnabled then
-						BB:Initialize()
-					else
-						_G.StaticPopup_Show('PROJECTAZILROKA_RL')
-					end
-				end,
-			},
-			General = {
-				order = 2,
-				type = 'group',
-				name = PA.ACL['General'],
-				guiInline = true,
-				set = function(info, value) BB.db[info[#info]] = value BB:Update() end,
-				args = {
-					DropTools = {
-						order = 1,
-						type = 'toggle',
-						name = PA.ACL['Drop Farm Tools'],
-					},
-					ToolSize = {
-						order = 2,
-						type = 'range',
-						name = PA.ACL['Farm Tool Size'],
-						min = 16, max = 64, step = 1,
-					},
-					SeedSize = {
-						order = 3,
-						type = 'range',
-						name = PA.ACL['Seed Size'],
-						min = 16, max = 64, step = 1,
-					},
-				},
-			},
-			AuthorHeader = {
-				order = -2,
-				type = 'header',
-				name = PA.ACL['Authors:'],
-			},
-			Authors = {
-				order = -1,
-				type = 'description',
-				name = BB.Authors,
-				fontSize = 'large',
-			},
-		},
-	}
+	PA.Options.args.BigButtons = PA.ACH:Group(BB.Title, BB.Description, nil, nil, function(info) return BB.db[info[#info]] end)
+	PA.Options.args.BigButtons.args.Description = PA.ACH:Description(BB.Description, 0)
+	PA.Options.args.BigButtons.args.Enable = PA.ACH:Toggle(PA.ACL['Enable'], nil, 1, nil, nil, nil, nil, function(info, value) BB.db[info[#info]] = value if not BB.isEnabled then BB:Initialize() else _G.StaticPopup_Show('PROJECTAZILROKA_RL') end end)
+
+	PA.Options.args.BigButtons.args.General = PA.ACH:Group(PA.ACL['General'], nil, 2, nil, nil, function(info, value) BB.db[info[#info]] = value BB:Update() end)
+	PA.Options.args.BigButtons.args.General.inline = true
+	PA.Options.args.BigButtons.args.General.args.DropTools = PA.ACH:Toggle(PA.ACL['Drop Farm Tools'], nil, 1)
+	PA.Options.args.BigButtons.args.General.args.ToolSize = PA.ACH:Range(PA.ACL['Farm Tool Size'], nil, 2, { min = 16, max = 64, step = 1 })
+	PA.Options.args.BigButtons.args.General.args.SeedSize = PA.ACH:Range(PA.ACL['Seed Size'], nil, 3, { min = 16, max = 64, step = 1 })
+
+	PA.Options.args.BigButtons.args.AuthorHeader = PA.ACH:Header(PA.ACL['Authors:'], -2)
+	PA.Options.args.BigButtons.args.Authors = PA.ACH:Description(BB.Authors, -1, 'large')
 end
 
 function BB:BuildProfile()
-	PA.Defaults.profile.BigButtons = {
-		Enable = true,
-		DropTools = false,
-		ToolSize = 50,
-		SeedSize = 30,
-	}
+	PA.Defaults.profile.BigButtons = { Enable = true, DropTools = false, ToolSize = 50, SeedSize = 30 }
+end
+
+function BB:UpdateSettings()
+	BB.db = PA.db.BigButtons
 end
 
 function BB:Initialize()
-	BB.db = PA.db.BigButtons
+	BB:UpdateSettings()
 
 	if BB.db.Enable ~= true then
 		return
@@ -325,6 +273,7 @@ function BB:Initialize()
 	Bar:SetFrameStrata('MEDIUM')
 	Bar:SetFrameLevel(0)
 	Bar:SetSize(50, 50)
+	Bar:ClearAllPoints()
 	Bar:SetPoint('TOP', _G.UIParent, 'TOP', 0, -250)
 	Bar.Buttons = {}
 
@@ -376,7 +325,7 @@ function BB:Initialize()
 		_G.Tukui[1]['Movers']:RegisterFrame(BB.Bar.SeedsFrame)
 	elseif PA.ElvUI then
 		_G.ElvUI[1]:CreateMover(BB.Bar, 'BigButtonsFarmBar', 'BigButtons Farm Bar Anchor', nil, nil, nil, 'ALL,GENERAL', nil, 'ProjectAzilroka,BigButtons')
-		_G.ElvUI[1]:CreateMover(BB.Bar.SeedsFrame, 'BigButtonsSeedBar', 'BigButtons Seed Bar Anchor', nil, nil, nil, 'ALL,GENERAL', nil, 'ProjectAzilroka,BigButtons')
+		_G.ElvUI[1]:CreateMover(BB.Bar.SeedsFrame, 'BigButtonsSeedBarMover', 'BigButtons Seed Bar Anchor', nil, nil, nil, 'ALL,GENERAL', nil, 'ProjectAzilroka,BigButtons')
 	end
 
 	PA:CreateShadow(Bar.SeedsFrame)

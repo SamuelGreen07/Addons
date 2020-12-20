@@ -4,7 +4,7 @@ local _G = getfenv(0)
 -- AddOn namespace.
 -- ----------------------------------------------------------------------------
 local FOLDER_NAME, plugin	= ...
-local IMAGES_FOLDER		= "Interface\\Addons\\" .. FOLDER_NAME .. "\\Images\\"
+      plugin.icon		= "Interface\\Addons\\" .. FOLDER_NAME .. "\\icon"
 -- ----------------------------------------------------------------------------
 local HandyNotes = LibStub("AceAddon-3.0"):GetAddon("HandyNotes")
 local HL = LibStub("AceAddon-3.0"):NewAddon(FOLDER_NAME, "AceEvent-3.0")
@@ -45,7 +45,7 @@ local info = {}
 --	Tooltip
 --	-------------------------------------------------------------------------------------------
 	function HLHandler:OnEnter(uiMapID, coord)
-		local tooltip = self:GetParent() == WorldMapFrame:GetCanvas() and WorldMapTooltip or GameTooltip
+		local tooltip = GameTooltip
 		if ( self:GetCenter() > UIParent:GetCenter() ) then -- compare X coordinate
 			tooltip:SetOwner(self, "ANCHOR_LEFT")
 		else
@@ -56,26 +56,31 @@ local info = {}
 		if not value then return nil end
 		------------------------------------------------------------------------------------
 		if value.achievement then
-			tip.title	= select(1, GetAchievementCriteriaInfoByID(value.achievement, value.criteria))
-			tip.note	= select(2, GetAchievementInfo(value.achievement))
-			tip.note2	= select(8, GetAchievementInfo(value.achievement))
+			tip.criteria	= select(1, GetAchievementCriteriaInfoByID(value.achievement, value.criteria))
+			tip.achievement	= select(2, GetAchievementInfo(value.achievement))
+			tip.description	= "Revealing the covered areas of the world map."
+			tip.note	= value.note
 		end
 		------------------------------------------------------------------------------------
-		if tip.title then 
-			tooltip:SetText("|cff3399ff" .. tip.title)
+		if tip.criteria then 
 			if tip.note then 
-			tooltip:AddLine(tip.note, nil, nil, nil, true)	
-				if tip.note2 then 
-				tooltip:AddLine(tip.note2, 1, 1, 1, true)
-				end
-				if tip.note3 then 
-				tooltip:AddLine(tip.note3, 1, 1, 1, true)
-				end
-				if tip.note4 then 
-				tooltip:AddLine(tip.note4, 1, 1, 1, true)
-				end
-
+			tooltip : AddDoubleLine ( tip.criteria , tip.note , 0.2 , 0.6 , 1 , 1 , 1 , 1 )
+			else
+			tooltip : AddLine ( tip.criteria , 0.2, 0.6, 1, true)
 			end
+
+			tooltip:AddLine	(CreateAtlasMarkup ("Timer-Fill", 250, 2))
+
+			if tip.achievement then 
+				tooltip:AddLine(tip.achievement, nil, nil, nil, true)	
+	--			tooltip:AddLine	(" " .. CreateAtlasMarkup ("Timer-Fill", 200, 2) .. " ")				
+			end	
+
+			if tip.description then 
+				tooltip:AddLine(tip.description, 1, 1, 1, true)
+			end
+				
+
 		end
 		tooltip:Show()
 	end
@@ -83,11 +88,7 @@ local info = {}
 --	Tooltip Hide
 --	-------------------------------------------------------------------------------------------
 	function HLHandler:OnLeave(uiMapID, coord)
-		if self:GetParent() == WorldMapFrame:GetCanvas() then
-		WorldMapTooltip:Hide()
-		else
 		GameTooltip:Hide()
-		end
 	end
 --	-------------------------------------------------------------------------------------------
 --	--	End of Tooltip
@@ -164,11 +165,9 @@ do
 		local icon, alpha, scale
 			scale = (value.scale or 1) * plugin.db.icon_scale
 			alpha = (value.alpha or 1) * plugin.db.icon_alpha
-	--		scale = value.scale or 1
-	--		alpha = value.alpha or 1
 			if value.achievement then
 				if (UnitName("player") ~= select ( 6, GetAchievementCriteriaInfoByID (value.achievement, value.criteria) ) ) then
-				icon = "Interface\\Addons\\" .. FOLDER_NAME .. "\\Images\\Explorer Coord" 
+				icon = plugin.icon
 				end
 			end
 --      -------------------------------------------------------------------------------------------
@@ -193,8 +192,8 @@ function HL:OnInitialize()
     -- Initialize our database with HandyNotes
     HandyNotes:RegisterPluginDB(FOLDER_NAME:gsub("HandyNotes_", ""), HLHandler, plugin.options)
 
-    -- watch for LOOT_CLOSED
-    self:RegisterEvent("LOOT_CLOSED", "Refresh")
+    self:RegisterEvent("ZONE_CHANGED", "Refresh")
+    self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "Refresh")
     self:RegisterEvent("ZONE_CHANGED_INDOORS", "Refresh")
 end
 

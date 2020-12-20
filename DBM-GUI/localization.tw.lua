@@ -33,6 +33,7 @@ L.Button_LoadMod 			= "載入模組"
 L.Mod_Enabled				= "啟用首領模組"
 L.Mod_Reset					= "讀取預設值"
 L.Reset 					= "重置"
+L.Import					= "匯入"
 
 L.Enable  					= "啟用"
 L.Disable					= "停用"
@@ -67,6 +68,7 @@ L.Latency_Text				= "設定最高延遲同步門檻:%d"
 L.Button_RangeFrame			= "顯示/隱藏距離監視器"
 L.Button_InfoFrame			= "顯示/隱藏訊息框架"
 L.Button_TestBars			= "測試計時條"
+L.Button_MoveBars			= "移動計時條"
 L.Button_ResetInfoRange		= "重置訊息/距離監視器"
 
 L.ModelOptions				= "3D模型預覽選項"
@@ -76,6 +78,7 @@ L.ModelSoundShort			= SHORT
 L.ModelSoundLong			= TOAST_DURATION_LONG
 
 L.ResizeOptions			 	= "尺寸調整選項"
+L.ResizeInfo				= "您可以通過點擊右下角並拖動來調整GUI的大小。"
 L.Button_ResetWindowSize	= "重設GUI視窗大小"
 L.Editbox_WindowWidth		= "GUI視窗寬度"
 L.Editbox_WindowHeight		= "GUI視窗高度"
@@ -132,6 +135,11 @@ L.SelectModProfileCopy		= "複製所有設定"
 L.SelectModProfileCopySound	= "只複製音效設定"
 L.SelectModProfileCopyNote	= "只複製註記設定"
 L.SelectModProfileDelete	= "刪除模組設定"
+
+L.Area_ImportExportProfile	= "匯入/匯出 設定檔"
+L.ImportExportInfo			= "匯入會覆寫您當前的設定檔，後果請自負。"
+L.ButtonImportProfile		= "匯入設定檔"
+L.ButtonExportProfile		= "匯出設定檔"
 
 -- Tab: Alerts
 L.TabCategory_Alerts	 	= "警告"

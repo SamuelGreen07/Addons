@@ -30,6 +30,7 @@ local UnitAffectingCombat, UnitIsPlayer, UnitGUID, UnitPosition, UnitIsConnected
 local C_EncounterJournal_GetSectionInfo, GetSpellInfo, GetSpellTexture, GetTime, IsSpellKnown = C_EncounterJournal.GetSectionInfo, GetSpellInfo, GetSpellTexture, GetTime, IsSpellKnown
 local EJ_GetEncounterInfo, UnitGroupRolesAssigned = EJ_GetEncounterInfo, UnitGroupRolesAssigned
 local SendChatMessage, GetInstanceInfo, Timer = BigWigsLoader.SendChatMessage, BigWigsLoader.GetInstanceInfo, BigWigsLoader.CTimerAfter
+local UnitDetailedThreatSituation = UnitDetailedThreatSituation
 local format, find, gsub, band, tremove, wipe = string.format, string.find, string.gsub, bit.band, table.remove, table.wipe
 local select, type, next, tonumber = select, type, next, tonumber
 local C = core.C
@@ -331,6 +332,7 @@ function boss:Disable(isWipe)
 		self.missing = nil
 		self.isWiping = nil
 		self.isEngaged = nil
+		self.bossTargetChecks = nil
 
 		self:CancelAllTimers()
 
@@ -921,7 +923,6 @@ end
 do
 	local bosses = {"boss1", "boss2", "boss3", "boss4", "boss5"}
 	local bossTargets = {"boss1target", "boss2target", "boss3target", "boss4target", "boss5target"}
-	local UnitDetailedThreatSituation = UnitDetailedThreatSituation
 	local function bossScanner()
 		for i = #bossTargetScans, 1, -1 do
 			local self, func, tankCheckExpiry, guid = bossTargetScans[i][1], bossTargetScans[i][2], bossTargetScans[i][3], bossTargetScans[i][4]
@@ -964,6 +965,42 @@ do
 		end
 
 		bossTargetScans[#bossTargetScans+1] = {self, func, solo and 0.1 or tankCheckExpiry, guid, 0} -- Tiny allowance when solo
+	end
+
+
+	function boss:NextTarget(event, unit)
+		self:UnregisterUnitEvent(event, unit)
+		local func = self.bossTargetChecks[unit]
+		self.bossTargetChecks[unit] = nil
+		local id = unit.."target"
+		local playerGUID = UnitGUID(id)
+		local name = self:UnitName(id)
+		func(self, name, playerGUID)
+	end
+	--- Register a callback to get the next target a boss swaps to (boss1 - boss5).
+	-- Looks for the boss as defined by the GUID and then returns the next target selected by that boss.
+	-- Unlike the :GetBossTarget functionality, :GetNextBossTarget doesn't care what the target is, it will just fire the callback with whatever unit the boss targets next
+	-- @param func callback function, passed (module, playerName, playerGUID)
+	-- @string guid GUID of the mob to get the target of
+	-- @number[opt] timeToWait seconds to wait for the boss to change target until giving up, if nil the default time of 0.3s is used
+	function boss:GetNextBossTarget(func, guid, timeToWait)
+		if not self.bossTargetChecks then
+			self.bossTargetChecks = {}
+		end
+
+		for i = 1, 5 do
+			local unit = bosses[i]
+			if UnitGUID(unit) == guid then
+				self.bossTargetChecks[unit] = func
+				self:RegisterUnitEvent("UNIT_TARGET", "NextTarget", unit)
+				Timer(timeToWait or 0.3, function()
+					if self.bossTargetChecks[unit] then
+						self:UnregisterUnitEvent("UNIT_TARGET", unit)
+					end
+				end)
+				break
+			end
+		end
 	end
 end
 
@@ -1313,6 +1350,14 @@ function boss:Tank(unit)
 	else
 		return myRole == "TANK"
 	end
+end
+
+--- Check if you are tanking a unit.
+-- @string targetUnit check if you are currently tanking this unit
+-- @string[opt="player"] sourceUnit check if a different player is currently tanking the targetUnit
+-- @return boolean
+function boss:Tanking(targetUnit, sourceUnit)
+	return UnitDetailedThreatSituation(sourceUnit or "player", targetUnit)
 end
 
 --- Check if your talent tree role is HEALER.

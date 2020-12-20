@@ -1,20 +1,33 @@
 # Deadly Boss Mods Core
 
-## [9.0.6-12-g050b46a](https://github.com/DeadlyBossMods/DeadlyBossMods/tree/050b46ac41bd4e4117a4a7e196d85e33446d8bcd) (2020-11-30)
-[Full Changelog](https://github.com/DeadlyBossMods/DeadlyBossMods/compare/9.0.6...050b46ac41bd4e4117a4a7e196d85e33446d8bcd) [Previous Releases](https://github.com/DeadlyBossMods/DeadlyBossMods/releases)
+## [9.0.11-19-ga458ce9](https://github.com/DeadlyBossMods/DeadlyBossMods/tree/a458ce97de94ca6631ba8310553d9b7662023532) (2020-12-20)
+[Full Changelog](https://github.com/DeadlyBossMods/DeadlyBossMods/compare/9.0.11...a458ce97de94ca6631ba8310553d9b7662023532) [Previous Releases](https://github.com/DeadlyBossMods/DeadlyBossMods/releases)
 
-- Apply affecting combat filters to plaguefall trash warnings  
-- Improved interrupt filter to automatically return false if channel info shows spell is not interruptable. Required for places like torghast where multiple enemies use same spells, and some are interrupt immune and some arent.  
-- revert one that was missed in PR  
-- Spanish Translates (#403)  
-- tweak IsValidWarning for solo runs, where the check might not want to be as strict for certain spell casts  
-- Applied combat filters to all trash warnings in Mists of Tirna to avoid situations where mobs in combat with other npcs nearby don't trigger trash warnings.  
-- Easier to find move button (#399)  
-    * Easier to find move button  
-    * And the GUI options come in 2 x 2, hurrahh, hurrah  
-- Fix variable name  
--  - Reworked the melee check prototypes to be more shadowlands robust in identifying what players are melee during encounter mechanics only real failure is survival hunters, no way to identify theme without inspecting, which won't work when all actions require info from same onupdate frame (can't quiry and wait for server reply for inspect requests mid fight, especially over and over again.  
-     - Reworked miasma icons on Hungering too prioritize giving star to melee targets  
-- Update localization.cn.lua (#398)  
-- Update zhTW (#395)  
-- Prep next dev cycle  
+- Make boss preview 300x300 (#443)  
+    This makes mobs actually RENDER properly, without cutting their heads off.  
+- Tell GUI to ignoreCustom (#442)  
+    * Tell GUI to ignoreCustom  
+    * And here too  
+- Also changed Drain fluids to be off by default based on feedback.  
+- Now that Altimor isn't broken, fix P4 sinseeker timer on mythic  
+    Also removed bad taunt warning in spires of ascension.. that mechanic doesn't seem to exist anymore  
+- Added two special warnings for both add switches on Council of Blood  
+    Added likely respawn time to sludgefist.  
+- Actually show the count in the gaze and slam warnings  
+- Updated zhTW (#441)  
+- Proper syntax for failures. (#431)  
+- Mod profile import/export (#440)  
+- Fix two stupid  
+- Fixed a bug wehre chain link warning never actually gave you partner name when it was supposed to  
+    Disabled sinseeker timer for phase 4 mythic since it doesn't get cast in P4?  
+    Made lady inerva personal warning for shared suffering 1 second faster  
+- Support for CustomSounds (the hacky way of installing sounds) (#439)  
+- Fix regression issue properly (#437)  
+- Tweaked altimor sinseeker timers now that some longer lasting pulls exist on WCL  
+    More aggressivevly restore sounds on login if option to disable them exists. Wouldn't want blizzard to delete that setting from the game too  
+- Update zhTW (#436)  
+- Blizzard apparently killed off ability to hide quest tooltips in 9.0, so disabled from DBM as well.  
+- Fix typo  
+- Fixed a serious regression that causes core to spam lua errors when playing sounds.  
+    Fixed a bug on sludgefist where the seismic timer would keep on keeping on when it ran out of sequenced timers. now it'll cleanup when it reaches end of timer table.. still need to fix actual missing timers.  
+- bump alpha revision  

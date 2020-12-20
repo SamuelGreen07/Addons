@@ -36,9 +36,15 @@ PA.LSM = LibStub('LibSharedMedia-3.0')
 PA.LDB = LibStub('LibDataBroker-1.1')
 PA.LCG = LibStub("LibCustomGlow-1.0")
 PA.LAB = LibStub('LibActionButton-1.0')
+PA.ACH = LibStub('LibAceConfigHelper')
 
 -- External Libraries
 PA.Masque = LibStub("Masque", true)
+PA.LCD = LibStub("LibClassicDurations", true)
+
+if PA.LCD then
+	PA.LCD:Register(AddOnName) 	-- Register LibClassicDurations
+end
 
 -- WoW Data
 PA.MyClass = select(2, UnitClass('player'))
@@ -89,12 +95,8 @@ end
 
 PA.Title = GetAddOnMetadata('ProjectAzilroka', 'Title')
 PA.Version = GetAddOnMetadata('ProjectAzilroka', 'Version')
-PA.Authors = GetAddOnMetadata('ProjectAzilroka', 'Author'):gsub(", ", "    ")
+PA.Authors = GetAddOnMetadata('ProjectAzilroka', 'Author'):gsub(', ', '    ')
 
-local Color = CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[PA.MyClass] or RAID_CLASS_COLORS[PA.MyClass]
-PA.ClassColor = { Color.r, Color.g, Color.b }
-
-PA.FontFlags = { MONOCHROME = 'MONOCHROME', MONOCHROMEOUTLINE = 'MONOCHROMEOUTLINE', NONE = 'None', OUTLINE = 'OUTLINE', THICKOUTLINE = 'THICKOUTLINE' }
 PA.AllPoints = { CENTER = 'CENTER', BOTTOM = 'BOTTOM', TOP = 'TOP', LEFT = 'LEFT', RIGHT = 'RIGHT', BOTTOMLEFT = 'BOTTOMLEFT', BOTTOMRIGHT = 'BOTTOMRIGHT', TOPLEFT = 'TOPLEFT', TOPRIGHT = 'TOPRIGHT' }
 
 PA.ElvUI = PA:IsAddOnEnabled('ElvUI', PA.MyName)
@@ -104,7 +106,29 @@ PA.Tukui = PA:IsAddOnEnabled('Tukui', PA.MyName)
 PA.AzilUI = PA:IsAddOnEnabled('AzilUI', PA.MyName)
 PA.AddOnSkins = PA:IsAddOnEnabled('AddOnSkins', PA.MyName)
 
+-- Setup oUF for pbuf
+local function GetoUF()
+	local key = PA.ElvUI and "ElvUI" or PA.Tukui and "Tukui"
+	if not key then return end
+	return _G[_G.GetAddOnMetadata(key, 'X-oUF')]
+end
+PA.oUF = GetoUF()
+
 PA.Classes = {}
+for k, v in pairs(LOCALIZED_CLASS_NAMES_MALE) do PA.Classes[v] = k end
+for k, v in pairs(LOCALIZED_CLASS_NAMES_FEMALE) do PA.Classes[v] = k end
+
+function PA:ClassColorCode(class)
+	local color = PA:GetClassColor(PA.Classes[class])
+	return format('FF%02x%02x%02x', color.r * 255, color.g * 255, color.b * 255)
+end
+
+function PA:GetClassColor(class)
+	return _G.CUSTOM_CLASS_COLORS and _G.CUSTOM_CLASS_COLORS[class] or _G.RAID_CLASS_COLORS[class or 'PRIEST']
+end
+
+local Color = PA:GetClassColor(PA.MyClass)
+PA.ClassColor = { Color.r, Color.g, Color.b }
 
 PA.ScanTooltip = CreateFrame('GameTooltip', 'PAScanTooltip', _G.UIParent, 'GameTooltipTemplate')
 PA.ScanTooltip:SetOwner(_G.UIParent, "ANCHOR_NONE")
@@ -113,9 +137,6 @@ PA.PetBattleFrameHider = CreateFrame('Frame', 'PA_PetBattleFrameHider', UIParent
 PA.PetBattleFrameHider:SetAllPoints()
 PA.PetBattleFrameHider:SetFrameStrata('LOW')
 RegisterStateDriver(PA.PetBattleFrameHider, 'visibility', '[petbattle] hide; show')
-
-for k, v in pairs(LOCALIZED_CLASS_NAMES_MALE) do PA.Classes[v] = k end
-for k, v in pairs(LOCALIZED_CLASS_NAMES_FEMALE) do PA.Classes[v] = k end
 
 function PA:GetUIScale()
 	local effectiveScale = _G.UIParent:GetEffectiveScale()
@@ -130,12 +151,6 @@ function PA:GetUIScale()
 	return magic/scale
 end
 
-function PA:ClassColorCode(class)
-	local color = class and (CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[PA.Classes[class]] or RAID_CLASS_COLORS[PA.Classes[class]]) or { r = 1, g = 1, b = 1 }
-
-	return format('FF%02x%02x%02x', color.r * 255, color.g * 255, color.b * 255)
-end
-
 function PA:GetClassName(class)
 	return PA.Classes[class]
 end
@@ -147,6 +162,16 @@ end
 
 function PA:Print(...)
 	print(PA:Color(PA.Title..':'), ...)
+end
+
+function PA:ShortValue(value)
+	if (value >= 1e6) then
+		return gsub(format("%.1fm", value / 1e6), "%.?0+([km])$", "%1")
+	elseif (value >= 1e3 or value <= -1e3) then
+		return gsub(format("%.1fk", value / 1e3), "%.?0+([km])$", "%1")
+	else
+		return value
+	end
 end
 
 function PA:RGBToHex(r, g, b, header, ending)
@@ -193,14 +218,25 @@ function PA:PairsByKeys(t, f)
 	return iter
 end
 
+function PA:AddKeysToTable(current, tbl)
+	if type(current) ~= 'table' then return end
+
+	for key, value in pairs(tbl) do
+		if current[key] == nil then
+			current[key] = value
+		end
+	end
+end
+
 function PA:SetTemplate(frame)
 	if PA.AddOnSkins then
 		_G.AddOnSkins[1]:SetTemplate(frame)
 	else
+		if not frame.SetBackdrop then _G.Mixin(frame,  _G.BackdropTemplateMixin) end
 		if frame.SetTemplate then
 			frame:SetTemplate('Transparent', true)
 		else
-			frame:SetBackdrop({ bgFile = PA.Solid, edgeFile = PA.Solid, tile = false, tileSize = 0, edgeSize = 1, insets = { left = 0, right = 0, top = 0, bottom = 0 } })
+			frame:SetBackdrop({ bgFile = PA.Solid, edgeFile = PA.Solid, edgeSize = 1 })
 		end
 		frame:SetBackdropColor(.08, .08, .08, .8)
 		frame:SetBackdropBorderColor(0.2, 0.2, 0.2, 0)
@@ -213,13 +249,8 @@ function PA:CreateBackdrop(frame)
 	else
 		frame.Backdrop = CreateFrame('Frame', nil, frame)
 		frame.Backdrop:SetFrameLevel(frame:GetFrameLevel() - 1)
-		if frame.SetTemplate then
-			frame.Backdrop:SetTemplate('Transparent', true)
-		else
-			frame.Backdrop:SetBackdrop({ bgFile = PA.Solid, edgeFile = PA.Solid, tile = false, tileSize = 0, edgeSize = 1, insets = { left = 0, right = 0, top = 0, bottom = 0 } })
-		end
-		frame.Backdrop:SetBackdropColor(.08, .08, .08, .8)
-		frame.Backdrop:SetBackdropBorderColor(0.2, 0.2, 0.2, 0)
+		frame.Backdrop:SetOutside(frame)
+		PA:SetTemplate(frame.Backdrop)
 	end
 end
 
@@ -228,9 +259,9 @@ function PA:CreateShadow(frame)
 		_G.AddOnSkins[1]:CreateShadow(frame)
 	elseif frame.CreateShadow then
 		frame:CreateShadow()
-		if not PA.SLE then
+		if not PA.SLE and not PA.NUI then
 			PA.ES:RegisterFrameShadows(frame)
-		elseif PA.SLE then
+		elseif PA.NUI then
 			_G.EnhancedShadows:RegisterShadow(frame.shadow)
 		end
 	end
@@ -448,8 +479,8 @@ StaticPopupDialogs["PROJECTAZILROKA_RL"] = {
 
 PA.Defaults = {
 	profile = {
-		cooldown = {
-			enable = true,
+		Cooldown = {
+			Enable = true,
 			threshold = 3,
 			hideBlizzard = false,
 			useIndicatorColor = false,
@@ -482,13 +513,7 @@ PA.Defaults = {
 	}
 }
 
-PA.Options = {
-	type = 'group',
-	name = PA:Color(PA.Title),
-	order = 6,
-	childGroups = "tab",
-	args = {},
-}
+PA.Options = PA.ACH:Group(PA:Color(PA.Title), nil, 6)
 
 function PA:GetOptions()
 	PA.AceOptionsPanel.Options.args.ProjectAzilroka = PA.Options
@@ -514,11 +539,10 @@ function PA:SetupProfile()
 	end
 end
 
-function PA:ADDON_LOADED(event, addon)
-	if addon == AddOnName then
-		PA.EP = LibStub('LibElvUIPlugin-1.0', true)
-		PA.AceOptionsPanel = PA.ElvUI and _G.ElvUI[1] or PA.EC
-		PA:UnregisterEvent(event)
+function PA:CallModuleFunction(module, func)
+	local pass, err = pcall(func, module)
+	if not pass and PA.Debug then
+		error(err)
 	end
 end
 
@@ -526,9 +550,13 @@ function PA:PLAYER_LOGIN()
 	PA.Multiple = PA:GetUIScale()
 
 	PA.AS = _G.AddOnSkins and _G.AddOnSkins[1]
+	PA.EP = LibStub('LibElvUIPlugin-1.0', true)
+	PA.AceOptionsPanel = PA.ElvUI and _G.ElvUI[1] or PA.EC
+
+	PA.Options.childGroups = PA.EC and 'tab' or 'tree'
 
 	for _, module in PA:IterateModules() do
-		if module.BuildProfile then module:BuildProfile() end
+		if module.BuildProfile then PA:CallModuleFunction(module, module.BuildProfile) end
 	end
 
 	PA:BuildProfile()
@@ -540,10 +568,13 @@ function PA:PLAYER_LOGIN()
 	PA:UpdateCooldownSettings('all')
 
 	for _, module in PA:IterateModules() do
-		if module.GetOptions then module:GetOptions() end
-		if module.Initialize then module:Initialize() end
+		if module.GetOptions then
+			PA:CallModuleFunction(module, module.GetOptions)
+		end
+		if module.Initialize then
+			PA:CallModuleFunction(module, module.Initialize)
+		end
 	end
 end
 
-PA:RegisterEvent('ADDON_LOADED')
 PA:RegisterEvent('PLAYER_LOGIN')

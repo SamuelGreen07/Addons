@@ -23,6 +23,23 @@ local CANCELLING_TABLE_LAYOUT = {
   },
   {
     headerTemplate = "AuctionatorStringColumnHeaderTemplate",
+    headerText = AUCTIONATOR_L_BID_PRICE,
+    headerParameters = { "bidPrice" },
+    cellTemplate = "AuctionatorPriceCellTemplate",
+    cellParameters = { "bidPrice" },
+    width = 150,
+    defaultHide = true,
+  },
+  {
+    headerTemplate = "AuctionatorStringColumnHeaderTemplate",
+    headerText = AUCTIONATOR_L_BIDDER,
+    headerParameters = { "bidder" },
+    cellTemplate = "AuctionatorStringCellTemplate",
+    cellParameters = { "bidder" },
+    defaultHide = true,
+  },
+  {
+    headerTemplate = "AuctionatorStringColumnHeaderTemplate",
     headerText = AUCTIONATOR_L_TIME_LEFT_H,
     headerParameters = { "timeLeft" },
     cellTemplate = "AuctionatorStringCellTemplate",
@@ -86,7 +103,9 @@ end
 
 local COMPARATORS = {
   price = Auctionator.Utilities.NumberComparator,
+  bidPrice = Auctionator.Utilities.NumberComparator,
   name = Auctionator.Utilities.StringComparator,
+  bidder = Auctionator.Utilities.StringComparator,
   quantity = Auctionator.Utilities.NumberComparator,
   timeLeft = Auctionator.Utilities.NumberComparator,
   undercut = Auctionator.Utilities.StringComparator,
@@ -145,25 +164,34 @@ function AuctionatorCancellingDataProviderMixin:PopulateAuctions()
   self:Reset()
 
   local results = {}
+  local total = 0
 
   for index = 1, C_AuctionHouse.GetNumOwnedAuctions() do
     local info = C_AuctionHouse.GetOwnedAuctionInfo(index)
 
     --Only look at unsold and uncancelled (yet) auctions
     if self:IsValidAuction(info) then
+      local price = info.buyoutAmount or info.bidAmount
+      total = total + price * info.quantity
       table.insert(results, {
         id = info.auctionID,
         quantity = info.quantity,
-        price = info.buyoutAmount or info.bidAmount,
+        price = price,
+        bidPrice = info.bidAmount,
+        bidder = info.bidder,
         itemKey = info.itemKey,
         itemLink = info.itemLink, -- Used for tooltips
-        timeLeft = math.ceil((info.timeLeftSeconds or 0)/60/60),
+        timeLeft = Auctionator.Utilities.RoundTime(info.timeLeftSeconds or 0),
         cancelled = (tIndexOf(self.waitingforCancellation, info.auctionID) ~= nil),
         undercut = self.undercutInfo[info.auctionID] or AUCTIONATOR_L_UNDERCUT_UNKNOWN
       })
     end
   end
   self:AppendEntries(results, true)
+
+  Auctionator.EventBus:RegisterSource(self, "CancellingDataProvider")
+    :Fire(self, Auctionator.Cancelling.Events.TotalUpdated, total)
+    :UnregisterSource(self)
 end
 
 function AuctionatorCancellingDataProviderMixin:UniqueKey(entry)
@@ -172,6 +200,10 @@ end
 
 function AuctionatorCancellingDataProviderMixin:GetTableLayout()
   return CANCELLING_TABLE_LAYOUT
+end
+
+function AuctionatorCancellingDataProviderMixin:GetColumnHideStates()
+  return Auctionator.Config.Get(Auctionator.Config.Options.COLUMNS_CANCELLING)
 end
 
 function AuctionatorCancellingDataProviderMixin:GetRowTemplate()

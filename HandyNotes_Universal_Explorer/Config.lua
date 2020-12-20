@@ -5,7 +5,7 @@ local FOLDER_NAME, plugin	= ...
 -- ----------------------------------------------------------------------------
 plugin.defaults = {
 	profile = {
-		icon_scale = 1.5,
+		icon_scale = 1.0,
 		icon_alpha = 1.0,
 		completed = false,
 	},

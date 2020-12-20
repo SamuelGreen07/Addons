@@ -3,8 +3,7 @@ local AR = PA:NewModule('AuraReminder', 'AceEvent-3.0', 'AceTimer-3.0')
 
 PA.AR = AR
 
-AR.Title = 'Aura Reminder'
-AR.Header = '|cFF16C3F2Aura|r |cFFFFFFFFReminder|r'
+AR.Title = '|cFF16C3F2Aura|r |cFFFFFFFFReminder|r'
 AR.Description = 'Reminder for Buffs / Debuffs'
 AR.Authors = 'Azilroka    NihilisticPandemonium'
 AR.isEnabled = false
@@ -146,74 +145,76 @@ function AR:Reminder_Update()
 
 	local Position = 1
 	for _, filter in pairs({PA.MyClass, 'Global'}) do
-		for _, db in pairs(AR.db.Filters[filter]) do
-			if db.enable and (not db.level or db.level and UnitLevel('player') > db.level) then
-				local Button = AR.CreatedReminders[Position]
-				if (not Button) or (Button:IsVisible()) then
-					Button = AR:CreateReminder(Position)
-					Position = Position + 1
-				end
-
-				AR:SetIconPosition(Button, db)
-
-				local filterCheck, reverseCheck = AR:FilterCheck(db), AR:FilterCheck(db, true)
-
-				if db.filterType == 'COOLDOWN' and db.cooldownSpellID and filterCheck then
-					local start, duration = GetSpellCooldown(db.cooldownSpellID)
-					if (duration and duration > 1.5) then
-						Button.cooldown:SetCooldown(start, duration)
+		if AR.db.Filters then
+			for _, db in pairs(AR.db.Filters[filter]) do
+				if db.enable and (not db.level or db.level and UnitLevel('player') > db.level) then
+					local Button = AR.CreatedReminders[Position]
+					if (not Button) or (Button:IsVisible()) then
+						Button = AR:CreateReminder(Position)
+						Position = Position + 1
 					end
 
-					Button.cooldown:SetShown((duration and duration > 0))
-					Button.icon:SetTexture(select(3, GetSpellInfo(db.cooldownSpellID)))
-					Button:SetShown((duration and duration == 0) or db.onCooldown)
+					AR:SetIconPosition(Button, db)
 
-					AR:UpdateColors(Button, db.cooldownSpellID)
+					local filterCheck, reverseCheck = AR:FilterCheck(db), AR:FilterCheck(db, true)
 
-					if (duration and duration > 1.5) and filterCheck and db.onCooldown then
-						Button:SetAlpha(db.cooldownAlpha or .5)
-					end
-				elseif (db.filterType == 'WEAPON' or (db.filterType == 'SPELL' and db.spellGroup and PA:CountTable(db.spellGroup) > 0)) and filterCheck then
-					if db.filterType == 'SPELL' then
-						local hasBuff, hasDebuff = AR:FindPlayerAura(db.spellGroup, db.personal), AR:FindPlayerAura(db.spellGroup, nil, 'HARMFUL')
-						local negate = AR:FindPlayerAura(db.negateGroup, db.personal)
+					if db.filterType == 'COOLDOWN' and db.cooldownSpellID and filterCheck then
+						local start, duration = GetSpellCooldown(db.cooldownSpellID)
+						if (duration and duration > 1.5) then
+							Button.cooldown:SetCooldown(start, duration)
+						end
 
-						if not (negate or hasBuff or hasDebuff) then
-							for buff, value in pairs(db.spellGroup) do
-								if value then
-									local usable = IsUsableSpell(buff);
-									if usable and AR:IsSpellOnCooldown(buff) then
-										break
-									end
+						Button.cooldown:SetShown((duration and duration > 0))
+						Button.icon:SetTexture(select(3, GetSpellInfo(db.cooldownSpellID)))
+						Button:SetShown((duration and duration == 0) or db.onCooldown)
 
-									if usable or not db.strictFilter then
-										Button.icon:SetTexture(select(3, GetSpellInfo(buff)))
-										AR:UpdateColors(Button, buff)
-										break
+						AR:UpdateColors(Button, db.cooldownSpellID)
+
+						if (duration and duration > 1.5) and filterCheck and db.onCooldown then
+							Button:SetAlpha(db.cooldownAlpha or .5)
+						end
+					elseif (db.filterType == 'WEAPON' or (db.filterType == 'SPELL' and db.spellGroup and PA:CountTable(db.spellGroup) > 0)) and filterCheck then
+						if db.filterType == 'SPELL' then
+							local hasBuff, hasDebuff = AR:FindPlayerAura(db.spellGroup, db.personal), AR:FindPlayerAura(db.spellGroup, nil, 'HARMFUL')
+							local negate = AR:FindPlayerAura(db.negateGroup, db.personal)
+
+							if not (negate or hasBuff or hasDebuff) then
+								for buff, value in pairs(db.spellGroup) do
+									if value then
+										local usable = IsUsableSpell(buff);
+										if usable and AR:IsSpellOnCooldown(buff) then
+											break
+										end
+
+										if usable or not db.strictFilter then
+											Button.icon:SetTexture(select(3, GetSpellInfo(buff)))
+											AR:UpdateColors(Button, buff)
+											break
+										end
 									end
 								end
+
+								Button:SetShown((((not hasBuff) and (not hasDebuff)) and not db.reverseCheck) or (reverseCheck and db.reverseCheck and ((hasBuff or hasDebuff) or ((not hasBuff) and (not hasDebuff)))))
+							end
+						end
+
+						if db.filterType == 'WEAPON' then
+							local hasOffhandWeapon = AR:HasOffHandWeapon(GetInventoryItemID('player', 17))
+							local hasMainHandEnchant, _, _, hasOffHandEnchant = GetWeaponEnchantInfo()
+
+							if (not hasMainHandEnchant) then
+								Button.icon:SetTexture(GetInventoryItemTexture('player', 16))
+							elseif (hasOffhandWeapon and not hasOffHandEnchant) then
+								Button.icon:SetTexture(GetInventoryItemTexture('player', 17))
 							end
 
-							Button:SetShown((((not hasBuff) and (not hasDebuff)) and not db.reverseCheck) or (reverseCheck and db.reverseCheck and ((hasBuff or hasDebuff) or ((not hasBuff) and (not hasDebuff)))))
-						end
-					end
-
-					if db.filterType == 'WEAPON' then
-						local hasOffhandWeapon = AR:HasOffHandWeapon(GetInventoryItemID('player', 17))
-						local hasMainHandEnchant, _, _, hasOffHandEnchant = GetWeaponEnchantInfo()
-
-						if (not hasMainHandEnchant) then
-							Button.icon:SetTexture(GetInventoryItemTexture('player', 16))
-						elseif (hasOffhandWeapon and not hasOffHandEnchant) then
-							Button.icon:SetTexture(GetInventoryItemTexture('player', 17))
+							Button:SetShown(not (hasMainHandEnchant or hasOffHandEnchant))
+							Button.icon:SetVertexColor(1, 1, 1)
 						end
 
-						Button:SetShown(not (hasMainHandEnchant or hasOffHandEnchant))
-						Button.icon:SetVertexColor(1, 1, 1)
-					end
-
-					if Button:IsShown() and not db.disableSound then
-						AR:PlaySoundFile()
+						if Button:IsShown() and not db.disableSound then
+							AR:PlaySoundFile()
+						end
 					end
 				end
 			end
@@ -239,17 +240,18 @@ function AR:SetIconPosition(button, db)
 	if not (button or db) then return end
 
 	local xOffset = db.xOffset or 0
-	local yOffset = db.yOffset or 0
+	local yOffset = db.yOffset or 200
 	local size = db.size or 40
 
 	button:ClearAllPoints()
-	button:SetPoint('CENTER', UIParent, 'CENTER', 0 + xOffset, 200 + yOffset);
+	button:SetPoint('CENTER', UIParent, 'CENTER', xOffset, yOffset);
 	button:SetSize(size, size)
 end
 
 function AR:CreateReminder(index)
 	local frame = CreateFrame('Frame', 'AuraReminder'..index, UIParent)
 	frame:Hide()
+	frame:SetClampedToScreen(true)
 	frame.icon = frame:CreateTexture(nil, 'OVERLAY')
 	frame.icon:SetTexCoord(unpack(PA.TexCoords))
 	frame.cooldown = CreateFrame('Cooldown', nil, frame, 'CooldownFrameTemplate')
@@ -315,14 +317,14 @@ local addGroupTemplate = { name = '', template = ''}
 function AR:GetOptions()
 	PA.Options.args.AuraReminder = {
 		type = 'group',
-		name = 'Aura Reminder',
+		name = AR.Title,
 		get = function(info) return AR.db[info[#info]] end,
 		set = function(info, value) AR.db[info[#info]] = value end,
 		args = {
-			Header = {
+			Description = {
 				order = 0,
-				type = 'header',
-				name = AR.Header,
+				type = 'description',
+				name = AR.Description,
 			},
 			Enable = {
 				order = 1,
@@ -356,6 +358,7 @@ function AR:GetOptions()
 					end
 				end,
 				set = function(info, value)
+					selectedFilter = nil
 					if value == 'Class' then
 						selectedGroup = PA.MyClass
 					else
@@ -389,7 +392,7 @@ function AR:GetOptions()
 				order = 5,
 				type = 'group',
 				name = PA.ACL['Filter Control'],
-				guiInline = true,
+				inline = true,
 				args = {
 					addFilter = {
 						order = 1,
@@ -452,6 +455,7 @@ function AR:GetOptions()
 						type = 'select',
 						name = PA.ACL['Remove Filter'],
 						get = function(info) return '' end,
+						confirm = function(info, value) return PA.ACL['Remove Filter']..' - '..value end,
 						set = function(info, value)
 							selectedFilter = nil
 							if DefaultFilters[selectedGroup][value] then
@@ -477,7 +481,7 @@ function AR:GetOptions()
 				order = 8,
 				type = 'group',
 				name = function() return selectedFilter end,
-				guiInline = true,
+				inline = true,
 				get = function(info) return AR.db.Filters[selectedGroup][selectedFilter][info[#info]] end,
 				set = function(info, value) AR.db.Filters[selectedGroup][selectedFilter][info[#info]] = value end,
 				hidden = function() return not selectedFilter end,
@@ -495,7 +499,7 @@ function AR:GetOptions()
 						values = function()
 							wipe(filterTypeList)
 							filterTypeList.SPELL = PA.ACL['Spell']
-							if selectedGroup == 'Class' then
+							if selectedGroup ~= 'Global' then
 								filterTypeList.WEAPON = PA.ACL['Weapon']
 								filterTypeList.COOLDOWN = PA.ACL['Cooldown']
 							end
@@ -506,51 +510,37 @@ function AR:GetOptions()
 						order = 3,
 						type = 'range',
 						name = PA.ACL['X Offset'],
-						min = -250, max = 250, step = 1,
+						min = -(PA.ScreenWidth / 2), max = (PA.ScreenWidth / 2), step = 1,
 					},
 					yOffset = {
 						order = 4,
 						type = 'range',
 						name = PA.ACL['Y Offset'],
-						min = -250, max = 250, step = 1,
+						min = -(PA.ScreenHeight / 2), max = (PA.ScreenHeight / 2), step = 1,
 					},
 					size = {
 						order = 5,
 						type = 'range',
 						name = PA.ACL['Size'],
-						min = 0, max = 64, step = 1,
+						min = 0, max = 128, step = 1,
 					},
 					conditions = {
 						order = 10,
-						type = 'group',
+						type = 'multiselect',
 						name = PA.ACL['Conditions'],
-						guiInline = true,
-						args = {
-							instance = {
-								order = 1,
-								type = 'toggle',
-								name = PA.ACL['Inside Raid/Party'],
-								desc = PA.ACL['Only run checks inside raid/party instances.'],
-							},
-							pvp = {
-								order = 2,
-								type = 'toggle',
-								name = PA.ACL['Inside BG/Arena'],
-								desc = PA.ACL['Only run checks inside BG/Arena instances.'],
-							},
-							combat = {
-								order = 3,
-								type = 'toggle',
-								name = PA.ACL['Combat'],
-								desc = PA.ACL['Only run checks during combat.'],
-							},
+						get = function(_, key) return AR.db.Filters[selectedGroup][selectedFilter][key] end,
+						set = function(_, key, value) AR.db.Filters[selectedGroup][selectedFilter][key] = value end,
+						values = {
+							instance = PA.ACL['Inside Raid/Party'],
+							pvp = PA.ACL['Inside BG/Arena'],
+							combat = PA.ACL['Combat'],
 						},
 					},
 					filterConditions = {
 						order = 11,
 						type = 'group',
 						name = PA.ACL['Filter Conditions'],
-						guiInline = true,
+						inline = true,
 						args = {
 							level = {
 								order = 4,
@@ -592,7 +582,7 @@ function AR:GetOptions()
 						order = 12,
 						type = 'group',
 						name = PA.ACL['Cooldown Conditions'],
-						guiInline = true,
+						inline = true,
 						hidden = function() return AR.db.Filters[selectedGroup][selectedFilter].filterType ~= 'COOLDOWN' or selectedGroup == 'Global' end,
 						args = {
 							dscription = {
@@ -636,8 +626,11 @@ function AR:GetOptions()
 						order = 13,
 						type = 'group',
 						name = PA.ACL['Spells'],
-						guiInline = true,
-						get = function(info) return '' end,
+						inline = true,
+						get = function(info)
+							AR:UpdateFilterGroup('spellGroup')
+							return ''
+						end,
 						hidden = function() return AR.db.Filters[selectedGroup][selectedFilter].filterType ~= 'SPELL' end,
 						args = {
 							AddSpell = {
@@ -648,6 +641,7 @@ function AR:GetOptions()
 									value = tonumber(value)
 									if not value then return end
 
+									AR.db.Filters[selectedGroup][selectedFilter].spellGroup = AR.db.Filters[selectedGroup][selectedFilter].spellGroup or {}
 									AR.db.Filters[selectedGroup][selectedFilter].spellGroup[value] = true
 									AR:UpdateFilterGroup('spellGroup')
 								end,
@@ -663,26 +657,27 @@ function AR:GetOptions()
 								end,
 								values = function()
 									wipe(spellList)
-									for spellID in pairs(AR.db.Filters[selectedGroup][selectedFilter].spellGroup) do
-										local name = GetSpellInfo(spellID)
-										spellList[spellID] = name and format('%s (%s)', name, spellID) or spellID
+									if AR.db.Filters[selectedGroup][selectedFilter].spellGroup then
+										for spellID in pairs(AR.db.Filters[selectedGroup][selectedFilter].spellGroup) do
+											local name = GetSpellInfo(spellID)
+											spellList[spellID] = name and format('%s (%s)', name, spellID) or spellID
+										end
 									end
 									return spellList
 								end,
 							},
-							spacer = {
-								order = 2,
-								type = 'description',
-								name = ' ',
-							}
+							spacer = PA.ACH:Spacer(2)
 						},
 					},
 					negateGroup = {
 						order = 14,
 						type = 'group',
 						name = PA.ACL['Negate Spells'],
-						guiInline = true,
-						get = function(info) return '' end,
+						inline = true,
+						get = function(info)
+							AR:UpdateFilterGroup('negateGroup')
+							return ''
+						end,
 						hidden = function() return AR.db.Filters[selectedGroup][selectedFilter].filterType ~= 'SPELL' end,
 						args = {
 							AddSpell = {
@@ -693,6 +688,7 @@ function AR:GetOptions()
 									value = tonumber(value)
 									if not value then return end
 
+									AR.db.Filters[selectedGroup][selectedFilter].negateGroup = AR.db.Filters[selectedGroup][selectedFilter].negateGroup or {}
 									AR.db.Filters[selectedGroup][selectedFilter].negateGroup[value] = true
 									AR:UpdateFilterGroup('negateGroup')
 								end,
@@ -704,96 +700,42 @@ function AR:GetOptions()
 								get = function() return '' end,
 								set = function(info, value)
 									AR.db.Filters[selectedGroup][selectedFilter].negateGroup[value] = nil;
-									AR:UpdateFilterGroup('spellGroup')
+									AR:UpdateFilterGroup('negateGroup')
 								end,
 								values = function()
 									wipe(spellList)
-									for spellID in pairs(AR.db.Filters[selectedGroup][selectedFilter].negateGroup) do
-										local name = GetSpellInfo(spellID)
-										spellList[spellID] = name and format('%s (%s)', name, spellID) or spellID
+									if AR.db.Filters[selectedGroup][selectedFilter].negateGroup then
+										for spellID in pairs(AR.db.Filters[selectedGroup][selectedFilter].negateGroup) do
+											local name = GetSpellInfo(spellID)
+											spellList[spellID] = name and format('%s (%s)', name, spellID) or spellID
+										end
 									end
 									return spellList
 								end,
 							},
-							spacer = {
-								order = 2,
-								type = 'description',
-								name = ' ',
-							}
+							spacer = PA.ACH:Spacer(2)
 						},
 					},
 				},
 			},
-			AuthorHeader = {
-				order = -4,
-				type = 'header',
-				name = PA.ACL['Authors:'],
-			},
-			Authors = {
-				order = -3,
-				type = 'description',
-				name = AR.Authors,
-				fontSize = 'large',
-			},
 		},
 	}
+
+	PA.Options.args.AuraReminder.args.AuthorHeader = PA.ACH:Header(PA.ACL['Authors:'], -2)
+	PA.Options.args.AuraReminder.args.Authors = PA.ACH:Description(AR.Authors, -1, 'large')
 
 	if PA.Retail then
 		local optionGroup = PA.Options.args.AuraReminder.args.filterGroup.args.filterConditions.args
 
-		local Specializations = {
-			['1'] = select(2, GetSpecializationInfo(1)),
-			['2'] = select(2, GetSpecializationInfo(2)),
-			['3'] = select(2, GetSpecializationInfo(3)),
-			['ANY'] = PA.ACL['Any'],
-		}
+		local Specializations = { ['ANY'] = PA.ACL['Any'] }
 
-		if PA.MyClass == 'DRUID' then
-			Specializations['4'] = select(2, GetSpecializationInfo(4))
+		for i = 1, 4 do
+			Specializations[tostring(i)] = select(2, GetSpecializationInfo(i))
 		end
 
-		optionGroup.role = {
-			order = 1,
-			type = 'select',
-			name = PA.ACL['Role'],
-			desc = PA.ACL['You must be a certain role for the icon to appear.'],
-			hidden = function() return selectedGroup == 'Global' end,
-			values = {
-				TANK = PA.ACL['Tank'],
-				DAMAGER = PA.ACL['Damage'],
-				HEALER = PA.ACL['Healer'],
-				ANY = PA.ACL['Any'],
-			},
-		}
-
-		optionGroup.tree = {
-			order = 2,
-			type = 'select',
-			name = PA.ACL['Talent Tree'],
-			desc = PA.ACL['You must be using a certain talent tree for the icon to show.'],
-			hidden = function() return AR.db.Filters[PA.MyClass][selectedFilter].reverseCheck or selectedGroup == 'Global' end,
-			get = function(info, value) return tostring(AR.db.Filters[PA.MyClass][selectedFilter].tree) end,
-			set = function(info, value)
-				if value == 'ANY' then
-					AR.db.Filters[PA.MyClass][selectedFilter].tree = 'ANY'
-				else
-					AR.db.Filters[PA.MyClass][selectedFilter].tree = tonumber(value)
-				end
-			end,
-			values = Specializations,
-		}
-
-		optionGroup.talentTreeException = {
-			order = 2,
-			type = 'select',
-			name = PA.ACL['Tree Exception'],
-			desc = PA.ACL['Set a talent tree to not follow the reverse check.'],
-			get = function(info) return tostring(AR.db.Filters[PA.MyClass][selectedFilter]['talentTreeException'] or 'NONE') end,
-			set = function(info, value) if value == 'NONE' then AR.db.Filters[PA.MyClass][selectedFilter].talentTreeException = nil else AR.db.Filters[PA.MyClass][selectedFilter]['talentTreeException'] = tonumber(value) end; end,
-			hidden = function() return not AR.db.Filters[PA.MyClass][selectedFilter].reverseCheck or selectedGroup == 'Global' end,
-			values = CopyTable(Specializations),
-		}
-
+		optionGroup.role = PA.ACH:Select(PA.ACL['Role'], PA.ACL['You must be a certain role for the icon to appear.'], 1, { TANK = PA.ACL['Tank'], DAMAGER = PA.ACL['Damage'], HEALER = PA.ACL['Healer'], ANY = PA.ACL['Any'] }, nil, nil, function(info) return AR.db.Filters[selectedGroup][selectedFilter][info[#info]] or 'ANY' end, nil, nil, function() return selectedGroup == 'Global' end)
+		optionGroup.tree = PA.ACH:Select(PA.ACL['Talent Tree'], PA.ACL['You must be using a certain talent tree for the icon to show.'], 2, Specializations, nil, nil, function() return tostring(AR.db.Filters[PA.MyClass][selectedFilter].tree or 'ANY') end, function(_, value) if value == 'ANY' then AR.db.Filters[PA.MyClass][selectedFilter].tree = 'ANY' else AR.db.Filters[PA.MyClass][selectedFilter].tree = tonumber(value) end end, nil, function() return selectedGroup == 'Global' or AR.db.Filters[PA.MyClass][selectedFilter].reverseCheck end)
+		optionGroup.talentTreeException = PA.ACH:Select(PA.ACL['Tree Exception'], PA.ACL['Set a talent tree to not follow the reverse check.'], 2, CopyTable(Specializations), nil, nil, function() return tostring(AR.db.Filters[PA.MyClass][selectedFilter]['talentTreeException'] or 'NONE') end, function(_, value) if value == 'NONE' then AR.db.Filters[PA.MyClass][selectedFilter].talentTreeException = nil else AR.db.Filters[PA.MyClass][selectedFilter]['talentTreeException'] = tonumber(value) end; end, nil, function() return selectedGroup == 'Global' or not AR.db.Filters[PA.MyClass][selectedFilter].reverseCheck end)
 		optionGroup.talentTreeException.values.NONE = PA.ACL['None']
 	end
 end

@@ -2,8 +2,7 @@ local PA = _G.ProjectAzilroka
 local EFL = PA:NewModule('EnhancedFriendsList', 'AceEvent-3.0', 'AceHook-3.0', 'AceTimer-3.0')
 PA.EFL, _G.EnhancedFriendsList = EFL, EFL
 
-EFL.Title = 'Enhanced Friends List'
-EFL.Header = PA.ACL['|cFF16C3F2Enhanced|r |cFFFFFFFFFriends List|r']
+EFL.Title = PA.ACL['|cFF16C3F2Enhanced|r |cFFFFFFFFFriends List|r']
 EFL.Description = PA.ACL['Provides Friends List Customization']
 EFL.Authors = 'Azilroka'
 EFL.Credits = 'Marotheit    Merathilis'
@@ -29,181 +28,32 @@ local ONE_YEAR = 12 * ONE_MONTH;
 local isBNConnected = _G.BNConnected()
 local LEVEL = LEVEL
 
+--[[
+/run for i,v in pairs(_G) do if type(v)=="string" and i:match("BNET_CLIENT_") then print(i,"=",v) end end
+]]
+
 EFL.Icons = {
 	Game = {
-		Alliance = {
-			Name = _G.FACTION_ALLIANCE,
-			Order = 1,
-			Default = "Interface/FriendsFrame/Battlenet-WoWicon",
-			BlizzardChat = 'Interface/ChatFrame/UI-ChatIcon-WoW',
-			Flat = MediaPath..'GameIcons/Flat/Alliance',
-			Gloss = MediaPath..'GameIcons/Gloss/Alliance',
-			Launcher = MediaPath..'GameIcons/Launcher/Alliance',
-		},
-		Horde = {
-			Name = _G.FACTION_HORDE,
-			Order = 2,
-			Default = 'Interface/FriendsFrame/Battlenet-WoWicon',
-			BlizzardChat = 'Interface/ChatFrame/UI-ChatIcon-WoW',
-			Flat = MediaPath..'GameIcons/Flat/Horde',
-			Gloss = MediaPath..'GameIcons/Gloss/Horde',
-			Launcher = MediaPath..'GameIcons/Launcher/Horde',
-		},
-		Neutral = {
-			Name = _G.FACTION_STANDING_LABEL4,
-			Order = 3,
-			Default = 'Interface/FriendsFrame/Battlenet-WoWicon',
-			BlizzardChat = 'Interface/ChatFrame/UI-ChatIcon-WoW',
-			Flat = MediaPath..'GameIcons/Flat/WoW',
-			Gloss = MediaPath..'GameIcons/Gloss/WoW',
-			Launcher = MediaPath..'GameIcons/Launcher/WoW',
-		},
-		App = {
-			Name = PA.ACL['App'],
-			Order = 4,
-			Color = '82C5FF',
-			Default = 'Interface/FriendsFrame/Battlenet-Battleneticon',
-			BlizzardChat = 'Interface/ChatFrame/UI-ChatIcon-Battlenet',
-			Flat = MediaPath..'GameIcons/Flat/BattleNet',
-			Gloss = MediaPath..'GameIcons/Gloss/BattleNet',
-			Launcher = MediaPath..'GameIcons/Launcher/BattleNet',
-			Animated = MediaPath..'GameIcons/Bnet',
-		},
-		BSAp = {
-			Name = PA.ACL['Mobile'],
-			Order = 5,
-			Color = '82C5FF',
-			Default = 'Interface/FriendsFrame/Battlenet-Battleneticon',
-			BlizzardChat = 'Interface/ChatFrame/UI-ChatIcon-Battlenet',
-			Flat = MediaPath..'GameIcons/Flat/BattleNet',
-			Gloss = MediaPath..'GameIcons/Gloss/BattleNet',
-			Launcher = MediaPath..'GameIcons/Launcher/BattleNet',
-			Animated = MediaPath..'GameIcons/Bnet',
-		},
-		[_G.BNET_CLIENT_D3 or 'D3'] = {
-			Name = PA.ACL['Diablo 3'],
-			Color = 'C41F3B',
-			Default = 'Interface/FriendsFrame/Battlenet-D3icon',
-			BlizzardChat = 'Interface/ChatFrame/UI-ChatIcon-D3',
-			Flat = MediaPath..'GameIcons/Flat/D3',
-			Gloss = MediaPath..'GameIcons/Gloss/D3',
-			Launcher = MediaPath..'GameIcons/Launcher/D3',
-		},
-		[_G.BNET_CLIENT_WTCG or 'WTCG'] = {
-			Name = PA.ACL['Hearthstone'],
-			Color = 'FFB100',
-			Default = 'Interface/FriendsFrame/Battlenet-WTCGicon',
-			BlizzardChat = 'Interface/ChatFrame/UI-ChatIcon-WTCG',
-			Flat = MediaPath..'GameIcons/Flat/Hearthstone',
-			Gloss = MediaPath..'GameIcons/Gloss/Hearthstone',
-			Launcher = MediaPath..'GameIcons/Launcher/Hearthstone',
-		},
-		[_G.BNET_CLIENT_SC or 'S1'] = {
-			Name = PA.ACL['Starcraft'],
-			Color = 'C495DD',
-			Default = 'Interface/FriendsFrame/Battlenet-Sc2icon',
-			BlizzardChat = 'Interface/ChatFrame/UI-ChatIcon-SC',
-			Flat = MediaPath..'GameIcons/Flat/SC',
-			Gloss = MediaPath..'GameIcons/Gloss/SC',
-			Launcher = MediaPath..'GameIcons/Launcher/SC',
-		},
-		[_G.BNET_CLIENT_SC2 or 'S2'] = {
-			Name = PA.ACL['Starcraft 2'],
-			Color = 'C495DD',
-			Default = "Interface/ChatFrame/UI-ChatIcon-SC2",
-			BlizzardChat = 'Interface/ChatFrame/UI-ChatIcon-SC2',
-			Flat = MediaPath..'GameIcons/Flat/SC2',
-			Gloss = MediaPath..'GameIcons/Gloss/SC2',
-			Launcher = MediaPath..'GameIcons/Launcher/SC2',
-		},
-		[_G.BNET_CLIENT_HEROES or 'Hero'] = {
-			Name = PA.ACL['Hero of the Storm'],
-			Color = '00CCFF',
-			Default = 'Interface/FriendsFrame/Battlenet-HotSicon',
-			BlizzardChat = 'Interface/ChatFrame/UI-ChatIcon-HotS',
-			Flat = MediaPath..'GameIcons/Flat/Heroes',
-			Gloss = MediaPath..'GameIcons/Gloss/Heroes',
-			Launcher = MediaPath..'GameIcons/Launcher/Heroes',
-		},
-		[_G.BNET_CLIENT_OVERWATCH or 'Pro'] = {
-			Name = PA.ACL['Overwatch'],
-			Color = 'FFFFFF',
-			Default = 'Interface/FriendsFrame/Battlenet-Overwatchicon',
-			BlizzardChat = 'Interface/ChatFrame/UI-ChatIcon-Overwatch',
-			Flat = MediaPath..'GameIcons/Flat/Overwatch',
-			Gloss = MediaPath..'GameIcons/Gloss/Overwatch',
-			Launcher = MediaPath..'GameIcons/Launcher/Overwatch',
-		},
-		[_G.BNET_CLIENT_DESTINY2 or 'DST2'] = {
-			Name = PA.ACL['Destiny 2'],
-			Color = 'FFFFFF',
-			Default = 'Interface/FriendsFrame/Battlenet-Destiny2icon',
-			BlizzardChat = 'Interface/ChatFrame/UI-ChatIcon-Destiny2',
-			Flat = MediaPath..'GameIcons/Launcher/Destiny2',
-			Gloss = MediaPath..'GameIcons/Launcher/Destiny2',
-			Launcher = MediaPath..'GameIcons/Launcher/Destiny2',
-		},
-		[_G.BNET_CLIENT_COD or 'VIPR'] = {
-			Name = PA.ACL['Call of Duty 4'],
-			Color = 'FFFFFF',
-			Default = 'Interface/FriendsFrame/Battlenet-CallOfDutyBlackOps4icon',
-			BlizzardChat = 'Interface/ChatFrame/UI-ChatIcon-CallOfDutyBlackOps4',
-			Flat = MediaPath..'GameIcons/Launcher/COD4',
-			Gloss = MediaPath..'GameIcons/Launcher/COD4',
-			Launcher = MediaPath..'GameIcons/Launcher/COD4',
-		},
-		[_G.BNET_CLIENT_COD_MW or 'ODIN'] = {
-			Name = PA.ACL['Call of Duty Modern Warfare'],
-			Color = 'FFFFFF',
-			Default = 'Interface/FriendsFrame/Battlenet-CallOfDutyMWicon',
-			BlizzardChat = 'Interface/ChatFrame/UI-ChatIcon-CallOfDutyMWicon',
-			Flat = MediaPath..'GameIcons/Launcher/CODMW',
-			Gloss = MediaPath..'GameIcons/Launcher/CODMW',
-			Launcher = MediaPath..'GameIcons/Launcher/CODMW',
-		},
-		[_G.BNET_CLIENT_WC3 or 'W3'] = {
-			Name = PA.ACL['Warcraft 3 Reforged'],
-			Color = 'FFFFFF',
-			Default = "Interface/FriendsFrame/Battlenet-Warcraft3Reforged",
-			BlizzardChat = 'Interface/FriendsFrame/Battlenet-Warcraft3Reforged',
-			Flat = MediaPath..'GameIcons/Launcher/WC3R',
-			Gloss = MediaPath..'GameIcons/Launcher/WC3R',
-			Launcher = MediaPath..'GameIcons/Launcher/WC3R',
-		},
+		Alliance = { Name = _G.FACTION_ALLIANCE, Order = 1, Default = "Interface/FriendsFrame/Battlenet-WoWicon", Launcher = MediaPath..'GameIcons/Launcher/Alliance' },
+		Horde = { Name = _G.FACTION_HORDE, Order = 2, Default = 'Interface/FriendsFrame/Battlenet-WoWicon', Launcher = MediaPath..'GameIcons/Launcher/Horde' },
+		Neutral = { Name = _G.FACTION_STANDING_LABEL4, Order = 3, Default = 'Interface/FriendsFrame/Battlenet-WoWicon', Launcher = MediaPath..'GameIcons/Launcher/WoW' },
+		App = { Name = PA.ACL['App'], Order = 4, Color = '82C5FF', Default = 'Interface/FriendsFrame/Battlenet-Battleneticon', Launcher = MediaPath..'GameIcons/Launcher/BattleNet' },
+		BSAp = { Name = PA.ACL['Mobile'], Order = 5, Color = '82C5FF', Default = 'Interface/FriendsFrame/Battlenet-Battleneticon', Launcher = MediaPath..'GameIcons/Launcher/BattleNet' },
+		D3 = { Name = PA.ACL['Diablo 3'], Color = 'C41F3B', Default = 'Interface/FriendsFrame/Battlenet-D3icon', Launcher = MediaPath..'GameIcons/Launcher/D3' },
+		WTCG = { Name = PA.ACL['Hearthstone'], Color = 'FFB100', Default = 'Interface/FriendsFrame/Battlenet-WTCGicon', Launcher = MediaPath..'GameIcons/Launcher/Hearthstone' },
+		S1 = { Name = PA.ACL['Starcraft'], Color = 'C495DD', Default = 'Interface/FriendsFrame/Battlenet-Sc2icon', Launcher = MediaPath..'GameIcons/Launcher/SC' },
+		S2 = { Name = PA.ACL['Starcraft 2'], Color = 'C495DD', Default = "Interface/ChatFrame/UI-ChatIcon-SC2", Launcher = MediaPath..'GameIcons/Launcher/SC2' },
+		Hero = { Name = PA.ACL['Hero of the Storm'], Color = '00CCFF', Default = 'Interface/FriendsFrame/Battlenet-HotSicon', Launcher = MediaPath..'GameIcons/Launcher/Heroes' },
+		Pro = { Name = PA.ACL['Overwatch'], Color = 'FFFFFF', Default = 'Interface/FriendsFrame/Battlenet-Overwatchicon', Launcher = MediaPath..'GameIcons/Launcher/Overwatch' },
+		VIPR = { Name = PA.ACL['Call of Duty 4'], Color = 'FFFFFF', Default = 'Interface/FriendsFrame/Battlenet-CallOfDutyBlackOps4icon', Launcher = MediaPath..'GameIcons/Launcher/COD4' },
+		ODIN = { Name = PA.ACL['Call of Duty Modern Warfare'], Color = 'FFFFFF', Default = 'Interface/FriendsFrame/Battlenet-CallOfDutyMWicon', Launcher = MediaPath..'GameIcons/Launcher/CODMW' },
+		W3 = { Name = PA.ACL['Warcraft 3 Reforged'], Color = 'FFFFFF', Default = "Interface/FriendsFrame/Battlenet-Warcraft3Reforged", Launcher = MediaPath..'GameIcons/Launcher/WC3R' },
 	},
 	Status = {
-		Online = {
-			Name = _G.FRIENDS_LIST_ONLINE,
-			Order = 1,
-			Default = _G.FRIENDS_TEXTURE_ONLINE,
-			Square = MediaPath..'StatusIcons/Square/Online',
-			D3 = MediaPath..'StatusIcons/D3/Online',
-			Color = {.243, .57, 1},
-		},
-		Offline = {
-			Name = _G.FRIENDS_LIST_OFFLINE,
-			Order = 2,
-			Default = _G.FRIENDS_TEXTURE_OFFLINE,
-			Square = MediaPath..'StatusIcons/Square/Offline',
-			D3 = MediaPath..'StatusIcons/D3/Offline',
-			Color = {.486, .518, .541},
-		},
-		DND = {
-			Name = _G.DEFAULT_DND_MESSAGE,
-			Order = 3,
-			Default = _G.FRIENDS_TEXTURE_DND,
-			Square = MediaPath..'StatusIcons/Square/DND',
-			D3 = MediaPath..'StatusIcons/D3/DND',
-			Color = {1, 0, 0},
-		},
-		AFK = {
-			Name = _G.DEFAULT_AFK_MESSAGE,
-			Order = 4,
-			Default = _G.FRIENDS_TEXTURE_AFK,
-			Square = MediaPath..'StatusIcons/Square/AFK',
-			D3 = MediaPath..'StatusIcons/D3/AFK',
-			Color = {1, 1, 0},
-		},
+		Online = { Name = _G.FRIENDS_LIST_ONLINE, Order = 1, Default = _G.FRIENDS_TEXTURE_ONLINE, Square = MediaPath..'StatusIcons/Square/Online', D3 = MediaPath..'StatusIcons/D3/Online', Color = {.243, .57, 1} },
+		Offline = { Name = _G.FRIENDS_LIST_OFFLINE, Order = 2, Default = _G.FRIENDS_TEXTURE_OFFLINE, Square = MediaPath..'StatusIcons/Square/Offline', D3 = MediaPath..'StatusIcons/D3/Offline', Color = {.486, .518, .541} },
+		DND = { Name = _G.DEFAULT_DND_MESSAGE, Order = 3, Default = _G.FRIENDS_TEXTURE_DND, Square = MediaPath..'StatusIcons/Square/DND', D3 = MediaPath..'StatusIcons/D3/DND', Color = {1, 0, 0} },
+		AFK = { Name = _G.DEFAULT_AFK_MESSAGE, Order = 4, Default = _G.FRIENDS_TEXTURE_AFK, Square = MediaPath..'StatusIcons/Square/AFK', D3 = MediaPath..'StatusIcons/D3/AFK', Color = {1, 1, 0} },
 	}
 }
 
@@ -285,17 +135,17 @@ function EFL:UpdateFriends(button)
 					end
 
 					if info.gameAccountInfo.wowProjectID == _G.WOW_PROJECT_CLASSIC and info.gameAccountInfo.realmDisplayName ~= PA.MyRealm then
-						infoText = format('%s - %s - %s', info.gameAccountInfo.areaName, info.gameAccountInfo.realmDisplayName, infoText)
+						infoText = format('%s - %s', info.gameAccountInfo.areaName or UNKNOWN, infoText)
 					elseif info.gameAccountInfo.realmDisplayName == PA.MyRealm then
 						infoText = info.gameAccountInfo.areaName
 					end
 
 					local faction = info.gameAccountInfo.factionName
-					button.gameIcon:SetTexture(faction and EFL.Icons.Game[faction][EFL.db[faction]] or EFL.Icons.Game.Neutral.Launcher)
+					button.gameIcon:SetTexture(faction and EFL.Icons.Game[faction][EFL.db.GameIconPack or 'Default'] or EFL.Icons.Game.Neutral.Launcher)
 				else
 					if not EFL.Icons.Game[client] then client = 'BSAp' end
 					nameText = format('|cFF%s%s|r', EFL.Icons.Game[client].Color or 'FFFFFF', nameText)
-					button.gameIcon:SetTexture(EFL.Icons.Game[client][EFL.db[client]])
+					button.gameIcon:SetTexture(EFL.Icons.Game[client][EFL.db.GameIconPack or 'Default'])
 				end
 
 				button.gameIcon:SetTexCoord(0, 1, 0, 1)
@@ -313,15 +163,6 @@ function EFL:UpdateFriends(button)
 		button.gameIcon:SetPoint('TOPRIGHT', -50, -2)
 	else
 		button.gameIcon:SetPoint('TOPRIGHT', -21, -2)
-	end
-
-	if not button.isUpdateHooked then
-		button:HookScript("OnUpdate", function(_, elapsed)
-			if button.gameIcon:GetTexture() == MediaPath..'GameIcons/Bnet' then
-				_G.AnimateTexCoords(button.gameIcon, 512, 256, 64, 64, 25, elapsed, 0.02)
-			end
-		end)
-		button.isUpdateHooked = true
 	end
 
 	if nameText then button.name:SetText(nameText) end
@@ -356,217 +197,53 @@ function EFL:UpdateFriends(button)
 end
 
 function EFL:GetOptions()
-	local Options = {
-		type = 'group',
-		name = EFL.Title,
-		desc = EFL.Description,
-		get = function(info) return EFL.db[info[#info]] end,
-		set = function(info, value) EFL.db[info[#info]] = value _G.FriendsFrame_Update() end,
-		args = {
-			Header = {
-				order = 0,
-				type = 'header',
-				name = EFL.Header
-			},
-			Enable = {
-				order = 1,
-				type = 'toggle',
-				name = PA.ACL['Enable'],
-				set = function(info, value)
-					EFL.db[info[#info]] = value
-					if (not EFL.isEnabled) then
-						EFL:Initialize()
-					else
-						_G.StaticPopup_Show('PROJECTAZILROKA_RL')
-					end
-				end,
-			},
-			General = {
-				order = 2,
-				type = 'group',
-				name = PA.ACL['General'],
-				guiInline = true,
-				args = {
-					NameSettings = {
-						type = 'group',
-						order = 1,
-						name = PA.ACL['Name Settings'],
-						guiInline = true,
-						args = {
-							NameFont = {
-								type = 'select', dialogControl = 'LSM30_Font',
-								order = 1,
-								name = PA.ACL['Name Font'],
-								desc = PA.ACL['The font that the RealID / Character Name / Level uses.'],
-								values = PA.LSM:HashTable('font'),
-							},
-							NameFontSize = {
-								order = 2,
-								name = PA.ACL['Name Font Size'],
-								desc = PA.ACL['The font size that the RealID / Character Name / Level uses.'],
-								type = 'range',
-								min = 6, max = 22, step = 1,
-							},
-							NameFontFlag = {
-								name = PA.ACL['Name Font Flag'],
-								desc = PA.ACL['The font flag that the RealID / Character Name / Level uses.'],
-								order = 3,
-								type = 'select',
-								values = PA.FontFlags,
-							},
-							ShowLevel = {
-								type = 'toggle',
-								order = 4,
-								name = PA.ACL['Show Level'],
-							},
-							DiffLevel = {
-								type = 'toggle',
-								order = 5,
-								name = PA.ACL['Level by Difficulty'],
-								disabled = function() return (not EFL.db.ShowLevel) end,
-							},
-						},
-					},
-					InfoSettings = {
-						type = 'group',
-						order = 2,
-						name = PA.ACL['Info Settings'],
-						guiInline = true,
-						args = {
-							InfoFont = {
-								type = 'select', dialogControl = 'LSM30_Font',
-								order = 1,
-								name = PA.ACL['Info Font'],
-								desc = PA.ACL['The font that the Zone / Server uses.'],
-								values = PA.LSM:HashTable('font'),
-							},
-							InfoFontSize = {
-								order = 2,
-								name = PA.ACL['Info Font Size'],
-								desc = PA.ACL['The font size that the Zone / Server uses.'],
-								type = 'range',
-								min = 6, max = 22, step = 1,
-							},
-							InfoFontFlag = {
-								order = 3,
-								name = PA.ACL['Info Font Outline'],
-								desc = PA.ACL['The font flag that the Zone / Server uses.'],
-								type = 'select',
-								values = PA.FontFlags,
-							},
-							StatusIconPack = {
-								name = PA.ACL['Status Icon Pack'],
-								desc = PA.ACL['Different Status Icons.'],
-								order = 4,
-								type = 'select',
-								values = {
-									['Default'] = 'Default',
-									['Square'] = 'Square',
-									['D3'] = 'Diablo 3',
-								},
-							},
-							ShowStatusBackground = {
-								type = 'toggle',
-								order = 5,
-								name = PA.ACL['Show Status Background'],
-							},
-							ShowStatusHighlight = {
-								type = 'toggle',
-								order = 6,
-								name = PA.ACL['Show Status Highlight'],
-							},
-							Texture = {
-								order = 7,
-								type = 'select', dialogControl = 'LSM30_Statusbar',
-								name = PA.ACL['Texture'],
-								values = PA.LSM:HashTable('statusbar'),
-							},
-						},
-					},
-				},
-			},
-			GameIcons = {
-				order = 3,
-				type = 'group',
-				name = PA.ACL['Game Icons'],
-				guiInline = true,
-				args = {},
-			},
-			GameIconsPreview = {
-				order = 4,
-				type = 'group',
-				name = PA.ACL['Game Icon Preview'],
-				guiInline = true,
-				args = {},
-			},
-			StatusIcons = {
-				order = 5,
-				type = 'group',
-				name = PA.ACL['Status Icon Preview'],
-				guiInline = true,
-				args = {},
-			},
-			AuthorHeader = {
-				order = -4,
-				type = 'header',
-				name = PA.ACL['Authors:'],
-			},
-			Authors = {
-				order = -3,
-				type = 'description',
-				name = EFL.Authors,
-				fontSize = 'large',
-			},
-			CreditsHeader = {
-				order = -2,
-				type = 'header',
-				name = PA.ACL['Credits:'],
-			},
-			Credits = {
-				order = -1,
-				type = 'description',
-				name = EFL.Credits,
-				fontSize = 'large',
-			},
-		},
-	}
+	PA.Options.args.EnhancedFriendsList = PA.ACH:Group(EFL.Title, EFL.Description, nil, nil, function(info) return EFL.db[info[#info]] end, function(info, value) EFL.db[info[#info]] = value _G.FriendsFrame_Update() end)
+	PA.Options.args.EnhancedFriendsList.args.Description = PA.ACH:Description(EFL.Description, 0)
+	PA.Options.args.EnhancedFriendsList.args.Enable = PA.ACH:Toggle(PA.ACL['Enable'], nil, 1, nil, nil, nil, nil, function(info, value) EFL.db[info[#info]] = value if not EFL.isEnabled then EFL:Initialize() else _G.StaticPopup_Show('PROJECTAZILROKA_RL') end end)
+
+	PA.Options.args.EnhancedFriendsList.args.General = PA.ACH:Group(PA.ACL['General'], nil, 2)
+	PA.Options.args.EnhancedFriendsList.args.General.inline = true
+
+	PA.Options.args.EnhancedFriendsList.args.General.args.NameSettings = PA.ACH:Group(PA.ACL['Name Settings'], nil, 1)
+	PA.Options.args.EnhancedFriendsList.args.General.args.NameSettings.inline = true
+	PA.Options.args.EnhancedFriendsList.args.General.args.NameSettings.args.NameFont = PA.ACH:SharedMediaFont(PA.ACL['Name Font'], PA.ACL['The font that the RealID / Character Name / Level uses.'], 1)
+	PA.Options.args.EnhancedFriendsList.args.General.args.NameSettings.args.NameFontSize = PA.ACH:Range(PA.ACL['Name Font Size'], PA.ACL['The font that the RealID / Character Name / Level uses.'], 2, { min = 6, max = 22, step = 1 })
+	PA.Options.args.EnhancedFriendsList.args.General.args.NameSettings.args.NameFontFlag = PA.ACH:FontFlags(PA.ACL['Name Font Flag'], PA.ACL['The font that the RealID / Character Name / Level uses.'], 3)
+	PA.Options.args.EnhancedFriendsList.args.General.args.NameSettings.args.ShowLevel = PA.ACH:Toggle(PA.ACL['Show Level'], nil, 4)
+	PA.Options.args.EnhancedFriendsList.args.General.args.NameSettings.args.DiffLevel = PA.ACH:Toggle(PA.ACL['Level by Difficulty'], nil, 5, nil, nil, nil, nil, nil, function() return (not EFL.db.ShowLevel) end)
+
+	PA.Options.args.EnhancedFriendsList.args.General.args.InfoSettings = PA.ACH:Group(PA.ACL['Info Settings'], nil, 2)
+	PA.Options.args.EnhancedFriendsList.args.General.args.InfoSettings.inline = true
+	PA.Options.args.EnhancedFriendsList.args.General.args.InfoSettings.args.InfoFont = PA.ACH:SharedMediaFont(PA.ACL['Info Font'], PA.ACL['The font that the Zone / Server uses.'], 1)
+	PA.Options.args.EnhancedFriendsList.args.General.args.InfoSettings.args.InfoFontSize = PA.ACH:Range(PA.ACL['Info Font Size'], PA.ACL['The font size that the Zone / Server uses.'], 2, { min = 6, max = 22, step = 1 })
+	PA.Options.args.EnhancedFriendsList.args.General.args.InfoSettings.args.InfoFontFlag = PA.ACH:FontFlags(PA.ACL['Info Font Outline'], PA.ACL['The font flag that the Zone / Server uses.'], 3)
+	PA.Options.args.EnhancedFriendsList.args.General.args.InfoSettings.args.ShowStatusBackground = PA.ACH:Toggle(PA.ACL['Show Status Background'], nil, 4)
+	PA.Options.args.EnhancedFriendsList.args.General.args.InfoSettings.args.ShowStatusHighlight = PA.ACH:Toggle(PA.ACL['Show Status Highlight'], nil, 5)
+	PA.Options.args.EnhancedFriendsList.args.General.args.InfoSettings.args.Texture = PA.ACH:SharedMediaStatusbar(PA.ACL['Texture'], nil, 6)
+
+	PA.Options.args.EnhancedFriendsList.args.General.args.IconSettings = PA.ACH:Group(PA.ACL['Icon Settings'], nil, 3)
+	PA.Options.args.EnhancedFriendsList.args.General.args.IconSettings.inline = true
+	PA.Options.args.EnhancedFriendsList.args.General.args.IconSettings.args.GameIconPack = PA.ACH:Select(PA.ACL['Game Icon Pack'], nil, 1, { Default = 'Default', Launcher = 'Launcher' })
+	PA.Options.args.EnhancedFriendsList.args.General.args.IconSettings.args.StatusIconPack = PA.ACH:Select(PA.ACL['Status Icon Pack'], PA.ACL['Different Status Icons.'], 2, { Default = 'Default', Square = 'Square', D3 = 'Diablo 3' })
+
+	PA.Options.args.EnhancedFriendsList.args.GameIconsPreview = PA.ACH:Group(PA.ACL['Game Icon Preview'], nil, 4)
+	PA.Options.args.EnhancedFriendsList.args.GameIconsPreview.inline = true
+
+	PA.Options.args.EnhancedFriendsList.args.StatusIcons = PA.ACH:Group(PA.ACL['Status Icon Preview'], nil, 5)
+	PA.Options.args.EnhancedFriendsList.args.StatusIcons.inline = true
 
 	for Key, Value in pairs(EFL.Icons.Game) do
-		Options.args.GameIcons.args[Key] = {
-			name = Value.Name..PA.ACL[' Icon'],
-			order = Value.Order,
-			type = 'select',
-			values = {
-				Default = 'Default',
-				BlizzardChat = 'Blizzard Chat',
-				Flat = 'Flat Style',
-				Gloss = 'Glossy',
-				Launcher = 'Launcher',
-			},
-		}
-		Options.args.GameIconsPreview.args[Key] = {
-			order = Value.Order,
-			type = 'execute',
-			name = Value.Name,
-			func = function() return end,
-			image = function(info) return EFL.Icons.Game[info[#info]][EFL.db[Key]], 32, 32 end,
-		}
+		PA.Options.args.EnhancedFriendsList.args.GameIconsPreview.args[Key] = PA.ACH:Execute(Value.Name, nil, Value.Order, nil, function(info) return EFL.Icons.Game[info[#info]][EFL.db.GameIconPack], 32, 32 end)
 	end
-
-	Options.args.GameIcons.args.App.values.Animated = 'Animated'
-	Options.args.GameIcons.args.BSAp.values.Animated = 'Animated'
 
 	for Key, Value in pairs(EFL.Icons.Status) do
-		Options.args.StatusIcons.args[Key] = {
-			order = Value.Order,
-			type = 'execute',
-			name = Value.Name,
-			func = function() return end,
-			image = function(info) return EFL.Icons.Status[info[#info]][EFL.db.StatusIconPack], 16, 16 end,
-		}
+		PA.Options.args.EnhancedFriendsList.args.StatusIcons.args[Key] = PA.ACH:Execute(Value.Name, nil, Value.Order, nil, function(info) return EFL.Icons.Status[info[#info]][EFL.db.StatusIconPack], 16, 16 end)
 	end
 
-	PA.Options.args.EnhancedFriendsList = Options
+	PA.Options.args.EnhancedFriendsList.args.AuthorHeader = PA.ACH:Header(PA.ACL['Authors:'], -4)
+	PA.Options.args.EnhancedFriendsList.args.Authors = PA.ACH:Description(EFL.Authors, -3, 'large')
+	PA.Options.args.EnhancedFriendsList.args.CreditsHeader = PA.ACH:Header(PA.ACL['Image Credits:'], -2)
+	PA.Options.args.EnhancedFriendsList.args.Credits = PA.ACH:Description(EFL.Credits, -1, 'large')
 end
 
 function EFL:BuildProfile()
@@ -584,11 +261,8 @@ function EFL:BuildProfile()
 		ShowStatusHighlight = true,
 		ShowStatusBackground = false,
 		Texture = 'Solid',
+		GameIconPack = 'Launcher'
 	}
-
-	for GameIcon in pairs(EFL.Icons.Game) do
-		PA.Defaults.profile.EnhancedFriendsList[GameIcon] = 'Launcher'
-	end
 
 	if PA.ElvUI then
 		PA.Defaults.profile.EnhancedFriendsList.NameFont = _G.ElvUI[1].db.general.font
@@ -605,8 +279,12 @@ function EFL:HandleBN()
 	isBNConnected = _G.BNConnected()
 end
 
-function EFL:Initialize()
+function EFL:UpdateSettings()
 	EFL.db = PA.db.EnhancedFriendsList
+end
+
+function EFL:Initialize()
+	EFL:UpdateSettings()
 
 	if EFL.db.Enable ~= true then
 		return
@@ -617,9 +295,9 @@ function EFL:Initialize()
 	EFL:RegisterEvent("BN_CONNECTED", 'HandleBN')
 	EFL:RegisterEvent("BN_DISCONNECTED", 'HandleBN')
 
-	--if PA.db.FG then
-	--	EFL:SecureHook(PA.FG, 'FriendGroups_UpdateFriendButton', function(self, button) EFL:UpdateFriends(button) end)
-	--else
+	if PA.db.FriendGroups and PA.db.FriendGroups.Enable then
+		EFL:SecureHook(_G.FriendGroups, 'FriendGroups_UpdateFriendButton', function(_, button) EFL:UpdateFriends(button) end)
+	else
 		EFL:SecureHook("FriendsFrame_UpdateFriendButton", 'UpdateFriends')
-	--end
+	end
 end

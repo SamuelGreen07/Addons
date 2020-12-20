@@ -17,6 +17,8 @@ L["AUCTION_TOOLTIP_TOOLTIP_TEXT"] = "Mostrar información sobre herramientas de 
 L["AUCTIONATOR"] = "Auctionator"
 L["AUTHOR_HEADER"] = "Autor"
 L["BID_PRICE"] = "Precio de pujar"
+--[[Translation missing --]]
+L["BIDDER"] = "Bidder"
 L["BIDDING_AUCTION_INFO"] = "%s Pujando en %s"
 L["BUG_REPORT"] = "Reportar un error"
 L["BUG_TOOLTIP_HEADER"] = "Reportar un error en Github"
@@ -25,6 +27,8 @@ L["BUYOUT_AUCTION_INFO"] = "%s Comprar en %s"
 L["BUYOUT_PRICE"] = "Compra"
 L["CANCEL"] = "Cancelar"
 L["CANCEL_UNDERCUT"] = "Cancelar descuento"
+--[[Translation missing --]]
+L["CANCEL_UNDERCUT_BUTTON_MACRO"] = "Cancel Undercut Button Macro"
 L["CANCELLING_TAB"] = "Cancelado"
 L["CANCELLING_TAB_HEADER"] = "Auctionator - Cancelado"
 L["CANNOT_AUCTION"] = [=[No se puede subastar
@@ -42,6 +46,14 @@ L["CONFIG_AUTO_LIST_SEARCH"] = [=[Escanear automáticamente en busca de objetos 
 L["CONFIG_AUTO_LIST_SEARCH_TOOLTIP_HEADER"] = "Búsqueda automática de listas."
 L["CONFIG_AUTO_LIST_SEARCH_TOOLTIP_TEXT"] = "Cuando se selecciona una lista, escanee automáticamente la casa de subastas para las entradas de la lista. Cuando esta opción está desactivada, puede buscar la lista completa al seleccionar el botón 'Buscar' en la barra lateral de la Lista de compras."
 L["CONFIG_AUTOSCAN"] = "Correr escaneo automático cuando la casa de subastas está abierta."
+--[[Translation missing --]]
+L["CONFIG_AUTOSCAN_INTERVAL"] = "Set to the number of minutes to wait between autoscans"
+--[[Translation missing --]]
+L["CONFIG_AUTOSCAN_INTERVAL_HEADER"] = "Interval between autoscans"
+--[[Translation missing --]]
+L["CONFIG_AUTOSCAN_INTERVAL_TOOLTIP_HEADER"] = "Autoscan Delay Interval"
+--[[Translation missing --]]
+L["CONFIG_AUTOSCAN_INTERVAL_TOOLTIP_TEXT"] = "By default an scan doesn't happen every time you open the Auction House. It waits until a fixed time has elapsed since the last scan."
 L["CONFIG_AUTOSCAN_TOOLTIP_HEADER"] = "Auto escáner"
 L["CONFIG_AUTOSCAN_TOOLTIP_TEXT"] = "Ejecute un análisis completo cuando se abra la casa de subastas. Si no está seleccionado, puede ejecutar un análisis completo haciendo clic en el botón 'Análisis completo' en la casa de subastas."
 L["CONFIG_BAG"] = "Bolsa"
@@ -62,7 +74,8 @@ L["CONFIG_DEBUG"] = "Alternar salida de depuración."
 L["CONFIG_DEBUG_TOOLTIP_HEADER"] = "Depurar Actionator"
 L["CONFIG_DEBUG_TOOLTIP_TEXT"] = "Esto es usado por los mantenedores para enviar mensajes de depuración al marco del chat."
 L["CONFIG_DEVELOPER"] = "Configuraciones de desarrollador"
-L["CONFIG_ENCHANT_TOOLTIP"] = "Mostrar información sobre herramientas para encantar (solo WoD, Legion y BfA)."
+--[[Translation missing --]]
+L["CONFIG_ENCHANT_TOOLTIP"] = "Show enchant tooltips (WoD, Legion, BfA & Shadowlands only.)"
 L["CONFIG_FULL_SCAN_STEP_SIZE"] = "Tamaño de paso de escaneo completo"
 L["CONFIG_LIFO_CATEGORY"] = "Vendiendo"
 L["CONFIG_MAIL_TOOLTIP"] = "Mostrar información sobre herramientas del buzón"
@@ -86,6 +99,12 @@ L["CONFIG_SELLING_CATEGORY"] = "Venta"
 L["CONFIG_SELLING_DEFAULT_QUANTITY_SUFFIX"] = "Establecer en 0 para la cantidad máxima"
 L["CONFIG_SELLING_DEFAULT_QUANTITY_TOOLTIP_HEADER"] = "Cantidad de contabilización predeterminada"
 L["CONFIG_SELLING_DEFAULT_QUANTITY_TOOLTIP_TEXT"] = "Esto le permite cambiar la cantidad predeterminada utilizada al publicar un objeto. Ajústelo a 0 para usar la cantidad máxima posible."
+--[[Translation missing --]]
+L["CONFIG_SELLING_GEAR_USE_ILVL"] = "For gear, use item level when selecting the price to compete with"
+--[[Translation missing --]]
+L["CONFIG_SELLING_GEAR_USE_ILVL_TOOLTIP_HEADER"] = "Use Item Level"
+--[[Translation missing --]]
+L["CONFIG_SELLING_GEAR_USE_ILVL_TOOLTIP_TEXT"] = "Normally gear is compared with any other gear that is similar, but without taking item level into account. This will make the item level be taken into account."
 L["CONFIG_SELLING_GEAR_VENDOR_PRICE_MULTIPLIER_SUFFIX"] = "Establecer en 0 sin precio"
 L["CONFIG_SELLING_GEAR_VENDOR_PRICE_MULTIPLIER_TOOLTIP_HEADER"] = "Precio predeterminado del vendedor de equipo"
 L["CONFIG_SELLING_GEAR_VENDOR_PRICE_MULTIPLIER_TOOLTIP_TEXT"] = "Esto le permite establecer un precio predeterminado para el equipo como un múltiplo del precio del vendedor. Esto se utiliza para cualquier equipo por el que Auctionator no tenga precio. Configure esto en 0 para no establecer un precio."
@@ -102,6 +121,9 @@ L["CONFIG_SELLING_TEXT"] = "Opciones para cambiar el comportamiento de la pesta�
 L["CONFIG_SHOPPING_CATEGORY"] = "Compras"
 L["CONFIG_SHOPPING_LIST"] = "Configuración de la lista de compras"
 L["CONFIG_SHOPPING_TEXT"] = "Opciones para cambiar el comportamiento de la pestaña Compras."
+L["CONFIG_SMALL_TABS"] = "Usa pequeñas pestañas para la casa de subastas (vuelva a abrir la casa de subastas para que surta efecto)"
+L["CONFIG_SMALL_TABS_TOOLTIP_HEADER"] = "Pestañas pequeñas"
+L["CONFIG_SMALL_TABS_TOOLTIP_TEXT"] = "Cuando demasiados addons agregan pestañas a la casa de subastas, pueden terminar desbordando más allá del final de la ventana de la casa de subastas. Esta configuración hace que las pestañas sean más pequeñas para que se ajusten mejor."
 L["CONFIG_STACK_TOOLTIP"] = "Mostrar el precio de la pila al mantener 'shift'."
 L["CONFIG_TOOLTIPS_CATEGORY"] = "Información sobre herramientas"
 L["CONFIG_TOOLTIPS_TEXT"] = [=[Opciones para mostrar información relacionada con diferentes subastas en la información sobre herramientas del juego.
@@ -160,6 +182,8 @@ L["GEAR_VENDOR_PRICE_MULTIPLIER"] = "Multiplicador de precio de vendedor de equi
 L["HIDE"] = "Ocultar"
 L["IMPORT"] = "Importar"
 L["INFO_TAB_HEADER"] = "Auctionator - Información"
+--[[Translation missing --]]
+L["IS_TOP_COLUMN"] = "Top?"
 L["IS_UNDERCUT"] = "¿Descontar?"
 L["ITEM_CLASS"] = "Clase de objeto"
 L["ITEM_LEVEL"] = "Nivel de objeto"
@@ -216,6 +240,8 @@ L["PROFILE_TOGGLE_TOOLTIP_HEADER"] = "Habilitar la configuración por personaje"
 L["PROFILE_TOGGLE_TOOLTIP_TEXT"] = "Los cambios en la configuración de Auctionator solo afectan a este personaje."
 L["QUANTITY"] = "Cantidad"
 L["REAGENT_SEARCH"] = "Búsqueda de componentes"
+--[[Translation missing --]]
+L["REALM_HISTORY"] = "Realm History"
 L["REMOVE_FAVOURITE"] = "Quitar favorito"
 L["RENAME"] = "Renombrar"
 L["RENAME_LIST_DIALOG"] = "Ingrese el nombre de la nueva lista de compra"
@@ -296,6 +322,19 @@ L["SPLASH_834_SHOPPING_1"] = "Se agregó la función de importación y exportaci
 L["SPLASH_834_SHOPPING_2"] = "Puede establecer una lista de compras predeterminada para buscar al abrir la pestaña Compras"
 L["SPLASH_834_SHOPPING_3"] = "Posibilidad de reordenar y editar objetos de la lista de compras."
 L["SPLASH_834_SHOPPING_HEADER"] = "Pestaña de compras"
+L["SPLASH_901_CHANGES_1"] = "Reemplazó el escaneo completo con un método diferente para evitar desconectarse en servidores ocupados."
+L["SPLASH_901_CHANGES_2"] = "La opción de escaneo automático ahora está desactivada de manera predeterminada."
+L["SPLASH_901_CHANGES_HEADER"] = "Cambios"
+L["SPLASH_901_DESCRIPTION"] = "Los cambios más importantes en esta versión son las columnas personalizables para los listados de artículos y los cambios en el escaneo completo. Como siempre, hay varias correcciones de errores."
+L["SPLASH_901_FEATURES_1"] = "Columnas personalizables en todas las vistas de resultados. Haga clic derecho en cualquier encabezado de columna para ver las opciones."
+L["SPLASH_901_FEATURES_2"] = "Opción de pestañas pequeñas para cuando demasiados complementos agregan pestañas a la casa de subastas"
+L["SPLASH_901_FEATURES_HEADER"] = "Nuevas características"
+--[[Translation missing --]]
+L["SPLASH_902_DESCRIPTION"] = "Along with the various bugfixes, there is one new feature."
+--[[Translation missing --]]
+L["SPLASH_902_FEATURES_1"] = "A new \"Your History\" section on the Selling tab to show the prices of past auctions you have created."
+--[[Translation missing --]]
+L["SPLASH_902_FEATURES_HEADER"] = "New Features"
 L["SPLASH_HIDE_MESSAGE"] = "No mostrar hasta la próxima actualización"
 L["SPLASH_SCREEN_HEADER"] = "Bienvenido a Auctionator"
 L["STACK_AUCTION_INFO"] = "%s para %s (en %s cada una)"
@@ -309,6 +348,8 @@ L["TOO_BIG_PERCENTAGE"] = "%% debe ser <= 100 (proporcionado %s)"
 L["TOO_MANY_SEARCH_RESULTS"] = "Demasiados resultados de búsqueda. Se muestran resultados limitantes."
 L["TOO_SMALL_PERCENTAGE"] = "%% debe ser >= 0 (proporcionado %s)"
 L["TOTAL_ITEMS_COLORED"] = "Total |cFFAAAAFF %s objetos|r"
+--[[Translation missing --]]
+L["TOTAL_ON_SALE"] = "Total on sale: %s"
 L["TOTAL_PRICE"] = "Precio total:"
 L["TRANSLATORS_BRAZIL_PORTUGUEUSE"] = "Portugués Brasileño"
 L["TRANSLATORS_FRENCH"] = "Francés"
@@ -332,6 +373,8 @@ L["UNDERCUT_YES"] = "Sí"
 L["UNIT_PRICE"] = "Precio por unidad"
 L["UNKNOWN"] = "Desconocido"
 L["UNSELECT_ALL"] = "Deseleccionar todo"
+--[[Translation missing --]]
+L["UPPER_UNIT_PRICE"] = "Upper Unit Price"
 L["VENDOR"] = "Vendedor"
 L["VENDOR_TOOLTIP_TOOLTIP_HEADER"] = [=[Información sobre herramientas del proveedor
 ]=]
@@ -339,6 +382,8 @@ L["VENDOR_TOOLTIP_TOOLTIP_TEXT"] = [=[Mostrar información del proveedor al pasa
 ]=]
 L["VERSION_HEADER"] = "Versión"
 L["VERSION_MESSAGE"] = "Versión %s"
+--[[Translation missing --]]
+L["YOUR_HISTORY"] = "Your History"
 
   return L
 end

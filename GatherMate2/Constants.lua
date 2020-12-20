@@ -411,6 +411,8 @@ local node_ids = {
 		-- 8.2.5
 		[NL["Jelly Deposit"]]					= 563,
 		[NL["Large Jelly Deposit"]]				= 564,
+		-- Shadowlands
+		[NL["Ground Wart"]]						= 565,
 	},
 	["Archaeology"] = {
 		-- cata archeolgy objects
@@ -509,6 +511,7 @@ local rare_spawns = {
 	[494] = {[493]=true,[495]=true,[496]=true,[497]=true,[498]=true}, -- nightshade
 	[493] = {[495]=true,[496]=true,[497]=true,[498]=true}, -- death blossom shares spawn with zone-specific herbs
 }
+GatherMate.rareNodes = rare_spawns
 Collector.rareNodes = rare_spawns
 -- Format zone = { "Database", "new node id"}
 local nodeRemap = {
@@ -910,6 +913,7 @@ local node_textures = {
 		[562] = icon_path.."Treasure\\ancient_mana.tga",
 		[563] = icon_path.."Treasure\\honey.tga",
 		[564] = icon_path.."Treasure\\honey.tga",
+		[565] = icon_path.."Treasure\\hide.tga",
 	},
 	["Archaeology"] = {
 		[601] = icon_path.."Archaeology\\shovel.tga",

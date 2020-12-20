@@ -7,6 +7,7 @@ function AuctionatorDataProviderMixin:OnLoad()
   self.insertedKeys = {}
   self.entriesToProcess = {}
   self.processCountPerUpdate = 10
+  self.presetSort = {key = nil, direction = nil}
 
   self.searchCompleted = false
 
@@ -40,6 +41,13 @@ end
 function AuctionatorDataProviderMixin:Sort(fieldName, sortDirection)
 end
 
+-- Sets sorting fieldName/sortDirection to use as data is being processed. Set
+-- either to nil to disable any sorting.
+function AuctionatorDataProviderMixin:SetPresetSort(fieldName, sortDirection)
+  self.presetSort.key = fieldName
+  self.presetSort.direction = sortDirection
+end
+
 -- Derive: This defines the Results Listing table layout
 -- The table layout should be an array of table layout column entries consisting of:
 --   1. REQUIRED headerTemplate - String
@@ -59,6 +67,12 @@ end
 --      If omitted, the column will use ColumnWidthConstraints.Fill from TableBuilder
 function AuctionatorDataProviderMixin:GetTableLayout()
   return {}
+end
+
+-- Derive: This sets table which stores the options for saving the customised
+-- column view.  If this is nil, it won't be possible to customise the columns.
+function AuctionatorDataProviderMixin:GetColumnHideStates()
+  return nil
 end
 
 function AuctionatorDataProviderMixin:GetRowTemplate()
@@ -134,6 +148,10 @@ function AuctionatorDataProviderMixin:CheckForEntriesToProcess()
 
       self.onEntryProcessed(entry)
     end
+  end
+
+  if self.presetSort.key ~= nil and self.presetSort.direction ~= nil then
+    self:Sort(self.presetSort.key, self.presetSort.direction)
   end
 
   if #self.entriesToProcess == 0 and self.searchCompleted then

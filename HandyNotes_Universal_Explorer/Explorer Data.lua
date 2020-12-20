@@ -1567,4 +1567,115 @@ plugin.points = {
 			[73203170] = {achievement=13712, criteria=46063,},	-- Zin-Azshari
 
 	},
+	[1462] = { 	-- Mechagon Island
+		
+		-- Explore Mechagon: 13776
+		--------------------------------------------
+		[73172923] = { achievement = 13776 , criteria = 45991 , label = "Rustbolt" , note = "73,17, 29,23" , },
+		[84963476] = { achievement = 13776 , criteria = 46041 , label = "Sparkweaver Point" , note = "84,96, 34,76" , },
+		[60475423] = { achievement = 13776 , criteria = 46043 , label = "Junkwatt Depot" , note = "60,47, 54,23" , },
+		[69904011] = { achievement = 13776 , criteria = 46042 , label = "The Heaps" , note = "69,90, 40,11" , },
+		[65703257] = { achievement = 13776 , criteria = 46044 , label = "Scrapbone Den" , note = "65,70, 32,57" , },
+		[33196758] = { achievement = 13776 , criteria = 46047 , label = "Western Spray" , note = "33.19, 67.58" , },
+		[69845848] = { achievement = 13776 , criteria = 46045 , label = "The Outflow" , note = "69,84, 58,48" , },
+		[49473771] = { achievement = 13776 , criteria = 46046 , label = "The Fleeting Forrest" , note = "49,47, 37,71" , },
+	},
+
+--------------------------------------------
+-- SHADOWLANDS DATABASE
+--------------------------------------------
+
+	[1565] = {	
+		-- Explore Ardenweald: 14304
+		--------------------------------------------
+		[61263441] = { achievement = 14304 , criteria = 48543 , label = "Dusty Burrows" , note = "61.26 34.41" , },
+		[31003443] = { achievement = 14304 , criteria = 48544 , label = "The Stalks" , note = "31.00 34.43" , },
+		[64811983] = { achievement = 14304 , criteria = 48545 , label = "Starlit Overlook" , note = "64.81 19.83" , },
+		[52365972] = { achievement = 14304 , criteria = 48546 , label = "Shimmerbough" , note = "52.36 59.72" , },
+		[24946095] = { achievement = 14304 , criteria = 48547 , label = "Tirna Scithe" , note = "24.94 60.95" , },
+		[60235340] = { achievement = 14304 , criteria = 48548 , label = "Hibernal Hollow" , note = "60.23 53.40" , },
+		[47985136] = { achievement = 14304 , criteria = 48549 , label = "Heart of the Forest" , note = "47.98 51.36" , },
+		[53517442] = { achievement = 14304 , criteria = 48550 , label = "Gormhive" , note = "53.51 74.42" , },
+		[51193372] = { achievement = 14304 , criteria = 48551 , label = "Glitterfall Basin" , note = "51.19 33.72" , },
+		[66375570] = { achievement = 14304 , criteria = 48552 , label = "Tirna Noch" , note = "66.37 55.70" , },
+		[35546643] = { achievement = 14304 , criteria = 48553 , label = "Darkreach" , note = "35.54 66.43" , },
+		[72832756] = { achievement = 14304 , criteria = 48554 , label = "Crumbled Ridge" , note = "72.83 27.56" , },
+		[36612949] = { achievement = 14304 , criteria = 48555 , label = "Gossamer Cliffs" , note = "36.61 29.49" , },
+	},
+	[1533] = {	
+		-- Explore Bastion: 14303
+		--------------------------------------------
+		[45847954] = { achievement = 14303 , criteria = 48532 , label = "Vestribule of Eternity" , note = "45.84 79.54" , },
+		[61224387] = { achievement = 14303 , criteria = 48533 , label = "Temple of Humility" , note = "61.22 43.87" , },
+		[62157360] = { achievement = 14303 , criteria = 48534 , label = "Purity's Pinnacle" , note = "62.15 73.60" , },
+		[51414947] = { achievement = 14303 , criteria = 48535 , label = "Firstborne's Bounty" , note = "51.41 49.47" , },
+		[49885752] = { achievement = 14303 , criteria = 48536 , label = "The Mnemonic Locus" , note = "49.88 57.52" , },
+		[50792101] = { achievement = 14303 , criteria = 48537 , label = "The Eternal Forge" , note = "50.79 21.01" , },
+		[58282882] = { achievement = 14303 , criteria = 48538 , label = "Elysian Hold" , note = "58.28 28.82" , },
+		[27592836] = { achievement = 14303 , criteria = 48539 , label = "Citadel of Loyalty" , note = "27.59 28.36" , },
+		[38005919] = { achievement = 14303 , criteria = 48540 , label = "Temple of Courage" , note = "38.00 59.19" , },
+		[54908232] = { achievement = 14303 , criteria = 48541 , label = "Aspirant's Crucible" , note = "54.90 82.32" , },
+		[46916346] = { achievement = 14303 , criteria = 48542 , label = "Agthia's Repose" , note = "46.91 63.46" , },
+	},
+	[1536] = {	
+		-- Explore Maldraxxus: 14305
+		--------------------------------------------
+		[49774613] = { achievement = 14305 , criteria = 50085 , label = "Theater of Pain" , note = "49.77 46.13" , },
+		[27993688] = { achievement = 14305 , criteria = 50086 , label = "The Stitchyard" , note = "27.99 36.88" , },
+		[39165540] = { achievement = 14305 , criteria = 50087 , label = "The Spearhead" , note = "39.16 55.40" , },
+		[43312904] = { achievement = 14305 , criteria = 50088 , label = "Sepulcher of Knowledge" , note = "43.31 29.04" , },
+		[50466782] = { achievement = 14305 , criteria = 50089 , label = "Seat of the Primus" , note = "50.46 67.82" , },
+		[59687193] = { achievement = 14305 , criteria = 50091 , label = "House of Plagues" , note = "59.68 71.93" , },
+		[34547728] = { achievement = 14305 , criteria = 50092 , label = "House of the Chosen" , note = "34.54 77.28" , },
+		[63613619] = { achievement = 14305 , criteria = 50093 , label = "House of Rituals" , note = "63.61 36.19" , },
+		[54611638] = { achievement = 14305 , criteria = 50094 , label = "House of Eyes" , note = "54.61 16.38" , },
+		[30022836] = { achievement = 14305 , criteria = 50095 , label = "House of Constructs" , note = "30.02 28.36" , },
+		[65044842] = { achievement = 14305 , criteria = 50096 , label = "Glutharn's Decay" , note = "65.04 48.42" , },
+		[54673240] = { achievement = 14305 , criteria = 50097 , label = "Forgotten Wounds" , note = "54.67 32.40" , },
+		[29695934] = { achievement = 14305 , criteria = 50098 , label = "Burning Thicket" , note = "29.69 59.34" , },
+	},
+	[1525] = {	
+		-- Explore Revendreth: 14306
+		--------------------------------------------
+		[72896582] = { achievement = 14306 , criteria = 48556 , label = "Caretaker's Manor" , note = "72.89 65.82" , },
+		[75263741] = { achievement = 14306 , criteria = 48557 , label = "Archivam" , note = "75.26 37.41" , },
+		[61237429] = { achievement = 14306 , criteria = 48558 , label = "Witherfall Ruin" , note = "61.23 74.29" , },
+		[66985880] = { achievement = 14306 , criteria = 48559 , label = "The Endmire" , note = "66.98 58.80" , },
+		[65953242] = { achievement = 14306 , criteria = 48560 , label = "Catacombs of Regret" , note = "65.95 32.42" , },
+		[61133879] = { achievement = 14306 , criteria = 48561 , label = "Old Gate" , note = "61.13 38.79" , },
+		[51087841] = { achievement = 14306 , criteria = 48562 , label = "The Night Market" , note = "51.08 78.41" , },
+		[43027136] = { achievement = 14306 , criteria = 48563 , label = "The Banewood" , note = "43.02 71.36" , },
+		[46575951] = { achievement = 14306 , criteria = 48564 , label = "Stalker's Lodge" , note = "46.57 59.51" , },
+		[49295058] = { achievement = 14306 , criteria = 48565 , label = "Chalice District" , note = "49.29 50.58" , },
+		[55083633] = { achievement = 14306 , criteria = 48566 , label = "Redelav District" , note = "55.08 36.33" , },
+		[40948022] = { achievement = 14306 , criteria = 48567 , label = "Dredhollow" , note = "40.94 80.22" , },
+		[29175002] = { achievement = 14306 , criteria = 48568 , label = "Ember Ward" , note = "29.17 50.02" , },
+		[45875086] = { achievement = 14306 , criteria = 48569 , label = "Darkwall Tower" , note = "45.87 50.86" , },
+		[45204559] = { achievement = 14306 , criteria = 48570 , label = "Court of the Harvesters" , note = "45.20 45.59" , },
+		[43543423] = { achievement = 14306 , criteria = 48571 , label = "Dominance Gate" , note = "43.54 34.23" , },
+		[21605517] = { achievement = 14306 , criteria = 48572 , label = "The Shrouded Asylum" , note = "21.60 55.17" , },
+		[25992886] = { achievement = 14306 , criteria = 48573 , label = "Dominance Keep" , note = "25.99 28.86" , },
+	},
+
+	[1543] = {	
+		-- Explore The Maw: 14663
+		--------------------------------------------
+		[23853667] = { achievement = 14663 , criteria = 49501 , label = "Calcis" , note = "23.85 36.67" , },
+		[42864312] = { achievement = 14663 , criteria = 49502 , label = "Cocyrus" , note = "42.86 43.12" , },
+		[16914943] = { achievement = 14663 , criteria = 49503 , label = "Crucible of the Damned" , note = "16.91 49.43" , },
+		[55196209] = { achievement = 14663 , criteria = 49504 , label = "Desmotaeron" , note = "55.19 62.09" , },
+		[31373372] = { achievement = 14663 , criteria = 49505 , label = "Gorgoa: River of Souls" , note = "31.37 33.72" , },
+		[47008086] = { achievement = 14663 , criteria = 49506 , label = "Marrow's Coppice" , note = "47.00 80.86" , },
+		[32886654] = { achievement = 14663 , criteria = 49507 , label = "Perdition Hold" , note = "32.88 66.54" , },
+		[33242161] = { achievement = 14663 , criteria = 49508 , label = "Planes of Torment" , note = "33.24 21.61" , },
+		[62506685] = { achievement = 14663 , criteria = 49509 , label = "Ravener's Lament" , note = "62.50 66.85" , },
+		[23156838] = { achievement = 14663 , criteria = 49510 , label = "The Altar of Domination" , note = "23.15 68.38" , },
+		[49576330] = { achievement = 14663 , criteria = 49511 , label = "The Beastwarrens" , note = "49.57 63.30" , },
+		[38784131] = { achievement = 14663 , criteria = 49512 , label = "Zovaal's Cauldron" , note = "38.78 41.31" , },
+	},
+
+-- DATABASE END
 }
+
+
+

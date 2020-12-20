@@ -14,9 +14,10 @@ AUCTIONATOR_LOCALES.enUS = function()
   L["CONFIG_AUTOSCAN"] = "Run autoscan when Auction House is opened."
   L["CONFIG_AUTOSCAN_TOOLTIP_HEADER"] = "Autoscan"
   L["CONFIG_AUTOSCAN_TOOLTIP_TEXT"] = "Run a full scan when the auction house is opened. If not selected, you may run a full scan by clicking the 'Full Scan' button in the auction house."
-  L["CONFIG_ALTERNATE_SCAN"] = "Use alternate slower scan mode by default"
-  L["CONFIG_ALTERNATE_SCAN_HEADER"] = "Alternate Scan Mode"
-  L["CONFIG_ALTERNATE_SCAN_TEXT"] = "The fast scan mode can cause disconnections on busy servers. This setting uses a slower and less likely to disconnect, scan method."
+  L["CONFIG_AUTOSCAN_INTERVAL_HEADER"] = "Interval between autoscans"
+  L["CONFIG_AUTOSCAN_INTERVAL"] = "Set to the number of minutes to wait between autoscans"
+  L["CONFIG_AUTOSCAN_INTERVAL_TOOLTIP_HEADER"] = "Autoscan Delay Interval"
+  L["CONFIG_AUTOSCAN_INTERVAL_TOOLTIP_TEXT"] = "By default an scan doesn't happen every time you open the Auction House. It waits until a fixed time has elapsed since the last scan."
 
   L["CONFIG_DEVELOPER"] = "Developer Settings"
   L["CONFIG_DEBUG"] = "Toggle debug output."
@@ -44,7 +45,7 @@ AUCTIONATOR_LOCALES.enUS = function()
   L["CONFIG_AUCTION_TOOLTIP"] = "Show auction tooltips."
   L["AUCTION_TOOLTIP_TOOLTIP_HEADER"] = "Auction Tooltip Information"
   L["AUCTION_TOOLTIP_TOOLTIP_TEXT"] = "Show auction information in tooltip on mouseover."
-  L["CONFIG_ENCHANT_TOOLTIP"] = "Show enchant tooltips (WoD, Legion & BfA only.)"
+  L["CONFIG_ENCHANT_TOOLTIP"] = "Show enchant tooltips (WoD, Legion, BfA & Shadowlands only.)"
   L["ENCHANT_TOOLTIP_TOOLTIP_HEADER"] = "Enchant Tooltip Information"
   L["ENCHANT_TOOLTIP_TOOLTIP_TEXT"] = "Show enchant information in tooltip on mouseover."
   L["CONFIG_STACK_TOOLTIP"] = "Show stack price when holding shift."
@@ -81,7 +82,6 @@ AUCTIONATOR_LOCALES.enUS = function()
 
   L["CONFIG_ADVANCED_CATEGORY"] = "Advanced"
   L["CONFIG_ADVANCED_TEXT"] = "Only look here if you know what you're doing"
-  L["CONFIG_FULL_SCAN_STEP_SIZE"] = "Full scan step size"
   L["CONFIG_SCAN_SETTINGS"] = "Scan Settings"
 
   L["AUTHOR_HEADER"] = "Author"
@@ -118,8 +118,6 @@ AUCTIONATOR_LOCALES.enUS = function()
   L["NEXT_SCAN_MESSAGE"] = "A full scan may be started in %s minutes and %s seconds."
   L["FULL_SCAN_FAILED"] = "Full scan failed to complete."
   L["FINISHED_PROCESSING"] = "Finished processing %s items."
-  L["STARTING_FULL_SCAN_ALTERNATE"] = "Starting a full scan (alternate mode)."
-  L["FULL_SCAN_ALTERNATE_FAILED"] = "Full scan (alternate mode) failed to complete."
 
   L["TOO_MANY_SEARCH_RESULTS"] = "Too many search results. Limiting results displayed."
   L["LIST_DELETE_ERROR"] = "An error occurred attempting to delete a list."
@@ -230,6 +228,19 @@ AUCTIONATOR_LOCALES.enUS = function()
   L["SPLASH_834_MISCELLANEOUS_HEADER"] = "Miscellaneous"
   L["SPLASH_834_MISCELLANEOUS_1"] = "Search the AH for reagents from the crafting window (a \"Search\" button appears when both the crafting window and the AH are open)"
 
+  L["SPLASH_901_DESCRIPTION"] = "Biggest changes in this release are customisable columns for item listings and the changes to the full scan. As always there are various bugfixes."
+
+  L["SPLASH_901_FEATURES_HEADER"] = "New Features"
+  L["SPLASH_901_FEATURES_1"] = "Customisable columns on all results views. Do a right click on any column header to see the options."
+  L["SPLASH_901_FEATURES_2"] = "Small tabs option for when too many addons add tabs to the Auction House"
+  L["SPLASH_901_CHANGES_HEADER"] = "Changes"
+  L["SPLASH_901_CHANGES_1"] = "Replaced the full scan with a different method to avoid getting disconnected on busy servers."
+  L["SPLASH_901_CHANGES_2"] = "The autoscan option now defaults to off."
+  L["SPLASH_902_DESCRIPTION"] = "Along with the various bugfixes, there is one new feature."
+
+  L["SPLASH_902_FEATURES_HEADER"] = "New Features"
+  L["SPLASH_902_FEATURES_1"] = "A new \"Your History\" section on the Selling tab to show the prices of past auctions you have created."
+
   L["SPLASH_HIDE_MESSAGE"] = "Do not show until next update"
 
   L["LIST_ADD_ITEM_HEADER"] = "Add Shopping List Item"
@@ -268,6 +279,7 @@ AUCTIONATOR_LOCALES.enUS = function()
   L["QUANTITY"] = "Quantity"
   L["MAX"] = "Max"
   L["UNIT_PRICE"] = "Unit Price"
+  L["UPPER_UNIT_PRICE"] = "Upper Unit Price"
   L["TIME_LEFT_H"] = "Time Left (h)"
   L["IS_UNDERCUT"] = "Undercut?"
   L["UNDERCUT_YES"] ="Yes"
@@ -305,6 +317,7 @@ AUCTIONATOR_LOCALES.enUS = function()
 
   L["BUYOUT_PRICE"] = "Buyout Price"
   L["BID_PRICE"] = "Bid Price"
+  L["BIDDER"] = "Bidder"
   L["DURATION"] = "Duration"
   L["POST"] = "Post"
   L["POST_BUTTON_MACRO"] = "Post Button Macro"
@@ -314,6 +327,10 @@ AUCTIONATOR_LOCALES.enUS = function()
   L["DEFAULT_TAB"] = "Default Tab"
   L["DEFAULT_TAB_TEXT"] = "shows as the default tab"
   L["NONE"] = "None"
+
+  L["CONFIG_SMALL_TABS"] = "Use small tabs for the Auction House (reopen the Auction House for it to take effect)"
+  L["CONFIG_SMALL_TABS_TOOLTIP_HEADER"] = "Small Tabs"
+  L["CONFIG_SMALL_TABS_TOOLTIP_TEXT"] = "When too many addons add tabs to the Auction House they can end up overflowing past the end of the Auction House window. This setting makes the tabs smaller so they fit better."
 
   L["CONFIG_SELLING_CATEGORY"] = "Selling"
   L["CONFIG_SELLING_TEXT"] = "Options to change the behaviour of the Selling tab"
@@ -362,6 +379,9 @@ AUCTIONATOR_LOCALES.enUS = function()
   L["CONFIG_SELLING_GEAR_VENDOR_PRICE_MULTIPLIER_SUFFIX"] = "Set to 0 for no price"
   L["CONFIG_SELLING_GEAR_VENDOR_PRICE_MULTIPLIER_TOOLTIP_HEADER"] = "Gear Vendor Price Default"
   L["CONFIG_SELLING_GEAR_VENDOR_PRICE_MULTIPLIER_TOOLTIP_TEXT"] = "This lets you set a default price for gear as a multiple of the vendor price. This is used for any gear Auctionator doesn't have a price for. Set this to 0 to not set a price."
+  L["CONFIG_SELLING_GEAR_USE_ILVL"] = "For gear, use item level when selecting the price to compete with"
+  L["CONFIG_SELLING_GEAR_USE_ILVL_TOOLTIP_HEADER"] = "Use Item Level"
+  L["CONFIG_SELLING_GEAR_USE_ILVL_TOOLTIP_TEXT"] = "Normally gear is compared with any other gear that is similar, but without taking item level into account. This will make the item level be taken into account."
 
   L["CLASSIC_SUPPORT_ERROR"] = "This version of Auctionator DOES NOT support Classic. Stuff may break and not work."
 
@@ -369,6 +389,9 @@ AUCTIONATOR_LOCALES.enUS = function()
 
   L["REAGENT_SEARCH"] = "Reagent Search"
   L["NUMBER_SEPARATOR"] = ","
+  L["TOTAL_ON_SALE"] = "Total on sale: %s"
+  L["REALM_HISTORY"] = "Realm History"
+  L["YOUR_HISTORY"] = "Your History"
 
   return L
 end

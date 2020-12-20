@@ -66,8 +66,14 @@ function AuctionatorUndercutScanMixin:EndScan()
 end
 
 local function ShouldInclude(itemKey)
-  return Auctionator.Config.Get(Auctionator.Config.Options.UNDERCUT_SCAN_NOT_LIFO) or
-        (itemKey.itemLevel == 0 and itemKey.battlePetSpeciesID == 0)
+  if Auctionator.Config.Get(Auctionator.Config.Options.UNDERCUT_SCAN_NOT_LIFO) then
+    return true
+  else
+    local classID = select(6, GetItemInfoInstant(itemKey.itemID))
+
+    return classID ~= LE_ITEM_CLASS_WEAPON and classID ~= LE_ITEM_CLASS_ARMOR and
+          itemKey.battlePetSpeciesID == 0
+  end
 end
 function AuctionatorUndercutScanMixin:NextStep()
   Auctionator.Debug.Message("next step")
@@ -82,6 +88,7 @@ function AuctionatorUndercutScanMixin:NextStep()
   local itemKeyString = Auctionator.Utilities.ItemKeyString(self.currentAuction.itemKey)
 
   if (self.currentAuction.status == 1 or
+      self.currentAuction.bidder ~= nil or
       not ShouldInclude(self.currentAuction.itemKey)) then
     Auctionator.Debug.Message("undercut scan skip")
 

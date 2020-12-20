@@ -19,7 +19,7 @@ local ldbi = LibStub("LibDBIcon-1.0")
 -- Generate our version variables
 --
 
-local BIGWIGS_VERSION = 188
+local BIGWIGS_VERSION = 196
 local BIGWIGS_RELEASE_STRING, BIGWIGS_VERSION_STRING = "", ""
 local versionQueryString, versionResponseString = "Q^%d^%s^%d^%s", "V^%d^%s^%d^%s"
 local customGuildName = false
@@ -34,7 +34,7 @@ do
 	local RELEASE = "RELEASE"
 
 	local releaseType = RELEASE
-	local myGitHash = "dead015" -- The ZIP packager will replace this with the Git hash.
+	local myGitHash = "4745dc0" -- The ZIP packager will replace this with the Git hash.
 	local releaseString = ""
 	--@alpha@
 	-- The following code will only be present in alpha ZIPs.
@@ -66,13 +66,14 @@ do
 		releaseString = L.guildRelease:format(BIGWIGS_GUILD_VERSION, BIGWIGS_VERSION)
 		versionQueryString = versionQueryString:format(BIGWIGS_VERSION, myGitHash, tbl.guildVersion, tbl.guildName)
 		versionResponseString = versionResponseString:format(BIGWIGS_VERSION, myGitHash, tbl.guildVersion, tbl.guildName)
+		BIGWIGS_VERSION_STRING = ("%d/%d-%s"):format(BIGWIGS_GUILD_VERSION, BIGWIGS_VERSION, myGitHash)
 	else
 		versionQueryString = versionQueryString:format(BIGWIGS_VERSION, myGitHash, 0, "")
 		versionResponseString = versionResponseString:format(BIGWIGS_VERSION, myGitHash, 0, "")
+		BIGWIGS_VERSION_STRING = ("%d-%s"):format(BIGWIGS_VERSION, myGitHash)
 	end
 
 	BIGWIGS_RELEASE_STRING = releaseString
-	BIGWIGS_VERSION_STRING = ("%d-%s"):format(BIGWIGS_VERSION, myGitHash)
 	-- END: MAGIC PACKAGER VOODOO VERSION STUFF
 end
 
@@ -118,6 +119,7 @@ local fakeZones = { -- Fake zones used as GUI menus
 	[-572]=true, -- Draenor
 	[-619]=true, -- Broken Isles
 	[-947]=true, -- Azeroth
+	[-1647]=true, -- Shadowlands
 }
 
 do
@@ -202,6 +204,7 @@ do
 		[2164] = bfa, -- The Eternal Palace
 		[2217] = bfa, -- Ny'alotha, the Waking City
 		--[[ BigWigs: Shadowlands ]]--
+		[-1647] = s, -- Shadowlands (Fake Menu)
 		[2296] = s, -- Castle Nathria
 
 		--[[ LittleWigs: Classic ]]--
@@ -317,6 +320,7 @@ do
 		[-542] = -572, [-543] = -572, [-534] = -572, -- Draenor
 		[-630] = -619, [-634] = -619, [-641] = -619, [-650] = -619, [-680] = -619, -- Broken Isles
 		[-942] = -947, -- Azeroth/BfA
+		[-1536] = -1647, -- Shadowlands
 	}
 end
 
@@ -1013,9 +1017,9 @@ end
 --
 
 do
-	local DBMdotRevision = "20201123192607" -- The changing version of the local client, changes with every new zip using the project-date-integer packager replacement.
-	local DBMdotDisplayVersion = "9.0.5" -- "N.N.N" for a release and "N.N.N alpha" for the alpha duration.
-	local DBMdotReleaseRevision = "20201123000000" -- Hardcoded time, manually changed every release, they use it to track the highest release version, a new DBM release is the only time it will change.
+	local DBMdotRevision = "20201217075343" -- The changing version of the local client, changes with every new zip using the project-date-integer packager replacement.
+	local DBMdotDisplayVersion = "9.0.11" -- "N.N.N" for a release and "N.N.N alpha" for the alpha duration.
+	local DBMdotReleaseRevision = "20201217000000" -- Hardcoded time, manually changed every release, they use it to track the highest release version, a new DBM release is the only time it will change.
 
 	local timer, prevUpgradedUser = nil, nil
 	local function sendMsg()
@@ -1519,9 +1523,9 @@ SlashCmdList.BigWigsVersion = function()
 		if not version then
 			version = ""
 		elseif guildVersion then
-			version = ("|cFFCCCCCC(%d/%d%s)|r"):format(guildVersion, version, hash and "-"..hash or "")
+			version = ("|cFFCCCCCC(%d/%d%s)|r"):format(guildVersion, version, hash and "-"..hash or "") -- %d because BigWigs versions are always stored as a number
 		else
-			version = ("|cFFCCCCCC(%d%s)|r"):format(version, hash and "-"..hash or "")
+			version = ("|cFFCCCCCC(%s%s)|r"):format(version, hash and "-"..hash or "") -- %s because DBM users are stored as a string
 		end
 
 		local _, class = UnitClass(name)

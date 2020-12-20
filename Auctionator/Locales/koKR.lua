@@ -17,6 +17,8 @@ L["AUCTION_TOOLTIP_TOOLTIP_TEXT"] = "마우스를 위로  가져갔을 때 경�
 L["AUCTIONATOR"] = "옥셔네이터"
 L["AUTHOR_HEADER"] = "만든사람"
 L["BID_PRICE"] = "입찰가"
+--[[Translation missing --]]
+L["BIDDER"] = "Bidder"
 L["BIDDING_AUCTION_INFO"] = "%s를 %s에 입찰했습니다."
 L["BUG_REPORT"] = "오류를 보고하기"
 L["BUG_TOOLTIP_HEADER"] = "깃허브에 오류를 보고하기"
@@ -25,6 +27,8 @@ L["BUYOUT_AUCTION_INFO"] = "%s를 %s에 즉시구매가로 올렸습니다."
 L["BUYOUT_PRICE"] = "즉시구매가"
 L["CANCEL"] = "취소"
 L["CANCEL_UNDERCUT"] = "최저가 경매취소"
+--[[Translation missing --]]
+L["CANCEL_UNDERCUT_BUTTON_MACRO"] = "Cancel Undercut Button Macro"
 L["CANCELLING_TAB"] = "취소하기"
 L["CANCELLING_TAB_HEADER"] = "옥셔네이터 - 취소하기"
 L["CANNOT_AUCTION"] = "경매 불가"
@@ -40,6 +44,14 @@ L["CONFIG_AUTO_LIST_SEARCH"] = "자동으로 구매목록을 검색"
 L["CONFIG_AUTO_LIST_SEARCH_TOOLTIP_HEADER"] = "자동으로 구매목록 검색"
 L["CONFIG_AUTO_LIST_SEARCH_TOOLTIP_TEXT"] = "구매목록을 선택하면 자동으로 구매목록에 추가된 품목을 검색합니다. 해당옵션이 꺼져있으면 하단의 검색 버튼으로도 검색이 가능합니다."
 L["CONFIG_AUTOSCAN"] = "경매장을 열 때 자동으로 구매목록 검색"
+--[[Translation missing --]]
+L["CONFIG_AUTOSCAN_INTERVAL"] = "Set to the number of minutes to wait between autoscans"
+--[[Translation missing --]]
+L["CONFIG_AUTOSCAN_INTERVAL_HEADER"] = "Interval between autoscans"
+--[[Translation missing --]]
+L["CONFIG_AUTOSCAN_INTERVAL_TOOLTIP_HEADER"] = "Autoscan Delay Interval"
+--[[Translation missing --]]
+L["CONFIG_AUTOSCAN_INTERVAL_TOOLTIP_TEXT"] = "By default an scan doesn't happen every time you open the Auction House. It waits until a fixed time has elapsed since the last scan."
 L["CONFIG_AUTOSCAN_TOOLTIP_HEADER"] = "자동검색"
 L["CONFIG_AUTOSCAN_TOOLTIP_TEXT"] = "경매장을 열 때 자동으로 구매목록을 검색합니다. 선택하지 않았다면 '전체검색' 버튼으로 구매목록을 수동검색 할 수 있습니다."
 L["CONFIG_BAG"] = "아이템 패널 옵션"
@@ -60,7 +72,8 @@ L["CONFIG_DEBUG"] = "디버그 모드"
 L["CONFIG_DEBUG_TOOLTIP_HEADER"] = "옥셔네이터 디버그"
 L["CONFIG_DEBUG_TOOLTIP_TEXT"] = "디버그 메시지를 채팅창에 출력합니다."
 L["CONFIG_DEVELOPER"] = "개발자 설정"
-L["CONFIG_ENCHANT_TOOLTIP"] = "마법부여 툴팁을 표시함 (드군, 군단, 격아 전용)"
+--[[Translation missing --]]
+L["CONFIG_ENCHANT_TOOLTIP"] = "Show enchant tooltips (WoD, Legion, BfA & Shadowlands only.)"
 L["CONFIG_FULL_SCAN_STEP_SIZE"] = "애드온 설치 시 튕기는 현상이 발생하면 숫자를 줄이세요"
 L["CONFIG_LIFO_CATEGORY"] = "판매: 일반"
 L["CONFIG_MAIL_TOOLTIP"] = "우체통 툴팁을 표시함"
@@ -84,6 +97,12 @@ L["CONFIG_SELLING_CATEGORY"] = "판매하기"
 L["CONFIG_SELLING_DEFAULT_QUANTITY_SUFFIX"] = "판매 갯수 설정"
 L["CONFIG_SELLING_DEFAULT_QUANTITY_TOOLTIP_HEADER"] = "판매 갯수 설정"
 L["CONFIG_SELLING_DEFAULT_QUANTITY_TOOLTIP_TEXT"] = "경매장에 물건을 판매할 때 기본 갯수를 설정합니다. (ex. 현재 가진 영약이 40개일 경우 4를 입력하면 경매장에 올릴 때 4개를 자동으로 올립니다, 0일 경우 40개 모두 판매합니다.)"
+--[[Translation missing --]]
+L["CONFIG_SELLING_GEAR_USE_ILVL"] = "For gear, use item level when selecting the price to compete with"
+--[[Translation missing --]]
+L["CONFIG_SELLING_GEAR_USE_ILVL_TOOLTIP_HEADER"] = "Use Item Level"
+--[[Translation missing --]]
+L["CONFIG_SELLING_GEAR_USE_ILVL_TOOLTIP_TEXT"] = "Normally gear is compared with any other gear that is similar, but without taking item level into account. This will make the item level be taken into account."
 L["CONFIG_SELLING_GEAR_VENDOR_PRICE_MULTIPLIER_SUFFIX"] = "장비 판매의 배수 설정"
 L["CONFIG_SELLING_GEAR_VENDOR_PRICE_MULTIPLIER_TOOLTIP_HEADER"] = "장비 판매의 배수 설정"
 L["CONFIG_SELLING_GEAR_VENDOR_PRICE_MULTIPLIER_TOOLTIP_TEXT"] = "해당 장비를 상점에 팔때의 배수를 입력하여 경매가격을 책정합니다. (ex. 2를 입력하면 상점판매가 33골드인 장비의 2배인 66골드로 경매장 가격이 자동등록됩니다.)"
@@ -98,6 +117,12 @@ L["CONFIG_SELLING_TEXT"] = "판매하기 탭의 설정을 변경합니다."
 L["CONFIG_SHOPPING_CATEGORY"] = "구매목록"
 L["CONFIG_SHOPPING_LIST"] = "구매목록 설정"
 L["CONFIG_SHOPPING_TEXT"] = "구매목록의 설정을 변경합니다."
+--[[Translation missing --]]
+L["CONFIG_SMALL_TABS"] = "Use small tabs for the Auction House (reopen the Auction House for it to take effect)"
+--[[Translation missing --]]
+L["CONFIG_SMALL_TABS_TOOLTIP_HEADER"] = "Small Tabs"
+--[[Translation missing --]]
+L["CONFIG_SMALL_TABS_TOOLTIP_TEXT"] = "When too many addons add tabs to the Auction House they can end up overflowing past the end of the Auction House window. This setting makes the tabs smaller so they fit better."
 L["CONFIG_STACK_TOOLTIP"] = "쉬프트로 전체 가격 표시"
 L["CONFIG_TOOLTIPS_CATEGORY"] = "툴팁"
 L["CONFIG_TOOLTIPS_TEXT"] = "게임 내 툴팁에 대한 설정을 변경합니다."
@@ -153,6 +178,8 @@ L["GEAR_VENDOR_PRICE_MULTIPLIER"] = "상점에 판매하는 가격의 배수로 
 L["HIDE"] = "숨기기"
 L["IMPORT"] = "가져오기"
 L["INFO_TAB_HEADER"] = "옥셔네이터 - 정보"
+--[[Translation missing --]]
+L["IS_TOP_COLUMN"] = "Top?"
 L["IS_UNDERCUT"] = "최저가아님?"
 L["ITEM_CLASS"] = "품목 분류"
 L["ITEM_LEVEL"] = "아이템 레벨"
@@ -204,6 +231,8 @@ L["PROFILE_TOGGLE_TOOLTIP_HEADER"] = "캐릭터 별 설정"
 L["PROFILE_TOGGLE_TOOLTIP_TEXT"] = "캐릭터 별 옥셔네이터 설정을 적용합니다."
 L["QUANTITY"] = "수량"
 L["REAGENT_SEARCH"] = "재료 검색"
+--[[Translation missing --]]
+L["REALM_HISTORY"] = "Realm History"
 L["REMOVE_FAVOURITE"] = "즐겨찾기 삭제"
 L["RENAME"] = "목록명 변경"
 L["RENAME_LIST_DIALOG"] = "목록의 이름을 변경합니다."
@@ -279,6 +308,26 @@ L["SPLASH_834_SHOPPING_1"] = "이미 생성되 있는 구매목록을 가져오�
 L["SPLASH_834_SHOPPING_2"] = "구매목록 탭을 열었을 때 설정을 통해 기존 생성되어 있는 구매목록 중 하나를 선택하여 즉시 검색할 수 있습니다."
 L["SPLASH_834_SHOPPING_3"] = "구매목록을 편집할 수 있습니다."
 L["SPLASH_834_SHOPPING_HEADER"] = "구매목록 탭"
+--[[Translation missing --]]
+L["SPLASH_901_CHANGES_1"] = "Replaced the full scan with a different method to avoid getting disconnected on busy servers."
+--[[Translation missing --]]
+L["SPLASH_901_CHANGES_2"] = "The autoscan option now defaults to off."
+--[[Translation missing --]]
+L["SPLASH_901_CHANGES_HEADER"] = "Changes"
+--[[Translation missing --]]
+L["SPLASH_901_DESCRIPTION"] = "Biggest changes in this release are customisable columns for item listings and the changes to the full scan. As always there are various bugfixes."
+--[[Translation missing --]]
+L["SPLASH_901_FEATURES_1"] = "Customisable columns on all results views. Do a right click on any column header to see the options."
+--[[Translation missing --]]
+L["SPLASH_901_FEATURES_2"] = "Small tabs option for when too many addons add tabs to the Auction House"
+--[[Translation missing --]]
+L["SPLASH_901_FEATURES_HEADER"] = "New Features"
+--[[Translation missing --]]
+L["SPLASH_902_DESCRIPTION"] = "Along with the various bugfixes, there is one new feature."
+--[[Translation missing --]]
+L["SPLASH_902_FEATURES_1"] = "A new \"Your History\" section on the Selling tab to show the prices of past auctions you have created."
+--[[Translation missing --]]
+L["SPLASH_902_FEATURES_HEADER"] = "New Features"
 L["SPLASH_HIDE_MESSAGE"] = "다음 업데이트까지 보이지 않기"
 L["SPLASH_SCREEN_HEADER"] = "옥셔네이터에 오신걸 환영합니다!"
 L["STACK_AUCTION_INFO"] = "%s  (전체 %s, 각 %s)"
@@ -292,6 +341,8 @@ L["TOO_BIG_PERCENTAGE"] = "%%는 100이거나 그 이하여야 합니다. (입�
 L["TOO_MANY_SEARCH_RESULTS"] = "검색 결과가 너무 많습니다. 제한된 결과만 표시됩니다."
 L["TOO_SMALL_PERCENTAGE"] = "%%는 0이거나 그 이상이여야 합니다. (입력값:%s)"
 L["TOTAL_ITEMS_COLORED"] = "전체 |cFFAAAAFF %s 개s|r"
+--[[Translation missing --]]
+L["TOTAL_ON_SALE"] = "Total on sale: %s"
 L["TOTAL_PRICE"] = "전체 판매가"
 L["TRANSLATORS_BRAZIL_PORTUGUEUSE"] = "브라질리언 포르투갈어"
 L["TRANSLATORS_FRENCH"] = "프랑스어"
@@ -314,11 +365,15 @@ L["UNDERCUT_YES"] = "O"
 L["UNIT_PRICE"] = "가격"
 L["UNKNOWN"] = "모름"
 L["UNSELECT_ALL"] = "모두선택 취소"
+--[[Translation missing --]]
+L["UPPER_UNIT_PRICE"] = "Upper Unit Price"
 L["VENDOR"] = "상점가"
 L["VENDOR_TOOLTIP_TOOLTIP_HEADER"] = "상점가 툴팁"
 L["VENDOR_TOOLTIP_TOOLTIP_TEXT"] = "상점가를 툴팁에 표시합니다."
 L["VERSION_HEADER"] = "버전"
 L["VERSION_MESSAGE"] = "%s 버전"
+--[[Translation missing --]]
+L["YOUR_HISTORY"] = "Your History"
 
   return L
 end
