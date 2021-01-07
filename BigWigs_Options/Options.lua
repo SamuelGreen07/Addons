@@ -16,6 +16,7 @@ local lds = LibStub("LibDualSpec-1.0")
 local loader = BigWigsLoader
 local API = BigWigsAPI
 options.SendMessage = loader.SendMessage
+local UnitName = loader.UnitName
 
 local bwTooltip = CreateFrame("GameTooltip", "BigWigsOptionsTooltip", UIParent, "GameTooltipTemplate")
 
@@ -71,15 +72,6 @@ local acOptions = {
 					name = L.flashScreen,
 					desc = L.flashScreenDesc,
 					order = 22,
-				},
-				chat = {
-					type = "toggle",
-					name = L.chatMessages,
-					desc = L.chatMessagesDesc,
-					order = 25,
-					width = "full",
-					get = function() return BigWigs:GetPlugin("Messages").db.profile.chat end,
-					set = function(_, v) BigWigs:GetPlugin("Messages").db.profile.chat = v end,
 				},
 				separator3 = {
 					type = "description",

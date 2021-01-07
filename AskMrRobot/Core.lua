@@ -53,7 +53,8 @@ local function initializeDb()
 			BagItems = {},             -- list of item info for bags
 			BankItems = {},            -- list of item info for bank
 			BagItemsAndCounts = {},    -- used mainly for the shopping list
-			BankItemsAndCounts = {},   -- used mainly for the shopping list			
+			BankItemsAndCounts = {},   -- used mainly for the shopping list		
+			GreatVaultItems = {},      -- available weekly rewards from the great vault	
 			GearSetups = {},           -- imported gear sets
 			JunkData = {},             -- imported data about items that can be vendored/scrapped/disenchanted
 			ExtraEnchantData = {},     -- enchant id to enchant display information and material information
@@ -715,4 +716,5 @@ function Amr:Test()
 	--local info = C_LegendaryCrafting.GetRuneforgePowerInfo(30)
 
 	--print(Amr:dump(info))
+
 end

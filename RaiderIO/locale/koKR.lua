@@ -16,6 +16,10 @@ L["API_DEPRECATED_UNKNOWN_ADDON"] = "<알수없는 애드온>"
 L["API_DEPRECATED_UNKNOWN_FILE"] = "<알수 없는 애드온 파일>"
 L["API_DEPRECATED_WITH"] = "|cffFF0000경고!|r addon |cffFFFFFF%s|r은(는) 더 이상 사용되지 않는 RaiderIO.%s. 함수를 호출합니다. 이 기능은 향후 릴리스에서 제거 될 예정입니다. %s의 작성자가 대신 새 API RaiderIO.%s로 업데이트하는 것이 좋습니다. 콜 스택: %s"
 L["API_INVALID_DATABASE"] = "|cffff0000 경고!|r |cffffffff%s|r에서 잘못된 RaiderIO 데이터베이스를 감지했습니다. RaiderIO Client에서 모든 지역과 진영을 새로 고치거나 Addon을 수동으로 다시 설치하십시오."
+--[[Translation missing --]]
+--[[ L["AUTO_COMBATLOG"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["AUTO_COMBATLOG_DESC"] = ""--]] 
 L["BEST_FOR_DUNGEON"] = "던전 최고 기록"
 L["BEST_RUN"] = "최고 기록"
 L["BEST_SCORE"] = "최고 쐐기 점수 (%s)"
@@ -199,6 +203,8 @@ L["RAID_PROGRESS_TITLE"] = "공격대 진행"
 L["RAIDERIO_AVERAGE_PLAYER_SCORE"] = "+%s단 시간내 평균 점수"
 L["RAIDERIO_BEST_RUN"] = "Raider.IO 쐐기 최고 단수"
 L["RAIDERIO_CLIENT_CUSTOMIZATION"] = "RaiderIO 클라이언트 사용자 정의"
+--[[Translation missing --]]
+--[[ L["RAIDERIO_LIVE_TRACKING"] = ""--]] 
 L["RAIDERIO_MP_BASE_SCORE"] = "Raider.IO 쐐기 기본 점수"
 L["RAIDERIO_MP_BEST_SCORE"] = "Raider.IO 쐐기 점수 (%s)"
 L["RAIDERIO_MP_SCORE"] = "Raider.IO 쐐기 점수"
@@ -271,6 +277,10 @@ L["UNKNOWN_SERVER_FOUND"] = "|cffFFFFFF%s|r: 새 서버가 발견되었습니다
 L["UNLOCKING_PROFILE_FRAME"] = "RaiderIO: 내 프로필 고정 해제"
 L["USE_ENGLISH_ABBREVIATION"] = "던전 강제 영어 약어"
 L["USE_ENGLISH_ABBREVIATION_DESC"] = "설정하면, 던전에 현재 사용중인 언어가 아닌 영어 버전 약어로 표시합니다."
+--[[Translation missing --]]
+--[[ L["USE_RAIDERIO_CLIENT_LIVE_TRACKING_SETTINGS"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["USE_RAIDERIO_CLIENT_LIVE_TRACKING_SETTINGS_DESC"] = ""--]] 
 L["WARNING_DEBUG_MODE_ENABLE"] = "|cffFFFFFF%s|r 디버그 모드가 활성화되었습니다. |cffFFFFFF/raiderio debug|r을 입력하여 기능을 비활성화 할 수 있습니다."
 L["WARNING_LOCK_POSITION_FRAME_AUTO"] = "RaiderIO: 먼저 내 프로필 위치 자동화 설정을 비활성화해야 합니다."
 

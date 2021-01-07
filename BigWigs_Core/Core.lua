@@ -27,7 +27,6 @@ local loader = BigWigsLoader
 core.SendMessage = loader.SendMessage
 
 local customBossOptions = {}
-local pName = UnitName("player")
 
 local mod, bosses, plugins = {}, {}, {}
 local coreEnabled = false
@@ -36,10 +35,13 @@ local coreEnabled = false
 local GetBestMapForUnit = loader.GetBestMapForUnit
 local SendAddonMessage = loader.SendAddonMessage
 local GetInstanceInfo = loader.GetInstanceInfo
+local UnitName = BigWigsLoader.UnitName
+local UnitGUID = BigWigsLoader.UnitGUID
 
 -- Upvalues
 local next, type, setmetatable = next, type, setmetatable
-local UnitGUID = UnitGUID
+
+local pName = UnitName("player")
 
 -------------------------------------------------------------------------------
 -- Event handling
@@ -188,31 +190,35 @@ local function zoneChanged()
 	end
 end
 
-do
-	local function add(moduleName, tbl, ...)
-		for i = 1, select("#", ...) do
-			local entry = select(i, ...)
-			local t = type(tbl[entry])
-			if t == "nil" then
-				tbl[entry] = moduleName
-			elseif t == "table" then
-				tbl[entry][#tbl[entry] + 1] = moduleName
-			elseif t == "string" then
-				local tmp = tbl[entry]
-				tbl[entry] = { tmp, moduleName }
+function core:RegisterEnableMob(module, ...)
+	for i = 1, select("#", ...) do
+		local mobId = select(i, ...)
+		if type(mobId) ~= "number" or mobId < 1 then
+			core:Error(("Module %q tried to register the mobId %q, but it wasn't a valid number."):format(module.moduleName, tostring(mobId)))
+		else
+			module.enableMobs[mobId] = true -- Module specific list
+			-- Global list
+			local entryType = type(enablemobs[mobId])
+			if entryType == "nil" then
+				enablemobs[mobId] = module.moduleName
+			elseif entryType == "table" then
+				enablemobs[mobId][#enablemobs[mobId] + 1] = module.moduleName
+			elseif entryType == "string" then -- Converting from 1 module registered to this mobId, to multiple modules
+				local previousModuleEntry = enablemobs[mobId]
+				enablemobs[mobId] = { previousModuleEntry, module.moduleName }
 			else
-				error(("Unknown type in a enable trigger table at index %d for %q."):format(i, tostring(moduleName)))
+				core:Error(("Unknown type in a enable trigger table at index %d for %q."):format(i, module.moduleName))
 			end
 		end
 	end
-	function core:RegisterEnableMob(module, ...) add(module.moduleName, enablemobs, ...) end
-	function core:GetEnableMobs()
-		local t = {}
-		for k,v in next, enablemobs do
-			t[k] = v
-		end
-		return t
+end
+
+function core:GetEnableMobs()
+	local t = {}
+	for k,v in next, enablemobs do
+		t[k] = v
 	end
+	return t
 end
 
 -------------------------------------------------------------------------------
@@ -220,24 +226,27 @@ end
 --
 
 do
-	local callbackRegistered = nil
+	local callbackRegistered = false
 	local messages = {}
-	local colors = {"red", "blue", "orange", "yellow", "green", "cyan", "purple"}
-	local sounds = {"Long", "Info", "Alert", "Alarm", "Warning", false, false, false, false, false}
+	local count = 1
+	local colors = {"green", "red", "orange", "yellow", "cyan", "blue", "blue", "purple"}
+	local sounds = {"Long", "Warning", "Alert", "Alarm", "Info", "onyou", "underyou", false}
 
 	local function barStopped(event, bar)
 		local a = bar:Get("bigwigs:anchor")
 		local key = bar:GetLabel()
 		if a and messages[key] then
-			local color = colors[random(1, #colors)]
-			local sound = sounds[random(1, #sounds)]
-			local emphasized = random(1, 3) == 1
-			if random(1, 4) == 2 then
+			if not colors[count] then count = 1 end
+			local color = colors[count]
+			local sound = sounds[count]
+			local emphasized = count == 2
+			if count == 6 then
 				core:SendMessage("BigWigs_Flash", core, key)
 			end
 			core:Print(L.test .." - ".. color ..": ".. key)
 			core:SendMessage("BigWigs_Message", core, key, color..": "..key, color, messages[key], emphasized)
 			core:SendMessage("BigWigs_Sound", core, key, sound)
+			count = count + 1
 			messages[key] = nil
 		end
 	end
@@ -266,12 +275,18 @@ do
 		core:SendMessage("BigWigs_StartBar", core, msg, msg, time, icon)
 
 		local guid = UnitGUID("target")
-		if guid then
-			local t = GetTime()
-			if (t - lastNamePlateBar) > 25 then
-				lastNamePlateBar = t
-				core:Print(L.testNameplate)
-				core:SendMessage("BigWigs_StartNameplateBar", core, msg, msg, 25, icon, false, guid)
+		if guid and UnitCanAttack("player", "target") then
+			for i = 1, 40 do
+				local unit = ("nameplate%d"):format(i)
+				if UnitGUID(unit) == guid then
+					local t = GetTime()
+					if (t - lastNamePlateBar) > 25 then
+						lastNamePlateBar = t
+						core:Print(L.testNameplate)
+						core:SendMessage("BigWigs_StartNameplateBar", core, msg, msg, 25, icon, false, guid)
+					end
+					return
+				end
 			end
 		end
 	end
@@ -678,9 +693,16 @@ do
 		end
 	end
 
+	local function profileUpdate()
+		core:SendMessage("BigWigs_ProfileUpdate")
+	end
+
 	function core:RegisterPlugin(module)
 		if type(module.defaultDB) == "table" then
 			module.db = core.db:RegisterNamespace(module.name, { profile = module.defaultDB } )
+			module.db.RegisterCallback(module, "OnProfileChanged", profileUpdate)
+			module.db.RegisterCallback(module, "OnProfileCopied", profileUpdate)
+			module.db.RegisterCallback(module, "OnProfileReset", profileUpdate)
 		end
 
 		setupOptions(module)

@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(2420, "DBM-CastleNathria", nil, 1190)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20201218044504")
+mod:SetRevision("20210104032608")
 mod:SetCreatureID(165521)
 mod:SetEncounterID(2406)
 mod:SetUsedIcons(1, 2, 3, 4, 5, 6, 7, 8)
@@ -59,7 +59,7 @@ local specWarnConcentrateAnima					= mod:NewSpecialWarningMoveAway(342321, nil, 
 local yellConcentrateAnimaFades					= mod:NewShortFadesYell(342321)--^^
 local specWarnGTFO								= mod:NewSpecialWarningGTFO(325713, nil, nil, nil, 1, 8)
 --Anima Constructs
-local specWarnCondemn							= mod:NewSpecialWarningInterruptCount(331550, "HasInterrupt", nil, nil, 1, 2)--Don't really want to hard interrupt warning for something with 10 second cast, this is opt in
+local specWarnCondemn							= mod:NewSpecialWarningInterruptCount(331550, false, nil, 2, 1, 2)--Don't really want to hard interrupt warning for something with 10 second cast, this is opt in
 
 --mod:AddTimerLine(BOSS)
 local timerDesiresContainer						= mod:NewTimer(120, "timerDesiresContainer", 341621, false, "timerContainers2")
@@ -70,7 +70,7 @@ local timerConcentrateContainer					= mod:NewTimer(120, "timerConcentrateContain
 local timerExposedDesiresCD						= mod:NewCDTimer(8.5, 341621, nil, "Tank|Healer", nil, 5, nil, DBM_CORE_L.TANK_ICON, true)--8.5-25 because yeah, boss spell queuing+CD even changing when higher rank
 local timerBottledAnimaCD						= mod:NewCDTimer(10.8, 342280, nil, nil, nil, 3, nil, nil, true)--10-36
 local timerSinsandSufferingCD					= mod:NewCDTimer(44.3, 325064, 202046, nil, nil, 3, nil, nil, true)--ShortName "Beams"
-local timerConcentratedAnimaCD					= mod:NewCDTimer(35.4, 342321, nil, nil, nil, 1, nil, nil, true, 1, 3)--Technically targetted(3) bar type as well, but since bar is both, and 2 other bars are already 3s, 1 makes more sense
+local timerConcentratedAnimaCD					= mod:NewCDTimer(35.4, 342321, nil, nil, 2, 1, nil, nil, true, 1)--Technically targetted(3) bar type as well, but since bar is both, and 2 other bars are already 3s, 1 makes more sense
 local timerChangeofHeart						= mod:NewTargetTimer(4, 340452, nil, nil, nil, 5, nil, DBM_CORE_L.HEALER_ICON)
 
 --local berserkTimer							= mod:NewBerserkTimer(600)
@@ -303,18 +303,11 @@ function mod:SPELL_AURA_APPLIED(args)
 		timerChangeofHeart:Start(args.destName)
 	elseif spellId == 325936 then
 		warnSharedCognition:CombinedShow(0.3, args.destName)
-	elseif spellId == 324983 then
-		if self:AntiSpam(4, args.destName.."1") then--Still announce using combat log any targets that didn't send a sync already
-			warnSharedSuffering:CombinedShow(0.3, args.destName)
-		end
---		if args:IsPlayer() then
---			specWarnSharedSuffering:Show()
---			specWarnSharedSuffering:Play("targetyou")
---			yellSharedSuffering:Yell()
---		end
+	elseif spellId == 324983 and self:AntiSpam(4, args.destName.."1") then
 		if self.Options.SetIconOnSharedSuffering and self.vb.sufferingIcon < 4 then--Icons for this are nice, but reserve 5 of them for adds
 			self:SetIcon(args.destName, self.vb.sufferingIcon)
 		end
+		warnSharedSuffering:CombinedShow(0.3, args.destName)
 		self.vb.sufferingIcon = self.vb.sufferingIcon + 1
 	elseif spellId == 332664 or spellId == 340477 or spellId == 339525 then--332664 was used on heroic testing, 340477 and 332664 both occured on mythic, not seen 339525 yet
 		warnConcentrateAnima:CombinedShow(0.3, args.destName)
@@ -385,7 +378,11 @@ function mod:OnTranscriptorSync(msg, targetName)
 	if msg:find("324983") and targetName then
 		targetName = Ambiguate(targetName, "none")
 		if self:AntiSpam(4, targetName.."1") then
-			warnSharedSuffering:Show(targetName)
+			if self.Options.SetIconOnSharedSuffering and self.vb.sufferingIcon < 4 then--Icons for this are nice, but reserve 5 of them for adds
+				self:SetIcon(targetName, self.vb.sufferingIcon)
+			end
+			warnSharedSuffering:CombinedShow(0.3, targetName)
+			self.vb.sufferingIcon = self.vb.sufferingIcon + 1
 		end
 	end
 end

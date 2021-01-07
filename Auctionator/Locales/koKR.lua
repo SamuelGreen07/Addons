@@ -111,6 +111,12 @@ L["CONFIG_SELLING_ICON_SIZE_TOOLTIP_HEADER"] = "아이콘 크기"
 L["CONFIG_SELLING_ICON_SIZE_TOOLTIP_TEXT"] = "판매 탭의 아이콘 크기를 조절합니다. (기본 42)"
 L["CONFIG_SELLING_LIFO_HEADER"] = "판매: 일반"
 L["CONFIG_SELLING_LIFO_TEXT"] = "일반 품목을 최저가를 %로 계산할 지 골드로 계산할지 설정합니다. 최저가가 아닐 경우, 현재 경매장의 최저가로 계산됩니다."
+--[[Translation missing --]]
+L["CONFIG_SELLING_MISSING_FAVOURITES"] = "Always show favourite items, including when not in your bag."
+--[[Translation missing --]]
+L["CONFIG_SELLING_MISSING_FAVOURITES_TOOLTIP_HEADER"] = "Missing favourites visible"
+--[[Translation missing --]]
+L["CONFIG_SELLING_MISSING_FAVOURITES_TOOLTIP_TEXT"] = "Show favourite items in the bag view even when they aren't in your bag."
 L["CONFIG_SELLING_NOT_LIFO_HEADER"] = "판매: 장비/펫"
 L["CONFIG_SELLING_NOT_LIFO_TEXT"] = "장비/펫의 최저가를 %로 계산할 지 골드로 계산할 지 설정합니다. 해당 카테고리는 목록이 개인화되며 최저가를 설정할 수 있습니다."
 L["CONFIG_SELLING_TEXT"] = "판매하기 탭의 설정을 변경합니다."
@@ -166,6 +172,8 @@ L["ENGAGE_HEADER"] = "옥셔네이터와 함께하기"
 L["EXACT_SEARCH"] = "정확한 이름 검색"
 L["EXPORT"] = "내보내기"
 L["EXPORT_AS"] = "다음으로 내보내기"
+--[[Translation missing --]]
+L["EXPORT_RESULTS"] = "Export Results"
 L["EXPORT_STRING"] = "공유가능한 스트링"
 L["EXPORT_WHISPER"] = "귓말하기"
 L["FAVOURITES"] = "즐겨찾기"
@@ -328,6 +336,20 @@ L["SPLASH_902_DESCRIPTION"] = "Along with the various bugfixes, there is one new
 L["SPLASH_902_FEATURES_1"] = "A new \"Your History\" section on the Selling tab to show the prices of past auctions you have created."
 --[[Translation missing --]]
 L["SPLASH_902_FEATURES_HEADER"] = "New Features"
+--[[Translation missing --]]
+L["SPLASH_903_DESCRIPTION"] = "One bugfix, and a couple of new features."
+--[[Translation missing --]]
+L["SPLASH_903_FEATURES_1"] = "A new \"Export Results\" button has been added to the Shopping tab to export the current search results in CSV format, suitable for importing into Excel."
+--[[Translation missing --]]
+L["SPLASH_903_FEATURES_2"] = "Favourite items in the Selling tab now stay visible even if they are no longer in your bag. This update resets your favourites list."
+--[[Translation missing --]]
+L["SPLASH_903_FEATURES_HEADER"] = "Features"
+--[[Translation missing --]]
+L["SPLASH_904_DESCRIPTION"] = "Bugfixes and a new history view"
+--[[Translation missing --]]
+L["SPLASH_904_FEATURES_1"] = "Right-clicking on a result in the Shopping tab will now open a dialog showing its price history."
+--[[Translation missing --]]
+L["SPLASH_904_FEATURES_HEADER"] = "Features"
 L["SPLASH_HIDE_MESSAGE"] = "다음 업데이트까지 보이지 않기"
 L["SPLASH_SCREEN_HEADER"] = "옥셔네이터에 오신걸 환영합니다!"
 L["STACK_AUCTION_INFO"] = "%s  (전체 %s, 각 %s)"

@@ -5,6 +5,7 @@
 
 local plugin = {}
 local core
+local UnitName, UnitGUID, Timer = BigWigsLoader.UnitName, BigWigsLoader.UnitGUID, BigWigsLoader.CTimerAfter
 do
 	local _, tbl =...
 	core = tbl.core
@@ -49,7 +50,6 @@ function plugin:Disable()
 end
 
 do
-	local UnitName = UnitName
 	--- Get the full name of a unit.
 	-- @string unit unit token or name
 	-- @bool[opt] trimServer append * instead of the server name
@@ -62,6 +62,15 @@ do
 			name = name .. (trimServer and "*" or "-"..server)
 		end
 		return name
+	end
+	--- Get the Globally Unique Identifier of a unit.
+	-- @string unit unit token or name
+	-- @return guid guid of the unit
+	function plugin:UnitGUID(unit)
+		local guid = UnitGUID(unit)
+		if guid then
+			return guid
+		end
 	end
 end
 
@@ -101,6 +110,13 @@ do
 	function plugin:GetPartyList()
 		return partyList
 	end
+end
+
+--- Trigger a function after a specific delay
+-- @param func callback function to trigger after the delay
+-- @number delay how long to wait until triggering the function
+function plugin:SimpleTimer(func, delay)
+	Timer(delay, func)
 end
 
 --- Force the options panel to update.

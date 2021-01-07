@@ -1,0 +1,77 @@
+## Interface: 90002
+## Name: AzeriteUI
+## Title: |c00000002|r|cff7284abA|r|cff6a7a9ez|r|cff617092e|r|cff596785r|r|cff505d78i|r|cff48536bt|r|cff3f495fe|r|cffffffffUI|r |cfffff5693.1|r |cFFFF7D00Beta|r
+## Author: Daniel Troko, Lars Norberg
+## Notes: Custom user graphical interface.|n|nDesign by Daniel Troko and Lars Norberg.|nCode by Lars Norberg.|n|n|cff4488ffPayPal|r|cffffffff:|r |n|cffffffffwww.paypal.me/GoldpawsStuff|r|n|n|cff4488ffPatreon|r|cffffffff:|r |n|cffffffffwww.patreon.com/GoldpawsStuff|r
+## Version: 3.1-Beta
+## DefaultState: Enabled
+## SavedVariables: AzeriteUI_DB
+## OptionalDeps: Clique
+## X-Category: Interface Enhancements
+## X-Discord: https://discord.gg/MUSfWXd
+## X-Website: https://www.patreon.com/goldpawsstuff
+## X-License: Custom
+
+# Global Fonts
+FontStyles.xml
+
+# Addon libraries & plugins, the main engine of it all.
+back-end\wheel.lua
+back-end\libraries.xml
+back-end\plugins.xml
+back-end\tools.xml
+
+# Addon localization.
+locale\enUS.lua
+locale\deDE.lua
+locale\esES.lua
+locale\esMX.lua
+locale\esMX.lua
+locale\frFR.lua
+locale\itIT.lua
+locale\koKR.lua
+locale\ptBR.lua
+locale\ptPT.lua
+locale\ruRU.lua
+locale\zhCN.lua
+locale\zhTW.lua  
+
+# Private addon API and tools. 
+# Also the old addon specific layouts and design,
+# though these will eventually all be moved tools
+# the new tinkertown schematics system. 
+front-end\private.lua
+
+# Where tinkerers should tinker. 
+tinkertown\tinkertown.xml
+
+# Main addon module, 
+# all others are children of this one. 
+front-end\root.lua
+
+# Menu Module. 
+# This one is required, even by the root.
+front-end\modules\menu-addon.lua
+
+# Modules.
+front-end\modules\actionbars.lua
+front-end\modules\extrabars.lua
+front-end\modules\chatwindows.lua
+front-end\modules\menu-game.lua
+front-end\modules\menu-gamepanels.lua
+front-end\modules\minimap.lua
+front-end\modules\misc.lua
+front-end\modules\misc-floaters.lua
+front-end\modules\misc-timers.lua
+front-end\modules\objectivestracker.lua
+front-end\modules\tooltips.lua
+front-end\modules\tooltips-blizzard.lua
+front-end\modules\unitframes.lua
+front-end\modules\unitframes-grouptools.lua
+front-end\modules\unitframes-nameplates.lua
+
+# These will be removed later.
+front-end\modules\deprecated\unitframes.lua
+
+# All addon- and module incompatibilities in one place.
+front-end\auto-disable.lua

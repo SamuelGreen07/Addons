@@ -16,6 +16,10 @@ L["API_DEPRECATED_UNKNOWN_ADDON"] = "<Unknown AddOn>"
 L["API_DEPRECATED_UNKNOWN_FILE"] = "<Unknown AddOn File>"
 L["API_DEPRECATED_WITH"] = "|cffFF0000Предупреждение!|r Дополнение |cffFFFFFF%s|r вызвало конфликт с функциями  RaiderIO.%s. Это функция будет удалена в будущих релизах. Пожалуйста сообщите автору %s для обновления до нового API RaiderIO.%s Вызовов стека: %s"
 L["API_INVALID_DATABASE"] = "|cffFF0000Предупреждение!|r Обнаружена недопустимая база данных RaiderIO в |cffffffff%s|r. Пожалуйста обновите все регионы и фракции в RaiderIO Client, либо переустановите дополнение вручную."
+--[[Translation missing --]]
+--[[ L["AUTO_COMBATLOG"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["AUTO_COMBATLOG_DESC"] = ""--]] 
 L["BEST_FOR_DUNGEON"] = "Лучший для подземелья"
 L["BEST_RUN"] = "Лучший проход"
 L["BEST_SCORE"] = "Лучший Эпох+ счет (%s)"
@@ -200,6 +204,8 @@ L["RAID_PROGRESS_TITLE"] = "Рейдовый прогресс"
 L["RAIDERIO_AVERAGE_PLAYER_SCORE"] = "Cредн. очки для прохода вовремя +%s"
 L["RAIDERIO_BEST_RUN"] = "Лучший Эпох+ проход"
 L["RAIDERIO_CLIENT_CUSTOMIZATION"] = "Настройки RaiderIO Client"
+--[[Translation missing --]]
+--[[ L["RAIDERIO_LIVE_TRACKING"] = ""--]] 
 L["RAIDERIO_MP_BASE_SCORE"] = "Основные очки Raider.IO"
 L["RAIDERIO_MP_BEST_SCORE"] = "Raider.IO Эпох+ очки (%s)"
 L["RAIDERIO_MP_SCORE"] = "Очки по версии Raider.IO"
@@ -270,6 +276,10 @@ L["UNKNOWN_SERVER_FOUND"] = "|cffFFFFFF%s|r обнаружил неизвест�
 L["UNLOCKING_PROFILE_FRAME"] = "Raider.IO: Разблокировать окно Эпох+ профиля."
 L["USE_ENGLISH_ABBREVIATION"] = "Включить английские сокращения для имен подземелий"
 L["USE_ENGLISH_ABBREVIATION_DESC"] = "Если включено, то аббревиатуры подземелий на текущем языке будут заменены на вариант английского языка."
+--[[Translation missing --]]
+--[[ L["USE_RAIDERIO_CLIENT_LIVE_TRACKING_SETTINGS"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["USE_RAIDERIO_CLIENT_LIVE_TRACKING_SETTINGS_DESC"] = ""--]] 
 L["WARNING_DEBUG_MODE_ENABLE"] = "|cffFFFFFF%s|r Режим отладки включен. Вы можете отключить его, набрав |cffFFFFFF/raiderio debug|r."
 L["WARNING_LOCK_POSITION_FRAME_AUTO"] = "Raider.IO: Для начала вы должны отключить автоматическое позиционирование Raider.IO профиля."
 

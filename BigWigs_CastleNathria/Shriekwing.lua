@@ -39,7 +39,7 @@ function mod:GetOptions()
 		-- Stage One - Thirst for Blood
 		330711, -- Earsplitting Shriek
 		340324, -- Sanguine Ichor
-		{342074, "SAY", "SAY_COUNTDOWN"}, -- Echolocation
+		{342074, "SAY", "SAY_COUNTDOWN", "ME_ONLY_EMPHASIZE"}, -- Echolocation
 		342863, -- Echoing Screech
 		345397, -- Wave of Blood
 		343005, -- Blind Swipe
@@ -133,7 +133,7 @@ do
 		playerList[#playerList+1] = args.destName
 		if self:Me(args.destGUID) then
 			self:Say(342074)
-			self:SayCountdown(342074, 8)
+			self:SayCountdown(342074, self:Mythic() and 6 or 8)
 			self:PlaySound(342074, "warning")
 		end
 		if #playerList == 1 then

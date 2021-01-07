@@ -43,7 +43,7 @@ function mod:GetOptions()
 	return {
 		"stages",
 		--[[ Huntsman Altimor ]]--
-		{335114, "SAY", "SAY_COUNTDOWN", "FLASH"}, -- Sinseeker
+		{335114, "SAY", "SAY_COUNTDOWN", "FLASH", "ME_ONLY_EMPHASIZE"}, -- Sinseeker
 		sinseekerMarker,
 		334404, -- Spreadshot
 
@@ -131,7 +131,7 @@ end
 
 function mod:UNIT_SPELLCAST_SUCCEEDED(_, unit, _, spellId)
 	if spellId == 334504 then -- Huntsman's Bond
-		local sourceGUID = UnitGUID(unit)
+		local sourceGUID = self:UnitGUID(unit)
 		if self:MobId(sourceGUID) == 165066 then -- Huntsman Altimor
 			stage = stage + 1
 			if stage == 2 then -- Bargast up
@@ -171,9 +171,7 @@ do
 			self:PlaySound(335114, "warning")
 			self:Flash(335114)
 		end
-		if self:GetOption(sinseekerMarker) then
-			SetRaidTarget(args.destName, count)
-		end
+		self:CustomIcon(sinseekerMarker, args.destName, count)
 		self:TargetsMessage(335114, "orange", playerList, 3, CL.count:format(self:SpellName(335114), sinseekerCount-1), nil, 2, playerIcons) -- Debuffs are very delayed
 	end
 end
@@ -183,9 +181,7 @@ function mod:HuntsmansMarkRemoved(args)
 		self:CancelSayCountdown(335114)
 	end
 
-	if self:GetOption(sinseekerMarker) then
-		SetRaidTarget(args.destName, 0)
-	end
+	self:CustomIcon(sinseekerMarker, args.destName)
 end
 
 function mod:Spreadshot(args)
@@ -216,8 +212,8 @@ function mod:ViciousLungeApplied(args)
 	self:PrimaryIcon(args.spellId, args.destName)
 	if self:Me(args.destGUID) then
 		self:PlaySound(args.spellId, "warning")
-		self:Say(args.spellId)
-		self:SayCountdown(args.spellId, 6)
+		self:Yell(args.spellId)
+		self:YellCountdown(args.spellId, 6)
 	end
 	bloodyThrashCount = bloodyThrashCount + 1
 	self:Bar(args.spellId, 25, CL.count:format(args.spellName, bloodyThrashCount))
@@ -226,7 +222,7 @@ end
 function mod:ViciousLungeRemoved(args)
 	self:PrimaryIcon(args.spellId)
 	if self:Me(args.destGUID) then
-		self:CancelSayCountdown(args.spellId)
+		self:CancelYellCountdown(args.spellId)
 	end
 end
 
@@ -267,7 +263,7 @@ do
 	function mod:shadesofBargastMarking(event, unit, guid)
 		if self:MobId(guid) == 171557 and not mobCollector[guid] then
 			shadesofBargastMarked = shadesofBargastMarked + 1
-			SetRaidTarget(unit, shadesofBargastMarked+3)
+			self:CustomIcon(shadesofBargastMarker, unit, shadesofBargastMarked+3)
 			mobCollector[guid] = true
 			if shadesofBargastMarked == 2 then
 				self:UnregisterTargetEvents()

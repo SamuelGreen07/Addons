@@ -1,6 +1,6 @@
 -- AskMrRobot-Serializer will serialize and communicate character data between users.
 
-local MAJOR, MINOR = "AskMrRobot-Serializer", 95
+local MAJOR, MINOR = "AskMrRobot-Serializer", 96
 local Amr, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not Amr then return end -- already loaded by something else
@@ -820,7 +820,18 @@ function Amr:SerializePlayerData(data, complete)
 		end
 		
         table.insert(fields, ".inv")
-        appendItemsToExport(fields, itemObjects)
+		appendItemsToExport(fields, itemObjects)
+		
+		if data.GreatVaultItems then
+			itemObjects = {}
+			for i, itemData in ipairs(data.GreatVaultItems) do
+				if itemData then
+					table.insert(itemObjects, itemData)
+				end
+			end
+			table.insert(fields, ".gv")
+			appendItemsToExport(fields, itemObjects)
+		end
     end
 
     return "$" .. table.concat(fields, ";") .. "$"

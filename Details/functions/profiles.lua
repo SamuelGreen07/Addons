@@ -1112,7 +1112,8 @@ _detalhes.default_profile = default_profile
 local default_player_data = {
 		coach = {
 			enabled = false,
-			welcome_panel_pos = {}
+			welcome_panel_pos = {},
+			last_coach_name = false,
 		},
 
 	--> force all fonts to have this outline
@@ -1302,7 +1303,7 @@ local default_global_data = {
 	--> mythic plus config
 		mythic_plus = {
 			always_in_combat = false, --
-			merge_boss_trash = false, --
+			merge_boss_trash = true, --
 			delete_trash_after_merge = true, --
 			--merge_boss_with_trash = false, --this won't be used
 			boss_dedicated_segment = true, --
