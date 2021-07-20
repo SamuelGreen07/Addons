@@ -14,6 +14,7 @@ local GetTradeskillLink = AtlasLoot.TooltipScan.GetTradeskillLink
 local ProfClickHandler = nil
 
 local PROF_COLOR = "|cffffff00"
+local WHITE_TEXT = "|cffffffff%s|r"
 local ITEM_COLORS = {}
 
 AtlasLoot.ClickHandler:Add(
@@ -82,7 +83,7 @@ function Prof.OnEnter(button)
 	tooltip:SetOwner(button, "ANCHOR_RIGHT", -(button:GetWidth() * 0.5), 5)
 	tooltip:SetSpellByID(button.SpellID)
 	if AtlasLoot.db.showIDsInTT then
-		tooltip:AddDoubleLine("SpellID:", button.SpellID)
+		tooltip:AddDoubleLine("SpellID:", format(WHITE_TEXT, button.SpellID))
 	end
 	tooltip:Show()
 end
@@ -95,9 +96,11 @@ function Prof.OnMouseAction(button, mouseButton)
 	if not mouseButton then return end
 	mouseButton = ProfClickHandler:Get(mouseButton)
 	if mouseButton == "ChatLink" then
-		if button.ItemID then
+		if button.ItemID and button.type ~= "secButton" then
 			local itemInfo, itemLink = GetItemInfo(button.ItemID)
-			AtlasLoot.Button:AddChatLink(itemLink, "item", button.ItemID)
+			AtlasLoot.Button:AddChatLink(itemLink)
+		elseif button.SpellID then
+			AtlasLoot.Button:AddChatLink(Profession.GetChatLink(button.SpellID))
 		end
 	elseif mouseButton == "WoWHeadLink" then
 		AtlasLoot.Button:OpenWoWHeadLink(button, "spell", button.SpellID)
@@ -135,13 +138,14 @@ function Prof.Refresh(button)
 
 		button.overlay:Show()
 		-- enchanting border
-		if not button.ItemID then
+		if not button.ItemID or button.type == "secButton" then
 			itemQuality = "gold"
 		end
 		button.overlay:SetQualityBorder(itemQuality)
 
 		if button.type == "secButton" then
-
+			itemTexture = nil
+			itemCount = nil
 		else
 			if itemName then
 				button.name:SetText("|c"..ITEM_COLORS[itemQuality or 0]..(spellName or itemName))
@@ -155,8 +159,8 @@ function Prof.Refresh(button)
 			button.count:Show()
 		end
 		if AtlasLoot.db.ContentPhase.enableOnCrafting then
-			local phaseT = Profession.GetPhaseTextureForSpellID(button.SpellID)
-			if phaseT then
+			local phaseT, active = Profession.GetPhaseTextureForSpellID(button.SpellID)
+			if phaseT and not active then
 				button.phaseIndicator:SetTexture(phaseT)
 				button.phaseIndicator:Show()
 			end

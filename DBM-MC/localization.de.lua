@@ -1,4 +1,4 @@
-﻿if GetLocale() ~= "deDE" then return end
+if GetLocale() ~= "deDE" then return end
 local L
 
 ----------------
@@ -79,7 +79,13 @@ L:SetGeneralLocalization{
 L = DBM:GetModLocalization("Majordomo")
 
 L:SetGeneralLocalization{
-	name = "Majordomus Exekutus"
+	name = "Majordomus Executus"
+}
+L:SetTimerLocalization{
+	timerShieldCD		= "Nächstes Schild"
+}
+L:SetOptionLocalization{
+	timerShieldCD		= "Zeige Zeit für den nächsten Schadenschild/Magiereflexion"
 }
 
 ----------------
@@ -107,4 +113,13 @@ L:SetOptionLocalization{
 L:SetMiscLocalization{
 	Submerge	= "KOMMT HERBEI, MEINE DIENER! VERTEIDIGT EUREN HERRN!",
 	Pull		= "Unverschämte Welpen! Ihr seid sehenden Auges dem Tod in die Arme gelaufen! Seht her, der Meister regt sich!"
+}
+
+-----------------
+--  MC: Trash  --
+-----------------
+L = DBM:GetModLocalization("MCTrash")
+
+L:SetGeneralLocalization{
+	name = "GK: Trash"
 }

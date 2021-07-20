@@ -21,6 +21,7 @@ local addon, ns = ...
 local cargBags = ns.cargBags
 
 local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+local isTBC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 
 local _G = _G
 
@@ -37,8 +38,8 @@ local ItemButton = cargBags:NewClass("ItemButton", nil, "Button")
 ]]
 function ItemButton:GetTemplate(bagID)
 	bagID = bagID or self.bagID
-	return (bagID == -3 and "ReagentBankItemButtonGenericTemplate") or (bagID == -1 and "BankItemButtonGenericTemplate") or (bagID and "ContainerFrameItemButtonTemplate") or (isClassic and "ItemButtonTemplate" or ""),
-      (bagID == -3 and ReagentBankFrame) or (bagID == -1 and BankFrame) or (bagID and _G["ContainerFrame"..bagID + 1]) or (isClassic and "ItemButtonTemplate" or "");
+	return (bagID == -3 and "ReagentBankItemButtonGenericTemplate") or (bagID == -1 and "BankItemButtonGenericTemplate") or (bagID and "ContainerFrameItemButtonTemplate") or ((isClassic or isTBC) and "ItemButtonTemplate" or ""),
+      (bagID == -3 and ReagentBankFrame) or (bagID == -1 and BankFrame) or (bagID and _G["ContainerFrame"..bagID + ((isClassic or isTBC) and 2 or 1)]);
 end 
 
 local mt_gen_key = {__index = function(self,k) self[k] = {}; return self[k]; end}
@@ -54,7 +55,6 @@ function ItemButton:New(bagID, slotID)
 
 	local tpl, parent = self:GetTemplate(bagID)
 	local button = table.remove(self.recycled[tpl]) or self:Create(tpl, parent)
-
 	button.bagID = bagID
 	button.slotID = slotID
 	button:SetID(slotID)
@@ -77,7 +77,7 @@ function ItemButton:Create(tpl, parent)
 	local name = ("%sSlot%d"):format(impl.name, impl.numSlots)
 
 	local button
-	if isClassic then
+	if isClassic or isTBC then
 		button = setmetatable(CreateFrame("Button", name, parent, tpl), self.__index)
 	else
 		button = setmetatable(CreateFrame("ItemButton", name, parent, tpl), self.__index)
@@ -96,11 +96,7 @@ function ItemButton:Create(tpl, parent)
 	bFS = _G[button:GetName().."Count"]
 	bFS:ClearAllPoints()
 	bFS:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 1.5, 1.5);
-	if RealUI then
-		bFS:SetFontObject(RealUIFont_PixelSmall)
-	else
-		bFS:SetFont(unpack(ns.options.fonts.itemCount))
-	end
+	bFS:SetFont(unpack(ns.options.fonts.itemCount))
 
 	return button
 end
@@ -118,7 +114,7 @@ end
 	@param item <table> [optional]
 	@return item <table>
 ]]
-function ItemButton:GetItemInfo(item)
-	return self.implementation:GetItemInfo(self.bagID, self.slotID, item)
+function ItemButton:GetCustomItemInfo(item)
+	return self.implementation:GetCustomItemInfo(self.bagID, self.slotID, item)
 end
 

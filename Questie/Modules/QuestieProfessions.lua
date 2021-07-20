@@ -1,127 +1,144 @@
-QuestieProfessions = {...}
+---@class QuestieProfessions
+local QuestieProfessions = QuestieLoader:CreateModule("QuestieProfessions");
+local _QuestieProfessions = {}
+
+---@type l10n
+local l10n = QuestieLoader:ImportModule("l10n")
+
 local playerProfessions = {}
 local professionTable = {}
+local alternativeProfessionNames = {}
+
+function QuestieProfessions:Init()
+
+    -- Generate professionTable with translations for all available locals.
+    -- We need the translated values because the API returns localized profession names
+    for professionId, professionName in pairs(_QuestieProfessions.professionNames) do
+        for _, translation in pairs(l10n.translations[professionName]) do
+            if translation == true then
+                professionTable[professionName] = professionId
+            else
+                professionTable[translation] = professionId
+            end
+        end
+    end
+
+    for professionName, professionId in pairs(alternativeProfessionNames) do
+        professionTable[professionName] = professionId
+    end
+
+    QuestieProfessions.professionTable = professionTable
+end
 
 function QuestieProfessions:Update()
     Questie:Debug(DEBUG_DEVELOP, "QuestieProfession: Update")
+    ExpandSkillHeader(0)
+    local isProfessionUpdate = false
 
     for i=1, GetNumSkillLines() do
         if i > 14 then break; end -- We don't have to go through all the weapon skills
 
-        local skillName, isHeader, isExpanded, skillRank, _, _, _, _, _, _, _, _, _ = GetSkillLineInfo(i)
-        if isHeader == 1 and isExpanded == nil then
-            Questie:Debug(DEBUG_DEVELOP, "QuestieProfession: Expanding header")
-            ExpandSkillHeader(i)
-        end
-
+        local skillName, isHeader, _, skillRank, _, _, _, _, _, _, _, _, _ = GetSkillLineInfo(i)
         if isHeader == nil and professionTable[skillName] then
-            playerProfessions[professionTable[skillName]] = skillRank
-        end
-
-        if isHeader == 1 and isExpanded == nil then
-            Questie:Debug(DEBUG_DEVELOP, "QuestieProfession: Collapsing header")
-            CollapseSkillHeader(i)
+            isProfessionUpdate = true -- A profession leveled up, not something like "Defense"
+            playerProfessions[professionTable[skillName]] = {skillName, skillRank}
         end
     end
+    return isProfessionUpdate
 end
 
 -- This function is just for debugging purpose
--- These is no need to access the playerProfessions table somewhere else
+-- There is no need to access the playerProfessions table somewhere else
 function QuestieProfessions:GetPlayerProfessions()
     return playerProfessions
 end
 
-local function HasProfession(prof)
-    return prof ~= nil and playerProfessions[prof] ~= nil
+function QuestieProfessions:GetProfessionNames()
+    local professionNames = {}
+    for _, data in pairs(playerProfessions) do
+        table.insert(professionNames, data[1])
+    end
+
+    return professionNames
 end
 
-local function HasProfessionSkill(prof, reqSkill)
-    return reqSkill ~= nil and playerProfessions[prof] >= reqSkill
+local function _HasProfession(profession)
+    return profession == nil or playerProfessions[profession] ~= nil
 end
 
-function QuestieProfessions:HasProfessionAndSkill(reqSkill)
-    return reqSkill == nil or (HasProfession(reqSkill[1]) and HasProfessionSkill(reqSkill[1], reqSkill[2]))
+local function _HasSkillLevel(profession, skillLevel)
+    return skillLevel == nil or playerProfessions[profession][2] >= skillLevel
 end
 
--- There are no quests for Skinning and Mining so we don't need them
-professionTable = {
-    ["First Aid"] = 129,
-    ["Erste Hilfe"] = 129,
-    ["Primeros auxilios"] = 129,
-    ["Secourisme"] = 129,
-    ["Primeiros Socorros"] = 129,
-    ["Первая помощь"] = 129,
-    ["急救"] = 129,
+function QuestieProfessions:HasProfessionAndSkillLevel(requiredSkill)
+    if requiredSkill == nil then
+        return true
+    end
 
-    ["Blacksmithing"] = 164,
-    ["Schmiedekunst"] = 164,
-    ["Herrería"] = 164,
-    ["Forge"] = 164,
-    ["Ferraria"] = 164,
-    ["Кузнечное дело"] = 164,
-    ["锻造"] = 164,
+    local profession = requiredSkill[1]
+    local skillLevel = requiredSkill[2]
+    return _HasProfession(profession) and _HasSkillLevel(profession, skillLevel)
+end
 
-    ["Leatherworking"] = 165,
-    ["Lederverarbeitung"] = 165,
-    ["Marroquinería"] = 165,
-    ["Travail du cuir"] = 165,
-    ["Couraria"] = 165,
-    ["Кожевничество"] = 165,
-    ["制皮"] = 165,
+QuestieProfessions.professionKeys = {
+    FIRST_AID = 129,
+    BLACKSMITHING = 164,
+    LEATHERWORKING = 165,
+    ALCHEMY = 171,
+    HERBALISM = 182,
+    COOKING = 185,
+    MINING = 186,
+    TAILORING = 197,
+    ENGINEERING = 202,
+    ENCHANTING = 333,
+    FISHING = 356,
+    SKINNING = 393,
+    JEWELCRAFTING = 755,
+    RIDING = 762,
+}
 
-    ["Alchemy"] = 171,
-    ["Alchimie"] = 171,
-    ["Alquimia"] = 171,
-    ["Alchimie"] = 171,
-    ["Alquimia"] = 171,
-    ["Алхимия"] = 171,
-    ["炼金术"] = 171,
+_QuestieProfessions.professionNames = {
+    [QuestieProfessions.professionKeys.FIRST_AID] = "First Aid",
+    [QuestieProfessions.professionKeys.BLACKSMITHING] = "Blacksmithing",
+    [QuestieProfessions.professionKeys.LEATHERWORKING] = "Leatherworking",
+    [QuestieProfessions.professionKeys.ALCHEMY] = "Alchemy",
+    [QuestieProfessions.professionKeys.HERBALISM] = "Herbalism",
+    [QuestieProfessions.professionKeys.COOKING] = "Cooking",
+    [QuestieProfessions.professionKeys.MINING] = "Mining",
+    [QuestieProfessions.professionKeys.TAILORING] = "Tailoring",
+    [QuestieProfessions.professionKeys.ENGINEERING] = "Engineering",
+    [QuestieProfessions.professionKeys.ENCHANTING] = "Enchanting",
+    [QuestieProfessions.professionKeys.FISHING] = "Fishing",
+    [QuestieProfessions.professionKeys.SKINNING] = "Skinning",
+    [QuestieProfessions.professionKeys.JEWELCRAFTING] = "Jewelcrafting",
+    [QuestieProfessions.professionKeys.RIDING] = "Riding",
+}
 
-    ["Herbalism"] = 182,
-    ["Kräuterkunde"] = 182,
-    ["Botánica"] = 182,
-    ["Herboristerie"] = 182,
-    ["Herborismo"] = 182,
-    ["Травничество"] = 182,
-    ["草药学"] = 182,
+function QuestieProfessions:GetProfessionName(professionKey)
+    return _QuestieProfessions.professionNames[professionKey]
+end
 
-    ["Cooking"] = 185,
-    ["Kochkunst"] = 185,
-    ["Cocina"] = 185,
-    ["Cuisine"] = 185,
-    ["Culinária"] = 185,
-    ["Кулинария"] = 185,
-    ["烹饪"] = 185,
-
-    ["Tailoring"] = 197,
-    ["Schneiderei"] = 197,
-    ["Costura"] = 197,
-    ["Couture"] = 197,
-    ["Alfaiataria"] = 197,
-    ["Портняжное дело"] = 197,
-    ["裁缝"] = 197,
-
-    ["Engineering"] = 202,
-    ["Ingenieurskunst"] = 202,
-    ["Ingeniería"] = 202,
-    ["Ingénierie"] = 202,
-    ["Engenharia"] = 202,
-    ["Инженерное дело"] = 202,
-    ["工程学"] = 202,
-
-    ["Enchanting"] = 333,
-    ["Verzauberkunst"] = 333,
-    ["Encantamiento"] = 333,
-    ["Enchantement"] = 333,
-    ["Encantamento"] = 333,
-    ["Наложение чар"] = 333,
-    ["附魔"] = 333,
-
-    ["Fishing"] = 356,
-    ["Angeln"] = 356,
-    ["Pesca"] = 356,
-    ["Pêche"] = 356,
-    ["Pesca"] = 356,
-    ["Рыбная ловля"] = 356,
-    ["钓鱼"] = 356,
+-- alternate naming scheme (used by DB)
+alternativeProfessionNames = {
+    ["Enchanter"] = 333,
+    ["Tailor"] = 197,
+    ["Leatherworker"] = 165,
+    ["Engineer"] = 202,
+    ["Blacksmith"] = 164,
+    ["Herbalist"] = 182,
+    ["Fisherman"] = 356,
+    ["Fishmonger"] = 356,
+    ["Skinner"] = 393,
+    ["Alchemist"] = 171,
+    ["Miner"] = 186,
+    ["Cook"] = 185,
+    ["Chef"] = 185,
+    ["Butcher"] = 185,
+    ["Physician"] = 129,
+    ["Weapon Crafter"] = 164,
+    ["Leathercrafter"] = 165,
+    ["Armorsmith"] = 164,
+    ["Weaponsmith"] = 164,
+    ["Surgeon"] = 129,
+    ["Trauma Surgeon"] = 129,
 }

@@ -17,45 +17,169 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ]]--
 
-local PT = LibStub("LibPeriodicTable-3.1")
 local L = Skillet.L
 
+--
+-- Smelting and Mining are bipolar so
+-- give them names to remember
+--
+local SMELTING = 2656
+local MINING = 2575
+
+--
 -- a table of tradeskills by id
+--
 local TradeSkillList = {
 	2259,		-- alchemy
 	2018,		-- blacksmithing
 	4036,		-- engineering
 	2108,		-- leatherworking
-	2656,		-- smelting (from mining, 2575)
-	2575,		-- mining
+	SMELTING,	-- smelting
+	MINING,		-- mining
 	3908,		-- tailoring
 	2550,		-- cooking
 	3273,		-- first aid
-	45357,		-- inscription
-	25229,		-- jewelcrafting
-	53428,		-- runeforging
+	2842,		-- poisons
+--	45357,		-- inscription (not in Classic)
+--	25229,		-- jewelcrafting (not in Classic)
+--	53428,		-- runeforging (not in Classic)
 }
 
+--
+-- a table of crafts by id
+--
 local CraftList = {
-	7411,		-- enchanting
-	2842,		-- poisons
+--	5149,		-- beast training
+	7411,		-- enchanting (Blizzard has restricted DoCraft(index) to anything but their own UI)
+}
+
+--
+--  a table of locale specific translations by id
+-- needed to fix Blizzard inconsistent translations
+--
+-- [tradeID] = {locale, old, new}
+--   locale is what GetLocale() returns
+--   old is the return from GetSpellInfo(tradeID)
+--   new is the return from GetTradeSkillLine() when the tradeskill / craft is opened
+--
+local TranslateList = {
+	[4036] = {"frFR", "Ingénieur", "Ingénierie"},			-- engineering
+	[3273] = {"frFR", "Premiers soins", "Secourisme"},		-- first aid
+	[2108] = {"esES", "Peletería", "Marroquinería"},		-- leatherworking
+	[3908] = {"esES", "Sastrería", "Costura"},				-- tailoring
+	[2108] = {"koKR", "가죽세공", "가죽 세공"},					-- leatherworking
 }
 
 Skillet.AdditionalAbilities = {
-	[7411]	= {13262,"Disenchant"},		-- enchanting = disenchant
+	[7411]	= {13262,"Disenchant"},		-- enchanting = disenchant (will disappear because enchanting is disabled)
 	[2550]	= {818,"Basic_Campfire"},	-- cooking = basic campfire
 	[45357] = {51005,"Milling"},		-- inscription = milling
 	[25229] = {31252,"Prospecting"},	-- jewelcrafting = prospecting
 	[2018]	= {126462,"Thermal Anvil"},	 -- blacksmithing = thermal anvil (item:87216)
 	[4036]	= {126462,"Thermal Anvil"},	 -- engineering = thermal anvil (item:87216)
-	[2656]	= {126462,"Thermal Anvil"},	 -- smelting = thermal anvil (item:87216)
+	[SMELTING]	= {126462,"Thermal Anvil"},	 -- smelting = thermal anvil (item:87216)
 }
-Skillet.AutoButtonsList = {}
-Skillet.TradeSkillAutoTarget = {
+
 --
--- None of these "features" exist in Classic
+-- Checks to see if the current trade is one that we support.
 --
-}
+function Skillet:IsSupportedTradeskill(tradeID)
+	if IsShiftKeyDown() or UnitAffectingCombat("player") or not tradeID or tradeID == 5419 or tradeID == 53428 then
+		return false
+	end
+	return true
+end
+
+--
+-- Collects generic tradeskill and craft data (id to name and name to id)
+--
+-- self.tradeSkillList contains data from both.
+-- self.skillIsCraft contains boolean (tradeskill or craft)
+-- self.tradeSkillIDsByName contains name to id data
+-- self.tradeSkillNamesByID contains id to name data
+--
+function Skillet:CollectTradeSkillData()
+	DA.DEBUG(0,"CollectTradeSkillData()")
+	self.tradeSkillList = {}
+	self.skillIsCraft = {}
+	self.tradeSkillIDsByName = {}
+	self.tradeSkillNamesByID = {}
+	for i=1,#TradeSkillList,1 do
+		local id = TradeSkillList[i]
+		local name = GetSpellInfo(id)
+		DA.DEBUG(2,"id= "..tostring(id)..", name= "..tostring(name))
+		if name then
+			table.insert(self.tradeSkillList,id)
+			self.skillIsCraft[id] = false
+			self.tradeSkillIDsByName[name] = id
+			self.tradeSkillNamesByID[id] = name
+		end
+	end
+	if not TSM_API and self.db.profile.support_crafting then
+		for i=1,#CraftList,1 do
+			local id = CraftList[i]
+			local name = GetSpellInfo(id)
+			DA.DEBUG(2,"id= "..tostring(id)..", name= "..tostring(name))
+			if name then
+				table.insert(self.tradeSkillList,id)
+				self.skillIsCraft[id] = true
+				self.tradeSkillIDsByName[name] = id
+				self.tradeSkillNamesByID[id] = name
+			end
+		end
+	end
+	local locale = GetLocale()
+	for id,t in pairs(TranslateList) do
+		local loc = t[1]
+		local old = t[2]
+		local new = t[3]
+		DA.DEBUG(2,"id= "..tostring(id)..", loc= "..tostring(loc)..", old= "..tostring(old)..", new= "..tostring(new))
+		if loc == locale then
+			self.tradeSkillIDsByName[new] = id
+		end
+	end
+end
+
+--
+-- this routine collects the basic data (which tradeskills a player has)
+--
+function Skillet:ScanPlayerTradeSkills(player)
+	--DA.DEBUG(0,"ScanPlayerTradeSkills("..tostring(player)..")")
+	if player == self.currentPlayer then -- only for active player
+		if not self.db.realm.tradeSkills[player] then
+			self.db.realm.tradeSkills[player] = {}
+		end
+		local skillRanksData = self.db.realm.tradeSkills[player]
+		if self.tradeSkillList then
+			for i=1,#self.tradeSkillList,1 do
+				local id = self.tradeSkillList[i]
+				local name = GetSpellInfo(id)				-- always returns data
+				if name then
+					local tradeName = GetSpellInfo(name)	-- only returns data if you have this spell in your spellbook
+					if tradeName then
+						--DA.DEBUG(2,"Collecting tradeskill data for: "..tostring(name)..", id= "..tostring(id)..", isCraft= "..tostring(self.skillIsCraft[id]))
+						if not skillRanksData[id] then
+							skillRanksData[id] = {}
+							skillRanksData[id].name = name
+							skillRanksData[id].rank = 0
+							skillRanksData[id].maxRank = 0
+							skillRanksData[id].isCraft = self.skillIsCraft[id]
+						end
+					else
+						--DA.DEBUG(2,"Skipping tradeskill data for: "..tostring(name)..", id= "..tostring(id)..", isCraft= "..tostring(self.skillIsCraft[id]))
+						skillRanksData[id] = nil
+					end
+				end
+			end
+		end
+		if not self.db.realm.faction then
+			self.db.realm.faction = {}
+		end
+		self.db.realm.faction[player] = UnitFactionGroup("player")
+	else
+		DA.DEBUG(0,"Player "..tostring(player).." is not currentPlayer")
+	end
+end
 
 --
 -- Items in this list are ignored because they can cause infinite loops.
@@ -116,39 +240,18 @@ local TradeSkillIgnoredMats	 = {
 }
 Skillet.TradeSkillIgnoredMats = TradeSkillIgnoredMats
 
+--
+-- None of these "features" exist in Classic
+--
 Skillet.scrollData = {
 --[[
-	-- Scraped from WoWhead using the following javascript:
-	-- for (i=0; i<listviewitems.length; i++) console.log("["+listviewitems[i].sourcemore[0].ti+"] = "+listviewitems[i].id+", 
-	-- "+listviewitems[i].name.substr(1));
+-- Scraped from WoWhead using the following javascript:
+-- for (i=0; i<listviewitems.length; i++) console.log("["+listviewitems[i].sourcemore[0].ti+"] = "+listviewitems[i].id+", 
+-- "+listviewitems[i].name.substr(1));
 ]]--
 }
 
-local TradeSkillIDsByName = {}		-- filled in with ids and names for reverse matching (since the same name has multiple id's based on level)
-local DifficultyText = {
-	x = "unknown",
-	o = "optimal",
-	m = "medium",
-	e = "easy",
-	t = "trivial",
-	u = "unavailable",
-}
-local DifficultyChar = {
-	unknown = "x",
-	optimal = "o",
-	medium = "m",
-	easy = "e",
-	trivial = "t",
-	unavailable = "u", 
-}
-local skill_style_type = {
-	["unknown"]			= { r = 1.00, g = 0.00, b = 0.00, level = 5, alttext="???", cstring = "|cffff0000"},
-	["optimal"]			= { r = 1.00, g = 0.50, b = 0.25, level = 4, alttext="+++", cstring = "|cffff8040"},
-	["medium"]			= { r = 1.00, g = 1.00, b = 0.00, level = 3, alttext="++",	cstring = "|cffffff00"},
-	["easy"]			= { r = 0.25, g = 0.75, b = 0.25, level = 2, alttext="+",	cstring = "|cff40c000"},
-	["trivial"]			= { r = 0.60, g = 0.60, b = 0.60, level = 1, alttext="",	cstring = "|cff909090"},
-	["header"]			= { r = 1.00, g = 0.82, b = 0,	  level = 0, alttext="",	cstring = "|cffffc800"},
-	["unavailable"]		= { r = 0.3, g = 0.3, b = 0.3,	  level = 6, alttext="",	cstring = "|cff606060"},
+Skillet.TradeSkillAutoTarget = {
 }
 
 local lastAutoTarget = {}
@@ -181,8 +284,39 @@ function Skillet:GetAutoTargetMacro(additionalSpellId)
 		return "/cast "..(GetSpellInfo(additionalSpellId) or "")
 	end
 end
+--
+--  end of "features" not in Classic
+--
 
+local DifficultyText = {
+	x = "unknown",
+	o = "optimal",
+	m = "medium",
+	e = "easy",
+	t = "trivial",
+	u = "unavailable",
+}
+local DifficultyChar = {
+	unknown = "x",
+	optimal = "o",
+	medium = "m",
+	easy = "e",
+	trivial = "t",
+	unavailable = "u", 
+}
+local skill_style_type = {
+	["unknown"]			= { r = 1.00, g = 0.00, b = 0.00, level = 5, alttext="???", cstring = "|cffff0000"},
+	["optimal"]			= { r = 1.00, g = 0.50, b = 0.25, level = 4, alttext="+++", cstring = "|cffff8040"},
+	["medium"]			= { r = 1.00, g = 1.00, b = 0.00, level = 3, alttext="++",	cstring = "|cffffff00"},
+	["easy"]			= { r = 0.25, g = 0.75, b = 0.25, level = 2, alttext="+",	cstring = "|cff40c000"},
+	["trivial"]			= { r = 0.60, g = 0.60, b = 0.60, level = 1, alttext="",	cstring = "|cff909090"},
+	["header"]			= { r = 1.00, g = 0.82, b = 0,	  level = 0, alttext="",	cstring = "|cffffc800"},
+	["unavailable"]		= { r = 0.3, g = 0.3, b = 0.3,	  level = 6, alttext="",	cstring = "|cff606060"},
+}
+
+--
 -- adds an recipe source for an itemID (recipeID produces itemID)
+--
 function Skillet:ItemDataAddRecipeSource(itemID,recipeID)
 	if not itemID or not recipeID then return end
 	if not self.db.global.itemRecipeSource then
@@ -194,7 +328,9 @@ function Skillet:ItemDataAddRecipeSource(itemID,recipeID)
 	self.db.global.itemRecipeSource[itemID][recipeID] = true
 end
 
+--
 -- adds a recipe usage for an itemID (recipeID uses itemID as a reagent)
+--
 function Skillet:ItemDataAddUsedInRecipe(itemID,recipeID)
 	if not itemID or not recipeID then return end
 	if not self.db.global.itemRecipeUsedIn then
@@ -206,7 +342,9 @@ function Skillet:ItemDataAddUsedInRecipe(itemID,recipeID)
 	self.db.global.itemRecipeUsedIn[itemID][recipeID] = true
 end
 
+--
 -- goes thru the stored recipe list and collects reagent and item information as well as skill lookups
+--
 function Skillet:CollectRecipeInformation()
 	for recipeID, recipeString in pairs(self.db.global.recipeDB) do
 		local tradeID, itemString, reagentString, toolString = string.split(" ",recipeString)
@@ -242,13 +380,14 @@ function Skillet:CollectRecipeInformation()
 		self.data.skillIndexLookup[player] = {}
 		for trade,skillList in pairs(tradeList) do
 			for i=1,#skillList do
---				local skillData = self:GetSkill(player, trade, i)
 				local skillString = self.db.realm.skillDB[player][trade][i]
 				if skillString then
-					local skillData = string.split(" ",skillString)
-					if skillData ~= "header" or skillData ~= "subheader" then
-						local recipeID = string.sub(skillData,2)
-						recipeID = tonumber(recipeID) or 0
+				--DA.DEBUG(0,"skillString= '"..skillString.."'")
+				local skillData = { string.split("@", skillString) }
+				--DA.DEBUG(0,"skillData= "..DA.DUMP1(skillData))
+					local skillHeader = { string.split(" ", skillData[1]) }
+					if skillHeader[1] ~= "header" or skillHeader[1] ~= "subheader" then
+						local recipeID = string.sub(skillData[1],2)
 						self.data.skillIndexLookup[player][recipeID] = i
 					end
 				end
@@ -257,25 +396,10 @@ function Skillet:CollectRecipeInformation()
 	end
 end
 
--- Checks to see if the current trade is one that we support.
-function Skillet:IsSupportedTradeskill(tradeID)
-	if IsShiftKeyDown() or not tradeID or tradeID == 5419 or tradeID == 53428 then
-		return false
-	end
-	return true
-end
-
-local missingVendorItems = {
-	[30817] = true,				-- simple flour
-	[4539] = true,				-- Goldenbark Apple
-	[17035] = true,				-- Stranglethorn seed
-	[17034] = true,				-- Maple seed
-	[52188] = true,				-- Jeweler's Setting
-	[4399]	= true,				-- Wooden Stock
-	[38682] = true,				-- Enchanting Vellum
-	[3857]	= true,				-- Coal
-}
-
+--[[
+--
+-- Inscription 
+--
 local topink = 113111				-- Warbinder's Ink
 local specialVendorItems = {
 	[37101] = {1, topink},			--Ivory Ink
@@ -294,41 +418,17 @@ local specialVendorItems = {
 	[61981] = {10, topink},			--Inferno Ink
 	[79255] = {10, topink},			--Starlight Ink
 }
+]]--
+--
+-- No special items in Classic (yet)
+--
+local specialVendorItems = {
+}
+Skillet.SpecialVendorItems = specialVendorItems
 
-function Skillet:VendorItemAvailable(itemID)
-	if specialVendorItems[itemID] then
-		local divider = specialVendorItems[itemID][1]
-		local currency = specialVendorItems[itemID][2]
-		local reagentAvailability = self:GetInventory(self.currentPlayer, currency)
-		local reagentAvailableAlts = 0
-		for alt in pairs(self.db.realm.inventoryData) do
-			if alt ~= self.currentPlayer then
-				local altBoth = self:GetInventory(alt, currency)
-				reagentAvailableAlts = reagentAvailableAlts + (altBoth or 0)
-			end
-		end
-		return math.floor(reagentAvailability / divider), math.floor(reagentAvailableAlts / divider)
-	else
-		return 100000, 100000
-	end
-end
-
--- queries for vendor info for a particular itemID
-function Skillet:VendorSellsReagent(itemID)
--- Check our local data first
-	if missingVendorItems[itemID] or specialVendorItems[itemID] then
-		return true
-	end
--- Check the LibPeriodicTable data next
-	if PT then
-		if itemID ~= 0 and PT:ItemInSet(itemID,"Tradeskill.Mat.BySource.Vendor") then
-			return true
-		end
-	end
-	return false
-end
-
+--
 -- resets the blizzard tradeskill search filters just to make sure no other addon has monkeyed with them
+--
 function Skillet:ExpandTradeSkillSubClass(i)
 	--DA.DEBUG(0,"ExpandTradeSkillSubClass "..tostring(i))
 end
@@ -352,14 +452,14 @@ function Skillet:GetRecipe(id)
 		end
 		if Skillet.db.global.recipeDB[id] then
 			local recipeString = Skillet.db.global.recipeDB[id]
-			DA.DEBUG(3,"recipeString= "..tostring(recipeString))
+			--DA.DEBUG(3,"recipeString= "..tostring(recipeString))
 			local tradeID, itemString, reagentString, toolString = string.split(" ",recipeString)
 			local itemID, numMade = 0, 1
 			local slot = nil
 			if itemString then
 				if itemString ~= "0" then
 					local a, b = string.split(":",itemString)
-					DA.DEBUG(3,"itemString a= "..tostring(a)..", b= "..tostring(b))
+					--DA.DEBUG(3,"itemString a= "..tostring(a)..", b= "..tostring(b))
 					if a ~= "0" then
 						itemID, numMade = a,b
 					else
@@ -387,8 +487,10 @@ function Skillet:GetRecipe(id)
 					local reagentList = { string.split(":",reagentString) }
 					local numReagents = #reagentList / 2
 					for i=1,numReagents do
+						local itemID = tonumber(reagentList[1 + (i-1)*2])
 						Skillet.data.recipeList[id].reagentData[i] = {}
-						Skillet.data.recipeList[id].reagentData[i].id = tonumber(reagentList[1 + (i-1)*2])
+						Skillet.data.recipeList[id].reagentData[i].id = itemID
+						Skillet.data.recipeList[id].reagentData[i].name = GetItemInfo(itemID)
 						Skillet.data.recipeList[id].reagentData[i].numNeeded = tonumber(reagentList[2 + (i-1)*2])
 					end
 				end
@@ -413,24 +515,46 @@ function Skillet:GetRecipe(id)
 end
 
 function Skillet:GetNumSkills(player, trade)
-	DA.DEBUG(0,"GetNumSkills("..tostring(player)..", "..tostring(trade)..")")
+	--DA.DEBUG(3,"GetNumSkills("..tostring(player)..", "..tostring(trade).."), tradeName= "..tostring(self.tradeSkillNamesByID[trade]))
 	local r
-	if not Skillet.db.realm.skillDB[player] then
-		r = 0
-	elseif not Skillet.db.realm.skillDB[player][trade] then
-		r = 0
+	if player == self.currentPlayer and trade == self.currentTrade then
+		if Skillet.isCraft then
+			r = GetNumCrafts()
+		else
+			r = GetNumTradeSkills()
+		end
 	else
-		r = #Skillet.db.realm.skillDB[player][trade]
+		if not Skillet.db.realm.skillDB[player] then
+			r = 0
+		elseif not Skillet.db.realm.skillDB[player][trade] then
+			r = 0
+		else
+			r = #Skillet.db.realm.skillDB[player][trade]
+		end
 	end
-	DA.DEBUG(2,"r= "..tostring(r))
+	--DA.DEBUG(3,"GetNumSkills= "..tostring(r))
 	return r
 end
 
 function Skillet:GetSkillRanks(player, trade)
-	--DA.DEBUG(0,"GetSkillRanks("..tostring(player)..", "..tostring(trade)..")")
+	--DA.DEBUG(3,"GetSkillRanks("..tostring(player)..", "..tostring(trade)..")")
+	local name, rank, maxRank
 	if player and trade then
-		if Skillet.db.realm.tradeSkills[player] then
-			return Skillet.db.realm.tradeSkills[player][trade]
+		if player == self.currentPlayer and trade == self.currentTrade then
+			if self.isCraft then
+				name, rank, maxRank = GetCraftDisplaySkillLine()
+			else
+				name, rank, maxRank = GetTradeSkillLine()
+			end
+			if self.db.realm.tradeSkills[player] and self.db.realm.tradeSkills[player][trade] then
+				if rank ~= 0 and maxRank ~= 0 then
+					self.db.realm.tradeSkills[player][trade].rank = rank
+					self.db.realm.tradeSkills[player][trade].maxRank = maxRank
+				end
+			end
+		end
+		if self.db.realm.tradeSkills[player] then
+			return self.db.realm.tradeSkills[player][trade]
 		end
 	end
 end
@@ -449,23 +573,26 @@ function Skillet:GetSkill(player,trade,index)
 			local skillString = Skillet.db.realm.skillDB[player][trade][index]
 			if skillString then
 				local skill = {}
-				local data = { string.split(" ",skillString) }
-				if data[1] == "header" or data[1] == "subheader" then
+				--DA.DEBUG(0,"skillString= '"..skillString.."'")
+				local skillData = { string.split("@", skillString) }
+				--DA.DEBUG(0,"skillData= "..DA.DUMP1(skillData))
+				local skillHeader = { string.split(" ", skillData[1]) }
+				if skillHeader[1] == "header" or skillHeader[1] == "subheader" then
 					skill.id = 0
+					skill.index = index
 				else
-					local difficulty = string.sub(data[1],1,1)
-					local recipeID = string.sub(data[1],2)
-					skill.id = tonumber(recipeID)
+					local difficulty = string.sub(skillData[1],1,1)
+					local recipeID = string.sub(skillData[1],2)
+					skill.id = recipeID
+					skill.index = index
 					skill.difficulty = DifficultyText[difficulty]
 					skill.color = skill_style_type[DifficultyText[difficulty]]
 					skill.tools = nil
-					recipeID = tonumber(recipeID)
-					for i=2,#data do
-						local subData = { string.split("=",data[i]) }
+					for i=2,#skillData do
+						local subData = { string.split("=",skillData[i]) }
 						if subData[1] == "cd" then
 							skill.cooldown = tonumber(subData[2])
 						elseif subData[1] == "t" then
-							local recipe = Skillet:GetRecipe(recipeID)
 							skill.tools = {}
 							for j=1,string.len(subData[2]) do
 								local missingTool = tonumber(string.sub(subData[2],j,j))
@@ -477,103 +604,18 @@ function Skillet:GetSkill(player,trade,index)
 				Skillet.data.skillList[player][trade][index] = skill
 			end
 		end
+		--DA.DEBUG(0,"GetSkill= "..DA.DUMP1(Skillet.data.skillList[player][trade][index]))
 		return Skillet.data.skillList[player][trade][index]
 	end
+	--DA.DEBUG(0,"GetSkill= "..DA.DUMP1(self.unknownRecipe))
 	return self.unknownRecipe
 end
 
 --
--- Collects generic tradeskill and craft data (id to name and name to id)
---
--- self.tradeSkillList contains data from both.
--- self.skillIsCraft contains boolean (tradeskill or craft)
---
-function Skillet:CollectTradeSkillData()
-	--DA.DEBUG(0,"CollectTradeSkillData()")
-	self.tradeSkillList = {}
-	self.skillIsCraft = {}
-	for i=1,#TradeSkillList,1 do
-		local id = TradeSkillList[i]
-		local name = GetSpellInfo(id)
-		--DA.DEBUG(1,"id= "..tostring(id)..", name= "..tostring(name))
-		if name then
-			table.insert(self.tradeSkillList,id)
-			self.skillIsCraft[id] = false
-			TradeSkillIDsByName[name] = id
-		end
-	end
-	for i=1,#CraftList,1 do
-		local id = CraftList[i]
-		local name = GetSpellInfo(id)
-		--DA.DEBUG(1,"id= "..tostring(id)..", name= "..tostring(name))
-		if name then
-			table.insert(self.tradeSkillList,id)
-			self.skillIsCraft[id] = true
-			TradeSkillIDsByName[name] = id
-		end
-	end
-	self.tradeSkillIDsByName = TradeSkillIDsByName
-end
-
--- this routine collects the basic data (which tradeskills a player has)
-function Skillet:ScanPlayerTradeSkills(player)
-	DA.DEBUG(0,"ScanPlayerTradeSkills("..tostring(player)..")")
-	if player == (UnitName("player")) then -- only for active player
-		if not Skillet.db.realm.tradeSkills[player] then
-			Skillet.db.realm.tradeSkills[player] = {}
-		end
-		local skillRanksData = Skillet.db.realm.tradeSkills[player]
---
--- Instead of two loops, TradeSkillList and CraftList
--- we should be able to use self.tradeSkillList instead
---
-		for i=1,#TradeSkillList,1 do
-			local id = TradeSkillList[i]
-			local name = GetSpellInfo(id)				-- always returns data
-			if name then
-				local tradeName = GetSpellInfo(name)	-- only returns data if you have this spell in your spellbook
-				if tradeName then
-					DA.DEBUG(0,"Collecting tradeskill data for: "..tostring(name))
-					if not skillRanksData[id] then
-						skillRanksData[id] = {}
-						skillRanksData[id].rank = 0
-						skillRanksData[id].maxRank = 0
-						skillRanksData[id].isCraft = false
-					end
-				else
-					DA.DEBUG(0,"Skipping tradeskill data for: "..tostring(name))
-					skillRanksData[id] = nil
-				end
-			end
-		end
-		for i=1,#CraftList,1 do
-			local id = CraftList[i]
-			local name = GetSpellInfo(id)				-- always returns data
-			if name then
-				local tradeName = GetSpellInfo(name)	-- only returns data if you have this spell in your spellbook
-				if tradeName then
-					DA.DEBUG(0,"Collecting craft data for: "..tostring(name))
-					if not skillRanksData[id] then
-						skillRanksData[id] = {}
-						skillRanksData[id].rank = 0
-						skillRanksData[id].maxRank = 0
-						skillRanksData[id].isCraft = true
-					end
-				else
-					DA.DEBUG(0,"Skipping craft data for: "..tostring(name))
-					skillRanksData[id] = nil
-				end
-			end
-		end
-		if not Skillet.db.realm.faction then
-			Skillet.db.realm.faction = {}
-		end
-		Skillet.db.realm.faction[player] = UnitFactionGroup("player")
-	end
-end
-
 -- takes a profession and a skill index and returns the recipe
+--
 function Skillet:GetRecipeDataByTradeIndex(tradeID, index)
+	--DA.DEBUG(2,"GetRecipeDataByTradeIndex("..tostring(tradeID)..", "..tostring(index)..")")
 	if not tradeID or not index then
 		return self.unknownRecipe
 	end
@@ -582,6 +624,7 @@ function Skillet:GetRecipeDataByTradeIndex(tradeID, index)
 		local recipeID = skill.id
 		if recipeID then
 			local recipeData = self:GetRecipe(recipeID)
+			--DA.DEBUG(2,"GetRecipeDataByTradeIndex= "..DA.DUMP1(recipeData))
 			return recipeData, recipeData.spellID, recipeData.ItemID
 		end
 	end
@@ -589,7 +632,7 @@ function Skillet:GetRecipeDataByTradeIndex(tradeID, index)
 end
 
 function Skillet:CalculateCraftableCounts()
-	DA.DEBUG(0,"CalculateCraftableCounts()")
+	--DA.DEBUG(0,"CalculateCraftableCounts()")
 	local player = self.currentPlayer
 	self.visited = {}
 	local n = self:GetNumSkills(player, self.currentTrade)
@@ -602,7 +645,7 @@ function Skillet:CalculateCraftableCounts()
 			end
 		end
 	end
-	DA.DEBUG(0,"CalculateCraftableCounts Complete")
+	--DA.DEBUG(0,"CalculateCraftableCounts Complete")
 end
 
 --
@@ -610,45 +653,62 @@ end
 -- is defined after this one
 --
 local function ScanTrade()
-	local profession, rank, maxRank = GetTradeSkillLine()
+	--DA.DEBUG(2,"ScanTrade()")
+	local profession, rank, maxRank
+	if Skillet.isCraft then
+		profession, rank, maxRank = GetCraftDisplaySkillLine()
+	else
+		profession, rank, maxRank = GetTradeSkillLine()
+	end
+	--DA.DEBUG(2,"ScanTrade: profession= "..tostring(profession)..", rank= "..tostring(rank)..", maxRank= "..tostring(maxRank))
 	if profession == "UNKNOWN" then
-		local profession, rank, maxRank = GetCraftDisplaySkillLine()
+		return false
 	end
-	DA.DEBUG(2,"profession= "..tostring(profession)..", rank= "..tostring(rank)..", maxRank= "..tostring(maxRank))
 	local tradeID = Skillet.tradeSkillIDsByName[profession]
+	if not tradeID then
+		return false
+	end
+	Skillet.currentTrade = tradeID
 	local player = Skillet.currentPlayer
-	local numSkills = GetNumTradeSkills()
-	local numCrafts = GetNumCrafts()
-	DA.DEBUG(2,"numSkills= "..tostring(numSkills)..", numCrafts= "..tostring(numCrafts))
 --
--- First, loop through all the recipes and make sure they are expanded
+-- First, loop through all the recipe groups and make sure they are expanded
 --
-	for i = 1, numSkills do
-		local skillName, skillType, numAvailable, isExpanded = GetTradeSkillInfo(i)
-		DA.DEBUG(2,"i= "..tostring(i)..", skillName= "..tostring(skillName)..", skillType="..tostring(skillType)..", isExpanded= "..tostring(isExpanded))
-		if skillType == "header" or skillType == "subheader" then
-			if not isExpanded then
-				ExpandTradeSkillSubClass(i)
+	local numSkills, numCrafts
+	if Skillet.isCraft then
+		numCrafts = GetNumCrafts()
+	else
+		numSkills = GetNumTradeSkills()
+	end
+	if numSkills then
+		for i = 1, numSkills do
+			local skillName, skillType, numAvailable, isExpanded = GetTradeSkillInfo(i)
+			--DA.DEBUG(2,"ScanTrade: i= "..tostring(i)..", skillName= "..tostring(skillName)..", skillType="..tostring(skillType)..", isExpanded= "..tostring(isExpanded))
+			if skillType == "header" or skillType == "subheader" then
+				if not isExpanded then
+					ExpandTradeSkillSubClass(i)
+				end
 			end
 		end
 	end
-	for i = 1, numCrafts do
-		local skillName, skillType, numAvailable, isExpanded = GetCraftInfo(i)
-		DA.DEBUG(2,"i= "..tostring(i)..", skillName= "..tostring(skillName)..", skillType="..tostring(skillType)..", isExpanded= "..tostring(isExpanded))
-		if skillType == "header" or skillType == "subheader" then
-			if not isExpanded then
-				ExpandCraftSubClass(i)
+	if numCrafts then
+		for i = 1, numCrafts do
+			local skillName, skillType, numAvailable, isExpanded = GetCraftInfo(i)
+			--DA.DEBUG(2,"ScanTrade: i= "..tostring(i)..", skillName= "..tostring(skillName)..", skillType="..tostring(skillType)..", isExpanded= "..tostring(isExpanded))
+			if skillType == "header" or skillType == "subheader" then
+				if not isExpanded then
+					ExpandCraftSubClass(i)
+				end
 			end
 		end
+--
+-- From here on, just one loop variable needed
+--
+	numSkills = numCrafts
 	end
-	numSkills = GetNumTradeSkills()
-	DA.DEBUG(0,"Scanning Trade "..tostring(profession)..": "..tostring(tradeID).." "..numSkills.." recipes")
-	if not Skillet.data.skillIndexLookup[player] then
-		Skillet.data.skillIndexLookup[player] = {}
-	end
+	DA.DEBUG(0,"ScanTrade: "..tostring(profession)..": "..tostring(tradeID).." "..numSkills.." recipes")
 	local skillDB = Skillet.db.realm.skillDB[player][tradeID]
-	local skillData = Skillet.data.skillList[player][tradeID]
 	local recipeDB = Skillet.db.global.recipeDB
+	local skillData = Skillet.data.skillList[player][tradeID]
 	if not skillData then
 		return false
 	end
@@ -659,36 +719,73 @@ local function ScanTrade()
 	mainGroup.locked = true
 	mainGroup.autoGroup = true
 	Skillet:RecipeGroupClearEntries(mainGroup)
-	local groupList = {}
-	if not Skillet.db.realm.tradeSkills[player] then
-		Skillet.db.realm.tradeSkills[player] = {}
-	end
-	if not Skillet.db.realm.tradeSkills[player][tradeID] then
-		Skillet.db.realm.tradeSkills[player][tradeID] = {}
-	end
-	local skillName, rank, maxRank = GetTradeSkillLine()
---	Skillet.db.realm.tradeSkills[player][tradeID].link = link
+	Skillet.groupList = {}
+	Skillet.db.realm.tradeSkills[player][tradeID].name = profession
 	Skillet.db.realm.tradeSkills[player][tradeID].rank = rank
 	Skillet.db.realm.tradeSkills[player][tradeID].maxRank = maxRank
+	Skillet.db.realm.tradeSkills[player][tradeID].isCraft = Skillet.isCraft
+--
+-- Mining and Smelting have a bipolar relationship 
+--
+	if tradeID == MINING then
+		if not Skillet.db.realm.tradeSkills[player][SMELTING] then
+			Skillet.db.realm.tradeSkills[player][SMELTING] = {}
+		end
+		Skillet.db.realm.tradeSkills[player][SMELTING].name = "Smelting ("..profession..")"
+		Skillet.db.realm.tradeSkills[player][SMELTING].rank = rank
+		Skillet.db.realm.tradeSkills[player][SMELTING].maxRank = maxRank
+		Skillet.db.realm.tradeSkills[player][SMELTING].isCraft = Skillet.isCraft
+	end
 	local numHeaders = 0
 	local parentGroup
-	for i = 1, numSkills, 1 do
-		local skillName, skillType, isExpanded, subSpell, extra
-		local skillName, skillType, numAvailable, isExpanded = GetTradeSkillInfo(i);
-		DA.DEBUG(0,i.." "..skillName)
-		DA.DEBUG(3,"i= "..tostring(i)..", skillName= "..tostring(skillName)..", skillType="..tostring(skillType)..", isExpanded= "..tostring(isExpanded))
+--
+-- data needed for filtering
+--
+	local numSubClass = {}
+	local numInvSlot = {}
+--
+-- Now actually process each recipe (skill)
+--
+	local s = 1
+--	if Skillet.isCraft then
+--		s = 0
+--	end
+	local skillNameSeen = {}
+	for i = s, numSkills, 1 do
+		local skillName, craftSubSpellName, skillType, numAvailable, isExpanded, subSpell, extra
+		if Skillet.isCraft then
+--
+-- If needed (by uncommenting three lines above), 
+-- Skillet-Classic can insert a fake header for Crafts
+--
+			if i == 0 then
+				skillName = "Enchanting"
+				skillType = "header"
+				isExpanded = true
+			else
+--
+-- GetCraftInfo() returns are: craftName, craftSubSpellName, craftType, numAvailable, isExpanded, trainingPointCost, requiredLevel
+--
+				skillName, craftSubSpellName, skillType, numAvailable, isExpanded = GetCraftInfo(i)
+			end
+		else
+			skillName, skillType, numAvailable, isExpanded = GetTradeSkillInfo(i)
+		end
+		--DA.DEBUG(0,"ScanTrade: i= "..tostring(i)..", skillName= "..tostring(skillName)..", craftSubSpellName= "..tostring(craftSubSpellName)..", skillType="..tostring(skillType)..", isExpanded= "..tostring(isExpanded))
 		if skillName then
 			if skillType == "header" or skillType == "subheader" then
+--
+-- for headers (and subheaders) define groups and
+-- add a header entry in the skillDB (SavedVariables)
+--
 				numHeaders = numHeaders + 1
-				if not isExpanded then
-					ExpandTradeSkillSubClass(i)
-				end
+				lastHeader = skillName
 				local groupName
-				if groupList[skillName] then
-					groupList[skillName] = groupList[skillName]+1
-					groupName = skillName.." "..groupList[skillName]
+				if Skillet.groupList[skillName] then
+					Skillet.groupList[skillName] = Skillet.groupList[skillName] + 1
+					groupName = skillName.." "..Skillet.groupList[skillName]
 				else
-					groupList[skillName] = 1
+					Skillet.groupList[skillName] = 1
 					groupName = skillName
 				end
 				skillDB[i] = "header "..skillName
@@ -702,32 +799,70 @@ local function ScanTrade()
 					Skillet:RecipeGroupAddSubGroup(parentGroup, currentGroup, i)
 				end
 			else
-				local recipeID = skillName
+--
+-- In Classic, recipes do not have a numerical ID so use the name as the id and 
+-- break everything that assumes it is a number and assumes it is unique
+--
+				local recipeID
+				recipeID = skillName
+				if skillNameSeen[recipeID] then
+					DA.DEBUG(0,"ScanTrade: i= "..tostring(i)..", skillName= "..tostring(skillName)..", craftSubSpellName= "..tostring(craftSubSpellName).." is not unique")
+--
+-- Make an attempt to create a unique recipeID
+--
+					if craftSubSpellName and craftSubSpellName ~= "" then
+						recipeID = recipeID..craftSubSpellName
+					else
+						recipeID = recipeID.."("..tostring(i)..")"
+					end
+					DA.DEBUG(0,"ScanTrade: using '"..tostring(recipeID).."' instead")
+				end
+				skillNameSeen[recipeID] = true
 				if currentGroup then
 					Skillet:RecipeGroupAddRecipe(currentGroup, recipeID, i)
 				else
 					Skillet:RecipeGroupAddRecipe(mainGroup, recipeID, i)
 				end
-				-- break recipes into lists by profession for ease of sorting
+--
+-- break recipes into lists and tables by profession for ease of sorting
+--
+-- SavedVariables:
+--   skillDB(skillDBstring) fields are separated by "|"
+--   recipeDB (recipeString) list by recipeID of fields separated by " ",
+--     (tools have spaces replaced by "_")
+--   ItemDataAddUsedInRecipe(reagentID, recipeID)  -- add a cross reference for where a particular item is used
+--   ItemDataAddRecipeSource(itemID,recipeID)      -- add a cross reference for the source of particular items
+--
+-- Temporary (data):
+--   skillData is a table
+--   skillIndexLookup contains the (player specific) spellIndex of the recipe
+--   recipeList is a list of "recipe" tables
+--
 				skillData[i] = {}
 				skillData[i].name = skillName
 				skillData[i].id = recipeID
-				skillData[i].noRecipe = noRecipe
 				skillData[i].difficulty = skillType
 				skillData[i].color = skill_style_type[skillType]
 				skillData[i].category = lastHeader
 				local skillDBString = DifficultyChar[skillType]..recipeID
-				local tools = { GetTradeSkillTools(i) }
+				local tools
+				if Skillet.isCraft then
+					tools = { GetCraftSpellFocus(i) }
+				else
+					tools = { GetTradeSkillTools(i) }
+				end
 				skillData[i].tools = {}
 				local slot = 1
 				for t=2,#tools,2 do
 					skillData[i].tools[slot] = (tools[t] or 0)
 					slot = slot + 1
 				end
-				local cd = GetTradeSkillCooldown(i)
-				if cd then
-					skillData[i].cooldown = cd + time()		-- this is when your cooldown will be up
-					skillDBString = skillDBString.." cd=" .. cd + time()
+				if not Skillet.isCraft then
+					local cd = GetTradeSkillCooldown(i)
+					if cd then
+						skillData[i].cooldown = cd + time()		-- this is when your cooldown will be up
+						skillDBString = skillDBString.."@cd="..cd + time()
+					end
 				end
 				local numTools = #tools+1
 				if numTools > 1 then
@@ -741,8 +876,8 @@ local function ScanTrade()
 						end
 						slot = slot + 1
 					end
-					if toolsAbsent then										-- only point out missing tools
-						skillDBString = skillDBString.." t="..toolString
+					if toolsAbsent then									-- only point out missing tools
+						skillDBString = skillDBString.."@t="..toolString
 					end
 				end
 				skillDB[i] = skillDBString
@@ -762,14 +897,33 @@ local function ScanTrade()
 						toolString = toolString..":"..string.gsub(tools[t]," ", "_")
 					end
 				end
-				local itemLink = GetTradeSkillItemLink(i)
+				local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType
+				local itemStackCount, itemEquipLoc, itemIcon, itemSellPrice, itemClassID, itemSubClassID
+				local bindType, expacID, itemSetID, isCraftingReagent
+				local itemString = "0"
+				if Skillet.isCraft then
+					itemLink = GetCraftItemLink(i)
+				else
+					itemLink = GetTradeSkillItemLink(i)
+				end
 				if not itemLink then
+					DA.DEBUG(0,"ScanTrade: break caused by no itemLink")
 					break
 				end
-				local itemString = "0"
-				if GetItemInfo(itemLink) then
-					local itemID = Skillet:GetItemIDFromLink(itemLink)
-					local minMade,maxMade = GetTradeSkillNumMade(i)
+				if not Skillet.isCraft then
+					itemName, _, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType,
+					  itemStackCount, itemEquipLoc, itemIcon, itemSellPrice, itemClassID, itemSubClassID,
+					  bindType, expacID, itemSetID, isCraftingReagent = GetItemInfo(itemLink)
+				else
+					itemName = "e"..tostring(Skillet:GetItemIDFromLink(itemLink))
+				end
+				if itemName then
+					local itemID, linkType = Skillet:GetItemIDFromLink(itemLink)
+					--DA.DEBUG(0,"ScanTrade: itemID= "..tostring(itemID)..", linkType= "..tostring(linkType))
+					local minMade,maxMade = 1, 1
+					if not Skillet.isCraft then
+						minMade,maxMade = GetTradeSkillNumMade(i)
+					end
 					recipe.itemID = itemID
 					recipe.numMade = (minMade + maxMade)/2
 					if recipe.numMade > 1 then
@@ -778,6 +932,31 @@ local function ScanTrade()
 						itemString = itemID
 					end
 					Skillet:ItemDataAddRecipeSource(itemID,recipeID) -- add a cross reference for the source of particular items
+--
+-- Our own filter data: subClass, invSlot
+--
+					if itemSubType then
+						if not Skillet.db.realm.subClass[player][tradeID].name then
+							Skillet.db.realm.subClass[player][tradeID].name = {}
+							Skillet.db.realm.subClass[player][tradeID].selected = "None"
+						end
+						numSubClass[itemSubType] = (numSubClass[itemSubType] or 0) + 1
+						Skillet.db.realm.subClass[player][tradeID].name[itemSubType] = numSubClass[itemSubType]
+						Skillet.db.realm.subClass[player][tradeID][itemID] = itemSubType
+					end
+					if itemEquipLoc then
+						if not Skillet.db.realm.invSlot[player][tradeID].name then
+							Skillet.db.realm.invSlot[player][tradeID].name = {}
+							Skillet.db.realm.invSlot[player][tradeID].selected = "None"
+						end
+						numInvSlot[itemEquipLoc] = (numInvSlot[itemEquipLoc] or 0) + 1
+						Skillet.db.realm.invSlot[player][tradeID].name[itemEquipLoc] = numInvSlot[itemEquipLoc]
+						Skillet.db.realm.invSlot[player][tradeID][itemID] = itemEquipLoc
+					end
+--[[
+--
+-- Not implemented in Classic
+--
 				else
 					recipe.numMade = 1
 					if Skillet.scrollData[recipeID] then
@@ -788,14 +967,34 @@ local function ScanTrade()
 					else
 						recipe.itemID = 0									-- indicates an enchant
 					end
+]]--
 				end
 				local reagentString = "-"
 				local reagentData = {}
-				for j=1, GetTradeSkillNumReagents(i), 1 do
-					local reagentName, _, numNeeded = GetTradeSkillReagentInfo(i,j)
+				local numReagents
+				if Skillet.isCraft then
+					numReagents = GetCraftNumReagents(i)
+				else
+					numReagents = GetTradeSkillNumReagents(i)
+				end
+				--DA.DEBUG(2,"ScanTrade: i= "..tostring(i)..", numReagents= "..tostring(numReagents))
+				for j=1, numReagents, 1 do
+					local reagentName, _, numNeeded
+					if Skillet.isCraft then
+						reagentName, _, numNeeded = GetCraftReagentInfo(i,j)	-- reagentName, reagentTexture, reagentCount, playerReagentCount
+					else
+						reagentName, _, numNeeded = GetTradeSkillReagentInfo(i,j)
+					end
+					--DA.DEBUG(2,"ScanTrade: i= "..tostring(i)..", j= "..tostring(j)..", reagentName= "..tostring(reagentName)..", numNeeded= "..tostring(numNeeded))
 					local reagentID = 0
 					if reagentName then
-						local reagentLink = GetTradeSkillReagentItemLink(i,j)
+						local reagentLink
+						if Skillet.isCraft then
+							reagentLink = GetCraftReagentItemLink(i,j)
+						else
+							reagentLink = GetTradeSkillReagentItemLink(i,j)
+						end
+						--DA.DEBUG(2,"ScanTrade: reagentLink= "..DA.PLINK(reagentLink))
 						reagentID = Skillet:GetItemIDFromLink(reagentLink)
 					else
 						gotNil = true
@@ -816,21 +1015,38 @@ local function ScanTrade()
 				if #tools then
 					recipeString = recipeString.." "..toolString
 				end
-				recipeDB[recipeID] = recipeString
+				if not recipeDB[recipeID] then
+					recipeDB[recipeID] = recipeString
+				elseif recipeDB[recipeID] ~= recipeString then
+					DA.DEBUG(0,"ScanTrade: replacing '"..tostring(recipeDB[recipeID]).."' with '"..tostring(recipeString).."'")
+					recipeDB[recipeID] = recipeString
+				end
 			end
 		end
 	end
-
+--
+-- SkilletMemory is a saved variable snapshot of data tables
+--
 	if DA.deepcopy then
 		SkilletMemory.groupList1 = {}
 		SkilletMemory.groupList1 = DA.deepcopy(Skillet.data.groupList)
 	end
-
+--
+-- all the lists have been built so
+-- use them to collect information based
+-- on the player's inventory
+--
 	Skillet:InventoryScan()
 	Skillet:CalculateCraftableCounts()
 	Skillet:SortAndFilterRecipes()
-	DA.DEBUG(0,"ScanTrade Complete, numSkills= "..tostring(numSkills)..", numHeaders= "..tostring(numHeaders))
-	if numHeaders == 0 then
+	--DA.DEBUG(2,"ScanTrade Complete, numSkills= "..tostring(numSkills)..", numHeaders= "..tostring(numHeaders))
+--
+-- return a boolean:
+--   true means we got good data for this profession (skill)
+--   false means there was no data available
+-- Note: Enchanting (the only Craft) has no headers
+--
+	if not Skillet.isCraft and numHeaders == 0 then
 		skillData.scanned = false
 		return false
 	end
@@ -842,23 +1058,39 @@ end
 -- This is the global function everyone else should use
 --
 function Skillet:RescanTrade()
-	DA.DEBUG(0,"RescanTrade()")
+	DA.DEBUG(0,"RescanTrade(), currentTrade= "..tostring(Skillet.currentTrade)..", lastTrade= "..tostring(lastTrade))
 	local player, tradeID = Skillet.currentPlayer, Skillet.currentTrade
 	if not player or not tradeID then return end
 --
 -- Make sure all the data structures exist
 --
-	if not Skillet.data.skillList[player] then
-		Skillet.data.skillList[player] = {}
-	end
 	if not Skillet.data.skillList[player][tradeID] then
 		Skillet.data.skillList[player][tradeID]={}
 	end
-	if not Skillet.db.realm.skillDB[player] then
-		Skillet.db.realm.skillDB[player] = {}
-	end
 	if not Skillet.db.realm.skillDB[player][tradeID] then
 		Skillet.db.realm.skillDB[player][tradeID] = {}
+	end
+	if not Skillet.db.realm.tradeSkills[player][tradeID] then
+		Skillet.db.realm.tradeSkills[player][tradeID] = {}
+	end
+--
+-- Our own filter data: subClass, invSlot
+--
+	if not Skillet.db.realm.subClass[player][tradeID] then
+		Skillet.db.realm.subClass[player][tradeID] = {}
+	end
+	if not Skillet.db.realm.invSlot[player][tradeID] then
+		Skillet.db.realm.invSlot[player][tradeID] = {}
+	end
+--
+-- Reset Blizzard's filters because they will effect what
+-- data gets returned
+--
+	if TradeSkillSubClassDropDown then
+		UIDropDownMenu_SetSelectedID(TradeSkillSubClassDropDown, 1)
+	end
+	if TradeSkillInvSlotDropDown then
+		UIDropDownMenu_SetSelectedID(TradeSkillInvSlotDropDown, 1)
 	end
 --
 -- Now the hard work begins
@@ -866,5 +1098,6 @@ function Skillet:RescanTrade()
 	Skillet.scanInProgress = true
 	Skillet.dataScanned = ScanTrade()	-- local function that does all the work
 	Skillet.scanInProgress = false
+	Skillet.lastTrade = Skillet.currentTrade
 	return Skillet.dataScanned
 end

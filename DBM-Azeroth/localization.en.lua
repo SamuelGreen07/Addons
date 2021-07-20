@@ -1,4 +1,4 @@
-﻿local L
+local L
 
 -- Lord Kazzak (Badlands)
 L = DBM:GetModLocalization("KazzakClassic")
@@ -52,7 +52,7 @@ L:SetGeneralLocalization{
 }
 
 L:SetMiscLocalization({
---	Pull		= "The strands of LIFE have been severed! The Dreamers must be avenged!"--Does not have one :\
+	Pull		= "I can sense the SHADOW on your hearts. There can be no rest for the wicked!"
 })
 
 -- Emeriss (Duskwood)

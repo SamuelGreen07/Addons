@@ -7,7 +7,6 @@ local ThreatPlates = Addon.ThreatPlates
 
 -- WoW APIs
 local UnitIsConnected = UnitIsConnected
-local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -31,6 +30,9 @@ function Addon:SetNameColor(unit)
 
   if unit.isTarget and db.targetWidget.ModeNames then
     color = db.targetWidget.HPBarColor
+    return color.r, color.g, color.b
+  elseif unit.IsFocus and db.FocusWidget.ModeNames then
+    color = db.FocusWidget.HPBarColor
     return color.r, color.g, color.b
   elseif unit.isMarked then
     if style == "NameOnly-Unique" and unique_setting.useColor then
@@ -84,7 +86,7 @@ function Addon:SetNameColor(unit)
         end
       end
 
-      color =  RAID_CLASS_COLORS[unit.class]
+      color = db.Colors.Classes[unit.class]
       return color.r, color.g, color.b
     end
 

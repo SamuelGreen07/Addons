@@ -1,34 +1,24 @@
-local L = LibStub("AceLocale-3.0"):NewLocale("Spy", "zhTW")
+local L = LibStub("AceLocale-3.0"):NewLocale("Spy", "zhTW") -- Traditional Chinese
 if not L then return end
 -- TOC Note: "偵測並警告你附近有敵方玩家出沒。"
 
--- Addon information
+-- Configuration
 L["Spy"] = "偵測敵方玩家 Spy"
 L["Version"] = "版本"
---L["LoadDescription"] = "|cff9933ff偵測敵方玩家插件已載入，輸入 |cffffffff/spy|cff9933ff 查看更多指令選項。"
-L["SpyEnabled"] = "|cff9933ff偵測敵方玩家插件已啟用。"
-L["SpyDisabled"] = "|cff9933ff偵測敵方玩家插件已停用，輸入 |cffffffff/spy enable|cff9933ff 來啟用。"
-L["UpgradeAvailable"] = "|cff9933ff偵測敵方玩家插件已有新版本，可以到這裡下載：\n|cffffffffhttps://www.curseforge.com/wow/addons/spy-classic"
-
--- Configuration frame name
 L["Spy Option"] = "PVP 偵測敵方玩家"
-
--- Configuration strings
 L["Profiles"] = "設定檔"
 
-L["GeneralSettings"] = "一般設定"
+-- About
+L["About"] = "信息"
 L["SpyDescription1"] = [[
-Spy 是一個可以警告你附近有敵方玩家出沒的插件。
+Spy 是一個可以警告你附近有敵方玩家出沒的插件。這些是一些主要功能。
 ]]
 L["SpyDescription2"] = [[
-
 |cffffd000附近清單|cffffffff
 附近清單會顯示已經被偵測到在附近的任何敵方玩家。點一下清單中的名字可以將玩家選取為目標，但是只能在非戰鬥中使用。一段時間後沒有偵測到的玩家會從清單中自動移除。
 
-標題列的清空按鈕可以立即清空清單，按住 CTRL 鍵來清空可以快速啟用/停用 Spy。
-
 |cffffd000最近清單|cffffffff
-最近清單會顯示最近一小時內偵測到的所有敵方玩家。
+顯示在一小時內檢測到的所有敵人。
 
 |cffffd000忽略清單|cffffffff
 Spy 不會顯示被加入到忽略清單中的玩家。透過滑鼠右鍵選單，或是按住 CTRL 鍵點擊名字將玩家加入清單和移除。
@@ -38,12 +28,22 @@ Spy 不會顯示被加入到忽略清單中的玩家。透過滑鼠右鍵選單�
 
 滑鼠右鍵選單也可以設定將某人加入到即殺清單的原因。如果你想要輸入不在清單中的原因，請在其他清單中使用 "自行輸入原因..."。
 
+|cffffd000Statistics Window|cffffffff
+The Statistics Window contains a list of all enemy encounters which can be sorted by name, level, guild, wins, losses and the last time an enemy was detected. It also provides the ability to search for a specific enemy by name or guild and has filters to show only enemies that are marked as Kill on Sight, with a Win/Loss or entered Reasons. 
 
-|cffffd000Author: Slipjack |cffffffff
+|cffffd000Kill On Sight Button|cffffffff
+If enabled, this button will be located on the enemy players target frame. Clicking on this button will add/remove the enemy target to/from the Kill On Sight list. Right clicking on the button will allow you to enter Kill on Sight reasons.
 
+|cffffd000作者: Slipjack|cffffffff
 ]]
+
+-- General Settings
+L["GeneralSettings"] = "一般設定"
+L["GeneralSettingsDescription"] = [[
+啟用或禁用Spy時的選項。
+]] 
 L["EnableSpy"] = "啟用"
-L["EnableSpyDescription"] = "現在和登入時都要啟用 Spy。"
+L["EnableSpyDescription"] = "啟用或禁用 Spy。"
 L["EnabledInBattlegrounds"] = "戰場中啟用"
 L["EnabledInBattlegroundsDescription"] = "身處在戰場中時啟用或停用 Spy。"
 L["EnabledInArenas"] = "競技場中啟用"
@@ -52,10 +52,31 @@ L["EnabledInWintergrasp"] = "世界戰鬥區域中啟用"
 L["EnabledInWintergraspDescription"] = "身處在世界戰鬥區中時啟用或停用 Spy，例如北裂境的冬握湖。"
 L["DisableWhenPVPUnflagged"] = "非 PVP 狀態時停用"
 L["DisableWhenPVPUnflaggedDescription"] = "依據自身的 PVP 狀態啟用或停用 Spy。"
+L["DisabledInZones"] = "在這些位置時禁用Spy"
+L["DisabledInZonesDescription"]	= "選擇將禁用Spy的位置。"
+L["Booty Bay"] = "藏宝海湾"
+L["Everlook"] = "永望镇"						
+L["Gadgetzan"] = "加基森"
+L["Ratchet"] = "棘齿城"
+L["The Salty Sailor Tavern"] = "水手之家旅店"
+L["Shattrath City"] = "撒塔斯城"
+L["Area 52"] = "52區"
+L["Dalaran"] = "達拉然"
+L["Dalaran (Northrend)"] = "達拉然(北裂境)"
+L["Bogpaddle"] = "沼槳"
+L["The Vindicaar"] = "维迪卡尔"
+L["Krasus' Landing"] = "卡薩斯平臺"
+L["The Violet Gate"] = "紫羅蘭之門"
+L["Magni's Encampment"] = "麥格尼的營地"
+L["Silithus"] = "希利蘇斯"
+L["Chamber of Heart"] = "心之室"
+L["Hall of Ancient Paths"] = "远古通路大厅"
+L["Sanctum of the Sages"] = "賢者聖所"
 
+-- Display
 L["DisplayOptions"] = "顯示"
 L["DisplayOptionsDescription"] = [[
-自動顯示或隱藏 Spy。
+Spy 窗口的選項和工具提示。
 ]]
 L["ShowOnDetection"] = "偵測到敵方玩家時顯示"
 L["ShowOnDetectionDescription"] = "偵測到敵方玩家時會自動將隱藏的 Spy 視窗和附近清單顯示出來。"
@@ -65,32 +86,58 @@ L["ShowOnlyPvPFlagged"] = "只顯示狀態為 PvP 的敵方玩家"
 L["ShowOnlyPvPFlaggedDescription"] = "在附近清單中只顯示切換為 PvP 狀態的敵方玩家。"
 L["ShowKoSButton"] = "在敌方目标框架上显示杀戮按钮"
 L["ShowKoSButtonDescription"] = "设置此项以在敌方玩家的目标框架上显示终止按钮."
+L["Alpha"] = "透明度"
+L["AlphaDescription"] = "設置Spy窗口的透明度。"
+L["AlphaBG"] = "戰場上的透明度"
+L["AlphaBGDescription"] = "在戰場中設置Spy窗口的透明度"
 L["LockSpy"] = "鎖定視窗"
 L["LockSpyDescription"] = "鎖定 Spy 視窗讓它不能被移動。"
+L["ClampToScreen"] = "螢幕鎖定"
+L["ClampToScreenDescription"] = "控制是否可以将SPY窗口拖出屏幕。"
 L["InvertSpy"] = "翻轉視窗"
 L["InvertSpyDescription"] = "上下翻轉 Spy 視窗。"
 L["Reload"] = "重新加载UI"
-L["ReloadDescription"] = "需要更改 SPY 窗口."
+L["ReloadDescription"] = "需要更改 Spy 窗口."
 L["ResizeSpy"] = "自動調整視窗大小"
 L["ResizeSpyDescription"] = "新增和移除敵方玩家時自動調整 Spy 視窗的大小。"
 L["ResizeSpyLimit"] = "列表限制"
-L["ResizeSpyLimitDescription"] = "限制SPY窗口中显示的敌方玩家数量。"
+L["ResizeSpyLimitDescription"] = "限制Spy窗口中显示的敌方玩家数量。"
+L["DisplayTooltipNearSpyWindow"] = "在Spy窗口附近顯示工具提示"
+L["DisplayTooltipNearSpyWindowDescription"] = "設置此項以在“間諜”窗口附近顯示工具提示。"
+L["SelectTooltipAnchor"] = "工具提示錨"
+L["SelectTooltipAnchorDescription"] = "如果已選中上述選項，則選擇工具提示的錨點。"
+L["ANCHOR_CURSOR"] = "光标"
+L["ANCHOR_TOP"] = "在上面"
+L["ANCHOR_BOTTOM"] = "下面"
+L["ANCHOR_LEFT"] = "左"			
+L["ANCHOR_RIGHT"] = "右"
 L["TooltipDisplayWinLoss"] = "滑鼠提示中顯示勝/敗統計"
 L["TooltipDisplayWinLossDescription"] = "在玩家的滑鼠提示中顯示該玩家的勝/敗統計資訊。"
 L["TooltipDisplayKOSReason"] = "滑鼠提示中顯示即殺原因"
 L["TooltipDisplayKOSReasonDescription"] = "在玩家的滑鼠提示中顯示該玩家被加入到即殺清單中的原因。"
 L["TooltipDisplayLastSeen"] = "滑鼠提示中顯示上次遇到的詳情"
 L["TooltipDisplayLastSeenDescription"] = "在玩家的滑鼠提示中顯示最近一次遇到該玩家的時間和地點。"
+L["DisplayListData"] = "選擇要顯示的敵人數據"
+L["Name"] = "名稱"
+L["Class"] = "职业"
 L["SelectFont"] = "選擇字體"
 L["SelectFontDescription"] = "選擇 Spy 視窗使用的字體。"
 L["RowHeight"] = "選擇列高"
 L["RowHeightDescription"] = "選擇 Spy 視窗橫列的高度。"
+L["Texture"] = "質地"
+L["TextureDescription"] = "選擇 Spy 窗口的紋理"
 
+-- Alerts
 L["AlertOptions"] = "警告"
 L["AlertOptionsDescription"] = [[
-遇到時可以將詳情通報到聊天頻道，並且控制偵測到敵方玩家時 Spy 該如何發出警告。
+當檢測到敵方玩家時的警報，公告和警告選項。
 ]]
-L["Announce"] = "通報到:"
+L["SoundChannel"] = "選擇聲音通道"
+L["Master"] = "主音量"
+L["SFX"] = "音效音量"
+L["Music"] = "音樂音量"
+L["Ambience"] = "環境音量"
+L["Announce"] = "發送公告至："
 L["None"] = "無"
 L["NoneDescription"] = "偵測到敵方玩家時不要通報。"
 L["Self"] = "自己"
@@ -118,14 +165,21 @@ L["SelectWarnRaceDescription"] = "選擇要發出警告音效的種族。"
 L["WarnRaceNote"] = "注意: 至少需要將敵人選取為目標一次 (點 Spy 視窗中的玩家名字) 他的種族才會加入到資料庫中，下次偵測到時便可以發出警告音效。和偵測附近敵人一樣，戰鬥中無法點選。"
 L["DisplayWarningsInErrorsFrame"] = "在錯誤訊息框架顯示警告"
 L["DisplayWarningsInErrorsFrameDescription"] = "使用錯誤訊息框架來顯示警告，而不是使用圖形介面的彈出視窗。"
+L["DisplayWarnings"] = "選擇警告消息的位置"
+L["Default"] = "默認位置"
+L["ErrorFrame"] = "錯誤框"
+L["Moveable"] = "可移動的"
 L["EnableSound"] = "啟用警告音效"
 L["EnableSoundDescription"] = "偵測到敵方玩家時啟用警告音效，隱形和即殺清單中的敵方玩家會發出不同的警告音效。"
 L["OnlySoundKoS"] = "只有即殺清單使用警告音效"
 L["OnlySoundKoSDescription"] = "只有偵測到即殺清單中的敵方玩家時才播放警告音效。"
+L["StopAlertsOnTaxi"] = "在飛行路線上關閉警報"
+L["StopAlertsOnTaxiDescription"] = "在飛行路線上停止所有新的警報和警告."
 
+-- Nearby List
 L["ListOptions"] = "附近清單"
 L["ListOptionsDescription"] = [[
-設定 Spy 該如何將敵方玩家加入附近清單和移除。
+關於如何添加和刪除敵方玩家的選項。
 ]]
 L["RemoveUndetected"] = "多久後從附近清單中移除敵方玩家:"
 L["1Min"] = "1 分鐘"
@@ -145,18 +199,20 @@ L["ShowNearbyListDescription"] = "偵測到敵方玩家時顯示附近清單，�
 L["PrioritiseKoS"] = "附近清單中優先排序即殺的敵方玩家"
 L["PrioritiseKoSDescription"] = "在附近清單中總是將即殺的敵方玩家顯示在最前面。"
 
-L["MinimapOptions"] = "地圖"
-L["MinimapOptionsDescription"] = [[
-提供額外的功能給能夠從小地圖追蹤人形生物的玩家。
+-- Map
+L["MapOptions"] = "地圖"
+L["MapOptionsDescription"] = [[
+世界地圖和小地圖的選項，包括圖標和工具提示。
 ]]
-L["MinimapTracking"] = "啟用小地圖追蹤"
-L["MinimapTrackingDescription"] = "啟用小地圖追蹤和偵測，在小地圖偵測到的已知敵方玩家會加入到附近清單。"
+L["MinimapDetection"] = "啟用小地圖檢測"
+L["MinimapDetectionDescription"] = "將光標移到在小地圖上檢測到的已知敵方玩家上，會將他們添加到“附近”列表中。"
+L["MinimapNote"] = "          注意：僅適用於可以追踪人形生物的玩家。"
 L["MinimapDetails"] = "滑鼠提示中顯示等級/職業細節"
 L["MinimapDetailsDescription"] = "更新小地圖的滑鼠提示，隨著敵人名字一併顯示等級/職業的詳細資訊。"
-L["DisplayOnMap"] = "在地圖上顯示敵人位置"
-L["DisplayOnMapDescription"] = "在世界地圖和小地圖上顯示由隊伍、團隊或公會其他 Spy 使用者偵測到的敵人位置。"
+L["DisplayOnMap"] = "在地圖上顯示圖標"
+L["DisplayOnMapDescription"] = "Display map icons for the location of other Spy users in your party, raid and guild when they detect enemies."
 L["SwitchToZone"] = "偵測到敵人時切換到目前區域的地圖"
-L["SwitchToZoneDescription"] = "打開世界地圖並且偵測到敵人時，會自動切換到玩家目前所在的區域地圖。"
+L["SwitchToZoneDescription"] = "當檢測到敵人時，將地圖更改為玩家當前區域地圖。"
 L["MapDisplayLimit"] = "限制顯示的地圖圖示:"
 L["LimitNone"] = "任何地方"
 L["LimitNoneDescription"] = "無視目前所在的地區，在地圖上顯示所有偵測到的敵人。"
@@ -165,9 +221,10 @@ L["LimitSameZoneDescription"] = "只顯示同一個區域中偵測到的敵人�
 L["LimitSameContinent"] = "相同大陸"
 L["LimitSameContinentDescription"] = "只顯示同一塊大陸中偵測到的敵人。"
 
+-- Data Management
 L["DataOptions"] = "資料維護"
 L["DataOptionsDescription"] = [[
-設定 Spy 如何收集和維護資料。
+關於 Spy 如何維護和收集數據的選項。
 ]]
 L["PurgeData"] = "清除多久後未偵測到的敵方玩家:"
 L["OneDay"] = "1 天"
@@ -189,19 +246,19 @@ L["PurgeWinLossDataDescription"] = "使用相同的時間，清除勝/敗資料�
 L["ShareData"] = "和其他 Spy 使用者分享資料"
 L["ShareDataDescription"] = "和隊伍、團隊和公會中也有使用 Spy 插件的玩家分享你遇到敵方玩家的詳情。"
 L["UseData"] = "使用來自於其他 Spy 使用者的資料"
-L["UseDataDescription"] = [[使用從隊伍、團隊和公會中也有使用 Spy 插件的玩家收集到的資料。
-
-另一個 Spy 使用者偵測到的敵方玩家，也會加入到你的附近清單中 (如果還有空間的話)。
-]]
+L["UseDataDescription"] = "使用從隊伍、團隊和公會中也有使用 Spy 插件的玩家收集到的資料。"
 L["ShareKOSBetweenCharacters"] = "不同角色共用即殺玩家資料"
 L["ShareKOSBetweenCharactersDescription"] = "分享標記為即殺的玩家給你在同一個伺服器、同陣營的其他角色。"
 
+-- Commands
 L["SlashCommand"] = "聊天視窗指令"
 L["SpySlashDescription"] = "這些按鈕會執行在聊天視窗輸入 /spy 時相同的指令選項動作。"
 L["Enable"] = "啟用"
 L["EnableDescription"] = "啟用 Spy 並顯示主視窗。"
 L["Show"] = "顯示"
 L["ShowDescription"] = "顯示主視窗."
+L["Hide"] = "隱藏"
+L["HideDescription"] = "隐藏主窗口。"
 L["Reset"] = "重置"
 L["ResetDescription"] = "重設主視窗的位置和外觀。"
 L["ClearSlash"] = "清空"
@@ -213,6 +270,8 @@ L["KOSDescription"] = "從即殺清單加入/移除玩家。"
 L["InvalidInput"] = "输入无效"
 L["Ignore"] = "忽略"
 L["IgnoreDescription"] = "從忽略清單加入/移除玩家。"
+L["Test"] = "Test"
+L["TestDescription"] = "顯示警告，以便您可以重新放置它。"
 
 -- Lists
 L["Nearby"] = "附近"
@@ -221,6 +280,8 @@ L["Ignore"] = "忽略"
 L["KillOnSight"] = "即殺"
 
 --Stats
+L["Won"] = "勝"
+L["Lost"] = "敗"
 L["Time"] = "時間"	
 L["List"] = "清單"
 L["Filter"] = "過濾"	
@@ -232,6 +293,10 @@ L["HonorKills"] = "榮譽擊殺"
 L["PvPDeaths"] = "PvP 死亡"
 
 -- Output messages
+L["VersionCheck"] = "|cffc41e3a警告！ 安裝了錯誤的Spy版本。 刪除此版本並安裝Spy Classic。"
+L["SpyEnabled"] = "|cff9933ff偵測敵方玩家插件已啟用。"
+L["SpyDisabled"] = "|cff9933ff偵測敵方玩家插件已停用，輸入 |cffffffff/spy show|cff9933ff 來啟用。"
+L["UpgradeAvailable"] = "|cff9933ff偵測敵方玩家插件已有新版本，可以到這裡下載：\n|cffffffffhttps://www.curseforge.com/wow/addons/spy-classic"
 L["AlertStealthTitle"] = "偵測到隱形玩家!"
 L["AlertKOSTitle"] = "偵測到即殺玩家!"
 L["AlertKOSGuildTitle"] = "偵測到公會即殺玩家!"
@@ -261,7 +326,9 @@ L["CloseDescription"] = "|cffffffff隱藏 Spy 主視窗。預設下次偵測到�
 L["Left/Right"] = "左 / 右"
 L["Left/RightDescription"] = "|cffffffff切換顯示附近、最近、忽略和即殺清單。"
 L["Clear"] = "清空"
-L["ClearDescription"] = "|cffffffff清空已經偵測到的玩家清單。顯示時 CTRL+左鍵點擊會啟用/停用 Spy。"
+L["ClearDescription"] = "|cffffffff清空已經偵測到的玩家清單。Ctrl+左键单击将开始/停止 Spy。 按住Shift並單擊可打開/關閉聲音。"
+L["SoundEnabled"] = "音頻警報已啟用"
+L["SoundDisabled"] = "音頻警報已禁用"
 L["NearbyCount"] = "附近數量"
 L["NearbyCountDescription"] = "|cffffffff附近球员的数量。"
 L["Statistics"] = "統計資料" 
@@ -270,7 +337,7 @@ L["AddToIgnoreList"] = "加入忽略清單"
 L["AddToKOSList"] = "加入即殺清單"
 L["RemoveFromIgnoreList"] = "從忽略清單移除"
 L["RemoveFromKOSList"] = "從即殺清單移除"
-L["RemoveFromStatsList"] = "從統計列表中刪除"   --++
+L["RemoveFromStatsList"] = "從統計列表中刪除"   
 L["AnnounceDropDownMenu"] = "通報"
 L["KOSReasonDropDownMenu"] = "設定即殺原因"
 L["PartyDropDownMenu"] = "隊伍"
@@ -281,12 +348,13 @@ L["Player"] = " (玩家)"
 L["KOSReason"] = "即殺"
 L["KOSReasonIndent"] = "    "
 L["KOSReasonOther"] = "自行輸入原因..."
-L["KOSReasonClear"] = "清空"
+L["KOSReasonClear"] = "明確原因"
 L["StatsWins"] = "|cff40ff00勝："
 L["StatsSeparator"] = "  "
 L["StatsLoses"] = "|cff0070dd敗："
 L["Located"] = "位置:"
 L["Yards"] = "碼"
+L["LocalDefenseChannelName"] = "本地防務"
 
 Spy_KOSReasonListLength = 6
 Spy_KOSReasonList = {
@@ -376,89 +444,78 @@ StaticPopupDialogs["Spy_SetKOSReasonOther"] = {
 	OnShow = function(self)
 		self.editBox:SetText("");
 	end,
-    	OnAccept = function(self)
+	OnAccept = function(self)
 		local reason = self.editBox:GetText()
 		Spy:SetKOSReason(self.playerName, "自行輸入原因...", reason)
 	end,
 };
 
---++ Class descriptions
---L["DEATHKNIGHT"] = "死亡騎士"
---L["DEMONHUNTER"] = "惡魔獵人"
+-- Class descriptions
+L["UNKNOWN"] = "未知"
 L["DRUID"] = "德魯伊"
 L["HUNTER"] = "獵人"
 L["MAGE"] = "法師"
---L["MONK"] = "武僧"
 L["PALADIN"] = "聖騎士"
 L["PRIEST"] = "牧師"
 L["ROGUE"] = "盜賊"
 L["SHAMAN"] = "薩滿"
 L["WARLOCK"] = "術士"
 L["WARRIOR"] = "戰士"
-L["UNKNOWN"] = "未知"
+L["DEATHKNIGHT"] = "死亡騎士"
+L["MONK"] = "武僧"
+L["DEMONHUNTER"] = "惡魔獵人"
 
---++ Race descriptions
-L["HUMAN"] = "人类"
-L["ORC"] = "兽人"
-L["DWARF"] = "矮人"
-L["NIGHT ELF"] = "暗夜精灵"
-L["UNDEAD"] = "亡灵"
-L["TAUREN"] = "牛头人"
-L["GNOME"] = "侏儒"
-L["TROLL"] = "巨魔"
---L["GOBLIN"] = "地精"
---L["BLOOD ELF"] = "血精灵"
---L["DRAENEI"] = "德莱尼"
---L["WORGEN"] = "狼人"
---L["PANDAREN"] = "熊猫人"
---L["NIGHTBORNE"] = "夜之子"
---L["HIGHMOUNTAIN TAUREN"] = "至高岭牛头人"
---L["VOID ELF"] = "虚空精灵"
---L["LIGHTFORGED DRAENEI"] = "光铸德莱尼"
---L["ZANDALARI TROLL"] = "赞达拉巨魔"
---L["KUL TIRAN"] = "库尔提拉斯人"
---L["DARK IRON DWARF"] = "黑铁矮人"
---L["MAG'HAR ORC"] = "玛格汉兽人"
+-- Race descriptions
+L["Human"] = "人类"
+L["Orc"] = "兽人"
+L["Dwarf"] = "矮人"
+L["Tauren"] = "牛头人"
+L["Troll"] = "巨魔"
+L["Night Elf"] = "暗夜精灵"
+L["Undead"] = "亡灵"
+L["Gnome"] = "侏儒"
+L["Blood Elf"] = "血精灵"
+L["Draenei"] = "德莱尼"
+L["Goblin"] = "地精"
+L["Worgen"] = "狼人"
+L["Pandaren"] = "熊猫人"
+L["Highmountain Tauren"] = "至高岭牛头人"
+L["Lightforged Draenei"] = "光铸德莱尼"
+L["Nightborne"] = "夜之子"
+L["Void Elf"] = "虚空精灵"
+L["Dark Iron Dwarf"] = "黑铁矮人"
+L["Mag'har Orc"] = "玛格汉兽人"
+L["Kul Tiran"] = "库尔提拉斯人"
+L["Zandalari Troll"] = "赞达拉巨魔"
+L["Mechagnome"] = "机械侏儒"
+L["Vulpera"] = "狐人"
 
---++ Font descriptions
-L["2002"] = "2002"
-L["2002 BOLD"] = "2002 Bold"
-L["ARIAL NARROW"] = "Arial Narrow" -- default chat font
-L["FRIZ QUADRATA TT"] = "Friz Quadrata TT" -- default main UI font
-L["FRIZQUADRATACTT"] = "FrizQuadrataCTT"
-L["MOK"] = "MoK"
-L["MORPHEUS"] = "Morpheus" -- default in game mail font
-L["NIMROD MT"] = "Nimrod MT"
-L["SKURRI"] = "Skurri" -- default unit frame combat font
-						
 -- Stealth abilities
-L["Stealth"] = "隱形"
+L["Stealth"] = "潜行"
 L["Prowl"] = "潛行"
 
--- Channel names
-L["LocalDefenseChannelName"] = "本地防務"
-
---++ Minimap color codes
---L["MinimapClassTextDEATHKNIGHT"] = "|cffc41e3a"
---L["MinimapClassTextDEMONHUNTER"] = "|cffa330c9"
+-- Minimap color codes
+L["MinimapGuildText"] = "|cffffffff"
+L["MinimapClassTextUNKNOWN"] = "|cff191919"
 L["MinimapClassTextDRUID"] = "|cffff7c0a"
 L["MinimapClassTextHUNTER"] = "|cffaad372"
 L["MinimapClassTextMAGE"] = "|cff68ccef"
---L["MinimapClassTextMONK"] = "|cff00ff96"
 L["MinimapClassTextPALADIN"] = "|cfff48cba"
 L["MinimapClassTextPRIEST"] = "|cffffffff"
 L["MinimapClassTextROGUE"] = "|cfffff468"
 L["MinimapClassTextSHAMAN"] = "|cff2359ff"
 L["MinimapClassTextWARLOCK"] = "|cff9382c9"
 L["MinimapClassTextWARRIOR"] = "|cffc69b6d"
-L["MinimapClassTextUNKNOWN"] = "|cff191919"
-L["MinimapGuildText"] = "|cffffffff"
+L["MinimapClassTextDEATHKNIGHT"] = "|cffc41e3a"
+L["MinimapClassTextMONK"] = "|cff00ff96"
+L["MinimapClassTextDEMONHUNTER"] = "|cffa330c9"
 
 Spy_AbilityList = {
 -----------------------------------------------------------
 -- Allows an estimation of the race, class and level of a
 -- player based on the abilities observed in the combat log.
 -----------------------------------------------------------
+
 --++ Racial Traits ++	
 	["影遁"]={ race = "Night Elf", level = 1, },
 	["血性狂暴"]={ race = "Orc", level = 1, },
@@ -492,14 +549,11 @@ Spy_AbilityList = {
 	["暗影抗性"]={ race = "Undead", level = 1, },
 	["奥术抗性"]={ race = "Gnome", level = 1, },
 	["精灵之魂"]={ race = "Night Elf", level = 1, },
-	
+
 --++ Druid Abilities ++	
 	["治疗之触"]={ class = "DRUID", level = 1, },
-	["野性印记"]={ class = "DRUID", level = 1, },
 	["愤怒"]={ class = "DRUID", level = 1, },
 	["月火术"]={ class = "DRUID", level = 4, },
-	["回春术"]={ class = "DRUID", level = 4, },
-	["荆棘术"]={ class = "DRUID", level = 6, },
 	["纠缠根须"]={ class = "DRUID", level = 8, },
 	["熊形态"]={ class = "DRUID", level = 10, },
 	["挫志咆哮"]={ class = "DRUID", level = 10, },
@@ -528,25 +582,18 @@ Spy_AbilityList = {
 	["急奔"]={ class = "DRUID", level = 26, },
 	["挑战咆哮"]={ class = "DRUID", level = 28, },
 	["畏缩"]={ class = "DRUID", level = 28, },
-	["宁静"]={ class = "DRUID", level = 30, },
 	["旅行形态"]={ class = "DRUID", level = 30, },
 	["凶猛撕咬"]={ class = "DRUID", level = 32, },
 	["毁灭"]={ class = "DRUID", level = 32, },
 	["狂暴回复"]={ class = "DRUID", level = 36, },
 	["突袭"]={ class = "DRUID", level = 36, },
 	["巨熊形态"]={ class = "DRUID", level = 40, },
-	["激活"]={ class = "DRUID", level = 40, },
-	["树皮术"]={ class = "DRUID", level = 44, },
-	["Barkskin Effect (DND)"]={ class = "DRUID", level = 44, },
-	["野性赐福"]={ class = "DRUID", level = 50, },
 --++ Druid Talents ++	
 	["自然之握"]={ class = "DRUID", level = 10, },
 	["野性冲锋"]={ class = "DRUID", level = 20, },
 	["虫群"]={ class = "DRUID", level = 20, },
 	["清晰预兆"]={ class = "DRUID", level = 20, },
 	["精灵之火（野性）"]={ class = "DRUID", level = 30, },
-	["枭兽形态"]={ class = "DRUID", level = 40, },
-	["迅捷治愈"]={ class = "DRUID", level = 40, },
 --++ Hunter Abilities ++	
 	["准备就绪"]={ class = "HUNTER", level = 1, },
 	["自动射击"]={ class = "HUNTER", level = 1, },
@@ -601,10 +648,8 @@ Spy_AbilityList = {
 	["胁迫"]={ class = "HUNTER", level = 30, },
 	["驱散射击"]={ class = "HUNTER", level = 30, },
 	["狂野怒火"]={ class = "HUNTER", level = 40, },
-	["强击光环"]={ class = "HUNTER", level = 40, },
 	["翼龙钉刺"]={ class = "HUNTER", level = 40, },
 --++ Mage Abilities ++	
-	["奥术智慧"]={ class = "MAGE", level = 1, },
 	["火球术"]={ class = "MAGE", level = 1, },
 	["霜甲术"]={ class = "MAGE", level = 1, },
 	["寒冰箭"]={ class = "MAGE", level = 4, },
@@ -614,12 +659,9 @@ Spy_AbilityList = {
 	["奥术飞弹"]={ class = "MAGE", level = 8, },
 	["变形术"]={ class = "MAGE", level = 8, },
 	["冰霜新星"]={ class = "MAGE", level = 10, },
-	["魔法抑制"]={ class = "MAGE", level = 12, },
-	["缓落术"]={ class = "MAGE", level = 12, },
 	["魔爆术"]={ class = "MAGE", level = 14, },
 	["侦测魔法"]={ class = "MAGE", level = 16, },
 	["烈焰风暴"]={ class = "MAGE", level = 16, },
-	["魔法增效"]={ class = "MAGE", level = 18, },
 	["解除次级诅咒"]={ class = "MAGE", level = 18, },
 	["闪现术"]={ class = "MAGE", level = 20, },
 	["暴风雪"]={ class = "MAGE", level = 20, },
@@ -662,67 +704,44 @@ Spy_AbilityList = {
 	["燃烧"]={ class = "MAGE", level = 40, },
 	["寒冰护体"]={ class = "MAGE", level = 40, },
 --++ Paladin Abilities ++	
-	["虔诚光环"]={ class = "PALADIN", level = 1, },
 	["圣光术"]={ class = "PALADIN", level = 1, },
 	["正义圣印"]={ class = "PALADIN", level = 1, },
-	["力量祝福"]={ class = "PALADIN", level = 4, },
 	["审判"]={ class = "PALADIN", level = 4, },
 	["圣佑术"]={ class = "PALADIN", level = 6, },
 	["十字军圣印"]={ class = "PALADIN", level = 6, },
 	["制裁之锤"]={ class = "PALADIN", level = 8, },
 	["纯净术"]={ class = "PALADIN", level = 8, },
-	["保护祝福"]={ class = "PALADIN", level = 10, },
 	["圣疗术"]={ class = "PALADIN", level = 10, },
 	["救赎"]={ class = "PALADIN", level = 12, },
-	["智慧祝福"]={ class = "PALADIN", level = 14, },
-	["惩罚光环"]={ class = "PALADIN", level = 16, },
 	["正义之怒"]={ class = "PALADIN", level = 16, },
-	["自由祝福"]={ class = "PALADIN", level = 18, },
 	["驱邪术"]={ class = "PALADIN", level = 20, },
 	["圣光闪现"]={ class = "PALADIN", level = 20, },
 	["感知亡灵"]={ class = "PALADIN", level = 20, },
-	["专注光环"]={ class = "PALADIN", level = 22, },
 	["公正圣印"]={ class = "PALADIN", level = 22, },
 	["超度亡灵"]={ class = "PALADIN", level = 24, },
 	["拯救祝福"]={ class = "PALADIN", level = 26, },
-	["暗影抗性光环"]={ class = "PALADIN", level = 28, },
 	["神圣干涉"]={ class = "PALADIN", level = 30, },
 	["光明圣印"]={ class = "PALADIN", level = 30, },
-	["冰霜抗性光环"]={ class = "PALADIN", level = 32, },
 	["圣盾术"]={ class = "PALADIN", level = 34, },
-	["火焰抗性光环"]={ class = "PALADIN", level = 36, },
 	["智慧圣印"]={ class = "PALADIN", level = 38, },
 	["光明祝福"]={ class = "PALADIN", level = 40, },
 	["召唤军马"]={ class = "PALADIN", level = 40, },
 	["清洁术"]={ class = "PALADIN", level = 42, },
 	["愤怒之锤"]={ class = "PALADIN", level = 44, },
-	["牺牲祝福"]={ class = "PALADIN", level = 46, },
 	["神圣愤怒"]={ class = "PALADIN", level = 50, },
-	["强效力量祝福"]={ class = "PALADIN", level = 52, },
-	["强效智慧祝福"]={ class = "PALADIN", level = 54, },
-	["强效王者祝福"]={ class = "PALADIN", level = 60, },
-	["强效光明祝福"]={ class = "PALADIN", level = 60, },
-	["强效拯救祝福"]={ class = "PALADIN", level = 60, },
-	["强效庇护祝福"]={ class = "PALADIN", level = 60, },
 	["召唤战马"]={ class = "PALADIN", level = 60, },
 --++ Paladin Talents ++	
-	["王者祝福"]={ class = "PALADIN", level = 20, },
 	["奉献"]={ class = "PALADIN", level = 20, },
 	["命令圣印"]={ class = "PALADIN", level = 20, },
-	["庇护祝福"]={ class = "PALADIN", level = 30, },
 	["神恩术"]={ class = "PALADIN", level = 30, },
-	["圣洁光环"]={ class = "PALADIN", level = 30, },
 	["神圣之盾"]={ class = "PALADIN", level = 40, },
 	["神圣震击"]={ class = "PALADIN", level = 40, },
 	["忏悔"]={ class = "PALADIN", level = 40, },
 --++ Priest Abilities ++	
 	["次级治疗术"]={ class = "PRIEST", level = 1, },
-	["真言术：韧"]={ class = "PRIEST", level = 1, },
 	["惩击"]={ class = "PRIEST", level = 1, },
 	["暗言术：痛"]={ class = "PRIEST", level = 4, },
-	["真言术：盾"]={ class = "PRIEST", level = 6, },
 	["渐隐术"]={ class = "PRIEST", level = 8, },
-	["恢复"]={ class = "PRIEST", level = 8, },
 	["绝望祷言"]={ class = "PRIEST", level = 10, },
 	["虚弱妖术"]={ class = "PRIEST", level = 10, },
 	["心灵震爆"]={ class = "PRIEST", level = 10, },
@@ -735,7 +754,6 @@ Spy_AbilityList = {
 	["驱散魔法"]={ class = "PRIEST", level = 18, },
 	["噬灵瘟疫"]={ class = "PRIEST", level = 20, },
 	["艾露恩的赐福"]={ class = "PRIEST", level = 20, },
-	["防护恐惧结界"]={ class = "PRIEST", level = 20, },
 	["回馈"]={ class = "PRIEST", level = 20, },
 	["快速治疗"]={ class = "PRIEST", level = 20, },
 	["神圣之火"]={ class = "PRIEST", level = 20, },
@@ -746,22 +764,15 @@ Spy_AbilityList = {
 	["法力燃烧"]={ class = "PRIEST", level = 24, },
 	["精神控制"]={ class = "PRIEST", level = 30, },
 	["治疗祷言"]={ class = "PRIEST", level = 30, },
-	["防护暗影"]={ class = "PRIEST", level = 30, },
 	["驱除疾病"]={ class = "PRIEST", level = 32, },
 	["漂浮术"]={ class = "PRIEST", level = 34, },
 	["强效治疗术"]={ class = "PRIEST", level = 40, },
-	["坚韧祷言"]={ class = "PRIEST", level = 48, },
-	["暗影防护祷言"]={ class = "PRIEST", level = 56, },
-	["精神祷言"]={ class = "PRIEST", level = 60, },
 --++ Priest Talents ++	
 	["神圣新星"]={ class = "PRIEST", level = 20, },
 	["心灵专注"]={ class = "PRIEST", level = 20, },
 	["精神鞭笞"]={ class = "PRIEST", level = 20, },
-	["神圣之灵"]={ class = "PRIEST", level = 30, },
 	["沉默"]={ class = "PRIEST", level = 30, },
-	["吸血鬼的拥抱"]={ class = "PRIEST", level = 30, },
 	["光明之泉"]={ class = "PRIEST", level = 40, },
-	["能量灌注"]={ class = "PRIEST", level = 40, },
 	["暗影形态"]={ class = "PRIEST", level = 40, },
 --++ Rogue Abilities ++	
 	["刺骨"]={ class = "ROGUE", level = 1, },
@@ -828,14 +839,12 @@ Spy_AbilityList = {
 	["治疗之泉图腾"]={ class = "SHAMAN", level = 20, },
 	["次级治疗波"]={ class = "SHAMAN", level = 20, },
 	["清毒图腾"]={ class = "SHAMAN", level = 22, },
-	["水下呼吸"]={ class = "SHAMAN", level = 22, },
 	["抗寒图腾"]={ class = "SHAMAN", level = 24, },
 	["视界术"]={ class = "SHAMAN", level = 26, },
 	["熔岩图腾"]={ class = "SHAMAN", level = 26, },
 	["法力之泉图腾"]={ class = "SHAMAN", level = 26, },
 	["抗火图腾"]={ class = "SHAMAN", level = 28, },
 	["火舌图腾"]={ class = "SHAMAN", level = 28, },
-	["水上行走"]={ class = "SHAMAN", level = 28, },
 	["星界传送"]={ class = "SHAMAN", level = 30, },
 	["根基图腾"]={ class = "SHAMAN", level = 30, },
 	["自然抗性图腾"]={ class = "SHAMAN", level = 30, },
@@ -925,7 +934,6 @@ Spy_AbilityList = {
 	["黑暗契约"]={ class = "WARLOCK", level = 40, },
 	["灵魂链接"]={ class = "WARLOCK", level = 40, },
 --++ Warrior Abilities ++	
-	["战斗怒吼"]={ class = "WARRIOR", level = 1, },
 	["战斗姿态"]={ class = "WARRIOR", level = 1, },
 	["英勇打击"]={ class = "WARRIOR", level = 1, },
 	["强化拳击"]={ class = "WARRIOR", level = 1, },

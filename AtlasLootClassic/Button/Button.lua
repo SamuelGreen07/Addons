@@ -32,7 +32,12 @@ local CreateFrame = CreateFrame
 
 -- UnitFactionGroup("player")		"Alliance", "Horde", "Neutral" or nil.
 -- :SetAtlas()
-local WOW_HEAD_LINK, WOW_HEAD_LINK_LOC = "https://classic.wowhead.com/%s=%d", "https://%s.classic.wowhead.com/%s=%d"
+local WOW_HEAD_LINK, WOW_HEAD_LINK_LOC
+if AtlasLoot:GetGameVersion() == 2 then
+	WOW_HEAD_LINK, WOW_HEAD_LINK_LOC = "https://tbc.wowhead.com/%s=%d", "https://%s.tbc.wowhead.com/%s=%d"
+else
+	WOW_HEAD_LINK, WOW_HEAD_LINK_LOC = "https://classic.wowhead.com/%s=%d", "https://%s.classic.wowhead.com/%s=%d"
+end
 local WOW_HEAD_LOCALE
 local FACTION_INFO_IS_SET_ID = 998
 local IGNORE_THIS_BUTTON_ID = 999
@@ -275,7 +280,7 @@ function Button:Create()
 
 	-- counter
 	button.count = button:CreateFontString(buttonName.."_count", "ARTWORK", "AtlasLoot_ItemAmountFont")
-	button.count:SetPoint("BOTTOMRIGHT", button.icon, "BOTTOMRIGHT", 0, 1)
+	button.count:SetPoint("BOTTOMRIGHT", button.icon, "BOTTOMRIGHT", -1, 1)
 	button.count:SetJustifyH("RIGHT")
 	button.count:SetHeight(15)
 	button.count:SetText(15)
@@ -333,11 +338,18 @@ function Button:Create()
 	button.secButton.completed:Hide()
 
 	button.secButton.count = button.secButton:CreateFontString(buttonName.."_secCount", "ARTWORK", "AtlasLoot_ItemAmountFont")
-	button.secButton.count:SetPoint("BOTTOMRIGHT", button.secButton.icon, "BOTTOMRIGHT", 0, 1)
+	button.secButton.count:SetPoint("BOTTOMRIGHT", button.secButton.icon, "BOTTOMRIGHT", -1, 1)
 	button.secButton.count:SetJustifyH("RIGHT")
 	button.secButton.count:SetHeight(15)
 	button.secButton.count:SetText(15)
 	button.secButton.count:Hide()
+
+	button.secButton.pvp = button.secButton:CreateTexture(buttonName.."_secButtonPvp")
+	button.secButton.pvp:SetPoint("BOTTOMRIGHT", button.secButton.icon, "BOTTOMRIGHT", -3, 3)
+	button.secButton.pvp:SetHeight(13)
+	button.secButton.pvp:SetWidth(13)
+	button.secButton.pvp:SetDrawLayer(button.secButton.icon:GetDrawLayer(), 1)
+	button.secButton.pvp:Hide()
 
 	button.secButton.phaseIndicator = button.secButton:CreateTexture(buttonName.."_phaseIndicator", "OVERLAY")
 	button.secButton.phaseIndicator:SetPoint("TOPLEFT", button.secButton.icon)
@@ -424,6 +436,13 @@ function Button:CreateSecOnly(frame)
 	button.secButton.count:SetHeight(15)
 	button.secButton.count:SetText(15)
 	button.secButton.count:Hide()
+
+	button.secButton.pvp = button.secButton:CreateTexture(buttonName.."_secButtonPvp")
+	button.secButton.pvp:SetPoint("BOTTOMRIGHT", button.secButton.icon, "BOTTOMRIGHT", -3, 3)
+	button.secButton.pvp:SetHeight(13)
+	button.secButton.pvp:SetWidth(13)
+	button.secButton.pvp:SetDrawLayer(button.secButton.icon:GetDrawLayer(), 1)
+	button.secButton.pvp:Hide()
 
 	button.secButton.phaseIndicator = button.secButton:CreateTexture(buttonName.."_phaseIndicator", "OVERLAY")
 	button.secButton.phaseIndicator:SetPoint("TOPLEFT", button.secButton.icon)
@@ -555,13 +574,20 @@ function Proto:SetContentTable(tab, formatTab, setOnlySec)
 			end
 
 			if not tab[FACTION_INFO_IS_SET_ID] then
-				horde = ( horde and alliance ) and ( PLAYER_FACTION_ID == 0 and horde or alliance ) or horde and horde or ( alliance and alliance or nil )
-				if type(horde) == "table" then
-					for i = 1, #horde do
-						tab[i+1] = horde[i]
+				local usedFaction
+
+				if PLAYER_FACTION_ID == 0  then
+					usedFaction = horde
+				else
+					usedFaction = alliance
+				end
+
+				if type(usedFaction) == "table" then
+					for i = 1, #usedFaction do
+						tab[i+1] = usedFaction[i]
 					end
-				elseif horde and horde ~= true then
-					tab[2] = horde
+				elseif usedFaction and usedFaction ~= true then
+					tab[2] = usedFaction
 				end
 				tab[FACTION_INFO_IS_SET_ID] = true
 			end
@@ -639,6 +665,11 @@ function Proto:SetContentTable(tab, formatTab, setOnlySec)
 			end
 		end
 	end
+
+	-- dumb but that fix vanishing text...
+	if self.name then
+		self.name:GetWidth()
+	end
 end
 
 function Proto:SetType(typ, val)
@@ -671,7 +702,7 @@ function Proto:SetSecType(typ, val)
 end
 
 function Proto:SetExtraType(typ, val)
-	if extra_button_types[typ] then
+	if extra_button_types[typ] and (not self.enhancedDesc or (not self.enhancedDesc.setExtraTypes) or (self.enhancedDesc.setExtraTypes and not self.enhancedDesc.setExtraTypes[typ])) then
 		self:AddEnhancedDescription()
 		--if self.__atlaslootinfo.extraType  then
 		--	if type(self.__atlaslootinfo.extraType[1]) ~= "table" then
@@ -683,11 +714,18 @@ function Proto:SetExtraType(typ, val)
 		--end
 		self.enhancedDesc.ttInfo = typ
 		extra_button_types[typ].OnSet(self, self.enhancedDesc)
+
+		self.enhancedDesc.setExtraTypes = self.enhancedDesc.setExtraTypes or {}
+		self.enhancedDesc.setExtraTypes[typ] = true
 	end
 end
 
 function Proto:SetDifficultyID(diffID)
 	self.__atlaslootinfo.difficulty = diffID
+end
+
+function Proto:SetNpcID(npcID)
+	self.__atlaslootinfo.npcID = npcID
 end
 
 function Proto:GetTypeFunctions()
@@ -720,6 +758,7 @@ local EnhancedDescriptionProto = {
 		self.contentSize = 0
 		self.info = nil
 		self.ttInfo = nil
+		self.setExtraTypes = nil
 		if self.removerInfo then
 			self.removerInfo[1](self.removerInfo[2])
 			self.removerInfo = nil
@@ -978,7 +1017,7 @@ local function ExtraItemFrame_Refresh(self, triggerButton)
 end
 
 function Button:ExtraItemFrame_GetFrame(button, itemList)
-	if button and button.IsExtraItemFrameButton then return end -- skip own buttons
+	if not itemList or (button and button.IsExtraItemFrameButton) then return end -- skip own buttons
 	local frame = ExtraItemFrame_Frame
 	if frame and frame.ItemList then
 		if frame.button == button then
@@ -987,7 +1026,7 @@ function Button:ExtraItemFrame_GetFrame(button, itemList)
 			ExtraItemFrame_Frame:Clear()
 		end
 	elseif not frame then
-		frame = CreateFrame("frame")
+		frame = CreateFrame("frame", nil, nil, _G.BackdropTemplateMixin and "BackdropTemplate" or nil)
 		frame:SetClampedToScreen(true)
 		frame:SetHeight(ITEM_ICON_SIZE+(BORDER_DISTANCE*2))
 		frame:SetWidth(BORDER_DISTANCE*2)
@@ -1034,7 +1073,7 @@ function Button:ExtraItemFrame_GetFrame(button, itemList)
 		end
 
 		if not skipScaling then
-			if fixedCounter > MAX_ITEMS_PER_LINE and fixedCounter % (MAX_ITEMS_PER_LINE+1) == 0 then
+			if fixedCounter > MAX_ITEMS_PER_LINE and fixedCounter % (MAX_ITEMS_PER_LINE) == 1 then
 				frame:SetHeight(frame:GetHeight() + ITEM_ICON_SIZE + ITEM_DISTANCE)
 			elseif fixedCounter == 1 then
 				frame:SetWidth(frame:GetWidth() + ITEM_ICON_SIZE)

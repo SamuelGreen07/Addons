@@ -7,12 +7,17 @@ local ADDON_NAME, Addon = ...
 local string, strsplit = string, strsplit
 
 -- WoW APIs
+local UnitThreatSituation = UnitThreatSituation
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
-local UnitReaction, UnitIsTapDenied, UnitGUID, UnitAffectingCombat = UnitReaction, UnitIsTapDenied, UnitGUID, UnitAffectingCombat
+local UnitReaction  = UnitReaction
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
-local LibThreatClassic = Addon.LibThreatClassic
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: UnitAffectingCombat, UnitGUID, UnitIsTapDenied
 
 local CLASSIFICATION_MAPPING = {
   ["boss"] = "Boss",
@@ -39,12 +44,13 @@ local OFFTANK_PETS = {
   ["61146"] = true,  -- Monk's Black Ox Statue
   ["103822"] = true, -- Druid's Force of Nature Treants
   ["95072"] = true,  -- Shaman's Earth Elemental
+  ["61056"] = true,  -- Primal Earth Elemental
 }
 
 -- Black Ox Statue of monks is: Creature with id 61146
 -- Treants of druids is: Creature with id 103822
 function Addon.IsOffTankCreature(unitid)
-  local guid = UnitGUID(unitid)
+  local guid = _G.UnitGUID(unitid)
 
   if not guid then return false end
 
@@ -65,10 +71,7 @@ function Addon:OnThreatTable(unit)
   --  return threatStatus ~= nil
 
   -- nil means player is not on unit's threat table - more acurate, but slower reaction time than the above solution
-  -- return UnitThreatSituation("player", unit.unitid) ~= nil
-
-  local _, _, scaledPercent, _, threatValue = LibThreatClassic:UnitDetailedThreatSituation("player", unit.unitid)
-  return scaledPercent and scaledPercent > 0
+  return UnitThreatSituation("player", unit.unitid) ~= nil
 end
 
 --toggle = {
@@ -82,7 +85,7 @@ end
 --},
 
 local function GetUnitClassification(unit)
-  if UnitIsTapDenied(unit.unitid) then
+  if _G.UnitIsTapDenied(unit.unitid) then
     return "Tapped"
   elseif UnitReaction(unit.unitid, "player") == 4 then
     return "Neutral"
@@ -106,12 +109,12 @@ function Addon:ShowThreatFeedback(unit)
   if db.toggle[GetUnitClassification(unit)] then
     if db.UseThreatTable then
       if isInstance and db.UseHeuristicInInstances then
-        return UnitAffectingCombat(unit.unitid)
+        return _G.UnitAffectingCombat(unit.unitid)
       else
         return Addon:OnThreatTable(unit)
       end
     else
-      return UnitAffectingCombat(unit.unitid)
+      return _G.UnitAffectingCombat(unit.unitid)
     end
   end
 

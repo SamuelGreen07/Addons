@@ -10,22 +10,44 @@ local ThreatPlates = Addon.ThreatPlates
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 
+-- Lua APIs
+local string = string
+
 -- WoW APIs
-local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
 local UnitPlayerControlled = UnitPlayerControlled
+
+Addon.CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
 
 ---------------------------------------------------------------------------------------------------
 -- Libraries
 ---------------------------------------------------------------------------------------------------
 local LibStub = LibStub
-
 ThreatPlates.L = LibStub("AceLocale-3.0"):GetLocale("TidyPlatesThreat")
 ThreatPlates.Media = LibStub("LibSharedMedia-3.0")
 Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
 Addon.LibAceConfigDialog = LibStub("AceConfigDialog-3.0")
-Addon.LibThreatClassic = LibStub:GetLibrary("ThreatClassic-1.0")
-Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
---Addon.LibClassicCasterino = LibStub("LibClassicCasterino")
+Addon.LibAceConfigRegistry = LibStub("AceConfigRegistry-3.0")
+
+if Addon.CLASSIC then
+	Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
+	--Addon.LibClassicCasterino = LibStub("LibClassicCasterino")
+end
+
+Addon.BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate"
+
+-- Use this once SetBackdrop backwards compatibility is removed
+--if BackdropTemplateMixin then -- Shadowlands
+--	Addon.BackdropTemplate = "BackdropTemplate"
+--
+--	Addon.SetBackdrop = function(frame, backdrop)
+--		frame.backdropInfo = backdrop
+--		frame:ApplyBackdrop()
+--	end
+--else
+--	Addon.SetBackdrop = function(frame, backdrop)
+--		frame:SetBackdrop(backdrop)
+--	end
+--end
 
 ---------------------------------------------------------------------------------------------------
 -- Define AceAddon TidyPlatesThreat
@@ -35,15 +57,48 @@ TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceCons
 TidyPlatesThreatDBM = true
 
 Addon.Animations = {}
-Addon.Widgets = {}
+Addon.Cache = {
+	TriggerWildcardTests = {},
+	CustomPlateTriggers = {
+		Name = {},
+		NameWildcard = {},
+		Aura = {},
+		Cast = {},
+	},
+	Styles = {
+		ForAllInstances = {},
+		PerInstance = {},
+		ForCurrentInstance = {},
+	}
+}
 
---------------------------------------------------------------------------------------------------
--- Functions to abstract from the presence of certain addons
 ---------------------------------------------------------------------------------------------------
-
-function Addon.GetUnitHealth(unitid)
-	return UnitHealth(unitid) or 0, UnitHealthMax(unitid) or 1
+-- Aura Highlighting
+---------------------------------------------------------------------------------------------------
+local LibCustomGlow = Addon.LibCustomGlow
+local function Wrapper_ButtonGlow_Start(frame, color, framelevel)
+	LibCustomGlow.ButtonGlow_Start(frame, color, nil, framelevel)
 end
+
+local function Wrapper_PixelGlow_Start(frame, color, framelevel)
+	LibCustomGlow.PixelGlow_Start(frame, color, nil, nil, nil, nil, nil, nil, nil, nil, framelevel)
+end
+
+local function Wrapper_AutoCastGlow_Start(frame, color, framelevel)
+	LibCustomGlow.AutoCastGlow_Start(frame, color, nil, nil, nil, nil, nil, nil, framelevel)
+end
+
+Addon.CUSTOM_GLOW_FUNCTIONS = {
+	Button = { "ButtonGlow_Start", "ButtonGlow_Stop", 8 },
+	Pixel = { "PixelGlow_Start", "PixelGlow_Stop", 3 },
+	AutoCast = { "AutoCastGlow_Start", "AutoCastGlow_Stop", 4 },
+}
+
+Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS = {
+	ButtonGlow_Start = Wrapper_ButtonGlow_Start,
+	PixelGlow_Start = Wrapper_PixelGlow_Start,
+	AutoCastGlow_Start = Wrapper_AutoCastGlow_Start,
+}
 
 --------------------------------------------------------------------------------------------------
 -- General Functions
@@ -53,6 +108,12 @@ end
 ThreatPlates.RGB = function(red, green, blue, alpha)
 	local color = { r = red/255, g = green/255, b = blue/255 }
 	if alpha then color.a = alpha end
+	return color
+end
+
+ThreatPlates.RGB_WITH_HEX = function(red, green, blue, alpha)
+	local color = ThreatPlates.RGB(red, green, blue, alpha)
+	color.colorStr = CreateColor(color.r, color.g, color.b, color.a):GenerateHexColor()
 	return color
 end
 
@@ -136,13 +197,27 @@ ThreatPlates.CopyTable = function(input)
 end
 
 Addon.MergeIntoTable = function(target, source)
+	if source == nil then return end
+
   for k,v in pairs(source) do
     if type(v) == "table" then
+			target[k] = target[k] or {}
       Addon.MergeIntoTable(target[k], v)
     else
       target[k] = v
     end
   end
+end
+
+Addon.MergeDefaultsIntoTable = function(target, defaults)
+	for k,v in pairs(defaults) do
+		if type(v) == "table" then
+			target[k] = target[k] or {}
+			Addon.MergeDefaultsIntoTable(target[k], v)
+		else
+			target[k] = target[k] or v
+		end
+	end
 end
 
 Addon.ConcatTables = function(base_table, table_to_concat)
@@ -153,6 +228,33 @@ Addon.ConcatTables = function(base_table, table_to_concat)
 	end
 
 	return concat_result
+end
+
+Addon.CheckTableStructure = function(reference_structure, table_to_check)
+	if table_to_check == nil then
+		return false
+	end
+
+	for k,v in pairs(reference_structure) do
+		if table_to_check[k] == nil or type(table_to_check[k]) ~= type(v) then
+			return false
+		elseif type(v) == "table" then
+			if not Addon.CheckTableStructure(v, table_to_check[k]) then
+				return false
+			end
+		end
+	end
+
+	return true
+end
+
+Addon.Split = function(split_string)
+	local result = {}
+	for entry in string.gmatch(split_string, "[^;]+") do
+		result[#result + 1] = entry:gsub("^%s*(.-)%s*$", "%1")
+	end
+
+	return result
 end
 
 --------------------------------------------------------------------------------------------------
@@ -201,13 +303,13 @@ local function DEBUG_PRINT_TABLE(data)
       if (type(data)=="table") then
         for pos,val in pairs(data) do
           if (type(val)=="table") then
-            ThreatPlates.DEBUG (indent.."["..pos.."] => "..tostring(data).." {")
+            ThreatPlates.DEBUG (indent.."["..tostring(pos).."] => "..tostring(data).." {")
             sub_print_r(val,indent..string.rep(" ",string.len(pos)+8))
             ThreatPlates.DEBUG (indent..string.rep(" ",string.len(pos)+6).."}")
           elseif (type(val)=="string") then
-            ThreatPlates.DEBUG (indent.."["..pos..'] => "'..val..'"')
+            ThreatPlates.DEBUG (indent.."["..tostring(pos)..'] => "'..val..'"')
           else
-            ThreatPlates.DEBUG (indent.."["..pos.."] => "..tostring(val))
+            ThreatPlates.DEBUG (indent.."["..tostring(pos).."] => "..tostring(val))
           end
         end
       else
@@ -281,6 +383,13 @@ local function DEBUG_AURA_LIST(data)
 		end
 	end
 	ThreatPlates.DEBUG("Aura List = [ " .. res .. " ]")
+end
+
+Addon.DebugPrintCaches = function()
+	print ("Wildcard Unit Test Cache:")
+	for k, v in pairs(Addon.Cache.TriggerWildcardTests) do
+		print ("  " .. k .. ":", v)
+	end
 end
 
 ---------------------------------------------------------------------------------------------------

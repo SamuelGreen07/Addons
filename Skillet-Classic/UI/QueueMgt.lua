@@ -32,7 +32,7 @@ function Skillet:QueueLoadDropdown_OnShow()
 	end
 end
 
-function Skillet:SkilletQueueLoadDropdown_Initialize()
+function Skillet.SkilletQueueLoadDropdown_Initialize(menuFrame,level)
 	local info
 	local i=1
 	info = UIDropDownMenu_CreateInfo()
@@ -40,9 +40,6 @@ function Skillet:SkilletQueueLoadDropdown_Initialize()
 	info.func = Skillet.QueueLoadDropdown_OnClick
 	info.value = i
 	i = i + 1
-	if self then
-		info.owner = self:GetParent()
-	end
 	UIDropDownMenu_AddButton(info)
 	for k,v in pairs(Skillet.db.profile.SavedQueues) do
 		info = UIDropDownMenu_CreateInfo()
@@ -50,9 +47,6 @@ function Skillet:SkilletQueueLoadDropdown_Initialize()
 		info.func = Skillet.QueueLoadDropdown_OnClick
 		info.value = i
 		i = i + 1
-		if self then
-			info.owner = self:GetParent()
-		end
 		UIDropDownMenu_AddButton(info)
 	end
 end

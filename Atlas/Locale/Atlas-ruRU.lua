@@ -1,10 +1,10 @@
--- $Id: Atlas-ruRU.lua 329 2019-09-04 08:14:03Z arith $
+-- $Id: Atlas-ruRU.lua 368 2021-05-20 15:03:14Z arithmandar $
 --[[
 
 	Atlas, a World of Warcraft instance map browser
 	Copyright 2005 ~ 2010 - Dan Gilbert <dan.b.gilbert at gmail dot com>
 	Copyright 2010 - Lothaer <lothayer at gmail dot com>, Atlas Team
-	Copyright 2011 ~ 2019 - Arith Hsu, Atlas Team <atlas.addon at gmail dot com>
+	Copyright 2011 ~ 2021 - Arith Hsu, Atlas Team <atlas.addon at gmail dot com>
 
 	This file is part of Atlas.
 
@@ -30,8 +30,8 @@ local L = AceLocale:NewLocale("Atlas", "ruRU", false);
 -- Atlas Russian Localization
 -- Compiled by Eugene Filatov, bigoblin, StingerSoft
 -- Last Update: 23.01.2011
--- $Date: 2019-09-04 08:14:03 +0000 (Wed, 04 Sep 2019) $
--- $Revision: 329 $
+-- $Date: 2021-05-20 15:03:14 +0000 (Thu, 20 May 2021) $
+-- $Revision: 368 $
 
 if ( GetLocale() == "ruRU" ) then
 -- Define the leading strings to be ignored while sorting
@@ -74,24 +74,34 @@ L["ATLAS_DDL_CONTINENT_DEEPHOLM"] = "Подземелья Подземья"
 L["ATLAS_DDL_CONTINENT_DRAENOR"] = "Подземелья Дренора"
 L["ATLAS_DDL_CONTINENT_EASTERN"] = "Подземелья Восточных королевств"
 L["ATLAS_DDL_CONTINENT_KALIMDOR"] = "Подземелья Калимдора"
+L["ATLAS_DDL_CONTINENT_KULTIRAS"] = "Кул-Тирас подземелья"
+L["ATLAS_DDL_CONTINENT_NAZJATAR"] = "Назжатар подземелья"
 L["ATLAS_DDL_CONTINENT_NORTHREND"] = "Подземелья Нордскола"
 L["ATLAS_DDL_CONTINENT_OUTLAND"] = "Подземелья Запределья"
 L["ATLAS_DDL_CONTINENT_PANDARIA"] = "Подземелья Пандарии"
+L["ATLAS_DDL_CONTINENT_ZANDALAR"] = "Зандалар подземелья"
 L["ATLAS_DDL_EXPANSION"] = "Дополнению"
 L["ATLAS_DDL_EXPANSION_BC"] = "Подземелья Burning Crusade"
+L["ATLAS_DDL_EXPANSION_BFA"] = "Битва за Азерот подземелья"
 L["ATLAS_DDL_EXPANSION_CATA"] = "Подземелья Cataclysm"
 L["ATLAS_DDL_EXPANSION_LEGION"] = "Подземелья Legion"
 L["ATLAS_DDL_EXPANSION_LEGION1"] = "Подземелья Легиона"
 L["ATLAS_DDL_EXPANSION_LEGION2"] = "Рейды Легиона"
 L["ATLAS_DDL_EXPANSION_MOP"] = "Подземелья Mists of Pandaria"
 L["ATLAS_DDL_EXPANSION_OLD"] = "Подземелья Старого Мира"
+L["ATLAS_DDL_EXPANSION_SHADOWLANDS"] = "Подземелья и рейды Shadowlands"
 L["ATLAS_DDL_EXPANSION_WOD"] = "Подземелья Warlords of Draenor"
 L["ATLAS_DDL_EXPANSION_WOTLK"] = "Подземелья Wrath of the Lich King"
 L["ATLAS_DDL_LEVEL"] = "Уровню"
 L["ATLAS_DDL_LEVEL_100PLUS"] = "Подземелья уровня 100+"
 L["ATLAS_DDL_LEVEL_100TO110"] = "Подземелья уровня 100-110"
 L["ATLAS_DDL_LEVEL_110PLUS"] = "Подземелья уровня 110+"
+L["ATLAS_DDL_LEVEL_110TO120"] = "Уровень подземелья 110-120"
+L["ATLAS_DDL_LEVEL_120PLUS"] = "Уровень подземелья 120+"
+L["ATLAS_DDL_LEVEL_120TO130"] = "Уровень подземелья 120-130"
+L["ATLAS_DDL_LEVEL_130PLUS"] = "Уровень подземелья 130+"
 L["ATLAS_DDL_LEVEL_45TO60"] = "Подземелья уровня 45-60"
+L["ATLAS_DDL_LEVEL_60PLUS"] = "Подземелья и рейды уровня 60+"
 L["ATLAS_DDL_LEVEL_60TO70"] = "Подземелья уровня 60-70"
 L["ATLAS_DDL_LEVEL_70TO80"] = "Подземелья уровня 70-80"
 L["ATLAS_DDL_LEVEL_80TO85"] = "Подземелья уровня 80-85"

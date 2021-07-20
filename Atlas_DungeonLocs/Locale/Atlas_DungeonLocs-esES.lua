@@ -1,10 +1,10 @@
--- $Id: Atlas_DungeonLocs-esES.lua 52 2019-09-04 07:43:51Z arith $
+-- $Id: Atlas_DungeonLocs-esES.lua 67 2021-05-22 13:40:02Z arithmandar $
 --[[
 
 	Atlas, a World of Warcraft instance map browser
 	Copyright 2005 ~ 2010 - Dan Gilbert <dan.b.gilbertat gmail dot com>
 	Copyright 2010 - Lothaer <lothayerat gmail dot com>, Atlas Team
-	Copyright 2011 ~ 2019 - Arith Hsu, Atlas Team <atlas.addon at gmail dot com>
+	Copyright 2011 ~ 2021 - Arith Hsu, Atlas Team <atlas.addon at gmail dot com>
 
 	This file is part of Atlas.
 

@@ -1,10 +1,10 @@
--- $Id: WorldMap.lua 329 2019-09-04 08:14:03Z arith $
+-- $Id: WorldMap.lua 368 2021-05-20 15:03:14Z arithmandar $
 --[[
 
 	Atlas, a World of Warcraft instance map browser
 	Copyright 2005 ~ 2010 - Dan Gilbert <dan.b.gilbert at gmail dot com>
 	Copyright 2010 - Lothaer <lothayer at gmail dot com>, Atlas Team
-	Copyright 2011 ~ 2019 - Arith Hsu, Atlas Team <atlas.addon at gmail dot com>
+	Copyright 2011 ~ 2021 - Arith Hsu, Atlas Team <atlas.addon at gmail dot com>
 
 	This file is part of Atlas.
 
@@ -39,6 +39,15 @@ local GameTooltip = _G.GameTooltip
 local FOLDER_NAME, private = ...
 local addon = LibStub("AceAddon-3.0"):GetAddon("Atlas")
 
+local WoWClassicEra, WoWClassicTBC, WoWRetail
+local wowtocversion  = select(4, GetBuildInfo())
+if wowtocversion < 20000 then
+	WoWClassicEra = true
+elseif wowtocversion > 19999 and wowtocversion < 90000 then 
+	WoWClassicTBC = true
+else
+	WoWRetail = true
+end
 local WorldMap = {}
 
 addon.WorldMap = WorldMap
@@ -54,13 +63,17 @@ local function createButton()
 	f:SetToplevel(true)
 	f:Hide()
 	f:ClearAllPoints()
-	f:SetPoint("TOPRIGHT", WorldMapFrame, "TOPRIGHT", -38, -68)
+	if (WoWClassicEra or WoWClassicTBC) then
+		f:SetPoint("TOPRIGHT", WorldMapFrame, "TOPRIGHT", -8, -70)
+	else
+		f:SetPoint("TOPRIGHT", WorldMapFrame, "TOPRIGHT", -38, -68)
 
-	f.Shadow = f:CreateTexture(name.."Shadow", "BACKGROUND")
-	f.Shadow:SetAtlas("MapCornerShadow-Right", true)
-	f.Shadow:SetPoint("TOPRIGHT", 4, 4)
-	f.Shadow:SetTexCoord(0, 1, 1, 0)
-	f.Shadow:SetDrawLayer("BACKGROUND", -1)
+		f.Shadow = f:CreateTexture(name.."Shadow", "BACKGROUND")
+		f.Shadow:SetAtlas("MapCornerShadow-Right", true)
+		f.Shadow:SetPoint("TOPRIGHT", 4, 4)
+		f.Shadow:SetTexCoord(0, 1, 1, 0)
+		f.Shadow:SetDrawLayer("BACKGROUND", -1)
+	end
 
 	f.Background = f:CreateTexture(name.."Background", "BACKGROUND")
 	f.Background:SetTexture("Interface\\Minimap\\UI-Minimap-Background")

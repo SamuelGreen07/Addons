@@ -10,11 +10,15 @@ local Widget = Addon.Widgets:NewWidget("ClassIcon")
 ---------------------------------------------------------------------------------------------------
 
 -- WoW APIs
-local CreateFrame = CreateFrame
 local UnitReaction = UnitReaction
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame
 
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\"
 -- local Masque = LibStub("Masque", true)
@@ -26,7 +30,7 @@ local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidg
 
 function Widget:Create(tp_frame)
   -- Required Widget Code
-  local widget_frame = CreateFrame("Frame", nil, tp_frame)
+  local widget_frame = _G.CreateFrame("Frame", nil, tp_frame)
   widget_frame:Hide()
 
   -- Custom Code III
@@ -49,7 +53,8 @@ function Widget:Create(tp_frame)
 end
 
 function Widget:IsEnabled()
-  return TidyPlatesThreat.db.profile.classWidget.ON or TidyPlatesThreat.db.profile.classWidget.ShowInHeadlineView
+  local db = TidyPlatesThreat.db.profile.classWidget
+  return db.ON or db.ShowInHeadlineView
 end
 
 function Widget:EnabledForStyle(style, unit)

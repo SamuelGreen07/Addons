@@ -119,17 +119,17 @@ GRML.listOfFonts = {
     "Interface\\AddOns\\Guild_Roster_Manager\\media\\fonts\\Roboto-Regular.TTF"    
 }
 
--- Method:          GRML.SetNewLanguage ( int , boolean )
+-- Method:          GRML.SetNewLanguage ( int , boolean , boolean )
 -- What it Does:    It establishes both the appropriate region font, and a modifier for the Mandarin text
 -- Purpose:         To be able to have an in-game UI option to change the player language.
-GRML.SetNewLanguage = function ( index , firstLoad )
+GRML.SetNewLanguage = function ( index , firstLoad , resetAllDefaults )
     GRML.LoadLanguage[index]();
-    GRM_G.FontChoice = GRML.listOfFonts[GRM_AddonSettings_Save[GRM_G.FID][GRM_G.setPID][2][44]];
+    GRM_G.FontChoice = GRML.listOfFonts[GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].selectedFont];
     GRML.SetFontModifier();
     if firstLoad then
-        GRM_UI.ReloadAllFrames( false );
+        GRM_UI.ReloadAllFrames( false , false );
     else
-        GRM_UI.ReloadAllFrames ( true );
+        GRM_UI.ReloadAllFrames ( true , resetAllDefaults );
     end
 
     -- Allow implementation of custom slash command.
@@ -161,7 +161,7 @@ GRML.SetFontModifier = function()
     elseif GRM_G.FontChoice == "Interface\\AddOns\\Guild_Roster_Manager\\media\\fonts\\Roboto-Regular.TTF" then
         GRM_G.FontModifier = 1;
     end
-    GRM_G.FontModifier = GRM_G.FontModifier + GRM_AddonSettings_Save[GRM_G.FID][GRM_G.setPID][2][45];
+    GRM_G.FontModifier = GRM_G.FontModifier + GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].fontModifier;
 end
 
 -- Method:          GRML.SetNewFont( int )
@@ -170,7 +170,7 @@ end
 GRML.SetNewFont = function( index )
     GRM_G.FontChoice = GRML.listOfFonts[index];
     GRML.SetFontModifier();
-    GRM_UI.ReloadAllFrames( true );
+    GRM_UI.ReloadAllFrames( true , false );
 end
 
 -- Method:          GRML.GetFontChoice() -- Not necessary for the most part as I can use "STANDARD_TEXT_FONT" - but, just in case...
@@ -178,11 +178,11 @@ end
 -- Purpose:         To ensure no ???? are in place and all characters are accounted for.
 GRML.GetFontChoiceIndex = function( localizationIndex )
     local result = 1;
-    if GRM_AddonSettings_Save[GRM_G.FID][GRM_G.setPID][2][44] ~= 1 then
+    if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].selectedFont ~= 1 then
         if ( localizationIndex < 5 or ( localizationIndex > 5 and localizationIndex < 10 ) or result > 13 ) then
             result = 2
         else
-            result = GRM_AddonSettings_Save[GRM_G.FID][GRM_G.setPID][2][44];
+            result = GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].selectedFont;
         end
         -- For Russian, need Cyrilic compatible font.
         if localizationIndex == 5 and GRM_G.Region ~= "ruRU" then
@@ -243,7 +243,7 @@ if GRM_G.Region == "deDE" then
     GRM_L["Professions"] = "Berufe"
     GRM_L["Guild: "] = "Gilde: "
     
-    if GRM_G.BuildVersion < GRM_G.RetailBuild then
+    if GRM_G.BuildVersion < 80000 then
         GRM_L["Guild created "] = "Gilde erstellt "
     else
         GRM_L["Guild created "] = "Gilde am "
@@ -424,7 +424,11 @@ elseif GRM_G.Region == "esMX" then
     GRM_L["has demoted"] = "ha degradado"
     GRM_L["Professions"] = "Profesiones"
     GRM_L["Guild: "] = "Hermandad: "
-    GRM_L["Guild created "] = "Hermandad creada "
+    if GRM_G.BuildVersion < 80000 then
+            GRM_L["Guild created "] = "Creación de hermandad"
+    else
+        GRM_L["Guild created "] = "Hermandad creada "
+    end
     GRM_L["added to friends"] = "añadido como amigo."
     GRM_L["is already your friend"] = "ya está en tu lista de amigos."
     GRM_L["Player not found."] = "No se ha encontrado al jugador."
@@ -644,7 +648,13 @@ elseif GRM_G.Region == "zhTW" then
     GRM_L["has demoted"] = "降職為"
     GRM_L["Professions"] = "專業技能"
     GRM_L["Guild: "] = "公會："
-    GRM_L["Guild created "] = "公會創立於"
+
+    if GRM_G.BuildVersion >= 80000 then
+        GRM_L["Guild created "] = "公會創立於"
+    else
+        GRM_L["Guild created "] = "創立於";
+    end
+
     GRM_L["added to friends"] = "已被加入好友名單。"
     GRM_L["is already your friend"] = "已經在你的好友名單中了"
     GRM_L["Player not found."] = "找不到該玩家。"

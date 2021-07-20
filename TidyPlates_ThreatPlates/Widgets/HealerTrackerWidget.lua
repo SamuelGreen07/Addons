@@ -11,12 +11,16 @@ local Widget = Addon.Widgets:NewWidget("HealerTracker")
 
 -- WoW APIs
 local GetTime = GetTime
-local CreateFrame = CreateFrame
 local RequestBattlefieldScoreData, GetNumBattlefieldScores = RequestBattlefieldScoreData, GetNumBattlefieldScores
 local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame
 
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\HealerTrackerWidget\\"
 local HEALER_SPECS = {
@@ -34,13 +38,13 @@ local HEALER_SPELLS = {
   [88684] = "PRIEST", -- Holy Word: Serenity
   [88685] = "PRIEST", -- Holy Word: Sanctuary
   [89485] = "PRIEST", -- Inner Focus
-  [10060] = "PRIEST", -- Power Infusion
   [33206] = "PRIEST", -- Pain Suppression
   [62618] = "PRIEST", -- Power Word: Barrier
   [724] = "PRIEST", -- Lightwell
   [14751] = "PRIEST", -- Chakra
   [34861] = "PRIEST", -- Circle of Healing
   [47788] = "PRIEST", -- Guardian Spirit
+  [33076] = "PRIEST", -- Prayer of Mending
 
   -- Druid (The affinity traits on the other specs makes this difficult)
   ---------
@@ -54,14 +58,14 @@ local HEALER_SPELLS = {
 
   -- Shaman
   ---------
-  [17116] = "SHAMAN", -- Nature's Swiftness
   [16190] = "SHAMAN", -- Mana Tide Totem
   [61295] = "SHAMAN", -- Riptide
-  [5394] = "SHAMAN", -- Healing Stream Totem
-  [1064] = "SHAMAN", -- Chain Heal
   [77130] = "SHAMAN", -- Purify Spirit
   [77472] = "SHAMAN", -- Healing Wave
   [98008] = "SHAMAN", -- Spirit Link Totem
+  [52127] = "SHAMAN", -- Water Shield
+  [73920] = "SHAMAN", -- Healing Rain
+  [108280] = "SHAMAN", -- Healing Tide Totem
 
   -- Paladin
   ----------
@@ -79,7 +83,6 @@ local HEALER_SPELLS = {
   [115310] = "MONK", -- Revival
   [116680] = "MONK", -- Thunder Focus Tea
   [116849] = "MONK", -- Life Cocoon
-  [116995] = "MONK", -- Surging mist
   [119611] = "MONK", -- Renewing mist
   [132120] = "MONK", -- Envelopping Mist
 }
@@ -205,7 +208,7 @@ end
 
 function Widget:Create(tp_frame)
   -- Required Widget Code
-  local frame = CreateFrame("Frame", nil, tp_frame)
+  local frame = _G.CreateFrame("Frame", nil, tp_frame)
   frame:Hide()
 
   -- Custom Code III
@@ -220,7 +223,8 @@ function Widget:Create(tp_frame)
 end
 
 function Widget:IsEnabled()
-  return TidyPlatesThreat.db.profile.healerTracker.ON or TidyPlatesThreat.db.profile.healerTracker.ShowInHeadlineView
+  local db = TidyPlatesThreat.db.profile.healerTracker
+  return db.ON or db.ShowInHeadlineView
 end
 
 function Widget:OnEnable()

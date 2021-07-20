@@ -1,7 +1,7 @@
-## Interface: 11302
+## Interface: 20501
 ## Title: WeakAuras Options
-## Author: Mirrored and the WeakAuras Team
-## Version: 2.15.0
+## Author: The WeakAuras Team
+## Version: 3.5.0
 ## Notes: Options for WeakAuras
 ## Notes-esES: Opciones para WeakAuras
 ## Notes-deDE: Optionen für WeakAuras
@@ -24,16 +24,28 @@ RegionOptions\Icon.lua
 RegionOptions\Text.lua
 RegionOptions\Group.lua
 RegionOptions\DynamicGroup.lua
+RegionOptions\StopMotion.lua
+RegionOptions\Model.lua
 RegionOptions\ProgressTexture.lua
 
 SubRegionOptions\SubRegionCommon.lua
 SubRegionOptions\SubText.lua
 SubRegionOptions\Border.lua
+SubRegionOptions\Glow.lua
+SubRegionOptions\Tick.lua
+SubRegionOptions\BarModel.lua
 
 Cache.lua
 
+CommonOptions.lua
+GroupOptions.lua
+DisplayOptions.lua
+TriggerOptions.lua
+LoadOptions.lua
 ActionOptions.lua
 AnimationOptions.lua
+InformationOptions.lua
+
 BuffTrigger.lua
 BuffTrigger2.lua
 GenericTrigger.lua
@@ -44,26 +56,37 @@ ConditionOptions.lua
 AuthorOptions.lua
 
 OptionsFrames\OptionsFrame.lua
-# -- Groups
+
+# Groups
 OptionsFrames\CodeReview.lua
 OptionsFrames\IconPicker.lua
 OptionsFrames\ImportExport.lua
+OptionsFrames\ModelPicker.lua
 OptionsFrames\TextEditor.lua
 OptionsFrames\TexturePicker.lua
-# -- misc Frames
+
+# Misc frames
 OptionsFrames\MoverSizer.lua
 OptionsFrames\FrameChooser.lua
 
 AceGUI-Widgets\AceGUIWidget-WeakAurasExpand.lua
+AceGUI-Widgets\AceGUIWidget-WeakAurasExpandSmall.lua
 AceGUI-Widgets\AceGUIWidget-WeakAurasIcon.lua
 AceGUI-Widgets\AceGUIWidget-WeakAurasNewHeaderButton.lua
 AceGUI-Widgets\AceGUIWidget-WeakAurasLoadedHeaderButton.lua
 AceGUI-Widgets\AceGUIWidget-WeakAurasDisplayButton.lua
+AceGUI-Widgets\AceGUIWidget-WeakAurasPendingInstallButton.lua
+AceGUI-Widgets\AceGUIWidget-WeakAurasPendingUpdateButton.lua
 AceGUI-Widgets\AceGUIWidget-WeakAurasTextureButton.lua
 AceGUI-Widgets\AceGUIWidget-WeakAurasIconButton.lua
 AceGUI-Widgets\AceGUIWidget-WeakAurasMultiLineEditBox.lua
 AceGUI-Widgets\AceGUIWidget-WeakAurasNewButton.lua
 AceGUI-Widgets\AceGUIWidget-WeakAurasImportButton.lua
 AceGUI-Widgets\AceGUIWidget-WeakAurasSortedDropDown.lua
+AceGUI-Widgets\AceGUIWidget-WeakAurasToolbarButton.lua
 AceGUI-Widgets\AceGUIWidget-WeakAurasTwoColumnDropDown.lua
+AceGUI-Widgets\AceGUIWidget-WeakAurasSnippetButton.lua
 AceGUI-Widgets\AceGUIContainer-WeakAurasTreeGroup.lua
+AceGUI-Widgets\AceGUIWidget-WeakAurasSnippetButton.lua
+AceGUI-Widgets\AceGUIContainer-WeakAurasInlineGroup.lua
+AceGUI-Widgets\AceGUIWidget-WeakAurasExpandAnchor.lua

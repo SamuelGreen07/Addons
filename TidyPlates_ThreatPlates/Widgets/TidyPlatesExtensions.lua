@@ -8,12 +8,15 @@ local ThreatPlates = Addon.ThreatPlates
 -- Lua APIs
 
 -- WoW APIs
-local UnitGetTotalAbsorbs, UnitGetTotalHealAbsorbs = UnitGetTotalAbsorbs, UnitGetTotalHealAbsorbs
-local UnitHealth = UnitHealth
-local UnitHealthMax = UnitHealthMax
+local UnitGetTotalHealAbsorbs = UnitGetTotalHealAbsorbs
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: UnitGetTotalAbsorbs, UnitHealth, UnitHealthMax
 
 ---------------------------------------------------------------------------------------------------
 -- Extensions to the TidyPlates UI elements
@@ -28,7 +31,7 @@ local IGNORED_STYLES = {
   empty= true,
 }
 
-function Addon:CreateExtensions(tp_frame)
+local function CreateExtensions(tp_frame)
   local visual = tp_frame.visual
 
   -- Fix layering of TidyPlates
@@ -49,19 +52,19 @@ function Addon:CreateExtensions(tp_frame)
   if ENABLE_ABSORB then
     -- check if absorbbar and glow are created at the samel level as healthbar
     if not absorbbar then
-      absorbbar = healthbar:CreateTexture(nil, "BORDER", -6)
+      absorbbar = healthbar:CreateTexture(nil, "ARTWORK", nil, 2)
       absorbbar:Hide()
 
-      absorbbar.overlay = healthbar:CreateTexture(nil, "OVERLAY", 0)
+      absorbbar.overlay = healthbar:CreateTexture(nil, "ARTWORK", nil, 3)
       absorbbar.overlay:SetTexture("Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Striped_Texture.tga", true, true)
       absorbbar.overlay:SetHorizTile(true)
       --absorbbar.tileSize = 64
---      absorbbar.overlay:SetTexture("Interface\\RaidFrame\\Shield-Overlay", true, true);	--Tile both vertically and horizontally
---      absorbbar.overlay:SetHorizTile(true)
---      absorbbar.tileSize = 32
+      --      absorbbar.overlay:SetTexture("Interface\\RaidFrame\\Shield-Overlay", true, true);	--Tile both vertically and horizontally
+      --      absorbbar.overlay:SetHorizTile(true)
+      --      absorbbar.tileSize = 32
       absorbbar.overlay:Hide()
 
-      local absorbglow = healthbar:CreateTexture(nil, "OVERLAY", 7)
+      local absorbglow = healthbar:CreateTexture(nil, "ARTWORK", nil, 4)
       absorbglow:SetTexture("Interface\\RaidFrame\\Shield-Overshield")
       absorbglow:SetBlendMode("ADD")
       absorbglow:SetWidth(8)
@@ -85,7 +88,7 @@ function Addon:CreateExtensions(tp_frame)
   end
 end
 
-function Addon:UpdateExtensions(tp_frame, unitid, style)
+local function UpdateExtensions(tp_frame, unitid, style)
   local visual = tp_frame.visual
   local absorbbar = visual.absorbbar
   local healthbar = visual.healthbar
@@ -107,14 +110,14 @@ function Addon:UpdateExtensions(tp_frame, unitid, style)
   end
 
   -- Code for absorb calculation see CompactUnitFrame.lua
-  local health = UnitHealth(unitid) or 0
-  local health_max = UnitHealthMax(unitid) or 0
+  local health = _G.UnitHealth(unitid) or 0
+  local health_max = _G.UnitHealthMax(unitid) or 0
   local heal_absorb = UnitGetTotalHealAbsorbs(unitid) or 0
-  local absorb = UnitGetTotalAbsorbs(unitid) or 0
+  local absorb = _G.UnitGetTotalAbsorbs(unitid) or 0
 
-  -- heal_absorb = 0.25 * UnitHealth(unitid)
-  -- absorb = UnitHealthMax(unitid) * 0.3 -- REMOVE
-  -- health = health_max * 0.75 -- REMOVE
+  -- heal_absorb = 0.2 * UnitHealth(unitid)
+  -- absorb = health_max * 0.3
+  -- health = health_max * 0.5
   -- visual.healthbar:SetValue(health)
 
   local db = TidyPlatesThreat.db.profile.settings.healthbar
@@ -245,4 +248,12 @@ function Addon:UpdateExtensions(tp_frame, unitid, style)
     absorbbar.glow:Hide()
     absorbbar:Hide()
   end
+end
+
+if Addon.CLASSIC then
+  Addon.CreateExtensions = function() end
+  Addon.UpdateExtensions = function() end
+else
+  Addon.CreateExtensions = CreateExtensions
+  Addon.UpdateExtensions = UpdateExtensions
 end

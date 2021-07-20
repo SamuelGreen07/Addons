@@ -15,7 +15,6 @@ GRM_UI.EstablishClassicFrames = function()
         GRM_UI.MemberDetailFrameClassic = GuildMemberDetailFrame;
         GRM_UI.MemberDetailFrame.RemoveButton = GuildMemberRemoveButton;
         GRM_UI.MemberDetailFrame.Name = GuildMemberDetailName;
-        GRM_UI.RankText = GuildMemberDetailRankText;
 
         -- MOTD and GuildInfo Window
         GRM_UI.CommunitiesGuildTextEditFrame = StaticPopup1;
@@ -53,7 +52,6 @@ GRM_UI.EstablishClassicFrames = function()
         GRM_UI.GuildInfoEditBox = CommunitiesGuildTextEditFrame.Container.ScrollFrame.EditBox;
         GRM_UI.GuildDetailsFrameEditMOTDButton = CommunitiesFrameGuildDetailsFrameInfo.EditMOTDButton;
         GRM_UI.GuildDetailsGuildInformationButton = CommunitiesFrameGuildDetailsFrameInfo.EditDetailsButton;
-        GRM_UI.RankText = GuildMemberRankDropdownText;
 
         -- When did they improve the guild roster window.
 
@@ -70,4 +68,4 @@ end
 
 -- Guild Event Log                          = 40000 (4.0 CATA)
 
--- Guild News and Rewards and so on         = 40000
+-- Guild News and Rewards and so on         = 40000 ''

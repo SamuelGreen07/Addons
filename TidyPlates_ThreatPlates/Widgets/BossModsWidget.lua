@@ -14,14 +14,17 @@ local Widget = Addon.Widgets:NewWidget("BossMods")
 local floor = math.floor
 
 -- WoW APIs
-local CreateFrame = CreateFrame
-local UnitGUID = UnitGUID
 local GetSpellTexture = GetSpellTexture
 local GetTime = GetTime
 local tremove = tremove
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame, UnitGUID
 
 --
 local DBM = DBM
@@ -71,7 +74,7 @@ local function UpdateAuraTexture(frame, aura, index)
 end
 
 local function CreateAuraTexture(frame, index)
-  local aura = frame:CreateTexture(nil, "OVERLAY", -8)
+  local aura = frame:CreateTexture(nil, "ARTWORK")
   local time = frame:CreateFontString(nil, "OVERLAY") -- Duration Text
 
   time:SetJustifyH("CENTER")
@@ -161,7 +164,7 @@ end
 
 -- DBM:FireEvent("BossMod_ShowNameplateAura", isGUID, unit, currentTexture, duration, desaturate, addLine, lineColor)
 local function BossMod_ShowNameplateAura(msg, is_guid, unit, aura_texture, duration, desaturate, addLine, lineColor)
-  local guid = (is_guid and unit) or UnitGUID(unit)
+  local guid = (is_guid and unit) or _G.UnitGUID(unit)
   if not guid then
     -- ThreatPlates.DEBUG('bossmods show discarded unmatched name: ' .. unit)
     return
@@ -216,7 +219,7 @@ end
 
 -- DBM:FireEvent("BossMod_HideNameplateAura", isGUID, unit, currentTexture)
 local function BossMod_HideNameplateAura(msg, is_guid, unit, aura_texture)
-  local guid = (is_guid and unit) or UnitGUID(unit)
+  local guid = (is_guid and unit) or _G.UnitGUID(unit)
   if not guid then
     return
   end
@@ -259,12 +262,12 @@ end
 
 function Widget:Create(tp_frame)
   -- Required Widget Code
-  local widget_frame = CreateFrame("Frame", nil, tp_frame)
+  local widget_frame = _G.CreateFrame("Frame", nil, tp_frame)
   widget_frame:Hide()
 
   -- Custom Code
   --------------------------------------
-  widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 2)
+  widget_frame:SetFrameLevel(tp_frame:GetFrameLevel())
   widget_frame.Auras = {}
   widget_frame.AurasNo = 0
 
@@ -277,7 +280,8 @@ function Widget:Create(tp_frame)
 end
 
 function Widget:IsEnabled()
-  return TidyPlatesThreat.db.profile.BossModsWidget.ON or TidyPlatesThreat.db.profile.BossModsWidget.ShowInHeadlineView
+  local db = TidyPlatesThreat.db.profile.BossModsWidget
+  return db.ON or db.ShowInHeadlineView
 end
 
 function Widget:OnEnable()
@@ -352,7 +356,7 @@ end
 local EnabledConfigMode = false
 function Addon:ConfigBossModsWidget()
   if not EnabledConfigMode then
-    local guid = UnitGUID("target")
+    local guid = _G.UnitGUID("target")
     if guid then
       BossMod_ShowNameplateAura("Configuration Mode", true, guid, GetSpellTexture(241600), nil, false, true, {1, 1, 0.5, 1})
       BossMod_ShowNameplateAura("Configuration Mode", true, guid, GetSpellTexture(207327), 7, false, true, {0, 0, 1, 1})

@@ -33,6 +33,8 @@ local unpack = unpack
 local math = math
 local string = string
 
+local BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate" or nil
+
 local function noop() end
 
 --[[
@@ -83,11 +85,7 @@ local function CreateInfoString(button, position)
 		str:SetJustifyH("RIGHT")
 		str:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 1.5, 1.5)
 	end
-	if RealUI then
-		str:SetFontObject(RealUIFont_PixelSmall)
-	else
-		str:SetFont(unpack(ns.options.fonts.itemCount))
-	end
+	str:SetFont(unpack(ns.options.fonts.itemCount))
 
 	return str
 end
@@ -125,7 +123,7 @@ local function ItemButton_Scaffold(self)
 	self.Count = _G[name.."Count"]
 	self.Cooldown = _G[name.."Cooldown"]
 	self.Quest = _G[name.."IconQuestTexture"]
-	self.Border = CreateFrame("Frame", nil, self)
+	self.Border = CreateFrame("Frame", nil, self, BackdropTemplate)
 	self.Border:SetPoint("TOPLEFT", self.Icon, 0, 0)
 	self.Border:SetPoint("BOTTOMRIGHT", self.Icon, 0, 0)
 	self.Border:SetBackdrop({
@@ -139,7 +137,7 @@ end
 
 --[[!
 	Update the button with new item-information
-	@param item <table> The itemTable holding information, see Implementation:GetItemInfo()
+	@param item <table> The itemTable holding information, see Implementation:GetCustomItemInfo()
 	@callback OnUpdate(item)
 ]]
 local L = cargBags:GetLocalizedTypes()
@@ -207,7 +205,7 @@ end
 
 --[[!
 	Updates the buttons cooldown with new item-information
-	@param item <table> The itemTable holding information, see Implementation:GetItemInfo()
+	@param item <table> The itemTable holding information, see Implementation:GetCustomItemInfo()
 	@callback OnUpdateCooldown(item)
 ]]
 local function ItemButton_UpdateCooldown(self, item)
@@ -223,7 +221,7 @@ end
 
 --[[!
 	Updates the buttons lock with new item-information
-	@param item <table> The itemTable holding information, see Implementation:GetItemInfo()
+	@param item <table> The itemTable holding information, see Implementation:GetCustomItemInfo()
 	@callback OnUpdateLock(item)
 ]]
 local function ItemButton_UpdateLock(self, item)
@@ -234,7 +232,7 @@ end
 
 --[[!
 	Updates the buttons quest texture with new item information
-	@param item <table> The itemTable holding information, see Implementation:GetItemInfo()
+	@param item <table> The itemTable holding information, see Implementation:GetCustomItemInfo()
 	@callback OnUpdateQuest(item)
 ]]
 local function ItemButton_UpdateQuest(self, item)

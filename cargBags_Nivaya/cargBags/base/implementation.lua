@@ -21,7 +21,19 @@ local addon, ns = ...
 local cargBags = ns.cargBags
 
 local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+local isTBC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+
+local animaSpells = {
+	[336327] = true,
+	[336456] = true,
+	[345706] = true,
+	[347555] = true,
+}
+local function IsAnimaItem(itemId)
+	local n,spellId = GetItemSpell(itemId or 0)
+	return spellId and animaSpells[spellId]
+end
 
 --[[!
 	@class Implementation
@@ -332,7 +344,7 @@ local function GetContainerItemLevel(link, bagID, slotID)
 	return itemDB[link]
 end]]
 
-function Implementation:GetItemInfo(bagID, slotID, i)
+function Implementation:GetCustomItemInfo(bagID, slotID, i)
 	i = i or defaultItem
 	for k in pairs(i) do i[k] = nil end
 
@@ -345,7 +357,7 @@ function Implementation:GetItemInfo(bagID, slotID, i)
 		local _
 		i.texture, i.count, i.locked, i.quality, i.readable, _, _, _, _, i.id = GetContainerItemInfo(bagID, slotID)
 		i.cdStart, i.cdFinish, i.cdEnable = GetContainerItemCooldown(bagID, slotID)
-		if isClassic then
+		if isClassic or isTBC then
 			i.isQuestItem, i.questID, i.questActive = nil, nil, nil
 			i.isInSet, i.setName = nil, nil
 		else
@@ -356,8 +368,8 @@ function Implementation:GetItemInfo(bagID, slotID, i)
 		-- *edits by Lars "Goldpaw" Norberg for WoW 5.0.4 (MoP)
 		-- last return value here, "texture", doesn't show for battle pets
 		local texture
-		i.name, i.link, i.rarity, i.level, i.minLevel, i.type, i.subType, i.stackCount, i.equipLoc, texture, i.sellPrice  = GetItemInfo(clink)
-		if isClassic then
+		i.name, i.link, i.rarity, i.level, i.minLevel, i.type, i.subType, i.stackCount, i.equipLoc, texture, i.sellPrice, i.classID, i.subClassID  = GetItemInfo(clink)
+		if isClassic or isTBC then
 			if i.type == cBnivL.Quest then
 				i.isQuestItem = true
 			end
@@ -373,8 +385,8 @@ function Implementation:GetItemInfo(bagID, slotID, i)
 			end
 		end
 		-- get the item spell to determine if the item is an Artifact Power boosting item
-		if isRetail and ns.options.filterArtifactPower and IsArtifactPowerItem(i.id) then
-			i.type = ARTIFACT_POWER
+		if isRetail and ns.options.filterArtifactPower and IsAnimaItem(i.id) then	--IsArtifactPowerItem(i.id) then
+			i.type = ANIMA
 		end
 		-- texture
 		i.texture = i.texture or texture
@@ -408,8 +420,9 @@ end
 	@param bagID <number>
 	@param slotID <number>
 ]]
+local function nope() end
 function Implementation:UpdateSlot(bagID, slotID)
-	local item = self:GetItemInfo(bagID, slotID)
+	local item = self:GetCustomItemInfo(bagID, slotID)
 	local button = self:GetButton(bagID, slotID)
 	local container = self:GetContainerForItem(item, button)
 
@@ -430,6 +443,7 @@ function Implementation:UpdateSlot(bagID, slotID)
 		button.container:RemoveButton(button)
 		self:SetButton(bagID, slotID, nil)
 		button:Free()
+
 	end
 end
 
@@ -498,14 +512,14 @@ function Implementation:BAG_UPDATE_COOLDOWN(event, bagID)
 		for slotID=1, GetContainerNumSlots(bagID) do
 			local button = self:GetButton(bagID, slotID)
 			if(button) then
-				local item = self:GetItemInfo(bagID, slotID)
+				local item = self:GetCustomItemInfo(bagID, slotID)
 				button:UpdateCooldown(item)
 			end
 		end
 	else
 		for id, container in pairs(self.contByID) do
 			for i, button in pairs(container.buttons) do
-				local item = self:GetItemInfo(button.bagID, button.slotID)
+				local item = self:GetCustomItemInfo(button.bagID, button.slotID)
 				button:UpdateCooldown(item)
 			end
 		end
@@ -522,7 +536,7 @@ function Implementation:ITEM_LOCK_CHANGED(event, bagID, slotID)
 
 	local button = self:GetButton(bagID, slotID)
 	if(button) then
-		local item = self:GetItemInfo(bagID, slotID)
+		local item = self:GetCustomItemInfo(bagID, slotID)
 		button:UpdateLock(item)
 	end
 end
@@ -562,7 +576,7 @@ end
 function Implementation:UNIT_QUEST_LOG_CHANGED(event)
 	for id, container in pairs(self.contByID) do
 		for i, button in pairs(container.buttons) do
-			local item = self:GetItemInfo(button.bagID, button.slotID)
+			local item = self:GetCustomItemInfo(button.bagID, button.slotID)
 			button:UpdateQuest(item)
 		end
 	end

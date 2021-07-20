@@ -69,10 +69,62 @@ function cargBags:GetImplementation(name)
 	return self.classes.Implementation:Get(name)
 end
 
+local FRAME_THAT_OPENED_BAGS = nil
+local function IsAnyBagOpen() return cargBags.blizzard:IsVisible()  end
 local function toggleBag(forceopen)	cargBags.blizzard:Toggle(forceopen)	end
 local function toggleNoForce()		cargBags.blizzard:Toggle()			end
 local function openBag()				cargBags.blizzard:Show()			end
 local function closeBag()				cargBags.blizzard:Hide()			end
+local function openAllBags(frame)
+	
+	if ( not UIParent:IsShown() ) then
+		return
+	end
+	if ( IsAnyBagOpen() ) then
+		return
+	end
+	if( frame and not FRAME_THAT_OPENED_BAGS ) then
+		FRAME_THAT_OPENED_BAGS = frame:GetName();
+	end
+
+	cargBags.blizzard:Show()
+
+end
+local function closeAllBags(frame)
+
+	if ( frame and frame:GetName() ~= FRAME_THAT_OPENED_BAGS) then
+		return
+	end
+	
+	FRAME_THAT_OPENED_BAGS = nil
+	
+	cargBags.blizzard:Hide()
+
+end
+local function openAllMC(frame)
+	local count = 0
+--	if IsAnyBagOpen() then
+--		return;
+--	end
+	for i = 0, NUM_BAG_FRAMES do
+		if ItemButtonUtil.GetItemContextMatchResultForContainer(i) == ItemButtonUtil.ItemContextMatchResult.Match then
+			cargBags.blizzard:Show()
+			count = 1
+			break
+		end
+	end
+	if frame and not FRAME_THAT_OPENED_BAGS then
+		FRAME_THAT_OPENED_BAGS = frame:GetName()
+	end
+	return count
+end
+local function checkHideUIPanel(frame)
+	if frame and frame:GetName() == FRAME_THAT_OPENED_BAGS then
+		FRAME_THAT_OPENED_BAGS = nil
+		cargBags.blizzard:Hide()
+	end
+end
+hooksecurefunc("HideUIPanel", checkHideUIPanel)
 
 --- Overwrites Blizzards Bag-Toggle-Functions with the implementation's ones
 --  @param name <string> The name of the implementation [optional]
@@ -85,10 +137,12 @@ function cargBags:ReplaceBlizzard(name)
 	ToggleBag = toggleNoForce
 	ToggleBackpack = toggleNoForce
 
-	OpenAllBags = toggleBag	-- Name is misleading, Blizz-function actually toggles bags
+	OpenAllBags = openAllBags
 	OpenBackpack = toggleBag -- Blizz does not provide toggling here
-	CloseAllBags = closeBag
+	CloseAllBags = closeAllBags
 	CloseBackpack = closeBag
+	
+	if _G.OpenAllBagsMatchingContext then OpenAllBagsMatchingContext = openAllMC end
 
 	BankFrame:UnregisterAllEvents()
 end

@@ -1,10 +1,10 @@
--- $Id: EJIntegration.lua 333 2019-09-04 11:03:14Z arith $
+-- $Id: EJIntegration.lua 368 2021-05-20 15:03:14Z arithmandar $
 --[[
 
 	Atlas, a World of Warcraft instance map browser
 	Copyright 2005 ~ 2010 - Dan Gilbert <dan.b.gilbert at gmail dot com>
 	Copyright 2010 - Lothaer <lothayer at gmail dot com>, Atlas Team
-	Copyright 2011 ~ 2019 - Arith Hsu, Atlas Team <atlas.addon at gmail dot com>
+	Copyright 2011 ~ 2021 - Arith Hsu, Atlas Team <atlas.addon at gmail dot com>
 
 	This file is part of Atlas.
 
@@ -36,7 +36,15 @@ local tonumber = _G.tonumber
 local GameTooltip = GameTooltip
 -- Libraries
 
-local WoWClassic = select(4, GetBuildInfo()) < 20000
+local WoWClassicEra, WoWClassicTBC, WoWRetail
+local wowtocversion  = select(4, GetBuildInfo())
+if wowtocversion < 20000 then
+	WoWClassicEra = true
+elseif wowtocversion > 19999 and wowtocversion < 90000 then 
+	WoWClassicTBC = true
+else
+	WoWRetail = true
+end
 
 -- ----------------------------------------------------------------------------
 -- AddOn namespace.
@@ -60,7 +68,9 @@ end
 -- Syntax 2: Atlas_GetBossName(bossname, encounterID);
 -- Syntax 2: Atlas_GetBossName(bossname, encounterID, creatureIndex);
 -- ------------------------------------------------------------
-function addon:GetBossName(bossname, encounterID, creatureIndex)
+function addon:GetBossName(bossname, encounterID, creatureIndex, moduleName)
+	local LL
+	if (moduleName) then LL = LibStub("AceLocale-3.0"):GetLocale("Atlas_"..moduleName) end
 	if (encounterID and EJ_GetEncounterInfo) then
 		local _, encounter, iconImage
 		if (not creatureIndex) then
@@ -75,17 +85,17 @@ function addon:GetBossName(bossname, encounterID, creatureIndex)
 			if (bossname and BB[bossname]) then
 				bossname = BB[bossname]
 			elseif (bossname and L[bossname]) then
-				bossname = L[bossname]
+				bossname = LL and LL[bossname] or bossname
 			else
 				--bossname = bossname
 			end
 		else
 			bossname = iconImage and format("|T%d:0:2.5|t%s", iconImage, encounter) or encounter
 		end
+	elseif (bossname and L[bossname]) then
+		bossname = LL and LL[bossname] or bossname
 	elseif (bossname and BB[bossname]) then
 		bossname = BB[bossname]
-	elseif (bossname and L[bossname]) then
-		bossname = L[bossname]
 	else
 		--bossname = bossname
 	end
@@ -98,7 +108,7 @@ function Atlas_GetBossName(bossname, encounterID, creatureIndex)
 end
 
 function addon:AdventureJournalButton_OnClick(frame)
-	if (WoWClassic) then return end
+	if (WoWClassicEra or WoWClassicTBC) then return end
 	local instanceID = frame.instanceID
 	local disabled = not C_AdventureJournal.CanBeShown()
 	if (disabled) then return end
@@ -122,7 +132,7 @@ function addon:AdventureJournalButton_OnClick(frame)
 end
 
 function addon:AdventureJournalButton_OnEnter(frame)
-	if (WoWClassic) then return end
+	if (WoWClassicEra or WoWClassicTBC) then return end
 	local instanceID = frame.instanceID
 	if (not instanceID) then return end
 

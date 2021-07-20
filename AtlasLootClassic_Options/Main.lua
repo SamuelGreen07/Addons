@@ -37,13 +37,27 @@ Options.config.args.atlasloot = {
 			width = "full",
 			name = AL["Show ID's in tooltip."],
 		},
+		showDropRate = {
+			order = 2.5,
+			type = "toggle",
+			width = "full",
+			name = AL["Show drop rate if available."],
+		},
 		showLvlRange = {
 			order = 3,
 			type = "toggle",
-			width = "full",
-			name = AL["Show level range if aviable."],
+			--width = "full",
+			name = AL["Show level range if available."],
 			get = function(info) return AtlasLoot.db.showLvlRange end,
 			set = function(info, value) AtlasLoot.db.showLvlRange = value AtlasLoot.GUI.OnLevelRangeRefresh() end,
+		},
+		enableBossLevel = {
+			order = 3.5,
+			type = "toggle",
+			--width = "full",
+			name = AL["Show boss level if available."],
+			get = function(info) return AtlasLoot.db.enableBossLevel end,
+			set = function(info, value) AtlasLoot.db.enableBossLevel = value AtlasLoot.GUI.OnLevelRangeRefresh() end,
 		},
 		showMinEnterLvl = {
 			order = 4,
@@ -65,6 +79,28 @@ Options.config.args.atlasloot = {
 			type = "toggle",
 			hidden = AtlasLoot.Button:GetWoWHeadLocale() and false or true,
 			name = AL["Use english WoWHead."],
+		},
+		enableAutoSelect = {
+			order = 7,
+			type = "toggle",
+			width = "full",
+			name = AL["Enable auto selection of instances if available."],
+			desc = AL["Select instance loottable on open."].."\n"..format(AL["This loads the |cff999999%s|r module."], "AtlasLootClassic_DungeonsAndRaids"),
+			set = function(info, value) AtlasLoot.db.enableAutoSelect = value AtlasLoot.Data.AutoSelect:RefreshOptions() end,
+		},
+		enableAutoSelectBoss = {
+			order = 8,
+			type = "toggle",
+			width = "full",
+			disabled = function() return not AtlasLoot.db.enableAutoSelect end,
+			name = AL["Enable auto selection of bosses if available."],
+		},
+		enableAtlasMapIntegration = {
+			order = 9,
+			type = "toggle",
+			width = "full",
+			name = AL["Enable Atlas map integration if available."],
+			set = function(info, value) AtlasLoot.db.enableAtlasMapIntegration = value AtlasLoot.GUI.OnLevelRangeRefresh() end,
 		},
 		headerSetting = {
 			order = 10,
@@ -113,3 +149,61 @@ Options.config.args.atlasloot = {
 		},
 	},
 }
+
+Options.orderNumber = Options.orderNumber + 1
+Options.config.args.classfilter = {
+	type = "group",
+	name = AL["Class Filter"],
+	childGroups = "select",
+	order = Options.orderNumber,
+	--get = function(info) return AtlasLoot.db[info[#info]] end,
+	--set = function(info, value) AtlasLoot.db[info[#info]] = value end,
+	args = {
+
+	}
+}
+
+-- build class filter list
+local ClassFilterStatList, SortedClassList, ClassFilterDB = AtlasLoot.Data.ClassFilter.GetStatListForOptions()
+local classFilterTab = Options.config.args.classfilter.args
+local CLASS_NAMES_WITH_COLORS = AtlasLoot:GetColoredClassNames()
+
+-- build filterList
+local OptionsFilterList = {}
+for filterStatCatIndex, filterStatCat in ipairs(ClassFilterStatList) do
+	OptionsFilterList[filterStatCatIndex..""] = {
+		order = filterStatCatIndex,
+		name = filterStatCat.name,
+		type = "group",
+		args = {}
+	}
+	local tab = OptionsFilterList[filterStatCatIndex..""].args
+	for statIndex, stat in ipairs(filterStatCat) do
+		if stat == "" then
+			tab[statIndex..stat] = {
+				order = statIndex,
+				name = "",
+				type = "header",
+				width = "full"
+			}
+		elseif _G[stat] then
+			tab[stat] = {
+				order = statIndex,
+				name = _G[stat],
+				type = "toggle",
+			}
+		end
+	end
+end
+
+for classIndex, className in ipairs(SortedClassList) do
+	classFilterTab[className] = {
+		order = classIndex,
+		name = CLASS_NAMES_WITH_COLORS[className],
+		type = "group",
+		childGroups = "tab",
+		get = function(info) return ClassFilterDB[className][info[#info]] end,
+		set = function(info, value) ClassFilterDB[className][info[#info]] = value end,
+		args = OptionsFilterList,
+	}
+end

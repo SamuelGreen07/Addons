@@ -57,38 +57,36 @@ local guildbank					-- Detailed contents of the guildbank
 local guildbankData				-- By item  contents of the guildbank
 ]]--
 
+--
 -- Creates and sets up the shopping list window
+--
 local function createShoppingListFrame(self)
 	local frame = SkilletShoppingList
 	if not frame then
 		return nil
 	end
-
-	frame:SetBackdrop(FrameBackdrop);
+	if TSM_API then
+		frame:SetFrameStrata("HIGH")
+	end
+	frame:SetBackdrop(FrameBackdrop)
 	frame:SetBackdropColor(0.1, 0.1, 0.1)
-
 	-- A title bar stolen from the Ace2 Waterfall window.
 	local r,g,b = 0, 0.7, 0; -- dark green
 	local titlebar = frame:CreateTexture(nil,"BACKGROUND")
 	local titlebar2 = frame:CreateTexture(nil,"BACKGROUND")
-
 	titlebar:SetPoint("TOPLEFT",frame,"TOPLEFT",3,-4)
 	titlebar:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-3,-4)
 	titlebar:SetHeight(13)
-
 	titlebar2:SetPoint("TOPLEFT",titlebar,"BOTTOMLEFT",0,0)
 	titlebar2:SetPoint("TOPRIGHT",titlebar,"BOTTOMRIGHT",0,0)
 	titlebar2:SetHeight(13)
-
 	titlebar:SetGradientAlpha("VERTICAL",r*0.6,g*0.6,b*0.6,1,r,g,b,1)
-	titlebar:SetTexture(r,g,b,1)
+	titlebar:SetColorTexture(r,g,b,1)
 	titlebar2:SetGradientAlpha("VERTICAL",r*0.9,g*0.9,b*0.9,1,r*0.6,g*0.6,b*0.6,1)
-	titlebar2:SetTexture(r,g,b,1)
-
+	titlebar2:SetColorTexture(r,g,b,1)
 	local title = CreateFrame("Frame",nil,frame)
 	title:SetPoint("TOPLEFT",titlebar,"TOPLEFT",0,0)
 	title:SetPoint("BOTTOMRIGHT",titlebar2,"BOTTOMRIGHT",0,0)
-
 	local titletext = title:CreateFontString("SkilletShoppingListTitleText", "OVERLAY", "GameFontNormalLarge")
 	titletext:SetPoint("TOPLEFT",title,"TOPLEFT",0,0)
 	titletext:SetPoint("TOPRIGHT",title,"TOPRIGHT",0,0)
@@ -100,28 +98,43 @@ local function createShoppingListFrame(self)
 
 	SkilletShowQueuesFromAllAltsText:SetText(L["Include alts"])
 	SkilletShowQueuesFromAllAlts:SetChecked(Skillet.db.char.include_alts)
-
 	SkilletShowQueuesInItemOrderText:SetText(L["Order by item"])
 	SkilletShowQueuesInItemOrder:SetChecked(Skillet.db.char.item_order)
-
 	SkilletShowQueuesMergeItemsText:SetText(L["Merge items"])
 	SkilletShowQueuesMergeItems:SetChecked(Skillet.db.char.merge_items)
-
+--[[
 	SkilletShowQueuesIncludeGuildText:SetText(L["Include guild"])
 	SkilletShowQueuesIncludeGuild:SetChecked(Skillet.db.char.include_guild)
-
-	-- The frame enclosing the scroll list needs a border and a background .....
+]]--
+--
+-- Button to retrieve items needed from the bank
+--
+	SkilletShoppingListRetrieveButton:SetText(L["Retrieve"])
+	SkilletShoppingListRetrieveButton:Hide()
+--
+-- Button to create an Auctionator search list for Shopping List contents
+--   should only show if the Auction House is open, Auctionator is
+--   installed, and the Auctionator plugin is enabled
+--   It should be hidden when the Auction House is closed
+--   Start with it (unconditionally) hidden
+--
+	SkilletSLAuctionatorButton:Hide()
+--
+-- The frame enclosing the scroll list needs a border and a background
+--
 	local backdrop = SkilletShoppingListParent
+	if TSM_API then
+		backdrop:SetFrameStrata("HIGH")
+	end
 	backdrop:SetBackdrop(ControlBackdrop)
 	backdrop:SetBackdropBorderColor(0.6, 0.6, 0.6)
 	backdrop:SetBackdropColor(0.05, 0.05, 0.05)
 	backdrop:SetResizable(true)
 
-	-- Button to retrieve items needed from the bank
-	SkilletShoppingListRetrieveButton:SetText(L["Retrieve"])
-
-	-- Ace Window manager library, allows the window position (and size)
-	-- to be automatically saved
+--
+-- Ace Window manager library, allows the window position (and size)
+-- to be automatically saved
+--
 	local shoppingListLocation = {
 		prefix = "shoppingListLocation_"
 	}
@@ -137,19 +150,15 @@ local function createShoppingListFrame(self)
 end
 
 function Skillet:ShoppingListButton_OnEnter(button)
-	local name, link, quality = self:GetItemInfo(button.id)
+	local name, link, quality = GetItemInfo(button.id)
 	GameTooltip:SetOwner(button, "ANCHOR_TOPLEFT")
 	GameTooltip:SetHyperlink(link)
 	GameTooltip:Show()
-	if EnhTooltip and EnhTooltip.TooltipCall then
-		local quantity = button.count
-		EnhTooltip.TooltipCall(GameTooltip, name, link, quality, quantity)
-	end
 	CursorUpdate(button)
 end
 
 function Skillet:ClearShoppingList(player)
-	DA.DEBUG(0,"ClearShoppingList(",player,")")
+	--DA.DEBUG(0,"ClearShoppingList("..tostring(player)..")")
 	local playerList
 	if player then
 		playerList = { player }
@@ -159,10 +168,10 @@ function Skillet:ClearShoppingList(player)
 			table.insert(playerList, player)
 		end
 	end
-	DA.DEBUG(0,"clear shopping list for: "..(player or "all players"))
+	--DA.DEBUG(0,"clear shopping list for: "..(player or "all players"))
 	for i=1,#playerList,1 do
 		local player = playerList[i]
-		DA.DEBUG(1,"player: "..player)
+		--DA.DEBUG(1,"player: "..player)
 		self.db.realm.reagentsInQueue[player] = {}
 		self.db.realm.queueData[player] = {}
 		self.db.realm.inventoryData[player] = {}
@@ -171,8 +180,15 @@ function Skillet:ClearShoppingList(player)
 	self:UpdateTradeSkillWindow()
 end
 
+--
+-- In Classic, there is no guildbank
+--
+--[[
 function Skillet:GetShoppingList(player, includeGuildbank)
-	DA.DEBUG(0,"GetShoppingList("..tostring(player)..", "..tostring(includeGuildbank)..")")
+	--DA.DEBUG(0,"GetShoppingList("..tostring(player)..", "..tostring(includeGuildbank)..")")
+]]--
+function Skillet:GetShoppingList(player)
+	--DA.DEBUG(0,"GetShoppingList("..tostring(player)..")")
 	self:InventoryScan()
 --[[
 	if not Skillet.db.global.cachedGuildbank then
@@ -190,14 +206,14 @@ function Skillet:GetShoppingList(player, includeGuildbank)
 			table.insert(playerList, player)
 		end
 	end
-	DA.DEBUG(0,"shopping list for: "..(player or "all players"))
+	--DA.DEBUG(0,"shopping list for: "..(player or "all players"))
 	local usedInventory = {}  -- only use the items from each player once
 	local curPlayer = self.currentPlayer
-	local usedGuild = {}
 	if not usedInventory[curPlayer] then
 		usedInventory[curPlayer] = {}
 	end
 --[[
+	local usedGuild = {}
 	local curGuild = GetGuildInfo("player")
 	if curGuild and not cachedGuildbank[curGuild] then
 		cachedGuildbank[curGuild] = {}
@@ -209,7 +225,7 @@ function Skillet:GetShoppingList(player, includeGuildbank)
 			usedInventory[player] = {}
 		end
 		local reagentsInQueue = self.db.realm.reagentsInQueue[player]
-		DA.DEBUG(1,"player: "..player)
+		--DA.DEBUG(1,"player: "..player)
 		if reagentsInQueue then
 			for id,count in pairs(reagentsInQueue) do
 				local name = GetItemInfo(id)
@@ -263,12 +279,18 @@ function Skillet:GetShoppingList(player, includeGuildbank)
 	return list
 end
 
+--
+-- In Classic, there is no guildbank
+--
 local function cache_list(self)
 	local name = nil
 	if not Skillet.db.char.include_alts then
 		name = Skillet.currentPlayer
 	end
+--[[
 	self.cachedShoppingList = self:GetShoppingList(name, Skillet.db.char.include_guild)
+]]--
+	self.cachedShoppingList = self:GetShoppingList(name)
 end
 
 local function indexBank()
@@ -315,7 +337,9 @@ local function indexBank()
 	Skillet.db.realm.bankDetails[player] = bank
 end
 
+--
 -- In Classic, there is no guild bank
+--
 --[[
 local function indexGuildBank(tab)
 	DA.DEBUG(0,"indexGuildBank("..tostring(tab)..")")
@@ -367,9 +391,11 @@ function Skillet:indexAllGuildBankTabs()
 end
 ]]--
 
+--
 -- Called when the bank frame is opened
+--
 function Skillet:BANKFRAME_OPENED()
-	DA.DEBUG(0,"BANKFRAME_OPENED")
+	DA.TRACE("BANKFRAME_OPENED")
 	bankFrameOpen = true
 	local player = self.currentPlayer
 --
@@ -392,9 +418,11 @@ function Skillet:BANKFRAME_OPENED()
 	self:DisplayShoppingList(true) -- true -> at a bank
 end
 
+--
 -- Called when the bank frame is closed
+--
 function Skillet:BANKFRAME_CLOSED()
-	DA.DEBUG(0,"BANKFRAME_CLOSED")
+	DA.TRACE("BANKFRAME_CLOSED")
 	local player = self.currentPlayer
 	self.db.realm.bankData[player] = {}
 	bank = {}
@@ -403,10 +431,12 @@ function Skillet:BANKFRAME_CLOSED()
 	self:HideShoppingList()
 end
 
+--
 -- In Classic, there is no guild bank
+--
 --[[
 function Skillet:GUILDBANKFRAME_OPENED()
-	DA.DEBUG(0,"GUILDBANKFRAME_OPENED")
+	DA.TRACE("GUILDBANKFRAME_OPENED")
 	guildbankQuery = 0
 	guildbankOnce = true
 	Skillet.guildBusy = false
@@ -428,22 +458,30 @@ function Skillet:GUILDBANKFRAME_OPENED()
 	self:DisplayShoppingList(true) -- true -> at a bank
 end
 
+--
 -- Called when the guild bank frame is closed
+--
 function Skillet:GUILDBANKFRAME_CLOSED()
-	DA.DEBUG(0,"GUILDBANKFRAME_CLOSED")
+	DA.TRACE("GUILDBANKFRAME_CLOSED")
 	guildbankFrameOpen = false
 	self:HideShoppingList()
 end
 ]]--
 
+--
 -- Called when the cursor has changed (should only be needed while debugging)
+--
 function Skillet:CURSOR_UPDATE()
 	local type, data, subType, subData = GetCursorInfo()
-	DA.TRACE("CURSOR_UPDATE - type=",type,", data=",data,", subType=",subType)
+	--DA.DEBUG(3,"CURSOR_UPDATE - type=",type,", data=",data,", subType=",subType)
 end
 
+--
 -- Called when the auction frame is opened
+--
 function Skillet:AUCTION_HOUSE_SHOW()
+	DA.TRACE("AUCTION_HOUSE_SHOW")
+	self.auctionOpen = true
 	self:AuctionScan()
 	self:RegisterEvent("AUCTION_OWNED_LIST_UPDATE")
 	if not self.db.profile.display_shopping_list_at_auction then
@@ -456,56 +494,117 @@ function Skillet:AUCTION_HOUSE_SHOW()
 	self:DisplayShoppingList(false) -- false -> not at a bank
 end
 
+--
 -- Called when the auction frame is closed
+--
 function Skillet:AUCTION_HOUSE_CLOSED()
+	DA.TRACE("AUCTION_HOUSE_CLOSED")
+	self.auctionOpen = false
 	self:UnregisterEvent("AUCTION_OWNED_LIST_UPDATE")
 	self:HideShoppingList()
 end
 
+--
 --	Called when the auction list updates and the auction frame is opened.
+--
 function Skillet:AUCTION_OWNED_LIST_UPDATE()
+	DA.TRACE("AUCTION_OWNED_LIST_UPDATE")
 	self:AuctionScan()
  end
 
+function Skillet:AuctionScan()
+	--DA.DEBUG(0,"AuctionScan()")
+	local player = Skillet.currentPlayer
+	local auctionData = {}
+	for i = 1, GetNumAuctionItems("owner") do
+		local _, _, count, _, _, _, _, _, _, _, _, _, _, _, _, saleStatus, itemID, _ =  GetAuctionItemInfo("owner", i);
+		if saleStatus ~= 1 then
+			auctionData[itemID] = (auctionData[itemID] or 0) + count
+		end
+	end
+	self.db.realm.auctionData[player] = auctionData
+end
+
+--
+-- Prints the contents of auctionData for this player
+--
+function Skillet:PrintAuctionData()
+	DA.DEBUG(0,"PrintAuctionData()");
+	local player = Skillet.currentPlayer
+	local auctionData = self.db.realm.auctionData[player]
+	if auctionData then
+		for itemID,count in pairs(auctionData) do
+			local itemName = GetItemInfo(itemID)
+			print("itemID= "..tostring(itemID).." ("..tostring(itemName).."), count= "..tostring(count))
+		end
+	end
+end
+
+--
 -- checks to see if this is a normal bag (not ammo, herb, enchanting, etc)
 -- I borrowed this code from ClosetGnome.
+--
 local function isNormalBag(bagId)
-	-- backpack and bank are always normal
+	DA.DEBUG(0, "isNormalBag("..tostring(bagId)..")")
+--
+-- backpack and bank are always normal
+--
 	if bagId == 0 or bagId == -1 then return true end
 	local id = GetInventoryItemID("player", ContainerIDToInventoryID(bagId))
 	if not id then return false end
-	local bagType = select(7, GetItemInfo(id))
-	-- INVTYPE_BAG is defined by Blizzard
-	if bagType and bagType == INVTYPE_BAG then return true end
+	local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount,
+	  itemEquipLoc, itemIcon, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, 
+	  isCraftingReagent = GetItemInfo(id)
+--
+-- is this one normal?
+--
+	if itemClassID and itemSubClassID and itemClassID == LE_ITEM_CLASS_CONTAINER and itemSubClassID == 0 then return true end
+--
+-- not a normal bag
+--
+	DA.DEBUG(1, "isNormalBag: bagId= "..tostring(bagId)..", itemClassID= "..tostring(itemClassID)..", itemSubClassID= "..tostring(itemSubClassID))
+	DA.DEBUG(1, "isNormalBag: itemType= "..tostring(itemType)..", itemSubType= "..tostring(itemSubType))
 	return false
 end
 
+--
 -- Returns a bag that the item can be placed in.
+--
 local function findBagForItem(itemID, count)
+	DA.DEBUG(0, "findBagForItem("..tostring(itemID)..", "..tostring(count)..")")
 	if not itemID then return nil end
 	local _, _, _, _, _, _, _, itemStackCount = GetItemInfo(itemID)
 	for container = 0, 4, 1 do
 		if isNormalBag(container) then
 			local bag_size = GetContainerNumSlots(container) -- 0 if there is no bag
+			DA.DEBUG(1, "findBagForItem: container= "..tostring(container)..", bag_size= "..tostring(bag_size))
 			for slot = 1, bag_size, 1 do
 				local bagitem = GetContainerItemID(container, slot)
 				if bagitem then
 					if itemID == bagitem then
-						-- found some of the same, it is a full stack or locked?
+--
+-- found some of the same, it is a full stack or locked?
+--
 						local _, num_in_bag, locked  = GetContainerItemInfo(container, slot)
 						local space_available = itemStackCount - num_in_bag
 						if space_available >= count and not locked then
+							DA.DEBUG(1, "findBagForItem: container= "..tostring(container)..", slot= "..tostring(slot)..", true")
 							return container, slot, true
 						end
 					end
 				else
-					-- no item there, this looks like a good place to put something.
+--
+-- no item there, this looks like a good place to put something.
+--
+					DA.DEBUG(1, "findBagForItem: container= "..tostring(container)..", slot= "..tostring(slot)..", false")
 					return container, slot, false
 				end
 			end
+		else
+			DA.DEBUG(0, "findBagForItem: container= "..tostring(container).." is not a normal bag")
 		end
 	end
-	return nil, nil
+	return nil, nil, nil
 end
 
 local function getItemFromBank(itemID, bag, slot, count)
@@ -542,7 +641,9 @@ local function getItemFromBank(itemID, bag, slot, count)
 	return num_moved
 end
 
+--
 -- In Classic, there is no guild bank
+--
 --[[
 local function getItemFromGuildBank(itemID, bag, slot, count)
 	DA.DEBUG(0,"getItemFromGuildBank(",itemID, bag, slot, count,")")
@@ -618,7 +719,7 @@ end
 -- It may look like a real Blizzard event but its not.
 --
 function Skillet:BANK_UPDATE(event,bagID) 
-	DA.DEBUG(2,"BANK_UPDATE( "..tostring(bagID).." )")
+	DA.TRACE("BANK_UPDATE( "..tostring(bagID).." )")
 	if Skillet.bankBusy then
 		DA.DEBUG(1, "BANK_UPDATE and bankBusy")
 		Skillet.gotBankEvent = true
@@ -628,7 +729,9 @@ function Skillet:BANK_UPDATE(event,bagID)
 	end
 end
 
+--
 -- In Classic, there is no guild bank
+--
 --[[
 --
 -- Called once to get things started and then is called after both
@@ -671,7 +774,7 @@ end
 -- Called as a result of a QueryGuildBankTab call or as a result of a change in the guildbank's contents.
 --
 function Skillet:GUILDBANKBAGSLOTS_CHANGED(event)
-	DA.DEBUG(2,"GUILDBANKBAGSLOTS_CHANGED")
+	DA.TRACE("GUILDBANKBAGSLOTS_CHANGED")
 	if guildbankOnce then
 		guildbankQuery = guildbankQuery + 1
 		if guildbankQuery == GetNumGuildBankTabs() then
@@ -693,7 +796,7 @@ end
 -- Event is fired when the main bank (bagID == -1) contents change.
 --
 function Skillet:PLAYERBANKSLOTS_CHANGED(event,slot)
-	DA.DEBUG(2,"PLAYERBANKSLOTS_CHANGED"..", slot="..tostring(slot))
+	DA.TRACE("PLAYERBANKSLOTS_CHANGED"..", slot="..tostring(slot))
 	if Skillet.bankBusy then
 		DA.DEBUG(1,"PLAYERBANKSLOTS_CHANGED and bankBusy")
 		Skillet.gotBankEvent = true
@@ -708,7 +811,7 @@ end
 --
 --[[
 function Skillet:PLAYERREAGENTBANKSLOTS_CHANGED(event,slot)
-	DA.DEBUG(2,"PLAYERREAGENTBANKSLOTS_CHANGED"..", slot="..tostring(slot))
+	DA.TRACE("PLAYERREAGENTBANKSLOTS_CHANGED"..", slot="..tostring(slot))
 	if Skillet.bankBusy then
 		DA.DEBUG(1,"PLAYERREAGENTBANKSLOTS_CHANGED and bankBusy")
 		Skillet.gotBankEvent = true
@@ -719,8 +822,9 @@ function Skillet:PLAYERREAGENTBANKSLOTS_CHANGED(event,slot)
 end
 ]]--
 
-
+--
 -- Gets all the reagents possible for queued recipes from the bank
+--
 function Skillet:GetReagentsFromBanks()
 	DA.DEBUG(0,"GetReagentsFromBanks")
 	local list = self.cachedShoppingList
@@ -833,9 +937,11 @@ local function get_button(i)
 	return button
 end
 
+--
 -- Called to update the shopping list window
+--
 function Skillet:UpdateShoppingListWindow(use_cached_recipes)
-	DA.DEBUG(0,"UpdateShoppingListWindow(",use_cached_recipes,")")
+	DA.DEBUG(0,"UpdateShoppingListWindow("..tostring(use_cached_recipes)..")")
 	local num_buttons = 0
 	if not self.shoppingList or not self.shoppingList:IsVisible() then
 		return
@@ -852,12 +958,16 @@ function Skillet:UpdateShoppingListWindow(use_cached_recipes)
 		SkilletShoppingListRetrieveButton:Enable()
 	end
 	if Skillet.db.char.item_order then
-		--sort by item
+--
+-- sort by item
+--
 		table.sort(self.cachedShoppingList, function(a,b)
 			return (a.id > b.id)
 		end)
 		if Skillet.db.char.merge_items then
-			--merge counts of same item
+--
+-- merge counts of same item
+--
 			local tryAgain = true
 			while tryAgain do
 				local o = nil
@@ -880,19 +990,25 @@ function Skillet:UpdateShoppingListWindow(use_cached_recipes)
 			numItems = #self.cachedShoppingList
 		end
 	else
-		--sort by name
+--
+--sort by name
+--
 		table.sort(self.cachedShoppingList, function(a,b)
 			return (b.player > a.player)
 		end)
 	end
 	local button_count = SkilletShoppingListList:GetHeight() / SKILLET_SHOPPING_LIST_HEIGHT
 	button_count = math.floor(button_count)
-	-- Update the scroll frame
+--
+-- Update the scroll frame
+--
 	FauxScrollFrame_Update(SkilletShoppingListList,          -- frame
 							numItems,                        -- num items
 							button_count,                    -- num to display
 							SKILLET_SHOPPING_LIST_HEIGHT)    -- value step (item height)
-	-- Where in the list of items to start counting.
+--
+-- Where in the list of items to start counting.
+--
 	local itemOffset = FauxScrollFrame_GetOffset(SkilletShoppingListList)
 	local width = SkilletShoppingListList:GetWidth()
 	local totalPrice = 0
@@ -933,43 +1049,69 @@ function Skillet:UpdateShoppingListWindow(use_cached_recipes)
 			player:Hide()
 		end
 	end
-	-- Hide any of the buttons that we created, but don't need right now
+--
+-- Hide any of the buttons that we created, but don't need right now
+--
 	for i = button_count+1, num_buttons, 1 do
 	   local button = get_button(i)
 	   button:Hide()
 	end
 end
 
--- Called when the list of reagents is scrolled
+--
+-- Updates the scrollbar when a scroll event happens
+--
 function Skillet:ShoppingList_OnScroll()
 	Skillet:UpdateShoppingListWindow(true) -- true == use the cached list of recipes
 end
 
+--
 -- Fills out and displays the shopping list frame
+--
 function Skillet:DisplayShoppingList(atBank)
-	DA.TRACE("DisplayShoppingList")
+	--DA.DEBUG(3,"DisplayShoppingList")
 	if not self.shoppingList then
 		self.shoppingList = createShoppingListFrame(self)
 	end
-	local frame = self.shoppingList
+	if self.auctionOpen and AuctionatorLoaded and self.ATRPlugin and self.db.profile.plugins.ATR.enabled then
+		SkilletSLAuctionatorButton:Show()
+	else
+		SkilletSLAuctionatorButton:Hide()
+	end
 	if atBank then
 		SkilletShoppingListRetrieveButton:Show()
 	else
 		SkilletShoppingListRetrieveButton:Hide()
 	end
 	cache_list(self)
+	local frame = self.shoppingList
 	if not frame:IsVisible() then
-	DA.TRACE("wants to show shopping list")
 		frame:Show()
 	end
-	-- true == use cached recipes, we just loaded them after all
+--
+-- true == use cached recipes, we just loaded them after all
+--
 	self:UpdateShoppingListWindow(true)
 end
 
+--
+-- Tests for shopping list window visible
+--
+function Skillet:IsShoppingListVisible()
+	if self.shoppingList then
+		return self.shoppingList:IsVisible()
+	end
+	return false
+end
+
+--
 -- Hides the shopping list window
+--
 function Skillet:HideShoppingList()
 	if self.shoppingList then
 		self.shoppingList:Hide()
+		SkilletSLAuctionatorButton:Hide()
+		SkilletShoppingListRetrieveButton:Hide()
 	end
 	self.cachedShoppingList = nil
 end

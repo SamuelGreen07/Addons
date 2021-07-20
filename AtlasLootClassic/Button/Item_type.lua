@@ -10,8 +10,12 @@ local Token = AtlasLoot.Data.Token
 local Recipe = AtlasLoot.Data.Recipe
 local Profession = AtlasLoot.Data.Profession
 local Sets = AtlasLoot.Data.Sets
+local ItemSet = AtlasLoot.Data.ItemSet
 local Mount = AtlasLoot.Data.Mount
 local ContentPhase = AtlasLoot.Data.ContentPhase
+local Droprate = AtlasLoot.Data.Droprate
+local Requirements = AtlasLoot.Data.Requirements
+local VendorPrice = AtlasLoot.Data.VendorPrice
 local ItemFrame, Favourites
 
 -- lua
@@ -21,7 +25,7 @@ local next, wipe, tab_remove = _G.next, _G.wipe, _G.table.remove
 local format, split, sfind, slower = _G.string.format, _G.string.split, _G.string.find, _G.string.lower
 
 -- WoW
-local GetItemInfo, IsEquippableItem = _G.GetItemInfo, _G.IsEquippableItem
+local GetItemInfo, IsEquippableItem, GetItemInfoInstant = _G.GetItemInfo, _G.IsEquippableItem, _G.GetItemInfoInstant
 local LOOT_BORDER_BY_QUALITY = _G["LOOT_BORDER_BY_QUALITY"]
 
 -- AL
@@ -32,6 +36,7 @@ local GetItemString = AtlasLoot.ItemString.Create
 local ITEM_COLORS = {}
 local DUMMY_ITEM_ICON = "Interface\\Icons\\INV_Misc_QuestionMark"
 local SET_ITEM = "|cff00ff00"..AL["Set item"]..":|r "
+local WHITE_TEXT = "|cffffffff%s|r"
 
 local itemIsOnEnter, buttonOnEnter = nil, nil
 
@@ -93,7 +98,7 @@ function Item.OnSet(button, second)
 			end
 		end
 		button.secButton.Droprate = button.__atlaslootinfo.Droprate
-		button.secButton.SetID = Sets:GetItemSetForItemID(button.secButton.ItemID)
+		button.secButton.SetID = ItemSet.GetSetIDforItemID(button.secButton.ItemID)
 
 		Item.Refresh(button.secButton)
 	else
@@ -106,9 +111,14 @@ function Item.OnSet(button, second)
 				button.ItemString = GetItemString(button.ItemID)
 			end
 		end
-		button.Droprate = button.__atlaslootinfo.Droprate
+		button.Droprate = Droprate:GetData(button.__atlaslootinfo.npcID, button.ItemID)-- button.__atlaslootinfo.Droprate
 
 		Item.Refresh(button)
+
+		-- Set Vendor price is aviable
+		if VendorPrice.ItemHasVendorPrice(button.ItemID) then
+			button:SetExtraType("Price", VendorPrice.GetVendorPriceForItem(button.ItemID))
+		end
 	end
 end
 
@@ -135,9 +145,9 @@ function Item.OnMouseAction(button, mouseButton)
 		elseif Recipe.IsRecipe(button.ItemID) then
 			button.ExtraFrameShown = true
 			AtlasLoot.Button:ExtraItemFrame_GetFrame(button, Recipe.GetRecipeDataForExtraFrame(button.ItemID))
-		elseif button.type ~= "secButton" and ( button.SetData or Sets:GetItemSetForItemID(button.ItemID) ) then -- sec buttons should not be clickable for sets
+		elseif button.type ~= "secButton" and ( button.SetData or ItemSet.GetSetIDforItemID(button.ItemID) ) then -- sec buttons should not be clickable for sets
 			if not button.SetData then
-				button.SetData = Sets:GetSetItems(Sets:GetItemSetForItemID(button.ItemID))
+				button.SetData = ItemSet.GetSetDataForExtraFrame(ItemSet.GetSetIDforItemID(button.ItemID))
 			end
 			button.ExtraFrameShown = true
 			AtlasLoot.Button:ExtraItemFrame_GetFrame(button, button.SetData)
@@ -205,15 +215,21 @@ function Item.OnEnter(button, owner)
 		tooltip:SetHyperlink(button.ItemString)
 	else
 		tooltip:SetItemByID(button.ItemID)
+		--tooltip:SetHyperlink("item:"..button.ItemID)
+		-- small fix for auctionatorTT as it not hooks SetItemByID
+		if _G.Atr_ShowTipWithPricing then
+			local itemName, itemLink = GetItemInfo(button.ItemID)
+			_G.Atr_ShowTipWithPricing(tooltip, itemLink)
+		end
 	end
-	if button.Droprate and db.showDropRate then
-		tooltip:AddDoubleLine(AL["Droprate:"], button.Droprate.."%")
+	if button.Droprate and AtlasLoot.db.showDropRate then
+		tooltip:AddDoubleLine(AL["Droprate:"], format(WHITE_TEXT, button.Droprate.."%"))
 	end
 	if AtlasLoot.db.showIDsInTT then
-		tooltip:AddDoubleLine("ItemID:", button.ItemID or 0)
+		tooltip:AddDoubleLine("ItemID:", format(WHITE_TEXT, button.ItemID or 0))
 	end
 	if AtlasLoot.db.ContentPhase.enableTT and ContentPhase:GetForItemID(button.ItemID) then
-		tooltip:AddDoubleLine(AL["Content phase:"], ContentPhase:GetForItemID(button.ItemID))
+		tooltip:AddDoubleLine(AL["Content phase:"], format(WHITE_TEXT, ContentPhase:GetForItemID(button.ItemID)))
 	end
 	if button.ItemID == 12784 then tooltip:AddLine("Arcanite Reaper Hoooooo!") end
 	tooltip:Show()
@@ -250,6 +266,7 @@ function Item.OnClear(button)
 	button.secButton.ItemString = nil
 	button.secButton.SetData = nil
 	button.secButton.RawName = nil
+	button.secButton.pvp:Hide()
 
 	itemIsOnEnter = nil
 	buttonOnEnter = nil
@@ -259,6 +276,22 @@ function Item.OnClear(button)
 		AtlasLoot.Button:ExtraItemFrame_ClearFrame()
 		button.ExtraFrameShown = false
 	end
+end
+
+function Item.GetDescription(itemID, itemEquipLoc, itemType, itemSubType)
+	if not itemEquipLoc then
+		local _
+		_, itemType, itemSubType, itemEquipLoc = GetItemInfoInstant(itemID)
+	end
+	local ret = Token.GetTokenDescription(itemID) or
+	Recipe.GetRecipeDescriptionWithRank(itemID) or
+	Profession.GetColorSkillRankItem(itemID) or
+	(Mount.IsMount(itemID) and ALIL["Mount"] or nil) or
+	( ItemSet.GetSetIDforItemID(itemID) and AL["|cff00ff00Set item:|r "] or "")..GetItemDescInfo(itemEquipLoc, itemType, itemSubType)
+	if Requirements.HasRequirements(itemID) then
+		ret = Requirements.GetReqString(itemID)..ret
+	end
+	return ret
 end
 
 function Item.Refresh(button)
@@ -276,6 +309,11 @@ function Item.Refresh(button)
 
 	if button.type == "secButton" then
 		button:SetNormalTexture(itemTexture or DUMMY_ITEM_ICON)
+
+		if Requirements.HasPvPRequirements(itemID) then
+			button.pvp:SetTexture(Requirements.GetPvPRankIconForItem(itemID))
+			button.pvp:Show()
+		end
 	else
 		-- ##################
 		-- icon
@@ -290,13 +328,7 @@ function Item.Refresh(button)
 		-- ##################
 		-- description
 		-- ##################
-		button.extra:SetText(
-			Token.GetTokenDescription(itemID) or
-			Recipe.GetRecipeDescriptionWithRank(itemID) or
-			Profession.GetColorSkillRankItem(itemID) or
-			(Mount.IsMount(button.ItemID) and ALIL["Mount"] or nil) or
-			( Sets:GetItemSetForItemID(itemID) and AL["|cff00ff00Set item:|r "] or "")..GetItemDescInfo(itemEquipLoc, itemType, itemSubType)
-		)
+		button.extra:SetText(Item.GetDescription(itemID, itemEquipLoc, itemType, itemSubType))
 	end
 	if Favourites and Favourites:IsFavouriteItemID(itemID) then
 		Favourites:SetFavouriteIcon(itemID, button.favourite)
@@ -306,12 +338,14 @@ function Item.Refresh(button)
 	end
 	--elseif Recipe.IsRecipe(itemID) then
 	if AtlasLoot.db.ContentPhase.enableOnItems then
-		local phaseT = Recipe.IsRecipe(itemID) and Recipe.GetPhaseTextureForItemID(itemID) or ContentPhase:GetPhaseTextureForItemID(itemID)
-		if phaseT then
+		local phaseT, active = ContentPhase:GetPhaseTextureForItemID(itemID)
+		if phaseT and not active then
 			button.phaseIndicator:SetTexture(phaseT)
 			button.phaseIndicator:Show()
 		end
 	end
+	-- Set tt so the text gets loaded
+	AtlasLootScanTooltip:SetItemByID(itemID)
 	return true
 end
 
@@ -332,7 +366,7 @@ function Item.ShowQuickDressUp(itemLink, ttFrame)
 	if not itemLink or not ttFrame or ( not IsEquippableItem(itemLink) and not Mount.IsMount(itemLink) ) then return end
 	if not Item.previewTooltipFrame then
 		local name = "AtlasLoot-SetToolTip"
-		local frame = CreateFrame("Frame", name)
+		local frame = CreateFrame("Frame", name, nil, _G.BackdropTemplateMixin and "BackdropTemplate" or nil)
 		frame:SetClampedToScreen(true)
 		frame:SetSize(230, 280)
 		frame:SetBackdrop(ALPrivate.BOX_BORDER_BACKDROP)
@@ -363,6 +397,7 @@ function Item.ShowQuickDressUp(itemLink, ttFrame)
 	local frame = Item.previewTooltipFrame
 
 	-- calculate point for frame
+	if not ttFrame.GetOwner or not ttFrame:GetOwner() then return end
 	local x,y = ttFrame:GetOwner():GetCenter()
 	local fPoint, oPoint = "BOTTOMLEFT", "TOPRIGHT"
 
@@ -424,12 +459,9 @@ local function EventFrame_OnEvent(frame, event, arg1, arg2)
 					local typFunc = button:GetTypeFunctions()
 					if typFunc then
 						typFunc.Refresh(button)
-						if ItemFrame and ItemFrame.SearchString then
-							local text = button.RawName or button.name:GetText()
-							if text and not sfind(slower(text), ItemFrame.SearchString, 1, true) then
-								button:SetAlpha(0.33)
-							end
-						end
+					end
+					if ItemFrame then
+						ItemFrame.UpdateFilterItem(button)
 					end
 				end
 			end

@@ -3,7 +3,7 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
-local Widget = Addon.Widgets:NewWidget("Arena")
+local Widget = (Addon.CLASSIC and {}) or Addon.Widgets:NewWidget("Arena")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -13,8 +13,7 @@ local Widget = Addon.Widgets:NewWidget("Arena")
 local pairs = pairs
 
 -- WoW APIs
-local CreateFrame = CreateFrame
-local GetNumArenaOpponents, UnitGUID, UnitReaction = GetNumArenaOpponents, UnitGUID, UnitReaction
+local GetNumArenaOpponents, UnitReaction = GetNumArenaOpponents, UnitReaction
 local IsInInstance, IsInBrawl = IsInInstance, C_PvP.IsInBrawl
 
 -- ThreatPlates APIs
@@ -25,6 +24,11 @@ local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ArenaWidget\\
 local ICON_TEXTURE = PATH .. "BG"
 local InArena = false
 local ArenaID = {}
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame, UnitGUID
 
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
@@ -37,8 +41,8 @@ local Settings
 
 local function GetArenaOpponents()
 	for i = 1, GetNumArenaOpponents() do
-		local player_guid = UnitGUID("arena" .. i)
-		local pet_guid = UnitGUID("arenapet" .. i)
+		local player_guid = _G.UnitGUID("arena" .. i)
+		local pet_guid = _G.UnitGUID("arenapet" .. i)
 
     if player_guid and not ArenaID[player_guid] then
       ArenaID[player_guid] = i
@@ -66,7 +70,7 @@ end
 
 function Widget:Create(tp_frame)
   -- Required Widget Code
-  local widget_frame = CreateFrame("Frame", nil, tp_frame)
+  local widget_frame = _G.CreateFrame("Frame", nil, tp_frame)
   widget_frame:Hide()
 
   -- Custom Code
@@ -78,7 +82,7 @@ function Widget:Create(tp_frame)
   widget_frame.Icon:SetAllPoints(widget_frame)
   widget_frame.Icon:SetTexture(ICON_TEXTURE)
 
-  widget_frame.NumText = widget_frame:CreateFontString(nil, "ARTWORK", 0)
+  widget_frame.NumText = widget_frame:CreateFontString(nil, "ARTWORK")
 
   self:UpdateLayout(widget_frame)
   --------------------------------------
@@ -157,18 +161,4 @@ end
 
 function Widget:UpdateSettings()
   Settings = TidyPlatesThreat.db.profile.arenaWidget
-
-  for _, tp_frame in pairs(Addon.PlatesCreated) do
-    local widget_frame = tp_frame.widgets.Arena
-
-    -- widget_frame could be nil if the widget as disabled and is enabled as part of a profile switch
-    -- For these frames, UpdateAuraWidgetLayout will be called anyway when the widget is initalized
-    -- (which happens after the settings update)
-    if widget_frame then
-      self:UpdateLayout(widget_frame)
-      if widget_frame.Active then -- equals: plate is visible and widget is active, i.e., show currently
-        self:OnUnitAdded(widget_frame, widget_frame.unit)
-      end
-    end
-  end
 end

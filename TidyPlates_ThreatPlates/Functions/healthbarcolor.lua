@@ -10,10 +10,12 @@ local floor = floor
 local abs = abs
 
 -- WoW APIs
-local UnitIsConnected, UnitReaction, UnitCanAttack, UnitAffectingCombat = UnitIsConnected, UnitReaction, UnitCanAttack, UnitAffectingCombat
+local UnitIsConnected, UnitReaction, UnitCanAttack = UnitIsConnected, UnitReaction, UnitCanAttack
 local UnitIsPlayer, UnitPlayerControlled = UnitIsPlayer, UnitPlayerControlled
-local UnitIsUnit, UnitExists = UnitIsUnit, UnitExists
-local RAID_CLASS_COLORS = RAID_CLASS_COLORS
+local UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned = UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned
+local IsInInstance = IsInInstance
+-- WoW Classic APIs:
+local GetPartyAssignment = GetPartyAssignment
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -22,8 +24,29 @@ local TOTEMS = Addon.TOTEMS
 local RGB_P = ThreatPlates.RGB_P
 local IsFriend
 local IsGuildmate
-local LibThreatClassic = Addon.LibThreatClassic
---local ShowQuestUnit
+local ShowQuestUnit
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: UnitAffectingCombat, UnitHealth, UnitHealthMax
+
+---------------------------------------------------------------------------------------------------
+-- Wrapper functions for WoW Classic
+---------------------------------------------------------------------------------------------------
+
+if Addon.CLASSIC then
+  UnitGroupRolesAssigned = function(target_unit)
+    return (GetPartyAssignment("MAINTANK", target_unit) and "TANK") or "NONE"
+  end
+
+  -- Quest widget is not available in Classic
+  ShowQuestUnit = function(...) return false end
+end
+
+---------------------------------------------------------------------------------------------------
+--
+---------------------------------------------------------------------------------------------------
 
 local reference = {
   FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
@@ -51,17 +74,18 @@ function CS:GetSmudgeColorRGB(colorA, colorB, perc)
       if h3 > 360 then
         h3 = h3-360
       end
-        end
     end
-    local s3 = s1-(s1-s2)*perc
-    local v3 = v1-(v1-v2)*perc
-    self:SetColorHSV(h3, s3, v3)
-    local r,g,b = self:GetColorRGB()
-    return r,g,b
+  end
+
+  local s3 = s1-(s1-s2)*perc
+  local v3 = v1-(v1-v2)*perc
+  self:SetColorHSV(h3, s3, v3)
+  local r,g,b = self:GetColorRGB()
+  return r,g,b
 end
 
 local function GetThreatSituation(unit, style, enable_off_tank)
-  local threat_status = LibThreatClassic:UnitThreatSituation("player", unit.unitid)
+  local threat_status = UnitThreatSituation("player", unit.unitid)
 
   local threat_situation, other_player_has_aggro
   if threat_status then
@@ -97,11 +121,10 @@ local function GetThreatSituation(unit, style, enable_off_tank)
     -- Player does not tank the unit, so check if it is off-tanked:
     if UnitExists(target_unit) then
       if UnitIsPlayer(target_unit) or UnitPlayerControlled(target_unit) then
-        local target_threat_situation = LibThreatClassic:UnitThreatSituation(target_unit, unit.unitid) or 0
+        local target_threat_situation = UnitThreatSituation(target_unit, unit.unitid) or 0
         if target_threat_situation > 1 then
           -- Target unit does tank unit, so check if target unit is a tank or an tank-like pet/guardian
-          --if ("TANK" == UnitGroupRolesAssigned(target_unit) and not UnitIsUnit("player", target_unit)) or UnitIsUnit(target_unit, "pet") or IsOffTankCreature(target_unit) then
-          if UnitIsUnit(target_unit, "pet") or IsOffTankCreature(target_unit) then
+          if ("TANK" == UnitGroupRolesAssigned(target_unit) and not UnitIsUnit("player", target_unit)) or UnitIsUnit(target_unit, "pet") or IsOffTankCreature(target_unit) then
             unit.IsOfftanked = true
           else
             -- Reset "unit.IsOfftanked"
@@ -122,33 +145,48 @@ local function GetThreatSituation(unit, style, enable_off_tank)
   return threat_situation
 end
 
-function Addon:GetThreatColor(unit, style, use_threat_table)
-  local db = TidyPlatesThreat.db.profile
+if Addon.CLASSIC then
+  function Addon:GetThreatColor(unit, style)
+    local db = TidyPlatesThreat.db.profile
 
-  local color
+    local color
 
-  -- Use threat detection heuristic
-  local on_threat_table = UnitAffectingCombat(unit.unitid)
+    -- Use threat detection heuristic
+    local on_threat_table = _G.UnitAffectingCombat(unit.unitid)
 
-  -- local on_threat_table
-  --  if use_threat_table then
-  --    if IsInInstance() and db.threat.UseHeuristicInInstances then
-  --      -- Use threat detection heuristic in instance
-  --      on_threat_table = UnitAffectingCombat(unit.unitid)
-  --    else
-  --      on_threat_table = Addon:OnThreatTable(unit)
-  --    end
-  --  else
-  --    -- Use threat detection heuristic
-  --    on_threat_table = UnitAffectingCombat(unit.unitid)
-  --  end
+    if on_threat_table then
+      color = db.settings[style].threatcolor[GetThreatSituation(unit, style, db.threat.toggle.OffTank)]
+    end
 
-  if on_threat_table then
-    color = db.settings[style].threatcolor[GetThreatSituation(unit, style, db.threat.toggle.OffTank)]
+    return color
   end
+else
+  function Addon:GetThreatColor(unit, style, use_threat_table)
+    local db = TidyPlatesThreat.db.profile
 
-  return color
+    local color
+
+    local on_threat_table
+    if use_threat_table then
+      if IsInInstance() and db.threat.UseHeuristicInInstances then
+        -- Use threat detection heuristic in instance
+        on_threat_table = _G.UnitAffectingCombat(unit.unitid)
+      else
+        on_threat_table = Addon:OnThreatTable(unit)
+      end
+    else
+      -- Use threat detection heuristic
+      on_threat_table = _G.UnitAffectingCombat(unit.unitid)
+    end
+
+    if on_threat_table then
+      color = db.settings[style].threatcolor[GetThreatSituation(unit, style, db.threat.toggle.OffTank)]
+    end
+
+    return color
+  end
 end
+
 
 -- Threat System is OP, player is in combat, style is tank or dps
 local function GetColorByThreat(unit, style)
@@ -156,8 +194,7 @@ local function GetColorByThreat(unit, style)
   local c
 
   if (db.threat.ON and db.threat.useHPColor and (style == "dps" or style == "tank")) then
-    --c = Addon:GetThreatColor(unit, style, db.threat.UseThreatTable)
-    c = Addon:GetThreatColor(unit, style, false)
+    c = Addon:GetThreatColor(unit, style, db.threat.UseThreatTable)  -- UseThreatTable is ignored in WoW Classic
   end
 
   return c
@@ -166,7 +203,7 @@ end
 local function GetColorByHealthDeficit(unit)
   local db = TidyPlatesThreat.db.profile
 
-  local pct = unit.health / unit.healthmax
+  local pct = (_G.UnitHealth(unit.unitid) or 0) / (_G.UnitHealthMax(unit.unitid) or 1)
   local r, g, b = CS:GetSmudgeColorRGB(db.aHPbarColor, db.bHPbarColor, pct)
   return RGB_P(r, g, b, 1)
 end
@@ -177,7 +214,7 @@ local function GetColorByClass(unit)
   local c
   if unit.type == "PLAYER" then
     if unit.reaction == "HOSTILE" and db.allowClass then
-      c = RAID_CLASS_COLORS[unit.class]
+      c = db.Colors.Classes[unit.class]
     elseif unit.reaction == "FRIENDLY" then
       local db_social = db.socialWidget
       if db_social.ShowFriendColor and IsFriend(unit) then
@@ -185,7 +222,7 @@ local function GetColorByClass(unit)
       elseif db_social.ShowGuildmateColor and IsGuildmate(unit) then
         c = db_social.GuildmateColor
       elseif db.friendlyClass then
-        c = RAID_CLASS_COLORS[unit.class]
+        c = db.Colors.Classes[unit.class]
       end
     end
   end
@@ -212,7 +249,7 @@ end
 --  local color
 --  if not UnitIsConnected(unit.unitid) then
 --    color =  db_color.DisconnectedUnit
---  elseif unit.isTapped  then
+--  elseif unit.isTapped then
 --    color =  db_color.TappedUnit
 --  elseif unit.reaction == "FRIENDLY" and unit.type == "PLAYER" then
 --    IsFriend = IsFriend or ThreatPlates.IsFriend
@@ -254,7 +291,7 @@ function Addon:SetHealthbarColor(unit)
 
   if style == "NameOnly" or style == "NameOnly-Unique" or style == "empty" or style == "etotem" then return end
 
-  --ShowQuestUnit = ShowQuestUnit or ThreatPlates.ShowQuestUnit
+  ShowQuestUnit = ShowQuestUnit or ThreatPlates.ShowQuestUnit
   IsFriend = IsFriend or ThreatPlates.IsFriend
   IsGuildmate = IsGuildmate or ThreatPlates.IsGuildmate
 
@@ -264,6 +301,8 @@ function Addon:SetHealthbarColor(unit)
   local c
   if unit.isTarget and db.targetWidget.ModeHPBar then
     c = db.targetWidget.HPBarColor
+  elseif unit.IsFocus and db.FocusWidget.ModeHPBar then
+    c = db.FocusWidget.HPBarColor
   elseif style == "unique" then
     -- Custom nameplate style defined for unit (does not work for totems right now)
     if unit.isMarked and unique_setting.allowMarked then
@@ -275,9 +314,9 @@ function Addon:SetHealthbarColor(unit)
         c = db_color.DisconnectedUnit
       elseif unit.isTapped then
         c = db_color.TappedUnit
-      --elseif ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
-      --  -- Unit is quest target
-      --  c = db.questWidget.HPBarColor
+      elseif ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
+        -- Unit is quest target
+        c = db.questWidget.HPBarColor
       elseif unique_setting.UseThreatColor then
         -- Threat System is should also be used for custom nameplate (in combat with thread system on)
         c = GetColorByThreat(unit, Addon:GetThreatStyle(unit))
@@ -316,8 +355,8 @@ function Addon:SetHealthbarColor(unit)
         c = db_color.DisconnectedUnit
       elseif unit.isTapped then
         c = db_color.TappedUnit
-      --elseif ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
-      --  c = db.questWidget.HPBarColor
+      elseif ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
+        c = db.questWidget.HPBarColor
       else
         c = GetColorByThreat(unit, style)
       end
@@ -357,4 +396,3 @@ ThreatPlates.GetColorByHealthDeficit = GetColorByHealthDeficit
 ThreatPlates.GetColorByClass = GetColorByClass
 ThreatPlates.GetColorByReaction = GetColorByReaction
 Addon.GetThreatSituation = GetThreatSituation
-

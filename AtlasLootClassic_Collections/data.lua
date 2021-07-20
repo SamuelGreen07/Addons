@@ -19,6 +19,8 @@ local data = AtlasLoot.ItemDB:Add(addonname, 1)
 local AL = AtlasLoot.Locales
 local ALIL = AtlasLoot.IngameLocales
 
+local GetForVersion = AtlasLoot.ReturnForGameVersion
+
 local NORMAL_DIFF = data:AddDifficulty(AL["Normal"], "n", 1, nil, true)
 local ALLIANCE_DIFF, HORDE_DIFF, LOAD_DIFF
 if UnitFactionGroup("player") == "Horde" then
@@ -38,59 +40,126 @@ local QUEST_EXTRA_ITTYPE = data:AddExtraItemTableType("Quest")
 local PRICE_EXTRA_ITTYPE = data:AddExtraItemTableType("Price")
 local SET_EXTRA_ITTYPE = data:AddExtraItemTableType("Set")
 
+local VENDOR_CONTENT = data:AddContentType(AL["Vendor"], ATLASLOOT_DUNGEON_COLOR)
 local SET_CONTENT = data:AddContentType(AL["Sets"], ATLASLOOT_PVP_COLOR)
-local WORLD_BOSS_CONTENT = data:AddContentType(AL["World Bosses"], ATLASLOOT_WORLD_BOSS_COLOR)
+--local WORLD_BOSS_CONTENT = data:AddContentType(AL["World Bosses"], ATLASLOOT_WORLD_BOSS_COLOR)
 local COLLECTIONS_CONTENT = data:AddContentType(AL["Collections"], ATLASLOOT_COLLECTIONS_COLOR)
 local WORLD_EVENT_CONTENT = data:AddContentType(AL["World Events"], ATLASLOOT_SEASONALEVENTS_COLOR)
+
+--@version-bcc@
+data["BadgeofJustice"] = {
+	name = format(AL["'%s' Vendor"], "Badge of Justice"),
+	ContentType = VENDOR_CONTENT,
+	TableType = NORMAL_ITTYPE,
+	gameVersion = 2,
+	items = {
+		{
+			name = ALIL["Cloth"],
+			[NORMAL_DIFF] = {
+				{ 1, 30762 }, -- Infernoweave Robe
+				{ 2, 30764 }, -- Infernoweave Gloves
+				{ 3, 30761 }, -- Infernoweave Leggings
+				{ 4, 30763 }, -- Infernoweave Boots
+			},
+		},
+		{
+			name = ALIL["Leather"],
+			[NORMAL_DIFF] = {
+				{ 1, 30776 }, -- Inferno Hardened Chestguard
+				{ 2, 30780 }, -- Inferno Hardened Gloves
+				{ 3, 30778 }, -- Inferno Hardened Leggings
+				{ 4, 30779 }, -- Inferno Hardened Boots
+			},
+		},
+		{
+			name = ALIL["Mail"],
+			[NORMAL_DIFF] = {
+				{ 1, 30773 }, -- Inferno Forged Hauberk
+				{ 2, 30774 }, -- Inferno Forged Gloves
+				{ 3, 30770 }, -- Inferno Forged Boots
+				{ 4, 30772 }, -- Inferno Forged Leggings
+			},
+		},
+		{
+			name = ALIL["Plate"],
+			[NORMAL_DIFF] = {
+				{ 1, 30769,  }, -- Inferno Tempered Chestguard
+				{ 2, 30767,  }, -- Inferno Tempered Gauntlets
+				{ 3, 30766 }, -- Inferno Tempered Leggings
+				{ 4, 30768 }, -- Inferno Tempered Boots
+			},
+		},
+		{
+			name = ALIL["Off Hand"],
+			[NORMAL_DIFF] = {
+				{ 1, 29266 }, -- Azure-Shield of Coldarra
+				{ 2, 29267 }, -- Light-Bearer's Faith Shield
+				{ 3, 29268 }, -- Mazthoril Honor Shield
+				{ 5, 29269 }, -- Sapphiron's Wing Bone
+				{ 6, 29270 }, -- Flametongue Seal
+				{ 7, 29271 }, -- Talisman of Kalecgos
+				{ 8, 29272 }, -- Orb of the Soul-Eater
+				{ 9, 29273 }, -- Khadgar's Knapsack
+				{ 10, 29274 }, -- Tears of Heaven
+				{ 16, 29275 }, -- Searing Sunblade
+			},
+		},
+		{
+			name = ALIL["Neck"],
+			[NORMAL_DIFF] = {
+				{ 1, 29368 }, -- Manasurge Pendant
+				{ 2, 29374 }, -- Necklace of Eternal Hope
+				{ 3, 29381 }, -- Choker of Vile Intent
+				{ 4, 29386 }, -- Necklace of the Juggernaut
+			},
+		},
+		{
+			name = ALIL["Cloak"],
+			[NORMAL_DIFF] = {
+				{ 1, 29369 }, -- Shawl of Shifting Probabilities
+				{ 2, 29375 }, -- Bishop's Cloak
+				{ 3, 29382 }, -- Blood Knight War Cloak
+				{ 4, 29385 }, -- Farstrider Defender's Cloak
+			},
+		},
+		{
+			name = ALIL["Finger"],
+			[NORMAL_DIFF] = {
+				{ 1, 29367 }, -- Ring of Cryptic Dreams
+				{ 2, 29373 }, -- Band of Halos
+				{ 3, 29379 }, -- Ring of Arathi Warlords
+				{ 4, 29384 }, -- Ring of Unyielding Force
+			},
+		},
+		{
+			name = ALIL["Trinket"],
+			[NORMAL_DIFF] = {
+				{ 1, 29370 }, -- Icon of the Silver Crescent
+				{ 2, 29376 }, -- Essence of the Martyr
+				{ 3, 29383 }, -- Bloodlust Brooch
+				{ 4, 29387 }, -- Gnomeregan Auto-Blocker 600
+			},
+		},
+		{
+			name = ALIL["Relic"],
+			[NORMAL_DIFF] = {
+				{ 1, 29388 }, -- Libram of Repentance
+				{ 2, 29389 }, -- Totem of the Pulsing Earth
+				{ 3, 29390 }, -- Everbloom Idol
+			},
+		},
+	}
+}
+--@end-version-bcc@
 
 data["TierSets"] = {
 	name = AL["Tier Sets"],
 	ContentType = SET_CONTENT,
-	LoadDifficulty = LOAD_DIFF,
 	TableType = SET_ITTYPE,
 	items = {
-		{ -- T0
-			name = format(AL["Tier %s Sets"], "0"),
-			[ALLIANCE_DIFF] = {
-				{ 1, 183 }, -- Warlock
-				{ 3, 182 }, -- Priest
-				{ 16, 181 }, -- Mage
-				{ 5, 184 }, -- Rogue
-				{ 20, 185 }, -- Druid
-				{ 7, 186 }, -- Hunter
-				{ 9, 189 }, -- Warrior
-				{ 24, 188 }, -- Paladin
-			},
-
-			[HORDE_DIFF] = {
-				GetItemsFromDiff = ALLIANCE_DIFF,
-				{ 22, 187 }, -- Shaman
-				{ 24 }, -- Paladin
-			},
-		},
-		{ -- T0.5
-			name = format(AL["Tier %s Sets"], "0.5"),
-			ContentPhase = 5,
-			[ALLIANCE_DIFF] = {
-				{ 1, 518 }, -- Warlock
-				{ 3, 514 }, -- Priest
-				{ 16, 517 }, -- Mage
-				{ 5, 512 }, -- Rogue
-				{ 20, 513 }, -- Druid
-				{ 7, 515 }, -- Hunter
-				{ 9, 511 }, -- Warrior
-				{ 24, 516 }, -- Paladin
-			},
-
-			[HORDE_DIFF] = {
-				GetItemsFromDiff = ALLIANCE_DIFF,
-				{ 22, 519 }, -- Shaman
-				{ 24 }, -- Paladin
-			},
-		},
 		{ -- T1
 			name = format(AL["Tier %s Sets"], "1"),
-			[ALLIANCE_DIFF] = {
+			[NORMAL_DIFF] = {
 				{ 1, 203 }, -- Warlock
 				{ 3, 202 }, -- Priest
 				{ 16, 201 }, -- Mage
@@ -98,19 +167,13 @@ data["TierSets"] = {
 				{ 20, 205 }, -- Druid
 				{ 7, 206 }, -- Hunter
 				{ 9, 209 }, -- Warrior
-				{ 24, 208 }, -- Paladin
-			},
-
-			[HORDE_DIFF] = {
-				GetItemsFromDiff = ALLIANCE_DIFF,
 				{ 22, 207 }, -- Shaman
-				{ 24 }, -- Paladin
+				{ 24, 208 }, -- Paladin
 			},
 		},
 		{ -- T2
 			name = format(AL["Tier %s Sets"], "2"),
-			ContentPhase = 3,
-			[ALLIANCE_DIFF] = {
+			[NORMAL_DIFF] = {
 				{ 1, 212 }, -- Warlock
 				{ 3, 211 }, -- Priest
 				{ 16, 210 }, -- Mage
@@ -118,19 +181,27 @@ data["TierSets"] = {
 				{ 20, 214 }, -- Druid
 				{ 7, 215 }, -- Hunter
 				{ 9, 218 }, -- Warrior
+				{ 22, 216 }, -- Shaman
 				{ 24, 217 }, -- Paladin
 			},
-
-			[HORDE_DIFF] = {
-				GetItemsFromDiff = ALLIANCE_DIFF,
-				{ 22, 216 }, -- Shaman
-				{ 24 }, -- Paladin
+		},
+		{ -- T2.5
+			name = format(AL["Tier %s Sets"], "2.5"),
+			[NORMAL_DIFF] = {
+				{ 1, 499 }, -- Warlock
+				{ 3, 507 }, -- Priest
+				{ 16, 503 }, -- Mage
+				{ 5, 497 }, -- Rogue
+				{ 20, 493 }, -- Druid
+				{ 7, 509 }, -- Hunter
+				{ 9, 496 }, -- Warrior
+				{ 22, 501 }, -- Shaman
+				{ 24, 505 }, -- Paladin
 			},
 		},
 		{ -- T3
 			name = format(AL["Tier %s Sets"], "3"),
-			ContentPhase = 6,
-			[ALLIANCE_DIFF] = {
+			[NORMAL_DIFF] = {
 				{ 1, 529 }, -- Warlock
 				{ 3, 525 }, -- Priest
 				{ 16, 526 }, -- Mage
@@ -138,16 +209,135 @@ data["TierSets"] = {
 				{ 20, 521 }, -- Druid
 				{ 7, 530 }, -- Hunter
 				{ 9, 523 }, -- Warrior
+				{ 22, 527 }, -- Shaman
 				{ 24, 528 }, -- Paladin
 			},
-
-			[HORDE_DIFF] = {
-				GetItemsFromDiff = ALLIANCE_DIFF,
-				{ 22, 527 }, -- Shaman
-				{ 24 }, -- Paladin
+		},
+--@version-bcc@
+		{ -- T4
+			name = format(AL["Tier %s Sets"], "4"),
+			[NORMAL_DIFF] = {
+				{ 1,    645 }, -- Warlock
+				{ 3,    663 }, -- Priest / Heal
+				{ 4,    664 }, -- Priest / Shadow
+				{ 6,    621 }, -- Rogue
+				{ 8,    651 }, -- Hunter
+				{ 10,    654 }, -- Warrior / Prot
+				{ 11,    655 }, -- Warrior / DD
+				{ 16,   648 }, -- Mage
+				{ 18,   638 }, -- Druid / Heal
+				{ 19,   639 }, -- Druid / Owl
+				{ 20,   640 }, -- Druid / Feral
+				{ 22,   631 }, -- Shaman / Heal
+				{ 23,   632 }, -- Shaman / Ele
+				{ 24,   633 }, -- Shaman / Enh
+				{ 26,   624 }, -- Paladin / Heal
+				{ 27,   625 }, -- Paladin / Prot
+				{ 28,   626 }, -- Paladin / DD
 			},
 		},
+		{ -- T5
+			name = format(AL["Tier %s Sets"], "5"),
+			[NORMAL_DIFF] = {
+				{ 1,    646 }, -- Warlock
+				{ 3,    665 }, -- Priest / Heal
+				{ 4,    666 }, -- Priest / Shadow
+				{ 6,    622 }, -- Rogue
+				{ 8,    652 }, -- Hunter
+				{ 10,    656 }, -- Warrior / Prot
+				{ 11,    657 }, -- Warrior / DD
+				{ 16,   649 }, -- Mage
+				{ 18,   642 }, -- Druid / Heal
+				{ 19,   643 }, -- Druid / Owl
+				{ 20,   641 }, -- Druid / Feral
+				{ 22,   634 }, -- Shaman / Heal
+				{ 23,   635 }, -- Shaman / Ele
+				{ 24,   636 }, -- Shaman / Enh
+				{ 26,   627 }, -- Paladin / Heal
+				{ 27,   628 }, -- Paladin / Prot
+				{ 28,   629 }, -- Paladin / DD
+			},
+		},
+		{
+			name = format(AL["Tier %s Sets"], "6"),
+			[NORMAL_DIFF] = {
+				{ 1,    670 }, -- Warlock
+				{ 3,    675 }, -- Priest / Heal
+				{ 4,    674 }, -- Priest / Shadow
+				{ 6,    668 }, -- Rogue
+				{ 8,    669 }, -- Hunter
+				{ 10,    673 }, -- Warrior / Prot
+				{ 11,    672 }, -- Warrior / DD
+				{ 16,   671 }, -- Mage
+				{ 18,   678 }, -- Druid / Heal
+				{ 19,   677 }, -- Druid / Owl
+				{ 20,   676 }, -- Druid / Feral
+				{ 22,   683 }, -- Shaman / Heal
+				{ 23,   684 }, -- Shaman / Ele
+				{ 24,   682 }, -- Shaman / Enh
+				{ 26,   681 }, -- Paladin / Heal
+				{ 27,   679 }, -- Paladin / Prot
+				{ 28,   680 }, -- Paladin / DD
+			},
+		},
+--@end-version-bcc@
 	},
+}
+
+data["DungeonSets"] = {
+	name = AL["Dungeon Sets"],
+	ContentType = SET_CONTENT,
+	TableType = SET_ITTYPE,
+	items = {
+		{ -- T0 / D1
+			name = format(AL["Dungeon Set %s"], "1"),
+			[NORMAL_DIFF] = {
+				{ 1, 183 }, -- Warlock
+				{ 3, 182 }, -- Priest
+				{ 16, 181 }, -- Mage
+				{ 5, 184 }, -- Rogue
+				{ 20, 185 }, -- Druid
+				{ 7, 186 }, -- Hunter
+				{ 9, 189 }, -- Warrior
+				{ 22, 187 }, -- Shaman
+				{ 24, 188 }, -- Paladin
+			},
+		},
+		{ -- T0.5 / D2
+			name = format(AL["Dungeon Set %s"], "2"),
+			[NORMAL_DIFF] = {
+				{ 1, 518 }, -- Warlock
+				{ 3, 514 }, -- Priest
+				{ 16, 517 }, -- Mage
+				{ 5, 512 }, -- Rogue
+				{ 20, 513 }, -- Druid
+				{ 7, 515 }, -- Hunter
+				{ 9, 511 }, -- Warrior
+				{ 22, 519 }, -- Shaman
+				{ 24, 516 }, -- Paladin
+			},
+		},
+--@version-bcc@
+		{ -- T0.5 / D2
+			name = format(AL["Dungeon Set %s"], "3"),
+			[NORMAL_DIFF] = {
+				{ 1, 658 },
+				{ 2, 647 },
+				{ 3, 644 },
+				{ 4, 662 },
+				{ 6, 659 },
+				{ 7, 637 },
+				{ 8, 620 },
+				{ 16, 650 },
+				{ 17, 660 },
+				{ 18, 630 },
+				{ 20, 623 },
+				{ 21, 661 },
+				{ 22, 653 },
+			},
+		},
+--@end-version-bcc@
+	}
 }
 
 data["ZGSets"] = {
@@ -264,10 +454,10 @@ data["MiscSets"] = {
 				{ 5,  141 }, -- Volcanic Armor / 54-61
 				{ 6,  143 }, -- Devilsaur Armor / 58-60
 				{ 7,  144 }, -- Ironfeather Armor / 54-58
-				{ 8,  221 }, -- Garb of Thero-shan / 32-42
+				{ 8,  534 }, -- Undead Slayer's Armor / 63
 				{ 9,  161 }, -- Defias Leather / 18-24
 				{ 10,  162 }, -- Embrace of the Viper / 19-23
-				{ 16,  534 }, -- Undead Slayer's Armor / 63
+				{ 16,  221 }, -- Garb of Thero-shan / 32-42
 			},
 		},
 		{ -- Mail
@@ -302,203 +492,82 @@ data["MiscSets"] = {
 				-- Dagger / Mace
 				{ 5,  65 }, -- Spider's Kiss
 				-- Trinket
-				{ 16,  444 }, -- Shard of the Gods / 60
+				{ 16,  241 }, -- Shard of the Gods / 60
 			},
 		},
 	},
 }
 
-data["Azuregos"] = {
-	name = AL["Azuregos"],
-	AtlasMapFile = "Azuregos",
-	ContentType = WORLD_BOSS_CONTENT,
+--@version-bcc@
+data["WorldEpicsBCC"] = {
+	name = AL["World Epics"],
+	ContentType = COLLECTIONS_CONTENT,
 	LoadDifficulty = LOAD_DIFF,
-	ContentPhase = 2,
+	TableType = NORMAL_ITTYPE,
+	gameVersion = 2,
+	CorrespondingFields = {
+		[1] = "WorldEpics",
+	},
 	items = {
-		{ -- AAzuregos
-			name = AL["Azuregos"],
-			npcId = 6109,
-			DisplayIDs = {{11460}},
-			AtlasMapBossID = 1,
-			[NORMAL_DIFF] = {
-				{ 1,  19132 }, -- Crystal Adorned Crown
-				{ 2,  18208 }, -- Drape of Benediction
-				{ 3,  18541 }, -- Puissant Cape
-				{ 4,  18547 }, -- Unmelting Ice Girdle
-				{ 5,  18545 }, -- Leggings of Arcane Supremacy
-				{ 6,  19131 }, -- Snowblind Shoes
-				{ 7,  19130 }, -- Cold Snap
-				{ 8,  17070 }, -- Fang of the Mystics
-				{ 9,  18202 }, -- Eskhandar's Left Claw
-				{ 10, 18542 }, -- Typhoon
-				{ 16, 18704 }, -- Mature Blue Dragon Sinew
-			},
+		{
+			name = AL["One-Handed Weapons"],
+			[NORMAL_ITTYPE] = {
+				{ 1, 31331 }, -- The Night Blade
+				{ 3, 31332 }, -- Blinkstrike
+				{ 16, 31336 }, -- Blade of Wizardry
+				{ 18, 31342 }, -- The Ancient Scepter of Sue-Min
+			}
 		},
-		{ -- ASpiritA
-			name = AL["Spirit of Azuregos"],
-			npcId = 15481,
-			DisplayIDs = {{15473}},
-			AtlasMapBossID = 1,
-			ExtraList = true,
-			[NORMAL_DIFF] = {
-				{ 1,  20949 }, -- Magical Ledger
+		{
+			name = AL["Two-Handed Weapons"],
+			[NORMAL_ITTYPE] = {
+				{ 1, 31318 }, -- Singing Crystal Axe
+				{ 16, 31322 }, -- The Hammer of Destiny
+				{ 18, 31334 }, -- Staff of Natural Fury
+			}
+		},
+		{
+			name = AL["Ranged Weapons"],
+			[NORMAL_ITTYPE] = {
+				{ 1, 31323 }, -- Don Santos' Famous Hunting Rifle
+				{ 16, 34622 }, -- Spinesever
+			}
+		},
+		{
+			name = ALIL["Trinket"].." & "..ALIL["Finger"].." & "..ALIL["Neck"],
+			[NORMAL_ITTYPE] = {
+				{ 1, 31339 }, -- Lola's Eve
+				{ 3, 31319 }, -- Band of Impenetrable Defenses
+				{ 4, 31326 }, -- Truestrike Ring
+				{ 16, 31338 }, -- Charlotte's Ivy
+				{ 18, 31321 }, -- Choker of Repentance
+			}
+		},
+		{
+			name = AL["Equip"],
+			[NORMAL_ITTYPE] = {
+				{ 1, 31329 }, -- Lifegiving Cloak
+				{ 3, 31340 }, -- Will of Edward the Odd
+				{ 4, 31343 }, -- Kamaei's Cerulean Skirt
+				{ 6, 31333 }, -- The Night Watchman
+				{ 7, 31335 }, -- Pants of Living Growth
+				{ 18, 31330 }, -- Lightning Crown
+				{ 19, 31328 }, -- Leggings of Beast Mastery
+				{ 21, 31320 }, -- Chestguard of Exile
 			},
 		},
 	},
 }
-
-data["LordKazzak"] = {
-	name = AL["Lord Kazzak"],
-	AtlasMapFile = "LordKazzak",
-	ContentType = WORLD_BOSS_CONTENT,
-	LoadDifficulty = LOAD_DIFF,
-	ContentPhase = 2,
-	items = {
-		{ -- KKazzak
-			name = AL["Lord Kazzak"],
-			npcId = 12397,
-			DisplayIDs = {{12449}},
-			AtlasMapBossID = 1,
-			[NORMAL_DIFF] = {
-				{ 1,  18546 }, -- Infernal Headcage
-				{ 2,  17111 }, -- Blazefury Medallion
-				{ 3,  18204 }, -- Eskhandar's Pelt
-				{ 4,  19135 }, -- Blacklight Bracer
-				{ 5,  18544 }, -- Doomhide Gauntlets
-				{ 6,  19134 }, -- Flayed Doomguard Belt
-				{ 7,  19133 }, -- Fel Infused Leggings
-				{ 8,  18543 }, -- Ring of Entropy
-				{ 9,  17112 }, -- Empyrean Demolisher
-				{ 10, 17113 }, -- Amberseal Keeper
-				{ 16, 18665 }, -- The Eye of Shadow
-			},
-		},
-	},
-}
-
-data["DragonsOfNightmare"] = {
-	name = AL["Dragons of Nightmare"],
-	AtlasMapFile = "FourDragons",
-	ContentType = WORLD_BOSS_CONTENT,
-	LoadDifficulty = LOAD_DIFF,
-	ContentPhase = 4,
-	items = {
-		{ -- DLethon
-			name = AL["Lethon"],
-			npcId = 14888,
-			DisplayIDs = {{15365}},
-			[NORMAL_DIFF] = {
-				{ 1,  20628 }, -- Deviate Growth Cap
-				{ 2,  20626 }, -- Black Bark Wristbands
-				{ 3,  20630 }, -- Gauntlets of the Shining Light
-				{ 4,  20625 }, -- Belt of the Dark Bog
-				{ 5,  20627 }, -- Dark Heart Pants
-				{ 6,  20629 }, -- Malignant Footguards
-				{ 9,  20579 }, -- Green Dragonskin Cloak
-				{ 10, 20615 }, -- Dragonspur Wraps
-				{ 11, 20616 }, -- Dragonbone Wristguards
-				{ 12, 20618 }, -- Gloves of Delusional Power
-				{ 13, 20617 }, -- Ancient Corroded Leggings
-				{ 14, 20619 }, -- Acid Inscribed Greaves
-				{ 15, 20582 }, -- Trance Stone
-				{ 16, 20644 }, -- Nightmare Engulfed Object
-				{ 17, 20600 }, -- Malfurion's Signet Ring
-				{ 24, 20580 }, -- Hammer of Bestial Fury
-				{ 25, 20581 }, -- Staff of Rampant Growth
-				{ 30, 20381 }, -- Dreamscale
-			},
-		},
-		{ -- DEmeriss
-			name = AL["Emeriss"],
-			npcId = 14889,
-			DisplayIDs = {{15366}},
-			[NORMAL_DIFF] = {
-				{ 1,  20623 }, -- Circlet of Restless Dreams
-				{ 2,  20622 }, -- Dragonheart Necklace
-				{ 3,  20624 }, -- Ring of the Unliving
-				{ 4,  20621 }, -- Boots of the Endless Moor
-				{ 5,  20599 }, -- Polished Ironwood Crossbow
-				{ 9,  20579 }, -- Green Dragonskin Cloak
-				{ 10, 20615 }, -- Dragonspur Wraps
-				{ 11, 20616 }, -- Dragonbone Wristguards
-				{ 12, 20618 }, -- Gloves of Delusional Power
-				{ 13, 20617 }, -- Ancient Corroded Leggings
-				{ 14, 20619 }, -- Acid Inscribed Greaves
-				{ 15, 20582 }, -- Trance Stone
-				{ 16, 20644 }, -- Nightmare Engulfed Object
-				{ 17, 20600 }, -- Malfurion's Signet Ring
-				{ 24, 20580 }, -- Hammer of Bestial Fury
-				{ 25, 20581 }, -- Staff of Rampant Growth
-				{ 30, 20381 }, -- Dreamscale
-			},
-		},
-		{ -- DTaerar
-			name = AL["Taerar"],
-			npcId = 14890,
-			DisplayIDs = {{15363}, {15367}},
-			[NORMAL_DIFF] = {
-				{ 1,  20633 }, -- Unnatural Leather Spaulders
-				{ 2,  20631 }, -- Mendicant's Slippers
-				{ 3,  20634 }, -- Boots of Fright
-				{ 4,  20632 }, -- Mindtear Band
-				{ 5,  20577 }, -- Nightmare Blade
-				{ 9,  20579 }, -- Green Dragonskin Cloak
-				{ 10, 20615 }, -- Dragonspur Wraps
-				{ 11, 20616 }, -- Dragonbone Wristguards
-				{ 12, 20618 }, -- Gloves of Delusional Power
-				{ 13, 20617 }, -- Ancient Corroded Leggings
-				{ 14, 20619 }, -- Acid Inscribed Greaves
-				{ 15, 20582 }, -- Trance Stone
-				{ 16, 20644 }, -- Nightmare Engulfed Object
-				{ 17, 20600 }, -- Malfurion's Signet Ring
-				{ 24, 20580 }, -- Hammer of Bestial Fury
-				{ 25, 20581 }, -- Staff of Rampant Growth
-				{ 30, 20381 }, -- Dreamscale
-			},
-		},
-		{ -- DYsondre
-			name = AL["Ysondre"],
-			npcId = 14887,
-			DisplayIDs = {{15364}},
-			[NORMAL_DIFF] = {
-				{ 1,  20637 }, -- Acid Inscribed Pauldrons
-				{ 2,  20635 }, -- Jade Inlaid Vestments
-				{ 3,  20638 }, -- Leggings of the Demented Mind
-				{ 4,  20639 }, -- Strangely Glyphed Legplates
-				{ 5,  20636 }, -- Hibernation Crystal
-				{ 6,  20578 }, -- Emerald Dragonfang
-				{ 9,  20579 }, -- Green Dragonskin Cloak
-				{ 10, 20615 }, -- Dragonspur Wraps
-				{ 11, 20616 }, -- Dragonbone Wristguards
-				{ 12, 20618 }, -- Gloves of Delusional Power
-				{ 13, 20617 }, -- Ancient Corroded Leggings
-				{ 14, 20619 }, -- Acid Inscribed Greaves
-				{ 15, 20582 }, -- Trance Stone
-				{ 16, 20644 }, -- Nightmare Engulfed Object
-				{ 17, 20600 }, -- Malfurion's Signet Ring
-				{ 24, 20580 }, -- Hammer of Bestial Fury
-				{ 25, 20581 }, -- Staff of Rampant Growth
-				{ 30, 20381 }, -- Dreamscale
-			},
-		},
-		{ -- DTrash
-			name = AL["Trash"],
-			ExtraList = true,
-			[NORMAL_DIFF] = {
-				{ 1,  21146 }, -- Fragment of the Nightmare's Corruption
-				{ 2,  21147 }, -- Fragment of the Nightmare's Corruption
-				{ 3,  21148 }, -- Fragment of the Nightmare's Corruption
-				{ 4,  21149 }, -- Fragment of the Nightmare's Corruption
-			},
-		},
-	},
-}
-
+--@end-version-bcc@
 data["WorldEpics"] = {
 	name = AL["World Epics"],
 	ContentType = COLLECTIONS_CONTENT,
 	LoadDifficulty = LOAD_DIFF,
 	TableType = NORMAL_ITTYPE,
+	gameVersion = 1,
+	CorrespondingFields = {
+		[2] = "WorldEpicsBCC",
+	},
 	items = {
 		{
 			name = AL["One-Handed Weapons"],
@@ -661,6 +730,151 @@ data["Mounts"] = {
 				{ 30,  13331 }, -- Red Skeletal Horse
 			},
 		},
+		{ -- PvPMountsPvP
+			name = AL["PvP"],
+			[ALLIANCE_DIFF] = {
+				{ 1,  19030 }, -- Stormpike Battle Charger
+				{ 3,  GetForVersion(18244,29467) }, -- Black War Ram
+				{ 4,  GetForVersion(18243,29465) }, -- Black Battlestrider
+				{ 5,  GetForVersion(18241,29468) }, -- Black War Steed Bridle
+				{ 6,  GetForVersion(18242,29471) }, -- Reins of the Black War Tiger
+--@version-bcc@
+				{ 7,  35906 }, -- Reins of the Black War Elekk
+				{ 16,  30609 }, -- Swift Nether Drake
+				{ 17,  37676 }, -- Vengeful Nether Drake
+				{ 18,  34092 }, -- Merciless Nether Drake
+				--{ 19,  43516 }, -- Brutal Nether Drake NYI
+--@end-version-bcc@
+			},
+			[HORDE_DIFF] = {
+				{ 1, 19029 }, -- Horn of the Frostwolf Howler
+				{ 3, GetForVersion(18245,29469) }, -- Horn of the Black War Wolf
+				{ 4, GetForVersion(18247,29466) }, -- Black War Kodo
+				{ 5, GetForVersion(18246,29472) }, -- Whistle of the Black War Raptor
+				{ 6, GetForVersion(18248,29470) }, -- Red Skeletal Warhorse
+--@version-bcc@
+				{ 7, 34129 }, -- Swift Warstrider
+				{ 16,  30609 }, -- Swift Nether Drake
+				{ 17,  37676 }, -- Vengeful Nether Drake
+				{ 18,  34092 }, -- Merciless Nether Drake
+				--{ 19,  43516 }, -- Brutal Nether Drake NYI
+--@end-version-bcc@
+			},
+		},
+		{
+			name = AL["Drops"],
+			[NORMAL_DIFF] = {
+				{ 1, 13335 }, -- Deathcharger's Reins
+				{ 3, 19872 }, -- Swift Razzashi Raptor
+				{ 5, 19902 }, -- Swift Zulian Tiger
+--@version-bcc@
+				{ 7, 32768 }, -- Reins of the Raven Lord
+				{ 9, 33809 }, -- Amani War Bear
+				{ 16, 30480 }, -- Fiery Warhorse's Reins
+				{ 18, 32458 }, -- Ashes of Al'ar
+--@end-version-bcc@
+			},
+		},
+		{
+			name = AL["Reputation"],
+			[ALLIANCE_DIFF] = {
+				{ 1, 13086 }, -- Reins of the Winterspring Frostsaber
+--@version-bcc@
+				{ 3, 29227 }, -- Reins of the Cobalt War Talbuk
+				{ 4, 29229 }, -- Reins of the Silver War Talbuk
+				{ 5, 29230 }, -- Reins of the Tan War Talbuk
+				{ 6, 29231 }, -- Reins of the White War Talbuk
+				{ 7, 31830 }, -- Reins of the Cobalt Riding Talbuk
+				{ 8, 31832 }, -- Reins of the Silver Riding Talbuk
+				{ 9, 31834 }, -- Reins of the Tan Riding Talbuk
+				{ 10, 31836 }, -- Reins of the White Riding Talbuk
+				{ 16, 33999 }, -- Cenarion War Hippogryph
+				{ 18, 32319 }, -- Blue Riding Nether Ray
+				{ 19, 32314 }, -- Green Riding Nether Ray
+                { 20, 32317 }, -- Red Riding Nether Ray
+                { 21, 32316 }, -- Purple Riding Nether Ray
+                { 22, 32318 }, -- Silver Riding Nether Ray
+				{ 24, 32858 }, -- Reins of the Azure Netherwing Drake
+                { 25, 32859 }, -- Reins of the Cobalt Netherwing Drake
+                { 26, 32857 }, -- Reins of the Onyx Netherwing Drake
+                { 27, 32860 }, -- Reins of the Purple Netherwing Drake
+                { 28, 32861 }, -- Reins of the Veridian Netherwing Drake
+                { 29, 32862 }, -- Reins of the Violet Netherwing Drake
+--@end-version-bcc@
+			},
+--@version-bcc@
+			[HORDE_DIFF] = {
+				{ 1, 29102 }, -- Reins of the Cobalt War Talbuk
+				{ 2, 29104 }, -- Reins of the Silver War Talbuk
+				{ 3, 29105 }, -- Reins of the Tan War Talbuk
+				{ 4, 29103 }, -- Reins of the White War Talbuk
+				{ 5, 31829 }, -- Reins of the Cobalt Riding Talbuk
+				{ 6, 31831 }, -- Reins of the Silver Riding Talbuk
+				{ 7, 31833 }, -- Reins of the Tan Riding Talbuk
+				{ 8, 31835 }, -- Reins of the White Riding Talbuk
+				{ 9, 31836 }, -- Reins of the White Riding Talbuk
+				{ 16, 33999 }, -- Cenarion War Hippogryph
+				{ 18, 32319 }, -- Blue Riding Nether Ray
+				{ 19, 32314 }, -- Green Riding Nether Ray
+                { 20, 32317 }, -- Red Riding Nether Ray
+                { 21, 32316 }, -- Purple Riding Nether Ray
+                { 22, 32318 }, -- Silver Riding Nether Ray
+				{ 24, 32858 }, -- Reins of the Azure Netherwing Drake
+                { 25, 32859 }, -- Reins of the Cobalt Netherwing Drake
+                { 26, 32857 }, -- Reins of the Onyx Netherwing Drake
+                { 27, 32860 }, -- Reins of the Purple Netherwing Drake
+                { 28, 32861 }, -- Reins of the Veridian Netherwing Drake
+                { 29, 32862 }, -- Reins of the Violet Netherwing Drake
+
+			},
+--@end-version-bcc@
+		},
+--@version-bcc@
+		{
+			name = AL["World Events"],
+			[NORMAL_DIFF] = {
+				{ 1, 33977 }, -- Swift Brewfest Ram
+				{ 2, 33976 }, -- Brewfest Ram
+				{ 4, 37012 }, -- The Horseman's Reins
+				{ 16, 33182 }, -- Swift Flying Broom
+				{ 17, 33184 }, -- Swift Magic Broom
+				{ 18, 33176 }, -- Flying Broom
+				{ 19, 37011 }, -- Magic Broom
+				{ 20, 33183 }, -- Old Magic Broom
+				{ 21, 33189 }, -- Rickety Magic Broom
+			},
+		},
+		{
+			name = AL["Crafting"],
+			[NORMAL_DIFF] = {
+				{ 1, 34061 }, -- Turbo-Charged Flying Machine Control
+				{ 2, 34060 }, -- Flying Machine Control
+			},
+		},
+--@end-version-bcc@
+		{
+			name = ALIL["Special"],
+			[NORMAL_DIFF] = {
+				{ 1, 21176 }, -- Black Qiraji Resonating Crystal
+				{ 3, 23720 }, -- Riding Turtle
+--@version-bcc@
+				{ 5, 33225 }, -- Reins of the Swift Spectral Tiger
+				{ 6, 33224 }, -- Reins of the Spectral Tiger
+				{ 8, 38576 }, -- Big Battle Bear
+				{ 16, 35226 }, -- X-51 Nether-Rocket X-TREME
+				{ 17, 35225 }, -- X-51 Nether-Rocket
+--@end-version-bcc@
+			},
+		},
+		{ -- AQ40
+			MapID = 3428,
+			[NORMAL_DIFF] = {
+				{ 1, 21218 }, -- Blue Qiraji Resonating Crystal
+				{ 2, 21323 }, -- Green Qiraji Resonating Crystal
+				{ 3, 21321 }, -- Red Qiraji Resonating Crystal
+				{ 4, 21324 }, -- Yellow Qiraji Resonating Crystal
+			},
+		},
 	},
 }
 
@@ -683,6 +897,9 @@ data["Tabards"] = {
 				{ 18, 23192 }, -- Tabard of the Scarlet Crusade
 				{ 19, 23705 }, -- Tabard of Flame
 				{ 20, 23709 }, -- Tabard of Frost
+--@version-bcc@
+				{ 22, 28788 }, -- Tabard of the Protector
+--@end-version-bcc@
 			},
 			[HORDE_DIFF] = {
 				GetItemsFromDiff = ALLIANCE_DIFF,
@@ -696,6 +913,95 @@ data["Tabards"] = {
 	},
 }
 
+--@version-bcc@
+data["LegendarysBCC"] = {
+	name = AL["Legendarys"],
+	ContentType = COLLECTIONS_CONTENT,
+	LoadDifficulty = LOAD_DIFF,
+	TableType = NORMAL_ITTYPE,
+	gameVersion = 2,
+	CorrespondingFields = {
+		[1] = "Legendarys",
+	},
+	items = {
+		{
+			name = AL["Legendarys"],
+			[NORMAL_ITTYPE] = {
+				{ 1,  34334 }, -- Thori'dal, the Stars' Fury
+
+				{ 16,  32837 }, -- Warglaive of Azzinoth
+				{ 17,  32838 }, -- Warglaive of Azzinoth
+			},
+		},
+		{
+			MapID = 3845,
+			[NORMAL_ITTYPE] = {
+				{ 1,  30312 }, -- Infinity Blade
+				{ 2,  30311 }, -- Warp Slicer
+				{ 3,  30317 }, -- Cosmic Infuser
+				{ 4,  30316 }, -- Devastation
+				{ 5,  30313 }, -- Staff of Disintegration
+				{ 6,  30314 }, -- Phaseshift Bulwark
+				{ 7,  30318 }, -- Netherstrand Longbow
+				{ 8,  30319 }, -- Nether Spike
+			},
+		},
+	},
+}
+--@end-version-bcc@
+
+data["Legendarys"] = {
+	name = AL["Legendarys"],
+	ContentType = COLLECTIONS_CONTENT,
+	LoadDifficulty = LOAD_DIFF,
+	TableType = NORMAL_ITTYPE,
+	gameVersion = 1,
+	CorrespondingFields = {
+		[2] = "LegendarysBCC",
+	},
+	items = {
+		{
+			name = AL["Legendarys"],
+			[NORMAL_ITTYPE] = {
+				{ 1,  19019 }, -- Thunderfury, Blessed Blade of the Windseeker
+
+				{ 3,  22631 }, -- Atiesh, Greatstaff of the Guardian / Priest
+				{ 4,  22589 }, -- Atiesh, Greatstaff of the Guardian / Mage
+				{ 5,  22630 }, -- Atiesh, Greatstaff of the Guardian / Warlock
+				{ 6,  22632 }, -- Atiesh, Greatstaff of the Guardian / Druid
+
+				{ 16,  17182 }, -- Sulfuras, Hand of Ragnaros
+
+				{ 18,  21176 }, -- Black Qiraji Resonating Crystal
+			},
+		},
+		{
+			name = ALIL["Quest Item"],
+			[NORMAL_ITTYPE] = {
+				{ 1,  19018 }, -- Dormant Wind Kissed Blade
+				{ 2,  19017 }, -- Essence of the Firelord
+				{ 3,  19016 }, -- Vessel of Rebirth
+				{ 4,  18564 }, -- Bindings of the Windseeker / Right
+				{ 5,  18563 }, -- Bindings of the Windseeker / Left
+				{ 7,  17204 }, -- Eye of Sulfuras
+				{ 9,  17771 }, -- Elementium Bar
+				{ 16,  22736 }, -- Andonisus, Reaper of Souls
+				{ 17,  22737 }, -- Atiesh, Greatstaff of the Guardian
+				{ 18,  22733 }, -- Staff Head of Atiesh
+				{ 19,  22734 }, -- Base of Atiesh
+				{ 20,  22727 }, -- Frame of Atiesh
+				{ 21,  22726 }, -- Splinter of Atiesh
+			},
+		},
+		{
+			name = AL["Unobtainable"],
+			[NORMAL_ITTYPE] = {
+				{ 1,  17782 }, -- Talisman of Binding Shard
+				{ 16,  20221 }, -- Foror's Fabled Steed
+			},
+		},
+	},
+}
 
 data["GurubashiArena"] = {
 	name = AL["Gurubashi Arena"],
@@ -1062,7 +1368,8 @@ data["ElementalInvasions"] = {
 	ContentType = WORLD_EVENT_CONTENT,
 	LoadDifficulty = NORMAL_DIFF,
 	TableType = NORMAL_ITTYPE,
-	ContentPhase = 2,
+	ContentPhase = 2.5,
+	gameVersion = 1,
 	items = {
 		{ -- ElementalInvasion
 			name = AL["Elemental Invasions"],
@@ -1103,8 +1410,22 @@ data["Darkmoon"] = {
 				{ 2,  19267 }, -- Darkmoon Card: Maelstrom
 				{ 3,  19257 }, -- Darkmoon Card: Heroism
 				{ 4,  19277 }, -- Darkmoon Card: Twisting Nether
-				{ 16,  19491 }, -- Amulet of the Darkmoon
-				{ 17,  19426 }, -- Orb of the Darkmoon
+--@version-bcc@
+				{ 6,  31907 }, -- Darkmoon Card: Vengeance
+				{ 7,  31890 }, -- Darkmoon Card: Crusade
+				{ 8,  31891 }, -- Darkmoon Card: Wrath
+				{ 9,  31914 }, -- Darkmoon Card: Madness
+--@end-version-bcc@
+				{ 16,  19491, 19182, [ATLASLOOT_IT_AMOUNT2] = 1200 }, -- Amulet of the Darkmoon
+				{ 17,  19426, 19182, [ATLASLOOT_IT_AMOUNT2] = 1200 }, -- Orb of the Darkmoon
+				{ 19,  19293, 19182, [ATLASLOOT_IT_AMOUNT2] = 50 }, -- Last Year's Mutton
+				{ 20,  19291, 19182, [ATLASLOOT_IT_AMOUNT2] = 50 }, -- Darkmoon Storage Box
+				{ 22,  9249, 19182, [ATLASLOOT_IT_AMOUNT2] = 40 }, -- Schematic: Steam Tonk Controller
+				{ 23,  19296, 19182, [ATLASLOOT_IT_AMOUNT2] = 40 }, -- Greater Darkmoon Prize
+				{ 25,  19297, 19182, [ATLASLOOT_IT_AMOUNT2] = 12 }, -- Lesser Darkmoon Prize
+				{ 27,  19292, 19182, [ATLASLOOT_IT_AMOUNT2] = 10 }, -- Last Month's Mutton
+				{ 29,  19298, 19182, [ATLASLOOT_IT_AMOUNT2] = 5 }, -- Minor Darkmoon Prize
+				{ 30,  19295, 19182, [ATLASLOOT_IT_AMOUNT2] = 5 }, -- Darkmoon Flower
 			},
 		},
 	},
@@ -1116,6 +1437,7 @@ data["SilithusAbyssal"] = {
 	LoadDifficulty = NORMAL_DIFF,
 	TableType = NORMAL_ITTYPE,
 	ContentPhase = 4,
+	gameVersion = 1,
 	items = {
 		{ -- AbyssalDukes
 			name = AL["Abyssal Dukes"],
@@ -1195,12 +1517,46 @@ data["SilithusAbyssal"] = {
 	},
 }
 
+data["AQOpening"] = {
+	name = AL["AQ opening"],
+	ContentType = WORLD_EVENT_CONTENT,
+	LoadDifficulty = NORMAL_DIFF,
+	TableType = NORMAL_ITTYPE,
+	ContentPhase = 5,
+	gameVersion = 1,
+	items = {
+		{
+			name = AL["AQ opening"],
+			[NORMAL_DIFF] = {
+				{ 1,  21138 }, -- Red Scepter Shard
+				{ 2,  21529 }, -- Amulet of Shadow Shielding
+				{ 3,  21530 }, -- Onyx Embedded Leggings
+				{ 5,  21139 }, -- Green Scepter Shard
+				{ 6,  21531 }, -- Drake Tooth Necklace
+				{ 7,  21532 }, -- Drudge Boots
+				{ 9,  21137 }, -- Blue Scepter Shard
+				{ 10, 21517 }, -- Gnomish Turban of Psychic Might
+				{ 11, 21527 }, -- Darkwater Robes
+				{ 12, 21526 }, -- Band of Icy Depths
+				{ 13, 21025 }, -- Recipe: Dirge's Kickin' Chimaerok Chops
+				{ 16, 21175 }, -- The Scepter of the Shifting Sands
+				{ 17, 21176 }, -- Black Qiraji Resonating Crystal
+				{ 18, 21523 }, -- Fang of Korialstrasz
+				{ 19, 21521 }, -- Runesword of the Red
+				{ 20, 21522 }, -- Shadowsong's Sorrow
+				{ 21, 21520 }, -- Ravencrest's Legacy
+			},
+		},
+	},
+}
+
 data["ScourgeInvasion"] = {
 	name = AL["Scourge Invasion"],
 	ContentType = WORLD_EVENT_CONTENT,
 	LoadDifficulty = NORMAL_DIFF,
 	TableType = NORMAL_ITTYPE,
 	ContentPhase = 6,
+	gameVersion = 1,
 	items = {
 		{ -- ScourgeInvasionEvent1
 			name = AL["Scourge Invasion"],

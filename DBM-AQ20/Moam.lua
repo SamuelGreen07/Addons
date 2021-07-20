@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod("Moam", "DBM-AQ20", 1)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20190823020343")
+mod:SetRevision("20210402014659")
 mod:SetCreatureID(15340)
 mod:SetEncounterID(720)
 mod:SetModelID(15392)
@@ -13,6 +13,7 @@ mod:RegisterEventsInCombat(
 )
 
 --Energize is mode boss goes in during Summon Mana Fiend Phase
+--TODO, update timrs on mana drains/etc
 --TODO, verify if arcane eruption wll always be the same
 --"Arcane Eruption-25672-npc:15340 = pull:325.8", -- [1]
 local warnEnergize		= mod:NewSpellAnnounce(25685, 3)
@@ -24,21 +25,16 @@ function mod:OnCombatStart(delay)
 	timerEnergize:Start(-delay)
 end
 
-do
-	local Energize = DBM:GetSpellInfo(25685)
-	function mod:SPELL_AURA_APPLIED(args)
-		--if args.spellId == 25685 then
-		if args.spellName == Energize and args:IsDestTypeHostile() then
-			warnEnergize:Show()
-			timerEnergizeDur:Start()
-		end
+function mod:SPELL_AURA_APPLIED(args)
+	if args.spellId == 25685 and args:IsDestTypeHostile() then
+		warnEnergize:Show()
+		timerEnergizeDur:Start()
 	end
+end
 
-	function mod:SPELL_AURA_REMOVED(args)
-		--if args.spellId == 25685 then
-		if args.spellName == Energize and args:IsDestTypeHostile() then
-			timerEnergizeDur:Stop()
-			timerEnergize:Start()
-		end
+function mod:SPELL_AURA_REMOVED(args)
+	if args.spellId == 25685 and args:IsDestTypeHostile() then
+		timerEnergizeDur:Stop()
+		timerEnergize:Start()
 	end
 end

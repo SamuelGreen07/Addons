@@ -1,34 +1,24 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("Spy", "ptBR")
 if not L then return end
+-- TOC Note: Detecta e alerta você da presença de jogadores inimigos.
 
-
--- Addon information
+-- Configuration
 L["Spy"] = "Spy"
 L["Version"] = "Versão"
---L["LoadDescription"] = "|cff9933ffSpy foi carregado. Digite |cffffffff/spy|cff9933ff para opções."
-L["SpyEnabled"] = "|cff9933ffSpy addon ativado."
-L["SpyDisabled"] = "|cff9933ffSpy addon desativado. Digite |cffffffff/spy enable|cff9933ff para ativar."
-L["UpgradeAvailable"] = "|cff9933ffA nova versão do Spy está disponivel. Baixe-o em:\n|cffffffffhttps://www.curseforge.com/wow/addons/spy-classic"
-
--- Configuration frame name
 L["Spy Option"] = "Spy"
-
--- Configuration strings
 L["Profiles"] = "Perfis"
 
-L["GeneralSettings"] = "Configurações Gerais"
+-- About
+L["About"] = "Info"
 L["SpyDescription1"] = [[
-Spy é um addon que vai alerta-lo da presença de jogadores inimigos nas proximidades.
+Spy é um addon que vai alerta-lo da presença de jogadores inimigos nas proximidades. Estas são algumas das principais características.
 ]]
 L["SpyDescription2"] = [[
-
 |cffffd000Lista de Proximidades|cffffffff
-A lista de Proximidades mostra qualquer inimigo detectado nas proximidades. Clicando na lista você irá mirar no jogador, mas isso só funciona fora de combate. Jogadores são removidos da lista se não forem mais detectados após um certo período de tempo.
-
-O botão limpar na barra de titulo é usado para limpar a lista, e segurando Ctrl enquanto limpa a lista permite a você rapidamente ativar/desativar o Spy.
+A lista de Proximidades mostra qualquer inimigo detectado nas proximidades. Jogadores são removidos da lista se não forem mais detectados após um certo período de tempo.
 
 |cffffd000Lista da Última Hora|cffffffff
-A Lista da Última Hora mostra todos os inimigos detectados na ultima hora.
+Exibe todos os inimigos detectados em uma hora.
 
 |cffffd000Lista de Ignorados|cffffffff
 Jogadores que são adicionados à lista de Ignorados não serão reportados pelo Spy. Você pode adicionar ou remover jogadores dessa lista usando o menu de contexto ou segurando Ctrl enquanto clicando no botão.
@@ -36,11 +26,21 @@ Jogadores que são adicionados à lista de Ignorados não serão reportados pelo
 |cffffd000Lista Negra|cffffffff
 Jogadores que são adicionados à Lista Negra são reportados pelo Spy através de um alarme sonoro.  Você pode adicionar ou remover jogadores dessa lista usando o menu de contexto ou segurando Shift enquanto clica no botão.
 
-O menu de contexto também permite que você justifique as razões que o levou a colocar determinada pessoa na Lista Negra. Se quiser colocar uma motivo especifico que não tenha na lista, em seguida, use "Digite seu próprio motivo..." em Outra lista..
+O menu de contexto também permite que você justifique as razões que o levou a colocar determinada pessoa na Lista Negra. Se quiser colocar uma motivo especifico que não tenha na lista, em seguida, use "Digite seu próprio motivo..." em Outra lista.
 
+|cffffd000Statistics Window|cffffffff
+The Statistics Window contains a list of all enemy encounters which can be sorted by name, level, guild, wins, losses and the last time an enemy was detected. It also provides the ability to search for a specific enemy by name or guild and has filters to show only enemies that are marked as Kill on Sight, with a Win/Loss or entered Reasons. 
 
-|cffffd000Autor: Slipjack |cffffffff
+|cffffd000Kill On Sight Button|cffffffff
+If enabled, this button will be located on the enemy players target frame. Clicking on this button will add/remove the enemy target to/from the Kill On Sight list. Right clicking on the button will allow you to enter Kill on Sight reasons.
 
+|cffffd000Autor: Slipjack|cffffffff
+]]
+
+-- General Settings
+L["GeneralSettings"] = "Configurações Gerais"
+L["GeneralSettingsDescription"] = [[
+Opções para quando o Spy está ativado ou desativado.
 ]]
 L["EnableSpy"] = "Ativar Spy"
 L["EnableSpyDescription"] = "Ativa ou desativa o Spy."
@@ -52,10 +52,31 @@ L["EnabledInWintergrasp"] = "Ativar Spy em Zonas de Combate"
 L["EnabledInWintergraspDescription"] = "Ativa ou desativa o Spy em locais como Invérnia."
 L["DisableWhenPVPUnflagged"] = "Desativar Spy quando JxJ estiver desativado"
 L["DisableWhenPVPUnflaggedDescription"] = "Ativa ou desativa o Spy dependendo se o seu status de JxJ estiver ativado ou desativado."
+L["DisabledInZones"] = "Desative o Spy enquanto estiver nesses locais"
+L["DisabledInZonesDescription"]	= "Selecione locais onde o Spy será desativado"
+L["Booty Bay"] = "Angra do Butim"
+L["Everlook"] = "Visteterna"						
+L["Gadgetzan"] = "Geringontzan"
+L["Ratchet"] = "Vila Catraca"
+L["The Salty Sailor Tavern"] = "Taberna do Lobo do Mar"
+L["Shattrath City"] = "Shattrath"
+L["Area 52"] = "Área 52"
+L["Dalaran"] = "Dalaran"
+L["Dalaran (Northrend)"] = "Dalaran (Nortúndria)"
+L["Bogpaddle"] = "Brejo do Goblin"
+L["The Vindicaar"] = "A Vindicaar"
+L["Krasus' Landing"] = "Plataforma de Krasus"
+L["The Violet Gate"] = "Portão Violeta"
+L["Magni's Encampment"] = "Acampamento de Magni"
+L["Silithus"] = "Silithus"
+L["Chamber of Heart"] = "Câmara do Coração"
+L["Hall of Ancient Paths"] = "Salão dos Antigos Caminhos"
+L["Sanctum of the Sages"] = "Sacrário dos Sábios"
 
+-- Display
 L["DisplayOptions"] = "Exibição"
 L["DisplayOptionsDescription"] = [[
-Spy pode ser mostrado e escondido automaticamente.
+Opções para a janela Spy e dicas de ferramentas.
 ]]
 L["ShowOnDetection"] = "Mostrar Spy quando um inimigo for detectado"
 L["ShowOnDetectionDescription"] = "Marque isso para que o Spy mostre a lista de Proximidades quando um inimigo for detectado."
@@ -65,8 +86,14 @@ L["ShowOnlyPvPFlagged"] = "Mostrar apenas jogadores inimigos sinalizados para Jx
 L["ShowOnlyPvPFlaggedDescription"] = "Defina isto para mostrar apenas jogadores inimigos marcados para JxJ na lista Proximidades.."
 L["ShowKoSButton"] = "Mostrar o botão da lista negra no quadro alvo inimigo"
 L["ShowKoSButtonDescription"] = "Defina isso para mostrar o botão da lista negra no quadro alvo do jogador inimigo."
+L["Alpha"] = "Transparência"
+L["AlphaDescription"] = "Defina a transparência da janela Spy."
+L["AlphaBG"] = "Transparência em CB"
+L["AlphaBGDescription"] = "Defina a transparência da janela Spy nos Campos de Batalha."
 L["LockSpy"] = "Travar a janela do Spy"
 L["LockSpyDescription"] = "Trava a janela para que ela não possa ser movida."
+L["ClampToScreen"] = "Limitar na Tela"
+L["ClampToScreenDescription"] = "Controla quando a janela do Spy pode ser arrastada para fora da tela."
 L["InvertSpy"] = "Inverter a janela de Spy"
 L["InvertSpyDescription"] = "Inverte a janela de Spy de cabeça para baixo."
 L["Reload"] = "Recarregar UI"
@@ -75,21 +102,41 @@ L["ResizeSpy"] = "Redimensionar janela do Spy automaticamente"
 L["ResizeSpyDescription"] = "Marque isso para que a janela do Spy seja redimensionada a medida que novos jogadores são adicionados ou removidos."
 L["ResizeSpyLimit"] = "Limite de lista"
 L["ResizeSpyLimitDescription"] = "Limite o número de jogadores inimigos mostrados na janela do Spy."
+L["DisplayTooltipNearSpyWindow"] = "Exibir dica de ferramenta perto da janela do Spy"
+L["DisplayTooltipNearSpyWindowDescription"] = "Defina isso para exibir dicas de ferramentas perto da janela do Spy."
+L["SelectTooltipAnchor"] = "Ponto de ancoragem da dica de ferramenta"
+L["SelectTooltipAnchorDescription"] = "Selecione o ponto de ancoragem para a dica de ferramenta se a opção acima tiver sido marcada."
+L["ANCHOR_CURSOR"] = "Cursor"
+L["ANCHOR_TOP"] = "Acima"
+L["ANCHOR_BOTTOM"] = "Debaixo"
+L["ANCHOR_LEFT"] = "Esquerda"			
+L["ANCHOR_RIGHT"] = "Direita"
 L["TooltipDisplayWinLoss"] = "Mostar estastica de Vitória/Derrota nas dicas"
 L["TooltipDisplayWinLossDescription"] = "Marque isso para que seja mostrado na dicas do jogador, as estasticas de Vitória/Derrota daquele um jogador."
 L["TooltipDisplayKOSReason"] = "Mostrar motivos da Lista Negra nas dicas"
 L["TooltipDisplayKOSReasonDescription"] = "Marque isso para que seja mostrado na dicas do jogador os motivos da Lista Negra daquele jogador."
 L["TooltipDisplayLastSeen"] = "Mostrar detalhes da ultima vez visto nas dicas"
 L["TooltipDisplayLastSeenDescription"] = "Marque isso para que seja mostrado nas dicas de jogador o ultimo local e hora em que aquele jogador foi visto."
+L["DisplayListData"] = "Selecione os dados do inimigo para exibir"
+L["Name"] = "Nome"
+L["Class"] = "Classe"
 L["SelectFont"] = "Selekt e Font"
-L["SelectFontDescription"] = "Selecione um tipo de letra para o Spy mostre ."
+L["SelectFontDescription"] = "Selecione um tipo de letra para a janela Spy."
 L["RowHeight"] = "Selecione a altura da linha"
-L["RowHeightDescription"] = "Selecione a altura da linha para a janela do espião."
+L["RowHeightDescription"] = "Selecione a altura da linha para a janela Spy."
+L["Texture"] = "Textura"
+L["TextureDescription"] = "Selecione a textura da janela Spy"
 
+-- Alerts
 L["AlertOptions"] = "Alertas"
 L["AlertOptionsDescription"] = [[
-Você pode anunciar em qualquer canal do chat os detalhes de um encontro e controlar como o Spy te alerta quando um inimigo é detectado.
+Opções para alertas, anúncios e avisos quando jogadores inimigos são detectados.
 ]]
+L["SoundChannel"] = "Selecionar canal de som"
+L["Master"] = "Geral"
+L["SFX"] = "Efeitos sonoros"
+L["Music"] = "Musica"
+L["Ambience"] = "Ambiência"
 L["Announce"] = "Anunciar Para:"
 L["None"] = "Ninguem"
 L["NoneDescription"] = "Não anunciar quando jogadores inimigos forem detectados."
@@ -118,11 +165,18 @@ L["SelectWarnRaceDescription"] = "Selecione uma raça para alerta de áudio."
 L["WarnRaceNote"] = "Nota: Você deve atingir o inimigo, pelo menos uma vez para que sua raça pode ser adicionado ao banco de dados. Na próxima detecção um alerta será emitido. Isso não funciona o mesmo que detectar os inimigos próximos em combate."
 L["DisplayWarningsInErrorsFrame"] = "Mostrar alertas no campo de erros"
 L["DisplayWarningsInErrorsFrameDescription"] = "Marque isso para usar o campo de erros para mostrar alertas ao invés de usar os popups graficos."
+L["DisplayWarnings"] = "Selecione o local da mensagem de avisos"
+L["Default"] = "padrão"
+L["ErrorFrame"] = "Quadro de erro"
+L["Moveable"] = "móvel"
 L["EnableSound"] = "Ativar alertas sonoros"
 L["EnableSoundDescription"] = "marque isso para ativar alertas sonoros quando um inimigo for detectado. Os sons são diferentes para Lista Negra e inimigos que ficam invisiveis."
 L["OnlySoundKoS"] = "Somente alertas sonoros de áudio para a lista Negra"
 L["OnlySoundKoSDescription"] = "Defina esta opção para reproduzir apenas alertas de áudio quando forem detectados jogadores inimigos na lista Negra."
+L["StopAlertsOnTaxi"] = "Desativar alertas enquanto estiver em uma rota de vôo"
+L["StopAlertsOnTaxiDescription"] = "Interrompa todos os novos alertas e avisos enquanto estiver em uma rota de vôo."
 
+-- Nearby List
 L["ListOptions"] = "Lista de Proximidades"
 L["ListOptionsDescription"] = [[
 Você pode configurar como o Spy adiciona e remove inimigos da lista de Proximidades.
@@ -145,18 +199,20 @@ L["ShowNearbyListDescription"] = "Marque isso para que ao detectar jogadores ini
 L["PrioritiseKoS"] = "Piorizar inimigos da Lista Negra na lista de Proximidades"
 L["PrioritiseKoSDescription"] = "Marque isso para sempre motrar primeiro inimigos da Lista Negra na lista de Proximidades."
 
-L["MinimapOptions"] = "Mapa"
-L["MinimapOptionsDescription"] = [[
-Para jogadores que podem rastrear humanóides o minimapa pode ser utilizado para fornecer recursos adicionais.
+-- Map
+L["MapOptions"] = "Mapa"
+L["MapOptionsDescription"] = [[
+Opções para mapa-múndi e minimapa, incluindo ícones e dicas de ferramentas.
 ]]
-L["MinimapTracking"] = "Ativar rastreamento no minimapa"
-L["MinimapTrackingDescription"] = "Marque isso para ativar rastreamento e detecção no minimapa. Jogadores inimigos detectados no minimapa serão adicionados à lista de Proximidades."
+L["MinimapDetection"] = "Ativar detecção de minimapa"
+L["MinimapDetectionDescription"] = "Rolar o cursor sobre jogadores inimigos conhecidos detectados no minimapa os adicionará à lista de Proximidades."
+L["MinimapNote"] = "          Nota: Funciona apenas para jogadores que podem rastrear humanoides."
 L["MinimapDetails"] = "Mostrar detalhes de level/classe nas dicas"
 L["MinimapDetailsDescription"] = "Marque isso para atualizar as dicas do mapa para que o level e a classe sejam mostrados juntamente com o nome dos inimigos."
-L["DisplayOnMap"] = "Mostrar localização do inimigo no mapa"
-L["DisplayOnMapDescription"] = "Marque isso para que seja mostrado no mapa-múndi e no minimapa a localização dos inimigos detectados por outros usuários do Spy em seu grupo, raide e guilda."
+L["DisplayOnMap"] = "Exibir ícones no mapa"
+L["DisplayOnMapDescription"] = "Exiba ícones de mapa para a localização de outros usuários do SPY em seu grupo, invasão e guilda quando detectar inimigos."
 L["SwitchToZone"] = "Mudar para o mapa actual zona de detecção de inimigo"
-L["SwitchToZoneDescription"] = "Se o mapa do mundo está aberto isso vai mudar o mapa para o jogadores mapa da zona atual quando são detectados inimigos."
+L["SwitchToZoneDescription"] = "Mude o mapa para o mapa da zona atual do jogador quando inimigos forem detectados."
 L["MapDisplayLimit"] = "Limitar icones mostrados no mapa para:"
 L["LimitNone"] = "Todos os lugares"
 L["LimitNoneDescription"] = "Mostrar no mapa todos os inimigos detectados independente da sua atual localização."
@@ -165,9 +221,10 @@ L["LimitSameZoneDescription"] = "Mostrar no mapa somente inimigos que estejam na
 L["LimitSameContinent"] = "Mesmo Continente"
 L["LimitSameContinentDescription"] = "Mostrar no mapa somente inimigos que estejam no mesmo continente que você."
 
+-- Data Management
 L["DataOptions"] = "Gerenciamento de Dados"
 L["DataOptionsDescription"] = [[
-Você pode configurar como o Spy coleta e mantem os dados.
+Opções sobre como o Spy mantém e reúne dados.
 ]]
 L["PurgeData"] = "Limpar dados de inimigos não detectados após:"
 L["OneDay"] = "1 dia"
@@ -189,19 +246,19 @@ L["PurgeWinLossDateDescription"] = "Defina esta opção para limpar os dados win
 L["ShareData"] = "Compartilhar dados com outros usuários do Spy"
 L["ShareDataDescription"] = "Marque isso para compartilhar os dados dos inimigos encontrados com outros usuários do Spy em seu grupo, raide e guilda."
 L["UseData"] = "Usar dados de outros usuários do Spy"
-L["UseDataDescription"] = [[Marque isso para usar dados coletados por outros usuários do Spy em seu grupo, raide e guilda.
-
-Se outro usuário do Spy detectar um jogador inimigo ele será adicionado a sua lista de Proximidades se ela não estiver cheia
-]]
+L["UseDataDescription"] = "Marque isso para usar dados coletados por outros usuários do Spy em seu grupo, raide e guilda."
 L["ShareKOSBetweenCharacters"] = "Compartilhar Lista Negra entre todos os seus personagens"
 L["ShareKOSBetweenCharactersDescription"] = "Marque isso para que a Lista Negra seja compartilhada entre todos os seus personagens do mesmo reino e facção."
 
+-- Commands
 L["SlashCommand"] = "Slash Command"
 L["SpySlashDescription"] = "Esses botões executam as mesmas funções que aquelas vistas no slash command /spy"
 L["Enable"] = "Enable"
 L["EnableDescription"] = "Permite que o Spy e mostra a janela principal."
 L["Show"] = "Mostrar"
 L["ShowDescription"] = "Mostra a janela principal."
+L["Hide"] = "Esconder "
+L["HideDescription"] = "Oculta a janela principal."
 L["Reset"] = "Reset"
 L["ResetDescription"] = "Reseta a posição e aparencia da janela principal."
 L["ClearSlash"] = "Limpar"
@@ -213,6 +270,8 @@ L["KOSDescription"] = "Adicionar/remover jogadores na Lista Negra."
 L["InvalidInput"] = "Entrada Inválida"
 L["Ignore"] = "Ignore"
 L["IgnoreDescription"] = "Adicionar/remover um jogador de/para a lista de ignorados."
+L["Test"] = "Test"
+L["TestDescription"] = "Exibe um aviso para que você possa reposicioná-lo."
 
 -- Lists
 L["Nearby"] = "Proximidades"
@@ -221,6 +280,8 @@ L["Ignore"] = "Ignorados"
 L["KillOnSight"] = "Lista Negra"
 
 --Stats
+L["Won"] = "Ganhou"
+L["Lost"] = "Perdeu"
 L["Time"] = "Tempo"	
 L["List"] = "Lista"	
 L["Filter"] = "Filtro"
@@ -231,7 +292,11 @@ L["Reason"] = "Motivo"
 L["HonorKills"] = "Honra Mata"
 L["PvPDeaths"] = "Mortes JxJ"	
 
--- Output messages
+-- Output Messages
+L["VersionCheck"] = "|cffc41e3aAtenção! A versão errada do Spy está instalada. Remova esta versão e instale o Spy Classic."
+L["SpyEnabled"] = "|cff9933ffSpy addon ativado."
+L["SpyDisabled"] = "|cff9933ffSpy addon desativado. Digite |cffffffff/spy show|cff9933ff para ativar."
+L["UpgradeAvailable"] = "|cff9933ffA nova versão do Spy está disponivel. Baixe-o em:\n|cffffffffhttps://www.curseforge.com/wow/addons/spy-classic"
 L["AlertStealthTitle"] = "Jogador invisivel detectado!"
 L["AlertKOSTitle"] = "Jogador na Lista Negra detectado!"
 L["AlertKOSGuildTitle"] = "Guildie de Lista Negra detectado!"
@@ -261,7 +326,9 @@ L["CloseDescription"] = "|cffffffffEsconde a janela do Spy. Por defeito ela irá
 L["Left/Right"] = "Direita/Esquerda"
 L["Left/RightDescription"] = "|cffffffffNavega entre as listas de Proximidades, Ultima Hora, Ignorados e Lista Negra."
 L["Clear"] = "Limpar"
-L["ClearDescription"] = "|cffffffffLimpa a lista de inimigos detectados. Ctrl e click Ativa/Desativa o Spy."
+L["ClearDescription"] = "|cffffffffLimpa a lista de inimigos detectados. Ctrl e click Inicia / Para  o Spy. Shift e Click liga / desliga todo o som."
+L["SoundEnabled"] = "Alertas de áudio ativados"
+L["SoundDisabled"] = "Alertas de áudio desativados"
 L["NearbyCount"] = "Contador de Inimigos"
 L["NearbyCountDescription"] = "|cffffffffContatdor de inimigos nas proximidades."
 L["Statistics"] = "Estatística"
@@ -281,12 +348,13 @@ L["Player"] = " (Jogador)"
 L["KOSReason"] = "Lista Negra"
 L["KOSReasonIndent"] = "    "
 L["KOSReasonOther"] = "Digite seu próprio motivo..."
-L["KOSReasonClear"] = "Limpar"
+L["KOSReasonClear"] = "Limpar motivo"
 L["StatsWins"] = "|cff40ff00Vitórias: "
 L["StatsSeparator"] = "  "
 L["StatsLoses"] = "|cff0070ddDerrotas: "
 L["Located"] = "localizado:"
 L["Yards"] = "jardas"
+L["LocalDefenseChannelName"] = "DefesaLocal"
 
 Spy_KOSReasonListLength = 6
 Spy_KOSReasonList = {
@@ -376,89 +444,78 @@ StaticPopupDialogs["Spy_SetKOSReasonOther"] = {
 	OnShow = function(self)
 		self.editBox:SetText("");
 	end,
-    	OnAccept = function(self)
+    OnAccept = function(self)
 		local reason = self.editBox:GetText()
 		Spy:SetKOSReason(self.playerName, "Digite seu próprio motivo...", reason)
 	end,
 };
 
---++ Class descriptions
---L["DEATHKNIGHT"] = "Cavaleiro da Morte"
---L["DEMONHUNTER"] = "Caçador de Demonios"
+-- Class descriptions
+L["UNKNOWN"] = "Desconhecido"
 L["DRUID"] = "Druida"
 L["HUNTER"] = "Caçador"
 L["MAGE"] = "Mago"
---L["MONK"] = "Monge"
 L["PALADIN"] = "Paladino"
 L["PRIEST"] = "Sacerdote"
 L["ROGUE"] = "Ladino"
 L["SHAMAN"] = "Xamã"
 L["WARLOCK"] = "Bruxo"
 L["WARRIOR"] = "Guerreiro"
-L["UNKNOWN"] = "Desconhecido"
+L["DEATHKNIGHT"] = "Cavaleiro da Morte"
+L["MONK"] = "Monge"
+L["DEMONHUNTER"] = "Caçador de Demonios"
 
 --++ Race descriptions
-L["HUMAN"] = "Humano"
-L["ORC"] = "Orc"
-L["DWARF"] = "Anão"
-L["NIGHT ELF"] = "Elfo Noturno"
-L["UNDEAD"] = "Morto-vivo"
-L["TAUREN"] = "Tauren"
-L["GNOME"] = "Gnomo"
-L["TROLL"] = "Troll"
---L["GOBLIN"] = "Goblin"
---L["BLOOD ELF"] = "Elfo Sangrento"
---L["DRAENEI"] = "Draenei"
---L["WORGEN"] = "Worgen"
---L["PANDAREN"] = "Pandaren"
---L["NIGHTBORNE"] = "Filho da Noite"
---L["HIGHMOUNTAIN TAUREN"] = "Tauren Altamontês"
---L["VOID ELF"] = "Void Elf"	
---L["LIGHTFORGED DRAENEI"] = "Draenei Forjado a Luz"
---L["ZANDALARI TROLL"] = "Troll Zandalari"
---L["KUL TIRAN"] = "Kultireno"
---L["DARK IRON DWARF"] = "Anão Ferro Negro"
---L["MAG'HAR ORC"] = "Orc Mag'har"
-
---++ Font descriptions
-L["2002"] = "2002"
-L["2002 BOLD"] = "2002 Bold"
-L["ARIAL NARROW"] = "Arial Narrow" -- default chat font
-L["FRIZ QUADRATA TT"] = "Friz Quadrata TT" -- default main UI font
-L["FRIZQUADRATACTT"] = "FrizQuadrataCTT"
-L["MOK"] = "MoK"
-L["MORPHEUS"] = "Morpheus" -- default in game mail font
-L["NIMROD MT"] = "Nimrod MT"
-L["SKURRI"] = "Skurri" -- default unit frame combat font
+L["Human"] = "Humano"
+L["Orc"] = "Orc"
+L["Dwarf"] = "Anão"
+L["Tauren"] = "Tauren"
+L["Troll"] = "Troll"
+L["Night Elf"] = "Elfo Noturno"
+L["Undead"] = "Morto-vivo"
+L["Gnome"] = "Gnomo"
+L["Blood Elf"] = "Elfo Sangrento"
+L["Draenei"] = "Draenei"
+L["Goblin"] = "Goblin"
+L["Worgen"] = "Worgen"
+L["Pandaren"] = "Pandaren"
+L["Highmountain Tauren"] = "Tauren Altamontês"
+L["Lightforged Draenei"] = "Draenei Forjado a Luz"
+L["Nightborne"] = "Filho da Noite"
+L["Void Elf"] = "Void Elf"	
+L["Dark Iron Dwarf"] = "Anão Ferro Negro"
+L["Mag'har Orc"] = "Orc Mag'har"
+L["Kul Tiran"] = "Kultireno"
+L["Zandalari Troll"] = "Troll Zandalari"
+L["Mechagnome"] = "Gnomecânico"
+L["Vulpera"] = "Vulpera"
 
 -- Stealth abilities
 L["Stealth"] = "Furtividade"
 L["Prowl"] = "Espreitar"
 
--- Channel names
-L["LocalDefenseChannelName"] = "DefesaLocal"
-
---++ Minimap color codes
---L["MinimapClassTextDEATHKNIGHT"] = "|cffc41e3a"
---L["MinimapClassTextDEMONHUNTER"] = "|cffa330c9"
+-- Minimap color codes
+L["MinimapGuildText"] = "|cffffffff"
+L["MinimapClassTextUNKNOWN"] = "|cff191919"
 L["MinimapClassTextDRUID"] = "|cffff7c0a"
 L["MinimapClassTextHUNTER"] = "|cffaad372"
 L["MinimapClassTextMAGE"] = "|cff68ccef"
---L["MinimapClassTextMONK"] = "|cff00ff96"
 L["MinimapClassTextPALADIN"] = "|cfff48cba"
 L["MinimapClassTextPRIEST"] = "|cffffffff"
 L["MinimapClassTextROGUE"] = "|cfffff468"
 L["MinimapClassTextSHAMAN"] = "|cff2359ff"
 L["MinimapClassTextWARLOCK"] = "|cff9382c9"
 L["MinimapClassTextWARRIOR"] = "|cffc69b6d"
-L["MinimapClassTextUNKNOWN"] = "|cff191919"
-L["MinimapGuildText"] = "|cffffffff"
+L["MinimapClassTextDEATHKNIGHT"] = "|cffc41e3a"
+L["MinimapClassTextMONK"] = "|cff00ff96"
+L["MinimapClassTextDEMONHUNTER"] = "|cffa330c9"
 
 Spy_AbilityList = {
 -----------------------------------------------------------
 -- Allows an estimation of the race, class and level of a
 -- player based on the abilities observed in the combat log.
 -----------------------------------------------------------
+
 --++ Racial Traits ++	
 	["Fusão Sombria"]={ race = "Night Elf", level = 1, },
 	["Fúria Sangrenta"]={ race = "Orc", level = 1, },
@@ -495,11 +552,8 @@ Spy_AbilityList = {
 
 --++ Druid Abilities ++	
 	["Toque de Cura"]={ class = "DRUID", level = 1, },
-	["Marca do Indomado"]={ class = "DRUID", level = 1, },
 	["Ira"]={ class = "DRUID", level = 1, },
 	["Fogo Lunar"]={ class = "DRUID", level = 4, },
-	["Rejuvenescer"]={ class = "DRUID", level = 4, },
-	["Espinhos"]={ class = "DRUID", level = 6, },
 	["Raízes Enredantes"]={ class = "DRUID", level = 8, },
 	["Forma de Urso"]={ class = "DRUID", level = 10, },
 	["Rugido Desmoralizante"]={ class = "DRUID", level = 10, },
@@ -528,25 +582,18 @@ Spy_AbilityList = {
 	["Arremetida"]={ class = "DRUID", level = 26, },
 	["Rugido Desafiador"]={ class = "DRUID", level = 28, },
 	["Acovardar"]={ class = "DRUID", level = 28, },
-	["Tranquilidade"]={ class = "DRUID", level = 30, },
 	["Forma de Viagem"]={ class = "DRUID", level = 30, },
 	["Mordida Feroz"]={ class = "DRUID", level = 32, },
 	["Assolar"]={ class = "DRUID", level = 32, },
 	["Regeneração Frenética"]={ class = "DRUID", level = 36, },
 	["Pulo do Gato"]={ class = "DRUID", level = 36, },
 	["Forma de Urso Hediondo"]={ class = "DRUID", level = 40, },
-	["Avivar"]={ class = "DRUID", level = 40, },
-	["Pele de Árvore"]={ class = "DRUID", level = 44, },
-	["Barkskin Effect (DND)"]={ class = "DRUID", level = 44, },
-	["Dádiva do Indomado"]={ class = "DRUID", level = 50, },
 --++ Druid Talents ++	
 	["Enredamento"]={ class = "DRUID", level = 10, },
 	["Investida Feral"]={ class = "DRUID", level = 20, },
 	["Nuvem de Insetos"]={ class = "DRUID", level = 20, },
 	["Presságio de Clareza"]={ class = "DRUID", level = 20, },
 	["Fogo Feérico (Feral)"]={ class = "DRUID", level = 30, },
-	["Forma de Luniscante"]={ class = "DRUID", level = 40, },
-	["Recomposição Rápida"]={ class = "DRUID", level = 40, },
 --++ Hunter Abilities ++	
 	["Prontidão"]={ class = "HUNTER", level = 1, },
 	["Tiro Automático"]={ class = "HUNTER", level = 1, },
@@ -601,10 +648,8 @@ Spy_AbilityList = {
 	["Intimidação"]={ class = "HUNTER", level = 30, },
 	["Tiro de Dispersão"]={ class = "HUNTER", level = 30, },
 	["Ira Bestial"]={ class = "HUNTER", level = 40, },
-	["Aura de Tiro Certeiro"]={ class = "HUNTER", level = 40, },
 	["Picada de Mantícora"]={ class = "HUNTER", level = 40, },
 --++ Mage Abilities ++	
-	["Inteligência Arcana"]={ class = "MAGE", level = 1, },
 	["Bola de Fogo"]={ class = "MAGE", level = 1, },
 	["Armadura Gélida"]={ class = "MAGE", level = 1, },
 	["Seta de Gelo"]={ class = "MAGE", level = 4, },
@@ -614,12 +659,9 @@ Spy_AbilityList = {
 	["Mísseis Arcanos"]={ class = "MAGE", level = 8, },
 	["Polimorfia"]={ class = "MAGE", level = 8, },
 	["Nova Congelante"]={ class = "MAGE", level = 10, },
-	["Atenuar Magia"]={ class = "MAGE", level = 12, },
-	["Queda Lenta"]={ class = "MAGE", level = 12, },
 	["Explosão Arcana"]={ class = "MAGE", level = 14, },
 	["Detectar Magia"]={ class = "MAGE", level = 16, },
 	["Golpe Flamejante"]={ class = "MAGE", level = 16, },
-	["Amplificar Magia"]={ class = "MAGE", level = 18, },
 	["Remover Maldição Inferior"]={ class = "MAGE", level = 18, },
 	["Lampejo"]={ class = "MAGE", level = 20, },
 	["Nevasca"]={ class = "MAGE", level = 20, },
@@ -662,67 +704,44 @@ Spy_AbilityList = {
 	["Combustão"]={ class = "MAGE", level = 40, },
 	["Barreira de Gelo"]={ class = "MAGE", level = 40, },
 --++ Paladin Abilities ++	
-	["Aura de Devoção"]={ class = "PALADIN", level = 1, },
 	["Luz Sagrada"]={ class = "PALADIN", level = 1, },
 	["Selo da Retidão"]={ class = "PALADIN", level = 1, },
-	["Bênção do Poder"]={ class = "PALADIN", level = 4, },
 	["Julgamento"]={ class = "PALADIN", level = 4, },
 	["Proteção Divina"]={ class = "PALADIN", level = 6, },
 	["Selo do Cruzado"]={ class = "PALADIN", level = 6, },
 	["Martelo da Justiça"]={ class = "PALADIN", level = 8, },
 	["Purificar"]={ class = "PALADIN", level = 8, },
-	["Bênção de Proteção"]={ class = "PALADIN", level = 10, },
 	["Impor as Mãos"]={ class = "PALADIN", level = 10, },
 	["Redenção"]={ class = "PALADIN", level = 12, },
-	["Bênção de Sabedoria"]={ class = "PALADIN", level = 14, },
-	["Aura da Retribuição"]={ class = "PALADIN", level = 16, },
 	["Fúria Íntegra"]={ class = "PALADIN", level = 16, },
-	["Bênção da Liberdade"]={ class = "PALADIN", level = 18, },
 	["Exorcismo"]={ class = "PALADIN", level = 20, },
 	["Clarão de Luz"]={ class = "PALADIN", level = 20, },
 	["Detectar Morto-vivo"]={ class = "PALADIN", level = 20, },
-	["Aura de Concentração"]={ class = "PALADIN", level = 22, },
 	["Selo da Justiça"]={ class = "PALADIN", level = 22, },
 	["Esconjurar Morto-vivo"]={ class = "PALADIN", level = 24, },
 	["Bênção da Salvação"]={ class = "PALADIN", level = 26, },
-	["Aura de Resistência à Sombra"]={ class = "PALADIN", level = 28, },
 	["Intervenção Divina"]={ class = "PALADIN", level = 30, },
 	["Selo da Luz"]={ class = "PALADIN", level = 30, },
-	["Aura de Resistência ao Gelo"]={ class = "PALADIN", level = 32, },
 	["Escudo Divino"]={ class = "PALADIN", level = 34, },
-	["Aura de Resistência ao Fogo"]={ class = "PALADIN", level = 36, },
 	["Selo da Sabedoria"]={ class = "PALADIN", level = 38, },
 	["Bênção de Luz"]={ class = "PALADIN", level = 40, },
 	["Evocar Cavalo de Guerra"]={ class = "PALADIN", level = 40, },
 	["Purificação"]={ class = "PALADIN", level = 42, },
 	["Martelo da Ira"]={ class = "PALADIN", level = 44, },
-	["Bênção do Sacrifício"]={ class = "PALADIN", level = 46, },
 	["Ira Sagrada"]={ class = "PALADIN", level = 50, },
-	["Bênção Maior de Poder"]={ class = "PALADIN", level = 52, },
-	["Bênção Maior de Sabedoria"]={ class = "PALADIN", level = 54, },
-	["Bênção Maior dos Reis"]={ class = "PALADIN", level = 60, },
-	["Bênção Maior de Luz"]={ class = "PALADIN", level = 60, },
-	["Bênção Maior da Salvação"]={ class = "PALADIN", level = 60, },
-	["Bênção Maior do Santuário"]={ class = "PALADIN", level = 60, },
 	["Evocar Corcel"]={ class = "PALADIN", level = 60, },
 --++ Paladin Talents ++	
-	["Bênção dos Reis"]={ class = "PALADIN", level = 20, },
 	["Consagração"]={ class = "PALADIN", level = 20, },
 	["Selo de Comando"]={ class = "PALADIN", level = 20, },
-	["Bênção do Santuário"]={ class = "PALADIN", level = 30, },
 	["Favorecimento Divino"]={ class = "PALADIN", level = 30, },
-	["Aura de Santidade"]={ class = "PALADIN", level = 30, },
 	["Escudo Sagrado"]={ class = "PALADIN", level = 40, },
 	["Choque Sagrado"]={ class = "PALADIN", level = 40, },
 	["Contrição"]={ class = "PALADIN", level = 40, },
 --++ Priest Abilities ++	
 	["Cura Inferior"]={ class = "PRIEST", level = 1, },
-	["Palavra de Poder: Fortitude"]={ class = "PRIEST", level = 1, },
 	["Punição"]={ class = "PRIEST", level = 1, },
 	["Palavra Sombria: Dor"]={ class = "PRIEST", level = 4, },
-	["Palavra de Poder: Escudo"]={ class = "PRIEST", level = 6, },
 	["Desvanecer"]={ class = "PRIEST", level = 8, },
-	["Renovar"]={ class = "PRIEST", level = 8, },
 	["Prece Desesperada"]={ class = "PRIEST", level = 10, },
 	["Bagata da Fraqueza"]={ class = "PRIEST", level = 10, },
 	["Impacto Mental"]={ class = "PRIEST", level = 10, },
@@ -735,7 +754,6 @@ Spy_AbilityList = {
 	["Dissipar Magia"]={ class = "PRIEST", level = 18, },
 	["Peste Devoradora"]={ class = "PRIEST", level = 20, },
 	["A graça de Eluna"]={ class = "PRIEST", level = 20, },
-	["Proteção contra Medo"]={ class = "PRIEST", level = 20, },
 	["Ciclo Elétrico"]={ class = "PRIEST", level = 20, },
 	["Cura Célere"]={ class = "PRIEST", level = 20, },
 	["Fogo Sagrado"]={ class = "PRIEST", level = 20, },
@@ -746,22 +764,15 @@ Spy_AbilityList = {
 	["Exaurir Mana"]={ class = "PRIEST", level = 24, },
 	["Controle Mental"]={ class = "PRIEST", level = 30, },
 	["Prece de Cura"]={ class = "PRIEST", level = 30, },
-	["Proteção Sombria"]={ class = "PRIEST", level = 30, },
 	["Abolir Doença"]={ class = "PRIEST", level = 32, },
 	["Levitar"]={ class = "PRIEST", level = 34, },
 	["Cura Maior"]={ class = "PRIEST", level = 40, },
-	["Prece da Fortitude"]={ class = "PRIEST", level = 48, },
-	["Prece de Proteção Sombria"]={ class = "PRIEST", level = 56, },
-	["Prece do Espírito"]={ class = "PRIEST", level = 60, },
 --++ Priest Talents ++	
 	["Nova Sagrada"]={ class = "PRIEST", level = 20, },
 	["Concentração Interior"]={ class = "PRIEST", level = 20, },
 	["Açoite Mental"]={ class = "PRIEST", level = 20, },
-	["Espírito Divino"]={ class = "PRIEST", level = 30, },
 	["Silêncio"]={ class = "PRIEST", level = 30, },
-	["Abraço Vampírico"]={ class = "PRIEST", level = 30, },
 	["Fonte de Luz"]={ class = "PRIEST", level = 40, },
-	["Infusão de Poder"]={ class = "PRIEST", level = 40, },
 	["Forma de Sombra"]={ class = "PRIEST", level = 40, },
 --++ Rogue Abilities ++	
 	["Eviscerar"]={ class = "ROGUE", level = 1, },
@@ -828,14 +839,12 @@ Spy_AbilityList = {
 	["Totem de Torrente Curativa"]={ class = "SHAMAN", level = 20, },
 	["Onda Curativa Menor"]={ class = "SHAMAN", level = 20, },
 	["Totem Antiveneno"]={ class = "SHAMAN", level = 22, },
-	["Respiração Aquática"]={ class = "SHAMAN", level = 22, },
 	["Totem de Resistência ao Gelo"]={ class = "SHAMAN", level = 24, },
 	["Visão Distante"]={ class = "SHAMAN", level = 26, },
 	["Totem de Magma"]={ class = "SHAMAN", level = 26, },
 	["Totem de Fonte de Mana"]={ class = "SHAMAN", level = 26, },
 	["Totem de Resistência ao Fogo"]={ class = "SHAMAN", level = 28, },
 	["Totem de Labaredas"]={ class = "SHAMAN", level = 28, },
-	["Andar sobre a Água"]={ class = "SHAMAN", level = 28, },
 	["Revocação Astral"]={ class = "SHAMAN", level = 30, },
 	["Totem de Aterramento"]={ class = "SHAMAN", level = 30, },
 	["Totem de Resistência à Natureza"]={ class = "SHAMAN", level = 30, },
@@ -925,7 +934,6 @@ Spy_AbilityList = {
 	["Pacto Sombrio"]={ class = "WARLOCK", level = 40, },
 	["Vínculo Anímico"]={ class = "WARLOCK", level = 40, },
 --++ Warrior Abilities ++	
-	["Brado de Batalha"]={ class = "WARRIOR", level = 1, },
 	["Postura de Batalha"]={ class = "WARRIOR", level = 1, },
 	["Golpe Heroico"]={ class = "WARRIOR", level = 1, },
 	["Murro Aprimorado"]={ class = "WARRIOR", level = 1, },

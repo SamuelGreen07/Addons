@@ -1,5 +1,4 @@
 ---------------------------------------------------------------------------------------------------
----------------------------------------------------------------------------------------------------
 -- Combo Points Widget
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
@@ -17,10 +16,10 @@ local floor = floor
 local sort = sort
 
 -- WoW APIs
-local CreateFrame, GetTime = CreateFrame, GetTime
+local GetTime = GetTime
 local UnitClass, UnitCanAttack = UnitClass, UnitCanAttack
 local UnitPower, UnitPowerMax, GetRuneCooldown = UnitPower, UnitPowerMax, GetRuneCooldown
-local GetSpecialization, GetShapeshiftFormID = GetSpecialization, GetShapeshiftFormID
+local GetShapeshiftFormID = GetShapeshiftFormID
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 
@@ -28,6 +27,11 @@ local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local TidyPlatesThreat = TidyPlatesThreat
 local RGB = Addon.ThreatPlates.RGB
 local Font = Addon.Font
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame, GetSpecialization
 
 local UPDATE_INTERVAL = Addon.ON_UPDATE_INTERVAL
 
@@ -62,10 +66,8 @@ local UNIT_POWER = {
     }
   },
   PALADIN = {
-    [3] = {
-      PowerType = Enum.PowerType.HolyPower,
-      Name = "HOLY_POWER",
-    }
+    PowerType = Enum.PowerType.HolyPower,
+    Name = "HOLY_POWER",
   },
   ROGUE = {
     PowerType = Enum.PowerType.ComboPoints,
@@ -177,7 +179,8 @@ Widget.TextureCoordinates = {}
 Widget.Colors = {}
 Widget.ShowInShapeshiftForm = true
 
-local ActiveSpec
+-- WoW Clasic only knows one spec, so set default to 1 which is never changed as ACTIVE_TALENT_GROUP_CHANGED is never fired
+local ActiveSpec = 1
 local RuneCooldowns = { 0, 0, 0, 0, 0, 0 }
 
 ---------------------------------------------------------------------------------------------------
@@ -189,18 +192,35 @@ local DeathKnightSpecColor, ShowRuneCooldown
 -- Combo Points Widget Functions
 ---------------------------------------------------------------------------------------------------
 
-function Widget:DetermineUnitPower()
-  local _, player_class = UnitClass("player")
-  --local player_spec_no = GetSpecialization()
+if Addon.CLASSIC then
+  function Widget:DetermineUnitPower()
+    local _, player_class = UnitClass("player")
+    local power_type = UNIT_POWER[player_class]
 
-  local power_type = UNIT_POWER[player_class] --and (UNIT_POWER[player_class][player_spec_no] or UNIT_POWER[player_class])
+    if power_type and power_type.Name then
+      self.PowerType = power_type.PowerType
+      self.UnitPowerMax = UnitPowerMax("player", self.PowerType)
+    else
+      self.PowerType = nil
+      self.UnitPowerMax = 0
+    end
+  end
+else
+  function Widget:DetermineUnitPower()
+    local _, player_class = UnitClass("player")
 
-  if power_type and power_type.Name then
-    self.PowerType = power_type.PowerType
-    self.UnitPowerMax = UnitPowerMax("player", self.PowerType)
-  else
-    self.PowerType = nil
-    self.UnitPowerMax = 0
+    local power_type = UNIT_POWER[player_class]
+    if power_type then
+      power_type = power_type[_G.GetSpecialization()] or power_type
+    end
+
+    if power_type and power_type.Name then
+      self.PowerType = power_type.PowerType
+      self.UnitPowerMax = UnitPowerMax("player", self.PowerType)
+    else
+      self.PowerType = nil
+      self.UnitPowerMax = 0
+    end
   end
 end
 
@@ -286,8 +306,10 @@ function Widget:UpdateRunicPower(widget_frame)
     cp_texture_off = widget_frame.ComboPointsOff[rune_id]
 
     if rune_id <= ready_runes_no then
-      cp_color = color[rune_id]
-      cp_texture:SetVertexColor(cp_color.r, cp_color.g, cp_color.b)
+      if self.db.Style ~= "Blizzard" then
+        cp_color = color[rune_id]
+        cp_texture:SetVertexColor(cp_color.r, cp_color.g, cp_color.b)
+      end
       cp_texture:Show()
       cp_texture_off:Hide()
 
@@ -335,16 +357,16 @@ local function EventHandler(event, unitid, power_type)
 end
 
 -- Arguments of ACTIVE_TALENT_GROUP_CHANGED (curr, prev) always seemt to be 1, 1
---function Widget:ACTIVE_TALENT_GROUP_CHANGED(...)
---  -- ACTIVE_TALENT_GROUP_CHANGED fires twice, so prevent that InitializeWidget is called twice (does not hurt,
---  -- but is not necesary either
---  local current_spec = GetSpecialization()
---  if ActiveSpec ~= current_spec then
---    -- Player switched to a spec that has combo points
---    self.WidgetHandler:InitializeWidget("ComboPoints")
---    ActiveSpec = current_spec
---  end
---end
+function Widget:ACTIVE_TALENT_GROUP_CHANGED(...)
+  -- ACTIVE_TALENT_GROUP_CHANGED fires twice, so prevent that InitializeWidget is called twice (does not hurt,
+  -- but is not necesary either
+  local current_spec = _G.GetSpecialization()
+  if ActiveSpec ~= current_spec then
+    -- Player switched to a spec that has combo points
+    ActiveSpec = current_spec
+    self.WidgetHandler:InitializeWidget("ComboPoints")
+  end
+end
 
 function Widget:UNIT_MAXPOWER(unitid, power_type)
   if self.PowerType then
@@ -401,12 +423,13 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function Widget:IsEnabled()
-  local enabled = self.db.ON or self.db.ShowInHeadlineView
+  local db = TidyPlatesThreat.db.profile.ComboPoints
+  local enabled = db.ON or db.ShowInHeadlineView
 
-  if enabled then
+  if enabled and not Addon.CLASSIC then
     -- Register ACTIVE_TALENT_GROUP_CHANGED here otherwise it won't be registerd when an spec is active that does not have combo points.
     -- If you then switch to a spec with talent points, the widget won't be enabled.
-    -- self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+    self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
   end
 
   self:DetermineUnitPower()
@@ -433,8 +456,9 @@ function Widget:OnEnable()
   if player_class == "DRUID" then
     self:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
     self.ShowInShapeshiftForm = (GetShapeshiftFormID() == 1)
---  elseif player_class == "DEATHKNIGHT" then
---    self:RegisterEvent("RUNE_POWER_UPDATE", EventHandler)
+  elseif player_class == "DEATHKNIGHT" then
+    -- Never registered for Classic, as there is no Death Knight class
+    self:RegisterEvent("RUNE_POWER_UPDATE", EventHandler)
   end
 
   -- self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandler)
@@ -447,7 +471,10 @@ function Widget:OnDisable()
   self:UnregisterEvent("UNIT_POWER_UPDATE")
   self:UnregisterEvent("UNIT_DISPLAYPOWER")
   self:UnregisterEvent("UNIT_MAXPOWER")
---  self:UnregisterEvent("RUNE_POWER_UPDATE")
+
+  if not Addon.CLASSIC then
+    self:UnregisterEvent("RUNE_POWER_UPDATE")
+  end
 
   self.WidgetFrame:Hide()
   self.WidgetFrame:SetParent(nil)
@@ -466,7 +493,7 @@ end
 
 function Widget:Create()
   if not self.WidgetFrame then
-    local widget_frame = CreateFrame("Frame", nil)
+    local widget_frame = _G.CreateFrame("Frame", nil)
     widget_frame:Hide()
 
     self.WidgetFrame = widget_frame
@@ -518,10 +545,10 @@ end
 function Widget:UpdateTexture(texture, texture_path, cp_no)
   if self.db.Style == "Blizzard" then
     if type(texture_path) == "table" then
-      --local texture_data = texture_path[GetSpecialization()]
-      local texture_data = texture_path[1]
+      local texture_data = texture_path[ActiveSpec]
       texture:SetAtlas(texture_data.Atlas)
       texture:SetAlpha(texture_data.Alpha or 1)
+      texture:SetVertexColor(1, 1, 1)
       texture:SetDesaturated(texture_data.Desaturation) -- nil means no desaturation
     else
       texture:SetAtlas(texture_path)
@@ -555,14 +582,14 @@ function Widget:UpdateLayout()
   local show_rune_cooldown = player_class == "DEATHKNIGHT" and ShowRuneCooldown
 
   for i = 1, self.UnitPowerMax do
-    widget_frame.ComboPoints[i] = widget_frame.ComboPoints[i] or widget_frame:CreateTexture(nil, "BACKGROUND")
+    widget_frame.ComboPoints[i] = widget_frame.ComboPoints[i] or widget_frame:CreateTexture(nil, "ARTWORK", nil, 0)
     self:UpdateTexture(widget_frame.ComboPoints[i], self.Texture, i)
 
-    widget_frame.ComboPointsOff[i] = widget_frame.ComboPointsOff[i] or widget_frame:CreateTexture(nil, "ARTWORK")
+    widget_frame.ComboPointsOff[i] = widget_frame.ComboPointsOff[i] or widget_frame:CreateTexture(nil, "ARTWORK", nil, 1)
     self:UpdateTexture(widget_frame.ComboPointsOff[i], self.TextureOff, i)
 
     if show_rune_cooldown then
-      local time_text = widget_frame.ComboPointsOff[i].Time or widget_frame:CreateFontString(nil, "ARTWORK", 0)
+      local time_text = widget_frame.ComboPointsOff[i].Time or widget_frame:CreateFontString(nil, "ARTWORK")
       widget_frame.ComboPointsOff[i].Time = time_text
 
       Font:UpdateText(widget_frame.ComboPointsOff[i], time_text, db.RuneCooldown)
@@ -591,14 +618,17 @@ function Widget:UpdateSettings()
   local _, player_class = UnitClass("player")
   local texture_info = TEXTURE_INFO[self.db.Style][player_class] or TEXTURE_INFO[self.db.Style]
 
-  self.UpdateUnitPower = self.UpdateComboPoints
-  --  if player_class == "DEATHKNIGHT" then
-  --    self.UpdateUnitPower = self.UpdateRunicPower
-  --    DeathKnightSpecColor = DEATHKNIGHT_COLORS[GetSpecialization()]
-  --    ShowRuneCooldown = self.db.RuneCooldown.Show
-  --  else
-  --    self.UpdateUnitPower = self.UpdateComboPoints
-  --  end
+  if not Addon.CLASSIC then
+    ActiveSpec = _G.GetSpecialization()
+  end
+
+  if player_class == "DEATHKNIGHT" then
+    self.UpdateUnitPower = self.UpdateRunicPower
+    DeathKnightSpecColor = DEATHKNIGHT_COLORS[ActiveSpec]
+    ShowRuneCooldown = self.db.RuneCooldown.Show
+  else
+    self.UpdateUnitPower = self.UpdateComboPoints
+  end
 
   self.TexCoord = texture_info.TexCoord
   self.IconWidth = texture_info.IconWidth

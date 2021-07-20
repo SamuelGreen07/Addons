@@ -9,7 +9,6 @@ local UnitPlayerControlled = UnitPlayerControlled
 local UnitExists = UnitExists
 local UnitName = UnitName
 local UNIT_LEVEL_TEMPLATE = UNIT_LEVEL_TEMPLATE
-local UnitClassification = UnitClassification
 local GetGuildInfo = GetGuildInfo
 local UnitName = UnitName
 
@@ -23,6 +22,12 @@ local TidyPlatesThreat = TidyPlatesThreat
 local RGB = ThreatPlates.RGB
 local RGB_P = ThreatPlates.RGB_P
 local GetColorByHealthDeficit = ThreatPlates.GetColorByHealthDeficit
+local UnitGetTotalAbsorbs
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: UnitClassification, UnitGetTotalAbsorbs
 
 ---------------------------------------------------------------------------------------------------
 -- Functions for subtext from TidyPlates
@@ -148,7 +153,7 @@ local function GetUnitSubtitle(unit)
 end
 
 local function GetLevelDescription(unit)
-	local classification = UnitClassification(unit.unitid)
+	local classification = _G.UnitClassification(unit.unitid)
 	local description
 
 	if classification == "worldboss" then
@@ -180,30 +185,32 @@ local function DummyFunction() return nil, COLOR_ROLE end
 local function TextHealthPercentColored(unit)
   local text_health, text_absorbs, color = "", "", COLOR_ROLE
 
-  --local absorbs_amount = UnitGetTotalAbsorbs(unit.unitid) or 0
-  --if ShowAbsorbs and absorbs_amount > 0 then
-  --  if Settings.AbsorbsAmount then
-  --    if Settings.AbsorbsShorten then
-  --      text_absorbs = Truncate(absorbs_amount)
-  --    else
-  --      text_absorbs = absorbs_amount
-  --    end
-  --  end
-  --
-  --  if Settings.AbsorbsPercentage then
-  --    local absorbs_percentage = ceil(100 * absorbs_amount / unit.healthmax) .. "%"
-  --
-  --    if text_absorbs == "" then
-  --      text_absorbs = absorbs_percentage
-  --    else
-  --      text_absorbs = text_absorbs .. " - " .. absorbs_percentage
-  --    end
-  --  end
-  --
-  --  if text_absorbs ~= "" then
-  --    text_absorbs = "[" .. text_absorbs .. "]"
-  --  end
-  --end
+  if ShowAbsorbs then
+    local absorbs_amount = _G.UnitGetTotalAbsorbs(unit.unitid) or 0
+    if absorbs_amount > 0 then
+      if Settings.AbsorbsAmount then
+        if Settings.AbsorbsShorten then
+          text_absorbs = Truncate(absorbs_amount)
+        else
+          text_absorbs = absorbs_amount
+        end
+      end
+
+      if Settings.AbsorbsPercentage then
+        local absorbs_percentage = ceil(100 * absorbs_amount / unit.healthmax) .. "%"
+
+        if text_absorbs == "" then
+          text_absorbs = absorbs_percentage
+        else
+          text_absorbs = text_absorbs .. " - " .. absorbs_percentage
+        end
+      end
+
+      if text_absorbs ~= "" then
+        text_absorbs = "[" .. text_absorbs .. "]"
+      end
+    end
+  end
 
   if ShowHealth and (Settings.full or unit.health ~= unit.healthmax) then
     local HpPct, HpAmt, HpMax = "", "", ""
@@ -356,7 +363,12 @@ function Addon:UpdateConfigurationStatusText()
 
   Truncate = (Settings.LocalizedUnitSymbol and TruncateEastAsian) or TruncateWestern
 
-  ShowAbsorbs = Settings.AbsorbsAmount or Settings.AbsorbsPercentage
+  if Addon.CLASSIC then
+    ShowAbsorbs = false
+  else
+    ShowAbsorbs = Settings.AbsorbsAmount or Settings.AbsorbsPercentage
+  end
+
   ShowHealth = Settings.amount or Settings.percent
 end
 

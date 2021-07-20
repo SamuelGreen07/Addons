@@ -38,6 +38,10 @@ local DA = LibStub("AceAddon-3.0"):GetAddon("Skillet")
 -- DA.DebugLevel should constrained to be a 
 -- number between 1 and 10.
 --
+-- DA.LogLevel is a boolean with false meaning log all
+-- DA.DEBUG calls regardless of level and true meaning
+-- only log calls when they are less than DA.DebugLevel
+--
 --
 DA.WarnShow = false
 DA.WarnLog = true
@@ -100,6 +104,18 @@ function DA.WARN(...)
 	table.insert(DA.DebugLog,date().."(W): "..text)
 	if (table.getn(DA.DebugLog) > DA.MAXDEBUG) then
 		table.remove(DA.DebugLog,1)
+	end
+end
+
+--
+-- If any logging is enabled, insert text into the debug log
+--
+function DA.MARK(text)
+	if DA.WarnLog or DA.DebugLogging or DA.TraceLog then
+		table.insert(DA.DebugLog,date().."(M): "..text)
+		if (table.getn(DA.DebugLog) > DA.MAXDEBUG) then
+			table.remove(DA.DebugLog,1)
+		end
 	end
 end
 
@@ -204,10 +220,12 @@ function DA.TRACE(...)
 	end
 end
 
+--
 -- Convert a table into a string with line breaks and indents.
 --   if specified, m is the maximum recursion depth.
+--
 function DA.DUMP(o,m,n)
-	if type(o) == 'table' then
+	if o and type(o) == 'table' then
 		if not DA.TableDump then return "{table}" end
 		local s
 		local i = ""
@@ -233,10 +251,12 @@ function DA.DUMP(o,m,n)
 	end
 end
 
+--
 -- Convert a table into a one line string.
 --   if specified, m is the maximum recursion depth.
+--
 function DA.DUMP1(o,m,n)
-	if type(o) == 'table' then
+	if o and type(o) == 'table' then
 		if not DA.TableDump then return "{table}" end
 		local s
 		if not n then n = 0 end
@@ -279,7 +299,9 @@ function DA.PROFILE(text)
 	end
 end
 
+--
 -- Convert a link into a printable string
+--
 function DA.PLINK(text)
 	if text then
 		return text:gsub('\124','\124\124')

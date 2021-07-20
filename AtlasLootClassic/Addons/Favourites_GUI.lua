@@ -646,19 +646,16 @@ function GUI:UpdateDropDown()
     local listDb
     local db = Favourites:GetDb()
     if db.activeList[2] == true then
-        listDb = Favourites:GetGlobaleLists()
+        listDb = Favourites:GetGlobaleLists(true)
     else
-        listDb = Favourites:GetProfileLists()
+        listDb = Favourites:GetProfileLists(true)
     end
-    for k,v in pairs(listDb) do
+    for i,v in ipairs(listDb) do
         dataEntrys[ #dataEntrys + 1 ] = {
-            id = k,
-            name = Favourites:GetListName(k, db.activeList[2] == true, true),
-            --coinTexture = tabVal.CoinTexture,
-            tt_title = Favourites:GetListName(k, db.activeList[2] == true, true),
+            id = v.id,
+            name = v.nameIcon,
+            tt_title = v.nameIcon,
         }
-
-        Favourites:GetListName(k, db.activeList[2] == true, true)
     end
 
     self.dropDownData = data
@@ -678,7 +675,7 @@ end
 function GUI:Create()
     if not self.frame then
         local frameName = "AtlasLoot_GUI-FavouritesFrame"
-        local frame = CreateFrame("Frame", frameName)
+        local frame = CreateFrame("Frame", frameName, nil, _G.BackdropTemplateMixin and "BackdropTemplate" or nil)
         frame:ClearAllPoints()
         frame:SetParent(UIParent)
         --frame:SetPoint(db.point[1], db.point[2], db.point[3], db.point[4], db.point[5])
@@ -715,22 +712,22 @@ function GUI:Create()
         frame.content:SetPoint("TOPLEFT", frame.titleFrame, "BOTTOMLEFT", 0, -3)
         frame.content:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -5, 5)
 
-        frame.content.slotBg = CreateFrame("Frame", nil, frame.content)
+        frame.content.slotBg = CreateFrame("Frame", nil, frame.content, _G.BackdropTemplateMixin and "BackdropTemplate" or nil)
         frame.content.slotBg:SetPoint("TOPLEFT", frame.content, "TOPLEFT", 0, 0)
         frame.content.slotBg:SetPoint("BOTTOMRIGHT", frame.content, "BOTTOMLEFT", 275, 0)
         frame.content.slotBg:SetBackdrop(ALPrivate.BOX_BACKDROP)
 
-        frame.content.headerBg = CreateFrame("Frame", nil, frame.content)
+        frame.content.headerBg = CreateFrame("Frame", nil, frame.content, _G.BackdropTemplateMixin and "BackdropTemplate" or nil)
         frame.content.headerBg:SetPoint("TOPLEFT", frame.content.slotBg, "TOPRIGHT", 0, 0)
         frame.content.headerBg:SetPoint("BOTTOMRIGHT", frame.content, "TOPRIGHT", 0, -27)
         frame.content.headerBg:SetBackdrop(ALPrivate.BOX_BACKDROP)
 
-        frame.content.bottomBg = CreateFrame("Frame", nil, frame.content)
+        frame.content.bottomBg = CreateFrame("Frame", nil, frame.content, _G.BackdropTemplateMixin and "BackdropTemplate" or nil)
         frame.content.bottomBg:SetPoint("TOPLEFT", frame.content.slotBg, "BOTTOMRIGHT", 2, 27)
         frame.content.bottomBg:SetPoint("BOTTOMRIGHT", frame.content, "BOTTOMRIGHT", 0, 0)
         frame.content.bottomBg:SetBackdrop(ALPrivate.BOX_BACKDROP)
 
-        frame.content.itemListBg = CreateFrame("Frame", nil, frame.content)
+        frame.content.itemListBg = CreateFrame("Frame", nil, frame.content, _G.BackdropTemplateMixin and "BackdropTemplate" or nil)
         frame.content.itemListBg:SetPoint("TOPLEFT", frame.content.headerBg, "BOTTOMLEFT", 2, -2)
         frame.content.itemListBg:SetPoint("BOTTOMRIGHT", frame.content.bottomBg, "TOPRIGHT", 0, 2)
         frame.content.itemListBg:SetBackdrop(ALPrivate.BOX_BACKDROP)
@@ -750,12 +747,12 @@ function GUI:Create()
 
         frame.content.optionsButton = AtlasLoot.GUI.CreateButton()
         frame.content.optionsButton:SetPoint("LEFT", frame.content.isGlobal.frame.text, "RIGHT", 5, 0)
-        frame.content.optionsButton:SetText(ALIL["Settings"])
+        frame.content.optionsButton:SetText(AL["Settings"])
         frame.content.optionsButton:SetScript("OnClick", ShowOptionsOnClick)
 
         frame.content.showAllItems = AtlasLoot.GUI.CreateButton()
         frame.content.showAllItems:SetPoint("LEFT", frame.content.bottomBg, "LEFT", 2, 0)
-        frame.content.showAllItems:SetText(ALIL["Show all items"])
+        frame.content.showAllItems:SetText(AL["Show all items"])
         frame.content.showAllItems:SetScript("OnClick", ShowAllItemsOnClick)
 
         frame.content.editBox = CreateFrame("EditBox", nil, frame.content, "InputBoxTemplate")

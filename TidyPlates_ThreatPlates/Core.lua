@@ -12,8 +12,8 @@ local tonumber, pairs = tonumber, pairs
 local SetNamePlateFriendlyClickThrough = C_NamePlate.SetNamePlateFriendlyClickThrough
 local SetNamePlateEnemyClickThrough = C_NamePlate.SetNamePlateEnemyClickThrough
 local UnitName, IsInInstance, InCombatLockdown = UnitName, IsInInstance, InCombatLockdown
-local GetCVar, SetCVar, IsAddOnLoaded = GetCVar, SetCVar, IsAddOnLoaded
-local C_NamePlate_SetNamePlateFriendlySize, C_NamePlate_SetNamePlateEnemySize, Lerp =  C_NamePlate.SetNamePlateFriendlySize, C_NamePlate.SetNamePlateEnemySize, Lerp
+local GetCVar, IsAddOnLoaded = GetCVar, IsAddOnLoaded
+local C_NamePlate, Lerp =  C_NamePlate, Lerp
 local C_Timer_After = C_Timer.After
 local NamePlateDriverFrame = NamePlateDriverFrame
 
@@ -22,8 +22,11 @@ local TidyPlatesThreat = TidyPlatesThreat
 local LibStub = LibStub
 local LSM = t.Media
 local L = t.L
-local LibThreatClassic = Addon.LibThreatClassic
-local LibClassicCasterino = Addon.LibClassicCasterino
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: SetCVar
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
@@ -69,7 +72,7 @@ local EVENTS = {
 
   "PLAYER_ENTERING_WORLD",
   "PLAYER_LOGIN",
-  "PLAYER_LOGOUT",
+  --"PLAYER_LOGOUT",
   "PLAYER_REGEN_ENABLED",
   "PLAYER_REGEN_DISABLED",
 
@@ -199,16 +202,19 @@ function TidyPlatesThreat:CheckForFirstStartUp()
 
   if not self.db.char.welcome then
     self.db.char.welcome = true
-    -- local Welcome = L["|cff89f559Welcome to |r|cff89f559Threat Plates!\nThis is your first time using Threat Plates and you are a(n):\n|r|cff"]..t.HCC[Addon.PlayerClass]..self:SpecName().." "..UnitClass("player").."|r|cff89F559.|r\n"
 
-    -- initialize roles for all available specs (level > 10) or set to default (dps/healing)
-    --    for index=1, GetNumSpecializations() do
-    --      local id, spec_name, description, icon, background, role = GetSpecializationInfo(index)
-    --      self:SetRole(t.SPEC_ROLES[Addon.PlayerClass][index], index)
-    --    end
+    if not Addon.CLASSIC then
+      local Welcome = L["|cff89f559Welcome to |r|cff89f559Threat Plates!\nThis is your first time using Threat Plates and you are a(n):\n|r|cff"]..t.HCC[Addon.PlayerClass]..self:SpecName().." "..UnitClass("player").."|r|cff89F559.|r\n"
 
-    --    t.Print(Welcome..L["|cff89f559You are currently in your "]..self:RoleText()..L["|cff89f559 role.|r"])
-    --    t.Print(L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"])
+      -- initialize roles for all available specs (level > 10) or set to default (dps/healing)
+      for index=1, GetNumSpecializations() do
+        local id, spec_name, description, icon, background, role = GetSpecializationInfo(index)
+        self:SetRole(t.SPEC_ROLES[Addon.PlayerClass][index], index)
+      end
+
+      t.Print(Welcome..L["|cff89f559You are currently in your "]..self:RoleText()..L["|cff89f559 role.|r"])
+      t.Print(L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"])
+    end
 
     local new_version = tostring(t.Meta("version"))
     if db.version ~= "" and db.version ~= new_version then
@@ -235,13 +241,14 @@ function TidyPlatesThreat:CheckForIncompatibleAddons()
   if IsAddOnLoaded("Kui_Nameplates") then
     StaticPopup_Show("IncompatibleAddon", "KuiNameplates")
   end
-  if IsAddOnLoaded("ElvUI") and ElvUI[1].private.nameplates.enable then
+  if IsAddOnLoaded("ElvUI") and ElvUI[1] and ElvUI[1].private and ElvUI[1].private.nameplates and ElvUI[1].private.nameplates.enable then
+  --if IsAddOnLoaded("ElvUI") and ElvUI[1].private.nameplates.enable then
     StaticPopup_Show("IncompatibleAddon", "ElvUI Nameplates")
   end
   if IsAddOnLoaded("Plater") then
     StaticPopup_Show("IncompatibleAddon", "Plater Nameplates")
   end
-  if IsAddOnLoaded("SpartanUI") and SUI.DB.EnabledComponents.Nameplates then
+  if IsAddOnLoaded("SpartanUI") and SUI.IsModuleEnabled and SUI:IsModuleEnabled("Nameplates") then
     StaticPopup_Show("IncompatibleAddon", "SpartanUI Nameplates")
   end
 end
@@ -251,40 +258,68 @@ end
 ---------------------------------------------------------------------------------------------------
 -- Copied from ElvUI:
 function Addon:SetBaseNamePlateSize()
-  local profile = TidyPlatesThreat.db.profile
+  local db = TidyPlatesThreat.db.profile.settings
 
+  local width = db.frame.width
+  local height = db.frame.height
+  if db.frame.SyncWithHealthbar then
+    -- this wont taint like NamePlateDriverFrame:SetBaseNamePlateSize
+
+    -- The default size of Threat Plates healthbars is based on large nameplates with these defaults:
+    --   NamePlateVerticalScale = 1.7
+    --   NamePlateVerticalScale = 1.4
+    local zeroBasedScale = 0.7  -- tonumber(GetCVar("NamePlateVerticalScale")) - 1.0
+    local horizontalScale = 1.4 -- tonumber(GetCVar("NamePlateVerticalScale"))
+
+    width = (db.healthbar.width - 10) * horizontalScale
+    height = (db.healthbar.height + 35) * Lerp(1.0, 1.25, zeroBasedScale)
+
+    db.frame.width = width
+    db.frame.height = height
+  end
+
+  -- Set to default values if Blizzard nameplates are enabled or in an instance (for friendly players)
   local isInstance, instanceType = IsInInstance()
   isInstance = isInstance and (instanceType == "party" or instanceType == "raid")
 
-  -- Classic has the same nameplate size for friendly and enemy units, so either set both or non at all (= set it to default values)
-  if not profile.ShowFriendlyBlizzardNameplates and not profile.ShowEnemyBlizzardNameplates and not isInstance then
-    local db = TidyPlatesThreat.db.profile.settings
-
-    local width = db.frame.width
-    local height = db.frame.height
-    if db.frame.SyncWithHealthbar then
-      -- this wont taint like NamePlateDriverFrame.SetBaseNamePlateSize
-      local zeroBasedScale = tonumber(GetCVar("NamePlateVerticalScale")) - 1.0
-      local horizontalScale = tonumber(GetCVar("NamePlateHorizontalScale"))
-
-      width = (db.healthbar.width - 10) * horizontalScale
-      height = (db.healthbar.height + 35) * Lerp(1.0, 1.25, zeroBasedScale)
-
-      db.frame.width = width
-      db.frame.height = height
+  db = TidyPlatesThreat.db.profile
+  if Addon.CLASSIC then
+    -- Classic has the same nameplate size for friendly and enemy units, so either set both or non at all (= set it to default values)
+    if not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates and not isInstance then
+      C_NamePlate.SetNamePlateFriendlySize(width, height)
+      C_NamePlate.SetNamePlateEnemySize(width, height)
+    else
+      -- Smaller nameplates are not available in Classic
+      C_NamePlate.SetNamePlateFriendlySize(128, 32)
+      C_NamePlate.SetNamePlateEnemySize(128, 32)
+    end
+  else
+    if db.ShowFriendlyBlizzardNameplates or isInstance then
+      if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
+        C_NamePlate.SetNamePlateFriendlySize(154, 64)
+      else
+        C_NamePlate.SetNamePlateFriendlySize(110, 45)
+      end
+    else
+      C_NamePlate.SetNamePlateFriendlySize(width, height)
     end
 
-    C_NamePlate_SetNamePlateFriendlySize(width, height)
-    C_NamePlate_SetNamePlateEnemySize(width, height)
-
-    Addon:ConfigClickableArea(false)
-
-    --local clampedZeroBasedScale = Saturate(zeroBasedScale)
-    --C_NamePlate_SetNamePlateSelfSize(baseWidth * horizontalScale * Lerp(1.1, 1.0, clampedZeroBasedScale), baseHeight)
-  else
-    C_NamePlate_SetNamePlateFriendlySize(128, 32)
-    C_NamePlate_SetNamePlateEnemySize(128, 32)
+    if db.ShowEnemyBlizzardNameplates then
+      if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
+        C_NamePlate.SetNamePlateEnemySize(154, 64)
+      else
+        C_NamePlate.SetNamePlateEnemySize(110, 45)
+      end
+    else
+      C_NamePlate.SetNamePlateEnemySize(width, height)
+    end
   end
+
+  Addon:ConfigClickableArea(false)
+
+  -- For personal nameplate:
+  --local clampedZeroBasedScale = Saturate(zeroBasedScale)
+  --C_NamePlate_SetNamePlateSelfSize(baseWidth * horizontalScale * Lerp(1.1, 1.0, clampedZeroBasedScale), baseHeight)
 end
 
 -- The OnInitialize() method of your addon object is called by AceAddon when the addon is first loaded
@@ -319,30 +354,23 @@ function TidyPlatesThreat:OnInitialize()
   -- Setup chat commands
   self:RegisterChatCommand("tptp", "ChatCommand")
 
-  -- Register callbacks for threat library
-  LibThreatClassic.RegisterCallback(self, "Activate", Addon.UNIT_THREAT_LIST_UPDATE)
-  LibThreatClassic.RegisterCallback(self, "Deactivate", Addon.UNIT_THREAT_LIST_UPDATE)
-  LibThreatClassic.RegisterCallback(self, "ThreatUpdated", Addon.UNIT_THREAT_LIST_UPDATE)
-  LibThreatClassic:RequestActiveOnSolo(true)
+  if Addon.CLASSIC then
+    local LibClassicCasterino = Addon.LibClassicCasterino
 
-  -- Register callsbacks for spellcasting library
-  LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_START", Addon.UNIT_SPELLCAST_START)
-  LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_DELAYED", Addon.UnitSpellcastMidway) -- only for player
-  LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_STOP", Addon.UNIT_SPELLCAST_STOP)
-  LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_FAILED", Addon.UNIT_SPELLCAST_STOP)
-  LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_INTERRUPTED", Addon.UNIT_SPELLCAST_INTERRUPTED)
-  LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_START", Addon.UNIT_SPELLCAST_CHANNEL_START)
-  LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_UPDATE", Addon.UnitSpellcastMidway) -- only for player
-  LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_STOP", Addon.UNIT_SPELLCAST_CHANNEL_STOP)
-
-  -- Add support for Real Mob Health
-  if IsAddOnLoaded("RealMobHealth") then
-    Addon.GetUnitHealth = RealMobHealth.GetUnitHealth
-    --RealMobHealth.RegisterAddOnEvent("HEALTH_UPDATE", Addon.RMH_HEALTH_UPDATE)
+    -- Register callsbacks for spellcasting library
+    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_START", Addon.UNIT_SPELLCAST_START)
+    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_DELAYED", Addon.UnitSpellcastMidway) -- only for player
+    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_STOP", Addon.UNIT_SPELLCAST_STOP)
+    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_FAILED", Addon.UNIT_SPELLCAST_STOP)
+    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_INTERRUPTED", Addon.UNIT_SPELLCAST_INTERRUPTED)
+    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_START", Addon.UNIT_SPELLCAST_CHANNEL_START)
+    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_UPDATE", Addon.UnitSpellcastMidway) -- only for player
+    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_STOP", Addon.UNIT_SPELLCAST_CHANNEL_STOP)
   end
 end
 
 local function SetCVarHook(name, value, c)
+  -- Used as detection for switching between small and large nameplates
   if name == "NamePlateVerticalScale" then
     local db = TidyPlatesThreat.db.profile.Automation
     local isInstance, instanceType = IsInInstance()
@@ -353,6 +381,8 @@ local function SetCVarHook(name, value, c)
     elseif db.SmallPlatesInInstances and isInstance then
       Addon.CVars:Set("nameplateGlobalScale", 0.4)
     end
+
+    Addon:CallbackWhenOoC(function() Addon:SetBaseNamePlateSize() end)
   end
 end
 
@@ -365,7 +395,9 @@ function TidyPlatesThreat:OnEnable()
   TidyPlatesThreat:CheckForFirstStartUp()
   TidyPlatesThreat:CheckForIncompatibleAddons()
 
-  --Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", self.db.profile.PersonalNameplate.ShowResourceOnTarget)
+  if not Addon.CLASSIC then
+    Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", self.db.profile.PersonalNameplate.ShowResourceOnTarget)
+  end
 
   TidyPlatesThreat:ReloadTheme()
 
@@ -467,12 +499,13 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
   -- SetCVar("ShowClassColorInNameplate", 1)
 
   local db = self.db.profile.questWidget
-  --if db.ON or db.ShowInHeadlineView then
-  --  Addon.CVars:Set("showQuestTrackingTooltips", 1)
-  --  --SetCVar("showQuestTrackingTooltips", 1)
-  --else
-  --  Addon.CVars:RestoreFromProfile("showQuestTrackingTooltips")
-  --end
+  if not Addon.CLASSIC then
+    if db.ON or db.ShowInHeadlineView then
+      Addon.CVars:Set("showQuestTrackingTooltips", 1)
+    else
+      Addon.CVars:RestoreFromProfile("showQuestTrackingTooltips")
+    end
+  end
 
   db = self.db.profile.Automation
   local isInstance, instanceType = IsInInstance()
@@ -491,6 +524,9 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
     Addon.CVars:RestoreFromProfile("nameplateGlobalScale")
   end
 
+  -- Update custom styles for the current instance
+  Addon.UpdateStylesForCurrentInstance()
+
   -- Adjust clickable area if we are in an instance. Otherwise the scaling of friendly nameplates' healthbars will
   -- be bugged
   Addon:SetBaseNamePlateSize()
@@ -500,16 +536,13 @@ end
 --end
 
 function TidyPlatesThreat:PLAYER_LOGIN(...)
-  self.db.profile.cache = {}
-
   if self.db.char.welcome then
     t.Print(L["|cff89f559Threat Plates:|r Welcome back |cff"]..t.HCC[Addon.PlayerClass]..UnitName("player").."|r!!")
   end
 end
 
-function TidyPlatesThreat:PLAYER_LOGOUT(...)
-  self.db.profile.cache = {}
-end
+--function TidyPlatesThreat:PLAYER_LOGOUT(...)
+--end
 
 -- Fires when the player leaves combat status
 -- Syncs addon settings with game settings in case changes weren't possible during startup, reload
@@ -534,10 +567,10 @@ function TidyPlatesThreat:PLAYER_REGEN_ENABLED()
 
   -- Dont't use automation for friendly nameplates if in an instance and Hide Friendly Nameplates is enabled
   if db.FriendlyUnits ~= "NONE" and not (isInstance and db.HideFriendlyUnitsInInstances) then
-    SetCVar("nameplateShowFriends", (db.FriendlyUnits == "SHOW_COMBAT" and 0) or 1)
+    _G.SetCVar("nameplateShowFriends", (db.FriendlyUnits == "SHOW_COMBAT" and 0) or 1)
   end
   if db.EnemyUnits ~= "NONE" then
-    SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 0) or 1)
+    _G.SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 0) or 1)
   end
 end
 
@@ -548,8 +581,8 @@ function TidyPlatesThreat:PLAYER_REGEN_DISABLED()
 
   -- Dont't use automation for friendly nameplates if in an instance and Hide Friendly Nameplates is enabled
   if db.FriendlyUnits ~= "NONE" and not (isInstance and db.HideFriendlyUnitsInInstances) then
-    SetCVar("nameplateShowFriends", (db.FriendlyUnits == "SHOW_COMBAT" and 1) or 0)
+    _G.SetCVar("nameplateShowFriends", (db.FriendlyUnits == "SHOW_COMBAT" and 1) or 0)
   end  if db.EnemyUnits ~= "NONE" then
-    SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 1) or 0)
+    _G.SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 1) or 0)
   end
 end

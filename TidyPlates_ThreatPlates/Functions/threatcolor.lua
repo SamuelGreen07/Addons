@@ -5,28 +5,43 @@ local ThreatPlates = Addon.ThreatPlates
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
-local UnitIsConnected, UnitAffectingCombat = UnitIsConnected, UnitAffectingCombat
+local UnitIsConnected = UnitIsConnected
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local RGB = ThreatPlates.RGB
 
+local ShowThreatGlow
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: UnitAffectingCombat
+
 local COLOR_TRANSPARENT = RGB(0, 0, 0, 0) -- opaque
 
-local function ShowThreatGlow(unit)
-  -- local db = TidyPlatesThreat.db.profile
+---------------------------------------------------------------------------------------------------
+-- Wrapper functions for WoW Classic
+---------------------------------------------------------------------------------------------------
 
-  return UnitAffectingCombat(unit.unitid)
+if Addon.CLASSIC then
+  ShowThreatGlow = function(unit)
+    return _G.UnitAffectingCombat(unit.unitid)
+  end
+else
+  ShowThreatGlow = function(unit)
+    local db = TidyPlatesThreat.db.profile
 
-  --  if db.ShowThreatGlowOnAttackedUnitsOnly then
-  --    if IsInInstance() and db.threat.UseHeuristicInInstances then
-  --      return UnitAffectingCombat(unit.unitid)
-  --    else
-  --      return Addon:OnThreatTable(unit)
-  --    end
-  --  else
-  --    return UnitAffectingCombat(unit.unitid)
-  --  end
+    if db.ShowThreatGlowOnAttackedUnitsOnly then
+      if IsInInstance() and db.threat.UseHeuristicInInstances then
+        return _G.UnitAffectingCombat(unit.unitid)
+      else
+        return Addon:OnThreatTable(unit)
+      end
+    else
+      return _G.UnitAffectingCombat(unit.unitid)
+    end
+  end
 end
 
 function Addon:SetThreatColor(unit)
@@ -52,12 +67,10 @@ function Addon:SetThreatColor(unit)
     -- is already in combat, but not yet on the mob's threat table for a sec or so.
     if db.threat.ON and db.threat.useHPColor then
       if style == "dps" or style == "tank" then
-        --color = Addon:GetThreatColor(unit, style, db.ShowThreatGlowOnAttackedUnitsOnly)
-        color = Addon:GetThreatColor(unit, style, false)
+        color = Addon:GetThreatColor(unit, style, db.ShowThreatGlowOnAttackedUnitsOnly) -- ShowThreatGlowOnAttackedUnitsOnly is ignored in WoW Classic
       end
     elseif InCombatLockdown() and (style == "normal" or style == "dps" or style == "tank") then
-      --color = Addon:GetThreatColor(unit, style, db.ShowThreatGlowOnAttackedUnitsOnly)
-      color = Addon:GetThreatColor(unit, style, false)
+      color = Addon:GetThreatColor(unit, style, db.ShowThreatGlowOnAttackedUnitsOnly)   -- ShowThreatGlowOnAttackedUnitsOnly is ignored in WoW Classic
     end
   end
 

@@ -1,34 +1,13 @@
 if not WeakAuras.IsCorrectVersion() then return end
+local AddonName, OptionsPrivate = ...
 
 local SharedMedia = LibStub("LibSharedMedia-3.0");
 local L = WeakAuras.L;
-
-if WeakAuras.IsClassic() then return end -- Models disabled for classic
 
 local function createOptions(parentData, data, index, subIndex)
   local options = {
     __title = L["Model %s"]:format(subIndex),
     __order = 1,
-    __up = function()
-      if (WeakAuras.ApplyToDataOrChildData(parentData, WeakAuras.MoveSubRegionUp, index, "subbarmodel")) then
-        WeakAuras.ReloadOptions2(parentData.id, parentData)
-      end
-    end,
-    __down = function()
-      if (WeakAuras.ApplyToDataOrChildData(parentData, WeakAuras.MoveSubRegionDown, index, "subbarmodel")) then
-        WeakAuras.ReloadOptions2(parentData.id, parentData)
-      end
-    end,
-    __duplicate = function()
-      if (WeakAuras.ApplyToDataOrChildData(parentData, WeakAuras.DuplicateSubRegion, index, "subbarmodel")) then
-        WeakAuras.ReloadOptions2(parentData.id, parentData)
-      end
-    end,
-    __delete = function()
-      if (WeakAuras.ApplyToDataOrChildData(parentData, WeakAuras.DeleteSubRegion, index, "subbarmodel")) then
-        WeakAuras.ReloadOptions2(parentData.id, parentData)
-      end
-    end,
     bar_model_visible = {
       type = "toggle",
       width = WeakAuras.doubleWidth,
@@ -37,24 +16,37 @@ local function createOptions(parentData, data, index, subIndex)
     },
     model_fileId = {
       type = "input",
-      width = WeakAuras.normalWidth,
+      width = WeakAuras.doubleWidth - 0.15,
       name = L["Model"],
-      order =  10
+      order =  10,
+      hidden = WeakAuras.IsClassic()
+    },
+    model_path = {
+      type = "input",
+      width = WeakAuras.doubleWidth - 0.15,
+      name = L["Model"],
+      order =  10.5,
+      hidden = not WeakAuras.IsClassic()
     },
     chooseModel = {
       type = "execute",
-      width = WeakAuras.normalWidth,
+      width = 0.15,
       name = L["Choose"],
       order =  11,
       func = function()
-        WeakAuras.OpenModelPicker(data, parentData);
+        OptionsPrivate.OpenModelPicker(parentData, {"subRegions", index});
       end,
+      imageWidth = 24,
+      imageHeight = 24,
+      control = "WeakAurasIcon",
+      image = "Interface\\AddOns\\WeakAuras\\Media\\Textures\\browse",
     },
     bar_model_clip = {
       type = "toggle",
       width = WeakAuras.normalWidth,
       name = L["Clipped by Progress"],
       order = 12,
+      hidden = function() return parentData.regionType ~= "aurabar" end
     },
     bar_model_alpha = {
       type = "range",
@@ -194,6 +186,9 @@ local function createOptions(parentData, data, index, subIndex)
       hidden = function() return not data.api end
     },
   }
+
+  OptionsPrivate.AddUpDownDeleteDuplicate(options, parentData, index, "subbarmodel")
+
   return options
 end
 

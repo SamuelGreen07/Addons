@@ -1,4 +1,4 @@
-﻿if GetLocale() ~= "koKR" then return end
+if GetLocale() ~= "koKR" then return end
 local L
 
 ----------------
@@ -113,4 +113,13 @@ L:SetOptionLocalization{
 L:SetMiscLocalization{
 	Submerge	= "나의 종들아! 어서 나와 주인을 돕거라!",
 	Pull		= "건방진 젖먹이! 죽고 싶어 안달이구나! 자, 보아라. 주인님께서 일어나신다!"
+}
+
+-----------------
+--  MC: Trash  --
+-----------------
+L = DBM:GetModLocalization("MCTrash")
+
+L:SetGeneralLocalization{
+	name = "화심: 일반몹"
 }
