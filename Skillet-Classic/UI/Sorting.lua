@@ -18,19 +18,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ]]--
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Skillet")
-local skill_style_type = {
-	["unavailable"]		= { r = 1.00, g = 0.00, b = 0.00, level = 6},
-	["unknown"]			= { r = 1.00, g = 0.00, b = 0.00, level = 5},
-	["optimal"]			= { r = 1.00, g = 0.50, b = 0.25, level = 4},
-	["medium"]			= { r = 1.00, g = 1.00, b = 0.00, level = 3},
-	["easy"]			= { r = 0.25, g = 0.75, b = 0.25, level = 2},
-	["trivial"]			= { r = 0.50, g = 0.50, b = 0.50, level = 1},
-	["header"]			= { r = 1.00, g = 0.82, b = 0,    level = 0},
-}
-Skillet.skill_style_type = skill_style_type
--- list of possible sorting methods
+--
+-- Table of difficulty colors defined in SkilletData.lua
+--
+local skill_style_type = Skillet.skill_style_type
+
+--
+-- List of possible sorting methods
+--
 local sorters = {}
 local recipe_sort_method = nil
+
+local function NOSORT(tradeskill, a, b)
+	return (a.skillIndex or 0) < (b.skillIndex or 0)
+end
 
 local function sort_recipe_by_name(tradeskill, a, b)
 	if a.name == b.name then
@@ -87,13 +88,13 @@ local function sort_recipe_by_item_level(tradeskill, a, b)
 	if not right then right = 0 end
 	if left == right then
 --
--- same level, try iLevel next
+-- Same level, try iLevel next
 --
 		local left = select(4,GetItemInfo(left_r.itemID)) or 0
 		local right = select(4,GetItemInfo(right_r.itemID)) or 0
 		if left == right then
 --
--- same level, sort by difficulty
+-- Same level, sort by difficulty
 --
 			return sort_recipe_by_skill_level(tradeskill, a, b)
 		else
@@ -119,7 +120,7 @@ local function sort_recipe_by_item_quality(tradeskill, a, b)
 	if not right then right = 0 end
 	if left == right then
 --
--- same level, sort by level required to use
+-- Same level, sort by level required to use
 --
 		return sort_recipe_by_item_level(tradeskill, a, b)
 	else
@@ -141,8 +142,30 @@ local function sort_recipe_by_index(tradeskill, a, b)
 	end
 end
 
-local function NOSORT(tradeskill, a, b)
-	return (a.skillIndex or 0) < (b.skillIndex or 0)
+local function get_suffix(recipe, first)
+	local ret = recipe.suffix
+	if not ret and recipe.recipeData then
+		ret = recipe.recipeData.suffix
+	end
+	if first and ret == nil and recipe.recipeID then
+		actualRecipe = Skillet:GetRecipe(recipe.recipeID)
+		Skillet:RecipeNameSuffix(tradeskill, actualRecipe)
+		ret = get_suffix(actualRecipe, false)
+	end
+	return ret
+end
+
+local function sort_recipe_by_suffix(tradeskill, a, b)
+	if a.subGroup or b.subGroup then
+		return NOSORT(tradeskill, a, b)
+	end
+	local as = get_suffix(a, true)
+	local bs = get_suffix(b, true)
+	if as == bs then
+		return (a.skillIndex or 0) < (b.skillIndex or 0)
+	else
+		return (as or 0) > (bs or 0)
+	end
 end
 
 local function SkillIsFilteredOut(skillIndex)
@@ -153,11 +176,14 @@ local function SkillIsFilteredOut(skillIndex)
 	--DA.DEBUG(1,"recipe= "..DA.DUMP1(recipe,1))
 	local recipeID = recipe.spellID or 0
 	if recipeID == 0 then
+--
+-- It's a header, don't filter here
+--
 		DA.DEBUG(1,"Detected header")
 		return false
 	end
 --
--- are we hiding anything that is trivial (has no chance of giving a skill point)
+-- Are we hiding anything that is trivial (has no chance of giving a skill point)
 --
 	if skill_style_type[skill.difficulty] then
 		if skill_style_type[skill.difficulty].level < (Skillet:GetTradeSkillOption("filterLevel") or 4) then
@@ -166,7 +192,7 @@ local function SkillIsFilteredOut(skillIndex)
 		end
 	end
 --
--- are we hiding anything that can't be created with the mats on this character?
+-- Are we hiding anything that can't be created with the mats on this character?
 --
 	if Skillet:GetTradeSkillOption("hideuncraftable") then
 		if not (skill.numCraftable > 0 and Skillet:GetTradeSkillOption("filterInventory-bag")) and
@@ -178,13 +204,13 @@ local function SkillIsFilteredOut(skillIndex)
 		end
 	end
 --
---	call our internal recipe filter
+--	Call our internal recipe filter
 --
 	if Skillet:RecipeFilter(skillIndex) then
 		return true
 	end
 --
---	call any external recipe filters
+--	Call any external recipe filters
 --
 	if Skillet.recipeFilters then
 		for _,f in pairs(Skillet.recipeFilters) do
@@ -195,7 +221,7 @@ local function SkillIsFilteredOut(skillIndex)
 		end
 	end
 --
--- string search
+-- String search
 --
 	local searchtext = Skillet:GetTradeSkillOption("searchtext")
 	if searchtext and searchtext ~= "" then
@@ -351,6 +377,68 @@ end
 -- currently selected tradekskill and sorting method
 -- if no sorting, then headers will be included
 --
+-- Adds the sorting routine to the list of sorting routines.
+--
+function Skillet:AddRecipeSorter(text, sorter)
+	assert(text and tostring(text),
+		"Usage Skillet:AddRecipeSorter(text, sorter), text must be a string")
+	assert(sorter and type(sorter) == "function",
+		"Usage Skillet:AddRecipeSorter(text, sorter), sorter must be a function")
+	table.insert(sorters, {["name"]=text, ["sorter"]=sorter})
+end
+
+function Skillet:InitializeSorting()
+--
+-- Default sorting methods
+-- We don't go through the public API for this as we want our methods
+-- to appear first in the list, no matter what.
+--
+	table.insert(sorters, 1, {["name"]=L["None"], ["sorter"]=sort_recipe_by_index})
+	table.insert(sorters, 2, {["name"]=L["By Name"], ["sorter"]=sort_recipe_by_name})
+	table.insert(sorters, 3, {["name"]=L["By Difficulty"], ["sorter"]=sort_recipe_by_skill_level})
+--	table.insert(sorters, 4, {["name"]=L["By Skill Level"], ["sorter"]=sort_recipe_by_skill_level})
+	table.insert(sorters, 4, {["name"]=L["By Item Level"], ["sorter"]=sort_recipe_by_item_level})
+	table.insert(sorters, 5, {["name"]=L["By Quality"], ["sorter"]=sort_recipe_by_item_quality})
+	table.insert(sorters, 6, {["name"]=L["By Suffix"], ["sorter"]=sort_recipe_by_suffix})
+
+	recipe_sort_method = sort_recipe_by_index
+	SkilletSortAscButton:SetScript("OnClick", function()
+--
+-- clicked the button will toggle sort ascending off
+--
+		set_sort_desc(true)
+		SkilletSortAscButton:Hide()
+		SkilletSortDescButton:Show()
+		self:UpdateTradeSkillWindow()
+	end)
+	SkilletSortAscButton:SetScript("OnEnter", function()
+		GameTooltip:SetOwner(SkilletSortAscButton, "ANCHOR_RIGHT")
+		GameTooltip:SetText(L["SORTASC"])
+	end)
+	SkilletSortAscButton:SetScript("OnLeave", function()
+		GameTooltip:Hide()
+	end)
+	SkilletSortDescButton:SetScript("OnClick", function()
+--
+-- Clicked the button will toggle sort descending off
+--
+		set_sort_desc(false)
+		SkilletSortDescButton:Hide()
+		SkilletSortAscButton:Show()
+		self:UpdateTradeSkillWindow()
+	end)
+	SkilletSortDescButton:SetScript("OnEnter", function()
+		GameTooltip:SetOwner(SkilletSortDescButton, "ANCHOR_RIGHT")
+		GameTooltip:SetText(L["SORTDESC"])
+	end)
+	SkilletSortDescButton:SetScript("OnLeave", function()
+		GameTooltip:Hide()
+	end)
+end
+
+--
+-- Causes the list of recipes to be resorted
+--
 function Skillet:SortAndFilterRecipes() -- SAFR: 
 	local skillListKey = Skillet.currentPlayer..":"..Skillet.currentTrade..":"..Skillet.currentGroupLabel
 	local numSkills = Skillet:GetNumSkills(Skillet.currentPlayer, Skillet.currentTrade)
@@ -367,7 +455,7 @@ function Skillet:SortAndFilterRecipes() -- SAFR:
 	local oldLength = #sortedSkillList
 	local button_index = 0
 --
--- load the filter dropdown and the search textbox with
+-- Load the filter dropdown and the search textbox with
 -- data saved for the currentTrade
 --
 	Skillet:FilterDropDown_OnLoad()
@@ -375,22 +463,25 @@ function Skillet:SortAndFilterRecipes() -- SAFR:
 	local groupLabel = Skillet.currentGroupLabel
 	DA.DEBUG(1,"SAFR: searchtext="..tostring(searchtext)..", groupLabel="..tostring(groupLabel))
 	if searchtext and searchtext ~= "" or groupLabel == "Flat" then
---	DA.DEBUG(1,"SAFR: groupLabel="..tostring(groupLabel))
---	if groupLabel == "Flat" or groupLabel == "Blizzard" then
 --
--- no prep necessary, just loop through the list and filter or search as directed
+-- No prep necessary, just loop through the list and filter or search as directed
 --
 		for i=1, numSkills, 1 do
 			local skill = Skillet:GetSkill(Skillet.currentPlayer, Skillet.currentTrade, i)
 			if skill then
 				local recipe = Skillet:GetRecipe(skill.id)
 				if skill.id ~= 0 then							-- not a header
-					if not SkillIsFilteredOut(i) then		-- skill is not filtered out
+					local filtered = SkillIsFilteredOut(i)
+					--DA.DEBUG(1,"SortAndFilterRecipes: SkillIsFilteredOut("..tostring(i)..")= "..tostring(filtered))
+					if not filtered then
+--
+-- skill is not filtered out
+--
 						button_index = button_index + 1
 						sortedSkillList[button_index] = {["recipeID"] = skill.id, ["spellID"] = recipe.spellID, ["name"] = recipe.name, ["skillIndex"] = i, ["recipeData"] = recipe, ["skillData"] = skill, ["depth"] = 0}
 					elseif i == Skillet.selectedSkill then
 --
--- if filtered out and selected - deselect
+-- If filtered out and selected - deselect
 --
 						Skillet.selectedSkill = nil
 					end
@@ -401,7 +492,7 @@ function Skillet:SortAndFilterRecipes() -- SAFR:
 		end	-- for
 		--DA.DEBUG(1,"SAFR: numSkills= "..tostring(numSkills)..", oldLength= "..tostring(oldLength)..", button_index= "..tostring(button_index))
 --
--- if the last result was larger than this result,
+-- If the last result was larger than this result,
 -- get rid of the extra old results.
 --
 		if oldLength > button_index then
@@ -451,65 +542,7 @@ function Skillet:SortAndFilterRecipes() -- SAFR:
 end
 
 --
--- Adds the sorting routine to the list of sorting routines.
---
-function Skillet:AddRecipeSorter(text, sorter)
-	assert(text and tostring(text),
-		"Usage Skillet:AddRecipeSorter(text, sorter), text must be a string")
-	assert(sorter and type(sorter) == "function",
-		"Usage Skillet:AddRecipeSorter(text, sorter), sorter must be a function")
-	table.insert(sorters, {["name"]=text, ["sorter"]=sorter})
-end
-
-function Skillet:InitializeSorting()
---
--- Default sorting methods
--- We don't go through the public API for this as we want our methods
--- to appear first in the list, no matter what.
---
-	table.insert(sorters, 1, {["name"]=L["None"], ["sorter"]=sort_recipe_by_index})
-	table.insert(sorters, 2, {["name"]=L["By Name"], ["sorter"]=sort_recipe_by_name})
-	table.insert(sorters, 3, {["name"]=L["By Difficulty"], ["sorter"]=sort_recipe_by_skill_level})
---	table.insert(sorters, 4, {["name"]=L["By Skill Level"], ["sorter"]=sort_recipe_by_skill_level})
-	table.insert(sorters, 4, {["name"]=L["By Item Level"], ["sorter"]=sort_recipe_by_item_level})
-	table.insert(sorters, 5, {["name"]=L["By Quality"], ["sorter"]=sort_recipe_by_item_quality})
-	recipe_sort_method = sort_recipe_by_index
-	SkilletSortAscButton:SetScript("OnClick", function()
---
--- clicked the button will toggle sort ascending off
---
-		set_sort_desc(true)
-		SkilletSortAscButton:Hide()
-		SkilletSortDescButton:Show()
-		self:UpdateTradeSkillWindow()
-	end)
-	SkilletSortAscButton:SetScript("OnEnter", function()
-		GameTooltip:SetOwner(SkilletSortAscButton, "ANCHOR_RIGHT")
-		GameTooltip:SetText(L["SORTASC"])
-	end)
-	SkilletSortAscButton:SetScript("OnLeave", function()
-		GameTooltip:Hide()
-	end)
-	SkilletSortDescButton:SetScript("OnClick", function()
---
--- clicked the button will toggle sort descending off
---
-		set_sort_desc(false)
-		SkilletSortDescButton:Hide()
-		SkilletSortAscButton:Show()
-		self:UpdateTradeSkillWindow()
-	end)
-	SkilletSortDescButton:SetScript("OnEnter", function()
-		GameTooltip:SetOwner(SkilletSortDescButton, "ANCHOR_RIGHT")
-		GameTooltip:SetText(L["SORTDESC"])
-	end)
-	SkilletSortDescButton:SetScript("OnLeave", function()
-		GameTooltip:Hide()
-	end)
-end
-
---
--- called when the sort drop down is first loaded
+-- Called when the sort drop down is first loaded
 --
 function Skillet:SortDropdown_OnLoad()
 	UIDropDownMenu_Initialize(SkilletSortDropdown, Skillet.SortDropdown_Initialize)
@@ -523,6 +556,10 @@ function Skillet:SortDropdown_OnLoad()
 			break
 		end
 	end
+--
+-- Can't call show_sort_toggle() here as the sort
+-- buttons have not been created yet
+--
 end
 
 --
@@ -559,6 +596,10 @@ function Skillet.SortDropdown_Initialize(menuFrame,level)
 		i = i + 1
 		UIDropDownMenu_AddButton(info)
 	end
+--
+-- Can't call show_sort_toggle() here as the sort
+-- buttons have not been created yet
+--
 end
 
 --

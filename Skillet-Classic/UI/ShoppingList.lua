@@ -65,6 +65,9 @@ local function createShoppingListFrame(self)
 	if not frame then
 		return nil
 	end
+	if not frame.SetBackdrop then
+		Mixin(frame, BackdropTemplateMixin)
+	end
 	if TSM_API then
 		frame:SetFrameStrata("HIGH")
 	end
@@ -123,6 +126,9 @@ local function createShoppingListFrame(self)
 -- The frame enclosing the scroll list needs a border and a background
 --
 	local backdrop = SkilletShoppingListParent
+	if not backdrop.SetBackdrop then
+		Mixin(backdrop, BackdropTemplateMixin)
+	end
 	if TSM_API then
 		backdrop:SetFrameStrata("HIGH")
 	end
@@ -142,9 +148,13 @@ local function createShoppingListFrame(self)
 	windowManager.RegisterConfig(frame, self.db.profile, shoppingListLocation)
 	windowManager.RestorePosition(frame)  -- restores scale also
 	windowManager.MakeDraggable(frame)
-	-- lets play the resize me game!
+--
+-- lets play the resize me game!
+--
 	Skillet:EnableResize(frame, 300, 165, Skillet.UpdateShoppingListWindow)
-	-- so hitting [ESC] will close the window
+--
+-- so hitting [ESC] will close the window
+--
 	tinsert(UISpecialFrames, frame:GetName())
 	return frame
 end
@@ -152,7 +162,9 @@ end
 function Skillet:ShoppingListButton_OnEnter(button)
 	local name, link, quality = GetItemInfo(button.id)
 	GameTooltip:SetOwner(button, "ANCHOR_TOPLEFT")
-	GameTooltip:SetHyperlink(link)
+	if link then
+		GameTooltip:SetHyperlink(link)
+	end
 	GameTooltip:Show()
 	CursorUpdate(button)
 end
@@ -229,14 +241,14 @@ function Skillet:GetShoppingList(player)
 		if reagentsInQueue then
 			for id,count in pairs(reagentsInQueue) do
 				local name = GetItemInfo(id)
-				DA.DEBUG(2,"reagent: "..id.." ("..tostring(name)..") x "..count)
+				--DA.DEBUG(2,"reagent: "..id.." ("..tostring(name)..") x "..count)
 				local deficit = count -- deficit is usually negative
 				local numInBoth, numInBothCurrent, numGuildbank = 0,0,0
 				local _
 				if not usedInventory[player][id] then
 					numInBoth = self:GetInventory(player, id)
 				end
-				DA.DEBUG(2,"numInBoth= "..numInBoth)
+				--DA.DEBUG(2,"numInBoth= "..numInBoth)
 				if numInBoth > 0 then
 					usedInventory[player][id] = true
 				end
@@ -244,7 +256,7 @@ function Skillet:GetShoppingList(player)
 					if not usedInventory[curPlayer] then
 						numInBothCurrent = self:GetInventory(curPlayer, id)
 					end
-					DA.DEBUG(2,"numInBothCurrent= "..numInBothCurrent)
+					--DA.DEBUG(2,"numInBothCurrent= "..numInBothCurrent)
 					if numInBothCurrent > 0 then
 						usedInventory[curPlayer][id] = true
 					end
@@ -294,7 +306,7 @@ local function cache_list(self)
 end
 
 local function indexBank()
-	DA.DEBUG(0,"indexBank()")
+	--DA.DEBUG(0,"indexBank()")
 --
 -- bank contains detailed contents of each tab,slot which 
 -- is only needed while the bank is open.
@@ -529,7 +541,7 @@ end
 -- Prints the contents of auctionData for this player
 --
 function Skillet:PrintAuctionData()
-	DA.DEBUG(0,"PrintAuctionData()");
+	--DA.DEBUG(0,"PrintAuctionData()");
 	local player = Skillet.currentPlayer
 	local auctionData = self.db.realm.auctionData[player]
 	if auctionData then
@@ -545,7 +557,7 @@ end
 -- I borrowed this code from ClosetGnome.
 --
 local function isNormalBag(bagId)
-	DA.DEBUG(0, "isNormalBag("..tostring(bagId)..")")
+	--DA.DEBUG(0, "isNormalBag("..tostring(bagId)..")")
 --
 -- backpack and bank are always normal
 --
@@ -562,8 +574,8 @@ local function isNormalBag(bagId)
 --
 -- not a normal bag
 --
-	DA.DEBUG(1, "isNormalBag: bagId= "..tostring(bagId)..", itemClassID= "..tostring(itemClassID)..", itemSubClassID= "..tostring(itemSubClassID))
-	DA.DEBUG(1, "isNormalBag: itemType= "..tostring(itemType)..", itemSubType= "..tostring(itemSubType))
+	--DA.DEBUG(1, "isNormalBag: bagId= "..tostring(bagId)..", itemClassID= "..tostring(itemClassID)..", itemSubClassID= "..tostring(itemSubClassID))
+	--DA.DEBUG(1, "isNormalBag: itemType= "..tostring(itemType)..", itemSubType= "..tostring(itemSubType))
 	return false
 end
 
@@ -571,13 +583,13 @@ end
 -- Returns a bag that the item can be placed in.
 --
 local function findBagForItem(itemID, count)
-	DA.DEBUG(0, "findBagForItem("..tostring(itemID)..", "..tostring(count)..")")
+	--DA.DEBUG(0, "findBagForItem("..tostring(itemID)..", "..tostring(count)..")")
 	if not itemID then return nil end
 	local _, _, _, _, _, _, _, itemStackCount = GetItemInfo(itemID)
 	for container = 0, 4, 1 do
 		if isNormalBag(container) then
 			local bag_size = GetContainerNumSlots(container) -- 0 if there is no bag
-			DA.DEBUG(1, "findBagForItem: container= "..tostring(container)..", bag_size= "..tostring(bag_size))
+			--DA.DEBUG(1, "findBagForItem: container= "..tostring(container)..", bag_size= "..tostring(bag_size))
 			for slot = 1, bag_size, 1 do
 				local bagitem = GetContainerItemID(container, slot)
 				if bagitem then
@@ -588,7 +600,7 @@ local function findBagForItem(itemID, count)
 						local _, num_in_bag, locked  = GetContainerItemInfo(container, slot)
 						local space_available = itemStackCount - num_in_bag
 						if space_available >= count and not locked then
-							DA.DEBUG(1, "findBagForItem: container= "..tostring(container)..", slot= "..tostring(slot)..", true")
+							--DA.DEBUG(1, "findBagForItem: container= "..tostring(container)..", slot= "..tostring(slot)..", true")
 							return container, slot, true
 						end
 					end
@@ -596,44 +608,44 @@ local function findBagForItem(itemID, count)
 --
 -- no item there, this looks like a good place to put something.
 --
-					DA.DEBUG(1, "findBagForItem: container= "..tostring(container)..", slot= "..tostring(slot)..", false")
+					--DA.DEBUG(1, "findBagForItem: container= "..tostring(container)..", slot= "..tostring(slot)..", false")
 					return container, slot, false
 				end
 			end
 		else
-			DA.DEBUG(0, "findBagForItem: container= "..tostring(container).." is not a normal bag")
+			--DA.DEBUG(0, "findBagForItem: container= "..tostring(container).." is not a normal bag")
 		end
 	end
 	return nil, nil, nil
 end
 
 local function getItemFromBank(itemID, bag, slot, count)
-	DA.DEBUG(0,"getItemFromBank(", itemID, bag, slot, count,")")
+	--DA.DEBUG(0,"getItemFromBank(", itemID, bag, slot, count,")")
 	ClearCursor()
 	local _, available = GetContainerItemInfo(bag, slot)
 	local num_moved = 0
 	if available then
 		if available == 1 or count >= available then
-			DA.DEBUG(1,"PickupContainerItem(",bag,", ", slot,")")
+			--DA.DEBUG(1,"PickupContainerItem(",bag,", ", slot,")")
 			PickupContainerItem(bag, slot)
 			num_moved = available
 		else
-			DA.DEBUG(1,"SplitContainerItem(",bag, slot, count,")")
+			--DA.DEBUG(1,"SplitContainerItem(",bag, slot, count,")")
 			SplitContainerItem(bag, slot, count)
 			num_moved = count
 		end
 		local tobag, toslot = findBagForItem(itemID, num_moved)
-		DA.DEBUG(1,"tobag=", tobag, " toslot=", toslot, " findBagForItem(", itemID, num_moved,")")
+		--DA.DEBUG(1,"tobag=", tobag, " toslot=", toslot, " findBagForItem(", itemID, num_moved,")")
 		if not tobag then
 			Skillet:Print(L["Could not find bag space for"]..": "..GetContainerItemLink(bag, slot))
 			ClearCursor()
 			return 0
 		end
 		if tobag == 0 then
-			DA.DEBUG(1,"PutItemInBackpack()")
+			--DA.DEBUG(1,"PutItemInBackpack()")
 			PutItemInBackpack()
 		else
-			DA.DEBUG(1,"PutItemInBag(",ContainerIDToInventoryID(tobag),")")
+			--DA.DEBUG(1,"PutItemInBag(",ContainerIDToInventoryID(tobag),")")
 			PutItemInBag(ContainerIDToInventoryID(tobag))
 		end
 	end
@@ -681,10 +693,10 @@ end
 -- BANK_UPDATE (subset of BAG_UPDATE) and BAG_UPDATE_DELAYED events have fired.
 --
 local function processBankQueue(where)
-	DA.DEBUG(1,"processBankQueue("..where..")")
+	--DA.DEBUG(1,"processBankQueue("..where..")")
 	local bankQueue = Skillet.bankQueue
 	if Skillet.bankBusy then
-		DA.DEBUG(1,"BANK_UPDATE and bankBusy")
+		--DA.DEBUG(1,"BANK_UPDATE and bankBusy")
 		while true do
 			local queueitem = table.remove(bankQueue,1)
 			if queueitem then
@@ -826,7 +838,7 @@ end
 -- Gets all the reagents possible for queued recipes from the bank
 --
 function Skillet:GetReagentsFromBanks()
-	DA.DEBUG(0,"GetReagentsFromBanks")
+	--DA.DEBUG(0,"GetReagentsFromBanks")
 	local list = self.cachedShoppingList
 	local incAlts = Skillet.db.char.include_alts
 	local name = UnitName("player")
@@ -835,10 +847,10 @@ function Skillet:GetReagentsFromBanks()
 -- Do things using a queue and events.
 --
 	if bankFrameOpen then
-		DA.DEBUG(0,"#list=",#list)
+		--DA.DEBUG(0,"#list=",#list)
 		local bankQueue = Skillet.bankQueue
 		for j,v in pairs(list) do
-			DA.DEBUG(2,"j=",j,", v=",DA.DUMP1(v))
+			--DA.DEBUG(2,"j=",j,", v=",DA.DUMP1(v))
 			local id = v.id
 			if incAlts or v.player == name then
 				for i,item in pairs(bank) do
@@ -941,7 +953,7 @@ end
 -- Called to update the shopping list window
 --
 function Skillet:UpdateShoppingListWindow(use_cached_recipes)
-	DA.DEBUG(0,"UpdateShoppingListWindow("..tostring(use_cached_recipes)..")")
+	--DA.DEBUG(0,"UpdateShoppingListWindow("..tostring(use_cached_recipes)..")")
 	local num_buttons = 0
 	if not self.shoppingList or not self.shoppingList:IsVisible() then
 		return
@@ -1069,7 +1081,7 @@ end
 -- Fills out and displays the shopping list frame
 --
 function Skillet:DisplayShoppingList(atBank)
-	--DA.DEBUG(3,"DisplayShoppingList")
+	--DA.DEBUG(0,"DisplayShoppingList")
 	if not self.shoppingList then
 		self.shoppingList = createShoppingListFrame(self)
 	end

@@ -52,7 +52,7 @@ local FrameBackdrop = {
 }
 
 local function createIgnoreListFrame(self)
-	DA.DEBUG(0,"createIgnoreListFrame")
+	--DA.DEBUG(0,"createIgnoreListFrame")
 	local frame = SkilletIgnoreList
 	if not frame then
 		return nil
@@ -61,6 +61,9 @@ local function createIgnoreListFrame(self)
 		frame:SetFrameStrata("TOOLTIP")
 	else
 		frame:SetFrameStrata("HIGH")
+	end
+	if not frame.SetBackdrop then
+		Mixin(frame, BackdropTemplateMixin)
 	end
 	frame:SetBackdrop(FrameBackdrop)
 	frame:SetBackdropColor(0.1, 0.1, 0.1)
@@ -93,6 +96,9 @@ local function createIgnoreListFrame(self)
 -- The frame enclosing the scroll list needs a border and a background .....
 --
 	local backdrop = SkilletIgnoreListParent
+	if not backdrop.SetBackdrop then
+		Mixin(backdrop, BackdropTemplateMixin)
+	end
 	if TSM_API then
 		backdrop:SetFrameStrata("HIGH")
 	end
@@ -124,7 +130,7 @@ local function createIgnoreListFrame(self)
 end
 
 function Skillet:GetIgnoreList(player)
-	DA.DEBUG(0,"GetIgnoreList("..tostring(player)..")")
+	--DA.DEBUG(0,"GetIgnoreList("..tostring(player)..")")
 	local list = {}
 	local playerList
 	if player then
@@ -135,11 +141,11 @@ function Skillet:GetIgnoreList(player)
 			table.insert(playerList, player)
 		end
 	end
-	DA.DEBUG(0,"Ignored List for: "..(player or "all players"))
+	--DA.DEBUG(0,"Ignored List for: "..(player or "all players"))
 	for i=1,#playerList,1 do
 		local player = playerList[i]
 		local userIgnoredMats = self.db.realm.userIgnoredMats[player]
-		DA.DEBUG(1,"player: "..player)
+		--DA.DEBUG(1,"player: "..player)
 		if userIgnoredMats then
 			for id,trade in pairs(userIgnoredMats) do
 				local entry = { ["player"] = player, ["trade"] = trade, ["id"] = id }
@@ -151,7 +157,7 @@ function Skillet:GetIgnoreList(player)
 end
 
 function Skillet:DeleteIgnoreEntry(index, player, id)
-	DA.DEBUG(0,"DeleteIgnoreEntry("..tostring(index)..", "..tostring(player)..", "..tostring(id)..")")
+	--DA.DEBUG(0,"DeleteIgnoreEntry("..tostring(index)..", "..tostring(player)..", "..tostring(id)..")")
 	table.remove(self.cachedIgnoreList,index)
 	self.db.realm.userIgnoredMats[player][id] = nil
 	self:UpdateIgnoreListWindow()
@@ -159,7 +165,7 @@ function Skillet:DeleteIgnoreEntry(index, player, id)
 end
 
 function Skillet:ClearIgnoreList(player)
-	DA.DEBUG(0,"ClearIgnoreList("..tostring(player)..")")
+	--DA.DEBUG(0,"ClearIgnoreList("..tostring(player)..")")
 	local playerList
 	if player then
 		playerList = { player }
@@ -169,7 +175,7 @@ function Skillet:ClearIgnoreList(player)
 			table.insert(playerList, player)
 		end
 	end
-	DA.DEBUG(0,"clear ignore list for: "..(player or "all players"))
+	--DA.DEBUG(0,"clear ignore list for: "..(player or "all players"))
 	for i=1,#playerList,1 do
 		local player = playerList[i]
 		DA.DEBUG(1,"player: "..player)
@@ -180,16 +186,31 @@ function Skillet:ClearIgnoreList(player)
 end
 
 --
+-- Called to add a count to the Ignored List button in the main frame
+--
+function Skillet:UpdateIgnoreListButton()
+	--DA.DEBUG(0,"UpdateIgnoreListButton()")
+	self.cachedIgnoreList = self:GetIgnoreList()
+	local numItems = #self.cachedIgnoreList
+	if numItems > 0 then
+		SkilletIgnoreListButton:SetText(L["Ignored List"].." ("..tostring(numItems)..")")
+	else
+		SkilletIgnoreListButton:SetText(L["Ignored List"])
+	end
+end
+
+--
 -- Called to update the ignore list window
 --
 function Skillet:UpdateIgnoreListWindow()
-	DA.DEBUG(0,"UpdateIgnoreListWindow")
+	--DA.DEBUG(0,"UpdateIgnoreListWindow()")
 	self.cachedIgnoreList = self:GetIgnoreList()
 	local numItems = #self.cachedIgnoreList
 	if not self.ignoreList or not self.ignoreList:IsVisible() then
-	    DA.DEBUG(0,"No ignoreList visible so return")
+		DA.DEBUG(0,"No ignoreList visible so return")
 		return
 	end
+	self:UpdateIgnoreListButton()
 	local button_count = SkilletIgnoreListList:GetHeight() / SKILLET_IGNORE_LIST_HEIGHT
 	button_count = math.floor(button_count)
 --
@@ -263,7 +284,7 @@ end
 -- Functions to show and hide the Ignorelist
 --
 function Skillet:DisplayIgnoreList()
-	DA.DEBUG(0,"DisplayIgnoreList()")
+	--DA.DEBUG(0,"DisplayIgnoreList()")
 	if not self.ignoreList then
 		self.ignoreList = createIgnoreListFrame(self)
 	end
@@ -277,8 +298,12 @@ function Skillet:DisplayIgnoreList()
 end
 
 function Skillet:HideIgnoreList()
-	if self.ignoreList then
+	--DA.DEBUG(0,"HideIgnoreList()")
+	local closed
+	if self.ignoreList and self.ignoreList:IsVisible() then
 		self.ignoreList:Hide()
+		closed = true
 	end
 	self.cachedIgnoreList = nil
+	return closed
 end
