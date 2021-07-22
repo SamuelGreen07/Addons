@@ -75,42 +75,48 @@ local HIDDEN = 0
 
 -- ElvUI changed block
 local CREATED = 2
+
 local pcall = pcall
 local tinsert = tinsert
 local CreateFrame = CreateFrame
 local GetSpellInfo = GetSpellInfo
 local UnitAura = UnitAura
 local UnitIsUnit = UnitIsUnit
+local GameTooltip = GameTooltip
 local floor, min = math.floor, math.min
-local LCD = LibStub('LibClassicDurations', true)
-local myClass = select(2, UnitClass('player'))
-
--- GLOBALS: GameTooltip
 -- end block
 
+-- ElvUI adds IsForbidden checks
 local function UpdateTooltip(self)
+	if(GameTooltip:IsForbidden()) then return end
+
 	GameTooltip:SetUnitAura(self:GetParent().__owner.unit, self:GetID(), self.filter)
 end
 
 local function onEnter(self)
-	if(not self:IsVisible()) then return end
+	if(GameTooltip:IsForbidden() or not self:IsVisible()) then return end
 
-	GameTooltip:SetOwner(self, self:GetParent().tooltipAnchor)
+	-- Avoid parenting GameTooltip to frames with anchoring restrictions,
+	-- otherwise it'll inherit said restrictions which will cause issues with
+	-- its further positioning, clamping, etc
+	GameTooltip:SetOwner(self, self:GetParent().__restricted and 'ANCHOR_CURSOR' or self:GetParent().tooltipAnchor)
 	self:UpdateTooltip()
 end
 
 local function onLeave()
+	if(GameTooltip:IsForbidden()) then return end
+
 	GameTooltip:Hide()
 end
 
 local function createAuraIcon(element, index)
-	local button = CreateFrame('Button', element:GetDebugName() .. 'Button' .. index, element)
+	local button = CreateFrame('Button', element:GetName() .. 'Button' .. index, element, "BackdropTemplate")
 	button:RegisterForClicks('RightButtonUp')
 
 	local cd = CreateFrame('Cooldown', '$parentCooldown', button, 'CooldownFrameTemplate')
 	cd:SetAllPoints()
 
-	local icon = button:CreateTexture(nil, 'ARTWORK')
+	local icon = button:CreateTexture(nil, 'BORDER')
 	icon:SetAllPoints()
 
 	local countFrame = CreateFrame('Frame', nil, button)
@@ -159,32 +165,21 @@ local function customFilter(element, unit, button, name)
 end
 
 local function updateIcon(element, unit, index, offset, filter, isDebuff, visible)
-	local name, texture, count, debuffType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll, timeMod, effect1, effect2, effect3 = UnitAura(unit, index, filter)
+	local name, texture, count, debuffType, duration, expiration, caster, isStealable,
+		nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll,
+		timeMod, effect1, effect2, effect3 = UnitAura(unit, index, filter)
 
-	if LCD and spellID then
-		local durationNew, expirationTimeNew = LCD:GetAuraDurationByUnit(unit, spellID, caster, name)
-		if durationNew and durationNew > 0 then
-			duration, expiration = durationNew, expirationTimeNew
-		end
-	end
-
-	if myClass == "SHAMAN" then
-		for slot = 1, 4 do
-			local _, _, start, durationTime, icon = GetTotemInfo(slot)
-			if icon == texture then
-				duration = durationTime
-				expiration = start + duration
-			end
-		end
-	end
-
-	-- ElvUI block
+	-- ElvUI changed block
 	if element.forceShow or element.forceCreate then
-		spellID = 47540
+		spellID = 5782
 		name, _, texture = GetSpellInfo(spellID)
 		if element.forceShow then
 			count, debuffType, duration, expiration, caster, isStealable, nameplateShowSelf, isBossDebuff = 5, "Magic", 0, 60, "player", nil, nil, nil
 		end
+	end
+
+	if isStealable then
+		element.hasStealable = true -- for Style Filters
 	end
 	-- end Block
 
@@ -227,9 +222,8 @@ local function updateIcon(element, unit, index, offset, filter, isDebuff, visibl
 		--]]
 
 		-- ElvUI changed block
-		local show = true
-		if element.forceCreate then show = false end
-		if not element.forceShow and not element.forceCreate then
+		local show = not element.forceCreate
+		if not (element.forceShow or element.forceCreate) then
 			show = (element.CustomFilter or customFilter) (element, unit, button, name, texture,
 				count, debuffType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID,
 				canApply, isBossDebuff, casterIsPlayer, nameplateShowAll,timeMod, effect1, effect2, effect3)
@@ -300,10 +294,9 @@ local function updateIcon(element, unit, index, offset, filter, isDebuff, visibl
 		elseif element.forceCreate then
 			local size = element.size or 16
 			button:SetSize(size, size)
-
 			button:Hide()
 
-			if (element.PostUpdateIcon) then
+			if element.PostUpdateIcon then
 				element:PostUpdateIcon(unit, button, index, position, duration, expiration, debuffType, isStealable)
 			end
 
@@ -341,9 +334,9 @@ local function filterIcons(element, unit, filter, limit, isDebuff, offset, dontH
 	local index = 1
 	local visible = 0
 	local hidden = 0
-	-- ElvUI changed block
-	local created = 0
-	-- end block
+	local created = 0 -- ElvUI
+	element.hasStealable = nil -- ElvUI
+
 	while(visible < limit) do
 		local result = updateIcon(element, unit, index, offset, filter, isDebuff, visible)
 		if(not result) then
@@ -362,9 +355,7 @@ local function filterIcons(element, unit, filter, limit, isDebuff, offset, dontH
 		index = index + 1
 	end
 
-	-- ElvUI changed block
-	visible = visible - created
-	-- end block
+	visible = visible - created -- ElvUI changed
 
 	if(not dontHide) then
 		for i = visible + offset + 1, #element do
@@ -522,54 +513,78 @@ local function UpdateAuras(self, event, unit)
 end
 
 local function Update(self, event, unit)
-	if(self.unit ~= unit) then return end
+	if (self.isForced and event ~= 'ElvUI_UpdateAllElements') or (self.unit ~= unit) then return end -- ElvUI changed
+
+	-- Assume no event means someone wants to re-anchor things. This is usually done by UpdateAllElements and :ForceUpdate.
+	if not event or event == 'ForceUpdate' or event == 'ElvUI_UpdateAllElements' then -- ElvUI changed
+		if self.Buffs then self.Buffs.anchoredIcons = 0 end
+		if self.Debuffs then self.Debuffs.anchoredIcons = 0 end
+		if self.Auras then self.Auras.anchoredIcons = 0 end
+	end
 
 	UpdateAuras(self, event, unit)
-
-	-- Assume no event means someone wants to re-anchor things. This is usually
-	-- done by UpdateAllElements and :ForceUpdate.
-	if(event == 'ForceUpdate' or not event) then
-		local buffs = self.Buffs
-		if(buffs) then
-			(buffs.SetPosition or SetPosition) (buffs, 1, buffs.createdIcons)
-		end
-
-		local debuffs = self.Debuffs
-		if(debuffs) then
-			(debuffs.SetPosition or SetPosition) (debuffs, 1, debuffs.createdIcons)
-		end
-
-		local auras = self.Auras
-		if(auras) then
-			(auras.SetPosition or SetPosition) (auras, 1, auras.createdIcons)
-		end
-	end
 end
 
 local function ForceUpdate(element)
 	return Update(element.__owner, 'ForceUpdate', element.__owner.unit)
 end
 
+-- ElvUI changed block
+local onUpdateElapsed, onUpdateWait = 0, 0.25
+local function onUpdateAuras(self, elapsed)
+	if onUpdateElapsed > onUpdateWait then
+		Update(self.__owner, 'OnUpdate', self.__owner.unit)
+
+		onUpdateElapsed = 0
+	else
+		onUpdateElapsed = onUpdateElapsed + elapsed
+	end
+end
+
+local function SetAuraUpdateSpeed(self, state)
+	onUpdateWait = state
+end
+
+local function SetAuraUpdateMethod(self, state, force)
+	if self.effectiveAura ~= state or force then
+		self.effectiveAura = state
+
+		if state then
+			self.updateAurasFrame:SetScript('OnUpdate', onUpdateAuras)
+			self:UnregisterEvent('UNIT_AURA', UpdateAuras)
+		else
+			self.updateAurasFrame:SetScript('OnUpdate', nil)
+			self:RegisterEvent('UNIT_AURA', UpdateAuras)
+		end
+	end
+end
+-- end block
+
 local function Enable(self)
+	-- ElvUI changed block
+	if not self.updateAurasFrame then
+		self.updateAurasFrame = CreateFrame('Frame', nil, self)
+		self.updateAurasFrame.__owner = self
+	end
+	-- end block
+
 	if(self.Buffs or self.Debuffs or self.Auras) then
-		self:RegisterEvent('UNIT_AURA', UpdateAuras)
+		-- ElvUI changed block
+		self.SetAuraUpdateSpeed = SetAuraUpdateSpeed
+		self.SetAuraUpdateMethod = SetAuraUpdateMethod
+		SetAuraUpdateMethod(self, self.effectiveAura, true)
+		-- end block
 
 		local buffs = self.Buffs
 		if(buffs) then
 			buffs.__owner = self
+			-- check if there's any anchoring restrictions
+			buffs.__restricted = not pcall(self.GetCenter, self)
 			buffs.ForceUpdate = ForceUpdate
 
 			buffs.createdIcons = buffs.createdIcons or 0
 			buffs.anchoredIcons = 0
-
-			-- Avoid parenting GameTooltip to frames with anchoring restrictions,
-			-- otherwise it'll inherit said restrictions which will cause issues
-			-- with its further positioning, clamping, etc
-			if(not pcall(self.GetCenter, self)) then
-				buffs.tooltipAnchor = 'ANCHOR_CURSOR'
-			else
-				buffs.tooltipAnchor = buffs.tooltipAnchor or 'ANCHOR_BOTTOMRIGHT'
-			end
+			buffs.tooltipAnchor = buffs.tooltipAnchor or 'ANCHOR_BOTTOMRIGHT'
 
 			buffs:Show()
 		end
@@ -577,19 +592,13 @@ local function Enable(self)
 		local debuffs = self.Debuffs
 		if(debuffs) then
 			debuffs.__owner = self
+			-- check if there's any anchoring restrictions
+			debuffs.__restricted = not pcall(self.GetCenter, self)
 			debuffs.ForceUpdate = ForceUpdate
 
 			debuffs.createdIcons = debuffs.createdIcons or 0
 			debuffs.anchoredIcons = 0
-
-			-- Avoid parenting GameTooltip to frames with anchoring restrictions,
-			-- otherwise it'll inherit said restrictions which will cause issues
-			-- with its further positioning, clamping, etc
-			if(not pcall(self.GetCenter, self)) then
-				debuffs.tooltipAnchor = 'ANCHOR_CURSOR'
-			else
-				debuffs.tooltipAnchor = debuffs.tooltipAnchor or 'ANCHOR_BOTTOMRIGHT'
-			end
+			debuffs.tooltipAnchor = debuffs.tooltipAnchor or 'ANCHOR_BOTTOMRIGHT'
 
 			debuffs:Show()
 		end
@@ -597,19 +606,13 @@ local function Enable(self)
 		local auras = self.Auras
 		if(auras) then
 			auras.__owner = self
+			-- check if there's any anchoring restrictions
+			auras.__restricted = not pcall(self.GetCenter, self)
 			auras.ForceUpdate = ForceUpdate
 
 			auras.createdIcons = auras.createdIcons or 0
 			auras.anchoredIcons = 0
-
-			-- Avoid parenting GameTooltip to frames with anchoring restrictions,
-			-- otherwise it'll inherit said restrictions which will cause issues
-			-- with its further positioning, clamping, etc
-			if(not pcall(self.GetCenter, self)) then
-				auras.tooltipAnchor = 'ANCHOR_CURSOR'
-			else
-				auras.tooltipAnchor = auras.tooltipAnchor or 'ANCHOR_BOTTOMRIGHT'
-			end
+			auras.tooltipAnchor = auras.tooltipAnchor or 'ANCHOR_BOTTOMRIGHT'
 
 			auras:Show()
 		end
@@ -619,6 +622,12 @@ local function Enable(self)
 end
 
 local function Disable(self)
+	-- ElvUI changed block
+	if self.updateAurasFrame then
+		self.updateAurasFrame:SetScript('OnUpdate', nil)
+	end
+	-- end block
+
 	if(self.Buffs or self.Debuffs or self.Auras) then
 		self:UnregisterEvent('UNIT_AURA', UpdateAuras)
 

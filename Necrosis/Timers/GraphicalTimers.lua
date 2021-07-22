@@ -1,48 +1,30 @@
 --[[
-    Necrosis LdC
-    Copyright (C) 2005-2008  Lom Enfroy
-
-    This file is part of Necrosis LdC.
-
-    Necrosis LdC is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    Necrosis LdC is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with Necrosis LdC; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+    Necrosis 
+    Copyright (C) - copyright file included in this release
 --]]
-
-
-------------------------------------------------------------------------------------------------------
--- Necrosis LdC
--- Par Lomig (Kael'Thas EU/FR) & Tarcalion (Nagrand US/Oceanic) 
--- Contributions deLiadora et Nyx (Kael'Thas et Elune EU/FR)
---
--- Skins et voix Françaises : Eliah, Ner'zhul
---
--- Version Allemande par Geschan
--- Version Espagnole par DosS (Zul’jin)
--- Version Russe par Komsomolka
---
--- Version $LastChangedDate: 2009-12-10 17:09:53 +1100 (Thu, 10 Dec 2009) $
-------------------------------------------------------------------------------------------------------
 
 -- Get a reference to the global env variable containing all the frames || On définit G comme étant le tableau contenant toutes les frames existantes.
 local _G = getfenv(0)
 
+local function OutputGroup(SpellGroup, index, msg)
+	if Necrosis.Debug.timers then
+		_G["DEFAULT_CHAT_FRAME"]:AddMessage("OGroup::"
+		.." '"..(tostring(msg) or "nyl").."'"
+		.." i'"..(tostring(index) or "nyl").."'"
+		.." n'"..(tostring(SpellGroup[index].Name) or "nyl").."'"
+		.." sn'"..(tostring(SpellGroup[index].SubName) or "nyl").."'"
+		.." tg'"..(tostring(SpellGroup[index].TargetGUID) or "nyl").."'"
+		.." v'"..(tostring(SpellGroup[index].Visible) or "nyl").."'"
+		.." t'"..(tostring(SpellGroup[index].Text) or "nyl").."'"
+		)
+	end
+end
 ------------------------------------------------------------------------------------------------------
 -- FUNCTIONS FOR CREATION OF FRAMES ||FONCTIONS DE CREATION DES FRAMES
 ------------------------------------------------------------------------------------------------------
 
 --Creation of headers for timer groups || Création des entêtes des groupes de timers
-function Necrosis:CreateGroup(SpellGroup, index)
+local function CreateGroup(SpellGroup, index)
 
 	local texte = ""
 	if _G["NecrosisSpellTimer"..index] then
@@ -100,6 +82,7 @@ function Necrosis:CreateGroup(SpellGroup, index)
 	else
 		texte = texte.." - ?"
 	end
+
 	if texte == "? - ?" then
 		frame:Hide()
 	else
@@ -107,11 +90,14 @@ function Necrosis:CreateGroup(SpellGroup, index)
 		frame:Show()
 	end
 
+	
+	OutputGroup(SpellGroup, index, "create")
+
 	return frame
 end
 
 -- Creation of the timers || Création des timers
-function Necrosis:AddFrame(FrameName)
+function Necrosis:AddFrame(FrameName,spellTexture)
 
 	if _G[FrameName] then
 		f = _G[FrameName]
@@ -126,7 +112,7 @@ function Necrosis:AddFrame(FrameName)
 
 	-- Définition de ses attributs
 	frame:SetWidth(150)
-	frame:SetHeight(10)
+	frame:SetHeight(15)
 	frame:ClearAllPoints()
 	frame:SetPoint("CENTER", UIParent, "CENTER", 3000, 3000)
 	frame:Show()
@@ -139,7 +125,8 @@ function Necrosis:AddFrame(FrameName)
 	texture:SetTexture(0, 0, 0, 0.5)
 	texture:ClearAllPoints()
 	texture:SetPoint(NecrosisConfig.SpellTimerJust, FrameName, NecrosisConfig.SpellTimerJust, 0, 0)
-	texture:Show()
+	--	(NecrosisConfig.SpellTimerJust, FrameName, NecrosisConfig.SpellTimerJust,spellTexture)
+	--texture:Show()
 
 	-- Définition de ses textes
 	-- Extérieur
@@ -151,10 +138,10 @@ function Necrosis:AddFrame(FrameName)
 	FontString:ClearAllPoints()
 
 	if NecrosisConfig.SpellTimerPos == -1 then
-		FontString:SetPoint("RIGHT", FrameName, "LEFT", -5, 1)
+		FontString:SetPoint("RIGHT", FrameName, "LEFT", -10, 0)
 		FontString:SetJustifyH("RIGHT")
 	else
-		FontString:SetPoint("LEFT", FrameName, "RIGHT", 5, 1)
+		FontString:SetPoint("LEFT", FrameName, "RIGHT", 10, 0)
 		FontString:SetJustifyH("LEFT")
 	end
 	FontString:Show()
@@ -165,11 +152,11 @@ function Necrosis:AddFrame(FrameName)
 	FontString = frame:CreateFontString(FrameName.."Text", "OVERLAY", "GameFontNormalSmall")
 
 	FontString:SetWidth(150)
-	FontString:SetHeight(10)
+	FontString:SetHeight(14)
 	FontString:SetJustifyH("LEFT")
 	FontString:SetJustifyV("MIDDLE")
 	FontString:ClearAllPoints()
-	FontString:SetPoint("LEFT", FrameName, "LEFT", 0, 0)
+	FontString:SetPoint("LEFT", FrameName, "LEFT", 10, 0)
 	FontString:Show()
 
 	FontString:SetTextColor(1, 1, 1)
@@ -178,14 +165,27 @@ function Necrosis:AddFrame(FrameName)
 	local StatusBar = CreateFrame("StatusBar", FrameName.."Bar", frame)
 
 	StatusBar:SetWidth(150)
-	StatusBar:SetHeight(10)
+	StatusBar:SetHeight(15)
 	StatusBar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
 	StatusBar:SetStatusBarColor(1, 1, 0)
 	StatusBar:SetFrameLevel(StatusBar:GetFrameLevel() - 1)
 	StatusBar:ClearAllPoints()
-	StatusBar:SetPoint(NecrosisConfig.SpellTimerJust, FrameName, NecrosisConfig.SpellTimerJust, 0, 0)
+	StatusBar:SetPoint(NecrosisConfig.SpellTimerJust, FrameName, NecrosisConfig.SpellTimerJust, 10, 0)
+	--StatusBar:SetPoint("TOPLEFT", FrameName, "TOPLEFT", 10, 20)
 	StatusBar:Show()
+	
+	
+	-- Définition de l'icone à gauche de la barre
+	icon = StatusBar:CreateTexture(FrameName.."Icon", "OVERLAY")
+	icon:SetWidth(15)
+	icon:SetHeight(15)
+	icon:SetTexture(spellTexture)
+	--print("create:",FrameName,spellTexture)
+	icon:ClearAllPoints()
+	icon:SetPoint("TOPLEFT", StatusBar, "TOPLEFT", -17, 0)
+	icon:Show()
 
+	
 	-- Définition de l'étincelle en bout de barre
 	texture = StatusBar:CreateTexture(FrameName.."Spark", "OVERLAY")
 
@@ -214,7 +214,7 @@ function NecrosisUpdateTimer(tableau, Changement)
 	LastPoint[1], LastPoint[2], LastPoint[3], LastPoint[4], LastPoint[5] = NecrosisTimerFrame0:GetPoint()
 	local LastGroup = 0
 
-	local yPosition = - NecrosisConfig.SensListe * 12
+	local yPosition = - NecrosisConfig.SensListe * 17 --le facteur correspond à l'interligne 
 
 	-- smooth timers (if selected) || *Lisse* l'écoulement des timers si option sélectionnée
 	local Now
@@ -233,16 +233,16 @@ function NecrosisUpdateTimer(tableau, Changement)
 		local StatusBar = _G["NecrosisTimerFrame"..tableau[index].Gtimer.."Bar"]
 		local Spark = _G["NecrosisTimerFrame"..tableau[index].Gtimer.."Spark"]
 		local Text = _G["NecrosisTimerFrame"..tableau[index].Gtimer.."OutText"]
-
+		
 		-- move frames to ensure they dont overlap || Déplacement des Frames si besoin pour qu'elles ne se chevauchent pas
 		if Changement then
 			-- if the frame belongs to a mob group, then move the whole group || Si les Frames appartiennent à un groupe de mob, et qu'on doit changer de groupe
 			if not (tableau[index].Group == LastGroup) and tableau[index].Group > 3 then
-				local f = Necrosis:CreateGroup(Changement, tableau[index].Group)
+				local f = CreateGroup(Changement, tableau[index].Group)
 				LastPoint[5] = LastPoint[5] + 1.2 * yPosition
 				f:ClearAllPoints()
 				f:SetPoint(LastPoint[1], LastPoint[2], LastPoint[3], LastPoint[4], LastPoint[5])
-				LastPoint[5] = LastPoint[5] + 0.2 * yPosition
+				LastPoint[5] = LastPoint[5] + 0.2 * yPosition--0.2
 				LastGroup = tableau[index].Group
 			end
 			Frame:ClearAllPoints()
@@ -253,7 +253,8 @@ function NecrosisUpdateTimer(tableau, Changement)
 		-- creation of color timers || Création de la couleur des timers en fonction du temps
 		local r, g
 		local b = 37/255
-		local PercentColor = (tableau[index].TimeMax - Now) / tableau[index].Time
+		local b_end = tableau[index].TimeMax -- tableau[index].MaxBar tableau[index].TimeMax
+		local PercentColor = (b_end - Now) / tableau[index].Time
 		if PercentColor > 0.5 then
 			r = (207/255) - (1 - PercentColor) * 2 * (207/255)
 			g = 1
@@ -263,18 +264,18 @@ function NecrosisUpdateTimer(tableau, Changement)
 		end
 
 		-- calculate the position of the spark on the timer || Calcul de la position de l'étincelle sur la barre de status
-		local sparkPosition = 150 * (tableau[index].TimeMax - Now) / tableau[index].Time
+		local sparkPosition = 150 * (b_end - Now) / tableau[index].Time
 		if sparkPosition < 1 then sparkPosition = 1 end
 
 		-- set the color and determine the portion to be filled || Définition de la couleur du timer et de la quantitée de jauge remplie
-		StatusBar:SetValue(2 * tableau[index].TimeMax - (tableau[index].Time + Now))
+		StatusBar:SetValue(2 * b_end - (tableau[index].Time + Now))
 		StatusBar:SetStatusBarColor(r, g, b)
 		Spark:ClearAllPoints()
 		Spark:SetPoint("CENTER", StatusBar, "LEFT", sparkPosition, 0)
 
 		-- update the clock value on the timer || Affichage du chrono extérieur
 		local minutes, secondes, affichage = 0, 0, nil
-		secondes = tableau[index].TimeMax - floor(GetTime())
+		secondes = b_end - floor(GetTime())
 		minutes = floor(secondes / 60 )
 		secondes = math.fmod(secondes, 60)
 
@@ -292,8 +293,8 @@ function NecrosisUpdateTimer(tableau, Changement)
 			affichage = affichage.."0"..secondes
 		end
 
-		if (tableau[index].Type == 1 or tableau[index].Type == 3 or tableau[index].Name == Necrosis.Spell[16].Name)
-		and tableau[index].Target and not (tableau[index].Target == "") then
+		if (tableau[index].Type == 1 or tableau[index].Type == 3 
+		and tableau[index].Target and not (tableau[index].Target == "")) then
 			if NecrosisConfig.SpellTimerPos == 1 then
 				affichage = affichage.." - "..tableau[index].Target
 			else
@@ -302,6 +303,5 @@ function NecrosisUpdateTimer(tableau, Changement)
 		end
 
 		Text:SetText(affichage)
-
 	end
 end

@@ -1,18 +1,16 @@
-local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
+local E, L, V, P, G = unpack(select(2, ...)) --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local M = E:GetModule('WorldMap')
 
---Lua functions
 local _G = _G
 local strfind = strfind
---WoW API / Variables
+
 local CreateFrame = CreateFrame
-local SetCVar = SetCVar
-local GetCVarBool = GetCVarBool
+local ShowUIPanel = ShowUIPanel
+local HideUIPanel = HideUIPanel
+local IsPlayerMoving = IsPlayerMoving
 local InCombatLockdown = InCombatLockdown
-local ShowUIPanel, HideUIPanel = ShowUIPanel, HideUIPanel
-local MOUSE_LABEL = MOUSE_LABEL:gsub('|T.-|t','')
+local MOUSE_LABEL = MOUSE_LABEL:gsub("|[TA].-|[ta]","")
 local PLAYER = PLAYER
--- GLOBALS: WORLD_MAP_MIN_ALPHA, CoordsHolder
 
 local INVERTED_POINTS = {
 	['TOPLEFT'] = 'BOTTOMLEFT',
@@ -25,6 +23,7 @@ local INVERTED_POINTS = {
 
 -- this will be updated later
 local smallerMapScale = 0.8
+local CoordsHolder
 
 function M:SetLargeWorldMap()
 	local WorldMapFrame = _G.WorldMapFrame
@@ -104,16 +103,6 @@ function M:PositionCoords()
 	CoordsHolder.mouseCoords:Point(position, CoordsHolder.playerCoords, INVERTED_POINTS[position], 0, y)
 end
 
-function M:AllowMapFade()
-	return GetCVarBool('mapFade') and not _G.WorldMapFrame:IsMouseOver()
-end
-
-function M:SetMovementAlpha()
-	local WorldMapFrame = _G.WorldMapFrame
-	_G.PlayerMovementFrameFader.RemoveFrame(WorldMapFrame)
-	_G.PlayerMovementFrameFader.AddDeferredFrame(WorldMapFrame, E.global.general.mapAlphaWhenMoving, 1, .5, M.AllowMapFade)
-end
-
 function M:ToggleMapFix(event)
 	local WorldMapFrame = _G.WorldMapFrame
 	ShowUIPanel(WorldMapFrame)
@@ -126,6 +115,67 @@ function M:ToggleMapFix(event)
 	end
 end
 
+function M:MapShouldFade()
+	-- normally we would check GetCVarBool('mapFade') here instead of the setting
+	return E.global.general.fadeMapWhenMoving and not _G.WorldMapFrame:IsMouseOver()
+end
+
+function M:MapFadeOnUpdate(elapsed)
+	self.elapsed = (self.elapsed or 0) + elapsed
+	if self.elapsed > 0.1 then
+		self.elapsed = 0
+
+		local object = self.FadeObject
+		local settings = object and object.FadeSettings
+		if not settings then return end
+
+		local fadeOut = IsPlayerMoving() and (not settings.fadePredicate or settings.fadePredicate())
+		local endAlpha = (fadeOut and (settings.minAlpha or 0.5)) or settings.maxAlpha or 1
+		local startAlpha = _G.WorldMapFrame:GetAlpha()
+
+		object.timeToFade = settings.durationSec or 0.5
+		object.startAlpha = startAlpha
+		object.endAlpha = endAlpha
+		object.diffAlpha = endAlpha - startAlpha
+
+		if object.fadeTimer then
+			object.fadeTimer = nil
+		end
+
+		E:UIFrameFade(_G.WorldMapFrame, object)
+	end
+end
+
+local fadeFrame
+function M:StopMapFromFading()
+	if fadeFrame then
+		fadeFrame:Hide()
+	end
+end
+
+function M:EnableMapFading(frame)
+	if not E.global.general.fadeMapWhenMoving then
+		return
+	end
+
+	if not fadeFrame then
+		fadeFrame = CreateFrame("FRAME")
+		fadeFrame:SetScript("OnUpdate", M.MapFadeOnUpdate)
+		frame:HookScript("OnHide", M.StopMapFromFading)
+	end
+
+	if not fadeFrame.FadeObject then fadeFrame.FadeObject = {} end
+	if not fadeFrame.FadeObject.FadeSettings then fadeFrame.FadeObject.FadeSettings = {} end
+
+	local settings = fadeFrame.FadeObject.FadeSettings
+	settings.fadePredicate = M.MapShouldFade
+	settings.durationSec = E.global.general.fadeMapDuration
+	settings.minAlpha = E.global.general.mapAlphaWhenMoving
+	settings.maxAlpha = 1
+
+	fadeFrame:Show()
+end
+
 function M:Initialize()
 	self.Initialized = true
 
@@ -135,7 +185,7 @@ function M:Initialize()
 
 	local WorldMapFrame = _G.WorldMapFrame
 	if E.global.general.WorldMapCoordinates.enable then
-		local CoordsHolder = CreateFrame('Frame', 'CoordsHolder', WorldMapFrame)
+		CoordsHolder = CreateFrame('Frame', 'ElvUI_CoordsHolder', WorldMapFrame)
 		CoordsHolder:SetFrameLevel(WorldMapFrame.BorderFrame:GetFrameLevel() + 2)
 		CoordsHolder:SetFrameStrata(WorldMapFrame.BorderFrame:GetFrameStrata())
 		CoordsHolder.playerCoords = CoordsHolder:CreateFontString(nil, 'OVERLAY')
@@ -148,6 +198,8 @@ function M:Initialize()
 		CoordsHolder.mouseCoords:SetText(MOUSE_LABEL..':   0, 0')
 
 		WorldMapFrame:HookScript('OnShow', function()
+			M:EnableMapFading(WorldMapFrame)
+
 			if not M.CoordsTimer then
 				M:UpdateCoords(true)
 				M.CoordsTimer = M:ScheduleRepeatingTimer('UpdateCoords', 0.1)
@@ -190,15 +242,6 @@ function M:Initialize()
 	_G.WorldMapMagnifyingGlassButton:Point('TOPLEFT', 60, -120)
 
 	self:RawHook(WorldMapFrame.ScrollContainer, 'GetCursorPosition', 'GetCursorPosition', true)
-
-	--Set alpha used when moving
-	WORLD_MAP_MIN_ALPHA = E.global.general.mapAlphaWhenMoving
-	SetCVar('mapAnimMinAlpha', E.global.general.mapAlphaWhenMoving)
-
-	--Enable/Disable map fading when moving
-	SetCVar('mapFade', (E.global.general.fadeMapWhenMoving == true and 1 or 0))
-
-	self:SetMovementAlpha()
 end
 
 E:RegisterInitialModule(M:GetName())

@@ -1,22 +1,19 @@
-local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
+local E, L, V, P, G = unpack(select(2, ...)) --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local S = E:GetModule('Skins')
 
---Cache global variables
---Lua functions
 local _G = _G
+local select = select
 
-local function LoadSkin()
-	if E.private.skins.blizzard.enable ~= true or E.private.skins.blizzard.guildregistrar ~= true then return end
+function S:GuildRegistrarFrame()
+	if not (E.private.skins.blizzard.enable and E.private.skins.blizzard.guildregistrar) then return end
 
 	local GuildRegistrarFrame = _G.GuildRegistrarFrame
-	S:HandlePortraitFrame(GuildRegistrarFrame, true)
+	S:HandleFrame(GuildRegistrarFrame, true, nil, 12, -17, -28, 65)
 
 	_G.GuildRegistrarFrameEditBox:StripTextures()
 	_G.GuildRegistrarGreetingFrame:StripTextures()
-	GuildRegistrarFrame.backdrop:Point('TOPLEFT', 12, -17)
-	GuildRegistrarFrame.backdrop:Point('BOTTOMRIGHT', -28, 65)
 
-	S:HandleCloseButton(GuildRegistrarFrameCloseButton)
+	S:HandleCloseButton(_G.GuildRegistrarFrameCloseButton)
 
 	S:HandleButton(_G.GuildRegistrarFrameGoodbyeButton)
 	S:HandleButton(_G.GuildRegistrarFrameCancelButton)
@@ -39,7 +36,7 @@ local function LoadSkin()
 	end
 
 	_G.GuildRegistrarPurchaseText:SetTextColor(1, 1, 1)
-	_G.AvailableServicesText:SetTextColor(1, 1, 0)
+	_G.GuildAvailableServicesText:SetTextColor(1, 1, 0)
 end
 
-S:AddCallback('GuildRegistrar', LoadSkin)
+S:AddCallback('GuildRegistrarFrame')

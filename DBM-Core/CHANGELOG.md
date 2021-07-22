@@ -1,8 +1,9 @@
 # Deadly Boss Mods Core
 
-## [2.5.8-16-g3a364d8](https://github.com/DeadlyBossMods/DBM-TBC-Classic/tree/3a364d89e6c7364c5d51f506c039a0b838f4e3e8) (2021-07-19)
-[Full Changelog](https://github.com/DeadlyBossMods/DBM-TBC-Classic/compare/2.5.8...3a364d89e6c7364c5d51f506c039a0b838f4e3e8) [Previous Releases](https://github.com/DeadlyBossMods/DBM-TBC-Classic/releases)
+## [2.5.8-17-gab5292b](https://github.com/DeadlyBossMods/DBM-TBC-Classic/tree/ab5292b3c60e26dde6d0139f3212203ddab8a9f4) (2021-07-21)
+[Full Changelog](https://github.com/DeadlyBossMods/DBM-TBC-Classic/compare/2.5.8...ab5292b3c60e26dde6d0139f3212203ddab8a9f4) [Previous Releases](https://github.com/DeadlyBossMods/DBM-TBC-Classic/releases)
 
+- Change how target count and cd count bars display so that they display the count next to spellname. reduces chance of the count being truncated and makes it more prominant in timers. It also makes it more uniform with warnings which already do count next to spell name. Don't worry this was done in a way that the arg order doesn't have to change nor does it break non updated locales. If you do localize though take note on syntax for flipping arg order in translated text from targetcount example.  
 - Update DBM-Core.lua  
 - Finish sync  
 - Push this, can't sync core because conflict.  

@@ -1,18 +1,17 @@
-local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
+local E, L, V, P, G = unpack(select(2, ...)) --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local S = E:GetModule('Skins')
 
---Cache global variables
---Lua functions
 local _G = _G
 
-local function LoadSkin()
-	if E.private.skins.blizzard.enable ~= true or E.private.skins.blizzard.battlefield ~= true then return end
+function S:SkinBattlefield()
+	if not (E.private.skins.blizzard.enable and E.private.skins.blizzard.battlefield) then return end
 
 	local BattlefieldFrame = _G.BattlefieldFrame
-	BattlefieldFrame:StripTextures()
+
+	BattlefieldFrame:StripTextures(true)
 	BattlefieldFrame:CreateBackdrop('Transparent')
-	BattlefieldFrame.backdrop:Point('TOPLEFT', 11, -12)
-	BattlefieldFrame.backdrop:Point('BOTTOMRIGHT', -32, 76)
+	BattlefieldFrame.backdrop:Point('TOPLEFT', 10, -12)
+	BattlefieldFrame.backdrop:Point('BOTTOMRIGHT', -32, 73)
 
 	_G.BattlefieldListScrollFrame:StripTextures()
 	S:HandleScrollBar(_G.BattlefieldListScrollFrameScrollBar)
@@ -23,7 +22,9 @@ local function LoadSkin()
 	S:HandleButton(_G.BattlefieldFrameJoinButton)
 	S:HandleButton(_G.BattlefieldFrameGroupJoinButton)
 
+	_G.BattlefieldFrameGroupJoinButton:Point('RIGHT', _G.BattlefieldFrameJoinButton, 'LEFT', -2, 0)
+
 	S:HandleCloseButton(_G.BattlefieldFrameCloseButton)
 end
 
-S:AddCallback('Battlefield', LoadSkin)
+S:AddCallback('SkinBattlefield')

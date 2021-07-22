@@ -1,0 +1,10 @@
+lightweight tag 31dded95ae15eea4ce4d7c4247e4a1b8f1c19d99 7.6.9.5
+Author:	CKNOEP <c.knoepffler@free.fr>
+Date:	Tue Jul 20 08:54:24 2021 +0200
+
+commit 31dded95ae15eea4ce4d7c4247e4a1b8f1c19d99
+Author: CKNOEP <c.knoepffler@free.fr>
+Date:   Tue Jul 20 08:54:24 2021 +0200
+
+    fix lua err first launch
+

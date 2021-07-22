@@ -1,29 +1,27 @@
-local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
-local S = E:GetModule('Skins');
+local E, L, V, P, G = unpack(select(2, ...)) --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
+local S = E:GetModule('Skins')
 
---Cache global variables
---Lua functions
 local _G = _G
---WoW API / Variables
+
+local CreateFrame = CreateFrame
 local hooksecurefunc = hooksecurefunc
 
-local function LoadSkin()
-	if E.private.skins.blizzard.enable ~= true or E.private.skins.blizzard.questtimers ~= true then return end
+function S:SkinQuestTimers()
+	if not (E.private.skins.blizzard.enable and E.private.skins.blizzard.questtimers) then return end
 
 	local QuestTimerFrame = _G.QuestTimerFrame
-	QuestTimerFrame:StripTextures()
-	QuestTimerFrame:SetTemplate('Transparent')
+	S:HandleFrame(QuestTimerFrame, true)
 
-	E:CreateMover(QuestTimerFrame, 'QuestTimerFrameMover', QUEST_TIMERS)
+	E:CreateMover(QuestTimerFrame, 'QuestTimerFrameMover', _G.QUEST_TIMERS)
 
 	QuestTimerFrame:ClearAllPoints()
-	QuestTimerFrame:SetAllPoints(QuestTimerFrameMover)
+	QuestTimerFrame:SetAllPoints(_G.QuestTimerFrameMover)
 
 	_G.QuestTimerHeader:Point('TOP', 1, 8)
 
 	local QuestTimerFrameHolder = CreateFrame('Frame', 'QuestTimerFrameHolder', E.UIParent)
 	QuestTimerFrameHolder:Size(150, 22)
-	QuestTimerFrameHolder:SetPoint('TOP', QuestTimerFrameMover, 'TOP')
+	QuestTimerFrameHolder:SetPoint('TOP', _G.QuestTimerFrameMover, 'TOP')
 
 	hooksecurefunc(QuestTimerFrame, 'SetPoint', function(_, _, parent)
 		if parent ~= QuestTimerFrameHolder then
@@ -33,4 +31,4 @@ local function LoadSkin()
 	end)
 end
 
-S:AddCallback('QuestTimer', LoadSkin)
+S:AddCallback('SkinQuestTimers')

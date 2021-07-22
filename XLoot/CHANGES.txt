@@ -1,18 +1,12 @@
-tag 9bd5b1854658283e6ec5aa6c3d71af5743198462 8.1-1
+tag 8706ff2b511db8f44233b296bd5d13321e115525 9.0-8
 Author:	Xuerian <xuerian@gmail.com>
-Date:	Sat Feb 9 22:50:30 2019 -0500
+Date:	Thu May 20 21:41:27 2021 -0400
 
-Monitor: Support Altoholic for item totals
+Potential fixes for GetCurrencyInfo() failing to return a value/asking it for unloaded currencies
 
-commit 4c58ed41a3c43da69705f251a7a71aa2a4692986
+commit d7379356c83666c13876f3c5a2f7862f2e0822f3
 Author: Xuerian <xuerian@gmail.com>
-Date:   Sat Feb 9 22:49:57 2019 -0500
+Date:   Thu May 20 21:40:34 2021 -0400
 
-    Monitor: Support Altoholic for item totals
-
-commit 9327d28621140f6d6649b229f1dbac14ea44a218
-Author: Xuerian <xuerian@gmail.com>
-Date:   Sat Feb 9 22:49:27 2019 -0500
-
-    8.1 ToC bump
+    Potential fixes for GetCurrencyInfo() failing to return a value/asking it for unloaded currencies
 

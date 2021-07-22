@@ -1,12 +1,10 @@
-local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
+local E, L, V, P, G = unpack(select(2, ...)) --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local DT = E:GetModule('DataTexts')
 
---Lua functions
 local _G = _G
 local format, strjoin = format, strjoin
 local date = date
 
---WoW API / Variables
 local GetGameTime = GetGameTime
 local RequestRaidInfo = RequestRaidInfo
 local TIMEMANAGER_TOOLTIP_LOCALTIME = TIMEMANAGER_TOOLTIP_LOCALTIME
@@ -33,7 +31,7 @@ E.valueColorUpdateFuncs[ValueColorUpdate] = true
 
 local function ConvertTime(h, m)
 	local AmPm
-	if E.db.datatexts.time24 == true then
+	if E.global.datatexts.settings.Time.time24 == true then
 		return h, m, -1
 	else
 		if h >= 12 then
@@ -48,7 +46,7 @@ local function ConvertTime(h, m)
 end
 
 local function CalculateTimeValues(tooltip)
-	if (tooltip and E.db.datatexts.localtime) or (not tooltip and not E.db.datatexts.localtime) then
+	if (tooltip and E.global.datatexts.settings.Time.localTime) or (not tooltip and not E.global.datatexts.settings.Time.localTime) then
 		return ConvertTime(GetGameTime())
 	else
 		local dateTable = date("*t")
@@ -61,8 +59,8 @@ local function OnLeave()
 	enteredFrame = false
 end
 
-local function OnEnter(self)
-	DT:SetupTooltip(self)
+local function OnEnter()
+	DT.tooltip:ClearLines()
 
 	if(not enteredFrame) then
 		enteredFrame = true
@@ -74,11 +72,9 @@ local function OnEnter(self)
 		DT.tooltip:AddLine(" ")
 	end
 	if AmPm == -1 then
-		DT.tooltip:AddDoubleLine(E.db.datatexts.localtime and TIMEMANAGER_TOOLTIP_REALMTIME or TIMEMANAGER_TOOLTIP_LOCALTIME,
-			format(europeDisplayFormat_nocolor, Hr, Min), 1, 1, 1, lockoutColorNormal.r, lockoutColorNormal.g, lockoutColorNormal.b)
+		DT.tooltip:AddDoubleLine(E.global.datatexts.settings.Time.localTime and TIMEMANAGER_TOOLTIP_REALMTIME or TIMEMANAGER_TOOLTIP_LOCALTIME, format(europeDisplayFormat_nocolor, Hr, Min), 1, 1, 1, lockoutColorNormal.r, lockoutColorNormal.g, lockoutColorNormal.b)
 	else
-		DT.tooltip:AddDoubleLine(E.db.datatexts.localtime and TIMEMANAGER_TOOLTIP_REALMTIME or TIMEMANAGER_TOOLTIP_LOCALTIME,
-			format(ukDisplayFormat_nocolor, Hr, Min, APM[AmPm]), 1, 1, 1, lockoutColorNormal.r, lockoutColorNormal.g, lockoutColorNormal.b)
+		DT.tooltip:AddDoubleLine(E.global.datatexts.settings.Time.localTime and TIMEMANAGER_TOOLTIP_REALMTIME or TIMEMANAGER_TOOLTIP_LOCALTIME, format(ukDisplayFormat_nocolor, Hr, Min, APM[AmPm]), 1, 1, 1, lockoutColorNormal.r, lockoutColorNormal.g, lockoutColorNormal.b)
 	end
 
 	DT.tooltip:Show()
@@ -127,4 +123,14 @@ function Update(self, t)
 	int = 5
 end
 
-DT:RegisterDatatext('Time', {"UPDATE_INSTANCE_INFO"}, OnEvent, Update, nil, OnEnter, OnLeave)
+local function OnClick(self, btn)
+	if btn == "RightButton" then
+		-- Show clock
+		_G.TimeManager_Toggle()
+	elseif btn == "LeftButton" then
+		-- Show stopwatch
+		_G.Stopwatch_Toggle()
+	end
+end
+
+DT:RegisterDatatext('Time', nil, {'UPDATE_INSTANCE_INFO'}, OnEvent, Update, OnClick, OnEnter, OnLeave, nil, nil, ValueColorUpdate)

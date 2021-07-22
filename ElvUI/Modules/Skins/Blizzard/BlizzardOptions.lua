@@ -1,13 +1,11 @@
-local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
+local E, L, V, P, G = unpack(select(2, ...)) --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local S = E:GetModule('Skins')
 
---Cache global variables
---Lua functions
 local _G = _G
 local select = select
 local ipairs = ipairs
 local pairs = pairs
---WoW API / Variables
+
 local hooksecurefunc = hooksecurefunc
 local UnitIsUnit = UnitIsUnit
 local InCombatLockdown = InCombatLockdown
@@ -35,8 +33,8 @@ function S.AudioOptionsVoicePanel_InitializeCommunicationModeUI(btn)
 	HandlePushToTalkButton(btn.PushToTalkKeybindButton)
 end
 
-local function LoadSkin()
-	if E.private.skins.blizzard.enable ~= true or E.private.skins.blizzard.BlizzardOptions ~= true then return end
+function S:BlizzardOptions()
+	if not (E.private.skins.blizzard.enable and E.private.skins.blizzard.blizzardOptions) then return end
 
 	-- here we reskin all 'normal' buttons
 	S:HandleButton(_G.ReadyCheckFrameYesButton)
@@ -106,6 +104,8 @@ local function LoadSkin()
 		_G.ChatConfigOtherSettingsPVP,
 		_G.ChatConfigOtherSettingsSystem,
 		_G.ChatConfigOtherSettingsCreature,
+		_G.ChatConfigChannelSettingsAvailable,
+		_G.ChatConfigChannelSettingsAvailableBox,
 		_G.ChatConfigChannelSettingsLeft,
 		_G.CombatConfigMessageSourcesDoneBy,
 		_G.CombatConfigColorsUnitColors,
@@ -191,7 +191,7 @@ local function LoadSkin()
 	end)
 
 	hooksecurefunc('ChatConfig_UpdateCheckboxes', function(frame)
-		if ( not _G.FCF_GetCurrentChatFrame() ) then
+		if not _G.FCF_GetCurrentChatFrame() then
 			return
 		end
 		for index in ipairs(frame.checkBoxTable) do
@@ -213,10 +213,10 @@ local function LoadSkin()
 	hooksecurefunc('ChatConfig_UpdateTieredCheckboxes', function(frame, index)
 		local group = frame.checkBoxTable[index]
 		local checkBox = _G[frame:GetName()..'CheckBox'..index]
-		if ( checkBox ) then
+		if checkBox then
 			S:HandleCheckBox(checkBox)
 		end
-		if ( group.subTypes ) then
+		if group.subTypes then
 			for k in ipairs(group.subTypes) do
 				S:HandleCheckBox(_G[frame:GetName()..'CheckBox'..index..'_'..k])
 			end
@@ -224,7 +224,7 @@ local function LoadSkin()
 	end)
 
 	hooksecurefunc('ChatConfig_UpdateSwatches', function(frame)
-		if ( not _G.FCF_GetCurrentChatFrame() ) then
+		if not _G.FCF_GetCurrentChatFrame() then
 			return
 		end
 		for index in ipairs(frame.swatchTable) do
@@ -240,20 +240,15 @@ local function LoadSkin()
 		_G.InterfaceOptionsFrame,
 		_G.InterfaceOptionsControlsPanel,
 		_G.InterfaceOptionsCombatPanel,
-		_G.InterfaceOptionsCombatPanelEnemyCastBars,
-		_G.InterfaceOptionsCombatTextPanel,
 		_G.InterfaceOptionsDisplayPanel,
-		_G.InterfaceOptionsObjectivesPanel,
 		_G.InterfaceOptionsSocialPanel,
 		_G.InterfaceOptionsActionBarsPanel,
 		_G.InterfaceOptionsNamesPanel,
 		_G.InterfaceOptionsNamesPanelFriendly,
 		_G.InterfaceOptionsNamesPanelEnemy,
 		_G.InterfaceOptionsNamesPanelUnitNameplates,
-		_G.InterfaceOptionsBattlenetPanel,
 		_G.InterfaceOptionsCameraPanel,
 		_G.InterfaceOptionsMousePanel,
-		_G.InterfaceOptionsHelpPanel,
 		_G.InterfaceOptionsAccessibilityPanel,
 		_G.VideoOptionsFrame,
 		_G.Display_,
@@ -267,12 +262,6 @@ local function LoadSkin()
 		_G.AudioOptionsSoundPanelVolume,
 		_G.AudioOptionsSoundPanelPlayback,
 		_G.AudioOptionsVoicePanel,
-		_G.AudioOptionsVoicePanelTalking,
-		_G.AudioOptionsVoicePanelListening,
-		_G.AudioOptionsVoicePanelBinding,
-		_G.AudioOptionsVoicePanelMicTest,
-		_G.AudioOptionsVoicePanelChatMode1,
-		_G.AudioOptionsVoicePanelChatMode2,
 		_G.CompactUnitFrameProfiles,
 		_G.CompactUnitFrameProfilesGeneralOptionsFrame,
 	}
@@ -311,13 +300,31 @@ local function LoadSkin()
 	end
 
 	_G.InterfaceOptionsFrameTab1:Point('BOTTOMLEFT', _G.InterfaceOptionsFrameCategories, 'TOPLEFT', 6, 1)
+	_G.InterfaceOptionsFrameTab1:StripTextures()
 	_G.InterfaceOptionsFrameTab2:Point('TOPLEFT', _G.InterfaceOptionsFrameTab1, 'TOPRIGHT', 1, 0)
+	_G.InterfaceOptionsFrameTab2:StripTextures()
 	_G.InterfaceOptionsSocialPanel.EnableTwitter.Logo:SetAtlas('WoWShare-TwitterLogo')
+
+	do -- plus minus buttons in addons category
+		local function skinButtons()
+			for i = 1, #_G.INTERFACEOPTIONS_ADDONCATEGORIES do
+				local button = _G['InterfaceOptionsFrameAddOnsButton'..i..'Toggle']
+				if button and not button.IsSkinned then
+					S:HandleCollapseTexture(button, true)
+					button.IsSkinned = true
+				end
+			end
+		end
+
+		hooksecurefunc('InterfaceOptions_AddCategory', skinButtons)
+		skinButtons()
+	end
 
 	--Create New Raid Profle
 	local newProfileDialog = _G.CompactUnitFrameProfilesNewProfileDialog
 	if newProfileDialog then
-		newProfileDialog:SetTemplate('Transparent')
+		newProfileDialog:StripTextures()
+		newProfileDialog:CreateBackdrop('Transparent')
 
 		S:HandleDropDownBox(_G.CompactUnitFrameProfilesNewProfileDialogBaseProfileSelector)
 		S:HandleButton(_G.CompactUnitFrameProfilesNewProfileDialogCreateButton)
@@ -332,13 +339,21 @@ local function LoadSkin()
 	--Delete Raid Profile
 	local deleteProfileDialog = _G.CompactUnitFrameProfilesDeleteProfileDialog
 	if deleteProfileDialog then
-		deleteProfileDialog:SetTemplate('Transparent')
+		deleteProfileDialog:StripTextures()
+		deleteProfileDialog:CreateBackdrop('Transparent')
+
 		S:HandleButton(_G.CompactUnitFrameProfilesDeleteProfileDialogDeleteButton)
 		S:HandleButton(_G.CompactUnitFrameProfilesDeleteProfileDialogCancelButton)
 	end
 
 	-- Toggle Test Audio Button - Wow 8.0
 	S:HandleButton(_G.AudioOptionsVoicePanel.TestInputDevice.ToggleTest)
+
+	local VUMeter = _G.AudioOptionsVoicePanelTestInputDevice.VUMeter
+	VUMeter:SetBackdrop()
+	VUMeter.Status:CreateBackdrop()
+	VUMeter.Status:SetStatusBarTexture(E.media.normTex)
+	E:RegisterStatusBar(VUMeter.Status)
 
 	-- PushToTalk KeybindButton - Wow 8.0
 	hooksecurefunc('AudioOptionsVoicePanel_InitializeCommunicationModeUI', S.AudioOptionsVoicePanel_InitializeCommunicationModeUI)
@@ -349,4 +364,4 @@ local function LoadSkin()
 	S:HandleSliderFrame(_G.UnitPopupVoiceUserVolume.Slider)
 end
 
-S:AddCallback('SkinBlizzard', LoadSkin)
+S:AddCallback('BlizzardOptions')

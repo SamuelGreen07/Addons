@@ -5,10 +5,15 @@
 
 local Search = LibStub('CustomSearch-1.0')
 local Unfit = LibStub('Unfit-1.0')
-local Lib = LibStub:NewLibrary('LibItemSearch-1.2-ElvUI', 8)
+local Lib = LibStub:NewLibrary('LibItemSearch-1.2-ElvUI', 10)
 if Lib then
-	Lib.Scanner = LibItemSearchTooltipScanner or CreateFrame('GameTooltip', 'LibItemSearchTooltipScanner', UIParent, 'GameTooltipTemplate')
 	Lib.Filters = {}
+	Lib.Scanner = LibItemSearchTooltipScanner or CreateFrame('GameTooltip', 'LibItemSearchTooltipScanner', UIParent, 'GameTooltipTemplate')
+	Lib.Scanner:RegisterEvent('GET_ITEM_INFO_RECEIVED')
+	Lib.Scanner:SetScript('OnEvent', function()
+		Lib.Filters.tipPhrases.keywords[FOLLOWERLIST_LABEL_CHAMPIONS:lower()] = Lib:TooltipLine('item:147556', 2)
+		Lib.Filters.tipPhrases.keywords[GARRISON_FOLLOWERS:lower()] = Lib:TooltipLine('item:147556', 2)
+	end)
 else
 	return
 end
@@ -28,13 +33,20 @@ function Lib:TooltipPhrase(link, search)
 	return link and self.Filters.tipPhrases:match(link, nil, search)
 end
 
+function Lib:ForQuest(link)
+	return self:Tooltip(link, GetItemClassInfo(LE_ITEM_CLASS_QUESTITEM):lower())
+end
+
+function Lib:IsReagent(link)
+	return self:TooltipPhrase(link, PROFESSIONS_USED_IN_COOKING)
+end
+
 function Lib:InSet(link, search)
 	if IsEquippableItem(link) then
 		local id = tonumber(link:match('item:(%-?%d+)'))
 		return self:BelongsToSet(id, (search or ''):lower())
 	end
 end
-
 
 
 --[[ Internal API ]]--
@@ -75,7 +87,7 @@ elseif IsAddOnLoaded('Wardrobe') then
 		end
 	end
 
-else
+elseif C_EquipmentSet then
 	function Lib:BelongsToSet(id, search)
 		for i, setID in pairs(C_EquipmentSet.GetEquipmentSetIDs()) do
 			local name = C_EquipmentSet.GetEquipmentSetInfo(setID)
@@ -89,10 +101,12 @@ else
 			end
 		end
 	end
+else
+	function Lib:BelongsToSet() end
 end
 
 
---[[ General ]]--
+--[[ General Filters ]]--
 
 Lib.Filters.name = {
 	tags = {'n', 'name'},
@@ -102,8 +116,7 @@ Lib.Filters.name = {
 	end,
 
 	match = function(self, item, _, search)
-	-- Modified: C_Item.GetItemNameByID returns nil for M+ keystones, a fallback is needed
-		return Search:Find(search, C_Item.GetItemNameByID(item) or item:match('%[(.-)%]'))
+		return Search:Find(search, C_Item.GetItemNameByID(item) or item:match('%[(.+)%]'))
 	end
 }
 
@@ -175,7 +188,7 @@ Lib.Filters.quality = {
 	end,
 
 	match = function(self, link, operator, num)
-		local quality = link:sub(1, 9) == 'battlepet' and tonumber(link:match('%d+:%d+:(%d+)')) or C_Item.GetItemQualityByID(link)
+		local quality = link:find('battlepet') and tonumber(link:match('%d+:%d+:(%d+)')) or C_Item.GetItemQualityByID(link)
 		return Search:Compare(operator, quality, num)
 	end,
 }
@@ -185,7 +198,7 @@ for i = 0, #ITEM_QUALITY_COLORS do
 end
 
 
---[[ Keywords ]]--
+--[[ Classic Keywords ]]--
 
 Lib.Filters.items = {
 	keyword = ITEMS:lower(),
@@ -209,8 +222,55 @@ Lib.Filters.usable = {
 	match = function(self, link)
 		if not Unfit:IsItemUnusable(link) then
 			local lvl = select(5, GetItemInfo(link))
-			return lvl and (lvl ~= 0 and lvl <= UnitLevel('player'))
+			return lvl and (lvl == 0 or lvl > UnitLevel('player'))
 		end
+	end
+}
+
+
+--[[ Retail Keywords ]]--
+
+if C_ArtifactUI then
+	Lib.Filters.artifact = {
+		keyword1 = ITEM_QUALITY6_DESC:lower(),
+		keyword2 = RELICSLOT:lower(),
+
+		canSearch = function(self, operator, search)
+			return not operator and self.keyword1:find(search) or self.keyword2:find(search)
+		end,
+
+		match = function(self, link)
+			local id = link:match('item:(%d+)')
+			return id and C_ArtifactUI.GetRelicInfoByItemID(id)
+		end
+	}
+end
+
+if C_AzeriteItem then
+	Lib.Filters.azerite = {
+		keyword = C_CurrencyInfo.GetBasicCurrencyInfo(C_CurrencyInfo.GetAzeriteCurrencyID()).name:lower(),
+
+		canSearch = function(self, operator, search)
+			return not operator and self.keyword:find(search)
+		end,
+
+		match = function(self, link)
+			return C_AzeriteItem.IsAzeriteItemByID(link) or C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItemByID(link)
+		end
+	}
+end
+
+Lib.Filters.keystone = {
+	keyword1 = CHALLENGES:lower(), --English: "mythic keystone" (localized)
+	keyword2 = "mythic keystone", --unlocalized
+
+	canSearch = function(self, operator, search)
+		return not operator and self.keyword1:find(search) or self.keyword2:find(search)
+	end,
+
+	match = function(self, link)
+		local id = link:match('item:(%d+)')
+		return id and (select(12, GetItemInfo(id)) == 5 and select(13, GetItemInfo(id)) == 1) --itemClassID 5 and itemSubClassID 1 which translates to "Keystone"
 	end
 }
 
@@ -277,8 +337,7 @@ Lib.Filters.tipPhrases = {
 		local matches = false
 		for i = 1, Lib.Scanner:NumLines() do
 			local text = _G[Lib.Scanner:GetName() .. 'TextLeft' .. i]:GetText()
-			text = CleanString(text)
-			if search == text then
+			if search == CleanString(text) then
 				matches = true
 				break
 			end
@@ -294,14 +353,15 @@ Lib.Filters.tipPhrases = {
 		[QUESTS_LABEL:lower()] = ITEM_BIND_QUEST,
 		[GetItemClassInfo(LE_ITEM_CLASS_QUESTITEM):lower()] = ITEM_BIND_QUEST,
 		[PROFESSIONS_USED_IN_COOKING:lower()] = PROFESSIONS_USED_IN_COOKING,
+		[APPEARANCE_LABEL:lower()] = TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN,
 		[TOY:lower()] = TOY,
 
 		[FOLLOWERLIST_LABEL_CHAMPIONS:lower()] = Lib:TooltipLine('item:147556', 2),
 		[GARRISON_FOLLOWERS:lower()] = Lib:TooltipLine('item:147556', 2),
 
 		['soulbound'] = ITEM_BIND_ON_PICKUP,
-    	['bound'] = ITEM_BIND_ON_PICKUP,
-    	['bop'] = ITEM_BIND_ON_PICKUP,
+		['bound'] = ITEM_BIND_ON_PICKUP,
+		['bop'] = ITEM_BIND_ON_PICKUP,
 		['boe'] = ITEM_BIND_ON_EQUIP,
 		['bou'] = ITEM_BIND_ON_USE,
 		['boa'] = ITEM_BIND_TO_BNETACCOUNT,

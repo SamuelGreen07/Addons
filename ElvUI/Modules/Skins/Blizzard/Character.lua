@@ -1,13 +1,11 @@
-local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
+local E, L, V, P, G = unpack(select(2, ...)) --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local S = E:GetModule('Skins')
 
---Cache global variables
---Lua functions
 local _G = _G
 local unpack = unpack
 local pairs = pairs
 local strfind = strfind
---WoW API / Variables
+
 local HasPetUI = HasPetUI
 local GetPetHappiness = GetPetHappiness
 local GetInventoryItemQuality = GetInventoryItemQuality
@@ -18,17 +16,21 @@ local NUM_FACTIONS_DISPLAYED = NUM_FACTIONS_DISPLAYED
 local CHARACTERFRAME_SUBFRAMES = CHARACTERFRAME_SUBFRAMES
 local hooksecurefunc = hooksecurefunc
 
-local function LoadSkin()
-	if E.private.skins.blizzard.enable ~= true or E.private.skins.blizzard.character ~= true then return end
+function S:CharacterFrame()
+	if not (E.private.skins.blizzard.enable and E.private.skins.blizzard.character) then return end
 
 	-- Character Frame
-	_G.CharacterFrame:StripTextures(true)
+	local CharacterFrame = _G.CharacterFrame
+	S:HandleFrame(CharacterFrame, true, nil, 11, -12, -32, 76)
 
-	_G.CharacterFrame:CreateBackdrop('Transparent')
-	_G.CharacterFrame.backdrop:Point('TOPLEFT', 11, -12)
-	_G.CharacterFrame.backdrop:Point('BOTTOMRIGHT', -32, 76)
+	S:HandleCloseButton(_G.CharacterFrameCloseButton, CharacterFrame.backdrop)
 
-	S:HandleCloseButton(_G.CharacterFrameCloseButton)
+	S:HandleDropDownBox(_G.PlayerStatFrameRightDropDown, 145)
+	S:HandleDropDownBox(_G.PlayerStatFrameLeftDropDown, 147)
+	S:HandleDropDownBox(_G.PlayerTitleDropDown, 200)
+	_G.PlayerStatFrameRightDropDown:Point('TOP', -2, 24)
+	_G.PlayerStatFrameLeftDropDown:Point('LEFT', -25, 24)
+	_G.PlayerTitleDropDown:Point('TOP', -7, -51)
 
 	for i = 1, #CHARACTERFRAME_SUBFRAMES do
 		S:HandleTab(_G['CharacterFrameTab'..i])
@@ -77,7 +79,7 @@ local function LoadSkin()
 	HandleResistanceFrame('MagicResFrame')
 
 	for _, slot in pairs({ _G.PaperDollItemsFrame:GetChildren() }) do
-		if slot:IsObjectType("Button") then
+		if slot:IsObjectType('Button') then
 			local icon = _G[slot:GetName()..'IconTexture']
 			local cooldown = _G[slot:GetName()..'Cooldown']
 
@@ -86,6 +88,7 @@ local function LoadSkin()
 			slot:StyleButton()
 
 			S:HandleIcon(icon)
+			icon:SetInside()
 
 			if cooldown then
 				E:RegisterCooldown(cooldown)
@@ -94,11 +97,13 @@ local function LoadSkin()
 	end
 
 	hooksecurefunc('PaperDollItemSlotButton_Update', function(self)
-		local rarity = GetInventoryItemQuality('player', self:GetID())
-		if rarity and rarity > 1 then
-			E:SetBackdropBorderColor(self, GetItemQualityColor(rarity))
-		else
-			E:SetBackdropBorderColor(self, unpack(E.media.bordercolor))
+		if self.SetBackdropBorderColor then
+			local rarity = GetInventoryItemQuality('player', self:GetID())
+			if rarity and rarity > 1 then
+				self:SetBackdropBorderColor(GetItemQualityColor(rarity))
+			else
+				self:SetBackdropBorderColor(unpack(E.media.bordercolor))
+			end
 		end
 	end)
 
@@ -129,7 +134,7 @@ local function LoadSkin()
 	local function updHappiness(self)
 		local happiness = GetPetHappiness()
 		local _, isHunterPet = HasPetUI()
-		if not happiness or not isHunterPet then return end
+		if not (happiness and isHunterPet) then return end
 
 		local texture = self:GetRegions()
 		if happiness == 1 then
@@ -257,7 +262,7 @@ local function LoadSkin()
 	end
 
 	hooksecurefunc('SkillFrame_SetStatusBar', function(statusBarID, skillIndex, numSkills)
-		local skillLine = _G["SkillTypeLabel"..statusBarID]
+		local skillLine = _G['SkillTypeLabel'..statusBarID]
 		if strfind(skillLine:GetNormalTexture():GetTexture(), 'MinusButton') then
 			skillLine:SetNormalTexture(E.Media.Textures.MinusButton)
 		else
@@ -277,18 +282,55 @@ local function LoadSkin()
 	_G.SkillDetailStatusBar:SetStatusBarTexture(E.media.normTex)
 	E:RegisterStatusBar(_G.SkillDetailStatusBar)
 
-	S:HandleNextPrevButton(_G.SkillDetailStatusBarUnlearnButton)
-	-- S:SquareButton_SetIcon(SkillDetailStatusBarUnlearnButton, 'DELETE')
+	S:HandleCloseButton(_G.SkillDetailStatusBarUnlearnButton)
+	S:HandleButton(_G.SkillDetailStatusBarUnlearnButton)
 	_G.SkillDetailStatusBarUnlearnButton:Size(24)
 	_G.SkillDetailStatusBarUnlearnButton:Point('LEFT', _G.SkillDetailStatusBarBorder, 'RIGHT', 5, 0)
 	_G.SkillDetailStatusBarUnlearnButton:SetHitRectInsets(0, 0, 0, 0)
 
-	-- Honor Frame
-	_G.HonorFrame:StripTextures()
+	-- Honor/Arena/PvP Tab
+	local PVPFrame = _G.PVPFrame
+	PVPFrame:StripTextures(true)
 
-	_G.HonorFrameProgressButton:CreateBackdrop()
-	_G.HonorFrameProgressBar:SetStatusBarTexture(E.media.normTex)
-	E:RegisterStatusBar(_G.HonorFrameProgressBar)
+	for i = 1, MAX_ARENA_TEAMS do
+		local pvpTeam = _G['PVPTeam'..i]
+
+		pvpTeam:StripTextures()
+		pvpTeam:CreateBackdrop('Default')
+		pvpTeam.backdrop:Point('TOPLEFT', 9, -4)
+		pvpTeam.backdrop:Point('BOTTOMRIGHT', -24, 3)
+
+		pvpTeam:HookScript('OnEnter', S.SetModifiedBackdrop)
+		pvpTeam:HookScript('OnLeave', S.SetOriginalBackdrop)
+
+		_G['PVPTeam'..i..'Highlight']:Kill()
+	end
+
+	local PVPTeamDetails = _G.PVPTeamDetails
+	PVPTeamDetails:StripTextures()
+	PVPTeamDetails:SetTemplate('Transparent')
+	PVPTeamDetails:Point('TOPLEFT', PVPFrame, 'TOPRIGHT', -30, -12)
+
+	local PVPFrameToggleButton = _G.PVPFrameToggleButton
+	S:HandleNextPrevButton(PVPFrameToggleButton)
+	PVPFrameToggleButton:Point('BOTTOMRIGHT', PVPFrame, 'BOTTOMRIGHT', -48, 81)
+	PVPFrameToggleButton:Size(14)
+
+	for i = 1, 5 do
+		local header = _G['PVPTeamDetailsFrameColumnHeader'..i]
+		header:StripTextures()
+		header:StyleButton()
+	end
+
+	for i = 1, 10 do
+		local button = _G['PVPTeamDetailsButton'..i]
+		button:Width(335)
+		S:HandleButtonHighlight(button)
+	end
+
+	S:HandleButton(_G.PVPTeamDetailsAddTeamMember)
+	S:HandleNextPrevButton(_G.PVPTeamDetailsToggleButton)
+	S:HandleCloseButton(_G.PVPTeamDetailsCloseButton)
 end
 
-S:AddCallback('Character', LoadSkin)
+S:AddCallback('CharacterFrame')

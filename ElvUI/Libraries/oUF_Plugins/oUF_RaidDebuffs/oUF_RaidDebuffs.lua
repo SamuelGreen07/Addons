@@ -62,7 +62,7 @@ local DispellColor = {
 	['Curse']	= {.6, 0, 1},
 	['Disease']	= {.6, .4, 0},
 	['Poison']	= {0, .6, 0},
-	['none'] = { .23, .23, .23},
+	['none']	= { .23, .23, .23},
 }
 
 local DispellPriority = {
@@ -219,7 +219,7 @@ local function Update(self, event, unit)
 	end
 
 	if self.RaidDebuffs.forceShow then
-		_spellId = 47540
+		_spellId = 5782
 		_name, _, _icon = GetSpellInfo(_spellId)
 		_count, _dtype, _duration, _endTime, _stackThreshold = 5, 'Magic', 0, 60, 0
 	end
@@ -237,10 +237,10 @@ local function Update(self, event, unit)
 	DispellPriority['Poison'] = 1
 end
 
-
 local function Enable(self)
 	if self.RaidDebuffs then
 		self:RegisterEvent('UNIT_AURA', Update)
+
 		return true
 	end
 end
@@ -248,6 +248,7 @@ end
 local function Disable(self)
 	if self.RaidDebuffs then
 		self:UnregisterEvent('UNIT_AURA', Update)
+
 		self.RaidDebuffs:Hide()
 	end
 end

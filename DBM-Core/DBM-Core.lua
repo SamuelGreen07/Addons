@@ -71,7 +71,7 @@ local function showRealDate(curseDate)
 end
 
 DBM = {
-	Revision = parseCurseDate("20210719190231"),
+	Revision = parseCurseDate("20210721200427"),
 	DisplayVersion = "2.5.9 alpha", -- the string that is shown as version
 	ReleaseRevision = releaseDate(2021, 6, 29) -- the date of the latest stable version that is available, optionally pass hours, minutes, and seconds for multiple releases in one day
 }

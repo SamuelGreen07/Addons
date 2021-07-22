@@ -1,20 +1,15 @@
-local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
+local E, L, V, P, G = unpack(select(2, ...)) --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local S = E:GetModule('Skins')
 
---Cache global variables
---Lua functions
 local _G = _G
---WoW API / Variables
+local pairs = pairs
 local hooksecurefunc = hooksecurefunc
 
-local function LoadSkin()
-	if E.private.skins.blizzard.enable ~= true or E.private.skins.blizzard.tabard ~= true then return end
+function S:TabardFrame()
+	if not (E.private.skins.blizzard.enable and E.private.skins.blizzard.tabard) then return end
 
 	local TabardFrame = _G.TabardFrame
-	S:HandlePortraitFrame(TabardFrame, true)
-	TabardFrame:CreateBackdrop('Transparent')
-	TabardFrame.backdrop:Point('TOPLEFT', 10, -12)
-	TabardFrame.backdrop:Point('BOTTOMRIGHT', -32, 74)
+	S:HandleFrame(TabardFrame, true, nil, 10, -12, -32, 74)
 
 	S:HandleCloseButton(_G.TabardFrameCloseButton)
 
@@ -40,7 +35,7 @@ local function LoadSkin()
 		frame:Show()
 	end
 
-	for i=1, 5 do
+	for i = 1, 5 do
 		local custom = 'TabardFrameCustomization'..i
 		_G[custom]:StripTextures()
 		S:HandleNextPrevButton(_G[custom..'LeftButton'])
@@ -48,7 +43,7 @@ local function LoadSkin()
 
 		if i > 1 then
 			_G[custom]:ClearAllPoints()
-			_G[custom]:Point('TOP', _G['TabardFrameCustomization'..i-1], 'BOTTOM', 0, -6)
+			_G[custom]:Point('TOP', _G['TabardFrameCustomization'..i - 1], 'BOTTOM', 0, -6)
 		else
 			local point, anchor, point2, x, y = _G[custom]:GetPoint()
 			_G[custom]:Point(point, anchor, point2, x, y+4)
@@ -57,17 +52,20 @@ local function LoadSkin()
 
 	_G.TabardCharacterModelRotateLeftButton:Point('BOTTOMLEFT', 4, 4)
 	_G.TabardCharacterModelRotateRightButton:Point('TOPLEFT', _G.TabardCharacterModelRotateLeftButton, 'TOPRIGHT', 4, 0)
-	hooksecurefunc(_G.TabardCharacterModelRotateLeftButton, 'SetPoint', function(self, point, _, _, xOffset, yOffset)
-		if point ~= 'BOTTOMLEFT' or xOffset ~= 4 or yOffset ~= 4 then
-			self:SetPoint('BOTTOMLEFT', 4, 4)
-		end
+
+	hooksecurefunc(_G.TabardCharacterModelRotateLeftButton, 'SetPoint', function(button)
+		if button._blocked then return end
+		button._blocked = true
+		button:Point('BOTTOMLEFT', 4, 4)
+		button._blocked = nil
 	end)
 
-	hooksecurefunc(_G.TabardCharacterModelRotateRightButton, 'SetPoint', function(self, point, _, _, xOffset, yOffset)
-		if point ~= 'TOPLEFT' or xOffset ~= 4 or yOffset ~= 0 then
-			self:SetPoint('TOPLEFT', _G.TabardCharacterModelRotateLeftButton, 'TOPRIGHT', 4, 0)
-		end
+	hooksecurefunc(_G.TabardCharacterModelRotateRightButton, 'SetPoint', function(button)
+		if button._blocked then return end
+		button._blocked = true
+		button:Point('TOPLEFT', _G.TabardCharacterModelRotateLeftButton, 'TOPRIGHT', 4, 0)
+		button._blocked = nil
 	end)
 end
 
-S:AddCallback('Tabard', LoadSkin)
+S:AddCallback('TabardFrame')

@@ -1,50 +1,45 @@
-local E, L, V, P, G = unpack(select(2, ...)) --Import: Engine, Locales, ProfileDB, GlobalDB
+local E, L, V, P, G = unpack(select(2, ...)) --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local S = E:GetModule('Skins')
 
---Lua functions
 local _G = _G
---WoW API / Variables
+
 local GetPetHappiness = GetPetHappiness
 local HasPetUI = HasPetUI
 local hooksecurefunc = hooksecurefunc
 local UnitExists = UnitExists
 
-local function LoadSkin()
-	if E.private.skins.blizzard.enable ~= true or E.private.skins.blizzard.stable ~= true then return end
+function S:PetStableFrame()
+	if not (E.private.skins.blizzard.enable and E.private.skins.blizzard.stable) then return end
 
 	local PetStableFrame = _G.PetStableFrame
-	S:HandlePortraitFrame(PetStableFrame, true)
+	S:HandleFrame(PetStableFrame, true, nil, 10, -11, -32, 71)
 
-	PetStableFrame:StripTextures()
-	PetStableFrame:CreateBackdrop('Transparent')
-	PetStableFrame.backdrop:Point('TOPLEFT', 10, -11)
-	PetStableFrame.backdrop:Point('BOTTOMRIGHT', -32, 71)
+	S:HandleButton(_G.PetStablePurchaseButton)
+	S:HandleCloseButton(_G.PetStableFrameCloseButton)
+	S:HandleRotateButton(_G.PetStableModelRotateRightButton)
+	S:HandleRotateButton(_G.PetStableModelRotateLeftButton)
 
-	S:HandleButton(PetStablePurchaseButton)
-	S:HandleCloseButton(PetStableFrameCloseButton)
-	S:HandleRotateButton(PetStableModelRotateRightButton)
-	S:HandleRotateButton(PetStableModelRotateLeftButton)
+	S:HandleItemButton(_G.PetStableCurrentPet, true)
+	_G.PetStableCurrentPetIconTexture:SetDrawLayer('ARTWORK')
 
-	S:HandleItemButton(_G['PetStableCurrentPet'], true)
-	_G['PetStableCurrentPetIconTexture']:SetDrawLayer('OVERLAY')
-
-	for i = 1, NUM_PET_STABLE_SLOTS do
+	for i = 1, _G.NUM_PET_STABLE_SLOTS do
 		S:HandleItemButton(_G['PetStableStabledPet'..i], true)
-		_G['PetStableStabledPet'..i..'IconTexture']:SetDrawLayer('OVERLAY')
+		_G['PetStableStabledPet'..i..'IconTexture']:SetDrawLayer('ARTWORK')
 	end
 
+	local PetStablePetInfo = _G.PetStablePetInfo
 	PetStablePetInfo:GetRegions():SetTexCoord(0.04, 0.15, 0.06, 0.30)
-	PetStablePetInfo:SetFrameLevel(PetModelFrame:GetFrameLevel() + 2)
+	PetStablePetInfo:SetFrameLevel(_G.PetModelFrame:GetFrameLevel() + 2)
 	PetStablePetInfo:CreateBackdrop('Default')
-	PetStablePetInfo:Size(24)
+	PetStablePetInfo:Size(22)
 
 	hooksecurefunc('PetStable_Update', function()
-		local happiness = GetPetHappiness()
 		local hasPetUI, isHunterPet = HasPetUI()
-		if UnitExists('pet') and hasPetUI and not isHunterPet then
-			return
-		end
+		if hasPetUI and not isHunterPet and UnitExists('pet') then return end
+
+		local happiness = GetPetHappiness()
 		local texture = PetStablePetInfo:GetRegions()
+
 		if happiness == 1 then
 			texture:SetTexCoord(0.41, 0.53, 0.06, 0.30)
 		elseif happiness == 2 then
@@ -55,4 +50,4 @@ local function LoadSkin()
 	end)
 end
 
-S:AddCallback('Stable', LoadSkin)
+S:AddCallback('PetStableFrame')

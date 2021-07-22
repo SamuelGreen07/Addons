@@ -1,9 +1,9 @@
 ------------------------------------------------------------------------
 -- Animation Functions
 ------------------------------------------------------------------------
-local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
+local E, L, V, P, G = unpack(select(2, ...)) --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 
---Lua functions
+local _G = _G
 local random, next, unpack, strsub = random, next, unpack, strsub
 
 E.AnimShake = {{-9,7,-7,12}, {-5,9,-9,5}, {-5,7,-7,5}, {-9,9,-9,9}, {-5,7,-7,5}, {-9,7,-9,5}}
@@ -17,6 +17,28 @@ function E:RandomAnimShake(index)
 	local s = E.AnimShake[index]
 	return random(s[1], s[2]), random(s[3], s[4])
 end
+
+--TEST
+--[[local t = UIParent:CreateFontString(nil, 'OVERLAY', 'GameTooltipText')
+t:SetText(0)
+t:Point('CENTER')
+t:FontTemplate(nil, 20)
+E:SetUpAnimGroup(t, 'Number', 10, 5)
+
+local b = CreateFrame('BUTTON', nil, UIParent)
+b:Point('CENTER', 0, -100)
+b:SetTemplate()
+b:Size(40,30)
+b:EnableMouse(true)
+b:SetScript('OnClick', function()
+	if t:GetText() == 10 then
+		t.NumberAnim:SetChange(0)
+		t.NumberAnimGroup:Play()
+	else
+		t.NumberAnim:SetChange(10)
+		t.NumberAnimGroup:Play()
+	end
+end)]]
 
 function E:SetUpAnimGroup(obj, Type, ...)
 	if not Type then Type = 'Flash' end
@@ -59,6 +81,29 @@ function E:SetUpAnimGroup(obj, Type, ...)
 				shake.path[i]:SetOffset(E.AnimShakeH[i], 0)
 			end
 		end
+	elseif Type == 'Elastic' then
+		local width, height, duration, loop = ...
+		obj.elastic = _G.CreateAnimationGroup(obj)
+
+		for i = 1, 4 do
+			local anim = obj.elastic:CreateAnimation(i < 3 and 'width' or 'height')
+			anim:SetChange((i==1 and width*0.45) or (i==2 and width) or (i==3 and height*0.45) or height)
+			anim:SetEasing('inout-elastic')
+			anim:SetDuration(duration)
+			obj.elastic[i] = anim
+		end
+
+		obj.elastic[1]:SetScript('OnFinished', function(anim) anim:Stop() obj.elastic[2]:Play() end)
+		obj.elastic[3]:SetScript('OnFinished', function(anim) anim:Stop() obj.elastic[4]:Play() end)
+		obj.elastic[2]:SetScript('OnFinished', function(anim) anim:Stop() if loop then obj.elastic[1]:Play() end end)
+		obj.elastic[4]:SetScript('OnFinished', function(anim) anim:Stop() if loop then obj.elastic[3]:Play() end end)
+	elseif Type == 'Number' then
+		local endingNumber, duration = ...
+		obj.NumberAnimGroup = _G.CreateAnimationGroup(obj)
+		obj.NumberAnim = obj.NumberAnimGroup:CreateAnimation('number')
+		obj.NumberAnim:SetChange(endingNumber)
+		obj.NumberAnim:SetEasing('in-circular')
+		obj.NumberAnim:SetDuration(duration)
 	else
 		local x, y, duration, customName = ...
 		if not customName then customName = 'anim' end
@@ -69,13 +114,13 @@ function E:SetUpAnimGroup(obj, Type, ...)
 		anim.in1 = anim:CreateAnimation('Translation')
 		anim.in1:SetDuration(0)
 		anim.in1:SetOrder(1)
-		anim.in1:SetOffset(E:Scale(x), E:Scale(y))
+		anim.in1:SetOffset(x, y)
 
 		anim.in2 = anim:CreateAnimation('Translation')
 		anim.in2:SetDuration(duration)
 		anim.in2:SetOrder(2)
 		anim.in2:SetSmoothing('OUT')
-		anim.in2:SetOffset(E:Scale(-x), E:Scale(-y))
+		anim.in2:SetOffset(-x, -y)
 
 		anim.out1 = obj:CreateAnimationGroup('Move_Out')
 		anim.out1:SetScript('OnFinished', function() obj:Hide() end)
@@ -84,7 +129,25 @@ function E:SetUpAnimGroup(obj, Type, ...)
 		anim.out2:SetDuration(duration)
 		anim.out2:SetOrder(1)
 		anim.out2:SetSmoothing('IN')
-		anim.out2:SetOffset(E:Scale(x), E:Scale(y))
+		anim.out2:SetOffset(x, y)
+	end
+end
+
+function E:Elasticize(obj, width, height)
+	if not obj.elastic then
+		if not width then width = obj:GetWidth() end
+		if not height then height = obj:GetHeight() end
+		E:SetUpAnimGroup(obj, 'Elastic', width, height, 2, false)
+	end
+
+	obj.elastic[1]:Play()
+	obj.elastic[3]:Play()
+end
+
+function E:StopElasticize(obj)
+	if obj.elastic then
+		obj.elastic[1]:Stop(true)
+		obj.elastic[3]:Stop(true)
 	end
 end
 
@@ -153,7 +216,7 @@ function E:SlideOut(obj, customName)
 end
 
 local FADEFRAMES, FADEMANAGER = {}, CreateFrame('FRAME')
-FADEMANAGER.delay = 0.05
+FADEMANAGER.delay = 0.025
 
 function E:UIFrameFade_OnUpdate(elapsed)
 	FADEMANAGER.timer = (FADEMANAGER.timer or 0) + elapsed
@@ -180,7 +243,7 @@ function E:UIFrameFade_OnUpdate(elapsed)
 				frame:SetAlpha(info.endAlpha)
 
 				-- If there is a fadeHoldTime then wait until its passed to continue on
-				if info.fadeHoldTime and info.fadeHoldTime > 0  then
+				if info.fadeHoldTime and info.fadeHoldTime > 0 then
 					info.fadeHoldTime = info.fadeHoldTime - elapsed
 				else
 					-- Complete the fade and call the finished function if there is one

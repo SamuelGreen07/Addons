@@ -1,13 +1,13 @@
-local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
+local E, L, V, P, G = unpack(select(2, ...)) --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local M = E:GetModule('Misc')
 local LBG = E.Libs.ButtonGlow
 
---Lua functions
 local _G = _G
 local unpack, pairs = unpack, pairs
 local tinsert = tinsert
 local max = max
---WoW API / Variables
+
+local CloseDropDownMenus = CloseDropDownMenus
 local CloseLoot = CloseLoot
 local CreateFrame = CreateFrame
 local CursorOnUpdate = CursorOnUpdate
@@ -17,6 +17,7 @@ local GetCVarBool = GetCVarBool
 local GetLootSlotInfo = GetLootSlotInfo
 local GetLootSlotLink = GetLootSlotLink
 local GetNumLootItems = GetNumLootItems
+local GiveMasterLoot = GiveMasterLoot
 local HandleModifiedItemClick = HandleModifiedItemClick
 local IsFishingLoot = IsFishingLoot
 local IsModifiedClick = IsModifiedClick
@@ -24,6 +25,9 @@ local LootSlot = LootSlot
 local LootSlotHasItem = LootSlotHasItem
 local ResetCursor = ResetCursor
 local StaticPopup_Hide = StaticPopup_Hide
+local StaticPopup_Show = StaticPopup_Show
+local ToggleDropDownMenu = ToggleDropDownMenu
+local UIDropDownMenu_Refresh = UIDropDownMenu_Refresh
 local UnitIsDead = UnitIsDead
 local UnitIsFriend = UnitIsFriend
 local UnitName = UnitName
@@ -176,6 +180,7 @@ function M:LOOT_SLOT_CLEARED(_, slot)
 	if lootFrame.slots[slot] then
 		lootFrame.slots[slot]:Hide()
 	end
+
 	anchorSlots(lootFrame)
 end
 
@@ -194,8 +199,6 @@ function M:LOOT_OPENED(_, autoloot)
 	if not lootFrame:IsShown() then
 		CloseLoot(not autoloot)
 	end
-
-	local items = GetNumLootItems()
 
 	if IsFishingLoot() then
 		lootFrame.title:SetText(L["Fishy Loot"])
@@ -223,6 +226,7 @@ function M:LOOT_OPENED(_, autoloot)
 	end
 
 	local m, w, t = 0, 0, lootFrame.title:GetStringWidth()
+	local items = GetNumLootItems()
 	if items > 0 then
 		for i=1, items do
 			local slot = lootFrame.slots[i] or createSlot(i)
@@ -305,19 +309,18 @@ function M:LOOT_OPENED(_, autoloot)
 end
 
 function M:OPEN_MASTER_LOOT_LIST()
-	ToggleDropDownMenu(1, nil, GroupLootDropDown, lootFrame.slots[LootFrame.selectedSlot], 0, 0)
+	ToggleDropDownMenu(1, nil, _G.GroupLootDropDown, lootFrame.slots[_G.LootFrame.selectedSlot], 0, 0)
 end
 
 function M:UPDATE_MASTER_LOOT_LIST()
-	UIDropDownMenu_Refresh(GroupLootDropDown)
+	UIDropDownMenu_Refresh(_G.GroupLootDropDown)
 end
 
 function M:LoadLoot()
 	if not E.private.general.loot then return end
 	lootFrameHolder = CreateFrame('Frame', 'ElvLootFrameHolder', E.UIParent)
-	lootFrameHolder:Point('TOPLEFT', 36, -195)
-	lootFrameHolder:Width(150)
-	lootFrameHolder:Height(22)
+	lootFrameHolder:Point('TOPLEFT', E.UIParent, 'TOPLEFT', 418, -186)
+	lootFrameHolder:Size(150, 22)
 
 	lootFrame = CreateFrame('Button', 'ElvLootFrame', lootFrameHolder)
 	lootFrame:Hide()
@@ -329,7 +332,7 @@ function M:LoadLoot()
 	lootFrame:SetToplevel(true)
 	lootFrame.title = lootFrame:CreateFontString(nil, 'OVERLAY')
 	lootFrame.title:FontTemplate(nil, nil, 'OUTLINE')
-	lootFrame.title:Point('BOTTOMLEFT', lootFrame, 'TOPLEFT', 0,  1)
+	lootFrame.title:Point('BOTTOMLEFT', lootFrame, 'TOPLEFT', 0, 1)
 	lootFrame.slots = {}
 	lootFrame:SetScript('OnHide', function()
 		StaticPopup_Hide('CONFIRM_LOOT_DISTRIBUTION')
@@ -350,8 +353,9 @@ function M:LoadLoot()
 	tinsert(_G.UISpecialFrames, 'ElvLootFrame')
 
 	function _G.GroupLootDropDown_GiveLoot()
-		if LootFrame.selectedQuality >= MASTER_LOOT_THREHOLD then
-			local dialog = StaticPopup_Show("CONFIRM_LOOT_DISTRIBUTION", ITEM_QUALITY_COLORS[LootFrame.selectedQuality].hex..LootFrame.selectedItemName..FONT_COLOR_CODE_CLOSE, self:GetText())
+		local LootFrame = _G.LootFrame
+		if LootFrame.selectedQuality >= _G.MASTER_LOOT_THREHOLD then
+			local dialog = StaticPopup_Show("CONFIRM_LOOT_DISTRIBUTION", ITEM_QUALITY_COLORS[LootFrame.selectedQuality].hex..LootFrame.selectedItemName.._G.FONT_COLOR_CODE_CLOSE, self:GetText())
 			if dialog then
 				dialog.data = self.value
 			end
@@ -362,7 +366,8 @@ function M:LoadLoot()
 	end
 
 	E.PopupDialogs["CONFIRM_LOOT_DISTRIBUTION"].OnAccept = function(data)
-		GiveMasterLoot(LootFrame.selectedSlot, data)
+		GiveMasterLoot(_G.LootFrame.selectedSlot, data)
 	end
-	StaticPopupDialogs["CONFIRM_LOOT_DISTRIBUTION"].preferredIndex = 3
+
+	_G.StaticPopupDialogs["CONFIRM_LOOT_DISTRIBUTION"].preferredIndex = 3
 end

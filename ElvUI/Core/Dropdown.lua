@@ -1,12 +1,10 @@
-local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
+local E, L, V, P, G = unpack(select(2, ...)) --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 
---Lua functions
 local _G = _G
 local tinsert = tinsert
---WoW API / Variables
-local CreateFrame = CreateFrame
 local ToggleFrame = ToggleFrame
 local GetCursorPosition = GetCursorPosition
+local CreateFrame = CreateFrame
 
 local PADDING = 10
 local BUTTON_HEIGHT = 16
@@ -14,7 +12,6 @@ local BUTTON_WIDTH = 135
 
 local function OnClick(btn)
 	btn.func()
-
 	btn:GetParent():Hide()
 end
 
@@ -29,7 +26,7 @@ end
 function E:DropDown(list, frame, xOffset, yOffset)
 	if not frame.buttons then
 		frame.buttons = {}
-		frame:SetFrameStrata("DIALOG")
+		frame:SetFrameStrata('DIALOG')
 		frame:SetClampedToScreen(true)
 		tinsert(_G.UISpecialFrames, frame:GetName())
 		frame:Hide()
@@ -38,27 +35,27 @@ function E:DropDown(list, frame, xOffset, yOffset)
 	xOffset = xOffset or 0
 	yOffset = yOffset or 0
 
-	for i=1, #frame.buttons do
+	for i = 1, #frame.buttons do
 		frame.buttons[i]:Hide()
 	end
 
-	for i=1, #list do
+	for i = 1, #list do
 		if not frame.buttons[i] then
-			frame.buttons[i] = CreateFrame("Button", nil, frame)
+			frame.buttons[i] = CreateFrame('Button', nil, frame)
 
 			frame.buttons[i].hoverTex = frame.buttons[i]:CreateTexture(nil, 'OVERLAY')
 			frame.buttons[i].hoverTex:SetAllPoints()
 			frame.buttons[i].hoverTex:SetTexture([[Interface\QuestFrame\UI-QuestTitleHighlight]])
-			frame.buttons[i].hoverTex:SetBlendMode("ADD")
+			frame.buttons[i].hoverTex:SetBlendMode('ADD')
 			frame.buttons[i].hoverTex:Hide()
 
 			frame.buttons[i].text = frame.buttons[i]:CreateFontString(nil, 'BORDER')
 			frame.buttons[i].text:SetAllPoints()
-			frame.buttons[i].text:FontTemplate(nil, nil, "")
-			frame.buttons[i].text:SetJustifyH("LEFT")
+			frame.buttons[i].text:FontTemplate(nil, nil, '')
+			frame.buttons[i].text:SetJustifyH('LEFT')
 
-			frame.buttons[i]:SetScript("OnEnter", OnEnter)
-			frame.buttons[i]:SetScript("OnLeave", OnLeave)
+			frame.buttons[i]:SetScript('OnEnter', OnEnter)
+			frame.buttons[i]:SetScript('OnLeave', OnLeave)
 		end
 
 		frame.buttons[i]:Show()
@@ -66,12 +63,12 @@ function E:DropDown(list, frame, xOffset, yOffset)
 		frame.buttons[i]:Width(BUTTON_WIDTH)
 		frame.buttons[i].text:SetText(list[i].text)
 		frame.buttons[i].func = list[i].func
-		frame.buttons[i]:SetScript("OnClick", OnClick)
+		frame.buttons[i]:SetScript('OnClick', OnClick)
 
 		if i == 1 then
-			frame.buttons[i]:Point("TOPLEFT", frame, "TOPLEFT", PADDING, -PADDING)
+			frame.buttons[i]:Point('TOPLEFT', frame, 'TOPLEFT', PADDING, -PADDING)
 		else
-			frame.buttons[i]:Point("TOPLEFT", frame.buttons[i-1], "BOTTOMLEFT")
+			frame.buttons[i]:Point('TOPLEFT', frame.buttons[i-1], 'BOTTOMLEFT')
 		end
 	end
 
@@ -83,7 +80,7 @@ function E:DropDown(list, frame, xOffset, yOffset)
 	x = x/UIScale
 	y = y/UIScale
 	frame:ClearAllPoints()
-	frame:Point("TOPLEFT", _G.UIParent, "BOTTOMLEFT", x + xOffset, y + yOffset)
+	frame:Point('TOPLEFT', _G.UIParent, 'BOTTOMLEFT', x + xOffset, y + yOffset)
 
 	ToggleFrame(frame)
 end

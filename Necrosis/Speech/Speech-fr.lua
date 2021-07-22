@@ -1,42 +1,14 @@
 --[[
-    Necrosis LdC
-    Copyright (C) 2005-2008  Lom Enfroy
-
-    This file is part of Necrosis LdC.
-
-    Necrosis LdC is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    Necrosis LdC is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with Necrosis LdC; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+    Necrosis 
+    Copyright (C) - copyright file included in this release
 --]]
-
-
-------------------------------------------------------------------------------------------------------
--- Necrosis LdC
--- Par Lomig (Kael'Thas EU/FR) & Tarcalion (Nagrand US/Oceanic) 
--- Contributions deLiadora et Nyx (Kael'Thas et Elune EU/FR)
---
--- Skins et voix Françaises : Eliah, Ner'zhul
---
--- Version Allemande par Geschan
--- Version Espagnole par DosS (Zul’jin)
--- Version Russe par Komsomolka
---
--- Version $LastChangedDate: 2010-08-04 12:04:27 +1000 (Wed, 04 Aug 2010) $
-------------------------------------------------------------------------------------------------------
 
 function Necrosis:Localization_Speech_Fr()
 
 	self.Speech.TP = {
+		[0] = {
+			"<after>Invocation en cours, cliquez sur le portail svp",
+		},
 		[1] = {
 			"<after>Taxi des Arcanes ! Cliquez sur le portail svp !",
 		},
@@ -61,6 +33,9 @@ function Necrosis:Localization_Speech_Fr()
 	}
 
 	self.Speech.Rez = {
+		[0] = {
+			"<after>--> <target> est prot\195\169g\195\169 par une pierre d'\195\162me <--",
+		},
 		[1] = {
 			"<after>Si ca vous tente un suicide collectif, <target> s'en fout, la pierre d'\195\162me lui permettra de se relever",
 		},
@@ -123,7 +98,7 @@ function Necrosis:Localization_Speech_Fr()
 				"Attendez, je sors mon briquet !",
 			},
 		},
-		-- Marcheur éthéré
+		-- Marcheur ï¿½thï¿½rï¿½
 		[2] = {
 			[1] = {
 				"Oups, je vais sans doute avoir besoin d'un idiot pour prendre les coups \195\160 ma place...",
@@ -163,14 +138,14 @@ function Necrosis:Localization_Speech_Fr()
 		-- Gangregarde
 		[5] = {
 			[1] = {
-				"<emote> concentre toute sa puissance dans ses connaissances d\195\169monologiques...",
+				"<player> concentre toute sa puissance dans ses connaissances d\195\169monologiques...",
 				"En \195\169change de cette \195\162me, viens \195\160 moi, Gangregarde !",
 				"<after>Ob\195\169is moi maintenant, <pet> !",
-				"<after><emote>fouille dans son sac, puis lance un cristal \195\160 <pet>",
+				"<after><player> fouille dans son sac, puis lance un cristal \195\160 <pet>",
 				"<sacrifice>Retourne dans les limbes et donne moi de ta puissance, D\195\169mon !"
 			},
 		},
-		-- Phrase pour la première invocation de pet (quand Necrosis ne connait pas encore leur nom)
+		-- Phrase pour la premiï¿½re invocation de pet (quand Necrosis ne connait pas encore leur nom)
 		[6] = {
 			[1] = {
 				"La p\195\170che au d\195\169mon ? Rien de plus facile !",
@@ -199,7 +174,7 @@ function Necrosis:Localization_Speech_Fr()
 				"J'invoque une monture de l'enfer !",
 			},
 			[3] = {
-				"<emote>ricane comme un damn\195\169 !",
+				"<player> ricane comme un damn\195\169 !",
 				"<after><yell>TREMBLEZ, MORTELS, J'ARRIVE A LA VITESSE DU CAUCHEMAR !!!!",
 			},
 			[4] = {
@@ -215,13 +190,13 @@ function Necrosis:Localization_Speech_Fr()
 end
 
 
--- Pour les caractères spéciaux :
--- é = \195\169 ---- è = \195\168
--- à = \195\160 ---- â = \195\162
--- ô = \195\180 ---- ê = \195\170
--- û = \195\187 ---- ä = \195\164
--- - = \195\132 ---- ö = \195\182
--- Ö = \195\150 ---- ü = \195\188
--- _ = \195\156 ---- î = \195\159
--- ç = \195\167 ---- î = \195\174
+-- Pour les caractï¿½res spï¿½ciaux :
+-- ï¿½ = \195\169 ---- ï¿½ = \195\168
+-- ï¿½ = \195\160 ---- ï¿½ = \195\162
+-- ï¿½ = \195\180 ---- ï¿½ = \195\170
+-- ï¿½ = \195\187 ---- ï¿½ = \195\164
+-- - = \195\132 ---- ï¿½ = \195\182
+-- ï¿½ = \195\150 ---- ï¿½ = \195\188
+-- _ = \195\156 ---- ï¿½ = \195\159
+-- ï¿½ = \195\167 ---- ï¿½ = \195\174
 

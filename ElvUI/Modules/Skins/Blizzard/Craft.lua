@@ -1,13 +1,10 @@
-local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
+local E, L, V, P, G = unpack(select(2, ...)) --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local S = E:GetModule('Skins')
 
---Cache global variables
---Lua functions
 local _G = _G
 local unpack, select = unpack, select
-local strfind, strmatch = strfind, strmatch
---WoW API / Variables
-local CreateFrame = CreateFrame
+local strfind = strfind
+
 local GetItemInfo = GetItemInfo
 local GetCraftNumReagents = GetCraftNumReagents
 local GetItemQualityColor = GetItemQualityColor
@@ -16,25 +13,24 @@ local GetCraftReagentInfo = GetCraftReagentInfo
 local GetCraftReagentItemLink = GetCraftReagentItemLink
 local hooksecurefunc = hooksecurefunc
 
-local function LoadSkin()
-	if E.private.skins.blizzard.enable ~= true or E.private.skins.blizzard.craft ~= true then return end
+-- This is the Hunter Beast Training skin
+function S:SkinCraftFrame()
+	if not (E.private.skins.blizzard.enable and E.private.skins.blizzard.craft) then return end
 
 	local CraftFrame = _G.CraftFrame
-	local CraftRankFrame = _G.CraftRankFrame
-	CraftFrame:StripTextures(true)
-	CraftFrame:CreateBackdrop('Transparent')
-	CraftFrame.backdrop:Point('TOPLEFT', 10, -12)
-	CraftFrame.backdrop:Point('BOTTOMRIGHT', -32, 76)
+	S:HandleFrame(CraftFrame, true, nil, 11, -12, -32, 76)
 
-	_G.CraftRankFrameBorder:StripTextures()
+	local CraftRankFrame = _G.CraftRankFrame
 	CraftRankFrame:StripTextures()
 	CraftRankFrame:Size(322, 16)
 	CraftRankFrame:ClearAllPoints()
 	CraftRankFrame:Point('TOP', -10, -45)
 	CraftRankFrame:CreateBackdrop()
-	CraftRankFrame:SetStatusBarTexture(E['media'].normTex)
+	CraftRankFrame:SetStatusBarTexture(E.media.normTex)
 	CraftRankFrame:SetStatusBarColor(0.13, 0.35, 0.80)
 	E:RegisterStatusBar(CraftRankFrame)
+
+	_G.CraftRankFrameBorder:StripTextures()
 
 	_G.CraftListScrollFrame:StripTextures()
 	_G.CraftDetailScrollFrame:StripTextures()
@@ -48,9 +44,6 @@ local function LoadSkin()
 	S:HandleButton(_G.CraftCreateButton)
 
 	local CraftIcon = _G.CraftIcon
-	CraftIcon:StripTextures()
-	CraftIcon:SetTemplate('Default')
-	CraftIcon:StyleButton(nil, true)
 
 	_G.CraftRequirements:SetTextColor(1, 0.80, 0.10)
 
@@ -84,32 +77,15 @@ local function LoadSkin()
 	end
 
 	for i = 1, _G.MAX_CRAFT_REAGENTS do
-		local reagent = _G['CraftReagent'..i]
 		local icon = _G['CraftReagent'..i..'IconTexture']
 		local count = _G['CraftReagent'..i..'Count']
-		--local name = _G['CraftReagent'..i..'Name']
 		local nameFrame = _G['CraftReagent'..i..'NameFrame']
 
-		icon:SetTexCoord(unpack(E.TexCoords))
-		icon:SetDrawLayer('OVERLAY')
-
-		icon.backdrop = CreateFrame('Frame', nil, reagent)
-		icon.backdrop:SetFrameLevel(reagent:GetFrameLevel() - 1)
-		icon.backdrop:SetTemplate('Default')
-		icon.backdrop:SetOutside(icon)
-
-		--icon:SetTexCoord(unpack(E.TexCoords))
-		--icon:SetDrawLayer('OVERLAY')
-		--icon:Size(E.PixelMode and 38 or 32)
-		--icon:Point('TOPLEFT', E.PixelMode and 1 or 4, -(E.PixelMode and 1 or 4))
-		icon:SetParent(icon.backdrop)
-
-		count:SetParent(icon.backdrop)
+		S:HandleIcon(icon, true)
+		icon:SetDrawLayer('ARTWORK')
 		count:SetDrawLayer('OVERLAY')
 
-		--name:Point('LEFT', nameFrame, 'LEFT', 20, 0)
-
-		nameFrame:Kill()
+		nameFrame:SetAlpha(0)
 	end
 
 	_G.CraftReagent1:Point('TOPLEFT', _G.CraftReagentLabel, 'BOTTOMLEFT', -3, -3)
@@ -119,8 +95,6 @@ local function LoadSkin()
 	_G.CraftReagent8:Point('LEFT', _G.CraftReagent7, 'RIGHT', 3, 0)
 
 	hooksecurefunc('CraftFrame_Update', function()
-		--CraftRankFrame:SetStatusBarColor(0.13, 0.28, 0.85)
-
 		for i = 1, _G.CRAFTS_DISPLAYED do
 			local button = _G['Craft'..i]
 			local texture = button:GetNormalTexture():GetTexture()
@@ -140,22 +114,18 @@ local function LoadSkin()
 		end
 	end)
 
+	CraftIcon:CreateBackdrop()
+
 	hooksecurefunc('CraftFrame_SetSelection', function(id)
 		if ( not id ) then
-			return;
+			return
 		end
 
 		local CraftReagentLabel = _G.CraftReagentLabel
 		CraftReagentLabel:Point('TOPLEFT', _G.CraftDescription, 'BOTTOMLEFT', 0, -10)
 
 		if CraftIcon:GetNormalTexture() then
-			CraftReagentLabel:SetAlpha(1)
-			CraftIcon:SetAlpha(1)
-			CraftIcon:GetNormalTexture():SetTexCoord(unpack(E.TexCoords))
-			CraftIcon:GetNormalTexture():SetInside()
-		else
-			CraftReagentLabel:SetAlpha(0)
-			CraftIcon:SetAlpha(0)
+			S:HandleIcon(CraftIcon:GetNormalTexture())
 		end
 
 		CraftIcon:Size(40)
@@ -165,10 +135,10 @@ local function LoadSkin()
 		if skillLink then
 			local quality = select(3, GetItemInfo(skillLink))
 			if quality and quality > 1 then
-				CraftIcon:SetBackdropBorderColor(GetItemQualityColor(quality))
+				CraftIcon.backdrop:SetBackdropBorderColor(GetItemQualityColor(quality))
 				_G.CraftName:SetTextColor(GetItemQualityColor(quality))
 			else
-				CraftIcon:SetBackdropBorderColor(unpack(E.media.bordercolor))
+				CraftIcon.backdrop:SetBackdropBorderColor(unpack(E.media.bordercolor))
 				_G.CraftName:SetTextColor(1, 1, 1)
 			end
 		end
@@ -177,7 +147,6 @@ local function LoadSkin()
 		for i = 1, numReagents, 1 do
 			local _, _, reagentCount, playerReagentCount = GetCraftReagentInfo(id, i)
 			local reagentLink = GetCraftReagentItemLink(id, i)
-			local reagent = _G['CraftReagent'..i]
 			local icon = _G['CraftReagent'..i..'IconTexture']
 			local name = _G['CraftReagent'..i..'Name']
 
@@ -185,29 +154,27 @@ local function LoadSkin()
 				local quality = select(3, GetItemInfo(reagentLink))
 				if quality and quality > 1 then
 					icon.backdrop:SetBackdropBorderColor(GetItemQualityColor(quality))
-					reagent:SetBackdropBorderColor(GetItemQualityColor(quality))
 					if playerReagentCount < reagentCount then
 						name:SetTextColor(0.5, 0.5, 0.5)
 					else
 						name:SetTextColor(GetItemQualityColor(quality))
 					end
 				else
-					reagent:SetBackdropBorderColor(unpack(E.media.bordercolor))
 					icon.backdrop:SetBackdropBorderColor(unpack(E.media.bordercolor))
 				end
 			end
 		end
 
 		if (numReagents < 5) then
-			_G.CraftDetailScrollFrameScrollBar:Hide();
-			_G.CraftDetailScrollFrameTop:Hide();
-			_G.CraftDetailScrollFrameBottom:Hide();
+			_G.CraftDetailScrollFrameScrollBar:Hide()
+			_G.CraftDetailScrollFrameTop:Hide()
+			_G.CraftDetailScrollFrameBottom:Hide()
 		else
-			_G.CraftDetailScrollFrameScrollBar:Show();
-			_G.CraftDetailScrollFrameTop:Show();
-			_G.CraftDetailScrollFrameBottom:Show();
+			_G.CraftDetailScrollFrameScrollBar:Show()
+			_G.CraftDetailScrollFrameTop:Show()
+			_G.CraftDetailScrollFrameBottom:Show()
 		end
 	end)
 end
 
-S:AddCallbackForAddon('Blizzard_CraftUI', 'Craft', LoadSkin)
+S:AddCallbackForAddon('Blizzard_CraftUI', 'SkinCraftFrame')

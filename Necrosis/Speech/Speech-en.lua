@@ -1,42 +1,14 @@
 --[[
-    Necrosis LdC
-    Copyright (C) 2005-2008  Lom Enfroy
-
-    This file is part of Necrosis LdC.
-
-    Necrosis LdC is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    Necrosis LdC is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with Necrosis LdC; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+    Necrosis 
+    Copyright (C) - copyright file included in this release
 --]]
-
-
-------------------------------------------------------------------------------------------------------
--- Necrosis LdC
--- Par Lomig (Kael'Thas EU/FR) & Tarcalion (Nagrand US/Oceanic) 
--- Contributions deLiadora et Nyx (Kael'Thas et Elune EU/FR)
---
--- Skins et voix Françaises : Eliah, Ner'zhul
---
--- Version Allemande par Geschan
--- Version Espagnole par DosS (Zul’jin)
--- Version Russe par Komsomolka
---
--- Version $LastChangedDate: 2010-08-04 12:04:27 +1000 (Wed, 04 Aug 2010) $
-------------------------------------------------------------------------------------------------------
 
 function Necrosis:Localization_Speech_En()
 
 	self.Speech.TP = {
+		[0] = {
+			"<after>Summoning <target> - please click on the portal",
+		},
 		[1] = {
 			"<after>Arcanum Taxi Cab! Please click on the portal so we can get this show on the road.",
 		},
@@ -59,6 +31,9 @@ function Necrosis:Localization_Speech_En()
 	}
 
 	self.Speech.Rez = {
+		[0] = {
+			"<after>--> <target> is soulstoned! <--",
+		},
 		[1] = {
 			"<after>If you cherish the idea of a mass suicide, <target> can now self-resurrect, so all should be fine. Go ahead.",
 		},
@@ -103,11 +78,22 @@ function Necrosis:Localization_Speech_En()
 	self.Speech.Demon = {
 		-- Imp
 		[1] = {
+--[[
+			[1] = {
+				"<player> is concentrating hard on Demoniac knowledge...",
+				"<yell> You crappy nasty little Imp...",
+				"<pet>! HEEL! NOW!",
+				"<after>Obey now, <pet>!",
+			},
+--]]
 			[1] = {
 				"You crappy nasty little Imp, stop sulking and get over here to help! AND THAT'S AN ORDER!",
 			},
 			[2] = {
 				"<pet>! HEEL! NOW!",
+			},
+			[3] = {
+				"I was tying to cook something from scratch... honest!",
 			},
 		},
 		-- Voidwalker
@@ -115,6 +101,12 @@ function Necrosis:Localization_Speech_En()
 			[1] = {
 				"Oops, I'll probably need an idiot to be knocked for me...",
 				"<pet>, please help!",
+			},
+			[2] = {
+				"<pet>, some creatures must become bits!",
+			},
+			[3] = {
+				"Well, here comes the consequences of my own actions...",
 			},
 		},
 		-- Succubus
@@ -132,10 +124,10 @@ function Necrosis:Localization_Speech_En()
 		-- Felguard
 		[5] = {
 			[1] = {
-				"<emote> is concentrating hard on Demoniac knowledge...",
+				"<player> is concentrating hard on Demoniac knowledge...",
 				"I'll give you a soul if you come to me, Felguard! Please hear my command!",
 				"<after>Obey now, <pet>!",
-				"<after><emote>looks in a bag, then throws a mysterious shard at <pet>",
+				"<after><player> looks in a bag, then throws a mysterious shard at <pet>",
 				"<sacrifice>Please return in the Limbs you are from, Demon, and give me your power in exchange!"
 			},
 		},
@@ -144,7 +136,7 @@ function Necrosis:Localization_Speech_En()
 			[1] = {
 				"Fishing? Yes I love fishing... Look!",
 				"I close my eyes, I move my fingers like that...",
-				"<after>And voila! Yes, yes, it is a fish, I can swear you!",
+				"<after>And voila! Yes, yes, it is a fish, I swear to you!",
 			},
 			[2] = {
 				"Anyway I hate you all! I don't need you, I have friends.... powerful friends!",
@@ -157,7 +149,7 @@ function Necrosis:Localization_Speech_En()
 				"Hey, I'm late! Let's find a horse that roxes!",
 			},
 			[2] = {
-				"<emote> is giggling gloomily...",
+				"<player> is giggling gloomily...",
 				"<yell>I am summoning a steed from nightmare!",
 			},
 			[3] = {

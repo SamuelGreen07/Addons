@@ -1,43 +1,14 @@
-﻿--[[
-    Necrosis LdC
-    Copyright (C) 2005-2008  Lom Enfroy
-
-    This file is part of Necrosis LdC.
-
-    Necrosis LdC is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    Necrosis LdC is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with Necrosis LdC; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+--[[
+    Necrosis 
+    Copyright (C) - copyright file included in this release
 --]]
-
-
-------------------------------------------------------------------------------------------------------
--- Necrosis LdC
--- Par Lomig (Kael'Thas EU/FR) & Tarcalion (Nagrand US/Oceanic) 
--- Contributions deLiadora et Nyx (Kael'Thas et Elune EU/FR)
---
--- Skins et voix Françaises : Eliah, Ner'zhul
---
--- Version Allemande par Geschan
--- Version Espagnole par DosS (Zul’jin)
--- Version Russe par Komsomolka (Хроми) (https://koms.ruguild.ru)
---
--- Version $LastChangedDate: 2010-08-04 12:04:27 +1000 (Wed, 04 Aug 2010) $
-------------------------------------------------------------------------------------------------------
-
 
 function Necrosis:Localization_Speech_Ru()
 
 	self.Speech.TP = {
+		[0] = {
+			"<after>Призываю <target>. Пожалуйста, нажмите на портал!",
+		},
 		[1] = {
 			"<after>Для открытия межгалактических путей, нажмите на портал.",
 		},
@@ -60,6 +31,9 @@ function Necrosis:Localization_Speech_Ru()
 	}
 
 	self.Speech.Rez = {
+		[0] = {
+			"<after>--> <target> теперь сохранен(а) на 15 минут <--",
+		},
 		[1] = {
 			"<after>Если вы затаили идею массового суицида, смею вас расстроить! <target> сейчас может самостоятельно оживить свой труп и всё будет хорошо!",
 		},
@@ -133,10 +107,10 @@ function Necrosis:Localization_Speech_Ru()
 		-- Felguard
 		[5] = {
 			[1] = {
-				"<emote> концентрируется на своих Демонических знаниях...",
+				"<player> концентрируется на своих Демонических знаниях...",
 				"Я отдам тебе душу, если ты явишься и будешь служить мне!",
 				"<after>Воскресни вновь, <pet>!",
-				"<after><emote>смотрит в сумку, затем кидает мистический осколок в <pet>",
+				"<after><player> смотрит в сумку, затем кидает мистический осколок в <pet>",
 				"<sacrifice>Я возвращаю тебя туда, откуда ты пришел, демон... но в замен ты одашь мне свою силу!"
 			},
 		},
@@ -158,7 +132,7 @@ function Necrosis:Localization_Speech_Ru()
 				"Лошааааадкаааа! Лошааааадкаааа!",
 			},
 			[2] = {
-				"<emote> глумится...",
+				"<player> глумится...",
 				"Я призываю коня из глубин Ада!",
 			},
 			[3] = {

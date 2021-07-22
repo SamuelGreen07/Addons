@@ -5,7 +5,12 @@ Handles the visibility and updating of power cost prediction.
 
 ## Widget
 
-PowerPrediction - A `StatusBar` used to represent power cost of spells on top of the Power element.
+PowerPrediction - A `table` containing the sub-widgets.
+
+## Sub-Widgets
+
+mainBar - A `StatusBar` used to represent power cost of spells on top of the Power element.
+altBar  - A `StatusBar` used to represent power cost of spells on top of the AdditionalPower element.
 
 ## Notes
 
@@ -14,19 +19,31 @@ A default texture will be applied if the widget is a StatusBar and doesn't have 
 ## Examples
 
     -- Position and size
-    local PowerPrediction = CreateFrame('StatusBar', nil, self.Power)
-    PowerPrediction:SetReverseFill(true)
-    PowerPrediction:SetPoint('TOP')
-    PowerPrediction:SetPoint('BOTTOM')
-    PowerPrediction:SetPoint('RIGHT', self.Power:GetStatusBarTexture(), 'RIGHT')
-    PowerPrediction:SetWidth(200)
+    local mainBar = CreateFrame('StatusBar', nil, self.Power)
+    mainBar:SetReverseFill(true)
+    mainBar:SetPoint('TOP')
+    mainBar:SetPoint('BOTTOM')
+    mainBar:SetPoint('RIGHT', self.Power:GetStatusBarTexture(), 'RIGHT')
+    mainBar:SetWidth(200)
+
+    local altBar = CreateFrame('StatusBar', nil, self.AdditionalPower)
+    altBar:SetReverseFill(true)
+    altBar:SetPoint('TOP')
+    altBar:SetPoint('BOTTOM')
+    altBar:SetPoint('RIGHT', self.AdditionalPower:GetStatusBarTexture(), 'RIGHT')
+    altBar:SetWidth(200)
 
     -- Register with oUF
-    self.PowerPrediction = PowerPrediction
+    self.PowerPrediction = {
+        mainBar = mainBar,
+        altBar = altBar
+    }
 --]]
 
 local _, ns = ...
 local oUF = ns.oUF
+
+local _, playerClass = UnitClass('player')
 
 local function Update(self, event, unit)
 	if(self.unit ~= unit) then return end
@@ -43,41 +60,56 @@ local function Update(self, event, unit)
 		element:PreUpdate(unit)
 	end
 
-	local _, _, _, startTime, endTime, _, _, _, spellID = CastingInfo()
-	local powerType = UnitPowerType(unit)
-	local cost = 0
+	local mainCost, altCost = 0, 0
+	local mainType = UnitPowerType(unit)
+	local mainMax = UnitPowerMax(unit, mainType)
+	local isPlayer = UnitIsUnit('player', unit)
+	local _, _, _, startTime, endTime, _, _, _, spellID = UnitCastingInfo(unit)
 
 	if(event == 'UNIT_SPELLCAST_START' and startTime ~= endTime) then
 		local costTable = GetSpellPowerCost(spellID)
-		for _, costInfo in next, costTable do
-			-- costInfo content:
-			-- - name: string (powerToken)
-			-- - type: number (powerType)
-			-- - cost: number
-			-- - costPercent: number
-			-- - costPerSec: number
-			-- - minCost: number
-			-- - hasRequiredAura: boolean
-			-- - requiredAuraID: number
-			if(costInfo.type == powerType) then
-				cost = costInfo.cost
+		if not costTable then
+			element.mainCost = mainCost
+			element.altCost = altCost
+		else
+			local checkRequiredAura = isPlayer and #costTable > 1
+			for _, costInfo in next, costTable do
+				local cost, ctype, cperc = costInfo.cost, costInfo.type, costInfo.costPercent
+				local checkSpec = not checkRequiredAura or costInfo.hasRequiredAura
+				if checkSpec and ctype == mainType then
+					mainCost = ((isPlayer or cost < mainMax) and cost) or (mainMax * cperc) / 100
+					element.mainCost = mainCost
+
+					break
+				end
 			end
 		end
+	elseif(spellID) then
+		-- if we try to cast a spell while casting another one we need to avoid resetting the element
+		mainCost = element.mainCost or 0
+		altCost = element.altCost or 0
+	else
+		element.mainCost = mainCost
+		element.altCost = altCost
 	end
 
-	element:SetMinMaxValues(0, UnitPowerMax(unit, powerType))
-	element:SetValue(cost)
-	element:Show()
+	if(element.mainBar) then
+		element.mainBar:SetMinMaxValues(0, mainMax)
+		element.mainBar:SetValue(mainCost)
+		element.mainBar:Show()
+	end
 
 	--[[ Callback: PowerPrediction:PostUpdate(unit, mainCost, altCost, hasAltManaBar)
 	Called after the element has been updated.
 
 	* self          - the PowerPrediction element
 	* unit          - the unit for which the update has been triggered (string)
-    * cost          - the cost of the cast ability (number)
+	* mainCost      - the main power type cost of the cast ability (number)
+	* altCost       - the secondary power type cost of the cast ability (number)
+	* hasAltManaBar - indicates if the unit has a secondary power bar (boolean)
 	--]]
 	if(element.PostUpdate) then
-		return element:PostUpdate(unit, cost)
+		return element:PostUpdate(unit, mainCost, altCost)
 	end
 end
 
@@ -109,8 +141,18 @@ local function Enable(self)
 		self:RegisterEvent('UNIT_SPELLCAST_SUCCEEDED', Path)
 		self:RegisterEvent('UNIT_DISPLAYPOWER', Path)
 
-		if(element:IsObjectType('StatusBar') and not element:GetStatusBarTexture()) then
-			element:SetStatusBarTexture([[Interface\TargetingFrame\UI-StatusBar]])
+		if(element.mainBar) then
+			if(element.mainBar:IsObjectType('StatusBar')
+				and not (element.mainBar:GetStatusBarTexture() or element.mainBar:GetStatusBarAtlas())) then
+				element.mainBar:SetStatusBarTexture([[Interface\TargetingFrame\UI-StatusBar]])
+			end
+		end
+
+		if(element.altBar) then
+			if(element.altBar:IsObjectType('StatusBar')
+				and not (element.altBar:GetStatusBarTexture() or element.altBar:GetStatusBarAtlas())) then
+				element.altBar:SetStatusBarTexture([[Interface\TargetingFrame\UI-StatusBar]])
+			end
 		end
 
 		return true
@@ -120,7 +162,13 @@ end
 local function Disable(self)
 	local element = self.PowerPrediction
 	if(element) then
-		element:Hide()
+		if(element.mainBar) then
+			element.mainBar:Hide()
+		end
+
+		if(element.altBar) then
+			element.altBar:Hide()
+		end
 
 		self:UnregisterEvent('UNIT_SPELLCAST_START', Path)
 		self:UnregisterEvent('UNIT_SPELLCAST_STOP', Path)

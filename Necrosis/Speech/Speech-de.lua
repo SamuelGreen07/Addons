@@ -1,42 +1,15 @@
 --[[
-    Necrosis LdC
-    Copyright (C) 2005-2008  Lom Enfroy
-
-    This file is part of Necrosis LdC.
-
-    Necrosis LdC is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    Necrosis LdC is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with Necrosis LdC; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+    Necrosis 
+    Copyright (C) - copyright file included in this release
 --]]
 
-
-------------------------------------------------------------------------------------------------------
--- Necrosis LdC
--- Par Lomig (Kael'Thas EU/FR) & Tarcalion (Nagrand US/Oceanic) 
--- Contributions deLiadora et Nyx (Kael'Thas et Elune EU/FR)
---
--- Skins et voix Françaises : Eliah, Ner'zhul
---
--- Version Allemande par Geschan
--- Version Espagnole par DosS (Zul’jin)
--- Version Russe par Komsomolka
---
--- Version $LastChangedDate: 2010-08-04 12:04:27 +1000 (Wed, 04 Aug 2010) $
-------------------------------------------------------------------------------------------------------
 
 function Necrosis:Localization_Speech_De()
 
 	self.Speech.TP = {
+		[0] = {
+			"<after><Portal> Ich beschw\195\182re <target>, bitte klickt auf das Tor <Portal>",
+		},
 		[1] = {
 			"<after>Arcanum Taxi Cab ! Ich beschw\195\182re <target>, bitte klicke auf das Portal.",
 		},
@@ -54,6 +27,9 @@ function Necrosis:Localization_Speech_De()
 	}
 
 	self.Speech.Rez = {
+		[0] = {
+			"<after>--> <target> hat nun einen Seelenstein aktiv f\195\188r 15 Minuten <--",
+		},
 		[1] = {
 			"<after>Solltet Ihr einen Massenselbstmord erw\195\164gen, denkt daran dass <target> sich nun selbst wiederbeleben kann. Alles wird gut werden, auf in den Kampf !",
 		},
@@ -100,7 +76,7 @@ function Necrosis:Localization_Speech_De()
 				"<pet>, Baby, sei ein Schatzi und hilf mir!",
 			},
 		},
-		-- Teufelsjäger
+		-- Teufelsjï¿½ger
 		[4] = {
 			[1] = {
 				"<pet> ! <pet> ! Bei Fu\195\159, mein Guter, bei Fu\195\159 ! <pet> !",
@@ -109,14 +85,14 @@ function Necrosis:Localization_Speech_De()
 		-- Felguard
 		[5] = {
 			[1] = {
-				"<emote> is concentrating hard on Demoniac knowledge...",
+				"<player> is concentrating hard on Demoniac knowledge...",
 				"I'll give you a soul if you come to me, Felguard ! Please hear my command !",
 				"<after>Obey now, <pet> !",
-				"<after><emote>looks in a bag, then throws a mysterious shard at <pet>",
+				"<after><player> looks in a bag, then throws a mysterious shard at <pet>",
 				"<sacrifice>Please return in the Limbs you are from, Demon, and give me your power in exchange !"
 			},
 		},
-		-- Sätze für die erste Beschwörung : Wenn Necrosis den Namen Deines Dämons noch nicht kennt
+		-- Sï¿½tze fï¿½r die erste Beschwï¿½rung : Wenn Necrosis den Namen Deines Dï¿½mons noch nicht kennt
 		[6] = {
 			[1] = {
 				"Angeln ? Oh jaaa, ich liebe Angeln, schau !",
@@ -127,7 +103,7 @@ function Necrosis:Localization_Speech_De()
 				"KOMM ZU MIR, KREATUR, DIE DU KOMMST AUS DER H\195\150LLE UND ENDLOSEN ALPTR\195\132UMEN !",
 			},
 		},
-		-- Sprüche zur Beschwörung des Mounts
+		-- Sprï¿½che zur Beschwï¿½rung des Mounts
 		[7] = {
 			[1] = {
 				"Hey, ich bin sp\195\164t dran ! Ich hoffe ich finde ein Pferd das rennt wie ein ge\195\182lter Blitz !",
@@ -143,12 +119,12 @@ end
 
 
 -- Besondere Zeichen :
--- é = \195\169 ---- è = \195\168
--- à = \195\160 ---- â = \195\162
--- ô = \195\180 ---- ê = \195\170
--- û = \195\187 ---- ä = \195\164
--- Ä = \195\132 ---- ö = \195\182
--- Ö = \195\150 ---- ü = \195\188
--- Ü = \195\156 ---- ß = \195\159
--- ç = \195\167 ---- î = \195\174
+-- ï¿½ = \195\169 ---- ï¿½ = \195\168
+-- ï¿½ = \195\160 ---- ï¿½ = \195\162
+-- ï¿½ = \195\180 ---- ï¿½ = \195\170
+-- ï¿½ = \195\187 ---- ï¿½ = \195\164
+-- ï¿½ = \195\132 ---- ï¿½ = \195\182
+-- ï¿½ = \195\150 ---- ï¿½ = \195\188
+-- ï¿½ = \195\156 ---- ï¿½ = \195\159
+-- ï¿½ = \195\167 ---- ï¿½ = \195\174
 

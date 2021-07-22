@@ -7,7 +7,7 @@ local LibStub = LibStub
 local gui = LibStub("AceGUI-3.0")
 local reg = LibStub("AceConfigRegistry-3.0-ElvUI")
 
-local MAJOR, MINOR = "AceConfigDialog-3.0-ElvUI", 79
+local MAJOR, MINOR = "AceConfigDialog-3.0-ElvUI", 84
 local AceConfigDialog, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not AceConfigDialog then return end
@@ -22,10 +22,10 @@ AceConfigDialog.frame.closing = AceConfigDialog.frame.closing or {}
 AceConfigDialog.frame.closeAllOverride = AceConfigDialog.frame.closeAllOverride or {}
 
 -- Lua APIs
-local tinsert, tsort, tremove = table.insert, table.sort, table.remove
+local tinsert, tsort, tremove, wipe = table.insert, table.sort, table.remove, table.wipe
 local strmatch, format = string.match, string.format
 local error = error
-local pairs, next, select, type, unpack, wipe, ipairs = pairs, next, select, type, unpack, wipe, ipairs
+local pairs, next, select, type, unpack, ipairs = pairs, next, select, type, unpack, ipairs
 local tostring, tonumber = tostring, tonumber
 local math_min, math_max, math_floor = math.min, math.max, math.floor
 
@@ -563,6 +563,7 @@ end
 local function OptionOnMouseLeave(widget, event)
 	if AceConfigDialog.tooltip:IsShown() then
 		AceConfigDialog.tooltip:Hide()
+		AceConfigDialog.tooltip:ClearAllPoints()
 	end
 end
 
@@ -576,13 +577,15 @@ local function GetFuncName(option)
 end
 do
 	local frame = AceConfigDialog.popup
-	if not frame then
+	if not frame or oldminor < 81 then
 		frame = CreateFrame("Frame", nil, UIParent)
 		AceConfigDialog.popup = frame
 		frame:Hide()
 		frame:SetPoint("CENTER", UIParent, "CENTER")
 		frame:SetSize(320, 72)
+		frame:EnableMouse(true) -- Do not allow click-through on the frame
 		frame:SetFrameStrata("TOOLTIP")
+		frame:SetFrameLevel(100) -- Lots of room to draw under it
 		frame:SetScript("OnKeyDown", function(self, key)
 			if key == "ESCAPE" then
 				self:SetPropagateKeyboardInput(false)
@@ -596,7 +599,7 @@ do
 			end
 		end)
 
-		if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+		if not frame.SetFixedFrameStrata then -- API capability check (classic check)
 			frame:SetBackdrop({
 				bgFile = [[Interface\DialogFrame\UI-DialogBox-Background-Dark]],
 				edgeFile = [[Interface\DialogFrame\UI-DialogBox-Border]],
@@ -606,8 +609,10 @@ do
 				insets = { left = 11, right = 11, top = 11, bottom = 11 },
 			})
 		else
-			local border = CreateFrame("Frame", nil, frame, "DialogBorderDarkTemplate")
+			local border = CreateFrame("Frame", nil, frame, "DialogBorderOpaqueTemplate")
 			border:SetAllPoints(frame)
+			frame:SetFixedFrameStrata(true)
+			frame:SetFixedFrameLevel(true)
 		end
 
 		local text = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
@@ -948,7 +953,7 @@ end
 
 local function MultiControlOnClosed(widget, event, ...)
 	local user = widget:GetUserDataTable()
-	if user.valuechanged then
+	if user.valuechanged and not widget:IsReleasing() then
 		local iscustom = user.rootframe:GetUserData("iscustom")
 		local basepath = user.rootframe:GetUserData("basepath") or emptyTbl
 		if iscustom then
@@ -1144,6 +1149,11 @@ local function sortTblAsStrings(x,y)
 	return tostring(x) < tostring(y) -- Support numbers as keys
 end
 
+-- added by ElvUI
+local function sortTblByValue(x,y)
+	return x[2] < y[2]
+end
+
 --[[
 	options - root of the options table being fed
 	container - widget that controls will be placed in
@@ -1192,8 +1202,7 @@ local function FeedOptions(appName, options,container,rootframe,path,group,inlin
 					local image, width, height = GetOptionsMemberValue("image",v, options, path, appName)
 
 					local iconControl = type(image) == "string" or type(image) == "number"
-					local buttonElvUI = GetOptionsMemberValue("buttonElvUI",v, options, path, appName)
-					control = CreateControl(v.dialogControl or v.control, iconControl and "Icon" or buttonElvUI and "Button-ElvUI" or "Button")
+					control = CreateControl(v.dialogControl or v.control, iconControl and "Icon" or "Button-ElvUI")
 					if iconControl then
 						if not width then
 							width = GetOptionsMemberValue("imageWidth",v, options, path, appName)
@@ -1220,11 +1229,16 @@ local function FeedOptions(appName, options,container,rootframe,path,group,inlin
 					control:SetCallback("OnClick",ActivateControl)
 
 				elseif v.type == "input" then
-					control = CreateControl(v.dialogControl or v.control, v.multiline and "MultiLineEditBox" or "EditBox")
+					control = CreateControl(v.dialogControl or v.control, v.multiline and "MultiLineEditBox-ElvUI" or "EditBox")
 
 					if v.multiline and control.SetNumLines then
 						control:SetNumLines(tonumber(v.multiline) or 4)
 					end
+					-- ElvUI block
+					if control.SetSyntaxHighlightingEnabled then
+						control:SetSyntaxHighlightingEnabled(v.luaHighlighting or false)
+					end
+					-- End ElvUI block
 					control:SetLabel(name)
 					control:SetCallback("OnEnterPressed",ActivateControl)
 					local text = GetOptionsMemberValue("get",v, options, path, appName)
@@ -1262,8 +1276,7 @@ local function FeedOptions(appName, options,container,rootframe,path,group,inlin
 						end
 					end
 				elseif v.type == "range" then
-					local sliderElvUI = GetOptionsMemberValue("sliderElvUI",v, options, path, appName)
-					control = CreateControl(v.dialogControl or v.control, sliderElvUI and "Slider-ElvUI" or "Slider")
+					control = CreateControl(v.dialogControl or v.control, "Slider-ElvUI")
 					control:SetLabel(name)
 					control:SetSliderValues(v.softMin or v.min or 0, v.softMax or v.max or 100, v.bigStep or v.step or 0)
 					control:SetIsPercent(v.isPercent)
@@ -1343,14 +1356,20 @@ local function FeedOptions(appName, options,container,rootframe,path,group,inlin
 				elseif v.type == "multiselect" then
 					local values = GetOptionsMemberValue("values", v, options, path, appName)
 					local disabled = CheckOptionDisabled(v, options, path, appName)
+					local sortByValue = GetOptionsMemberValue("sortByValue", v, options, path, appName)
 
 					local valuesort = new()
 					if values then
 						for value, text in pairs(values) do
-							tinsert(valuesort, value)
+							tinsert(valuesort, (sortByValue and {value, text}) or value)
 						end
 					end
-					tsort(valuesort)
+
+					if sortByValue then
+						tsort(valuesort, sortTblByValue)
+					else
+						tsort(valuesort)
+					end
 
 					local controlType = v.dialogControl or v.control
 					if controlType then
@@ -1380,7 +1399,7 @@ local function FeedOptions(appName, options,container,rootframe,path,group,inlin
 						end
 						--check:SetTriState(v.tristate)
 						for i = 1, #valuesort do
-							local key = valuesort[i]
+							local key = (sortByValue and valuesort[i][1]) or valuesort[i]
 							local value = GetOptionsMemberValue("get",v, options, path, appName, key)
 							control:SetItemValue(key,value)
 						end
@@ -1396,7 +1415,7 @@ local function FeedOptions(appName, options,container,rootframe,path,group,inlin
 						control:PauseLayout()
 
 						for i = 1, #valuesort do
-							local value = valuesort[i]
+							local value = (sortByValue and valuesort[i][1]) or valuesort[i]
 							local text = values[value]
 							if dragdrop then
 								local button = gui:Create("Button-ElvUI")
@@ -1438,16 +1457,22 @@ local function FeedOptions(appName, options,container,rootframe,path,group,inlin
 								check:SetCallback("OnValueChanged",ActivateMultiControl)
 								InjectInfo(check, options, v, path, rootframe, appName)
 								control:AddChild(check)
-								if width == "double" then
-									check:SetWidth(width_multiplier * 2)
-								elseif width == "half" then
-									check:SetWidth(width_multiplier / 2)
-								elseif (type(width) == "number") then
-									control:SetWidth(width_multiplier * width)
-								elseif width == "full" then
-									check.width = "fill"
+
+								local customWidth = control.customWidth or GetOptionsMemberValue("customWidth",v,options,path,appName)
+								if customWidth then
+									check:SetWidth(customWidth)
 								else
-									check:SetWidth(width_multiplier)
+									if width == "double" then
+										check:SetWidth(width_multiplier * 2)
+									elseif width == "half" then
+										check:SetWidth(width_multiplier / 2)
+									elseif (type(width) == "number") then
+										control:SetWidth(width_multiplier * width)
+									elseif width == "full" then
+										check.width = "fill"
+									else
+										check:SetWidth(width_multiplier)
+									end
 								end
 							end
 						end
@@ -1609,6 +1634,7 @@ end
 
 local function TreeOnButtonLeave(widget, event, value, button)
 	AceConfigDialog.tooltip:Hide()
+	AceConfigDialog.tooltip:ClearAllPoints()
 end
 
 

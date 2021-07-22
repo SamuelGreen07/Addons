@@ -96,6 +96,7 @@ function XLoot.FancyPlayerName(name, class, opt)
 	else
 		c = white
 	end
+	-- !CLASSIC
 	local role = 'NONE'
 	if UnitGroupRolesAssigned then
 		role = UnitGroupRolesAssigned(name)

@@ -1,42 +1,14 @@
 --[[
-    Necrosis LdC
-    Copyright (C) 2005-2008  Lom Enfroy
-
-    This file is part of Necrosis LdC.
-
-    Necrosis LdC is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    Necrosis LdC is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with Necrosis LdC; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+    Necrosis 
+    Copyright (C) - copyright file included in this release
 --]]
-
-
-------------------------------------------------------------------------------------------------------
--- Necrosis LdC
--- Par Lomig (Kael'Thas EU/FR) & Tarcalion (Nagrand US/Oceanic) 
--- Contributions deLiadora et Nyx (Kael'Thas et Elune EU/FR)
---
--- Skins et voix Françaises : Eliah, Ner'zhul
---
--- Version Allemande par Geschan
--- Version Espagnole par DosS (Zul’jin)
--- Version Russe par Komsomolka
---
--- Version $LastChangedDate: 2010-08-04 12:04:27 +1000 (Wed, 04 Aug 2010) $
-------------------------------------------------------------------------------------------------------
 
 function Necrosis:Localization_Speech_Es()
 
 	self.Speech.TP = {
+		[0] = {
+			"<after>Invocando a <target>, por favor cliquead en el portal.",
+		},
 		[1] = {
 			"<after>\194\161 Compa\195\177\195\173a de Taxi Arcanum ! Estoy invocando a <target>, por favor cliquead en el portal.",
 		},
@@ -53,6 +25,9 @@ function Necrosis:Localization_Speech_Es()
 	}
 
 	self.Speech.Rez = {
+		[0] = {
+			"<after>--> <target> ha recibido la piedra del alma durante 15 minutos <--",
+		},
 		[1] = {
 			"<after>Si os agrada la idea de un suicidio en masa, ahora <target> puede auto-resucitar, as\195\173 todos contentos. Adelante.",
 		},
@@ -108,10 +83,10 @@ function Necrosis:Localization_Speech_Es()
 		-- Felguard
 		[5] = {
 			[1] = {
-				"<emote> is concentrating hard on Demoniac knowledge...",
+				"<player> is concentrating hard on Demoniac knowledge...",
 				"I'll give you a soul if you come to me, Felguard ! Please hear my command !",
 				"<after>Obey now, <pet> !",
-				"<after><emote>looks in a bag, then throws a mysterious shard at <pet>",
+				"<after><player> looks in a bag, then throws a mysterious shard at <pet>",
 				"<sacrifice>Please return in the Limbs you are from, Demon, and give me your power in exchange !"
 			},
 		},
@@ -140,11 +115,11 @@ function Necrosis:Localization_Speech_Es()
 
 end
 
--- Caracteres especiales españoles :
--- á = \195\161 ---- Á = \195\161
--- é = \195\169 ---- É = \195\137
--- í = \195\173 ---- Í = \195\141
--- ó = \195\179 ---- Ó = \195\147
--- ú = \195\186 ---- Ú = \195\154
--- ñ = \195\177 ---- Ñ = \195\145
--- ¡ = \194\161 ---- ¿ = \194\191
+-- Caracteres especiales espaï¿½oles :
+-- ï¿½ = \195\161 ---- ï¿½ = \195\161
+-- ï¿½ = \195\169 ---- ï¿½ = \195\137
+-- ï¿½ = \195\173 ---- ï¿½ = \195\141
+-- ï¿½ = \195\179 ---- ï¿½ = \195\147
+-- ï¿½ = \195\186 ---- ï¿½ = \195\154
+-- ï¿½ = \195\177 ---- ï¿½ = \195\145
+-- ï¿½ = \194\161 ---- ï¿½ = \194\191

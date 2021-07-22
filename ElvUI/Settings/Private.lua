@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------------------------------
 -- Locked Settings, These settings are stored for your character only regardless of profile options.
 ------------------------------------------------------------------------------------------------------
-local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
+local E, L, V, P, G = unpack(select(2, ...)) --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 
 V.general = {
 	loot = true,
@@ -16,16 +16,19 @@ V.general = {
 	chatBubbleFontOutline = 'NONE',
 	chatBubbleName = false,
 	pixelPerfect = true,
+	replaceNameFont = true,
+	replaceCombatFont = true,
 	replaceBlizzFonts = true,
+	unifiedBlizzFonts = false,
+	totemBar = true,
 	minimap = {
 		enable = true,
-		hideCalendar = true,
 		hideTracking = false,
 	},
-	worldMap = true,
 	classColorMentionsSpeech = true,
 	raidUtility = true,
 	voiceOverlay = true,
+	worldMap = true,
 }
 
 V.bags = {
@@ -40,11 +43,12 @@ V.nameplates = {
 V.auras = {
 	enable = true,
 	disableBlizzard = true,
-
+	buffsHeader = true,
+	debuffsHeader = true,
 	masque = {
 		buffs = false,
 		debuffs = false,
-	},
+	}
 }
 
 V.chat = {
@@ -52,100 +56,60 @@ V.chat = {
 }
 
 V.skins = {
-	ace3 = {
-		enable = true,
-	},
+	ace3Enable = true,
 	checkBoxSkin = true,
-	parchmentRemover = {
-		enable = false,
-	},
+	parchmentRemoverEnable = false,
 	blizzard = {
 		enable = true,
-		deathRecap = true,
-		bags = true,
-		bmah = true, --black market ah
-		reforge = true,
-		calendar = true,
-		achievement = true,
-		lfguild = true,
-		inspect = true,
-		binding = true,
-		gbank = true,
-		archaeology = true,
-		guildcontrol = true,
-		guild = true,
-		tradeskill = true,
-		raid = true,
-		talent = true,
+
+		addonManager = true,
+		arena = true,
+		arenaRegistrar = true,
 		auctionhouse = true,
-		barber = true,
-		macro = true,
-		debug = true,
-		trainer = true,
-		socket = true,
-		loot = true,
-		lootRoll = true,
-		alertframes = true,
-		bgscore = true,
-		merchant = true,
-		mail = true,
-		garrison = true,
-		help = true,
-		trade = true,
-		gossip = true,
-		greeting = true,
-		worldmap = true,
-		taxi = true,
-		timemanger = true,
-		tooltip = true,
-		quest = true,
-		questChoice = true,
-		questtimers = true,
-		petition = true,
-		dressingroom = true,
-		pvp = true,
-		lfg = true,
-		nonraid = true,
-		friends = true,
-		spellbook = true,
-		character = true,
-		craft = true,
-		misc = true,
-		tabard = true,
-		guildregistrar = true,
-		timemanager = true,
-		encounterjournal = true,
-		voidstorage = true,
-		transmogrify = true,
-		stable = true,
+		bags = true,
 		battlefield = true,
 		bgmap = true,
-		collections = true,
-		petbattleui = true,
-		losscontrol = true,
-		itemUpgrade = true,
-		addonManager = true,
+		bgscore = true,
+		binding = true,
+		blizzardOptions = true,
+		channels = true,
+		character = true,
+		communities = true,
+		craft = true,
+		debug = true,
+		dressingroom = true,
+		eventLog = true,
+		friends = true,
+		gossip = true,
+		guild = true,
+		guildcontrol = true,
+		guildregistrar = true,
+		help = true,
+		inspect = true,
+		loot = true,
+		macro = true,
+		mail = true,
+		merchant = true,
 		mirrorTimers = true,
-		objectiveTracker = true,
-		orderhall = true,
-		artifact = true,
-		talkinghead = true,
-		tutorial = true,
-		AdventureMap = true,
-		Obliterum = true,
-		Contribution = true,
-		BlizzardOptions = true,
-		Warboard = true,
-		AlliedRaces = true,
-		Channels = true,
-		AzeriteUI = true,
-		AzeriteRespec = true,
-		Communities = true,
-		Scrapping = true,
-		IslandQueue = true,
-		IslandsPartyPose = true,
-		GMChat = true,
-	},
+		misc = true,
+		petition = true,
+		quest = true,
+		questChoice = true,
+		raid = true,
+		socket = true,
+		spellbook = true,
+		stable = true,
+		tabard = true,
+		talent = true,
+		taxi = true,
+		timemanager = true,
+		tooltip = true,
+		trade = true,
+		tradeskill = true,
+		trainer = true,
+		tutorials = true,
+		worldmap = true,
+	}
 }
 
 V.tooltip = {
@@ -157,9 +121,11 @@ V.unitframe = {
 	disabledBlizzardFrames = {
 		player = true,
 		target = true,
+		focus = true,
+		arena = true,
 		party = true,
 		raid = true,
-	},
+	}
 }
 
 V.actionbar = {
@@ -169,5 +135,5 @@ V.actionbar = {
 		actionbars = false,
 		petBar = false,
 		stanceBar = false,
-	},
+	}
 }

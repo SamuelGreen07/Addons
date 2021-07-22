@@ -1,14 +1,11 @@
-local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
+local E, L, V, P, G = unpack(select(2, ...)) --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local S = E:GetModule('Skins')
 
---Cache global variables
---Lua functions
 local _G = _G
 local pairs = pairs
 local unpack = unpack
---WoW API / Variables
+
 local hooksecurefunc = hooksecurefunc
-local IsAddOnLoaded = IsAddOnLoaded
 local CreateFrame = CreateFrame
 
 local function SkinNavBarButtons(self)
@@ -35,18 +32,11 @@ local function SkinNavBarButtons(self)
 	end
 end
 
-local function LoadSkin()
-	if E.private.skins.blizzard.enable ~= true or E.private.skins.blizzard.misc ~= true then return end
+function S:BlizzardMiscFrames()
+	if not (E.private.skins.blizzard.enable and E.private.skins.blizzard.misc) then return end
 
 	-- Blizzard frame we want to reskin
 	local skins = {
-		'StaticPopup1',
-		'StaticPopup2',
-		'StaticPopup3',
-		'StaticPopup4',
-		'InterfaceOptionsFrame',
-		'VideoOptionsFrame',
-		'AudioOptionsFrame',
 		'AutoCompleteBox',
 		'ReadyCheckFrame'
 	}
@@ -58,35 +48,13 @@ local function LoadSkin()
 
 	S:HandleButton(_G.StaticPopup1ExtraButton)
 
-	if not IsAddOnLoaded('ConsolePortUI_Menu') then
+	if not E:IsAddOnEnabled('ConsolePortUI_Menu') then
 		-- reskin all esc/menu buttons
-		local BlizzardMenuButtons = {
-			_G.GameMenuButtonOptions,
-			_G.GameMenuButtonSoundOptions,
-			_G.GameMenuButtonUIOptions,
-			_G.GameMenuButtonKeybindings,
-			_G.GameMenuButtonMacros,
-			_G.GameMenuButtonAddOns,
-			_G.GameMenuButtonWhatsNew,
-			_G.GameMenuButtonRatings,
-			_G.GameMenuButtonAddons,
-			_G.GameMenuButtonLogout,
-			_G.GameMenuButtonQuit,
-			_G.GameMenuButtonContinue,
-			_G.GameMenuButtonMacOptions,
-			_G.GameMenuButtonStore,
-			_G.GameMenuButtonHelp
-		}
-
-		for i = 1, #BlizzardMenuButtons do
-			local menuButton = BlizzardMenuButtons[i]
-			if menuButton then
-				S:HandleButton(menuButton)
+		for _, Button in pairs({_G.GameMenuFrame:GetChildren()}) do
+			if Button.IsObjectType and Button:IsObjectType("Button") then
+				S:HandleButton(Button)
 			end
 		end
-
-		-- Skin the ElvUI Menu Button
-		S:HandleButton(_G.GameMenuFrame.ElvUI)
 
 		_G.GameMenuFrame:StripTextures()
 		_G.GameMenuFrame:SetTemplate('Transparent')
@@ -95,21 +63,21 @@ local function LoadSkin()
 		_G.GameMenuFrameHeader:Point('TOP', _G.GameMenuFrame, 0, 7)
 	end
 
-	if IsAddOnLoaded('OptionHouse') then
+	if E:IsAddOnEnabled('OptionHouse') then
 		S:HandleButton(_G.GameMenuButtonOptionHouse)
 	end
 
 	-- since we cant hook `CinematicFrame_OnShow` or `CinematicFrame_OnEvent` directly
 	-- we can just hook onto this function so that we can get the correct `self`
 	-- this is called through `CinematicFrame_OnShow` so the result would still happen where we want
-	hooksecurefunc('CinematicFrame_OnDisplaySizeChanged', function(self)
-		if self and self.closeDialog and not self.closeDialog.template then
-			self.closeDialog:StripTextures()
-			self.closeDialog:SetTemplate('Transparent')
-			self:SetScale(_G.UIParent:GetScale())
-			local dialogName = self.closeDialog.GetName and self.closeDialog:GetName()
-			local closeButton = self.closeDialog.ConfirmButton or (dialogName and _G[dialogName..'ConfirmButton'])
-			local resumeButton = self.closeDialog.ResumeButton or (dialogName and _G[dialogName..'ResumeButton'])
+	hooksecurefunc('CinematicFrame_OnDisplaySizeChanged', function(s)
+		if s and s.closeDialog and not s.closeDialog.template then
+			s.closeDialog:StripTextures()
+			s.closeDialog:SetTemplate('Transparent')
+			s:SetScale(_G.UIParent:GetScale())
+			local dialogName = s.closeDialog.GetName and s.closeDialog:GetName()
+			local closeButton = s.closeDialog.ConfirmButton or (dialogName and _G[dialogName..'ConfirmButton'])
+			local resumeButton = s.closeDialog.ResumeButton or (dialogName and _G[dialogName..'ResumeButton'])
 			if closeButton then S:HandleButton(closeButton) end
 			if resumeButton then S:HandleButton(resumeButton) end
 		end
@@ -118,13 +86,13 @@ local function LoadSkin()
 	-- same as above except `MovieFrame_OnEvent` and `MovieFrame_OnShow`
 	-- cant be hooked directly so we can just use this
 	-- this is called through `MovieFrame_OnEvent` on the event `PLAY_MOVIE`
-	hooksecurefunc('MovieFrame_PlayMovie', function(self)
-		if self and self.CloseDialog and not self.CloseDialog.template then
-			self:SetScale(_G.UIParent:GetScale())
-			self.CloseDialog:StripTextures()
-			self.CloseDialog:SetTemplate('Transparent')
-			S:HandleButton(self.CloseDialog.ConfirmButton)
-			S:HandleButton(self.CloseDialog.ResumeButton)
+	hooksecurefunc('MovieFrame_PlayMovie', function(s)
+		if s and s.CloseDialog and not s.CloseDialog.template then
+			s:SetScale(_G.UIParent:GetScale())
+			s.CloseDialog:StripTextures()
+			s.CloseDialog:SetTemplate('Transparent')
+			S:HandleButton(s.CloseDialog.ConfirmButton)
+			S:HandleButton(s.CloseDialog.ResumeButton)
 		end
 	end)
 
@@ -143,7 +111,6 @@ local function LoadSkin()
 		end
 	end
 
-
 	-- reskin popup buttons
 	for i = 1, 4 do
 		local StaticPopup = _G['StaticPopup'..i]
@@ -153,6 +120,9 @@ local function LoadSkin()
 				hooksecurefunc(_G['StaticPopup'..i], 'UpdateRecapButton', S.UpdateRecapButton)
 			end
 		end)
+		StaticPopup:StripTextures()
+		StaticPopup:SetTemplate('Transparent')
+
 		for j = 1, 4 do
 			local button = StaticPopup['button'..j]
 			S:HandleButton(button)
@@ -167,6 +137,7 @@ local function LoadSkin()
 			anim1:SetTarget(button.shadow)
 			anim2:SetTarget(button.shadow)
 		end
+
 		_G['StaticPopup'..i..'EditBox']:SetFrameLevel(_G['StaticPopup'..i..'EditBox']:GetFrameLevel()+1)
 		S:HandleEditBox(_G['StaticPopup'..i..'EditBox'])
 		S:HandleEditBox(_G['StaticPopup'..i..'MoneyInputFrameGold'])
@@ -203,9 +174,9 @@ local function LoadSkin()
 
 	--DropDownMenu
 	hooksecurefunc('UIDropDownMenu_CreateFrames', function(level, index)
-		local listFrame = _G['DropDownList'..level];
-		local listFrameName = listFrame:GetName();
-		local expandArrow = _G[listFrameName..'Button'..index..'ExpandArrow'];
+		local listFrame = _G['DropDownList'..level]
+		local listFrameName = listFrame:GetName()
+		local expandArrow = _G[listFrameName..'Button'..index..'ExpandArrow']
 		if expandArrow then
 			local normTex = expandArrow:GetNormalTexture()
 			expandArrow:SetNormalTexture(E.Media.Textures.ArrowUp)
@@ -215,12 +186,16 @@ local function LoadSkin()
 		end
 
 		local Backdrop = _G[listFrameName..'Backdrop']
-		if not Backdrop.template then Backdrop:StripTextures() end
-		Backdrop:SetTemplate('Transparent')
+		if Backdrop and not Backdrop.template then
+			Backdrop:StripTextures()
+			Backdrop:SetTemplate('Transparent')
+		end
 
 		local menuBackdrop = _G[listFrameName..'MenuBackdrop']
-		if not menuBackdrop.template then menuBackdrop:StripTextures() end
-		menuBackdrop:SetTemplate('Transparent')
+		if menuBackdrop and not menuBackdrop.template then
+			menuBackdrop:StripTextures()
+			menuBackdrop:SetTemplate('Transparent')
+		end
 	end)
 
 	hooksecurefunc('UIDropDownMenu_SetIconImage', function(icon, texture)
@@ -232,8 +207,8 @@ local function LoadSkin()
 	end)
 
 	hooksecurefunc('ToggleDropDownMenu', function(level)
-		if ( not level ) then
-			level = 1;
+		if not level then
+			level = 1
 		end
 
 		local r, g, b = unpack(E.media.rgbvaluecolor)
@@ -253,13 +228,12 @@ local function LoadSkin()
 				button:CreateBackdrop()
 			end
 
-			button.backdrop:Hide()
-
 			if not button.notCheckable then
 				uncheck:SetTexture()
+
 				local _, co = check:GetTexCoord()
 				if co == 0 then
-					check:SetTexture('Interface\\Buttons\\UI-CheckBox-Check')
+					check:SetTexture([[Interface\Buttons\UI-CheckBox-Check]])
 					check:SetVertexColor(r, g, b, 1)
 					check:Size(20, 20)
 					check:SetDesaturated(true)
@@ -273,13 +247,13 @@ local function LoadSkin()
 				end
 
 				button.backdrop:Show()
-				check:SetTexCoord(0, 1, 0, 1);
+				check:SetTexCoord(0, 1, 0, 1)
 			else
+				button.backdrop:Hide()
 				check:Size(16, 16)
 			end
 		end
 	end)
-
 
 	local SideDressUpFrame = _G.SideDressUpFrame
 	S:HandleCloseButton(_G.SideDressUpModelCloseButton)
@@ -292,7 +266,7 @@ local function LoadSkin()
 	-- StackSplit
 	local StackSplitFrame = _G.StackSplitFrame
 	StackSplitFrame:StripTextures()
-	StackSplitFrame:CreateBackdrop('Transparent')
+	StackSplitFrame:SetTemplate('Transparent')
 
 	StackSplitFrame.bg1 = CreateFrame('Frame', nil, StackSplitFrame)
 	StackSplitFrame.bg1:SetTemplate('Transparent')
@@ -300,8 +274,8 @@ local function LoadSkin()
 	StackSplitFrame.bg1:Point('BOTTOMRIGHT', -10, 55)
 	StackSplitFrame.bg1:SetFrameLevel(StackSplitFrame.bg1:GetFrameLevel() - 1)
 
-	-- S:HandleButton(StackSplitFrame.OkayButton)
-	-- S:HandleButton(StackSplitFrame.CancelButton)
+	S:HandleButton(_G.StackSplitOkayButton)
+	S:HandleButton(_G.StackSplitCancelButton)
 
 	local buttons = {StackSplitFrame.LeftButton, StackSplitFrame.RightButton}
 	for _, btn in pairs(buttons) do
@@ -326,4 +300,4 @@ local function LoadSkin()
 	hooksecurefunc('NavBar_AddButton', SkinNavBarButtons)
 end
 
-S:AddCallback('SkinMisc', LoadSkin)
+S:AddCallback('BlizzardMiscFrames')

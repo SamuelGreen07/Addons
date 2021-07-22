@@ -1,6 +1,6 @@
 --[[
 Name: LibRangeCheck-2.0
-Revision: $Revision: 198 $
+Revision: $Revision$
 Author(s): mitch0
 Website: http://www.wowace.com/projects/librangecheck-2-0/
 Description: A range checking library based on interact distances and spell ranges
@@ -26,7 +26,7 @@ License: Public Domain
 --     print("target is between " .. minRange .. " and " .. maxRange .. " yards")
 -- end
 --
--- local meleeChecker = rc:GetFriendMaxChecker(rc.MeleeRange) -- 5 yds
+-- local meleeChecker = rc:GetFriendMaxChecker(rc.MeleeRange) or rc:GetFriendMinChecker(rc.MeleeRange) -- use the closest checker (MinChecker) if no valid Melee checker is found
 -- for i = 1, 4 do
 --     -- TODO: check if unit is valid, etc
 --     if meleeChecker("party" .. i) then
@@ -40,8 +40,8 @@ License: Public Domain
 --
 -- @class file
 -- @name LibRangeCheck-2.0
-local MAJOR_VERSION = "LibRangeCheck-2.0"
-local MINOR_VERSION = tonumber(("$Revision: 198 $"):match("%d+")) + 100000
+local MAJOR_VERSION = "LibRangeCheck-2.0-ElvUI"
+local MINOR_VERSION = tonumber(("$Revision: 205 $"):match("%d+")) + 100000
 
 local lib, oldminor = LibStub:NewLibrary(MAJOR_VERSION, MINOR_VERSION)
 if not lib then
@@ -49,6 +49,7 @@ if not lib then
 end
 
 local IsClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+local IsTBC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC)
 
 -- << STATIC CONFIG
 
@@ -76,107 +77,210 @@ local InteractLists = {
     },
 }
 
-local MeleeRange = 5
+local MeleeRange = 2
 
 -- list of friendly spells that have different ranges
 local FriendSpells = {}
 -- list of harmful spells that have different ranges
 local HarmSpells = {}
+-- list of resurrect spells that have different ranges
+local ResSpells = {}
+-- list of pet spells that have different ranges
+local PetSpells = {}
 
-FriendSpells["DEATHKNIGHT"] = {
-}
+-- Death Knights
+FriendSpells["DEATHKNIGHT"] = {}
 HarmSpells["DEATHKNIGHT"] = {
-    49576, -- ["Death Grip"], -- 30
+    49576, -- Death Grip (30 yards)
+    47541, -- Death Coil (Unholy) (40 yards)
 }
+ResSpells["DEATHKNIGHT"] = {
+    61999, -- Raise Ally (40 yards)
+}
+PetSpells["DEATHKNIGHT"] = {}
 
-FriendSpells["DEMONHUNTER"] = {
-}
+-- Demon Hunters
+FriendSpells["DEMONHUNTER"] = {}
 HarmSpells["DEMONHUNTER"] = {
-    185123, -- ["Throw Glaive"], -- 30
+    185123, -- Throw Glaive (Havoc) (30 yards)
+    183752, -- Consume Magic (20 yards)
+    204021, -- Fiery Brand (Vengeance) (30 yards)
 }
+ResSpells["DEMONHUNTER"] = {}
+PetSpells["DEMONHUNTER"] = {}
 
+-- Druids
 FriendSpells["DRUID"] = {
-    774, -- ["Rejuvenation"], -- 40
-    2782, -- ["Remove Corruption"], -- 40
+    774,  -- Rejuvenation (40 yards, level 10)
+    2782, -- Remove Corruption (40 yards, level 19)
+    8936, -- Regrowth (40 yards, level 5)
+    5185, -- Healing Touch (40 yards)
 }
 HarmSpells["DRUID"] = {
-    5176, -- ["Wrath"], -- 40
-    339, -- ["Entangling Roots"], -- 35
-    6795, -- ["Growl"], -- 30
-    33786, -- ["Cyclone"], -- 20
-    22568, -- ["Ferocious Bite"], -- 5
+    5176,  -- Wrath (40 yards)
+    339,   -- Entangling Roots (35 yards)
+    6795,  -- Growl (30 yards)
+    33786, -- Cyclone (20 yards)
+    22568, -- Ferocious Bite (Melee Range)
+    8921,  -- Moonfire (40 yards, level 2)
 }
+ResSpells["DRUID"] = {
+    50769, -- Revive (40 yards, level 14)
+    20484, -- Rebirth (30 yards)
+}
+PetSpells["DRUID"] = {}
 
+-- Hunters
 FriendSpells["HUNTER"] = {}
 HarmSpells["HUNTER"] = {
-    75, -- ["Auto Shot"], -- 40
+    75, -- Auto Shot (40 yards)
+}
+ResSpells["HUNTER"] = {}
+PetSpells["HUNTER"] = {
+    136, -- Mend Pet (45 yards, 68 yards)
 }
 
+-- Mages
 FriendSpells["MAGE"] = {
+    130, -- Slow Fall (40 yards)
+    1459, -- Arcane Intellect (30 yards)
 }
 HarmSpells["MAGE"] = {
-    44614, --["Frostfire Bolt"], -- 40
-    5019, -- ["Shoot"], -- 30
+    44614, -- Flurry (40 yards)
+    5019,  -- Shoot (30 yards)
+    118,   -- Polymorph (30 yards)
+    116,   -- Frostbolt (40 yards)
+    133,   -- Fireball (40 yards)
+    44425, -- Arcane Barrage (40 yards)
 }
+ResSpells["MAGE"] = {}
+PetSpells["MAGE"] = {}
 
+-- Monks
 FriendSpells["MONK"] = {
-    115450, -- ["Detox"], -- 40
-    115546, -- ["Provoke"], -- 30
+    115450, -- Detox (40 yards)
+    115546, -- Provoke (30 yards)
+    116670, -- Vivify (40 yards)
 }
 HarmSpells["MONK"] = {
-    115546, -- ["Provoke"], -- 30
-    115078, -- ["Paralysis"], -- 20
-    100780, -- ["Tiger Palm"], -- 5
+    115546, -- Provoke (30 yards)
+    115078, -- Paralysis (20 yards)
+    100780, -- Tiger Palm (Melee Range)
+    117952, -- Crackling Jade Lightning (40 yards)
 }
+ResSpells["MONK"] = {
+    115178, -- Resuscitate (40 yards)
+}
+PetSpells["MONK"] = {}
 
+-- Paladins
 FriendSpells["PALADIN"] = {
-    19750, -- ["Flash of Light"], -- 40
+    19750, -- Flash of Light (40 yards)
+    4987, -- Cleanse (40 yards)
+    635, -- Holy Light (40 yards)
 }
 HarmSpells["PALADIN"] = {
-    62124, -- ["Reckoning"], -- 30
-    20271, -- ["Judgement"], -- 30
-    853, -- ["Hammer of Justice"], -- 10
-    35395, -- ["Crusader Strike"], -- 5
+    853,    -- Hammer of Justice (10 yards)
+    35395,  -- Crusader Strike (Melee Range)
+    62124,  -- Hand of Reckoning (30 yards)
+    183218, -- Hand of Hindrance (30 yards)
+    20271,  -- Judgement (30 yards)
+    20473,  -- Holy Shock (40 yards)
 }
+ResSpells["PALADIN"] = {
+    7328, -- Redemption (40 yards)
+}
+PetSpells["PALADIN"] = {}
 
+-- Priests
 FriendSpells["PRIEST"] = {
-    527, -- ["Purify"], -- 40
-    17, -- ["Power Word: Shield"], -- 40
+    527,  -- Purify (40 yards)
+    2061, -- Flash Heal (40 yards)
+    17,   -- Power Word: Shield (40 yards)
+    1706, -- Levitate (40 yards)
 }
 HarmSpells["PRIEST"] = {
-    589, -- ["Shadow Word: Pain"], -- 40
-    5019, -- ["Shoot"], -- 30
+    589,  -- Shadow Word: Pain (40 yards)
+    585,  -- Smite (40 yards)
+    5019, -- Shoot (30 yards)
+    8092, -- Mindblast (30 yards)
 }
+ResSpells["PRIEST"] = {
+    2006, -- Resurrection (40 yards)
+}
+PetSpells["PRIEST"] = {}
 
-FriendSpells["ROGUE"] = {}
+-- Rogues
+FriendSpells["ROGUE"] = {
+    57934, -- Tricks of the Trade (100 yards)
+}
 HarmSpells["ROGUE"] = {
-    2764, -- ["Throw"], -- 30
-    2094, -- ["Blind"], -- 15
+    185565, -- Poisoned Knife (Assassination) (30 yards)
+    185763, -- Pistol Shot (Outlaw) (20 yards)
+    114014, -- Shuriken Toss (Sublety) (30 yards)
+    2764,   -- Throw (30 yards)
+    3018,   -- Shoot (30 yards)
+    2094,   -- Blind (15 yards)
 }
+ResSpells["ROGUE"] = {}
+PetSpells["ROGUE"] = {}
 
+-- Shamans
 FriendSpells["SHAMAN"] = {
-    8004, -- ["Healing Surge"], -- 40
-    546, -- ["Water Walking"], -- 30
+    8004,   -- Healing Surge (Resto/Elemental) (40 yards)
+    188070, -- Healing Surge (Enhancement) (40 yards)
+    546,    -- Water Walking (30 yards)
+    526,    -- Cure Poison (40 yards)
+    2860,   -- Cure Disease (40 yards)
+    331,    -- Healing Wave (40 yards)
+    8004,   -- Lesser Healing Wave (40 yards)
 }
 HarmSpells["SHAMAN"] = {
-    403, -- ["Lightning Bolt"], -- 40
-    370, -- ["Purge"], -- 30
-    73899, -- ["Primal Strike"],. -- 5
+    370,    -- Purge (30 yards)
+    188196, -- Lightning Bolt (40 yards)
+    73899,  -- Primal Strike (Melee Range)
+    403,    -- Lightning Bolt (30 yards)
+    421,    -- Chain Lightning (30 yards)
+    8042,   -- Earth Shock (20 yards)
 }
+ResSpells["SHAMAN"] = {
+    2008, -- Ancestral Spirit (40 yards)
+}
+PetSpells["SHAMAN"] = {}
 
+-- Warriors
 FriendSpells["WARRIOR"] = {}
 HarmSpells["WARRIOR"] = {
-    355, -- ["Taunt"], -- 30
-    100, -- ["Charge"], -- 8-25
-    5246, -- ["Intimidating Shout"], -- 8
+    355,  -- Taunt (30 yards)
+    5246, -- Intimidating Shout (Arms/Fury) (8 yards)
+    100,  -- Charge (Arms/Fury) (8-25 yards)
+    3018, -- Shoot (5-30 yards)
+    2764, -- Throw (5-30 yards)
 }
+ResSpells["WARRIOR"] = {}
+PetSpells["WARRIOR"] = {}
 
+-- Warlocks
 FriendSpells["WARLOCK"] = {
-    5697, -- ["Unending Breath"], -- 30
+    5697,  -- Unending Breath (30 yards)
+    20707, -- Soulstone (40 yards) ~ this can be precasted so leave it in friendly aswell as res
+    132,   -- Detect Invisibility (30 yards)
 }
 HarmSpells["WARLOCK"] = {
-    686, -- ["Shadow Bolt"], -- 40
-    5019, -- ["Shoot"], -- 30
+    5019,   -- Shoot (30 yards)
+    234153, -- Drain Life (40 yards, level 9)
+    198590, -- Drain Soul (40 yards, level 15)
+    686,    -- Shadow Bolt (Demonology / Affliction) (40 yards)
+    232670, -- Shadow Bolt (40 yards)
+    5782,   -- Fear (30 yards)
+    172,    -- Corruption (30 yards)
+    348,    -- Immolate (30 yards)
+}
+ResSpells["WARLOCK"] = {
+    20707, -- Soulstone (40 yards)
+}
+PetSpells["WARLOCK"] = {
+    755, -- Health Funnel (45 yards)
 }
 
 -- Items [Special thanks to Maldivia for the nice list]
@@ -208,6 +312,7 @@ local FriendItems  = {
     },
     [10] = {
         32321, -- Sparrowhawk Net
+        17626, -- Frostwolf Muzzle
     },
     [15] = {
         1251, -- Linen Bandage
@@ -232,6 +337,7 @@ local FriendItems  = {
     },
     [25] = {
         31463, -- Zezzak's Shard
+        13289, -- Egan's Blaster
     },
     [30] = {
         1180, -- Scroll of Stamina
@@ -310,6 +416,7 @@ local HarmItems = {
     },
     [10] = {
         32321, -- Sparrowhawk Net
+        17626, -- Frostwolf Muzzle
     },
     [15] = {
         33069, -- Sturdy Rope
@@ -321,6 +428,7 @@ local HarmItems = {
         24268, -- Netherweave Net
         41509, -- Frostweave Net
         31463, -- Zezzak's Shard
+        13289, -- Egan's Blaster
     },
     [30] = {
         835, -- Large Rope Net
@@ -371,17 +479,9 @@ local HarmItems = {
     },
 }
 
--- This could've been done by checking player race as well and creating tables for those, but it's easier like this
-for k, v in pairs(FriendSpells) do
-    tinsert(v, 28880) -- ["Gift of the Naaru"]
-end
-
--- >> END OF STATIC CONFIG
-
 -- cache
-
+-- GLOBALS: LibStub, CreateFrame
 local setmetatable = setmetatable
-local tonumber = tonumber
 local pairs = pairs
 local tostring = tostring
 local print = print
@@ -396,10 +496,10 @@ local GetSpellBookItemName = GetSpellBookItemName
 local GetNumSpellTabs = GetNumSpellTabs
 local GetSpellTabInfo = GetSpellTabInfo
 local GetItemInfo = GetItemInfo
-local UnitAura = UnitAura
 local UnitCanAttack = UnitCanAttack
 local UnitCanAssist = UnitCanAssist
 local UnitExists = UnitExists
+local UnitIsUnit = UnitIsUnit
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local CheckInteractDistance = CheckInteractDistance
 local IsSpellInRange = IsSpellInRange
@@ -407,15 +507,21 @@ local IsItemInRange = IsItemInRange
 local UnitClass = UnitClass
 local UnitRace = UnitRace
 local GetInventoryItemLink = GetInventoryItemLink
-local GetSpecialization = GetSpecialization
-local GetSpecializationInfo = GetSpecializationInfo
 local GetTime = GetTime
 local HandSlotId = GetInventorySlotInfo("HandsSlot")
 local math_floor = math.floor
 local UnitIsVisible = UnitIsVisible
 
+-- This could've been done by checking player race as well and creating tables for those, but it's easier like this
+for _, v in pairs(FriendSpells) do
+    tinsert(v, 28880) -- Gift of the Naaru (40 yards)
+end
+
+-- >> END OF STATIC CONFIG
+
 -- temporary stuff
 
+local pendingItemRequest
 local itemRequestTimeoutAt
 local foundNewItems
 local cacheAllItems
@@ -685,17 +791,20 @@ lib.checkerCache_Item = lib.checkerCache_Item or {}
 lib.miscRC = createCheckerList(nil, nil, DefaultInteractList)
 lib.friendRC = createCheckerList(nil, nil, DefaultInteractList)
 lib.harmRC = createCheckerList(nil, nil, DefaultInteractList)
+lib.resRC = createCheckerList(nil, nil, DefaultInteractList)
+lib.petRC = createCheckerList(nil, nil, DefaultInteractList)
+lib.friendNoItemsRC = createCheckerList(nil, nil, DefaultInteractList)
+lib.harmNoItemsRC = createCheckerList(nil, nil, DefaultInteractList)
 
 lib.failedItemRequests = {}
 
 -- << Public API
 
-
 --- The callback name that is fired when checkers are changed.
 -- @field
 lib.CHECKERS_CHANGED = "CHECKERS_CHANGED"
 -- "export" it, maybe someone will need it for formatting
---- Constant for Melee range (5yd).
+--- Constant for Melee range (2yd).
 -- @field
 lib.MeleeRange = MeleeRange
 
@@ -783,7 +892,19 @@ function lib:init(forced)
     if updateCheckers(self.harmRC, createCheckerList(HarmSpells[playerClass], HarmItems, interactList)) then
         changed = true
     end
+    if updateCheckers(self.friendNoItemsRC, createCheckerList(FriendSpells[playerClass], nil, interactList)) then
+        changed = true
+    end
+    if updateCheckers(self.harmNoItemsRC, createCheckerList(HarmSpells[playerClass], nil, interactList)) then
+        changed = true
+    end
     if updateCheckers(self.miscRC, createCheckerList(nil, nil, interactList)) then
+        changed = true
+    end
+    if updateCheckers(self.resRC, createCheckerList(ResSpells[playerClass], nil, interactList)) then
+        changed = true
+    end
+    if updateCheckers(self.petRC, createCheckerList(PetSpells[playerClass], nil, interactList)) then
         changed = true
     end
     if changed and self.callbacks then
@@ -879,7 +1000,7 @@ function lib:GetSmartMinChecker(range)
         getMinChecker(self.miscRC, range))
 end
 
---- Return a checker suitable for in-of-range checking that checks the unit type and calls the appropriate checker (friend/harm/misc).
+--- Return a checker suitable for in-range checking that checks the unit type and calls the appropriate checker (friend/harm/misc).
 -- @param range the range to check for.
 -- @return **checker** function.
 function lib:GetSmartMaxChecker(range)
@@ -909,20 +1030,35 @@ end
 -- local rc = LibStub("LibRangeCheck-2.0")
 -- local minRange, maxRange = rc:GetRange('target')
 -- local minRangeIfVisible, maxRangeIfVisible = rc:GetRange('target', true)
-function lib:GetRange(unit, checkVisible)
+function lib:GetRange(unit, checkVisible, noItems)
     if not UnitExists(unit) then
         return nil
     end
+
     if checkVisible and not UnitIsVisible(unit) then
         return nil
     end
+
+    local canAssist = UnitCanAssist("player", unit)
     if UnitIsDeadOrGhost(unit) then
-        return getRange(unit, self.miscRC)
+        if canAssist then
+            return getRange(unit, self.resRC)
+        else
+            return getRange(unit, self.miscRC)
+        end
     end
+
     if UnitCanAttack("player", unit) then
-        return getRange(unit, self.harmRC)
-    elseif UnitCanAssist("player", unit) then
-        return getRange(unit, self.friendRC)
+        return getRange(unit, noItems and self.harmNoItemsRC or self.harmRC)
+    elseif UnitIsUnit("pet", unit) then
+        local minRange, maxRange = getRange(unit, noItems and self.friendNoItemsRC or self.friendRC)
+        if minRange or maxRange then
+            return minRange, maxRange
+        else
+            return getRange(unit, self.petRC)
+        end
+    elseif canAssist then
+        return getRange(unit, noItems and self.friendNoItemsRC or self.friendRC)
     else
         return getRange(unit, self.miscRC)
     end
@@ -967,6 +1103,17 @@ function lib:UNIT_AURA(event, unit)
     end
 end
 
+function lib:GET_ITEM_INFO_RECEIVED(event, item, success)
+    -- print("### GET_ITEM_INFO_RECEIVED: " .. tostring(item) .. ", " .. tostring(success))
+    if item == pendingItemRequest then
+        pendingItemRequest = nil
+        if not success then
+            self.failedItemRequests[item] = true
+        end
+        lastUpdate = UpdateDelay
+    end
+end
+
 function lib:processItemRequests(itemRequests)
     while true do
         local range, items = next(itemRequests)
@@ -977,11 +1124,17 @@ function lib:processItemRequests(itemRequests)
                 itemRequests[range] = nil
                 break
             elseif self.failedItemRequests[item] then
+                -- print("### processItemRequests: failed: " .. tostring(item))
                 tremove(items, i)
+            elseif item == pendingItemRequest and GetTime() < itemRequestTimeoutAt then
+                return true; -- still waiting for server response
             elseif GetItemInfo(item) then
+                -- print("### processItemRequests: found: " .. tostring(item))
                 if itemRequestTimeoutAt then
+                    -- print("### processItemRequests: new: " .. tostring(item))
                     foundNewItems = true
                     itemRequestTimeoutAt = nil
+                    pendingItemRequest = nil
                 end
                 if not cacheAllItems then
                     itemRequests[range] = nil
@@ -989,14 +1142,21 @@ function lib:processItemRequests(itemRequests)
                 end
                 tremove(items, i)
             elseif not itemRequestTimeoutAt then
+                -- print("### processItemRequests: waiting: " .. tostring(item))
                 itemRequestTimeoutAt = GetTime() + ItemRequestTimeout
+                pendingItemRequest = item
+                if not self.frame:IsEventRegistered("GET_ITEM_INFO_RECEIVED") then
+                    self.frame:RegisterEvent("GET_ITEM_INFO_RECEIVED")
+                end
                 return true
-            elseif GetTime() > itemRequestTimeoutAt then
+            elseif GetTime() >= itemRequestTimeoutAt then
+                -- print("### processItemRequests: timeout: " .. tostring(item))
                 if cacheAllItems then
                     print(MAJOR_VERSION .. ": timeout for item: " .. tostring(item))
                 end
                 self.failedItemRequests[item] = true
                 itemRequestTimeoutAt = nil
+                pendingItemRequest = nil
                 tremove(items, i)
             else
                 return true -- still waiting for server response
@@ -1024,6 +1184,7 @@ function lib:initialOnUpdate()
         cacheAllItems = nil
     end
     self.frame:Hide()
+    self.frame:UnregisterEvent("GET_ITEM_INFO_RECEIVED")
 end
 
 function lib:scheduleInit()
@@ -1037,7 +1198,6 @@ function lib:scheduleAuraCheck()
     self.frame:Show()
 end
 
-
 -- << load-time initialization
 
 function lib:activate()
@@ -1046,7 +1206,7 @@ function lib:activate()
         self.frame = frame
         frame:RegisterEvent("LEARNED_SPELL_IN_TAB")
         frame:RegisterEvent("CHARACTER_POINTS_CHANGED")
-        if not IsClassic then
+        if not IsClassic and not IsTBC then
             frame:RegisterEvent("PLAYER_TALENT_UPDATE")
         end
         frame:RegisterEvent("SPELLS_CHANGED")
@@ -1057,8 +1217,8 @@ function lib:activate()
         end
     end
     initItemRequests()
-    self.frame:SetScript("OnEvent", function(frame, ...) self:OnEvent(...) end)
-    self.frame:SetScript("OnUpdate", function(frame, elapsed)
+    self.frame:SetScript("OnEvent", function(_, ...) self:OnEvent(...) end)
+    self.frame:SetScript("OnUpdate", function(_, elapsed)
         lastUpdate = lastUpdate + elapsed
         if lastUpdate < UpdateDelay then
             return

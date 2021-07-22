@@ -1,33 +1,31 @@
-local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
+local E, L, V, P, G = unpack(select(2, ...)) --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local S = E:GetModule('Skins')
 
---Cache global variables
---Lua functions
 local _G = _G
 local unpack, select = unpack, select
---WoW API / Variables
+
+local CreateFrame = CreateFrame
 local GetInboxHeaderInfo = GetInboxHeaderInfo
 local GetInboxItemLink = GetInboxItemLink
+local GetInboxNumItems = GetInboxNumItems
 local GetItemInfo = GetItemInfo
-local GetSendMailItem = GetSendMailItem
 local GetItemQualityColor = GetItemQualityColor
+local GetSendMailItem = GetSendMailItem
 local hooksecurefunc = hooksecurefunc
 
-local function LoadSkin()
-	if E.private.skins.blizzard.enable ~= true or E.private.skins.blizzard.mail ~= true then return end
+function S:MailFrame()
+	if not (E.private.skins.blizzard.enable and E.private.skins.blizzard.mail) then return end
 
 	-- Mail Frame / Inbox Frame
 	local MailFrame = _G.MailFrame
-	S:HandlePortraitFrame(MailFrame, true)
-	MailFrame.backdrop:Point('TOPLEFT', -5, 0)
-	MailFrame.backdrop:Point('BOTTOMRIGHT', -2, 0)
+	S:HandleFrame(MailFrame, true, nil, -5, 0, -2, 0)
 
-	_G.MailFrameCloseButton:Point('TOPRIGHT', MailFrame.backdrop, 'TOPRIGHT', 4, 3)
+	_G.MailFrameCloseButton:Point('TOPRIGHT', 0, 2)
 
 	_G.InboxFrameBg:StripTextures()
 	_G.MailFrameBg:StripTextures()
 
-	_G.InboxTitleText:Point('CENTER', InboxFrame, 'TOP', -10, -17)
+	_G.InboxTitleText:Point('CENTER', _G.InboxFrame, 'TOP', -10, -17)
 
 	for i = 1, _G.INBOXITEMS_TO_DISPLAY do
 		local mail = _G['MailItem'..i]
@@ -36,21 +34,15 @@ local function LoadSkin()
 
 		mail:StripTextures()
 		mail:CreateBackdrop('Default')
-		mail.backdrop:Point('TOPLEFT', 42, -2)
-		mail.backdrop:Point('BOTTOMRIGHT', -2, 6)
-
-		mail.bg = CreateFrame('Frame', nil, mail)
-		mail.bg:SetTemplate('Default', true)
-		mail.bg:Point('TOPLEFT', -2, -2)
-		mail.bg:Point('BOTTOMRIGHT', -270, 6)
-		mail.bg:SetFrameLevel(mail.bg:GetFrameLevel() - 2)
+		mail.backdrop:Point('TOPLEFT', 42, -3)
+		mail.backdrop:Point('BOTTOMRIGHT', -2, 5)
 
 		button:StripTextures()
+		button:SetTemplate()
 		button:StyleButton()
-		button:SetAllPoints(mail.bg)
 
 		icon:SetTexCoord(unpack(E.TexCoords))
-		icon:SetInside(mail.bg)
+		icon:SetInside()
 	end
 
 	hooksecurefunc('InboxFrame_Update', function()
@@ -70,18 +62,18 @@ local function LoadSkin()
 						local quality = select(3, GetItemInfo(ItemLink))
 
 						if quality and quality > 1 then
-							mail.bg:SetBackdropBorderColor(GetItemQualityColor(quality))
+							mail.backdrop:SetBackdropBorderColor(GetItemQualityColor(quality))
 						else
-							mail.bg:SetBackdropBorderColor(unpack(E.media.bordercolor))
+							mail.backdrop:SetBackdropBorderColor(unpack(E.media.bordercolor))
 						end
 					end
 				elseif isGM then
-					mail.bg:SetBackdropBorderColor(0, 0.56, 0.94)
+					mail.backdrop:SetBackdropBorderColor(0, 0.56, 0.94)
 				else
-					mail.bg:SetBackdropBorderColor(unpack(E.media.bordercolor))
+					mail.backdrop:SetBackdropBorderColor(unpack(E.media.bordercolor))
 				end
 			else
-				mail.bg:SetBackdropBorderColor(unpack(E.media.bordercolor))
+				mail.backdrop:SetBackdropBorderColor(unpack(E.media.bordercolor))
 			end
 
 			index = index + 1
@@ -183,7 +175,7 @@ local function LoadSkin()
 	-- Open Mail Frame
 	local OpenMailFrame = _G.OpenMailFrame
 	OpenMailFrame:StripTextures(true) -- stupid portrait
-	S:HandlePortraitFrame(OpenMailFrame, true)
+	S:HandleFrame(OpenMailFrame, true)
 	OpenMailFrame.backdrop:Point('TOPLEFT', -5, 0)
 	OpenMailFrame.backdrop:Point('BOTTOMRIGHT', -2, 0)
 
@@ -209,11 +201,13 @@ local function LoadSkin()
 
 	hooksecurefunc('OpenMailFrame_UpdateButtonPositions', function()
 		for i = 1, _G.ATTACHMENTS_MAX_RECEIVE do
-			local ItemLink = GetInboxItemLink(_G.InboxFrame.openMailID, i)
+			local itemLink = GetInboxItemLink(_G.InboxFrame.openMailID, i)
 			local button = _G['OpenMailAttachmentButton'..i]
 
-			if ItemLink then
-				local quality = select(3, GetItemInfo(ItemLink))
+			button:SetTemplate('NoBackdrop')
+
+			if itemLink then
+				local quality = select(3, GetItemInfo(itemLink))
 
 				if quality and quality > 1 then
 					button:SetBackdropBorderColor(GetItemQualityColor(quality))
@@ -269,4 +263,4 @@ local function LoadSkin()
 	_G.OpenMailMoneyButtonCount:SetDrawLayer('OVERLAY')
 end
 
-S:AddCallback('Mail', LoadSkin)
+S:AddCallback('MailFrame')

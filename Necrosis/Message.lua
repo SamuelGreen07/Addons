@@ -1,37 +1,7 @@
 --[[
-    Necrosis LdC
-    Copyright (C) 2005-2008  Lom Enfroy
-
-    This file is part of Necrosis LdC.
-
-    Necrosis LdC is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    Necrosis LdC is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with Necrosis LdC; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+    Necrosis 
+    Copyright (C) - copyright file included in this release
 --]]
-
-------------------------------------------------------------------------------------------------------
--- Necrosis LdC
--- Par Lomig (Kael'Thas EU/FR) & Tarcalion (Nagrand US/Oceanic)
--- Contributions deLiadora et Nyx (Kael'Thas et Elune EU/FR)
---
--- Skins et voix Françaises : Eliah, Ner'zhul
---
--- Version Allemande par Geschan
--- Version Espagnole par DosS (Zul’jin)
--- Version Russe par Komsomolka
---
--- Version $LastChangedDate: 2008-10-19 14:52:05 +1100 (Sun, 19 Oct 2008) $
-------------------------------------------------------------------------------------------------------
 
 -- One defines G as being the table containing all the existing frames.
 local _G = getfenv(0)
@@ -39,42 +9,44 @@ local _G = getfenv(0)
 ------------------------------------------------------------------------------------------------------
 -- Message handler (CONSOLE, CHAT, MESSAGE SYSTEM)
 ------------------------------------------------------------------------------------------------------
+--[[ As of Sep 2019, SendChatMessage was made hardware protected to public channels
+- SAY/YELL seems hardware event protected while outdoors but not inside instances/raids
+- public channels require hw events outdoors/indoors
+- WHISPER is unaffected
+--]]
 function Necrosis:Msg(msg, type)
+	if Necrosis.Debug.speech then
+		_G["DEFAULT_CHAT_FRAME"]:AddMessage(":Msg"
+		.." "..(tostring(type))..":"
+		.." '"..(tostring(msg)).."'"
+		)
+	end
+
 	if msg then
+		inInstance, _ = IsInInstance()
+
 		-- dispatch the message to the appropriate chat channel depending on the message type
 		if (type == "WORLD") then
-			local groupMembersCount = GetNumGroupMembers()
-
-			if (groupMembersCount > 5) then
+			if UnitInRaid("player") then
 				-- send to all raid members
 				SendChatMessage(msg, "RAID")
-			elseif (groupMembersCount > 0) then
+			elseif UnitInParty("player") then
 				-- send to party members
 				SendChatMessage(msg, "PARTY")
 			else
 				-- not in a group so lets use the 'say' channel
-				SendChatMessage(msg, "SAY")
+				if (inInstance) then SendChatMessage(msg, "SAY") end
 			end
-		elseif (type == "PARTY") then
-			SendChatMessage(msg, "PARTY")
-		elseif (type == "RAID") then
-			SendChatMessage(msg, "RAID")
-		elseif (type == "SAY") then
-			SendChatMessage(msg, "SAY")
-		elseif (type == "EMOTE") then
-			SendChatMessage(msg, "EMOTE")
-		elseif (type == "YELL") then
-			SendChatMessage(msg, "YELL")
 		else
 			-- Add some color to our message :D
 			msg = self:MsgAddColor(msg)
-			local Intro = "|CFFFF00FFNe|CFFFF50FFcr|CFFFF99FFos|CFFFFC4FFis|CFFFFFFFF: "
+			local Intro = "|CFFFF00FFNe|CFFFF50FFcr|CFFFF99FFos|CFFFFC4FFis|CFFFFFFFF: "..msg.."|r"
 			if NecrosisConfig.ChatType then
 				-- ...... on the first chat frame
-				ChatFrame1:AddMessage(Intro..msg, 1.0, 0.7, 1.0, 1.0, UIERRORS_HOLD_TIME)
+				ChatFrame1:AddMessage(Intro, 1.0, 0.7, 1.0, 1.0, UIERRORS_HOLD_TIME)
 			else
 				-- ...... on the middle of the screen
-				UIErrorsFrame:AddMessage(Intro..msg, 1.0, 0.7, 1.0, 1.0, UIERRORS_HOLD_TIME)
+				UIErrorsFrame:AddMessage(Intro, 1.0, 0.7, 1.0, 1.0, UIERRORS_HOLD_TIME)
 			end
 		end
 	end
@@ -139,29 +111,65 @@ end
 ------------------------------------------------------------------------------------------------------
 -- Replace user-friendly string variables in the invocation messages
 ------------------------------------------------------------------------------------------------------
-function Necrosis:MsgReplace(msg, target, pet)
-	msg = msg:gsub("<player>", UnitName("player"))
+local function MsgReplace(msg, player, target, pet)
 	msg = msg:gsub("<emote>", "")
 	msg = msg:gsub("<after>", "")
 	msg = msg:gsub("<sacrifice>", "")
 	msg = msg:gsub("<yell>", "")
-	if target then
+
+		msg = msg:gsub("<player>", player)
 		msg = msg:gsub("<target>", target)
+		msg = msg:gsub("<pet>", pet)
+
+	if Necrosis.Debug.speech then
+		_G["DEFAULT_CHAT_FRAME"]:AddMessage("MsgReplace"
+		.." '"..(tostring(msg) or "nyl").."'"
+		)
 	end
-	if pet and NecrosisConfig.PetName[pet] then
-		msg = msg:gsub("<pet>", NecrosisConfig.PetName[pet])
-	end
+
 	return msg
 end
 
+local function Out(Spell, Speech, msg, style)
+	local player = UnitName("player") or UNKNOWN
+	local target = Spell.TargetName or UNKNOWN
+	local pet = Speech.DemonName or UNKNOWN
+	local s = style or "USER"
+	
+	if Necrosis.Debug.speech then
+		_G["DEFAULT_CHAT_FRAME"]:AddMessage("Out"
+		.." n'"..(tostring(player)).."'"
+		.." t'"..(tostring(target)).."'"
+		.." p'"..(tostring(pet)).."'"
+		.." s'"..(tostring(s).."'")
+		)
+	end
+
+	Necrosis:Msg(MsgReplace(msg, player, target, pet), style)
+end
 ------------------------------------------------------------------------------------------------------
 -- Handles the posting of messages while casting a spell.
 ------------------------------------------------------------------------------------------------------
 function Necrosis:Speech_It(Spell, Speeches, metatable)
+	if Necrosis.Debug.speech then
+		_G["DEFAULT_CHAT_FRAME"]:AddMessage("Speech_It ::"
+		.." sum'"..tostring(NecrosisConfig.PlayerSummons).."'"
+		.." dem'"..tostring(NecrosisConfig.DemonSummon).."'"
+		.." soul'"..tostring(NecrosisConfig.RoSSummon).."'"
+		)
+		_G["DEFAULT_CHAT_FRAME"]:AddMessage("Speech_It"
+		.." n'"..(tostring(Spell.Name) or "nyl").."'"
+		.." mnt'"..(tostring(Necrosis.IsSpellMount(Spell.Name)) or "nyl").."'"
+		.." rez'"..(tostring(Necrosis.IsSpellRez(Spell.Name)) or "nyl").."'"
+		.." sum'"..(tostring(Spell.Name == Necrosis.GetSpellName("summoning")) or "nyl").."'"
+		.." dem'"..(tostring(Necrosis.IsSpellDemon(Spell.Name)) or "nyl").."'"
+		)
+	end
+
 	-- messages to be posted while summoning a mount
-	if (Spell.Name == Necrosis.Spell[1].Name or Spell.Name == Necrosis.Spell[2].Name) then
+	if Necrosis.IsSpellMount(Spell.Name) then -- 1 or 2 
 		Speeches.SpellSucceed.Steed = setmetatable({}, metatable)
-		if NecrosisConfig.SteedSummon and NecrosisConfig.ChatMsg and self.Speech.Demon[7] and not NecrosisConfig.SM then
+		if NecrosisConfig.SteedSummon and NecrosisConfig.ChatMsg and self.Speech.Demon[7] then
 			local tempnum = math.random(1, #self.Speech.Demon[7])
 			while tempnum == Speeches.LastSpeech.Steed and #self.Speech.Demon[7] >= 2 do
 				tempnum = math.random(1, #self.Speech.Demon[7])
@@ -170,226 +178,203 @@ function Necrosis:Speech_It(Spell, Speeches, metatable)
 			for i in ipairs(self.Speech.Demon[7][tempnum]) do
 				if self.Speech.Demon[7][tempnum][i]:find("<after>") then
 					Speeches.SpellSucceed.Steed:insert(self.Speech.Demon[7][tempnum][i])
-				elseif self.Speech.Demon[7][tempnum][i]:find("<emote>") then
-					self:Msg(self:MsgReplace(self.Speech.Demon[7][tempnum][i]), "EMOTE")
-				elseif self.Speech.Demon[7][tempnum][i]:find("<yell>") then
-					self:Msg(self:MsgReplace(self.Speech.Demon[7][tempnum][i]), "YELL")
 				else
-					self:Msg(self:MsgReplace(self.Speech.Demon[7][tempnum][i]), "SAY")
-				end
-			end
-		end
-	-- messsages to be posted while casting 'Ritual of Souls' -Draven (April 3rd, 2008)
-	elseif Spell.Name == Necrosis.Spell[50].Name then
-		Speeches.SpellSucceed.RoS = setmetatable({}, metatable)
-		if (NecrosisConfig.ChatMsg or NecrosisConfig.SM) and NecrosisConfig.RoSSummon and self.Speech.RoS then
-			local tempnum = math.random(1, #self.Speech.RoS)
-			while tempnum == Speeches.LastSpeech.RoS and #self.Speech.RoS >= 2 do
-				tempnum = math.random(1, #self.Speech.RoS)
-			end
-			Speeches.LastSpeech.RoS = tempnum
-			for i in ipairs(self.Speech.RoS[tempnum]) do
-				if self.Speech.RoS[tempnum][i]:find("<after>") then
-					Speeches.SpellSucceed.RoS:insert(self.Speech.RoS[tempnum][i])
-				elseif self.Speech.RoS[tempnum][i]:find("<emote>") then
-					self:Msg(self:MsgReplace(self.Speech.RoS[tempnum][i]), "EMOTE")
-				elseif self.Speech.RoS[tempnum][i]:find("<yell>") then
-					self:Msg(self:MsgReplace(self.Speech.RoS[tempnum][i]), "YELL")
-				else
-					self:Msg(self:MsgReplace(self.Speech.RoS[tempnum][i]), "WORLD")
+					Out(Spell, Speeches, self.Speech.Demon[7][tempnum][i], "WORLD")
 				end
 			end
 		end
 	-- messages to be posted while casting 'Soulstone' on a friendly target
-	elseif Spell.Name == Necrosis.Spell[11].Name and not (Spell.TargetName == UnitName("player")) then
+	elseif Necrosis.IsSpellRez(Spell.Name) -- 11  
+--		and not (Spell.TargetName == UnitName("player")) 
+		then
+			local tempnum = 1
 		Speeches.SpellSucceed.Rez = setmetatable({}, metatable)
-		if (NecrosisConfig.ChatMsg or NecrosisConfig.SM) and self.Speech.Rez then
-			local tempnum = math.random(1, #self.Speech.Rez)
-			while tempnum == Speeches.LastSpeech.Rez and #self.Speech.Rez >= 2 do
+		if NecrosisConfig.PlayerSS and NecrosisConfig.ChatMsg and self.Speech.Rez then
+			if NecrosisConfig.PlayerSSSM then
+				tempnum = 0 -- short message
+			else
 				tempnum = math.random(1, #self.Speech.Rez)
+				-- do not use the same speech twice in a row
+				while tempnum == Speeches.LastSpeech.Rez and #self.Speech.Rez >= 3 do
+					tempnum = math.random(1, #self.Speech.Rez)
+				end
 			end
 			Speeches.LastSpeech.Rez = tempnum
 			for i in ipairs(self.Speech.Rez[tempnum]) do
 				if self.Speech.Rez[tempnum][i]:find("<after>") then
 					Speeches.SpellSucceed.Rez:insert(self.Speech.Rez[tempnum][i])
-				elseif self.Speech.Rez[tempnum][i]:find("<emote>") then
-					self:Msg(self:MsgReplace(self.Speech.Rez[tempnum][i], Spell.TargetName), "EMOTE")
-				elseif self.Speech.Rez[tempnum][i]:find("<yell>") then
-					self:Msg(self:MsgReplace(self.Speech.Rez[tempnum][i], Spell.TargetName), "YELL")
 				else
-					self:Msg(self:MsgReplace(self.Speech.Rez[tempnum][i], Spell.TargetName), "WORLD")
+					Out(Spell, Speeches, self.Speech.Rez[tempnum][i], "WORLD")
 				end
 			end
 		end
+--[[
+_G["DEFAULT_CHAT_FRAME"]:AddMessage("Speech_It SS::::"
+.." chat'"..tostring(NecrosisConfig.ChatMsg).."'"
+.." sum'"..tostring(NecrosisConfig.PlayerSS).."'"
+.." SM'"..tostring(NecrosisConfig.PlayerSSSM).."'"
+.." #'"..tostring(tempnum).."'"
+)
+--]]
 	-- messages to be posted while casting 'Ritual of Summoning'
-	elseif Spell.Name == Necrosis.Spell[37].Name then
+	elseif Spell.Name == Necrosis.GetSpellName("summoning") then -- 37
+			local tempnum = 1
+		-- Output the victim if in party or raid
 		Speeches.SpellSucceed.TP = setmetatable({}, metatable)
-		if (NecrosisConfig.ChatMsg or NecrosisConfig.SM) and self.Speech.TP then
-			local tempnum = math.random(1, #self.Speech.TP)
-			while tempnum == Speeches.LastSpeech.TP and #self.Speech.TP >= 2 do
+		if NecrosisConfig.PlayerSummons and NecrosisConfig.ChatMsg then
+			if NecrosisConfig.PlayerSummonsSM then
+				tempnum = 0 -- short message
+			else
 				tempnum = math.random(1, #self.Speech.TP)
+				-- do not use the same speech twice in a row
+				while tempnum == Speeches.LastSpeech.TP and #self.Speech.TP >= 3 do
+					tempnum = math.random(1, #self.Speech.TP)
+				end
 			end
 			Speeches.LastSpeech.TP = tempnum
 			for i in ipairs(self.Speech.TP[tempnum]) do
 				if self.Speech.TP[tempnum][i]:find("<after>") then
 					Speeches.SpellSucceed.TP:insert(self.Speech.TP[tempnum][i])
-				elseif self.Speech.TP[tempnum][i]:find("<emote>") then
-					self:Msg(self:MsgReplace(self.Speech.TP[tempnum][i], Spell.TargetName), "EMOTE")
-				elseif self.Speech.TP[tempnum][i]:find("<yell>") then
-					self:Msg(self:MsgReplace(self.Speech.TP[tempnum][i], Spell.TargetName), "YELL")
 				else
-					self:Msg(self:MsgReplace(self.Speech.TP[tempnum][i], Spell.TargetName), "WORLD")
+					Out(Spell, Speeches, self.Speech.TP[tempnum][i], "WORLD")
 				end
 			end
 		end
+--[[
+_G["DEFAULT_CHAT_FRAME"]:AddMessage("Speech_It summon::::"
+.." chat'"..tostring(NecrosisConfig.ChatMsg).."'"
+.." sum'"..tostring(NecrosisConfig.PlayerSummons).."'"
+.." SM'"..tostring(NecrosisConfig.PlayerSummonsSM).."'"
+.." #'"..tostring(tempnum).."'"
+)
+--]]
 		AlphaBuffMenu = 1
 		AlphaBuffVar = GetTime() + 3
 	-- messages to be posted while summoning a pet demon
-	else for type = 3, 7, 1 do
-		if Spell.Name == Necrosis.Spell[type].Name then
-			Speeches.SpellSucceed.Pet = setmetatable({}, metatable)
-			Speeches.SpellSucceed.Sacrifice = setmetatable({}, metatable)
-			Speeches.DemonName = type - 2
-			if NecrosisConfig.DemonSummon and NecrosisConfig.ChatMsg and not NecrosisConfig.SM then
-				local generalSpeechNum = math.random(1, 10) -- show general speech if num is 9 or 10
+	elseif Necrosis.IsSpellDemon(Spell.Name) then
+		Speeches.SpellSucceed.Pet = setmetatable({}, metatable)
+		Speeches.SpellSucceed.Sacrifice = setmetatable({}, metatable)
+		
+		local id, usage, timer = Necrosis.GetSpellByName(Spell.Name)
+		Speeches.DemonName = NecrosisConfig.PetInfo[usage] or "" 
+		if usage -- safety...
+		then
+			if usage == "imp" then Speeches.DemonId = 1 
+			elseif usage == "voidwalker" then Speeches.DemonId = 2 
+			elseif usage == "succubus"   then Speeches.DemonId = 3 
+			elseif usage == "felhunter"  then Speeches.DemonId = 4 
+			else -- should never happen...
+			end
+		else
+			-- should never happen...
+		end
 
-				if (not NecrosisConfig.PetName[Speeches.DemonName] or generalSpeechNum > 8) and self.Speech.Demon[6] then
-					local tempnum = math.random(1, #self.Speech.Demon[6])
-					while tempnum == Speeches.LastSpeech.Pet and #self.Speech.Demon[6] >= 2 do
-						tempnum = math.random(1, #self.Speech.Demon[6])
+		if NecrosisConfig.DemonSummon and NecrosisConfig.ChatMsg then
+			local generalSpeechNum = math.random(1, 10) -- show general speech if num is 9 or 10
+
+			local dn = 0
+			if (NecrosisConfig.PetInfo[usage] == "" or generalSpeechNum > 8) and self.Speech.Demon[6] then
+				dn = 6
+			elseif self.Speech.Demon[Speeches.DemonId] then
+				dn = Speeches.DemonId
+			else
+				dn = 0 -- ??
+			end
+
+			if dn > 0 then
+				local tempnum = math.random(1, #self.Speech.Demon[dn])
+				while tempnum == Speeches.LastSpeech.Pet and #self.Speech.Demon[dn] >= 2 do
+					tempnum = math.random(1, #self.Speech.Demon[dn])
+				end
+				if Necrosis.Debug.speech then
+					_G["DEFAULT_CHAT_FRAME"]:AddMessage("Speech_It summon "
+						.." '"..(tostring(Spell.Name)).."'"
+						.." '"..(tostring(Speeches.DemonName)).."'"
+						.." '"..(tostring(Speeches.DemonId)).."'"
+						.." #'"..(tostring(generalSpeechNum)).."'"
+						.." #'"..(tostring(dn)).."'"
+						.." '"..(tostring(NecrosisConfig.PetName[dn])).."'"
+						.." picked #'"..(tostring(tempnum) or "nyl").."'"
+						.." last #'"..(tostring(Speeches.LastSpeech.Pet) or "nyl").."'"
+					)
+				end
+				Speeches.LastSpeech.Pet = tempnum
+				for i in ipairs(self.Speech.Demon[dn][tempnum]) do
+					if Necrosis.Debug.speech then
+						_G["DEFAULT_CHAT_FRAME"]:AddMessage("Speech_It summon "
+						.." i'"..(tostring(i) or "nyl").."'"
+						.." '"..(tostring(self.Speech.Demon[dn][tempnum][i]) or "nyl").."'"
+						)
 					end
-					Speeches.LastSpeech.Pet = tempnum
-					for i in ipairs(self.Speech.Demon[6][tempnum]) do
-						if self.Speech.Demon[6][tempnum][i]:find("<after>") then
-							Speeches.SpellSucceed.Pet:insert(self.Speech.Demon[6][tempnum][i])
-						elseif self.Speech.Demon[6][tempnum][i]:find("<sacrifice>")then
-							Speeches.SpellSucceed.Sacrifice:insert(self.Speech.Demon[6][tempnum][i])
-						elseif self.Speech.Demon[6][tempnum][i]:find("<emote>") then
-							self:Msg(self:MsgReplace(self.Speech.Demon[6][tempnum][i]), "EMOTE")
-						elseif self.Speech.Demon[6][tempnum][i]:find("<yell>") then
-							self:Msg(self:MsgReplace(self.Speech.Demon[6][tempnum][i]), "YELL")
-						else
-							self:Msg(self:MsgReplace(self.Speech.Demon[6][tempnum][i]), "SAY")
-						end
-					end
-				elseif self.Speech.Demon[Speeches.DemonName] then
-					local tempnum = math.random(1, #self.Speech.Demon[Speeches.DemonName])
-					while tempnum == Speeches.LastSpeech.Pet and #self.Speech.Demon[Speeches.DemonName] >= 2 do
-						tempnum = math.random(1, #self.Speech.Demon[Speeches.DemonName])
-					end
-					Speeches.LastSpeech.Pet = tempnum
-					for i in ipairs(self.Speech.Demon[Speeches.DemonName][tempnum]) do
-						if self.Speech.Demon[Speeches.DemonName][tempnum][i]:find("<after>") then
-							Speeches.SpellSucceed.Pet:insert(
-								self.Speech.Demon[Speeches.DemonName][tempnum][i]
-							)
-						elseif self.Speech.Demon[Speeches.DemonName][tempnum][i]:find("<sacrifice>")then
-							Speeches.SpellSucceed.Sacrifice:insert(
-								self.Speech.Demon[Speeches.DemonName][tempnum][i]
-							)
-						elseif self.Speech.Demon[Speeches.DemonName][tempnum][i]:find("<emote>") then
-							self:Msg(self:MsgReplace(self.Speech.Demon[Speeches.DemonName][tempnum][i], nil , Speeches.DemonName), "EMOTE")
-						elseif self.Speech.Demon[Speeches.DemonName][tempnum][i]:find("<yell>") then
-							self:Msg(self:MsgReplace(self.Speech.Demon[Speeches.DemonName][tempnum][i], nil , Speeches.DemonName), "YELL")
-						else
-							self:Msg(self:MsgReplace(self.Speech.Demon[Speeches.DemonName][tempnum][i], nil , Speeches.DemonName), "SAY")
-						end
+					if self.Speech.Demon[dn][tempnum][i]:find("<after>") then
+						Speeches.SpellSucceed.Pet:insert(
+							self.Speech.Demon[dn][tempnum][i]
+						)
+					elseif self.Speech.Demon[dn][tempnum][i]:find("<sacrifice>")then
+						Speeches.SpellSucceed.Sacrifice:insert(
+							self.Speech.Demon[dn][tempnum][i]
+						)
+					else
+						Out(Spell, Speeches, self.Speech.Demon[dn][tempnum][i], "WORLD")
 					end
 				end
 			end
-			AlphaPetMenu = 1
-			AlphaPetVar = GetTime() + 3
 		end
-	end end
+		AlphaPetMenu = 1
+		AlphaPetVar = GetTime() + 3
+	end
 	return Speeches
 end
 
 ------------------------------------------------------------------------------------------------------
 -- Handles the posting of messages after a spell has been cast.
 ------------------------------------------------------------------------------------------------------
-function Necrosis:Speech_Then(Spell, DemonName, Speech)
--- TODO need to be fixed ..
+function Necrosis:Speech_Then(Spell, Speech)
+	if Necrosis.Debug.speech then
+		_G["DEFAULT_CHAT_FRAME"]:AddMessage("Speech_Then"
+		.." n'"..(tostring(Spell.Name) or "nyl").."'"
+		.." mnt'"..(tostring(Necrosis.IsSpellMount(Spell.Name)) or "nyl").."'"
+		.." rez'"..(tostring(Necrosis.IsSpellRez(Spell.Name)) or "nyl").."'"
+		.." sum'"..(tostring(Spell.Name == Necrosis.GetSpellName("summoning")) or "nyl").."'"
+		.." dem'"..(tostring(Necrosis.IsSpellDemon(Spell.Name)) or "nyl").."'"
+		)
+	end
+	
 	-- messages to be posted after a mount is summoned.
-	if (Spell.Name == Necrosis.Spell[1].Name or Spell.Name == Necrosis.Spell[2].Name) then
-		for i in ipairs(Speech.Steed) do
-			if Speech.Steed[i]:find("<emote>") then
-				self:Msg(self:MsgReplace(Speech.Steed[i]), "EMOTE")
-			elseif Speech.Steed[i]:find("<yell>") then
-				self:Msg(self:MsgReplace(Speech.Steed[i]), "YELL")
-			else
-				self:Msg(self:MsgReplace(Speech.Steed[i]), "WORLD")
-			end
+	if Necrosis.IsSpellMount(Spell.Name) then -- 1 or 2 
+		for i in ipairs(Speech.SpellSucceed.Steed) do
+			Out(Spell, Speech.SpellSucceed, Speech.Steed[i], "USER")
 		end
 		Speech.Steed = {}
-		if _G["NecrosisMountButton"] then
-			NecrosisMountButton:SetNormalTexture("Interface\\Addons\\Necrosis\\UI\\MountButton-02")
+		local f = _G[Necrosis.Warlock_Buttons.mounts.f]
+		if f then
+			f:SetNormalTexture("Interface\\Addons\\Necrosis\\UI\\MountButton-02")
 		end
-	-- messages to be posted after a 'Ritual of Souls' is cast -Draven (April 3rd, 2008)
-	elseif Spell.Name == Necrosis.Spell[50].Name then
-		for i in ipairs(Speech.RoS) do
-			if Speech.RoS[i]:find("<emote>") then
-				self:Msg(self:MsgReplace(Speech.RoS[i]), "EMOTE")
-			elseif Speech.RoS[i]:find("<yell>") then
-				self:Msg(self:MsgReplace(Speech.RoS[i]), "YELL")
-			else
-				self:Msg(self:MsgReplace(Speech.RoS[i]), "WORLD")
-			end
-		end
-		Speech.RoS = {}
 	-- messages to be posted after 'Soulstone' is cast
-	elseif Spell.Name == Necrosis.Spell[11].Name then
-		for i in ipairs(Speech.Rez) do
-			if Speech.Rez[i]:find("<emote>") then
-				self:Msg(self:MsgReplace(Speech.Rez[i], Spell.TargetName), "EMOTE")
-			elseif Speech.Rez[i]:find("<yell>") then
-				self:Msg(self:MsgReplace(Speech.Rez[i], Spell.TargetName), "YELL")
-			else
-				self:Msg(self:MsgReplace(Speech.Rez[i], Spell.TargetName), "WORLD")
-			end
+	elseif Necrosis.IsSpellRez(Spell.Name) then -- 11
+		for i in ipairs(Speech.SpellSucceed.Rez) do
+			Out(Spell, Speech, Speech.SpellSucceed.Rez[i], "WORLD")
 		end
 		Speech.Rez = {}
 	-- messages to be posted after 'Ritual of Summoning' is cast
-	elseif (Spell.Name == Necrosis.Spell[37].Name) then
-		for i in ipairs(Speech.TP) do
-			if Speech.TP[i]:find("<emote>") then
-				self:Msg(self:MsgReplace(Speech.TP[i], Spell.TargetName), "EMOTE")
-			elseif Speech.TP[i]:find("<yell>") then
-				self:Msg(self:MsgReplace(Speech.TP[i], Spell.TargetName), "YELL")
-			else
-				self:Msg(self:MsgReplace(Speech.TP[i], Spell.TargetName), "WORLD")
-			end
+	elseif Spell.Name == Necrosis.GetSpellName("summoning") then -- 37 
+		for i in ipairs(Speech.SpellSucceed.TP) do
+			Out(Spell, Speech, Speech.SpellSucceed.TP[i], "WORLD")
 		end
 		Speech.TP = {}
 	-- messages to be posted after sacrificing a demon
-	elseif Spell.Name == Necrosis.Spell[44].Name then
-		for i in ipairs(Speech.Sacrifice) do
-			if Speech.Sacrifice[i]:find("<emote>") then
-				self:Msg(self:MsgReplace(Speech.Sacrifice[i], nil, DemonName), "EMOTE")
-			elseif Speech.Sacrifice[i]:find("<yell>") then
-				self:Msg(self:MsgReplace(Speech.Sacrifice[i], nil, DemonName), "YELL")
-			else
-				self:Msg(self:MsgReplace(Speech.Sacrifice[i], nil, DemonName), "SAY")
-			end
+	elseif Spell.Name == Necrosis.GetSpellName("sacrifice") then -- 44 
+		for i in ipairs(Speech.SpellSucceed.Sacrifice) do
+			Out(Spell, Speech, Speech.SpellSucceed.Sacrifice[i], "WORLD")
 		end
 		Speech.Sacrifice = {}
 	-- messages to be posted after summoning a demon
-	elseif Spell.Name == Necrosis.Spell[3].Name
-			or Spell.Name == Necrosis.Spell[4].Name
-			or Spell.Name == Necrosis.Spell[5].Name
-			or Spell.Name == Necrosis.Spell[6].Name
-			or Spell.Name == Necrosis.Spell[7].Name
-			then
-				for i in ipairs(Speech.Pet) do
-					if Speech.Pet[i]:find("<emote>") then
-						self:Msg(self:MsgReplace(Speech.Pet[i], nil, DemonName), "EMOTE")
-					elseif Speech.Pet[i]:find("<yell>") then
-						self:Msg(self:MsgReplace(Speech.Pet[i], nil, DemonName), "YELL")
-					else
-						self:Msg(self:MsgReplace(Speech.Pet[i], nil, DemonName), "SAY")
-					end
-				end
-				Speech.Pet = {}
+	elseif Necrosis.IsSpellDemon(Spell.Name) then
+		for i in ipairs(Speech.SpellSucceed.Pet) do
+			Out(Spell, Speech, Speech.SpellSucceed.Pet[i], "WORLD")
+		end
+		Speech.Pet = {}
 	end
 
-	return Speech
+	return Speech.SpellSucceed
 end
