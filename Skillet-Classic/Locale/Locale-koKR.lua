@@ -51,6 +51,10 @@ L["can be created from reagents on all characters"] = ": 모든 캐릭터에 있
 L["can be created from reagents on other characters"] = ": 다른 캐릭터의 재료로 제작 가능 "
 L["can be created with reagents bought at vendor"] = ": 상점에서 구입한 재료로 제작 가능 "
 L["Changing profession to"] = "전문기술 변경 :"
+--[[Translation missing --]]
+L["CLAMPTOSCREENDESC"] = "Force frames to remain on screen"
+--[[Translation missing --]]
+L["CLAMPTOSCREENNAME"] = "Clamp frames to screen"
 L["Clear"] = "초기화"
 L["Click"] = "클릭"
 L["click here to add a note"] = "클릭하면 메모를 남길 수 있습니다."

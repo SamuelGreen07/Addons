@@ -197,7 +197,8 @@ Necrosis.TooltipData = {
 	["SpellTimer"] = {
 		Label = L["SPELLTIMER_LABEL"],
 		Text = L["SPELLTIMER_TEXT"],
-		Right = L["SPELLTIMER_RIGHT"]
+		Right = L["SPELLTIMER_RIGHT"],
+		Left = L["SPELLTIMER_LEFT"]
 	},
 	["ShadowTrance"] = {
 		Label = L["SHADOW_TRANCE_LABEL"]
@@ -245,9 +246,15 @@ Necrosis.TooltipData = {
 	},
 	["CurseMenu"] = {
 		Label = L["CURSE_MENU_LABEL"],
-		Text = L["CURSE_MENU_TEXT_1"],
+		Text = L["CURSE_MENU_LABEL"],
 		Text2 = L["CURSE_MENU_TEXT_2"],
 	},
+	
+	["DestroyShards"] = {
+		Label = L["DESTROY_SHARD_MENU_LABEL"],
+		Text = L["DESTROY_SHARD_MENU_TEXT"],
+	},
+	
 	["DominationCooldown"] = L["DOMINATION_COOLDOWN"],
 	-- These are filled when the frame is created and the localized spell names are known
 	-- curses
@@ -401,6 +408,7 @@ Necrosis.Config.Sphere.Colour = {
 	L["ORANGE"],
 	L["TURQUOISE"],
 	L["PURPLE"],
+	L["PURPLE2"],	
 	L["666"],
 	L["X"],
 }
@@ -432,6 +440,7 @@ Necrosis.Config.Buttons.Name = {
 	L["SHOW_STEED"],
 	L["SHOW_DEMON"],
 	L["SHOW_CURSE"],
+	L["SHOW_DESTROY_SHARDS"],
 }
 
 Necrosis.Config.Menus = {
@@ -455,6 +464,7 @@ Necrosis.Config.Menus.Orientation = {
 Necrosis.Config.Timers = {
 	["Type de timers"] = L["TIMER_TYPE"],
 	["Afficher le bouton des timers"] = L["TIMER_SPELL"],
+	["Transparence des timers"] = L["TIMER_ALPHA"],	
 	["Afficher les timers sur la gauche du bouton"] = L["TIMER_LEFT"],
 	["Afficher les timers de bas en haut"] = L["TIMER_UP"],
 }

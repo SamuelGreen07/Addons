@@ -63,9 +63,10 @@ local defaults = {
 		display_required_level = false,
 		display_item_level = false,
 		display_shopping_list_at_bank = true,
-		display_shopping_list_at_guildbank = false,		-- not in Classic, disabled (for now) in BCC
 		display_shopping_list_at_auction = true,
 		display_shopping_list_at_merchant = true,
+		display_shopping_list_at_guildbank = false,		-- in BCC only
+		use_guildbank_as_alt = false,					-- in BCC only
 		use_blizzard_for_followers = false,				-- not in Classic
 		hide_blizzard_frame = true,						-- primarily for debugging
 		support_crafting = true,
@@ -75,6 +76,7 @@ local defaults = {
 		search_includes_reagents = true,
 		confirm_queue_clear = false,
 		queue_only_view = true,
+		clamp_to_screen = true,
 		scale_tooltip = false,
 		transparency = 1.0,
 		scale = 1.0,
@@ -176,6 +178,13 @@ function Skillet:EnableBlizzardFrame()
 	end
 end
 
+function Skillet:RefreshConfig(event, database, profile)
+	DA.CHAT("RefreshConfig("..tostring(event)..", "..tostring(profile)..")")
+--
+-- Would do some stuff here
+--
+end
+
 --
 -- Called when the addon is loaded
 --
@@ -199,7 +208,11 @@ function Skillet:OnInitialize()
 	DA.DebugLog = SkilletDBPC
 	DA.DebugProfile = SkilletProfile
 	self.db = AceDB:New("SkilletDB", defaults)
-
+	self.db.RegisterCallback(self, "OnProfileChanged", "RefreshConfig")
+	self.db.RegisterCallback(self, "OnProfileCopied", "RefreshConfig")
+	self.db.RegisterCallback(self, "OnProfileReset", "RefreshConfig")
+	self.db.RegisterCallback(self, "OnNewProfile", "RefreshConfig")
+	self.db.RegisterCallback(self, "OnProfileDeleted", "RefreshConfig")
 --
 -- Clean up obsolete data
 --
@@ -278,16 +291,9 @@ function Skillet:OnInitialize()
 	if not self.db.global.SkillLevels then
 		self:InitializeSkillLevels()
 	end
-
---
--- Classic doesn't have a Guild Bank
--- Currently this only effects ShoppingList.lua
---
---[[
 	if not self.db.global.cachedGuildbank then
 		self.db.global.cachedGuildbank = {}
 	end
-]]--
 
 --
 -- Hook default tooltips
@@ -531,6 +537,12 @@ function Skillet:InitializeDatabase(player, clean)
 		if not self.db.realm.faction then
 			self.db.realm.faction = {}
 		end
+		if not self.db.realm.race then
+			self.db.realm.race = {}
+		end
+		if not self.db.realm.class then
+			self.db.realm.class = {}
+		end
 		if not self.db.realm.guid then
 			self.db.realm.guid = {}
 		end
@@ -652,11 +664,13 @@ function Skillet:OnEnable()
 	self:RegisterEvent("BANKFRAME_OPENED")
 	self:RegisterEvent("PLAYERBANKSLOTS_CHANGED")
 	self:RegisterEvent("BANKFRAME_CLOSED")
---[[
-	self:RegisterEvent("GUILDBANKFRAME_OPENED")
-	self:RegisterEvent("GUILDBANKBAGSLOTS_CHANGED")
-	self:RegisterEvent("GUILDBANKFRAME_CLOSED")
-]]--
+
+	if isBCC then
+		self:RegisterEvent("GUILDBANKFRAME_OPENED")
+		self:RegisterEvent("GUILDBANKBAGSLOTS_CHANGED")
+		self:RegisterEvent("GUILDBANKFRAME_CLOSED")
+	end
+
 	self:RegisterEvent("AUCTION_HOUSE_SHOW")
 	self:RegisterEvent("AUCTION_HOUSE_CLOSED")
 --
@@ -705,8 +719,8 @@ function Skillet:OnEnable()
 -- run the upgrade code to convert any old settings
 --
 	self:UpgradeDataAndOptions()
-
 	self:CollectTradeSkillData()
+	self:CollectCurrencyData()
 	self:ScanPlayerTradeSkills()
 	self:CreateAdditionalButtonsList()
 	self:EnablePlugins()
@@ -723,6 +737,8 @@ function Skillet:PLAYER_ENTERING_WORLD()
 	local player = UnitName("player")
 	local realm = GetRealmName()
 	local faction = UnitFactionGroup("player")
+	local raceName, raceFile, raceID = UnitRace("player")
+	local className, classFile, classId = UnitClass("player")
 	local guid = UnitGUID("player")		-- example: guid="Player-970-0002FD64" kind=="Player" server=="970" ID="0002FD64" 
 --
 -- PLAYER_ENTERING_WORLD happens on login and when changing zones so
@@ -737,6 +753,11 @@ function Skillet:PLAYER_ENTERING_WORLD()
 	SkilletWho.player = player
 	SkilletWho.realm = realm
 	SkilletWho.faction = faction
+	SkilletWho.raceFile = raceFile
+	SkilletWho.classFile = classFile
+	self.db.realm.faction[player] = faction
+	self.db.realm.race[player] = raceFile
+	self.db.realm.class[player] = classFile
 	SkilletWho.guid = guid
 	if guid then
 		local kind, server, ID = strsplit("-", guid)
@@ -747,7 +768,6 @@ function Skillet:PLAYER_ENTERING_WORLD()
 -- Skillet.db.global.* data indexed by server.
 --
 		self.db.realm.guid[player]= guid
-		self.db.realm.faction[player] = faction
 		if (server) then
 			self.data.server = server
 			self.data.realm = realm
@@ -834,7 +854,6 @@ function Skillet:TRADE_SKILL_UPDATE()
 		if Skillet.lastCraft ~= Skillet.isCraft then
 			Skillet:ConfigureRecipeControls()
 		end
-		Skillet:AdjustInventory()
 	end
 	DA.TRACE("TRADE_SKILL_UPDATE: dataSourceChanged= "..tostring(Skillet.dataSourceChanged)..", dataScanned= "..tostring(Skillet.dataScanned))
 	if Skillet.dataSourceChanged or not Skillet.dataScanned then
@@ -845,7 +864,9 @@ end
 
 function Skillet:CRAFT_UPDATE()
 	DA.TRACE("CRAFT_UPDATE")
-	Skillet.craftUpdate = Skillet.craftUpdate + 1
+	if Skillet.craftUpdate then
+		Skillet.craftUpdate = Skillet.craftUpdate + 1
+	end
 	DA.TRACE("CRAFT_UPDATE: closingTrade= "..tostring(Skillet.closingTrade)..", tradeShow= "..tostring(Skillet.tradeShow)..", craftUpdate= "..tostring(Skillet.craftUpdate))
 	if Skillet.closingTrade or not Skillet.craftShow then return end
 --	if Skillet.craftUpdate < 2 then return end
@@ -853,7 +874,6 @@ function Skillet:CRAFT_UPDATE()
 		if Skillet.lastCraft ~= Skillet.isCraft then
 			Skillet:ConfigureRecipeControls()
 		end
-		Skillet:AdjustInventory()
 	end
 	DA.TRACE("CRAFT_UPDATE: dataSourceChanged= "..tostring(Skillet.dataSourceChanged)..", dataScanned= "..tostring(Skillet.dataScanned))
 	if Skillet.dataSourceChanged or not Skillet.dataScanned then
@@ -1070,7 +1090,6 @@ function Skillet:SkilletShow()
 	DA.DEBUG(0,"name= '"..tostring(name).."', rank= "..tostring(rank)..", maxRank= "..tostring(maxRank))
 	if name then self.currentTrade = self.tradeSkillIDsByName[name] end
 	if self:IsSupportedTradeskill(self.currentTrade) then
-		self:InventoryScan()
 		--DA.DEBUG(0,"SkilletShow: "..self.currentTrade..", name= '"..tostring(name).."', rank= "..tostring(rank)..", maxRank= "..tostring(maxRank))
 		self.selectedSkill = nil
 		self.dataScanned = false

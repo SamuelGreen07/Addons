@@ -1,37 +1,28 @@
 local E, L, V, P, G = unpack(select(2, ...)) --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local UF = E:GetModule('UnitFrames')
-local HealComm = LibStub('LibHealComm-4.0')
 
 local CreateFrame = CreateFrame
-
 function UF.HealthClipFrame_HealComm(frame)
-	local pred = frame.HealthPrediction
-	if pred then
-		UF:SetAlpha_HealComm(pred, true)
-		UF:SetVisibility_HealComm(pred)
+	if frame.HealthPrediction then
+		UF:SetAlpha_HealComm(frame.HealthPrediction, 1)
 	end
 end
 
-function UF:SetAlpha_HealComm(obj, show)
-	obj.myBar:SetAlpha(show and 1 or 0)
-	obj.otherBar:SetAlpha(show and 1 or 0)
+function UF:SetAlpha_HealComm(obj, alpha)
+	obj.myBar:SetAlpha(alpha)
+	obj.otherBar:SetAlpha(alpha)
 end
 
-function UF:SetVisibility_HealComm(obj)
-	-- the first update is from `HealthClipFrame_HealComm`
-	-- we set this variable to allow `Configure_HealComm` to
-	-- update the elements overflow lock later on by option
-	if not obj.allowClippingUpdate then
-		obj.allowClippingUpdate = true
-	end
+function UF:SetTexture_HealComm(obj, texture)
+	if type(texture) == 'number' then texture = E.media.blankTex end
 
-	if obj.maxOverflow > 1 then
-		obj.myBar:SetParent(obj.health)
-		obj.otherBar:SetParent(obj.health)
-	else
-		obj.myBar:SetParent(obj.parent)
-		obj.otherBar:SetParent(obj.parent)
-	end
+	obj.myBar:SetStatusBarTexture(texture)
+	obj.otherBar:SetStatusBarTexture(texture)
+end
+
+function UF:SetFrameLevel_HealComm(obj, level)
+	obj.myBar:SetFrameLevel(level)
+	obj.otherBar:SetFrameLevel(level)
 end
 
 function UF:Construct_HealComm(frame)
@@ -41,17 +32,7 @@ function UF:Construct_HealComm(frame)
 	local myBar = CreateFrame('StatusBar', nil, parent)
 	local otherBar = CreateFrame('StatusBar', nil, parent)
 
-	myBar:SetFrameLevel(11)
-	otherBar:SetFrameLevel(11)
-
-	UF.statusbars[myBar] = true
-	UF.statusbars[otherBar] = true
-
-	local texture = (not health.isTransparent and health:GetStatusBarTexture()) or E.media.blankTex
-	UF:Update_StatusBar(myBar, texture)
-	UF:Update_StatusBar(otherBar, texture)
-
-	local healPrediction = {
+	local prediction = {
 		myBar = myBar,
 		otherBar = otherBar,
 		maxOverflow = 1,
@@ -60,79 +41,114 @@ function UF:Construct_HealComm(frame)
 		frame = frame
 	}
 
-	UF:SetAlpha_HealComm(healPrediction)
+	UF:SetAlpha_HealComm(prediction, 0)
+	UF:SetFrameLevel_HealComm(prediction, 11)
+	UF:SetTexture_HealComm(prediction, E.media.blankTex)
 
-	return healPrediction
+	return prediction
+end
+
+function UF:SetSize_HealComm(frame)
+	local health = frame.Health
+	local pred = frame.HealthPrediction
+	local orientation = health:GetOrientation()
+
+	local db = frame.db.healPrediction
+	local width, height = health:GetSize()
+
+	if orientation == 'HORIZONTAL' then
+		local barHeight = db.height
+		if barHeight == -1 or barHeight > height then barHeight = height end
+
+		pred.myBar:SetSize(width, barHeight)
+		pred.otherBar:SetSize(width, barHeight)
+		pred.parent:SetSize(width * (pred.maxOverflow or 0), height)
+	else
+		local barWidth = db.height -- this is really width now not height
+		if barWidth == -1 or barWidth > width then barWidth = width end
+
+		pred.myBar:SetSize(barWidth, height)
+		pred.otherBar:SetSize(barWidth, height)
+		pred.parent:SetSize(width, height * (pred.maxOverflow or 0))
+	end
 end
 
 function UF:Configure_HealComm(frame)
-	if frame.db.healPrediction and frame.db.healPrediction.enable then
-		local healPrediction = frame.HealthPrediction
-		local myBar = healPrediction.myBar
-		local otherBar = healPrediction.otherBar
-		local c = self.db.colors.healPrediction
-		healPrediction.maxOverflow = 1 + (c.maxOverflow or 0)
+	local db = frame.db.healPrediction
+	if db and db.enable then
+		local pred = frame.HealthPrediction
+		local parent = pred.parent
+		local myBar = pred.myBar
+		local otherBar = pred.otherBar
 
-		if healPrediction.allowClippingUpdate then
-			UF:SetVisibility_HealComm(healPrediction)
-		end
+		local colors = UF.db.colors.healPrediction
+		pred.maxOverflow = 1 + (colors.maxOverflow or 0)
 
 		if not frame:IsElementEnabled('HealthPrediction') then
 			frame:EnableElement('HealthPrediction')
 		end
-
-		healPrediction.healType = HealComm[frame.db.healPrediction.healType]
 
 		local health = frame.Health
 		local orientation = health:GetOrientation()
 		local reverseFill = health:GetReverseFill()
 		local healthBarTexture = health:GetStatusBarTexture()
 
-		myBar:SetOrientation(orientation)
-		otherBar:SetOrientation(orientation)
+		pred.reverseFill = reverseFill
+		pred.healthBarTexture = healthBarTexture
+		pred.myBarTexture = myBar:GetStatusBarTexture()
+		pred.otherBarTexture = otherBar:GetStatusBarTexture()
 
-		if orientation == 'HORIZONTAL' then
-			local width = health:GetWidth()
-			width = (width > 0 and width) or health.WIDTH
-			local p1 = reverseFill and 'RIGHT' or 'LEFT'
-			local p2 = reverseFill and 'LEFT' or 'RIGHT'
-
-			myBar:Size(width, 0)
-			myBar:ClearAllPoints()
-			myBar:Point('TOP', health, 'TOP')
-			myBar:Point('BOTTOM', health, 'BOTTOM')
-			myBar:Point(p1, healthBarTexture, p2)
-
-			otherBar:Size(width, 0)
-			otherBar:ClearAllPoints()
-			otherBar:Point('TOP', health, 'TOP')
-			otherBar:Point('BOTTOM', health, 'BOTTOM')
-			otherBar:Point(p1, myBar:GetStatusBarTexture(), p2)
-		else
-			local height = health:GetHeight()
-			height = (height > 0 and height) or health.HEIGHT
-			local p1 = reverseFill and 'TOP' or 'BOTTOM'
-			local p2 = reverseFill and 'BOTTOM' or 'TOP'
-
-			myBar:Size(0, height)
-			myBar:ClearAllPoints()
-			myBar:Point('LEFT', health, 'LEFT')
-			myBar:Point('RIGHT', health, 'RIGHT')
-			myBar:Point(p1, healthBarTexture, p2)
-
-			otherBar:Size(0, height)
-			otherBar:ClearAllPoints()
-			otherBar:Point('LEFT', health, 'LEFT')
-			otherBar:Point('RIGHT', health, 'RIGHT')
-			otherBar:Point(p1, myBar:GetStatusBarTexture(), p2)
-		end
+		UF:SetTexture_HealComm(pred, UF.db.colors.transparentHealth and E.media.blankTex or healthBarTexture:GetTexture())
 
 		myBar:SetReverseFill(reverseFill)
 		otherBar:SetReverseFill(reverseFill)
 
-		myBar:SetStatusBarColor(c.personal.r, c.personal.g, c.personal.b, c.personal.a)
-		otherBar:SetStatusBarColor(c.others.r, c.others.g, c.others.b, c.others.a)
+		myBar:SetStatusBarColor(colors.personal.r, colors.personal.g, colors.personal.b, colors.personal.a)
+		otherBar:SetStatusBarColor(colors.others.r, colors.others.g, colors.others.b, colors.others.a)
+
+		myBar:SetOrientation(orientation)
+		otherBar:SetOrientation(orientation)
+
+		if orientation == 'HORIZONTAL' then
+			local p1 = reverseFill and 'RIGHT' or 'LEFT'
+			local p2 = reverseFill and 'LEFT' or 'RIGHT'
+
+			local anchor = db.anchorPoint
+			pred.anchor, pred.anchor1, pred.anchor2 = anchor, p1, p2
+
+			myBar:ClearAllPoints()
+			myBar:Point(anchor, health)
+			myBar:Point(p1, healthBarTexture, p2)
+
+			otherBar:ClearAllPoints()
+			otherBar:Point(anchor, health)
+			otherBar:Point(p1, pred.myBarTexture, p2)
+
+			parent:ClearAllPoints()
+			parent:Point(p1, health, p1)
+		else
+			local p1 = reverseFill and 'TOP' or 'BOTTOM'
+			local p2 = reverseFill and 'BOTTOM' or 'TOP'
+
+			-- anchor converts while the health is in vertical orientation to be able to use a height
+			-- (well in this case, width) other than -1 which positions the absorb on the left or right side
+			local anchor = (db.anchorPoint == 'BOTTOM' and 'RIGHT') or (db.anchorPoint == 'TOP' and 'LEFT') or db.anchorPoint
+			pred.anchor, pred.anchor1, pred.anchor2 = anchor, p1, p2
+
+			myBar:ClearAllPoints()
+			myBar:Point(anchor, health)
+			myBar:Point(p1, healthBarTexture, p2)
+
+			otherBar:ClearAllPoints()
+			otherBar:Point(anchor, health)
+			otherBar:Point(p1, pred.myBarTexture, p2)
+
+			parent:ClearAllPoints()
+			parent:Point(p1, health, p1)
+		end
 	elseif frame:IsElementEnabled('HealthPrediction') then
 		frame:DisableElement('HealthPrediction')
 	end
+
+	UF:SetSize_HealComm(frame)
 end

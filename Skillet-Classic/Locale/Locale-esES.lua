@@ -47,6 +47,10 @@ L["can be created from reagents on all characters"] = "se puede crear a partir d
 L["can be created from reagents on other characters"] = "se puede crear a partir de componentes en otros personajes"
 L["can be created with reagents bought at vendor"] = "se puede crear con componentes comprados en el vendedor"
 L["Changing profession to"] = "Cambiar de profesión a"
+--[[Translation missing --]]
+L["CLAMPTOSCREENDESC"] = "Force frames to remain on screen"
+--[[Translation missing --]]
+L["CLAMPTOSCREENNAME"] = "Clamp frames to screen"
 L["Clear"] = "Limpiar"
 L["Click"] = "Haz Clic"
 L["click here to add a note"] = "Haz clic aquí para añadir una nota"

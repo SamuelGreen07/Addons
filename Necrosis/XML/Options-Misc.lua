@@ -38,9 +38,9 @@ function Necrosis:SetMiscConfig()
 		frame:SetScript("OnClick", function(self)
 			NecrosisConfig.SoulshardSort = self:GetChecked()
 			if NecrosisConfig.SoulshardSort then
-				NecrosisDestroyShardBag:Enable()
+				NecrosisMoveShardShardBag:Enable()
 			else
-				NecrosisDestroyShardBag:Disable()
+				NecrosisMoveShardShardBag:Disable()
 			end
 		end)
 
@@ -52,22 +52,22 @@ function Necrosis:SetMiscConfig()
 		frame:SetFontString(FontString)
 
 		-- Destruction des fragments quand le sac est plein
-		frame = CreateFrame("CheckButton", "NecrosisDestroyShardBag", NecrosisMiscConfig, "UICheckButtonTemplate")
-		frame:EnableMouse(true)
-		frame:SetWidth(24)
-		frame:SetHeight(24)
-		frame:Show()
-		frame:ClearAllPoints()
-		frame:SetPoint("LEFT", NecrosisMiscConfig, "BOTTOMLEFT", 50, 380)
+		--frame = CreateFrame("CheckButton", "NecrosisDestroyShardBag", NecrosisMiscConfig, "UICheckButtonTemplate")
+		--frame:EnableMouse(true)
+		--frame:SetWidth(24)
+		--frame:SetHeight(24)
+		--frame:Show()
+		--frame:ClearAllPoints()
+		--frame:SetPoint("LEFT", NecrosisMiscConfig, "BOTTOMLEFT", 50, 380)
 
-		frame:SetScript("OnClick", function(self) NecrosisConfig.SoulshardDestroy = self:GetChecked() end)
+		--frame:SetScript("OnClick", function(self) NecrosisConfig.SoulshardDestroy = self:GetChecked() end)
 
-		FontString = frame:CreateFontString(nil, nil, "GameFontNormalSmall")
-		FontString:Show()
-		FontString:ClearAllPoints()
-		FontString:SetPoint("LEFT", frame, "RIGHT", 5, 1)
-		FontString:SetTextColor(1, 1, 1)
-		frame:SetFontString(FontString)
+		--FontString = frame:CreateFontString(nil, nil, "GameFontNormalSmall")
+		--FontString:Show()
+		--FontString:ClearAllPoints()
+		--FontString:SetPoint("LEFT", frame, "RIGHT", 5, 1)
+		--FontString:SetTextColor(1, 1, 1)
+		--frame:SetFontString(FontString)
 		--frame:SetDisabledTextColor(0.75, 0.75, 0.75)
 
 		-- Choose the bag for storing soul shards || Choix du sac à fragments
@@ -84,19 +84,35 @@ function Necrosis:SetMiscConfig()
 
 		frame:SetScript("OnEnter", function(self)
 			GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-			GameTooltip:SetText(5-math.floor(self:GetValue()))
+			local bagName = GetBagName(5-math.floor(self:GetValue())-1);  
+			GameTooltip:SetText(bagName)
+		
+		
 		end)
+		
 		frame:SetScript("OnLeave", function() GameTooltip:Hide() end)
+		
 		frame:SetScript("OnMouseUp", function(self)
-			GameTooltip:SetText(5 - self:GetValue())
+			local bagName = GetBagName(5-math.floor(self:GetValue())-1);  
+			GameTooltip:SetText(bagName)
+			
 			NecrosisConfig.SoulshardContainer = 4 - math.floor(self:GetValue())
+			
 			-- print(NecrosisConfig.SoulshardContainer)
 			Necrosis:SoulshardSwitch("MOVE")
 		end)
-		frame:SetScript("OnValueChanged", function(self) GameTooltip:SetText(5 - self:GetValue()) end)
+		
+		frame:SetScript("OnValueChanged", function(self) 
+		local bagName = GetBagName(5-math.floor(self:GetValue())-1);  
+		GameTooltip:SetText(bagName)
+		
+		
+		end)
 
-		NecrosisShardBagLow:SetText("5")
-		NecrosisShardBagHigh:SetText("1")
+		NecrosisShardBagLow:SetText("Bag#5")
+		NecrosisShardBagHigh:SetText("Bag#1")
+
+
 
 		-- Set the number of shards to keep || Destruction des fragments après X
 		frame = CreateFrame("CheckButton", "NecrosisDestroyShard", NecrosisMiscConfig, "UICheckButtonTemplate")
@@ -164,6 +180,8 @@ function Necrosis:SetMiscConfig()
 			local fb = _G[Necrosis.Warlock_Buttons.backlash.f]
 			local fa = _G[Necrosis.Warlock_Buttons.anti_fear.f]
 			local fe = _G[Necrosis.Warlock_Buttons.elemental.f]
+			local fd = _G[Necrosis.Warlock_Buttons.demon.f]	
+			
 			if (self:GetChecked()) then
 				Necrosis:NoDrag()
 				NecrosisButton:RegisterForDrag("")
@@ -172,6 +190,7 @@ function Necrosis:SetMiscConfig()
 				fb:RegisterForDrag("")
 				fa:RegisterForDrag("")
 				fe:RegisterForDrag("")
+				fd:RegisterForDrag("")			
 				NecrosisConfig.NoDragAll = true
 			else
 				if not NecrosisConfig.NecrosisLockServ then
@@ -183,6 +202,7 @@ function Necrosis:SetMiscConfig()
 				fb:RegisterForDrag("LeftButton")
 				fa:RegisterForDrag("LeftButton")
 				fe:RegisterForDrag("LeftButton")
+				fd:RegisterForDrag("LeftButton")				
 				NecrosisConfig.NoDragAll = false
 			end
 		end)
@@ -208,20 +228,31 @@ function Necrosis:SetMiscConfig()
 				ShowUIPanel(NecrosisShadowTranceButton)
 				ShowUIPanel(NecrosisBacklashButton)
 				ShowUIPanel(NecrosisAntiFearButton)
-				ShowUIPanel(NecrosisCreatureAlertButton)
+				NecrosisCreatureAlertButton_elemental:SetAlpha(1)
+				NecrosisCreatureAlertButton_elemental:SetMovable(true)
+				NecrosisCreatureAlertButton_demon:SetMovable(true)				
+				NecrosisCreatureAlertButton_demon:SetAlpha(1)
 				NecrosisShadowTranceButton:RegisterForDrag("LeftButton")
 				NecrosisBacklashButton:RegisterForDrag("LeftButton")
 				NecrosisAntiFearButton:RegisterForDrag("LeftButton")
-				NecrosisCreatureAlertButton:RegisterForDrag("LeftButton")
+				NecrosisCreatureAlertButton_demon:RegisterForDrag("LeftButton")
+				NecrosisCreatureAlertButton_elemental:RegisterForDrag("LeftButton")				
 			else
 				HideUIPanel(NecrosisShadowTranceButton)
 				HideUIPanel(NecrosisBacklashButton)
 				HideUIPanel(NecrosisAntiFearButton)
-				HideUIPanel(NecrosisCreatureAlertButton)
+				NecrosisCreatureAlertButton_elemental:SetAlpha(0)
+				NecrosisCreatureAlertButton_demon:SetAlpha(0)
+				
+				NecrosisCreatureAlertButton_elemental:SetMovable(false)
+				NecrosisCreatureAlertButton_demon:SetMovable(false)
+
+			    NecrosisCreatureAlertButton_elemental:RegisterForDrag("")		
+				NecrosisCreatureAlertButton_demon:RegisterForDrag("")		
 				NecrosisShadowTranceButton:RegisterForDrag("")
 				NecrosisBacklashButton:RegisterForDrag("")
 				NecrosisAntiFearButton:RegisterForDrag("")
-				NecrosisCreatureAlertButton:RegisterForDrag("")
+
 			end
 		end)
 
@@ -257,14 +288,20 @@ function Necrosis:SetMiscConfig()
 			AFx = AFx * (NecrosisConfig.ShadowTranceScale / 100)
 			AFy = AFy * (NecrosisConfig.ShadowTranceScale / 100)
 
-			CAx, CAy = NecrosisCreatureAlertButton:GetCenter()
+			CAx, CAy = NecrosisCreatureAlertButton_elemental:GetCenter()
 			CAx = CAx * (NecrosisConfig.ShadowTranceScale / 100)
 			CAy = CAy * (NecrosisConfig.ShadowTranceScale / 100)
+			
+			CDx, CDy = NecrosisCreatureAlertButton_demon:GetCenter()
+			CDx = CDx * (NecrosisConfig.ShadowTranceScale / 100)
+			CDy = CDy * (NecrosisConfig.ShadowTranceScale / 100)
 
 			ShowUIPanel(NecrosisShadowTranceButton)
+			ShowUIPanel(NecrosisShadowTranceButton)			
 			ShowUIPanel(NecrosisBacklashButton)
 			ShowUIPanel(NecrosisAntiFearButton)
-			ShowUIPanel(NecrosisCreatureAlertButton)
+			NecrosisCreatureAlertButton_elemental:SetAlpha(1)
+			NecrosisCreatureAlertButton_demon:SetAlpha(1)
 			GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
 			GameTooltip:SetText(self:GetValue().."%")
 		end)
@@ -273,7 +310,8 @@ function Necrosis:SetMiscConfig()
 				HideUIPanel(NecrosisShadowTranceButton)
 				HideUIPanel(NecrosisBacklashButton)
 				HideUIPanel(NecrosisAntiFearButton)
-				HideUIPanel(NecrosisCreatureAlertButton)
+				NecrosisCreatureAlertButton_elemental:SetAlpha(0)
+				NecrosisCreatureAlertButton_demon:SetAlpha(0)				
 			end
 			GameTooltip:Hide()
 		end)
@@ -290,9 +328,15 @@ function Necrosis:SetMiscConfig()
 				NecrosisBacklashButton:SetPoint("CENTER", "UIParent", "BOTTOMLEFT", BLx / (NecrosisConfig.ShadowTranceScale / 100), BLy / (NecrosisConfig.ShadowTranceScale / 100))
 				NecrosisBacklashButton:SetScale(NecrosisConfig.ShadowTranceScale / 100)
 
-				NecrosisCreatureAlertButton:ClearAllPoints()
-				NecrosisCreatureAlertButton:SetPoint("CENTER", "UIParent", "BOTTOMLEFT", CAx / (NecrosisConfig.ShadowTranceScale / 100), CAy / (NecrosisConfig.ShadowTranceScale / 100))
-				NecrosisCreatureAlertButton:SetScale(NecrosisConfig.ShadowTranceScale / 100)
+				NecrosisCreatureAlertButton_elemental:ClearAllPoints()
+				NecrosisCreatureAlertButton_elemental:SetPoint("CENTER", "UIParent", "BOTTOMLEFT", CAx / (NecrosisConfig.ShadowTranceScale / 100), CAy / (NecrosisConfig.ShadowTranceScale / 100))
+				NecrosisCreatureAlertButton_elemental:SetScale(NecrosisConfig.ShadowTranceScale / 100)
+
+				NecrosisCreatureAlertButton_demon:ClearAllPoints()
+				NecrosisCreatureAlertButton_demon:SetPoint("CENTER", "UIParent", "BOTTOMLEFT", CDx / (NecrosisConfig.ShadowTranceScale / 100), CDy / (NecrosisConfig.ShadowTranceScale / 100))
+				NecrosisCreatureAlertButton_demon:SetScale(NecrosisConfig.ShadowTranceScale / 100)
+
+
 
 				NecrosisAntiFearButton:ClearAllPoints()
 				NecrosisAntiFearButton:SetPoint("CENTER", "UIParent", "BOTTOMLEFT", AFx / (NecrosisConfig.ShadowTranceScale / 100), AFy / (NecrosisConfig.ShadowTranceScale / 100))
@@ -305,7 +349,7 @@ function Necrosis:SetMiscConfig()
 	end
 
 	NecrosisMoveShard:SetChecked(NecrosisConfig.SoulshardSort)
-	NecrosisDestroyShardBag:SetChecked(NecrosisConfig.SoulshardDestroy)
+	--NecrosisDestroyShardBag:SetChecked(NecrosisConfig.SoulshardDestroy)
 	NecrosisShardBag:SetValue(4 - NecrosisConfig.SoulshardContainer)
 	NecrosisDestroyShard:SetChecked(NecrosisConfig.DestroyShard)
 
@@ -319,7 +363,7 @@ function Necrosis:SetMiscConfig()
 	NecrosisHiddenSize:SetValue(NecrosisConfig.ShadowTranceScale)
 
 	NecrosisMoveShard:SetText(self.Config.Misc["Deplace les fragments"])
-	NecrosisDestroyShardBag:SetText(self.Config.Misc["Detruit les fragments si le sac plein"])
+	--NecrosisDestroyShardBag:SetText(self.Config.Misc["Detruit les fragments si le sac plein"])
 	NecrosisShardBagText:SetText(self.Config.Misc["Choix du sac contenant les fragments"])
 	NecrosisDestroyShard:SetText(self.Config.Misc["Nombre maximum de fragments a conserver"])
 	NecrosisLock:SetText(self.Config.Misc["Verrouiller Necrosis sur l'interface"])
@@ -327,9 +371,9 @@ function Necrosis:SetMiscConfig()
 	NecrosisHiddenSizeText:SetText(self.Config.Misc["Taille des boutons caches"])
 
 	if NecrosisConfig.SoulshardSort then
-		NecrosisDestroyShardBag:Enable()
+		--NecrosisDestroyShardBag:Enable()
 	else
-		NecrosisDestroyShardBag:Disable()
+		--NecrosisDestroyShardBag:Disable()
 	end
 
 	frame:Show()

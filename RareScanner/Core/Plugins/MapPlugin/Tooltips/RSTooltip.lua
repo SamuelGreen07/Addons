@@ -88,15 +88,13 @@ end
 --=====================================================
 
 local ItemToolTip = CreateFrame("GameTooltip", "RSMapItemToolTip", nil, "GameTooltipTemplate")
-ItemToolTip:SetScale(0.7)
 local ItemToolTipComp1 = CreateFrame("GameTooltip", "RSMapItemToolTipComp1", nil, "GameTooltipTemplate")
-ItemToolTipComp1:SetScale(0.7)
 local ItemToolTipComp2 = CreateFrame("GameTooltip", "RSMapItemToolTipComp2", nil, "GameTooltipTemplate")
-ItemToolTipComp2:SetScale(0.7)
 ItemToolTip.shoppingTooltips = { ItemToolTipComp1, ItemToolTipComp2 }
 
 local function showItemToolTip(cell, args)
 	local itemID, itemLink, itemClassID, itemSubClassID = unpack(args)
+	ItemToolTip:SetScale(0.7 * RSConfigDB.GetWorldMapTooltipsScale())
 	ItemToolTip:SetOwner(cell:GetParent(), "ANCHOR_LEFT", -10)
 	ItemToolTip:SetHyperlink(itemLink)
 		
@@ -113,6 +111,8 @@ end
 
 local function showItemComparationTooltip(cell)
 	if (IsShiftKeyDown() and ItemToolTip:IsShown()) then
+		ItemToolTipComp1:SetScale(0.7 * RSConfigDB.GetWorldMapTooltipsScale())
+		ItemToolTipComp2:SetScale(0.7 * RSConfigDB.GetWorldMapTooltipsScale())
 		GameTooltip_OnTooltipSetShoppingItem(ItemToolTip)
 		GameTooltip_ShowCompareItem(ItemToolTip)
 		cell:SetPropagateKeyboardInput(false)
@@ -163,6 +163,7 @@ local function filterItem(cell, args)
 end
 
 local function showAchievementTooltip(cell, achievementLink)
+	ItemToolTip:SetScale(0.7 * RSConfigDB.GetWorldMapTooltipsScale())
 	ItemToolTip:SetOwner(cell:GetParent(), "ANCHOR_LEFT")
 	ItemToolTip:SetHyperlink(achievementLink)
 	ItemToolTip:Show()
@@ -191,6 +192,7 @@ function RSTooltip.ShowGroupTooltip(pin)
 	groupTooltip = RareScannerMapTooltip:Acquire("RsGroupMapToolTip", tpColumns, unpack(identation))
 
 	pin.groupTooltip = groupTooltip
+	groupTooltip:SetScale(RSConfigDB.GetWorldMapTooltipsScale())
 	groupTooltip:SetFrameLevel(2000)
 	groupTooltip:ClearAllPoints()
 	groupTooltip:SetClampedToScreen(true)
@@ -395,6 +397,7 @@ function RSTooltip.ShowSimpleTooltip(pin, parentTooltip)
 
 	local tooltip = RareScannerMapTooltip:Acquire("RsSimpleMapToolTip", 10, "CENTER", "CENTER", "CENTER", "CENTER", "CENTER", "CENTER", "CENTER", "CENTER", "CENTER", "CENTER")
 	pin.tooltip = tooltip
+	tooltip:SetScale(RSConfigDB.GetWorldMapTooltipsScale())
 	tooltip:SetFrameLevel(2000)
 	tooltip:ClearAllPoints()
 	tooltip:SetClampedToScreen(true)
@@ -476,4 +479,12 @@ function RSTooltip.ReleaseTooltip(tooltip)
 		tooltip = nil
 	end
 	ItemToolTip:Hide()
+end
+
+--=====================================================
+-- Events overrider
+--=====================================================
+
+function RSTooltip.AddSpecialEventsLines(self, tooltip)
+-- Nothing to implement, this method will be hooked wherever its needed
 end

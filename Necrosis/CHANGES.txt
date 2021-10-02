@@ -1,10 +1,12 @@
-lightweight tag 31dded95ae15eea4ce4d7c4247e4a1b8f1c19d99 7.6.9.5
+lightweight tag 2032aa0c99e4278c1aeea5d5ef8d5a7ac77c8886 7.6.9.23
 Author:	CKNOEP <c.knoepffler@free.fr>
-Date:	Tue Jul 20 08:54:24 2021 +0200
+Date:	Sun Sep 12 07:49:51 2021 +0200
 
-commit 31dded95ae15eea4ce4d7c4247e4a1b8f1c19d99
+commit 2032aa0c99e4278c1aeea5d5ef8d5a7ac77c8886
 Author: CKNOEP <c.knoepffler@free.fr>
-Date:   Tue Jul 20 08:54:24 2021 +0200
+Date:   Sun Sep 12 07:49:51 2021 +0200
 
-    fix lua err first launch
+    Update CHANGES.txt
+    
+    Fix Show hide button Enslave and Bannish when the option is checked
 

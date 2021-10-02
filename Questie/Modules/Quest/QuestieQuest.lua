@@ -1,8 +1,4 @@
 --- COMPATIBILITY ---
-local GetNumQuestLogEntries = GetNumQuestLogEntries or C_QuestLog.GetNumQuestLogEntries
-local GetQuestLogIndexByID = GetQuestLogIndexByID or C_QuestLog.GetLogIndexForQuestID
-local IsQuestComplete = IsQuestComplete or C_QuestLog.IsComplete
-local GetQuestGreenRange = GetQuestGreenRange or UnitQuestTrivialLevelRange
 local IsQuestFlaggedCompleted = IsQuestFlaggedCompleted or C_QuestLog.IsQuestFlaggedCompleted
 
 ---@class QuestieQuest
@@ -35,8 +31,6 @@ local TaskQueue = QuestieLoader:ImportModule("TaskQueue")
 local QuestieDB = QuestieLoader:ImportModule("QuestieDB")
 ---@type QuestieCorrections
 local QuestieCorrections = QuestieLoader:ImportModule("QuestieCorrections")
----@type DailyQuests
-local DailyQuests = QuestieLoader:ImportModule("DailyQuests")
 ---@type ZoneDB
 local ZoneDB = QuestieLoader:ImportModule("ZoneDB")
 ---@type QuestieCombatQueue
@@ -58,6 +52,10 @@ local ipairs = ipairs;
 local strim = string.trim;
 local smatch = string.match;
 
+-- 3 * (Max possible number of quests in game quest log)
+-- This is a safe value, even smaller would be enough. Too large won't effect performance
+local MAX_QUEST_LOG_INDEX = 75
+
 QuestieQuest.availableQuests = {} --Gets populated at PLAYER_ENTERED_WORLD
 
 -- forward declaration
@@ -70,7 +68,7 @@ local HBD = LibStub("HereBeDragonsQuestie-2.0")
 local dungeons = ZoneDB:GetDungeons()
 
 function QuestieQuest:Initialize()
-    Questie:Debug(DEBUG_INFO, "[QuestieQuest]: Getting all completed quests")
+    Questie:Debug(Questie.DEBUG_INFO, "[QuestieQuest]: Getting all completed quests")
     Questie.db.char.complete = GetQuestsCompleted()
 
     QuestieProfessions:Update()
@@ -80,7 +78,7 @@ function QuestieQuest:Initialize()
 end
 
 function QuestieQuest:ToggleNotes(showIcons)
-    Questie:Debug(DEBUG_DEVELOP, "[QuestieQuest:ToggleNotes] showIcons:", showIcons)
+    Questie:Debug(Questie.DEBUG_DEVELOP, "[QuestieQuest:ToggleNotes] showIcons:", showIcons)
     QuestieQuest:GetAllQuestIds() -- add notes that weren't added from previous hidden state
 
     if showIcons then
@@ -233,7 +231,7 @@ function QuestieQuest:AddAllNotes()
 end
 
 function QuestieQuest:Reset()
-    Questie:Debug(DEBUG_DEVELOP, "[QuestieQuest:Reset]")
+    Questie:Debug(Questie.DEBUG_DEVELOP, "[QuestieQuest:Reset]")
     QuestieQuest:ClearAllNotes()
 
 
@@ -252,7 +250,7 @@ function QuestieQuest:Reset()
 end
 
 function QuestieQuest:SmoothReset()
-    Questie:Debug(DEBUG_DEVELOP, "[QuestieQuest:SmoothReset]")
+    Questie:Debug(Questie.DEBUG_DEVELOP, "[QuestieQuest:SmoothReset]")
     if QuestieQuest._isResetting then
         QuestieQuest._resetAgain = true
         return
@@ -315,7 +313,7 @@ function QuestieQuest:SmoothReset()
             return not QuestieQuest._nextRestQuest
         end,
         function()
-            return #QuestieMap._mapDrawQueue == 0 and #QuestieMap._minimapDrawQueue == 0 and (not QuestieQuest._resetNeedsAvailables)
+            return (not QuestieQuest._resetNeedsAvailables) and #QuestieMap._mapDrawQueue == 0 and #QuestieMap._minimapDrawQueue == 0
         end,
         function()
             QuestieQuest._isResetting = nil
@@ -331,9 +329,9 @@ function QuestieQuest:SmoothReset()
     ticker = C_Timer.NewTicker(0.01, function()
         if stepTable[step]() then
             step = step + 1
-        end
-        if not stepTable[step] then
-            ticker:Cancel()
+            if not stepTable[step] then
+                ticker:Cancel()
+            end
         end
         if QuestieQuest._resetAgain and not QuestieQuest._resetNeedsAvailables then -- we can stop the current reset
             ticker:Cancel()
@@ -378,7 +376,7 @@ end
 
 function QuestieQuest:AcceptQuest(questId)
     if(QuestiePlayer.currentQuestlog[questId] == nil) then
-        Questie:Debug(DEBUG_INFO, "[QuestieQuest]: Accepted Quest:", questId);
+        Questie:Debug(Questie.DEBUG_INFO, "[QuestieQuest]: Accepted Quest:", questId);
 
         local quest = QuestieDB:GetQuest(questId)
         QuestiePlayer.currentQuestlog[questId] = quest
@@ -396,16 +394,16 @@ function QuestieQuest:AcceptQuest(questId)
         --Broadcast an update.
         --Questie:SendMessage("QC_ID_BROADCAST_QUEST_UPDATE", questId); -- :UpdateQuest is called immediately after AcceptQuest now, so this is redundant
     else
-        Questie:Debug(DEBUG_INFO, "[QuestieQuest]: Accepted Quest:", questId, " Warning: Quest already existed, not adding");
+        Questie:Debug(Questie.DEBUG_INFO, "[QuestieQuest]: Accepted Quest:", questId, " Warning: Quest already existed, not adding");
     end
 end
 
 function QuestieQuest:CompleteQuest(quest)
     local questId = quest.Id
     QuestiePlayer.currentQuestlog[questId] = nil;
-    -- Only quests that aren't repeatable and not a daily quest should be marked complete,
+    -- Only quests that are daily quests or aren't repeatable should be marked complete,
     -- otherwise objectives for repeatable quests won't track correctly - #1433
-    Questie.db.char.complete[questId] = DailyQuests:IsDailyQuest(questId) or (not quest.IsRepeatable);
+    Questie.db.char.complete[questId] = QuestieDB:IsDailyQuest(questId) or (not quest.IsRepeatable);
 
     QuestieHash:RemoveQuestHash(questId)
 
@@ -424,7 +422,7 @@ function QuestieQuest:CompleteQuest(quest)
     --This should probably be done first, because DrawAllAvailableQuests looks at QuestieMap.questIdFrames[QuestId] to add available
     QuestieQuest:CalculateAndDrawAvailableQuestsIterative()
 
-    Questie:Debug(DEBUG_INFO, "[QuestieQuest]: Completed Quest:", questId)
+    Questie:Debug(Questie.DEBUG_INFO, "[QuestieQuest]: Completed Quest:", questId)
 end
 
 function QuestieQuest:AbandonedQuest(questId)
@@ -469,13 +467,13 @@ function QuestieQuest:AbandonedQuest(questId)
 
         QuestieQuest:CalculateAndDrawAvailableQuestsIterative()
 
-        Questie:Debug(DEBUG_INFO, "[QuestieQuest]: Abandoned Quest:", questId);
+        Questie:Debug(Questie.DEBUG_INFO, "[QuestieQuest]: Abandoned Quest:", questId);
     end
 end
 
----@param questId QuestId
+---@param questId number
 function QuestieQuest:UpdateQuest(questId)
-    Questie:Debug(DEBUG_DEVELOP, "[QuestieQuest:UpdateQuest]", questId)
+    Questie:Debug(Questie.DEBUG_DEVELOP, "[QuestieQuest:UpdateQuest]", questId)
     ---@type Quest
     local quest = QuestieDB:GetQuest(questId)
     if quest and (not Questie.db.char.complete[questId]) then
@@ -483,12 +481,12 @@ function QuestieQuest:UpdateQuest(questId)
         QuestieQuest:UpdateObjectiveNotes(quest)
         local isComplete = quest:IsComplete()
         if isComplete == 1 then -- Quest is complete
-            Questie:Debug(DEBUG_DEVELOP, "[QuestieQuest:UpdateQuest] Quest is complete")
+            Questie:Debug(Questie.DEBUG_DEVELOP, "[QuestieQuest:UpdateQuest] Quest is complete")
             QuestieMap:UnloadQuestFrames(questId)
             --QuestieTooltips:RemoveQuest(questId)
             QuestieQuest:AddFinisher(quest)
         elseif isComplete == -1 then -- Failed quests should be shown as available again
-            Questie:Debug(DEBUG_DEVELOP, "[QuestieQuest:UpdateQuest] Quest failed")
+            Questie:Debug(Questie.DEBUG_DEVELOP, "[QuestieQuest:UpdateQuest] Quest failed")
             QuestieMap:UnloadQuestFrames(questId)
             QuestieTooltips:RemoveQuest(questId)
             _QuestieQuest:DrawAvailableQuest(quest)
@@ -504,11 +502,14 @@ end
 
 --Run this if you want to update the entire table
 function QuestieQuest:GetAllQuestIds()
-    Questie:Debug(DEBUG_INFO, "[QuestieQuest]: Getting all quests");
-    local numEntries, _ = GetNumQuestLogEntries();
+    Questie:Debug(Questie.DEBUG_INFO, "[QuestieQuest]: Getting all quests");
     QuestiePlayer.currentQuestlog = {}
-    for index = 1, numEntries do
+    for index = 1, MAX_QUEST_LOG_INDEX do
         local title, _, _, isHeader, _, _, _, questId, _, _, _, _, _, _, _, _, _ = GetQuestLogTitle(index)
+        if (not title) then
+            -- We exceeded the valid quest log entries
+            break
+        end
         if (not isHeader) and (not QuestieDB.QuestPointers[questId]) then
             if not Questie._sessionWarnings[questId] then
                 Questie:Error(l10n("The quest %s is missing from Questie's database, Please report this on GitHub or Discord!", tostring(questId)))
@@ -527,7 +528,7 @@ function QuestieQuest:GetAllQuestIds()
             else
                 QuestiePlayer.currentQuestlog[questId] = questId
             end
-            Questie:Debug(DEBUG_SPAM, "[QuestieQuest]: Adding the quest", questId, QuestiePlayer.currentQuestlog[questId]);
+            Questie:Debug(Questie.DEBUG_SPAM, "[QuestieQuest]: Adding the quest", questId, QuestiePlayer.currentQuestlog[questId]);
         end
     end
     QuestieCombatQueue:Queue(function()
@@ -537,11 +538,14 @@ function QuestieQuest:GetAllQuestIds()
 end
 
 function QuestieQuest:GetAllQuestIdsNoObjectives()
-    Questie:Debug(DEBUG_INFO, "[QuestieQuest]: Getting all quests without objectives)");
-    local numEntries, _ = GetNumQuestLogEntries();
+    Questie:Debug(Questie.DEBUG_INFO, "[QuestieQuest]: Getting all quests without objectives)");
     QuestiePlayer.currentQuestlog = {}
-    for index = 1, numEntries do
-        local _, _, _, isHeader, _, _, _, questId, _, _, _, _, _, _, _, _, _ = GetQuestLogTitle(index)
+    for index = 1, MAX_QUEST_LOG_INDEX do
+        local title, _, _, isHeader, _, _, _, questId, _, _, _, _, _, _, _, _, _ = GetQuestLogTitle(index)
+        if (not title) then
+            -- We exceeded the valid quest log entries
+            break
+        end
         if (not isHeader) and (not QuestieDB.QuestPointers[questId]) then
             if not Questie._sessionWarnings[questId] then
                 Questie:Error(l10n("The quest %s is missing from Questie's database, Please report this on GitHub or Discord!", tostring(questId)))
@@ -555,14 +559,14 @@ function QuestieQuest:GetAllQuestIdsNoObjectives()
             else
                 QuestiePlayer.currentQuestlog[questId] = questId
             end
-            Questie:Debug(DEBUG_SPAM, "[QuestieQuest]: Adding the quest", questId, QuestiePlayer.currentQuestlog[questId]);
+            Questie:Debug(Questie.DEBUG_SPAM, "[QuestieQuest]: Adding the quest", questId, QuestiePlayer.currentQuestlog[questId]);
         end
     end
 end
 
 -- iterate all notes, update / remove as needed
 function QuestieQuest:UpdateObjectiveNotes(quest)
-    Questie:Debug(DEBUG_SPAM, "[QuestieQuest]: UpdateObjectiveNotes:", quest.Id)
+    Questie:Debug(Questie.DEBUG_SPAM, "[QuestieQuest]: UpdateObjectiveNotes:", quest.Id)
     if quest.Objectives then
         for objectiveIndex, objective in pairs(quest.Objectives) do
             local result, err = xpcall(QuestieQuest.PopulateObjective, function(err)
@@ -570,7 +574,7 @@ function QuestieQuest:UpdateObjectiveNotes(quest)
                 print(debugstack())
             end, QuestieQuest, quest, objectiveIndex, objective, false);
             if (not result) then
-                Questie:Debug(DEBUG_SPAM, "[QuestieQuest]: There was an error populating objectives for", quest.name, quest.Id, objectiveIndex, err);
+                Questie:Debug(Questie.DEBUG_SPAM, "[QuestieQuest]: There was an error populating objectives for", quest.name, quest.Id, objectiveIndex, err);
             end
         end
     end
@@ -579,7 +583,7 @@ end
 function QuestieQuest:AddFinisher(quest)
     --We should never ever add the quest if IsQuestFlaggedComplete true.
     local questId = quest.Id
-    Questie:Debug(DEBUG_INFO, "[QuestieQuest]", "Adding finisher for quest", questId)
+    Questie:Debug(Questie.DEBUG_INFO, "[QuestieQuest]", "Adding finisher for quest", questId)
 
     if(QuestiePlayer.currentQuestlog[questId] and (IsQuestFlaggedCompleted(questId) == false) and (IsQuestComplete(questId) or quest:IsComplete() == 1) and (not Questie.db.char.complete[questId])) then
         local finisher
@@ -589,10 +593,10 @@ function QuestieQuest:AddFinisher(quest)
             elseif quest.Finisher.Type == "object" then
                 finisher = QuestieDB:GetObject(quest.Finisher.Id)
             else
-                Questie:Debug(DEBUG_CRITICAL, "[QuestieQuest]: Unhandled finisher type:", quest.Finisher.Type, questId, quest.name)
+                Questie:Debug(Questie.DEBUG_CRITICAL, "[QuestieQuest]: Unhandled finisher type:", quest.Finisher.Type, questId, quest.name)
             end
         else
-            Questie:Debug(DEBUG_CRITICAL, "[QuestieQuest]: Quest has no finisher:", questId, quest.name)
+            Questie:Debug(Questie.DEBUG_CRITICAL, "[QuestieQuest]: Quest has no finisher:", questId, quest.name)
         end
         if(finisher ~= nil and finisher.spawns ~= nil) then
             QuestieTooltips:RegisterQuestStartTooltip(questId, finisher)
@@ -623,11 +627,11 @@ function QuestieQuest:AddFinisher(quest)
                                 end
                             end
                         else
-                            Questie:Debug(DEBUG_DEVELOP, "[QuestieQuest]: Adding world icon as finisher")
+                            Questie:Debug(Questie.DEBUG_DEVELOP, "[QuestieQuest]: Adding world icon as finisher")
                             local x = coords[1];
                             local y = coords[2];
 
-                            Questie:Debug(DEBUG_DEVELOP, "[QuestieQuest]:", finisherZone, x, y)
+                            Questie:Debug(Questie.DEBUG_DEVELOP, "[QuestieQuest]:", finisherZone, x, y)
                             finisherIcons[finisherZone] = QuestieMap:DrawWorldIcon(data, finisherZone, x, y)
                             if not finisherLocs[finisherZone] then
                                 finisherLocs[finisherZone] = {x, y}
@@ -658,7 +662,7 @@ function QuestieQuest:AddFinisher(quest)
                 end
             end
         else
-            Questie:Debug(DEBUG_CRITICAL, "[QuestieQuest]: finisher or finisher.spawns == nil")
+            Questie:Debug(Questie.DEBUG_CRITICAL, "[QuestieQuest]: finisher or finisher.spawns == nil")
         end
     end
 end
@@ -695,7 +699,7 @@ function QuestieQuest:ForceToMap(type, id, label, customScale)
 end
 
 function QuestieQuest:PopulateObjective(quest, objectiveIndex, objective, blockItemTooltips) -- must be pcalled
-    Questie:Debug(DEBUG_DEVELOP, "[QuestieQuest:PopulateObjective] " .. objective.Description)
+    Questie:Debug(Questie.DEBUG_DEVELOP, "[QuestieQuest:PopulateObjective] " .. objective.Description)
 
     local completed = objective.Completed
 
@@ -770,7 +774,7 @@ function QuestieQuest:PopulateObjective(quest, objectiveIndex, objective, blockI
 end
 
 _RegisterObjectiveTooltips = function(objective, questId)
-    Questie:Debug(DEBUG_INFO, "Registering objective tooltips for " .. objective.Description)
+    Questie:Debug(Questie.DEBUG_INFO, "Registering objective tooltips for " .. objective.Description)
     if objective.spawnList then
         for id, spawnData in pairs(objective.spawnList) do
             if spawnData.TooltipKey and (not objective.AlreadySpawned[id]) and (not objective.hasRegisteredTooltips) then
@@ -886,7 +890,7 @@ _DrawObjectiveIcons = function(iconsToDraw, objective, maxPerType)
 
         for _, hotzone in pairs(hotzones or {}) do
             if(spawnedIconCount[questId] > maxPerType) then
-                Questie:Debug(DEBUG_DEVELOP, "[QuestieQuest]", "Too many icons for quest:", questId)
+                Questie:Debug(Questie.DEBUG_DEVELOP, "[QuestieQuest]", "Too many icons for quest:", questId)
                 break;
             end
 
@@ -944,7 +948,7 @@ _GetIconsSortedByDistance = function(questId, icons, spawnedIconCount, maxPerTyp
     -- use the keys to retrieve the values in the sorted order
     for _, distance in ipairs(tableKeys) do
         if(spawnedIconCount[questId] > maxPerType) then
-            Questie:Debug(DEBUG_DEVELOP, "[QuestieQuest]", "Too many icons for quest:", questId)
+            Questie:Debug(Questie.DEBUG_DEVELOP, "[QuestieQuest]", "Too many icons for quest:", questId)
             break;
         end
         iconCount = iconCount + 1;
@@ -1012,7 +1016,7 @@ local function _AddSourceItemObjective(quest)
 end
 
 function QuestieQuest:PopulateObjectiveNotes(quest) -- this should be renamed to PopulateNotes as it also handles finishers now
-    Questie:Debug(DEBUG_DEVELOP, "[QuestieQuest:PopulateObjectiveNotes]", "Populating objectives for:", quest.Id)
+    Questie:Debug(Questie.DEBUG_DEVELOP, "[QuestieQuest:PopulateObjectiveNotes]", "Populating objectives for:", quest.Id)
     if (not quest) then
         return
     end
@@ -1035,7 +1039,7 @@ function QuestieQuest:PopulateObjectiveNotes(quest) -- this should be renamed to
 
     -- check for special (unlisted) DB objectives
     if next(quest.SpecialObjectives) then
-        Questie:Debug(DEBUG_DEVELOP, "Adding special objectives")
+        Questie:Debug(Questie.DEBUG_DEVELOP, "Adding special objectives")
         local index = 0 -- SpecialObjectives is a string table, but we need a number
         for _, objective in pairs(quest.SpecialObjectives) do
             local result, err = xpcall(QuestieQuest.PopulateObjective, function(err)
@@ -1052,18 +1056,20 @@ end
 
 function QuestieQuest:PopulateQuestLogInfo(quest)
     if quest.Objectives == nil then
-        Questie:Debug(DEBUG_SPAM, "[QuestieQuest]: PopulateQuestLogInfo: Creating new objective table")
+        Questie:Debug(Questie.DEBUG_SPAM, "[QuestieQuest]: PopulateQuestLogInfo: Creating new objective table")
         quest.Objectives = {};
     end
     local logID = GetQuestLogIndexByID(quest.Id);
     if logID ~= 0 then
-        _, _, _, _, _, quest.isComplete, _, _, _, _, _, _, _, _, _, quest.isHidden = GetQuestLogTitle(logID)
+        local _, _, _, _, _, isComplete, _, _, _, _, _, _, _, _, _, isHidden = GetQuestLogTitle(logID)
+        quest.isComplete = isComplete
+        quest.isHidden = isHidden
         if quest.isComplete ~= nil and quest.isComplete == 1 then
             quest.isComplete = true
         end
-        Questie:Debug(DEBUG_SPAM, "[QuestieQuest]: PopulateMeta:", quest.isComplete, quest.name)
+        Questie:Debug(Questie.DEBUG_SPAM, "[QuestieQuest]: PopulateMeta:", quest.isComplete, quest.name)
     else
-        Questie:Debug(DEBUG_SPAM, "[QuestieQuest]: Error: No logid:", quest.name, quest.Id )
+        Questie:Debug(Questie.DEBUG_SPAM, "[QuestieQuest]: Error: No logid:", quest.name, quest.Id )
     end
     QuestieQuest:GetAllQuestObjectives(quest)
 end
@@ -1082,10 +1088,10 @@ function QuestieQuest:GetAllQuestObjectives(quest)
 
                     -- Sometimes we need to retry to get the correct text from the API
                     if (not objective.text) or objective.text:sub(1, 1) == " " then
-                        Questie:Debug(DEBUG_INFO, "Retrying to get objectiveText for '", objective.text, "'")
+                        Questie:Debug(Questie.DEBUG_INFO, "Retrying to get objectiveText for '", objective.text, "'")
                         local retry = C_QuestLog.GetQuestObjectives(quest.Id)
                         objective.text = retry[objectiveIndex].text
-                        Questie:Debug(DEBUG_INFO, "Received text is:", retry[objectiveIndex].text)
+                        Questie:Debug(Questie.DEBUG_INFO, "Received text is:", retry[objectiveIndex].text)
                     end
                     quest.Objectives[objectiveIndex] = {
                         Id = quest.ObjectiveData[objectiveIndex].Id,
@@ -1107,7 +1113,7 @@ function QuestieQuest:GetAllQuestObjectives(quest)
         end
 
         if (not quest.Objectives[objectiveIndex]) or (not quest.Objectives[objectiveIndex].Id) then
-            Questie:Debug(DEBUG_SPAM, "[QuestieQuest]: Error finding entry ID for objective", objective.type, objective.text)
+            Questie:Debug(Questie.DEBUG_SPAM, "[QuestieQuest]: Error finding entry ID for objective", objective.type, objective.text)
         end
     end
 
@@ -1204,7 +1210,7 @@ local L_QUEST_OBJECTS_FOUND = QuestieLib:SanitizePattern(QUEST_OBJECTS_FOUND)
 local _has_seen_incomplete = {}
 local _has_sent_announce = {}
 function QuestieQuest:GetAllLeaderBoardDetails(questId)
-    Questie:Debug(DEBUG_SPAM, "[QuestieQuest:GetAllLeaderBoardDetails] for questId", questId)
+    Questie:Debug(Questie.DEBUG_SPAM, "[QuestieQuest:GetAllLeaderBoardDetails] for questId", questId)
     local questObjectives = QuestieLib:GetQuestObjectives(questId);
     if not questObjectives then
         -- Some quests just don't have a real objective e.g. 2744
@@ -1327,7 +1333,7 @@ function _QuestieQuest:DrawAvailableQuest(quest) -- prevent recursion
             QuestieTooltips:RegisterQuestStartTooltip(quest.Id, npc)
 
             if (npc ~= nil and npc.spawns ~= nil) then
-                --Questie:Debug(DEBUG_DEVELOP,"Adding Quest:", questObject.Id, "StarterNPC:", NPC.Id)
+                --Questie:Debug(Questie.DEBUG_DEVELOP,"Adding Quest:", questObject.Id, "StarterNPC:", NPC.Id)
                 local starterIcons = {}
                 local starterLocs = {}
                 for npcZone, spawns in pairs(npc.spawns) do
@@ -1407,7 +1413,7 @@ function _QuestieQuest:GetQuestIcon(quest)
 end
 
 function QuestieQuest:CalculateAndDrawAvailableQuestsIterative(callback)
-    Questie:Debug(DEBUG_INFO, "[QuestieQuest] 0 available quests drawn. PlayerLevel =", QuestiePlayer:GetPlayerLevel());
+    Questie:Debug(Questie.DEBUG_INFO, "[QuestieQuest] 0 available quests drawn. PlayerLevel =", QuestiePlayer:GetPlayerLevel());
 
     local data = QuestieDB.QuestPointers or QuestieDB.questData
     local index = next(data)
@@ -1453,7 +1459,7 @@ function QuestieQuest:CalculateAndDrawAvailableQuestsIterative(callback)
                             ---@type Quest
                             local quest = QuestieDB:GetQuest(questId)
                             if (not quest.tagInfoWasCached) then
-                                Questie:Debug(DEBUG_INFO, "Caching for quest", quest.Id)
+                                Questie:Debug(Questie.DEBUG_INFO, "Caching for quest", quest.Id)
                                 quest:GetQuestTagInfo() -- cache to load in the tooltip
                                 quest.tagInfoWasCached = true
                             end

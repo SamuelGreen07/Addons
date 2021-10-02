@@ -123,8 +123,8 @@ E.ClassRole = {
 
 E.DispelClasses = {
 	PRIEST	= { Magic = true,  Disease = true },
-	SHAMAN	= { Magic = false, Curse = true },
-	PALADIN	= { Poison = true, Magic = false,  Disease = true },
+	SHAMAN	= { Magic = false, Poison = true,  Disease = true, Curse = false },
+	PALADIN	= { Magic = true, Poison = true,  Disease = true },
 	DRUID	= { Magic = false, Curse = true,   Poison = true,  Disease = false },
 	MAGE	= { Curse = true }
 }

@@ -12,7 +12,7 @@ NECROSIS_ID = "Necrosis"
 Necrosis.Data = {
 	Version = GetAddOnMetadata("Necrosis", "Version"),
 	AppName = "Necrosis",
-	LastConfig = "7.6",
+	LastConfig = "7.6c",
 	Enabled = false,
 }
 
@@ -155,10 +155,19 @@ function Necrosis:Initialize(Config)
 	if NecrosisConfig.Timers then -- just in case... was added in 7.2
 	else	
 		NecrosisConfig.Timers = Config.Timers
+		
 	end
-	Necrosis.UpdateSpellTimers(NecrosisConfig.Timers)
+	--  Add new parameter between 2 version
+	if NecrosisConfig.NecrosisAlphaBar then
+	else
+	NecrosisConfig.NecrosisAlphaBar = 85 -- just in case... was added in 7.6
+	end
 	
+	Necrosis.UpdateSpellTimers(NecrosisConfig.Timers)-- init timers
 	
+	-- Création de la liste des sorts disponibles
+	self:SpellSetup("Initialize")
+	-- Dessine les UI et button Popoup
 	self:CreateWarlockUI()
 	self:CreateWarlockPopup()
 	-----------------------------------------------------------
@@ -166,8 +175,6 @@ function Necrosis:Initialize(Config)
 	-----------------------------------------------------------
 	-- Affichage d'un message sur la console
 	self:Msg(self.ChatMessage.Interface.Welcome, "USER")
-	-- Création de la liste des sorts disponibles
-	self:SpellSetup("Initialize")
 
     -- Enregistrement de la commande console
 	SlashCmdList["NecrosisCommand"] = Necrosis.SlashHandler

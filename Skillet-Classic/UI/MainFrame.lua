@@ -399,6 +399,9 @@ function Skillet:CreateTradeSkillWindow()
 	self.fullView = true
 	self.saved_full_button_count = 0
 	self.saved_SA_button_count = 0
+	if self.db.profile.clamp_to_screen then
+		frame:SetClampedToScreen(self.db.profile.clamp_to_screen)
+	end
 	return frame
 end
 
@@ -937,15 +940,14 @@ function Skillet:UpdateTradeSkillWindow()
 	if title then
 		title:SetText(L["Skillet Trade Skills"] .. " "..self.version.." ("..Skillet.wowVersion.."): " .. self.currentPlayer .. "/" .. tradeName)
 	end
-	local sortedSkillList = self.data.sortedSkillList[skillListKey]
+--
+-- Progression status bar
+--
 	local rank,maxRank = 0,0
 	local skillRanks = self:GetSkillRanks(self.currentPlayer, self.currentTrade)
 	if skillRanks then
 		rank,maxRank = skillRanks.rank, skillRanks.maxRank
 	end
---
--- Progression status bar
---
 	SkilletRankFrame:SetMinMaxValues(0, maxRank)
 	SkilletRankFrame:SetValue(rank)
 	SkilletRankFrameSkillRank:SetText(tradeName.."    "..rank.."/"..maxRank)
@@ -997,6 +999,7 @@ function Skillet:UpdateTradeSkillWindow()
 -- Iterate through all the buttons that make up the scroll window
 -- and fill them in with data or hide them, as necessary
 --
+	local sortedSkillList = self.data.sortedSkillList[skillListKey]
 	--DA.DEBUG(0,"Start for loop, button_count= "..tostring(button_count))
 	for i=1, button_count, 1 do
 		local rawSkillIndex = i + skillOffset
@@ -1491,6 +1494,9 @@ function Skillet:SkillButton_OnEnter(button)
 	local text = string.format("[%s/%s/%s]", L["inventory"], L["bank"], L["craftable"])
 	tip:AddDoubleLine("\n", text)
 	local text = string.format("itemID= %d",recipe.itemID)
+	if Skillet.isCraft then
+		text = string.format("spellID= %d",recipe.itemID)
+	end
 	tip:AddDoubleLine("\n", text)
 	tip:Show()
 	button.locked = false
@@ -1684,9 +1690,24 @@ function Skillet:UpdateDetailsWindow(skillIndex)
 --
 		SkilletSkillName:SetText(recipe.name)
 		SkilletRecipeNotesButton:Show()
-		if recipe.spellID and recipe.itemID then
+--
+-- Fill the skill level bar
+--
+		if recipe.itemID and recipe.spellID then
 			--DA.DEBUG(0,"UpdateDetailsWindow: itemID= "..tostring(recipe.itemID)..", spellID= "..tostring(recipe.spellID))
-			local orange,yellow,green,gray = self:GetTradeSkillLevels((recipe.itemID>0 and recipe.itemID) or -recipe.spellID)	-- was spellID now is itemID or -spellID
+			local orange,yellow,green,gray = self:GetTradeSkillLevels(recipe.itemID, recipe.spellID)
+--
+-- Save the actual values
+--
+			SkilletRankFrame.itemID = recipe.itemID
+			SkilletRankFrame.spellID = recipe.spellID
+			SkilletRankFrame.gray = gray
+			SkilletRankFrame.green = green
+			SkilletRankFrame.yellow = yellow
+			SkilletRankFrame.orange = orange
+--
+-- Set the graphical values
+--
 			SkilletRankFrame.subRanks.green:SetValue(gray)
 			SkilletRankFrame.subRanks.yellow:SetValue(green)
 			SkilletRankFrame.subRanks.orange:SetValue(yellow)
@@ -1700,18 +1721,14 @@ function Skillet:UpdateDetailsWindow(skillIndex)
 --
 		SkilletSkillCooldown:SetText("")
 		if not Skillet.isCraft then
-			local _, _, _, _, _, _, _, _, _, _, _, displayAsUnavailable, unavailableString = GetTradeSkillInfo(skillIndex)
-			--DA.DEBUG(0,"displayAsUnavailable="..tostring(displayAsUnavailable)..", unavailableString="..tostring(unavailableString))
-			local cooldown = 0
-			cooldown = (skill.cooldown or 0) - time()
-			if cooldown > 0 then
+			local cooldown = GetTradeSkillCooldown(skillIndex)
+			if cooldown and cooldown > 0 then
 				SkilletSkillCooldown:SetText(COOLDOWN_REMAINING.." "..SecondsToTime(cooldown))
-			elseif displayAsUnavailable then
-				local width = SkilletReagentParent:GetWidth()
-				local iconw = SkilletSkillIcon:GetWidth()
-				SkilletSkillCooldown:SetWidth(width - iconw - 15)
-				SkilletSkillCooldown:SetMaxLines(3)
-				SkilletSkillCooldown:SetText(unavailableString)
+			end
+		else
+			local cooldown = GetCraftCooldown(skillIndex)
+			if cooldown and cooldown > 0 then
+				SkilletSkillCooldown:SetText(COOLDOWN_REMAINING.." "..SecondsToTime(cooldown))
 			end
 		end
 	else
@@ -2377,15 +2394,17 @@ function Skillet:getLvlUpChance()
 --
 -- icy: 03.03.2012:
 -- according to pope (http://www.wowhead.com/spell=83949#comments)
--- % to level up with this receipt is calculated by: (greySkill - yourSkill) / (greySkill - yellowSkill
+-- % to level up with this receipt is calculated by: (greySkill - yourSkill) / (greySkill - yellowSkill)
 --
-	local skilRanks = self:GetSkillRanks(self.currentPlayer, self.currentTrade)
 	local currentLevel, maxLevel = 0, 0
-	if skilRanks then
-		currentLevel, maxLevel = skilRanks.rank, skilRanks.maxRank
+	local skillRanks = self:GetSkillRanks(self.currentPlayer, self.currentTrade)
+	if skillRanks then
+		currentLevel, maxLevel = skillRanks.rank, skillRanks.maxRank
 	end
-	local gray = tonumber(SkilletRankFrame.subRanks.green:GetValue())
-	local yellow = tonumber(SkilletRankFrame.subRanks.orange:GetValue())
+	local gray = SkilletRankFrame.gray
+	local yellow = SkilletRankFrame.yellow
+	if not gray then gray = SkilletRankFrame.subRanks.green:GetValue() end
+	if not yellow then yellow = SkilletRankFrame.subRanks.orange:GetValue() end
 	--DA.DEBUG(0,"currentLevel= "..tostring(currentLevel)..", gray= "..tostring(gray)..", yellow= "..tostring(yellow))
 	if (currentLevel > gray) then
 		return 0
@@ -2407,11 +2426,20 @@ function Skillet:RankFrame_OnEnter(button)
 	GameTooltip:SetOwner(button, "ANCHOR_BOTTOMLEFT")
 	local r,g,b = SkilletSkillName:GetTextColor()
 	GameTooltip:AddLine(SkilletSkillName:GetText(),r,g,b)
-	local gray = SkilletRankFrame.subRanks.green:GetValue()
-	local green = SkilletRankFrame.subRanks.yellow:GetValue()
-	local yellow = SkilletRankFrame.subRanks.orange:GetValue()
-	local orange = SkilletRankFrame.subRanks.red:GetValue()
-	-- lets add the chance to level up that skill with that receipt
+	local itemID = SkilletRankFrame.itemID
+	local spellID = SkilletRankFrame.spellID
+	local gray = SkilletRankFrame.gray
+	local green = SkilletRankFrame.green
+	local yellow = SkilletRankFrame.yellow
+	local orange = SkilletRankFrame.orange
+	--DA.DEBUG(0,"RankFrame_OnEnter: "..tostring(itemID).."= "..tostring(orange).."/"..tostring(yellow).."/"..tostring(green).."/"..tostring(gray)..", spellID= "..tostring(spellID))
+	if not gray then gray = SkilletRankFrame.subRanks.green:GetValue() end
+	if not green then green = SkilletRankFrame.subRanks.yellow:GetValue() end
+	if not yellow then yellow = SkilletRankFrame.subRanks.orange:GetValue() end
+	if not orange then orange = SkilletRankFrame.subRanks.red:GetValue() end
+--
+-- Lets add the chance to level up that skill with that receipt
+--
 	local chance = Skillet:getLvlUpChance()
 	chance = math.floor(chance*10)/10		-- one decimal is enough
 	GameTooltip:AddLine(COLORORANGE..orange.."|r/"..COLORYELLOW..yellow.."|r/"..COLORGREEN..green.."|r/"..COLORGRAY..gray.."|r/ Chance:"..chance.."|r%")
@@ -2567,29 +2595,96 @@ function Skillet:ReagentButtonOnClick(button, skillIndex, reagentIndex)
 end
 
 --
--- Called when the icon button is clicked
+-- Recurse through the reagents expanding craftables into their non-craftable source.
 --
-function Skillet:ReagentsLinkOnClick(button, skillIndex, reagentIndex)
-	DA.DEBUG(0,"ReagentsLinkOnClick("..tostring(button)..", "..tostring(skillIndex)..", "..tostring(reagentIndex)..")")
+local function recurseReagents(orecipe, oi, recipe, level)
+	DA.DEBUG(0,"recurseReagents("..tostring(orecipe.name)..", "..tostring(oi)..", "..tostring(recipe.name)..", "..tostring(level)..")")
+	--DA.DEBUG(1,"recurseReagents: orecipe= "..DA.DUMP1(orecipe))
+	DA.DEBUG(1,"recurseReagents: recipe= "..DA.DUMP1(recipe))
+	for i = 1, #recipe.reagentData, 1 do
+		if level == 1 then oi = i end
+		local oreagent = orecipe.reagentData[oi]
+		local reagent = recipe.reagentData[i]
+		--DA.DEBUG(1,"recurseReagents: reagent= "..DA.DUMP1(reagent))
+		if reagent and reagent.id then
+			local reagentName, reagentLink, recipeSource, reagentIndex
+			reagentName, reagentLink = GetItemInfo(reagent.id)
+			recipeSource = Skillet.db.global.itemRecipeSource[reagent.id]
+			DA.DEBUG(1,"recurseReagents: recipeSource= "..DA.DUMP1(recipeSource))
+			if recipeSource then
+				for recipeSourceID in pairs(recipeSource) do
+					reagentRecipe = Skillet:GetRecipe(recipeSourceID)
+					--DA.DEBUG(2,"recurseReagents: recipeSourceID= "..tostring(recipeSourceID)..", reagentRecipe= "..DA.DUMP1(reagentRecipe))
+					reagentIndex = Skillet.data.skillIndexLookup[Skillet.currentPlayer][recipeSourceID]
+					--DA.DEBUG(2,"recurseReagents: recipeSourceID= "..tostring(recipeSourceID)..", reagentIndex= "..tostring(reagentIndex))
+				end
+			end
+			--DA.DEBUG(1,"recurseReagents: reagentLink= "..DA.DUMP1(reagentLink))
+			if reagentLink then
+				if reagentIndex then
+					recurseReagents(orecipe, oi, reagentRecipe, level+1)
+				end
+				if not Skillet.reagentLinkList[oreagent.id] then
+					Skillet.reagentLinkList[oreagent.id] = {}
+				end
+				if not Skillet.reagentLinkList[oreagent.id][level] then
+					Skillet.reagentLinkList[oreagent.id][level] = {}
+				end
+				if not Skillet.reagentLinkList[oreagent.id][level][reagent.id] then
+					Skillet.reagentLinkList[oreagent.id][level][reagent.id] = {}
+				end
+				Skillet.reagentLinkList[oreagent.id][level][reagent.id].reagentIndex = i
+				Skillet.reagentLinkList[oreagent.id][level][reagent.id].reagentName = reagentName
+				Skillet.reagentLinkList[oreagent.id][level][reagent.id].reagentLink = reagentLink
+				Skillet.reagentLinkList[oreagent.id][level][reagent.id].numNeeded = reagent.numNeeded
+				Skillet.reagentLinkList[oreagent.id][level][reagent.id].tradeID = reagentRecipe.tradeID
+				Skillet.reagentLinkList[oreagent.id][level][reagent.id].recipeID = recipe.itemID
+				Skillet.reagentLinkList[oreagent.id][level][reagent.id].recipeName = recipe.name
+				Skillet.reagentLinkList[oreagent.id][level][reagent.id].orecipeIndex = oi
+			end
+		end
+	end
+end
+
+--
+-- Called when the icon button is alt-clicked
+--
+function Skillet:ReagentsLinkOnClick(button, skillIndex, recurse)
+	DA.DEBUG(0,"ReagentsLinkOnClick("..tostring(button)..", "..tostring(skillIndex)..", "..tostring(recurse)..")")
 	if not self.db.profile.link_craftable_reagents then
 		return
 	end
+	local skillIndexLookup = Skillet.data.skillIndexLookup[Skillet.currentPlayer]
 	local recipe = self:GetRecipeDataByTradeIndex(self.currentTrade, skillIndex)
 	--DA.DEBUG(1,"recipe= "..DA.DUMP1(recipe))
+	if recurse then
+		self.reagentLinkList = {}
+		recurseReagents(recipe, 0, recipe, 1)
+		DA.DEBUG(1,"reagentLinkList= "..DA.DUMP(self.reagentLinkList))
+	end
 	local sep = " "
 	for i = 1, #recipe.reagentData, 1 do
 		local reagent = recipe.reagentData[i]
 		--DA.DEBUG(1,"reagent= "..DA.DUMP1(reagent))
-		if reagent then
-			local reagentName, reagentLink
-			if reagent.id then
-				reagentName, reagentLink = GetItemInfo(reagent.id)
+		if reagent and reagent.id then
+			local reagentName, reagentLink, recipeSource, reagentIndex
+			reagentName, reagentLink = GetItemInfo(reagent.id)
+			recipeSource = Skillet.db.global.itemRecipeSource[reagent.id]
+			--DA.DEBUG(1,"recipeSource= "..DA.DUMP1(recipeSource))
+			if recipeSource then
+				for recipeSourceID in pairs(recipeSource) do
+					reagentRecipe = Skillet:GetRecipe(recipeSourceID)
+					reagentIndex = skillIndexLookup[recipeSourceID]
+					--DA.DEBUG(2,"recipeSourceID= "..tostring(recipeSourceID)..", reagentIndex= "..tostring(reagentIndex))
+				end
 			end
 			--DA.DEBUG(1,"reagentLink= "..DA.DUMP1(reagentLink))
-			if reagentLink then
+			if reagentLink and reagentIndex then
+				ChatEdit_InsertLink(sep .. reagent.numNeeded .. "x" .. reagentLink.."*")
+			elseif reagentLink then
 				ChatEdit_InsertLink(sep .. reagent.numNeeded .. "x" .. reagentLink)
 			end
-		sep = ", "
+			sep = ", "
 		end
 	end
 end
@@ -3193,6 +3288,9 @@ function Skillet:CreateStandaloneQueueFrame()
 -- so hitting [ESC] will close the window
 --
 	tinsert(UISpecialFrames, frame:GetName())
+	if self.db.profile.clamp_to_screen then
+		frame:SetClampedToScreen(self.db.profile.clamp_to_screen)
+	end
 	return frame
 end
 

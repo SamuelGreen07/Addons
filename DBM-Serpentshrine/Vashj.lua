@@ -1,11 +1,13 @@
 local mod	= DBM:NewMod("Vashj", "DBM-Serpentshrine")
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20210623162544")
+mod:SetRevision("20210928224521")
 mod:SetCreatureID(21212)
-mod:SetEncounterID(WOW_PROJECT_ID ~= (WOW_PROJECT_BURNING_CRUSADE_CLASSIC or 5) and 628 or 2463)
+mod:SetEncounterID(628, 2463)
 mod:SetModelID(20748)
 mod:SetUsedIcons(1)
+mod:SetHotfixNoticeRev(20210919000000)
+mod:SetMinSyncRevision(20210919000000)
 
 mod:RegisterCombat("combat")
 
@@ -15,8 +17,8 @@ mod:RegisterEventsInCombat(
 	"SPELL_CAST_START 38253",
 	"SPELL_CAST_SUCCESS 38316",
 	"UNIT_DIED",
-	"CHAT_MSG_MONSTER_YELL",
-	"CHAT_MSG_LOOT"
+	"CHAT_MSG_MONSTER_YELL"
+--	"CHAT_MSG_LOOT"
 )
 
 local warnCharge		= mod:NewTargetNoFilterAnnounce(38280, 4)
@@ -26,9 +28,10 @@ local warnElemental		= mod:NewAnnounce("WarnElemental", 4, 31687)
 local warnStrider		= mod:NewAnnounce("WarnStrider", 3, 475)
 local warnNaga			= mod:NewAnnounce("WarnNaga", 3, 2120)
 --local warnShield		= mod:NewAnnounce("WarnShield", 3)
-local warnLoot			= mod:NewAnnounce("WarnLoot", 4, 38132)
+--local warnLoot			= mod:NewAnnounce("WarnLoot", 4, 38132)
 local warnPhase3		= mod:NewPhaseAnnounce(3)
 
+--local specWarnCore		= mod:NewSpecialWarning("SpecWarnCore", nil, nil, nil, 1, 8)
 local specWarnCharge	= mod:NewSpecialWarningMoveAway(38280, nil, nil, nil, 1, 2)
 local yellCharge		= mod:NewYell(38280)
 local specWarnElemental	= mod:NewSpecialWarning("SpecWarnElemental")--Changed from soon to a now warning. the soon warning not accurate because of 11 second variation so not useful special warning.
@@ -42,13 +45,11 @@ local timerNaga			= mod:NewTimer(47.5, "TimerNaga", 2120, nil, nil, 1)
 
 mod:AddRangeFrameOption(10, 38280)
 mod:AddSetIconOption("ChargeIcon", 38280, false, false, {1})
---mod:AddBoolOption("AutoChangeLootToFFA", true)
 
 mod.vb.shieldLeft = 4
 mod.vb.nagaCount = 1
 mod.vb.striderCount = 1
 mod.vb.elementalCount = 1
---local lootmethod, masterlooterRaidID
 local elementals = {}
 
 function mod:StriderSpawn()
@@ -72,22 +73,12 @@ function mod:OnCombatStart(delay)
 	self.vb.nagaCount = 1
 	self.vb.striderCount = 1
 	self.vb.elementalCount = 1
---	if IsInGroup() and DBM:GetRaidRank() == 2 then
---		lootmethod, _, masterlooterRaidID = GetLootMethod()
---	end
 end
 
 function mod:OnCombatEnd()
 	if self.Options.RangeFrame then
 		DBM.RangeCheck:Hide()
 	end
---	if IsInGroup() and self.Options.AutoChangeLootToFFA and DBM:GetRaidRank() == 2 then
---		if masterlooterRaidID then
---			SetLootMethod(lootmethod, "raid"..masterlooterRaidID)
---		else
---			SetLootMethod(lootmethod)
---		end
---	end
 end
 
 function mod:SPELL_AURA_APPLIED(args)
@@ -158,44 +149,13 @@ end
 
 function mod:CHAT_MSG_MONSTER_YELL(msg)
 	if msg == L.DBM_VASHJ_YELL_PHASE2 or msg:find(L.DBM_VASHJ_YELL_PHASE2) then
-		self:SetStage(2)
-		self.vb.nagaCount = 1
-		self.vb.striderCount = 1
-		self.vb.elementalCount = 1
-		self.vb.shieldLeft = 4
-		warnPhase2:Show()
-		timerNaga:Start(nil, tostring(self.vb.nagaCount))
-		warnNaga:Schedule(42.5, tostring(self.vb.elementalCount))
-		self:ScheduleMethod(47.5, "NagaSpawn")
-		timerElementalCD:Start(nil, tostring(self.vb.elementalCount))
-		warnElemental:Schedule(45, tostring(self.vb.elementalCount))
-		timerStrider:Start(nil, tostring(self.vb.striderCount))
-		warnStrider:Schedule(57, tostring(self.vb.striderCount))
-		self:ScheduleMethod(63, "StriderSpawn")
---		if IsInGroup() and self.Options.AutoChangeLootToFFA and DBM:GetRaidRank() == 2 then
---			SetLootMethod("freeforall")
---		end
+		self:SendSync("Phase2")
 	elseif msg == L.DBM_VASHJ_YELL_PHASE3 or msg:find(L.DBM_VASHJ_YELL_PHASE3) then
-		self:SetStage(3)
-		warnPhase3:Show()
-		timerNaga:Cancel()
-		warnNaga:Cancel()
-		timerElementalCD:Cancel()
-		warnElemental:Cancel()
-		timerStrider:Cancel()
-		warnStrider:Cancel()
-		self:UnscheduleMethod("NagaSpawn")
-		self:UnscheduleMethod("StriderSpawn")
---		if IsInGroup() and self.Options.AutoChangeLootToFFA and DBM:GetRaidRank() == 2 then
---			if masterlooterRaidID then
---				SetLootMethod(lootmethod, "raid"..masterlooterRaidID)
---			else
---				SetLootMethod(lootmethod)
---			end
---		end
+		self:SendSync("Phase3")
 	end
 end
 
+--[[
 function mod:CHAT_MSG_LOOT(msg)
 	-- DBM:AddMsg(msg) --> Meridium receives loot: [Magnetic Core]
 	local player, itemID = msg:match(L.LootMsg)
@@ -203,13 +163,48 @@ function mod:CHAT_MSG_LOOT(msg)
 		self:SendSync("LootMsg", player)
 	end
 end
+--]]
 
-function mod:OnSync(event, playerName)
-	if not self:IsInCombat() then return end
-	if event == "LootMsg" and playerName then
-		playerName = DBM:GetUnitFullName(playerName)
-		if self:AntiSpam(2, playerName) then
-			warnLoot:Show(playerName)
+do
+	local myName = UnitName("player")
+	function mod:OnSync(msg, playerName)
+		if not self:IsInCombat() then return end
+		if msg == "Phase2" and self.vb.phase < 2 then
+			self:SetStage(2)
+			self.vb.nagaCount = 1
+			self.vb.striderCount = 1
+			self.vb.elementalCount = 1
+			self.vb.shieldLeft = 4
+			warnPhase2:Show()
+			timerNaga:Start(nil, self.vb.nagaCount)
+			warnNaga:Schedule(42.5, self.vb.elementalCount)
+			self:ScheduleMethod(47.5, "NagaSpawn")
+			timerElementalCD:Start(nil, self.vb.elementalCount)
+			warnElemental:Schedule(45, self.vb.elementalCount)
+			timerStrider:Start(nil, self.vb.striderCount)
+			warnStrider:Schedule(57, self.vb.striderCount)
+			self:ScheduleMethod(63, "StriderSpawn")
+		elseif msg == "Phase3" and self.vb.phase < 3 then
+			self:SetStage(3)
+			warnPhase3:Show()
+			timerNaga:Cancel()
+			warnNaga:Cancel()
+			timerElementalCD:Cancel()
+			warnElemental:Cancel()
+			timerStrider:Cancel()
+			warnStrider:Cancel()
+			self:UnscheduleMethod("NagaSpawn")
+			self:UnscheduleMethod("StriderSpawn")
+--		elseif msg == "LootMsg" and playerName then
+			--[[playerName = DBM:GetUnitFullName(playerName) or playerName
+			if self:AntiSpam(2, playerName) then
+				if playerName == myName then
+					specWarnCore:Show()
+					specWarnCore:Play("useitem")
+				else
+					warnLoot:Show(playerName)
+				end
+			end--]]
 		end
 	end
 end

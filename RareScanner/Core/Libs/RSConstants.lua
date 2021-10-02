@@ -24,8 +24,8 @@ RSConstants.LOOT_ITEM_ID = nil
 -- Current versions
 ---============================================================================
 
-RSConstants.CURRENT_DB_VERSION = 1
-RSConstants.CURRENT_LOOT_DB_VERSION = 1
+RSConstants.CURRENT_DB_VERSION = 2
+RSConstants.CURRENT_LOOT_DB_VERSION = 2
 
 ---============================================================================
 -- Timers
@@ -69,7 +69,8 @@ RSConstants.PROFILE_DEFAULTS = {
 			soundObjectDisabled = false,
 			soundObjectPlayed = "PVP Horde",
 			soundVolume = 4,
-			soundChannel = "Master"
+			soundChannel = "Master",
+			soundCustomFolder = "RareScannerSounds"
 		},
 		display = {
 			displayButton = true,
@@ -116,9 +117,8 @@ RSConstants.PROFILE_DEFAULTS = {
 			cleanWorldMapSearcherOnChange = true,
 			displayMinimapIcons = true,
 			waypointTomtom = false,
-			tooltipsAchievements = true,
+			tooltipsScale = 1.0,
 			tooltipsNotes = true,
-			tooltipsState = true,
 			tooltipsSeen = true,
 			tooltipsCommands = true
 		},
@@ -139,6 +139,25 @@ RSConstants.PROFILE_DEFAULTS = {
 		}
 	}
 }
+
+---============================================================================
+-- Sounds
+---============================================================================
+
+RSConstants.DEFAULT_SOUNDS = {
+	["Achievement Sound"] = "Interface\\AddOns\\RareScanner\\Media\\achievmentsound1-4.ogg",
+	["Alarm Clock"] = "Interface\\AddOns\\RareScanner\\Media\\alarmclockwarning2-4.ogg",
+	["Boat Docking"] = "Interface\\AddOns\\RareScanner\\Media\\boatdockedwarning-4.ogg",
+	["Siege Engineer Weapon"] = "Interface\\AddOns\\RareScanner\\Media\\fx_ograid_siege_weaponmachine_warning-4.ogg",
+	["PVP Alliance"] = "Interface\\AddOns\\RareScanner\\Media\\pvpwarningalliance-4.ogg",
+	["PVP Horde"] = "Interface\\AddOns\\RareScanner\\Media\\pvpwarninghorde-4.ogg",
+	["Ready Check"] = "Interface\\AddOns\\RareScanner\\Media\\readycheck-4.ogg",
+	["Horn"] = "Interface\\AddOns\\RareScanner\\Media\\gruntling_horn_bb-4.ogg",
+	["Event Wardrum Ogre"] = "Interface\\AddOns\\RareScanner\\Media\\Event_wardrum_ogre-4.ogg",
+	["Level Up"] = "Interface\\AddOns\\RareScanner\\Media\\levelup2-4.ogg",
+}
+
+RSConstants.EXTERNAL_SOUND_FOLDER = "Interface\\AddOns\\%s\\%s"
 
 ---============================================================================
 -- CMD commands

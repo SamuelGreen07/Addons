@@ -52,6 +52,10 @@ L["can be created from reagents on all characters"] = "可从所有人物的材�
 L["can be created from reagents on other characters"] = "可由其他人物的材料制造"
 L["can be created with reagents bought at vendor"] = "可通过从商人处购买材料制造"
 L["Changing profession to"] = "更换专业为"
+--[[Translation missing --]]
+L["CLAMPTOSCREENDESC"] = "Force frames to remain on screen"
+--[[Translation missing --]]
+L["CLAMPTOSCREENNAME"] = "Clamp frames to screen"
 L["Clear"] = "清除"
 L["Click"] = "点击"
 L["click here to add a note"] = "点击这里来添加注释"

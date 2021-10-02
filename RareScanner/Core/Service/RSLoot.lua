@@ -26,7 +26,7 @@ local function IsEquipable(itemClassID, itemSubClassID, itemEquipLoc)
 		end
 	end
 	-- check if cloth and not cloak
-	if (itemClassID == LE_ITEM_CLASS_ARMOR and itemSubClassID == LE_ITEM_ARMOR_CLOTH and not RSUtils.Contains(private.CLOTH_CHARACTERES, classIndex) and itemEquipLoc ~= "INVTYPE_CLOAK") then --check if its cloth and not cloak
+	if (itemClassID == Enum.ItemClass.Armor and itemSubClassID == Enum.ItemArmorSubclass.Cloth and not RSUtils.Contains(private.CLOTH_CHARACTERES, classIndex) and itemEquipLoc ~= "INVTYPE_CLOAK") then --check if its cloth and not cloak
 		return false
 	end
 
@@ -76,7 +76,7 @@ function RSLoot.IsFiltered(itemID, itemLink, itemRarity, itemEquipLoc, itemClass
 	end
 
 	-- Completed quests
-	if (RSConfigDB.IsFilteringLootByCompletedQuest() and (itemClassID == LE_ITEM_CLASS_QUESTITEM or (itemClassID == LE_ITEM_CLASS_CONSUMABLE and itemSubClassID == 8))) then --quest item
+	if (RSConfigDB.IsFilteringLootByCompletedQuest() and (itemClassID == Enum.ItemClass.Questitem or (itemClassID == Enum.ItemClass.Consumable and itemSubClassID == 8))) then --quest item
 		local questIDs = RSLootDB.GetAssociatedQuestIDs(itemID)
 		if (questIDs) then
 			local filtered = false
@@ -97,7 +97,7 @@ function RSLoot.IsFiltered(itemID, itemLink, itemRarity, itemEquipLoc, itemClass
 	end
 
 	-- Equipable filter
-	if (RSConfigDB.IsFilteringLootByNotEquipableItems() and (itemClassID == LE_ITEM_CLASS_WEAPON or itemClassID == LE_ITEM_CLASS_ARMOR)) then --weapons or armor
+	if (RSConfigDB.IsFilteringLootByNotEquipableItems() and (itemClassID == Enum.ItemClass.Weapon or itemClassID == Enum.ItemClass.Armor)) then --weapons or armor
 		if (not IsEquipable(itemClassID, itemSubClassID, itemEquipLoc)) then
 			RSLogger:PrintDebugMessageItemID(itemID, string.format("Item [%s]. Filtrado por no ser equipable.", itemID))
 			return true;

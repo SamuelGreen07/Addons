@@ -202,16 +202,15 @@ function Necrosis:SetBuffSpellAttribute(button)
 			local Rank1 = self.Warlock_Spells[710].InSpellBook and self.Warlock_Spells[710].CastName
 			if Necrosis.Warlock_Spells[Necrosis.Warlock_Spell_Use[f.high_of]].SpellRank == 2 then -- has rank 2
 				local Rank2 = self.Warlock_Spells[18647].InSpellBook and self.Warlock_Spells[18647].CastName
+				
 				-- so lets use the "harmbutton" special attribute!
 				-- assign Banish(rank 2) to LEFT click 
-				f:SetAttribute("harmbutton"..l_click, "banishrank2")
-				f:SetAttribute("type-banishrank2", "macro")
-				f:SetAttribute("macrotext-banishrank2", "/focus\n/cast "..Rank2)
+				f:SetAttribute("type1", "macro")
+				f:SetAttribute("macrotext1", "/focus\n/cast "..Rank1)
 				
 				-- assign Banish(rank 1) to RIGHT click 
-				f:SetAttribute("harmbutton"..r_click, "banishrank1")
-				f:SetAttribute("type-banishrank1", "macro")
-				f:SetAttribute("macrotext-banishrank1", "/focus\n/cast "..Rank1) 
+				f:SetAttribute("type2", "macro")
+				f:SetAttribute("macrotext2q", "/focus\n/cast "..Rank2)
 
 				-- allow focused target to be rebanished with CTRL+LEFT or RIGHT click
 				f:SetAttribute("ctrl-type"..l_click, "spell")
@@ -311,6 +310,7 @@ end
 
 -- On associe les malédictions au clic sur le bouton concerné
 function Necrosis:SetCurseSpellAttribute(button)
+
 	if InCombatLockdown() then
 		return
 	end
@@ -342,14 +342,15 @@ function Necrosis:CurseSpellAttribute()
 		local fr = Necrosis.Warlock_Buttons[v.f_ptr].f
 		if Necrosis.IsSpellKnown(v.high_of) -- in spell book
 --		and NecrosisConfig.DemonSpellPosition[i] > 0 -- and requested
+		
 		then
-			Necrosis:SetCurseSpellAttribute(fr)
+		Necrosis:SetCurseSpellAttribute(fr)	
 		end
 	end
 end
 
 -- Associating the frames to buttons, and creating stones on right-click.
--- Association de la monture au bouton, et de la création des pierres sur un clic droit
+-- Association de la monture au bouton, et de la création des pierres sur un clic droit + bouton destroy shards over limit
 function Necrosis:StoneAttribute(Steed)
 	
 	if InCombatLockdown() then
@@ -382,8 +383,21 @@ function Necrosis:StoneAttribute(Steed)
 		if f then
 			f:SetAttribute("type2", "spell")
 			f:SetAttribute("spell2", Necrosis.GetSpellCastName("healthstone")) 
+			f:SetAttribute("shift-type*", "spell")
+			f:SetAttribute("shift-spell*", Necrosis.GetSpellCastName("Ritual_of_Souls")) 			
+
 		end
 	end
+	
+	-- Destroy Shards button is a new type, with function attached
+	local destroy_shards_button = _G[Necrosis.Warlock_Buttons.destroy_shards.f]
+	if (destroy_shards_button) then
+		destroy_shards_button:SetScript(
+			"OnClick",
+			Necrosis.Warlock_Buttons.destroy_shards.func
+		)
+	end
+	
 	
 	SetSSAttribs(nil, "Icon update")
 
@@ -503,9 +517,9 @@ function Necrosis:StoneAttribute(Steed)
 	f = _G[f]
 	if f then
 		-- hearthstone || Pour la pierre de foyer
-		f:SetAttribute("unit1", "target")
+		--f:SetAttribute("unit1", "target")
 		f:SetAttribute("type1", "macro")
-		f:SetAttribute("macrotext", "/focus")
+		f:SetAttribute("macrotext", "/necrosis")
 		f:SetAttribute("type2", "item")
 		f:SetAttribute("item", self.Translation.Item.Hearthstone)
 	end
@@ -515,7 +529,7 @@ function Necrosis:StoneAttribute(Steed)
 	if f then
 		f:SetAttribute("unit1", "target")
 		f:SetAttribute("type1", "macro")
-		f:SetAttribute("macrotext", "/focus")
+		f:SetAttribute("macrotext", "/necrosis timer2")
 		f:SetAttribute("type2", "item")
 		f:SetAttribute("item", self.Translation.Item.Hearthstone)
 	end

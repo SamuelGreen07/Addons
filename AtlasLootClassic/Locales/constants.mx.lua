@@ -30,12 +30,48 @@ AL["AtlasLoot Modules"] = "Módulos de AtlasLoot"
 AL["Balzaphon"] = "Balzaphon"
 AL["Bonus"] = "Bonus"
 AL["Bow"] = "Arco"
+--[[Translation missing --]]
+--[[ AL["Brutal Gladiator's Aegis"] = "Brutal Gladiator's Aegis"--]] 
+--[[Translation missing --]]
+--[[ AL["Brutal Gladiator's Battlegear"] = "Brutal Gladiator's Battlegear"--]] 
+--[[Translation missing --]]
+--[[ AL["Brutal Gladiator's Dreadgear"] = "Brutal Gladiator's Dreadgear"--]] 
+--[[Translation missing --]]
+--[[ AL["Brutal Gladiator's Earthshaker"] = "Brutal Gladiator's Earthshaker"--]] 
+--[[Translation missing --]]
+--[[ AL["Brutal Gladiator's Felshroud"] = "Brutal Gladiator's Felshroud"--]] 
+--[[Translation missing --]]
+--[[ AL["Brutal Gladiator's Investiture"] = "Brutal Gladiator's Investiture"--]] 
+--[[Translation missing --]]
+--[[ AL["Brutal Gladiator's Pursuit"] = "Brutal Gladiator's Pursuit"--]] 
+--[[Translation missing --]]
+--[[ AL["Brutal Gladiator's Raiment"] = "Brutal Gladiator's Raiment"--]] 
+--[[Translation missing --]]
+--[[ AL["Brutal Gladiator's Redemption"] = "Brutal Gladiator's Redemption"--]] 
+--[[Translation missing --]]
+--[[ AL["Brutal Gladiator's Refuge"] = "Brutal Gladiator's Refuge"--]] 
+--[[Translation missing --]]
+--[[ AL["Brutal Gladiator's Regalia"] = "Brutal Gladiator's Regalia"--]] 
+--[[Translation missing --]]
+--[[ AL["Brutal Gladiator's Sanctuary"] = "Brutal Gladiator's Sanctuary"--]] 
+--[[Translation missing --]]
+--[[ AL["Brutal Gladiator's Thunderfist"] = "Brutal Gladiator's Thunderfist"--]] 
+--[[Translation missing --]]
+--[[ AL["Brutal Gladiator's Vestments"] = "Brutal Gladiator's Vestments"--]] 
+--[[Translation missing --]]
+--[[ AL["Brutal Gladiator's Vindication"] = "Brutal Gladiator's Vindication"--]] 
+--[[Translation missing --]]
+--[[ AL["Brutal Gladiator's Wartide"] = "Brutal Gladiator's Wartide"--]] 
+--[[Translation missing --]]
+--[[ AL["Brutal Gladiator's Wildhide"] = "Brutal Gladiator's Wildhide"--]] 
 AL["Chat Link"] = "Enlace de Chat"
 AL["Click to open Atlas instance map."] = "Haz clic para abrir el mapa de instancias de Atlas."
 AL["Collections"] = "Colecciones"
 AL["Command %s not found. Use '/al slash' for a full list of commands"] = "Comando %s no se encuentra. Escribe '/al slash' para una lista de todos los comandos."
 AL["Content phase:"] = "Fase de contenido:"
 AL["Copy Box"] = "Caja de copiar"
+--[[Translation missing --]]
+--[[ AL["Coren Direbrew"] = "Coren Direbrew"--]] 
 AL["Crafting"] = "Fabricados"
 AL["Crossbow"] = "Ballesta"
 AL["Ctrl + C to copy"] = "Ctrl + C para copiar"
@@ -70,8 +106,7 @@ AL["Misc"] = "Varios"
 AL["Model"] = "Modelo"
 AL["Module %s is deactivated."] = "Módulo %s es desactivado."
 AL["Module %s is not installed."] = "Módulo %s no es instalado."
---[[Translation missing --]]
---[[ AL["New version available!"] = "New version available!"--]] 
+AL["New version available!"] = "¡Nueva versión disponible!"
 AL["No module found."] = "No se encuentra módulo."
 AL["Normal"] = "Normal"
 AL["One-Hand, Axe"] = "Una mano, Hacha"
@@ -90,8 +125,7 @@ AL["Quest objective."] = "Objetivo de misión."
 AL["Reagent for..."] = "Componente para..."
 AL["Regen"] = "Regeneración"
 AL["Remove item from list"] = "Quitar objeto de la lista"
---[[Translation missing --]]
---[[ AL["Reputation"] = "Reputation"--]] 
+AL["Reputation"] = "Reputación"
 AL["Required module %s is currently disabled."] = "Módulo requerido %s es desactivado."
 AL["Required module %s is not installed."] = "Módulo requerido %s no es instalado."
 AL["Right Click"] = "Clic Derecho"

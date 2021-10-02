@@ -96,9 +96,8 @@ function UF:Configure_ClassBar(frame)
 	bars:Width(CLASSBAR_WIDTH - SPACING)
 	bars:Height(frame.CLASSBAR_HEIGHT - SPACING)
 
-	if frame.ClassBar == 'ClassPower' then
-
-		local maxClassBarButtons = max(UF.classMaxResourceBar[E.myclass] or 0, MAX_COMBO_POINTS)
+	if (frame.ClassBar == 'ClassPower' or frame.ClassBar == 'Totems') then
+		local maxClassBarButtons = max(UF.classMaxResourceBar[E.myclass] or 0, frame.ClassBar == 'Totems' and 4 or MAX_COMBO_POINTS)
 		for i = 1, maxClassBarButtons do
 			bars[i].backdrop:Hide()
 
@@ -153,7 +152,7 @@ function UF:Configure_ClassBar(frame)
 				end
 
 				--Fix missing backdrop colors on Combo Points when using Spaced style
-				if frame.ClassBar == 'ClassPower' then
+				if frame.ClassBar == 'ClassPower' or frame.ClassBar == 'Totems' then
 					if frame.USE_MINI_CLASSBAR then
 						bars[i].bg:SetParent(bars[i].backdrop)
 					else
@@ -239,8 +238,8 @@ function UF:Configure_ClassBar(frame)
 		if frame.AdditionalPower and not frame:IsElementEnabled('AdditionalPower') then
 			frame:EnableElement('AdditionalPower')
 		end
-		if frame.AlternativePower and not frame:IsElementEnabled('AlternativePower') then
-			frame:EnableElement('AlternativePower')
+		if frame.Totems and not frame:IsElementEnabled("Totems") then
+			frame:EnableElement("Totems")
 		end
 	else
 		if frame.ClassPower and frame:IsElementEnabled('ClassPower') then
@@ -249,8 +248,8 @@ function UF:Configure_ClassBar(frame)
 		if frame.AdditionalPower and frame:IsElementEnabled('AdditionalPower') then
 			frame:DisableElement('AdditionalPower')
 		end
-		if frame.AlternativePower and frame:IsElementEnabled('AlternativePower') then
-			frame:DisableElement('AlternativePower')
+		if frame.Totems and frame:IsElementEnabled("Totems") then
+			frame:DisableElement("Totems")
 		end
 	end
 end
@@ -371,12 +370,8 @@ function UF:Construct_AdditionalPowerBar(frame)
 	additionalPower:SetStatusBarTexture(E.media.blankTex)
 	UF.statusbars[additionalPower] = true
 
-	additionalPower.RaisedElementParent = CreateFrame('Frame', nil, additionalPower)
-	additionalPower.RaisedElementParent:SetFrameLevel(additionalPower:GetFrameLevel() + 100)
-	additionalPower.RaisedElementParent:SetAllPoints()
-
-	additionalPower.text = additionalPower.RaisedElementParent:CreateFontString(nil, 'OVERLAY')
-	UF:Configure_FontString(additionalPower.text)
+	additionalPower.RaisedElementParent = UF:CreateRaisedElement(additionalPower, true)
+	additionalPower.text = UF:CreateRaisedText(additionalPower.RaisedElementParent)
 
 	additionalPower.bg = additionalPower:CreateTexture(nil, 'BORDER')
 	additionalPower.bg:SetAllPoints(additionalPower)
@@ -417,3 +412,48 @@ function UF:PostVisibilityAdditionalPower(enabled)
 
 	UF:PostVisibility_ClassBars(frame)
 end
+
+-----------------------------------------------------------
+-- Totems
+-----------------------------------------------------------
+local TotemColors = {
+	[1] = {.58,.23,.10},
+	[2] = {.23,.45,.13},
+	[3] = {.19,.48,.60},
+	[4] = {.42,.18,.74},
+}
+
+function UF:Construct_Totems(frame)
+	local totems = CreateFrame("Frame", nil, frame)
+	totems:CreateBackdrop(nil, nil, nil, self.thinBorders, true)
+	totems.Destroy = {}
+
+	for i = 1, 4 do
+		local r, g, b = unpack(TotemColors[i])
+
+		totems[i] = CreateFrame("StatusBar", frame:GetName().."Totem"..i, totems)
+		totems[i]:CreateBackdrop(nil, nil, nil, self.thinBorders, true)
+		totems[i].backdrop:SetParent(totems)
+
+		totems[i]:SetStatusBarTexture(E.media.blankTex)
+		totems[i]:SetStatusBarColor(r, g, b)
+
+		UF.statusbars[totems[i]] = true
+
+		totems[i]:SetMinMaxValues(0, 1)
+		totems[i]:SetValue(0)
+
+		totems[i].bg = totems[i]:CreateTexture(nil, "BORDER")
+		totems[i].bg:SetAllPoints(totems[i])
+		totems[i].bg:SetTexture(E['media'].blankTex)
+		totems[i].bg.multiplier = 0.3
+
+		totems[i].bg:SetVertexColor(r * .3, g * .3, b * .3)
+	end
+
+	frame.MAX_CLASS_BAR = 4
+	frame.ClassBar = 'Totems'
+
+	return totems
+end
+

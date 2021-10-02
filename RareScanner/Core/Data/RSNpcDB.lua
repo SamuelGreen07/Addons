@@ -111,16 +111,11 @@ function RSNpcDB.SetCustomNpcInfo(npcID, info)
 			end
 			
 			completedZonesCounter = completedZonesCounter + 1
-		elseif (zoneID == RSConstants.ALL_ZONES_CUSTOM_NPC) then
+		else
 			local mapID = tonumber(zoneID)
 			zones[mapID] = {}			
 			completedZonesCounter = completedZonesCounter + 1
 		end
-	end
-	
-	if (completedZonesCounter == 0) then
-		RSLogger:PrintDebugMessage(string.format("SetCustomNpcInfo[%s]: Ignorado por no tener coordenadas en ninguna de sus zonas", npcID))
-		return
 	end
 	
 	local npcIDnumber = tonumber(npcID)
@@ -231,6 +226,17 @@ function RSNpcDB.GetInternalNpcInfo(npcID)
 		return private.NPC_INFO[npcID]
 	end
 
+	return nil
+end
+
+function RSNpcDB.GetInternalMapID(npcID)
+	if (npcID) then
+		if (RSNpcDB.IsInternalNpcMonoZone(npcID)) then
+			local npcInfo = RSNpcDB.GetInternalNpcInfo(npcID)
+			return npcInfo.zoneID
+		end
+	end
+	
 	return nil
 end
 

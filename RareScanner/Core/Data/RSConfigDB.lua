@@ -69,6 +69,67 @@ end
 -- Sound options database
 ---============================================================================
 
+function RSConfigDB.GetCustomSoundsFolder()
+	return private.db.sound.soundCustomFolder
+end
+
+function RSConfigDB.SetCustomSoundsFolder(value)
+	private.db.sound.soundCustomFolder = value
+end
+
+function RSConfigDB.AddCustomSound(name,file)
+	if (not private.db.sound.custom) then
+		private.db.sound.custom = {}
+	end
+	
+	if (file) then
+		private.db.sound.custom[name] = file
+	end
+end
+
+function RSConfigDB.GetCustomSound(name)
+	if (private.db.sound.custom and name and private.db.sound.custom[name]) then
+		return private.db.sound.custom[name]
+	end
+	
+	return nil
+end
+
+function RSConfigDB.GetCustomSounds()
+	return private.db.sound.custom
+end
+
+function RSConfigDB.DeleteCustomSound(name)
+	if (private.db.sound.custom and name and private.db.sound.custom[name]) then
+		private.db.sound.custom[name] = nil
+	
+		-- Checks if selected audios match with the deleted, in that case restores default values
+		if (RSConfigDB.GetSoundPlayedWithObjects() == name) then
+			RSConfigDB.SetSoundPlayedWithObjects("PVP Horde")
+		end
+		if (RSConfigDB.GetSoundPlayedWithNpcs() == name) then
+			RSConfigDB.SetSoundPlayedWithNpcs("Horn")
+		end
+	end
+end
+
+function RSConfigDB.GetSoundList()
+	local defaultList = {} 
+	
+	-- Add internal sounds
+	for name, file in pairs (RSConstants.DEFAULT_SOUNDS) do
+		defaultList[name] = file
+	end
+	
+	-- Add custom sounds
+	if (RSConfigDB.GetCustomSounds()) then
+		for name, file in pairs (RSConfigDB.GetCustomSounds()) do
+			defaultList[name] = string.format(RSConstants.EXTERNAL_SOUND_FOLDER, RSConfigDB.GetCustomSoundsFolder(), file)
+		end
+	end
+	return defaultList;
+end
+
 function RSConfigDB.IsPlayingSound()
 	return private.db.sound.soundDisabled
 end
@@ -816,12 +877,12 @@ end
 -- Worldmap tooltips
 ---============================================================================
 
-function RSConfigDB.IsShowingTooltipsOnIngameIcons()
-	return private.db.map.tooltipsOnIngameIcons
+function RSConfigDB.GetWorldMapTooltipsScale()
+	return private.db.map.tooltipsScale
 end
 
-function RSConfigDB.SetShowingTooltipsOnIngameIcons(value)
-	private.db.map.tooltipsOnIngameIcons = value
+function RSConfigDB.SetWorldMapTooltipsScale(value)
+	private.db.map.tooltipsScale = value
 end
 
 function RSConfigDB.IsShowingTooltipsNotes()
@@ -854,14 +915,6 @@ end
 
 function RSConfigDB.SetShowingTooltipsSeen(value)
 	private.db.map.tooltipsSeen = value
-end
-
-function RSConfigDB.IsShowingTooltipsState()
-	return private.db.map.tooltipsState
-end
-
-function RSConfigDB.SetShowingTooltipsState(value)
-	private.db.map.tooltipsState = value
 end
 
 function RSConfigDB.IsShowingTooltipsCommands()

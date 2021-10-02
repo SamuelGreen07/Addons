@@ -1,13 +1,9 @@
 # Skillet-Classic  -Ace3-
 
-## [1.30](https://github.com/b-morgan/Skillet-Classic/tree/1.30) (2021-07-11)
-[Full Changelog](https://github.com/b-morgan/Skillet-Classic/compare/1.29...1.30) [Previous Releases](https://github.com/b-morgan/Skillet-Classic/releases)
+## [1.36](https://github.com/b-morgan/Skillet-Classic/tree/1.36) (2021-09-28)
+[Full Changelog](https://github.com/b-morgan/Skillet-Classic/compare/1.35...1.36) [Previous Releases](https://github.com/b-morgan/Skillet-Classic/releases)
 
-- Update SkillLevelData.lua (data for SkilletRankFrame)  
-- Update comments  
-- Move call to ScanPlayerTradeSkills  
-- Tweak TRADE\_SKILL\_UPDATE code  
-- Remove lastTrade  
-- Fix for issue #28  
-- Fix for issue #28  
-- Fix linking Enhancement  
+- Add AdjustInventory call to ProcessQueue  
+- Add message on profile changes  
+- Log warnings when logging debugs  
+- Update toc  

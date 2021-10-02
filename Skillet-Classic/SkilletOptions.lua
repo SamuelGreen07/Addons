@@ -153,32 +153,32 @@ Skillet.options =
 					width = "full",
 					order = 19
 				},
-					queue_craftable_reagents = {
-						type = "toggle",
-						name = L["QUEUECRAFTABLEREAGENTSNAME"],
-						desc = L["QUEUECRAFTABLEREAGENTSDESC"],
-						get = function()
-							return Skillet.db.profile.queue_craftable_reagents
-						end,
-						set = function(self,value)
-							Skillet.db.profile.queue_craftable_reagents = value
-						end,
-						width = 1.5,
-						order = 20
-					},
-					ignore_banked_reagents = {
-						type = "toggle",
-						name = L["IGNOREBANKEDREAGENTSNAME"],
-						desc = L["IGNOREBANKEDREAGENTSDESC"],
-						get = function()
-							return Skillet.db.profile.ignore_banked_reagents
-						end,
-						set = function(self,value)
-							Skillet.db.profile.ignore_banked_reagents = value
-						end,
-						width = 1.5,
-						order = 21
-					},
+				queue_craftable_reagents = {
+					type = "toggle",
+					name = L["QUEUECRAFTABLEREAGENTSNAME"],
+					desc = L["QUEUECRAFTABLEREAGENTSDESC"],
+					get = function()
+						return Skillet.db.profile.queue_craftable_reagents
+					end,
+					set = function(self,value)
+						Skillet.db.profile.queue_craftable_reagents = value
+					end,
+					width = 1.5,
+					order = 20
+				},
+				ignore_banked_reagents = {
+					type = "toggle",
+					name = L["IGNOREBANKEDREAGENTSNAME"],
+					desc = L["IGNOREBANKEDREAGENTSDESC"],
+					get = function()
+						return Skillet.db.profile.ignore_banked_reagents
+					end,
+					set = function(self,value)
+						Skillet.db.profile.ignore_banked_reagents = value
+					end,
+					width = 1.5,
+					order = 21
+				},
 --[[
 				queue_glyph_reagents = {
 					type = "toggle",
@@ -240,7 +240,6 @@ Skillet.options =
 					},
 					display_shopping_list_at_guildbank = {
 						hidden = isClassic,
-						disabled = isBCC,
 						type = "toggle",
 						name = L["Guild bank"],
 						desc = L["DISPLAYSHOPPINGLISTATGUILDBANKDESC"],
@@ -362,13 +361,27 @@ Skillet.options =
 					width = "full",
 					order = 35
 				},
+				use_guildbank_as_alt = {
+					hidden = isClassic,
+					type = "toggle",
+					name = L["USEGUILDBANKASALTNAME"],
+					desc = L["USEGUILDBANKASALTDESC"],
+					get = function()
+						return Skillet.db.profile.use_guildbank_as_alt
+					end,
+					set = function(self,value)
+						Skillet.db.profile.use_guildbank_as_alt = value
+						Skillet:UpdateTradeSkillWindow()
+					end,
+					width = "full",
+					order = 36
+				},
 			}
 		},
 		appearance = {
 			type = 'group',
 			name = L["Appearance"],
 			desc = L["APPEARANCEDESC"],
---			order = 12,
 			args = {
 				display_required_level = {
 					type = "toggle",
@@ -438,6 +451,21 @@ Skillet.options =
 					set = function(self,value)
 						Skillet.db.profile.queue_only_view = value
 						Skillet:UpdateTradeSkillWindow()
+					end,
+					width = "full",
+					order = 5,
+				},
+				clamp_to_screen = {
+					type = "toggle",
+					name = L["CLAMPTOSCREENNAME"],
+					desc = L["CLAMPTOSCREENDESC"],
+					get = function()
+						return Skillet.db.profile.clamp_to_screen
+					end,
+					set = function(self,value)
+						Skillet.db.profile.clamp_to_screen = value
+						if SkilletFrame then SkilletFrame:SetClampedToScreen(value) end
+						if SkilletStandaloneQueue then SkilletStandaloneQueue:SetClampedToScreen(value) end
 					end,
 					width = "full",
 					order = 5,
@@ -898,7 +926,41 @@ Skillet.options =
 			set = function(self,value)
 				Skillet.db.profile.nomodkeys = value
 			end,
-			order = 75
+			order = 76
+		},
+--
+-- commands to print and initialize skill data (SkillLevelData.lua)
+--
+		printskilllevels = {
+			type = 'input',
+			name = "PrintSkillLevels",
+			desc = "Print Skill Levels",
+			get = function()
+				return value
+			end,
+			set = function(self,value)
+				if not (UnitAffectingCombat("player")) then
+					Skillet:PrintTradeSkillLevels(value)
+				else
+					DA.DEBUG(0,"|cff8888ffSkillet|r: Combat lockdown restriction." ..
+												  " Leave combat and try again.")
+				end
+			end,
+			order = 77
+		},
+		initskilllevels = {
+			type = 'execute',
+			name = "Init Skill Levels",
+			desc = "Initialize Skill Levels",
+			func = function()
+				if not (UnitAffectingCombat("player")) then
+					Skillet:InitializeSkillLevels()
+				else
+					DA.DEBUG(0,"|cff8888ffSkillet|r: Combat lockdown restriction." ..
+												  " Leave combat and try again.")
+				end
+			end,
+			order = 78
 		},
 
 --

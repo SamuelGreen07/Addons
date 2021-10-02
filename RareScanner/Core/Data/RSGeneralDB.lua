@@ -58,6 +58,14 @@ function RSGeneralDB.AddAlreadyFoundNpcWithoutVignette(npcID)
 	-- Extract position from player
 	local mapID = C_Map.GetBestMapForUnit("player")
 	if (mapID) then
+		-- Ignore if the map is a continent (which might happend in the areas outside a dungeon)
+		for continentID, _ in pairs (private.CONTINENT_ZONE_IDS) do
+			if (mapID == continentID) then
+				RSLogger:PrintDebugMessage(string.format("AddAlreadyFoundNpcWithoutVignette[%s]: Error! Se ha obtenido un mapID de un continente!", npcID))
+				return
+			end
+		end
+			
 		local mapPosition = C_Map.GetPlayerMapPosition(mapID, "player")
 		local artID = C_Map.GetMapArtID(mapID)
 		if (mapPosition) then

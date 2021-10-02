@@ -58,6 +58,7 @@ local tunpack = unpack;
 
 QuestieMap.drawTimer = nil;
 QuestieMap.fadeLogicTimerShown = nil;
+local fadeLogicCoroutine
 
 local isDrawQueueDisabled = false
 
@@ -92,7 +93,7 @@ function QuestieMap:UnloadQuestFrames(questId, iconType)
                 end
             end
         end
-        Questie:Debug(DEBUG_DEVELOP, "[QuestieMap]: Unloading quest frames: %s", questId)
+        Questie:Debug(Questie.DEBUG_DEVELOP, "[QuestieMap]: Unloading quest frames: %s", questId)
     end
 end
 
@@ -152,15 +153,22 @@ QuestieMap._mapDrawQueue = mapDrawQueue
 QuestieMap._minimapDrawQueue = minimapDrawQueue
 
 function QuestieMap:InitializeQueue() -- now called on every loading screen
-    Questie:Debug(DEBUG_DEVELOP, "[QuestieMap] Starting draw queue timer!")
+    Questie:Debug(Questie.DEBUG_DEVELOP, "[QuestieMap] Starting draw queue timer!")
     local isInInstance, instanceType = IsInInstance()
 
     if (not isInInstance) or instanceType ~= "raid" then -- only run map updates when not in a raid
         isDrawQueueDisabled = false
         if not QuestieMap.drawTimer then 
             QuestieMap.drawTimer = C_Timer.NewTicker(0.2, QuestieMap.ProcessQueue)
-            QuestieMap.processCounter = 0 -- used to reduce calls on edge notes
-            QuestieMap.fadeLogicTimerShown = C_Timer.NewTicker(0.3, QuestieMap.ProcessShownMinimapIcons)
+            -- ! Remember to update the distance variable in ProcessShownMinimapIcons if you change the timer
+            QuestieMap.fadeLogicTimerShown = C_Timer.NewTicker(0.1, function ()
+                if fadeLogicCoroutine and coroutine.status(fadeLogicCoroutine) == "suspended" then
+                    coroutine.resume(fadeLogicCoroutine)
+                end
+            end)
+        end
+        if not fadeLogicCoroutine then
+            fadeLogicCoroutine = coroutine.create(QuestieMap.ProcessShownMinimapIcons)
         end
     else
         if QuestieMap.drawTimer then -- cancel existing timer while in dungeon/raid
@@ -185,26 +193,72 @@ function QuestieMap:GetScaleValue()
 end
 
 function QuestieMap:ProcessShownMinimapIcons()
-    local doEdgeUpdate = false
-    QuestieMap.processCounter = QuestieMap.processCounter + 1
-    if QuestieMap.processCounter > 13 then -- only update icons on the edge every 4 seconds
-        QuestieMap.processCounter = 0
-        doEdgeUpdate = true
-    end
+    --Upvalue the most used functions in here
+    local getTime, cYield, getWorldPos = GetTime, coroutine.yield, HBD.GetPlayerWorldPosition
 
-    local playerX, playerY, _ = HBD:GetPlayerWorldPosition()
-    QuestieMap.playerX = playerX
-    QuestieMap.playerY = playerY
-    ---@param minimapFrame IconFrame
-    for minimapFrame, data in pairs(HBDPins.activeMinimapPins) do
-        if minimapFrame.miniMapIcon and ((data.distanceFromMinimapCenter < 1.1) or doEdgeUpdate) then
-            if minimapFrame.FadeLogic then
-                minimapFrame:FadeLogic()
+    --Max icons per tick
+    local maxCount = 50
+
+    --Local variables defined here instead of in loop
+    --saves time because it doesn't need to remake the variables
+    local doEdgeUpdate = true
+    local playerX, playerY
+    local count
+    local lastUpdate = getTime()
+
+    local xd, yd
+    local totalDistance = 0
+
+    --This coroutine never dies, we want it to keep looping forever
+    --yield stops it from being "infinite" and crashing the game
+    while true do
+        count = 0
+
+        playerX, playerY = getWorldPos()
+
+        --Calculate squared distance
+        -- No need for absolute values as these are used only as squared
+        xd = (playerX or 0) - (QuestieMap.playerX or 0)
+        yd = (playerY or 0) - (QuestieMap.playerY or 0)
+        --Instead of math.sqrt we just used the square distance for speed
+        totalDistance = totalDistance + (xd * xd + yd * yd)
+
+
+        --These variables are used inside the fadelogic
+        QuestieMap.playerX = playerX
+        QuestieMap.playerY = playerY
+
+        -- Only update icons on the edge every 1 seconds
+        -- totalDistance is used because sometimes we move so fast that we need to update it more often.
+        -- ! Remember to update the distance variable if you change the timer
+        if totalDistance > 3 or getTime() - lastUpdate >= 1 then
+            doEdgeUpdate = true
+            lastUpdate = getTime()
+            --print("Dist:", totalDistance)
+            totalDistance = 0
+        end
+
+        ---@param minimapFrame IconFrame
+        for minimapFrame, data in pairs(HBDPins.activeMinimapPins) do
+            if minimapFrame.miniMapIcon and ((data.distanceFromMinimapCenter < 1.1) or doEdgeUpdate) then
+                if minimapFrame.FadeLogic then
+                    minimapFrame:FadeLogic()
+                end
+                if minimapFrame.GlowUpdate then
+                    minimapFrame:GlowUpdate()
+                end
             end
-            if minimapFrame.GlowUpdate then
-                minimapFrame:GlowUpdate()
+
+            --Never run more than maxCount in a single run
+            if count > maxCount then
+                cYield()
+                count = 0
+            else
+                count = count + 1
             end
         end
+        cYield()
+        doEdgeUpdate = false
     end
 end
 
@@ -254,7 +308,7 @@ end
 ---@param npcID number @The ID of the NPC
 function QuestieMap:ShowNPC(npcID, icon, scale, title, body, disableShiftToRemove, typ, excludeDungeon)
     if type(npcID) ~= "number" then
-        Questie:Debug(DEBUG_DEVELOP, "[QuestieMap:ShowNPC]", "Got <" .. type(npcID) .. "> instead of <number>")
+        Questie:Debug(Questie.DEBUG_DEVELOP, "[QuestieMap:ShowNPC]", "Got <" .. type(npcID) .. "> instead of <number>")
         return
     end
     -- get the NPC data
@@ -392,7 +446,7 @@ function QuestieMap:DrawManualIcon(data, areaID, x, y, typ)
 
     local uiMapId = ZoneDB:GetUiMapIdByAreaId(areaID)
     if (not uiMapId) then
-        Questie:Debug(DEBUG_CRITICAL, "No UiMapID for areaId :".. areaID .. " " .. tostring(data.Name))
+        Questie:Debug(Questie.DEBUG_CRITICAL, "No UiMapID for areaId :".. areaID .. " " .. tostring(data.Name))
         return nil, nil
     end
     -- set the icon

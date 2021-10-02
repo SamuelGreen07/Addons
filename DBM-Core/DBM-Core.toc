@@ -1,31 +1,30 @@
-## Interface: 20501
-## X-Min-Interface: 20501
+## Interface: 20502
+## X-Min-Interface: 90100
+## X-Min-Interface-Classic: 11400
+## X-Min-Interface-BCC: 20502
+
 ## Title:|cffffd200Deadly Boss Mods|r |cff69ccf0Core|r
 ## Title-zhCN:|cffffd200Deadly Boss Mods|r |cff69ccf0核心|r
 ## Title-ruRU:|cffffd200Deadly Boss Mods|r |cff69ccf0Ядро|r
+## Title-itIT:|cffffd200Deadly Boss Mods|r |cff69ccf0Base|r
 ## Title-zhTW:|cffffd200Deadly Boss Mods|r |cff69ccf0核心|r
 ## Title-koKR:|cffffd200Deadly Boss Mods|r |cff69ccf0핵심 모듈|r
-## Title-esES:|cffffd200Deadly Boss Mods|r |cff69ccf0Proceso|r
-## Title-esMX:|cffffd200Deadly Boss Mods|r |cff69ccf0Proceso|r
+## Title-esES:|cffffd200Deadly Boss Mods|r |cff69ccf0Núcleo|r
+## Title-esMX:|cffffd200Deadly Boss Mods|r |cff69ccf0Núcleo|r
 ## Title-frFR:|cffffd200Deadly Boss Mods|r |cff69ccf0Noyau|r
 ## Notes: Deadly Boss Mods
 ## Dependencies: DBM-StatusBarTimers
-## OptionalDependencies: LibStub, CallbackHandler-1.0, LibSharedMedia-3.0, LibChatAnims, LibDBIcon-1.0
+## OptionalDependencies: LibStub, CallbackHandler-1.0, LibSharedMedia-3.0, LibChatAnims, LibDBIcon-1.0, LibDeflate, LibSerialize
 ## SavedVariables: DBM_AllSavedOptions, DBM_MinimapIcon
 ## SavedVariablesPerCharacter: DBM_UsedProfile, DBM_UseDualProfile, DBM_CharSavedRevision
 ## LoadOnDemand: 0
 ## DefaultState: enabled
-## Author: Tandanu and Nitram and MysticalOS
-## X-Website: http://www.deadlybossmods.com
-## X-Curse-Project-ID: 3358
-## X-Wago-ID: qv633o6b
-## X-WoWI-ID: 25929
-## Version: 2.5.8-17-gab5292b
+## Author: MysticalOS, QartemisT
+## Version: 69781e7
+## X-Website: https://deadlybossmods.com
 
-#@no-lib-strip@
 Libs\LibStub\LibStub.lua
 Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
-
 Libs\LibChatAnims\LibChatAnims.xml
 Libs\LibSharedMedia-3.0\lib.xml
 Libs\LibLatency\LibLatency.xml
@@ -34,7 +33,6 @@ Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
 Libs\LibDBIcon-1.0\lib.xml
 Libs\LibDeflate\LibDeflate.lua
 Libs\LibSerialize\lib.xml
-#@end-no-lib-strip@
 
 localization.en.lua
 localization.de.lua
@@ -46,6 +44,7 @@ localization.tw.lua
 localization.kr.lua
 localization.es.lua
 localization.br.lua
+
 DBM-Core.lua
 DBM-Arrow.lua
 DBM-Flash.lua
@@ -53,3 +52,10 @@ DBM-RangeCheck.lua
 DBM-InfoFrame.lua
 DBM-HudMap.lua
 DBM-Nameplate.lua
+
+# Modules
+modules\MinimapButton.lua
+modules\Sounds.lua
+modules\SpecRole.lua
+
+modules\objects\Localization.lua
