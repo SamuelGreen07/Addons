@@ -3522,29 +3522,20 @@ GRM_UI.GR_MetaDataInitializeUIFirst = function( isManualUpdate )
     GRM_UI.GRM_MemberDetailMetaData.GRM_CustomNoteEditBoxFrame.GRM_CustomNoteScrollFrameSliderOverlayTextUp:SetPoint ( "CENTER" , GRM_CustomNoteScrollFrameSliderScrollUpButton , 0 , 0 );
     GRM_UI.GRM_MemberDetailMetaData.GRM_CustomNoteEditBoxFrame.GRM_CustomNoteScrollFrameSliderOverlayTextUp:SetFont ( [[Interface\AddOns\Guild_Roster_Manager\media\fonts\Arial.TTF]] , 12)
     GRM_UI.GRM_MemberDetailMetaData.GRM_CustomNoteEditBoxFrame.GRM_CustomNoteScrollFrameSliderOverlayTextUp:SetText ("▲");
-    if GRM_G.BuildVersion >= 20000 then
-        GRM_CustomNoteScrollFrameSliderScrollUpButton.Backdrop = CreateFrame( "Frame" , "GRM_CustomNoteScrollFrameSliderScrollUpButtonBackdrop" , GRM_CustomNoteScrollFrameSliderScrollUpButton , "BackdropTemplate" );
-        GRM_CustomNoteScrollFrameSliderScrollUpButton:SetNormalTexture ( nil );
-        GRM_CustomNoteScrollFrameSliderScrollUpButton.Backdrop:SetAllPoints();
-        GRM_CustomNoteScrollFrameSliderScrollUpButton.Backdrop.backdropInfo = GRM_UI.noteBackdrop3;
-        GRM_CustomNoteScrollFrameSliderScrollUpButton.Backdrop:ApplyBackdrop();
-    else
-        GRM_CustomNoteScrollFrameSliderScrollUpButton:SetNormalTexture ( nil );
-        GRM_CustomNoteScrollFrameSliderScrollUpButton:SetBackdrop ( GRM_UI.noteBackdrop3 );
-    end
+    GRM_CustomNoteScrollFrameSliderScrollUpButton.Backdrop = CreateFrame( "Frame" , "GRM_CustomNoteScrollFrameSliderScrollUpButtonBackdrop" , GRM_CustomNoteScrollFrameSliderScrollUpButton , "BackdropTemplate" );
+    GRM_CustomNoteScrollFrameSliderScrollUpButton:SetNormalTexture ( nil );
+    GRM_CustomNoteScrollFrameSliderScrollUpButton.Backdrop:SetAllPoints();
+    GRM_CustomNoteScrollFrameSliderScrollUpButton.Backdrop.backdropInfo = GRM_UI.noteBackdrop3;
+    GRM_CustomNoteScrollFrameSliderScrollUpButton.Backdrop:ApplyBackdrop();
     GRM_UI.GRM_MemberDetailMetaData.GRM_CustomNoteEditBoxFrame.GRM_CustomNoteScrollFrameSliderOverlayTextDown:SetPoint ( "CENTER" , GRM_CustomNoteScrollFrameSliderScrollDownButton , 0 , 0 );
     GRM_UI.GRM_MemberDetailMetaData.GRM_CustomNoteEditBoxFrame.GRM_CustomNoteScrollFrameSliderOverlayTextDown:SetFont ( [[Interface\AddOns\Guild_Roster_Manager\media\fonts\Arial.TTF]] , 12)
     GRM_UI.GRM_MemberDetailMetaData.GRM_CustomNoteEditBoxFrame.GRM_CustomNoteScrollFrameSliderOverlayTextDown:SetText ("▼");
-    if GRM_G.BuildVersion >= 20000 then
-        GRM_CustomNoteScrollFrameSliderScrollDownButton.Backdrop = CreateFrame( "Frame" , "GRM_CustomNoteScrollFrameSliderScrollDownButtonBackdrop" , GRM_CustomNoteScrollFrameSliderScrollDownButton , "BackdropTemplate" );
-        GRM_CustomNoteScrollFrameSliderScrollDownButton:SetNormalTexture ( nil );
-        GRM_CustomNoteScrollFrameSliderScrollDownButton.Backdrop:SetAllPoints()
-        GRM_CustomNoteScrollFrameSliderScrollDownButton.Backdrop.backdropInfo = GRM_UI.noteBackdrop3;
-        GRM_CustomNoteScrollFrameSliderScrollDownButton.Backdrop:ApplyBackdrop()
-    else
-        GRM_CustomNoteScrollFrameSliderScrollDownButton:SetNormalTexture ( nil );
-        GRM_CustomNoteScrollFrameSliderScrollDownButton:SetBackdrop ( GRM_UI.noteBackdrop3 );
-    end
+    GRM_CustomNoteScrollFrameSliderScrollDownButton.Backdrop = CreateFrame( "Frame" , "GRM_CustomNoteScrollFrameSliderScrollDownButtonBackdrop" , GRM_CustomNoteScrollFrameSliderScrollDownButton , "BackdropTemplate" );
+    GRM_CustomNoteScrollFrameSliderScrollDownButton:SetNormalTexture ( nil );
+    GRM_CustomNoteScrollFrameSliderScrollDownButton.Backdrop:SetAllPoints()
+    GRM_CustomNoteScrollFrameSliderScrollDownButton.Backdrop.backdropInfo = GRM_UI.noteBackdrop3;
+    GRM_CustomNoteScrollFrameSliderScrollDownButton.Backdrop:ApplyBackdrop()
+
     GRM_CustomNoteScrollFrameSliderThumbTexture:SetAlpha ( 0.45 );
     GRM_CustomNoteScrollFrameSliderScrollUpButton:SetSize ( 14 , 12 );
     GRM_CustomNoteScrollFrameSliderScrollDownButton:SetSize ( 14 , 12 );

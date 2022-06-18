@@ -1,12 +1,12 @@
-lightweight tag 2032aa0c99e4278c1aeea5d5ef8d5a7ac77c8886 7.6.9.23
+lightweight tag 9fc86325919c1d066a293cd15a5c1c04f6562c12 7.6.9.34
 Author:	CKNOEP <c.knoepffler@free.fr>
-Date:	Sun Sep 12 07:49:51 2021 +0200
+Date:	Sun Feb 13 10:07:28 2022 +0100
 
-commit 2032aa0c99e4278c1aeea5d5ef8d5a7ac77c8886
+commit 9fc86325919c1d066a293cd15a5c1c04f6562c12
 Author: CKNOEP <c.knoepffler@free.fr>
-Date:   Sun Sep 12 07:49:51 2021 +0200
+Date:   Sun Feb 13 10:07:28 2022 +0100
 
-    Update CHANGES.txt
+    fix elemetal button
     
-    Fix Show hide button Enslave and Bannish when the option is checked
+    fix elemetal button drag and drop fucntion
 

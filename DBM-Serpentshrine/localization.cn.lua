@@ -94,6 +94,7 @@ L:SetMiscLocalization{
 	Human		= "人形态",
 	Demon		= "恶魔形态",
 	YellDemon	= "滚开吧，脆弱的精灵。现在我说了算！",
+	YellPhase1  = "我的放逐终于结束了！",
 	YellPhase2	= "不……不！你在干什么？我才是主宰！你听到没有？我……啊啊啊啊！控制……不住了。"
 }
 
@@ -143,7 +144,7 @@ L:SetOptionLocalization{
 	WarnMurlocs		= "警报鱼人群",
 	SpecWarnMurlocs	= "鱼人群出现时显示特殊警报",
 	TimerMurlocs	= "显示鱼人群出现计时",
-	GraveIcon		= DBM_CORE_L.AUTO_ICONS_OPTION_TEXT:format(38049)
+	GraveIcon		= DBM_CORE_L.AUTO_ICONS_OPTION_TARGETS:format(38049)
 }
 
 L:SetMiscLocalization{

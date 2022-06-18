@@ -218,6 +218,9 @@ Necrosis.TooltipData = {
 	["Succubus"] = {
 		Label = "" --L["SUCCUBUS_LABEL"]
 	},
+	["Inccubus"] = {
+		Label = "" --L["SUCCUBUS_LABEL"]
+	},
 	["Felhunter"] = {
 		Label = "" --L["FELHUNTER_LABEL"]
 	},
@@ -256,6 +259,7 @@ Necrosis.TooltipData = {
 	},
 	
 	["DominationCooldown"] = L["DOMINATION_COOLDOWN"],
+	["DominationCooldown2"] = "Shift-Clic[R] to Sacrifice",	
 	-- These are filled when the frame is created and the localized spell names are known
 	-- curses
 	["Weakness"] = {
@@ -398,8 +402,9 @@ Necrosis.Config.Sphere = {
 	["Skin de la pierre Necrosis"] = L["SPHERE_SKIN"],
 	["Evenement montre par la sphere"] = L["SPHERE_EVENT"],
 	["Sort caste par la sphere"] = L["SPHERE_SPELL"],
+	["Sort caste par la sphere2"] = L["SPHERE_SPELL2"],
 	["Afficher le compteur numerique"] = L["SPHERE_COUNTER"],
-	["Shift+Clic on Sphere to del. Shards"] = L["SPHERE_SPELL+CTRL"],
+	["Shift+Clic on Sphere to del. Shards"] = L["SPHERE_SPELL_RIGHTCLICK"],
 	["Type de compteur numerique"] = L["SPHERE_STONE"],
 }
 Necrosis.Config.Sphere.Colour = {
@@ -452,6 +457,7 @@ Necrosis.Config.Menus = {
 	["Afficher automatiquement les menus en combat"] = L["MENU_AUTO_COMBAT"],
 	["Fermer le menu apres un clic sur un de ses elements"] = L["MENU_CLOSE_CLICK"],
 	["Orientation du menu"] = L["MENU_ORIENTATION"],
+	["Quick Sacrifice (Summ. & Sacr."] = L["MENU_QUICK_SACRIFICE"],	
 	["Changer la symetrie verticale des boutons"] = L["MENU_VERT"],
 	["Taille du bouton Banir"] = L["MENU_BANISH"],
 }
@@ -503,10 +509,22 @@ Necrosis.Translation.DemonName = {
 	[1] = L["IMP"],
 	[2] = L["VOIDWALKER"],
 	[3] = L["SUCCUBUS"],
-	[4] = L["FELHUNTER"],
-	[5] = L["FELGUARD"],
-	[6] = L["INFERNAL"],
-	[7] = L["DOOMGUARD"],
+	[4] = L["INCCUBUS"],
+	[5] = L["FELHUNTER"],
+	[6] = L["FELGUARD"],
+	[7] = L["INFERNAL"],
+	[8] = L["DOOMGUARD"],
+}
+
+Necrosis.NameDemon = {
+	[1] = "imp",
+	[2] = "Voidwalker",
+	[3] = "Succubus",
+	[4] = "Inccubus",
+	[5] = "Felhunter",
+	[6] = "Felguard",
+	[7] = "Infernal",
+	[8] = "Doomguard",
 }
 
 -- Traduction du nom des objets utilisés par Necrosis
@@ -565,6 +583,7 @@ Necrosis.Translation.Misc = {
 	["Rank"] = L["RANK"],
 	["Create"] = L["CREATE"],
 }
+
 
 -- Gestion de la détection des cibles protégées contre la peur
 Necrosis.AntiFear = {

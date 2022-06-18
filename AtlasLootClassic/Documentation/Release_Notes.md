@@ -2,6 +2,46 @@
 
 This mod is distributed under Version 2 of the GPL.  A copy of the GPL is included in this zip file with links to non-english translations.
 
+## v2.4.3 (May, 09, 2022)
+
+- Update .toc version
+- (bcc) Remove vendor items from sunwell loot tables and add them as tokens
+- (bcc) Add sunmote vendor
+- (bcc) Add sunwell sunmote prices to boss drops (PR #204)
+- (bcc) Remove Gladiators Maul from S3 (#205)
+- (bcc) Add Vendor scan that updates prices after visiting a vendor
+
+## v2.4.2 (Apr, 13, 2022)
+
+- (bcc) Update vendor prices
+- (bcc) #203 add Fist weapons for Hunter
+- (bcc) Update BoJ Vendors
+
+## v2.4.1-bcc (Jan, 19, 2022)
+
+- (bcc) update .toc version
+- (bcc) update vendor prices
+- (bcc) remove Heavy Netherweave Net
+
+## v2.4.0 (Nov, 10, 2021)
+
+- update classic .toc version
+- (classic) fix lua error on start
+- (bcc) update vendor prices
+
+## v2.3.4-bcc (Sep, 30, 2021)
+
+- restore classic version of midsummer festival
+- (bcc) add ahune to tbc midsummer festival version
+- (bcc) add seperate hallow's end for tbc
+- (bcc) add headless horseman to tbc hallow's end version
+- (bcc) add coren direbrew in brd
+- (bcc) add brewfest event
+- (bcc) add talisman of the alliance/horde
+- (bcc) add missing Season 2, 3 & 4 sets
+- (bcc) add brutal glladiator mount
+- (bcc) added reins of the dark war/riding talbuk
+
 ## v2.3.3-bcc (Sep, 18, 2021)
 
 - fixed bug on colorpicker which caused it to pick the wrong color for background (#169)

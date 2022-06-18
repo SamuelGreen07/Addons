@@ -37,6 +37,20 @@ function Details:StartMeUp() --I'll never stop!
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --> initialize
 
+		C_Timer.After(2, function()
+			--test libOpenRaid deprecated code
+			--[=[
+			local openRaidLib = LibStub:GetLibrary("LibOpenRaid-1.0")
+			openRaidLib.playerInfoManager.GetPlayerInfo()
+			openRaidLib.RequestAllPlayersInfo()
+			openRaidLib.playerInfoManager.GetAllPlayersInfo()
+			openRaidLib.gearManager.GetAllPlayersGear()
+			openRaidLib.gearManager.GetPlayerGear()
+			openRaidLib.cooldownManager.GetAllPlayersCooldown()
+			openRaidLib.cooldownManager.GetPlayerCooldowns()
+			--]=]
+		end)
+
 	--build frames
 		--plugin container
 			self:CreatePluginWindowContainer()
@@ -130,9 +144,22 @@ function Details:StartMeUp() --I'll never stop!
 		end
 
 		function self:RefreshAfterStartup()
-		
+
+			--repair nicknames
+			if (not _detalhes.ignore_nicktag) then
+				local currentCombat = Details:GetCurrentCombat()
+				local containerDamage = currentCombat:GetContainer(DETAILS_ATTRIBUTE_DAMAGE)
+				for _, actorObject in containerDamage:ListActors() do
+					--get the actor nickname
+					local nickname = Details:GetNickname(actorObject:Name(), false, true)
+					if (nickname) then
+						actorObject.displayName = nickname
+					end
+				end
+			end
+
 			self:RefreshMainWindow(-1, true)
-			
+
 			local lower_instance = _detalhes:GetLowerInstanceNumber()
 
 			for index = 1, #self.tabela_instancias do
@@ -246,7 +273,6 @@ function Details:StartMeUp() --I'll never stop!
 			end
 
 			self.parser_frame:RegisterEvent ("COMBAT_LOG_EVENT_UNFILTERED")
-
 
 	--update is in group
 	self.details_users = {}
@@ -428,7 +454,7 @@ function Details:StartMeUp() --I'll never stop!
 	_detalhes:LoadFramesForBroadcastTools()
 	_detalhes:BrokerTick()
 	
-	--boss mobs callbacks (DBM and BigWigs)
+	--register boss mobs callbacks (DBM and BigWigs) -> functions/bossmods.lua
 	Details.Schedules.NewTimer(5, Details.BossModsLink, Details)
 
 	--limit item level life for 24Hs
@@ -470,14 +496,12 @@ function Details:StartMeUp() --I'll never stop!
 
 	--shutdown pre-pot announcer
 	Details.announce_prepots.enabled = false
-	--disable the min healing to show
-	Details.deathlog_healingdone_min =  1
 	--remove standard skin on 9.0.1
 	_detalhes.standard_skin = false
 	--enforce to show 6 abilities on the tooltip
 	--_detalhes.tooltip.tooltip_max_abilities = 6 freeeeeedooommmmm
 
-
+	Details.InstallRaidInfo()
 
 	--Plater integration
 	C_Timer.After(2, function()
@@ -552,47 +576,55 @@ function Details:StartMeUp() --I'll never stop!
 		warningMessage:SetText ("< right click and choose 'Enter Battle' if 'Enter Battle' button does not work")
 		
 		C_Timer.NewTicker(3, function() -- default = 1
-			if (StaticPopup1:IsShown() or StaticPopup2:IsShown()) then
-				if (StaticPopup1.which == "ADDON_ACTION_FORBIDDEN" or (StaticPopup2 and StaticPopup2:IsShown() and StaticPopup2.which == "ADDON_ACTION_FORBIDDEN")) then
+			if (not Details.DontMoveMinimapIconOnBattlegroundError) then
+				if (StaticPopup1:IsShown() or StaticPopup2:IsShown()) then
+					if (StaticPopup1.which == "ADDON_ACTION_FORBIDDEN" or (StaticPopup2 and StaticPopup2:IsShown() and StaticPopup2.which == "ADDON_ACTION_FORBIDDEN")) then
 
-					if (StaticPopup2:IsShown()) then
-						if (StaticPopup2.which == "ADDON_ACTION_FORBIDDEN") then
-							StaticPopup_Hide("ADDON_ACTION_FORBIDDEN")
-						end
-					end
-	
-					taintWarning:Show()
-					taintWarning:SetPoint ("topleft", StaticPopup1, "bottomleft", 0, -10)
-					if (MiniMapBattlefieldFrame:IsShown() and not Details.DontMoveMinimapIconOnBattlegroundError)then
-
-						if (not originalPosition) then
-							local a = {}
-							for i = 1, MiniMapBattlefieldFrame:GetNumPoints() do
-								a[#a + 1] = {MiniMapBattlefieldFrame:GetPoint(i)}
+						if (StaticPopup2:IsShown()) then
+							if (StaticPopup2.which == "ADDON_ACTION_FORBIDDEN") then
+								StaticPopup_Hide("ADDON_ACTION_FORBIDDEN")
 							end
-							originalPosition = a
 						end
-	
-						MiniMapBattlefieldFrame:ClearAllPoints()
-						MiniMapBattlefieldFrame:SetPoint("left", taintWarning, "left", 10, -2)
-						warningMessage:SetPoint ("left", MiniMapBattlefieldFrame, "right", 9, 0)
-						MiniMapBattlefieldFrame:SetFrameStrata("HIGH")
+		
+						
+						if (MiniMapBattlefieldFrame:IsShown())then
+							taintWarning:Show()
+							taintWarning:SetPoint ("topleft", StaticPopup1, "bottomleft", 0, -10)
+							if (not originalPosition) then
+								local a = {}
+								for i = 1, MiniMapBattlefieldFrame:GetNumPoints() do
+									a[#a + 1] = {MiniMapBattlefieldFrame:GetPoint(i)}
+								end
+								originalPosition = a
+							end
+		
+							MiniMapBattlefieldFrame:ClearAllPoints()
+							MiniMapBattlefieldFrame:SetPoint("left", taintWarning, "left", 10, -2)
+							warningMessage:SetPoint ("left", MiniMapBattlefieldFrame, "right", 9, 0)
+							MiniMapBattlefieldFrame:SetFrameStrata("HIGH")
 
-						isOnOriginalPosition = false
+							isOnOriginalPosition = false
+						end
 					end
-				end
-			else
-				if (originalPosition and not isOnOriginalPosition) then
-					MiniMapBattlefieldFrame:ClearAllPoints()
-					for i = 1, #originalPosition do
-						MiniMapBattlefieldFrame:SetPoint(unpack (originalPosition[i]))
+				else
+					if (originalPosition and not isOnOriginalPosition) then
+						MiniMapBattlefieldFrame:ClearAllPoints()
+						for i = 1, #originalPosition do
+							MiniMapBattlefieldFrame:SetPoint(unpack (originalPosition[i]))
+						end
+						taintWarning:Hide()
+						isOnOriginalPosition = true
 					end
-					taintWarning:Hide()
-					isOnOriginalPosition = true
 				end
 			end
 		end)
 	end
+
+	hooksecurefunc(GameCooltip, "SetMyPoint", function()
+		if (DetailsAllAttributesFrame) then
+			DetailsAllAttributesFrame:Hide()
+		end
+	end)
 
 
 	function Details:InstallOkey()

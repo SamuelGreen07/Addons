@@ -74,8 +74,7 @@ local defaults = {
 		include_craftbuttons = true,
 		include_tradebuttons = true,
 		search_includes_reagents = true,
-		confirm_queue_clear = false,
-		queue_only_view = true,
+		interrupt_clears_queue = false,
 		clamp_to_screen = true,
 		scale_tooltip = false,
 		transparency = 1.0,
@@ -83,23 +82,17 @@ local defaults = {
 		ttscale = 1.0,
 		plugins = {},
 		SavedQueues = {},
+		include_alts = true,	-- Display alt's items in shopping list
+		same_faction = true,	-- Display same faction alt items only
+		item_order =  false,	-- Order shopping list by item
+		merge_items = false,	-- Merge same shopping list items together
+		include_guild = false,	-- Use the contents of the Guild Bank
 	},
 	realm = {
 --
 -- notes added to items crafted or used in crafting
 --
 		notes = {},
-	},
-	char = {
---
--- options specific to a current tradeskill
---
-		tradeskill_options = {},
-		include_alts = true,	-- Display alt's items in shopping list
-		same_faction = true,	-- Display same faction alt items only
-		item_order =  false,	-- Order shopping list by item
-		merge_items = false,	-- Merge same shopping list items together
-		include_guild = false,	-- Use the contents of the Guild Bank
 	},
 }
 
@@ -178,11 +171,74 @@ function Skillet:EnableBlizzardFrame()
 	end
 end
 
+--
+-- Called with events that should have an existing profile.
+--
 function Skillet:RefreshConfig(event, database, profile)
 	DA.CHAT("RefreshConfig("..tostring(event)..", "..tostring(profile)..")")
+end
+
 --
--- Would do some stuff here
+-- Called with events that need the profile created.
 --
+function Skillet:InitializeProfile(event, database, profile)
+	DA.CHAT("InitializeProfile("..tostring(event)..", "..tostring(profile)..")")
+	self:ConfigureProfile()
+	self:ConfigurePlayerProfile()
+end
+
+--
+-- Called from events related to profile manipulation and new characters
+--
+function Skillet:ConfigureProfile()
+	if Skillet.db.profile.WarnLog == nil then
+		Skillet.db.profile.WarnLog = true
+	end
+	Skillet.WarnLog = Skillet.db.profile.WarnLog
+	Skillet.WarnShow = Skillet.db.profile.WarnShow
+	Skillet.DebugShow = Skillet.db.profile.DebugShow
+	Skillet.DebugLogging = Skillet.db.profile.DebugLogging
+	Skillet.DebugLevel = Skillet.db.profile.DebugLevel
+	Skillet.LogLevel = Skillet.db.profile.LogLevel
+	Skillet.MAXDEBUG = Skillet.db.profile.MAXDEBUG or 4000
+	Skillet.MAXPROFILE = Skillet.db.profile.MAXPROFILE or 2000
+	Skillet.TableDump = Skillet.db.profile.TableDump
+	Skillet.TraceShow = Skillet.db.profile.TraceShow
+	Skillet.TraceLog = Skillet.db.profile.TraceLog
+	Skillet.ProfileShow = Skillet.db.profile.ProfileShow
+--
+-- Profile variable to control Skillet fixes for Blizzard bugs.
+-- Can be toggled [or turned off] with "/skillet fixbugs [off]"
+--
+	if Skillet.db.profile.FixBugs == nil then
+		Skillet.db.profile.FixBugs = true
+	end
+	Skillet.FixBugs = Skillet.db.profile.FixBugs
+end
+
+--
+-- Called from events related to profile manipulation and new characters
+--
+function Skillet:ConfigurePlayerProfile()
+	if not self.db.profile.groupDB then
+		self.db.profile.groupDB = {}
+	end
+	if not self.db.profile.groupSN then
+		self.db.profile.groupSN = {}
+	end
+	if not self.db.profile.SavedQueues then
+		self.db.profile.SavedQueues = {}
+	end
+	if not self.db.profile.plugins then
+		self.db.profile.plugins = {}
+	end
+	if self.db.profile.plugins.recipeNamePlugin then
+		if not self.db.profile.plugins.recipeNameSuffix then
+			self.db.profile.plugins.recipeNameSuffix = self.db.profile.plugins.recipeNamePlugin
+		end
+		self.db.profile.plugins.recipeNamePlugin = nil
+	end
+	self:InitializePlugins()
 end
 
 --
@@ -210,8 +266,8 @@ function Skillet:OnInitialize()
 	self.db = AceDB:New("SkilletDB", defaults)
 	self.db.RegisterCallback(self, "OnProfileChanged", "RefreshConfig")
 	self.db.RegisterCallback(self, "OnProfileCopied", "RefreshConfig")
-	self.db.RegisterCallback(self, "OnProfileReset", "RefreshConfig")
-	self.db.RegisterCallback(self, "OnNewProfile", "RefreshConfig")
+	self.db.RegisterCallback(self, "OnProfileReset", "InitializeProfile")
+	self.db.RegisterCallback(self, "OnNewProfile", "InitializeProfile")
 	self.db.RegisterCallback(self, "OnProfileDeleted", "RefreshConfig")
 --
 -- Clean up obsolete data
@@ -321,31 +377,7 @@ function Skillet:OnInitialize()
 --
 -- Note:	Undefined is the same as false so we only need to predefine true variables
 --
-	if Skillet.db.profile.WarnLog == nil then
-		Skillet.db.profile.WarnLog = true
-	end
-
-	Skillet.WarnLog = Skillet.db.profile.WarnLog
-	Skillet.WarnShow = Skillet.db.profile.WarnShow
-	Skillet.DebugShow = Skillet.db.profile.DebugShow
-	Skillet.DebugLogging = Skillet.db.profile.DebugLogging
-	Skillet.DebugLevel = Skillet.db.profile.DebugLevel
-	Skillet.LogLevel = Skillet.db.profile.LogLevel
-	Skillet.MAXDEBUG = Skillet.db.profile.MAXDEBUG or 4000
-	Skillet.MAXPROFILE = Skillet.db.profile.MAXPROFILE or 2000
-	Skillet.TableDump = Skillet.db.profile.TableDump
-	Skillet.TraceShow = Skillet.db.profile.TraceShow
-	Skillet.TraceLog = Skillet.db.profile.TraceLog
-	Skillet.ProfileShow = Skillet.db.profile.ProfileShow
---
--- Profile variable to control Skillet fixes for Blizzard bugs.
--- Can be toggled [or turned off] with "/skillet fixbugs [off]"
---
-	if Skillet.db.profile.FixBugs == nil then
-		Skillet.db.profile.FixBugs = true
-	end
-	Skillet.FixBugs = Skillet.db.profile.FixBugs
-
+	Skillet:ConfigureProfile()
 --
 -- Create a static popup for changing professions
 --
@@ -412,8 +444,8 @@ end
 -- good cause.
 --
 function Skillet:FlushCustomData()
-	Skillet.db.realm.groupDB = {}
-	Skillet.db.realm.groupSN = {}
+	Skillet.db.profile.groupDB = {}
+	Skillet.db.profile.groupSN = {}
 end
 
 --
@@ -468,12 +500,36 @@ function Skillet:InitializeDatabase(player, clean)
 		return
 	end
 	if player then
-		if not self.db.realm.groupDB then
-			self.db.realm.groupDB = {}
+--
+-- Session data
+--
+		if not self.data then
+			self.data = {}
 		end
-		if not self.db.realm.groupSN then
-			self.db.realm.groupSN = {}
+		if not self.data.recipeList then
+			self.data.recipeList = {}
 		end
+		if not self.data.skillList then
+			self.data.skillList = {}
+		end
+		if not self.data.skillList[player] or clean then
+			self.data.skillList[player] = {}
+		end
+		if not self.data.groupList then
+			self.data.groupList = {}
+		end
+		if not self.data.groupList[player] or clean then
+			self.data.groupList[player] = {}
+		end
+		if not self.data.skillIndexLookup then
+			self.data.skillIndexLookup = {}
+		end
+		if not self.data.skillIndexLookup[player] or clean then
+			self.data.skillIndexLookup[player] = {}
+		end
+--
+-- Realm data
+--
 		if not self.db.realm.skillDB then
 			self.db.realm.skillDB = {}
 		end
@@ -510,29 +566,11 @@ function Skillet:InitializeDatabase(player, clean)
 		if not self.db.realm.auctionData[player] or clean then
 			self.db.realm.auctionData[player] = {}
 		end
-		if not self.data then
-			self.data = {}
+		if not self.db.realm.trade_wait then
+			self.db.realm.trade_wait = 1	-- variable to control how many TRADE_SKILL_UPDATE events to ignore
 		end
-		if not self.data.recipeList then
-			self.data.recipeList = {}
-		end
-		if not self.data.skillList then
-			self.data.skillList = {}
-		end
-		if not self.data.skillList[player] or clean then
-			self.data.skillList[player] = {}
-		end
-		if not self.data.groupList then
-			self.data.groupList = {}
-		end
-		if not self.data.groupList[player] or clean then
-			self.data.groupList[player] = {}
-		end
-		if not self.data.skillIndexLookup then
-			self.data.skillIndexLookup = {}
-		end
-		if not self.data.skillIndexLookup[player] or clean then
-			self.data.skillIndexLookup[player] = {}
+		if not self.db.realm.craft_wait then
+			self.db.realm.craft_wait = 1	-- variable to control how many CRAFT_UPDATE events to ignore
 		end
 		if not self.db.realm.faction then
 			self.db.realm.faction = {}
@@ -603,19 +641,10 @@ function Skillet:InitializeDatabase(player, clean)
 			if not self.db.realm.userIgnoredMats[player] or clean then
 				self.db.realm.userIgnoredMats[player] = {}
 			end
-			if not self.db.profile.SavedQueues then
-				self.db.profile.SavedQueues = {}
-			end
-			if not self.db.profile.plugins then
-				self.db.profile.plugins = {}
-			end
-			if self.db.profile.plugins.recipeNamePlugin then
-				if not self.db.profile.plugins.recipeNameSuffix then
-					self.db.profile.plugins.recipeNameSuffix = self.db.profile.plugins.recipeNamePlugin
-				end
-				self.db.profile.plugins.recipeNamePlugin = nil
-			end
-			self:InitializePlugins()
+--
+-- Profile data
+--
+			Skillet:ConfigurePlayerProfile()
 		end
 	end
 end
@@ -715,10 +744,9 @@ function Skillet:OnEnable()
 	self.currentPlayer = UnitName("player")
 	self.currentGroupLabel = "Blizzard"
 	self.currentGroup = nil
---
--- run the upgrade code to convert any old settings
---
-	self:UpgradeDataAndOptions()
+	self.skippedQueue = {}
+	self:UpgradeDataAndOptions()		-- run the upgrade code to convert any old settings
+	self:ConvertIgnoreListData()
 	self:CollectTradeSkillData()
 	self:CollectCurrencyData()
 	self:ScanPlayerTradeSkills()
@@ -849,7 +877,7 @@ function Skillet:TRADE_SKILL_UPDATE()
 	Skillet.tradeUpdate = Skillet.tradeUpdate + 1
 	DA.TRACE("TRADE_SKILL_UPDATE: closingTrade= "..tostring(Skillet.closingTrade)..", tradeShow= "..tostring(Skillet.tradeShow)..", tradeUpdate= "..tostring(Skillet.tradeUpdate))
 	if Skillet.closingTrade or not Skillet.tradeShow then return end
---	if Skillet.tradeUpdate < 2 then return end
+	if Skillet.tradeUpdate < Skillet.db.realm.trade_wait then return end
 	if Skillet.tradeSkillFrame and Skillet.tradeSkillFrame:IsVisible() then
 		if Skillet.lastCraft ~= Skillet.isCraft then
 			Skillet:ConfigureRecipeControls()
@@ -869,7 +897,7 @@ function Skillet:CRAFT_UPDATE()
 	end
 	DA.TRACE("CRAFT_UPDATE: closingTrade= "..tostring(Skillet.closingTrade)..", tradeShow= "..tostring(Skillet.tradeShow)..", craftUpdate= "..tostring(Skillet.craftUpdate))
 	if Skillet.closingTrade or not Skillet.craftShow then return end
---	if Skillet.craftUpdate < 2 then return end
+	if Skillet.craftUpdate < Skillet.db.realm.craft_wait then return end
 	if Skillet.tradeSkillFrame and Skillet.tradeSkillFrame:IsVisible() then
 		if Skillet.lastCraft ~= Skillet.isCraft then
 			Skillet:ConfigureRecipeControls()
@@ -1206,6 +1234,9 @@ end
 
 function Skillet:UNIT_INVENTORY_CHANGED(event, unit)
 	DA.TRACE("UNIT_INVENTORY_CHANGED( "..tostring(unit).." )")
+	if self.tradeSkillOpen then
+		self:AdjustInventory()
+	end
 end
 
 --
@@ -1465,6 +1496,7 @@ function Skillet:HideTradeSkillWindow()
 	local closed -- was anything closed by us?
 	local frame = self.tradeSkillFrame
 	if frame and frame:IsVisible() then
+		self:DisablePauseButton()
 		self:StopCast()
 		frame:Hide()
 		closed = true
@@ -1478,7 +1510,9 @@ end
 function Skillet:HideAllWindows()
 	--DA.DEBUG(0,"HideAllWindows()")
 	local closed -- was anything closed?
-	-- Cancel anything currently being created
+--
+-- Cancel anything currently being created
+--
 	if self:HideTradeSkillWindow() then
 		closed = true
 	end
@@ -1493,15 +1527,8 @@ function Skillet:HideAllWindows()
 	end
 	self.currentTrade = nil
 	self.selectedSkill = nil
+	self.queueCasting = nil
 	return closed
-end
-
---
--- Show the options window
---
-function Skillet:ShowOptions()
-	InterfaceOptionsFrame_Show()
-	InterfaceOptionsFrame_OpenToCategory("Skillet")
 end
 
 --

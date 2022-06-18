@@ -83,6 +83,7 @@ L:SetMiscLocalization{
 	Human		= "Human",
 	Demon		= "Demon",
 	YellDemon	= "Be gone, trifling elf%.%s*I am in control now!",
+	YellPhase1  = "Finally my banishment ends!",
 	YellPhase2	= "No... no! What have you done? I am the master! Do you hear me? I am... aaggh! Can't... contain him."
 }
 
@@ -130,7 +131,7 @@ L:SetTimerLocalization{
 L:SetOptionLocalization{
 	SpecWarnMurlocs	= "Show special warning when Murlocs spawning",
 	TimerMurlocs	= "Show timer for Murlocs spawning",
-	GraveIcon		= DBM_CORE_L.AUTO_ICONS_OPTION_TEXT:format(38049)
+	GraveIcon		= DBM_CORE_L.AUTO_ICONS_OPTION_TARGETS:format(38049)
 }
 
 L:SetMiscLocalization{
@@ -174,7 +175,7 @@ L:SetOptionLocalization{
 	TimerNaga			= "Show timer for next Naga",
 	SpecWarnElemental	= "Show special warning when Tainted Elemental coming",
 	SpecWarnCore		= "Show special warning when Tainted Core is on you",
-	ChargeIcon			= DBM_CORE_L.AUTO_ICONS_OPTION_TEXT:format(38280)
+	ChargeIcon			= DBM_CORE_L.AUTO_ICONS_OPTION_TARGETS:format(38280)
 }
 
 L:SetMiscLocalization{

@@ -11,7 +11,7 @@ local isRetail = WOW_PROJECT_ID == (WOW_PROJECT_MAINLINE or 1)
 local DBM = DBM
 local L = DBM_CORE_L
 local UnitClass, GetTime, GetPartyAssignment, UnitGroupRolesAssigned, GetRaidTargetIndex, UnitExists, UnitGetTotalAbsorbs, UnitName, UnitHealth, UnitPower, UnitPowerMax, UnitIsDeadOrGhost, UnitThreatSituation, UnitPosition, UnitIsUnit, UIDropDownMenu_CreateInfo, UIDropDownMenu_AddButton = UnitClass, GetTime, GetPartyAssignment, UnitGroupRolesAssigned, GetRaidTargetIndex, UnitExists, UnitGetTotalAbsorbs, UnitName, UnitHealth, UnitPower, UnitPowerMax, UnitIsDeadOrGhost, UnitThreatSituation, UnitPosition, UnitIsUnit, UIDropDownMenu_CreateInfo, UIDropDownMenu_AddButton
-local error, tostring, type, pairs, ipairs, select, tonumber, tsort, twipe, mfloor, mmax, mmin, mrandom, schar, ssplit, CAfter = error, tostring, type, pairs, ipairs, select, tonumber, table.sort, table.wipe, math.floor, math.max, math.min, math.random, string.char, string.split, C_Timer.After
+local error, tostring, type, pairs, ipairs, select, tonumber, tsort, twipe, mfloor, mmax, mmin, mrandom, schar, ssplit = error, tostring, type, pairs, ipairs, select, tonumber, table.sort, table.wipe, math.floor, math.max, math.min, math.random, string.char, string.split
 local NORMAL_FONT_COLOR, SPELL_FAILED_OUT_OF_RANGE = NORMAL_FONT_COLOR, SPELL_FAILED_OUT_OF_RANGE
 local RAID_CLASS_COLORS = _G["CUSTOM_CLASS_COLORS"] or RAID_CLASS_COLORS-- for Phanx' Class Colors
 
@@ -353,14 +353,14 @@ local function updateIcons()
 	for uId in DBM:GetGroupMembers() do
 		local icon = GetRaidTargetIndex(uId)
 		local icon2 = GetRaidTargetIndex(uId .. "target")
-		if icon then
+		if icon and icon <= 8 then
 			icons[DBM:GetUnitFullName(uId)] = ("|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_%d:0|t"):format(icon)
 		end
-		if icon2 then
+		if icon2 and icon2 <= 8 then
 			icons[DBM:GetUnitFullName(uId .. "target")] = ("|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_%d:0|t"):format(icon2)
 		end
 	end
-	for i = 1, 5 do
+	for i = 1, 10 do
 		local icon = GetRaidTargetIndex("boss" .. i)
 		if icon then
 			icons[UnitName("boss" .. i)] = ("|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_%d:0|t"):format(icon)
@@ -422,7 +422,7 @@ local function updateEnemyPower()
 				end
 			end
 		else
-			for i = 1, 5 do
+			for i = 1, 10 do
 				local uId = "boss" .. i
 				local currentPower, maxPower = UnitPower(uId), UnitPowerMax(uId)
 				if maxPower and maxPower > 0 then
@@ -433,7 +433,7 @@ local function updateEnemyPower()
 				end
 			end
 		end
-	else -- Check primary power type and alternate power types together. This should only be used if BOTH power types exist on same boss, else fix your shit MysticalOS
+	else -- Check primary power type and alternate power types together. This should only be used if BOTH power types exist on same boss
 		if specificUnit then
 			if not isRetail then
 				specificUnit = UnitExists(specificUnit) or DBM:GetUnitIdFromGUID(specificUnit)--unitID already passed or GUID we convert into unitID
@@ -456,7 +456,7 @@ local function updateEnemyPower()
 				end
 			end
 		else
-			for i = 1, 5 do
+			for i = 1, 10 do
 				local uId = "boss" .. i
 				-- Primary Power
 				local currentPower, maxPower = UnitPower(uId), UnitPowerMax(uId)
@@ -485,9 +485,7 @@ local function updateEnemyAbsorb()
 	local totalAbsorb = value[2]
 	local specificUnit = value[3]
 	if specificUnit then
-		if not isRetail then
-			specificUnit = UnitExists(specificUnit) or DBM:GetUnitIdFromGUID(specificUnit)--unitID already passed or GUID we convert into unitID
-		end
+		specificUnit = UnitExists(specificUnit) or DBM:GetUnitIdFromGUID(specificUnit)--unitID already passed or GUID we convert into unitID
 		if UnitExists(specificUnit) then
 			local absorbAmount
 			if spellInput then -- Get specific spell absorb
@@ -496,18 +494,15 @@ local function updateEnemyAbsorb()
 				absorbAmount = UnitGetTotalAbsorbs(specificUnit)
 			end
 			if absorbAmount and absorbAmount > 0 then
-				local text
 				if totalAbsorb then
-					text = absorbAmount / totalAbsorb * 100
-					lines[UnitName(specificUnit)] = mfloor(text) .. "%"
+					lines[UnitName(specificUnit)] = mfloor(absorbAmount / totalAbsorb * 100) .. "%"
 				else
-					text = absorbAmount
-					lines[UnitName(specificUnit)] = mfloor(text)
+					lines[UnitName(specificUnit)] = mfloor(absorbAmount)
 				end
 			end
 		end
-	else
-		for i = 1, 5 do
+	else--Generic absorbs for bosses. Not to be mistaken for updateMultiEnemyAbsorb, which supports checking multiple units that might or might not be bosses
+		for i = 1, 10 do
 			local uId = "boss" .. i
 			if UnitExists(uId) then
 				local absorbAmount
@@ -517,7 +512,72 @@ local function updateEnemyAbsorb()
 					absorbAmount = UnitGetTotalAbsorbs(uId)
 				end
 				if absorbAmount and absorbAmount > 0 then
-					lines[UnitName(uId)] = mfloor(totalAbsorb and absorbAmount / totalAbsorb * 100 or absorbAmount) .. "%"
+					if totalAbsorb then
+						lines[UnitName(uId)] = mfloor(totalAbsorb and absorbAmount / totalAbsorb * 100) .. "%"
+					else
+						lines[UnitName(uId)] = mfloor(absorbAmount)
+					end
+				end
+			end
+		end
+	end
+	updateLines()
+	updateIcons()
+end
+
+--Really hate splitting this off from updateEnemyAbsorb but having them merged was even uglier
+--Note, this method also less efficient than boss only or single unit absorb tracking.
+--Don't use this function to be lazy (ie just passing 1 guid instead of finding valid unit at mod level)
+local function updateMultiEnemyAbsorb()
+	twipe(lines)
+	local spellInput = value[1]
+	local totalAbsorb = value[2]
+	local guidTable = value[3]--Multi target by table
+	local guidTracked = {}
+	for i = 1, 10 do
+		if #guidTable == #guidTracked then--Stop searching, found everything we're looking for.
+			break
+		end
+		local uId = "boss" .. i
+		if UnitExists(uId) then
+			local targetGUID = UnitGUID(uId)
+			if guidTable[targetGUID] and not guidTracked[targetGUID] then
+				guidTracked[targetGUID] = true
+				local absorbAmount
+				if spellInput then -- Get specific spell absorb
+					absorbAmount = select(16, DBM:UnitBuff(uId, spellInput)) or select(16, DBM:UnitDebuff(uId, spellInput))
+				else -- Get all of them
+					absorbAmount = UnitGetTotalAbsorbs(uId)
+				end
+				if absorbAmount and absorbAmount > 0 then
+					if totalAbsorb then
+						lines[UnitName(uId)] = mfloor(totalAbsorb and absorbAmount / totalAbsorb * 100) .. "%"
+					else
+						lines[UnitName(uId)] = mfloor(absorbAmount)
+					end
+				end
+			end
+		end
+	end
+	for unitId in DBM:GetGroupMembers() do--Do not use self on this function, because self might be bossModPrototype
+		if #guidTable == #guidTracked then--Stop searching, found everything we're looking for.
+			break
+		end
+		local uId = unitId .. "target"
+		local targetGUID = UnitGUID(unitId)
+		if guidTable[targetGUID] and not guidTracked[targetGUID] then
+			guidTracked[targetGUID] = true
+			local absorbAmount
+			if spellInput then -- Get specific spell absorb
+				absorbAmount = select(16, DBM:UnitBuff(uId, spellInput)) or select(16, DBM:UnitDebuff(uId, spellInput))
+			else -- Get all of them
+				absorbAmount = UnitGetTotalAbsorbs(uId)
+			end
+			if absorbAmount and absorbAmount > 0 then
+				if totalAbsorb then
+					lines[UnitName(uId)] = mfloor(totalAbsorb and absorbAmount / totalAbsorb * 100) .. "%"
+				else
+					lines[UnitName(uId)] = mfloor(absorbAmount)
 				end
 			end
 		end
@@ -530,8 +590,7 @@ local function updateAllAbsorb()
 	twipe(lines)
 	local spellInput = value[1]
 	local totalAbsorb = value[2]
-	local totalAbsorb2 = value[3]
-	for i = 1, 5 do
+	for i = 1, 10 do
 		local uId = "boss" .. i
 		if UnitExists(uId) then
 			local absorbAmount
@@ -540,16 +599,24 @@ local function updateAllAbsorb()
 			else -- Get all of them
 				absorbAmount = UnitGetTotalAbsorbs(uId)
 			end
-			if absorbAmount then
-				lines[UnitName(uId)] = mfloor(totalAbsorb and absorbAmount / totalAbsorb * 100 or absorbAmount) .. "%"
+			if absorbAmount and absorbAmount > 0 then
+				if totalAbsorb then
+					lines[UnitName(uId)] = mfloor(totalAbsorb and absorbAmount / totalAbsorb * 100) .. "%"
+				else
+					lines[UnitName(uId)] = mfloor(absorbAmount)
+				end
 			end
 		end
 	end
 	if spellInput then
 		for uId in DBM:GetGroupMembers() do
 			local absorbAmount = select(16, DBM:UnitBuff(uId, spellInput)) or select(16, DBM:UnitDebuff(uId, spellInput))
-			if absorbAmount then
-				lines[DBM:GetUnitFullName(uId)] = mfloor(totalAbsorb and absorbAmount / totalAbsorb2 * 100 or absorbAmount) .. "%"
+			if absorbAmount and absorbAmount > 0 then
+				if totalAbsorb then
+					lines[UnitName(uId)] = mfloor(totalAbsorb and absorbAmount / totalAbsorb * 100) .. "%"
+				else
+					lines[UnitName(uId)] = mfloor(absorbAmount)
+				end
 			end
 		end
 	end
@@ -562,9 +629,18 @@ local function updatePlayerAbsorb()
 	local spellInput = value[1]
 	local totalAbsorb = value[2]
 	for uId in DBM:GetGroupMembers() do
-		local absorbAmount = select(16, DBM:UnitBuff(uId, spellInput)) or select(16, DBM:UnitDebuff(uId, spellInput))
-		if absorbAmount then
-			lines[DBM:GetUnitFullName(uId)] = mfloor(totalAbsorb and absorbAmount / totalAbsorb * 100 or absorbAmount)
+		local absorbAmount
+		if spellInput then -- Get specific spell absorb
+			absorbAmount = select(16, DBM:UnitBuff(uId, spellInput)) or select(16, DBM:UnitDebuff(uId, spellInput))
+		else--Not even spell input given, this is a very generic infoframe
+			absorbAmount = UnitGetTotalAbsorbs(uId)
+		end
+		if absorbAmount and absorbAmount > 0 then
+			if totalAbsorb then
+				lines[UnitName(uId)] = mfloor(totalAbsorb and absorbAmount / totalAbsorb * 100) .. "%"
+			else
+				lines[UnitName(uId)] = mfloor(absorbAmount)
+			end
 		end
 	end
 	updateLines()
@@ -696,9 +772,9 @@ local function updatePlayerDebuffStacks()
 	twipe(lines)
 	local spellInput = value[1]
 	for uId in DBM:GetGroupMembers() do
-		local spellName, _, count = DBM:UnitDebuff(uId, spellInput)
-		if spellName and count then
-			lines[DBM:GetUnitFullName(uId)] = count
+		local spellName, _, count, _, _, _, _, _, _, _, _, _, _, _, _, count2 = DBM:UnitDebuff(uId, spellInput)
+		if spellName and (count or count2) then
+			lines[DBM:GetUnitFullName(uId)] = count2 or count
 		end
 	end
 	updateIcons()
@@ -828,6 +904,7 @@ local events = {
 	["playerpower"] = updatePlayerPower,
 	["enemypower"] = updateEnemyPower,
 	["enemyabsorb"] = updateEnemyAbsorb,
+	["multienemyabsorb"] = updateMultiEnemyAbsorb,
 	["allabsorb"] = updateAllAbsorb,
 	["playerabsorb"] = updatePlayerAbsorb,
 	["playerbuff"] = updatePlayerBuffs,
@@ -1100,21 +1177,25 @@ function infoFrame:Update(time)
 	end
 	if frame:IsShown() then
 		if time then
-			CAfter(time, function()
-				onUpdate(frame)
-			end)
+			DBM:Unschedule(onUpdate)
+			DBM:Schedule(time, onUpdate, frame)
 		else
 			onUpdate(frame)
 		end
 	end
 end
 
-function infoFrame:UpdateTable(table)
+function infoFrame:UpdateTable(table, time)
 	if not frame then
 		createFrame()
 	end
 	if frame:IsShown() and table then
-		onUpdate(frame, table)
+		if time then
+			DBM:Unschedule(onUpdate)
+			DBM:Schedule(time, onUpdate, frame, table)
+		else
+			onUpdate(frame, table)
+		end
 	end
 end
 

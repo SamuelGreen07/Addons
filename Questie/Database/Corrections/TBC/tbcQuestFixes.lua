@@ -1,5 +1,6 @@
 ---@class QuestieTBCQuestFixes
 local QuestieTBCQuestFixes = QuestieLoader:CreateModule("QuestieTBCQuestFixes")
+local _QuestieTBCQuestFixes = {}
 
 ---@type QuestieDB
 local QuestieDB = QuestieLoader:ImportModule("QuestieDB")
@@ -13,44 +14,13 @@ QuestieCorrections.reversedKillCreditQuestIDs = {
 }
 
 function QuestieTBCQuestFixes:Load()
-    QuestieDB.questData[12192] = {}; -- This One Time, When I Was Drunk... (Horde)
-    QuestieDB.questData[12420] = {}; -- Brew of the Month Club (Alliance)
-    QuestieDB.questData[63866] = {}; -- Claiming the Light
-    QuestieDB.questData[64139] = {}; -- A Summons from Lady Liadrin
-    QuestieDB.questData[64140] = {}; -- The Master's Path
-    QuestieDB.questData[64141] = {}; -- A Gesture of Commitment
-    QuestieDB.questData[64142] = {}; -- A Demonstration of Loyalty
-    QuestieDB.questData[64143] = {}; -- True Masters of the Light
-    QuestieDB.questData[64144] = {}; -- True Masters of the Light
-    QuestieDB.questData[64145] = {}; -- True Masters of the Light
-    QuestieDB.questData[64319] = {}; -- A Study in Power
-    QuestieDB.questData[64845] = {}; -- Alliance War Effort
-
-    -- Alliance boosted quests
-    QuestieDB.questData[64028] = {}; -- A New Beginning
-    QuestieDB.questData[64031] = {}; -- Tools for Survival
-    QuestieDB.questData[64034] = {}; -- Combat Training
-    QuestieDB.questData[64035] = {}; -- Talented
-    QuestieDB.questData[64037] = {}; -- Eastern Plaguelands
-    QuestieDB.questData[64038] = {}; -- The Dark Portal
-    -- Horde boosted quests
-    QuestieDB.questData[64046] = {}; -- A New Beginning
-    QuestieDB.questData[64047] = {}; -- A New Beginning
-    QuestieDB.questData[64048] = {}; -- Tools for Survival
-    QuestieDB.questData[64049] = {}; -- Tools for Survival
-    QuestieDB.questData[64050] = {}; -- Combat Training
-    QuestieDB.questData[64051] = {}; -- Combat Training
-    QuestieDB.questData[64052] = {}; -- Talented
-    QuestieDB.questData[64053] = {}; -- Talented
-    QuestieDB.questData[64063] = {}; -- The Dark Portal
-    QuestieDB.questData[64064] = {}; -- Eastern Plaguelands
-    QuestieDB.questData[64128] = {}; -- Eastern Plaguelands
-    QuestieDB.questData[64217] = {}; -- The Dark Portal
+    _QuestieTBCQuestFixes:InsertMissingQuestIds()
 
     local questKeys = QuestieDB.questKeys
     local raceIDs = QuestieDB.raceKeys
     local classIDs = QuestieDB.classKeys
     local zoneIDs = ZoneDB.zoneIDs
+    local sortKeys = QuestieDB.sortKeys
 
     return {
         [62] = {
@@ -61,6 +31,12 @@ function QuestieTBCQuestFixes:Load()
         },
         [155] = {
             [questKeys.triggerEnd] = {"Escort The Defias Traitor to discover where VanCleef is hiding", {[zoneIDs.WESTFALL]={{42.55,71.53}}}},
+        },
+        [171] = {
+            [questKeys.questLevel] = -1,
+        },
+        [172] = {
+            [questKeys.questLevel] = -1,
         },
         [201] = {
             [questKeys.triggerEnd] = {"Locate the hunters' camp", {[zoneIDs.STRANGLETHORN_VALE]={{35.73,10.82}}}},
@@ -80,6 +56,9 @@ function QuestieTBCQuestFixes:Load()
         [503] = {
             [questKeys.triggerEnd] = {"Find where Gol'dir is being held", {[zoneIDs.ALTERAC_VALLEY]={{60.58,43.86}}}},
         },
+        [558] = {
+            [questKeys.questLevel] = -1,
+        },
         [578] = {
             [questKeys.triggerEnd] = {"Locate the haunted island", {[zoneIDs.STRANGLETHORN_VALE]={{21.56,21.98}}}},
         },
@@ -95,6 +74,19 @@ function QuestieTBCQuestFixes:Load()
         [870] = {
             [questKeys.triggerEnd] = {"Explore the waters of the Forgotten Pools", {[zoneIDs.THE_BARRENS]={{45.06,22.56}}}},
         },
+        [910] = {
+            [questKeys.questLevel] = -1,
+        },
+        [911] = {
+            [questKeys.questLevel] = -1,
+        },
+        [915] = {
+            [questKeys.questLevel] = -1,
+            [questKeys.preQuestGroup] = {910,911,1800},
+        },
+        [925] = {
+            [questKeys.questLevel] = -1,
+        },
         [927] = {
             [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
         },
@@ -104,8 +96,15 @@ function QuestieTBCQuestFixes:Load()
         [1046] = {
             [questKeys.objectives] = {nil,nil,{{5388,nil},{5462,nil}},nil},
         },
+        [1048] = {
+            [questKeys.requiredLevel] = 30,
+        },
         [1049] = { -- Not available to UNDEAD
             [questKeys.requiredRaces] = raceIDs.ORC + raceIDs.TAUREN + raceIDs.TROLL + raceIDs.BLOOD_ELF,
+        },
+        [1103] = {
+            [questKeys.preQuestSingle] = {100},
+            [questKeys.parentQuest] = 0,
         },
         [1109] = {
             [questKeys.requiredLevel] = 22,
@@ -113,9 +112,31 @@ function QuestieTBCQuestFixes:Load()
         },
         [1135] = {
             [questKeys.startedBy] = {{4456},nil,nil},
+            [questKeys.zoneOrSort] = zoneIDs.DARKSHORE,
+        },
+        [1437] = {
+            [questKeys.triggerEnd] = {"Find and search Tyranis and Dalinda Malem's wagon", {[zoneIDs.DESOLACE]={{56.52,17.84}}}},
         },
         [1448] = {
             [questKeys.triggerEnd] = {"Search for the Temple of Atal'Hakkar", {[zoneIDs.SWAMP_OF_SORROWS]={{64.67,48.82},{64.36,56.12},{64.09,51.95},{69.6,44.18},{73.97,46.36}}}},
+        },
+        [1468] = {
+            [questKeys.questLevel] = -1,
+        },
+        [1479] = {
+            [questKeys.questLevel] = -1,
+        },
+        [1486] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
+        },
+        [1508] = {
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+        },
+        [1558] = {
+            [questKeys.questLevel] = -1,
+        },
+        [1687] = {
+            [questKeys.questLevel] = -1,
         },
         [1699] = {
             [questKeys.triggerEnd] = {"Enter the Rethban Caverns", {[zoneIDs.REDRIDGE_MOUNTAINS]={{19.22,25.25}}}},
@@ -123,17 +144,42 @@ function QuestieTBCQuestFixes:Load()
         [1719] = {
             [questKeys.triggerEnd] = {"Step on the grate to begin the Affray", {[zoneIDs.THE_BARRENS]={{68.61,48.72}}}},
         },
+        [1799] = {
+            [questKeys.preQuestSingle] = {4967,4969},
+        },
+        [1800] = {
+            [questKeys.questLevel] = -1,
+        },
+        [1801] = {
+            [questKeys.requiredRaces] = raceIDs.ORC + raceIDs.UNDEAD + raceIDs.BLOOD_ELF,
+        },
+        [1803] = {
+            [questKeys.requiredRaces] = raceIDs.ORC + raceIDs.UNDEAD + raceIDs.BLOOD_ELF,
+        },
+        [1805] = {
+            [questKeys.requiredRaces] = raceIDs.ORC + raceIDs.UNDEAD + raceIDs.BLOOD_ELF,
+        },
         [2240] = {
             [questKeys.triggerEnd] = {"Explore the Hidden Chamber", {[zoneIDs.BADLANDS]={{35.22,10.32}}}},
         },
         [2501] = {
             [questKeys.zoneOrSort] = -181,
         },
+        [2841] = {
+            [questKeys.childQuests] = {},
+        },
         [2842] = {
             [questKeys.requiredLevel] = 20,
+            [questKeys.parentQuest] = 0,
         },
         [2989] = {
             [questKeys.triggerEnd] = {"Search the Altar of Zul", {[zoneIDs.THE_HINTERLANDS]={{48.86,68.42}}}},
+        },
+        [2996] = {
+            [questKeys.requiredRaces] = raceIDs.ORC + raceIDs.UNDEAD + raceIDs.BLOOD_ELF,
+        },
+        [3001] = {
+            [questKeys.requiredRaces] = raceIDs.ORC + raceIDs.UNDEAD + raceIDs.BLOOD_ELF,
         },
         [3117] = {
             [questKeys.requiredRaces] = raceIDs.NIGHT_ELF,
@@ -141,14 +187,56 @@ function QuestieTBCQuestFixes:Load()
         [3505] = {
             [questKeys.triggerEnd] = {"Find Magus Rimtori's camp", {[zoneIDs.AZSHARA]={{59.29,31.21}}}},
         },
-        [4740] = {
+        [3631] = {
+            [questKeys.startedBy] = {{3326}},
+            [questKeys.finishedBy] = {{6251}},
+            [questKeys.requiredRaces] = raceIDs.ORC + raceIDs.UNDEAD + raceIDs.BLOOD_ELF,
+        },
+        [4021] = {
+            [questKeys.extraObjectives] = {{{[zoneIDs.THE_BARRENS]={{44.7,28.1}}}, ICON_TYPE_EVENT, "Defeat Centaur to summon Warlord Krom'zar", 0}}
+        },
+        [4485] = {
+            [questKeys.startedBy] = {}, -- Hiding via startedBy because the quest does not exist in TBC, but does in Era
+        },
+        [4486] = {
+            [questKeys.startedBy] = {}, -- Hiding via startedBy because the quest does not exist in TBC, but does in Era
+        },
+        [4487] = {
+            [questKeys.startedBy] = {{5172}},
+            [questKeys.finishedBy] = {{6251}},
+        },
+        [4488] = {
+            [questKeys.startedBy] = {{461}},
+            [questKeys.finishedBy] = {{6251}},
+        },
+        [4489] = {
+            [questKeys.startedBy] = {{4563}},
+            [questKeys.finishedBy] = {{6251}},
+            [questKeys.requiredRaces] = raceIDs.ORC + raceIDs.UNDEAD + raceIDs.BLOOD_ELF,
+        },
+        [4490] = {
+            [questKeys.startedBy] = {{6251}},
+            [questKeys.finishedBy] = {{6251}},
             [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+        },
+        [4822] = {
+            [questKeys.questLevel] = -1,
+            [questKeys.preQuestGroup] = {1479,1558,1687},
         },
         [4842] = {
             [questKeys.triggerEnd] = {"Discover Darkwhisper Gorge", {[zoneIDs.WINTERSPRING]={{60.1,73.44}}}},
         },
         [5168] = {
             [questKeys.preQuestSingle] = {5210},
+        },
+        [5502] = {
+            [questKeys.questLevel] = -1,
+        },
+        [5649] = {
+            [questKeys.requiredLevel] = 5,
+        },
+        [5961] = {
+            [questKeys.requiredLevel] = 54,
         },
         [6025] = {
             [questKeys.triggerEnd] = {"Overlook Hearthglen from a high vantage point", {[zoneIDs.WESTERN_PLAGUELANDS]={{45.7,18.5}}}},
@@ -211,11 +299,30 @@ function QuestieTBCQuestFixes:Load()
         [7868] = {
             [questKeys.requiredMinRep] = {889,21000}
         },
+        [8114] = {
+            [questKeys.triggerEnd] = {"Take Four Bases in Arathi Basin", {[zoneIDs.ARATHI_HIGHLANDS]={{45.9,45.8}}}},
+        },
+        [8115] = {
+            [questKeys.triggerEnd] = {"Take Five Bases in Arathi Basin", {[zoneIDs.ARATHI_HIGHLANDS]={{45.9,45.8}}}},
+        },
+        [8121] = {
+            [questKeys.triggerEnd] = {"Hold Four Bases in Arathi Basin", {[zoneIDs.ARATHI_HIGHLANDS]={{73.2,30}}}},
+        },
+        [8122] = {
+            [questKeys.triggerEnd] = {"Hold Five Bases in Arathi Basin", {[zoneIDs.ARATHI_HIGHLANDS]={{73.2,30}}}},
+        },
         [8151] = {
             [questKeys.requiredRaces] = raceIDs.NIGHT_ELF,
         },
         [8259] = {
             [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+        },
+        [8311] = {
+            [questKeys.requiredLevel] = 10,
+            [questKeys.questLevel] = -1,
+        },
+        [8312] = {
+            [questKeys.requiredLevel] = 10,
         },
         [8325] = {
             [questKeys.requiredRaces] = raceIDs.BLOOD_ELF,
@@ -258,11 +365,40 @@ function QuestieTBCQuestFixes:Load()
         [8347] = {
             [questKeys.requiredRaces] = raceIDs.BLOOD_ELF,
         },
+        [8353] = {
+            [questKeys.requiredLevel] = 10,
+        },
+        [8354] = {
+            [questKeys.requiredLevel] = 10,
+        },
+        [8355] = {
+            [questKeys.requiredLevel] = 10,
+        },
+        [8356] = {
+            [questKeys.requiredLevel] = 10,
+        },
+        [8357] = {
+            [questKeys.requiredLevel] = 10,
+            [questKeys.questLevel] = -1,
+        },
+        [8358] = {
+            [questKeys.requiredLevel] = 10,
+        },
+        [8359] = {
+            [questKeys.requiredLevel] = 10,
+        },
+        [8360] = {
+            [questKeys.requiredLevel] = 10,
+            [questKeys.questLevel] = -1,
+        },
         [8367] = {
             [questKeys.requiredLevel] = 61,
         },
         [8371] = {
             [questKeys.requiredLevel] = 61,
+        },
+        [8410] = {
+            [questKeys.startedBy] = {{3032,13417,20407,23127,},nil,nil,},
         },
         [8412] = {
             [questKeys.requiredRaces] = raceIDs.ALL,
@@ -315,6 +451,189 @@ function QuestieTBCQuestFixes:Load()
         },
         [8484] = {
             [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+        },
+        [8619] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8635] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8636] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8642] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8643] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8644] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8645] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8646] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8647] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8648] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8649] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8650] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8651] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8652] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8653] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8654] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8670] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8671] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8672] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8673] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8674] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8675] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8676] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8677] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8678] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8679] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8680] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8681] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8682] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8683] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8684] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8685] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8686] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8688] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8713] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8714] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8715] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8716] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8717] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8718] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8719] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8720] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8721] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8722] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8723] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8724] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8725] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8726] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8727] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8862] = {
+            [questKeys.requiredLevel] = 10,
+        },
+        [8863] = {
+            [questKeys.requiredLevel] = 1,
+        },
+        [8866] = {
+            [questKeys.questLevel] = -1,
+        },
+        [8867] = {
+            [questKeys.questLevel] = 70,
+        },
+        [8870] = {
+            [questKeys.questLevel] = 70,
+        },
+        [8871] = {
+            [questKeys.questLevel] = 70,
+        },
+        [8872] = {
+            [questKeys.questLevel] = 70,
+        },
+        [8873] = {
+            [questKeys.questLevel] = 70,
+        },
+        [8874] = {
+            [questKeys.questLevel] = 70,
+        },
+        [8875] = {
+            [questKeys.questLevel] = 70,
+        },
+        [8876] = {
+            [questKeys.requiredLevel] = 25,
+        },
+        [8883] = {
+            [questKeys.questLevel] = 70,
         },
         [9130] = {
             [questKeys.requiredMinRep] = {},
@@ -390,11 +709,17 @@ function QuestieTBCQuestFixes:Load()
         [9303] = {
             [questKeys.objectives] = {{{16518,"Nestlewood Owlkin inoculated"}},nil,nil,nil},
         },
+        [9339] = {
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+        },
         [9355] = {
             [questKeys.preQuestSingle] = {10143,10483},
         },
         [9360] = {
             [questKeys.startedBy] = {{15407},nil,{23249}},
+        },
+        [9365] = {
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
         },
         [9375] = {
             [questKeys.triggerEnd] = {"Escort Wounded Blood Elf Pilgrim to Falcon Watch", {[zoneIDs.HELLFIRE_PENINSULA]={{27.09,61.92}}}},
@@ -721,6 +1046,9 @@ function QuestieTBCQuestFixes:Load()
         [9889] = {
             [questKeys.triggerEnd] = {"Unkor Submits", {[zoneIDs.TEROKKAR_FOREST]={{20.02,63.05}}}},
         },
+        [9898] = {
+            [questKeys.name] = "The Respect of Another",
+        },
         [9902] = {
             [questKeys.requiredMinRep] = {978,0},
         },
@@ -747,12 +1075,14 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.preQuestSingle] = {10107,10108},
         },
         [9931] = {
+            [questKeys.objectives] = {nil,nil,nil,nil,{{17138,18064},17138,"Expedition Researcher Freed"}},
             [questKeys.preQuestGroup] = {9927,9928},
         },
         [9932] = {
             [questKeys.preQuestGroup] = {9927,9928},
         },
         [9933] = {
+            [questKeys.preQuestSingle] = {},
             [questKeys.preQuestGroup] = {9931,9932},
         },
         [9934] = {
@@ -839,6 +1169,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.requiredMaxRep]= {932,0},
         },
         [10019] = {
+            [questKeys.preQuestSingle] = {},
             [questKeys.preQuestGroup] = {10211,10017},
             [questKeys.requiredMaxRep]= {932,0},
         },
@@ -847,6 +1178,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.requiredMaxRep]= {934,0},
         },
         [10025] = {
+            [questKeys.preQuestSingle] = {},
             [questKeys.preQuestGroup] = {10211,10024},
             [questKeys.requiredMaxRep]= {934,0},
         },
@@ -1017,9 +1349,6 @@ function QuestieTBCQuestFixes:Load()
         [10120] = {
             [questKeys.preQuestSingle] = {},
         },
-        [10166] = {
-            [questKeys.extraObjectives] = {{nil, ICON_TYPE_EVENT, "Place Old Whitebark's Pendant by the runestone at the Scorched Grove.", 0, {{"object", 181260}}}},
-        },
         [10168] = {
             [questKeys.extraObjectives] = {{nil, ICON_TYPE_EVENT, "Use the Soul Mirror near Ancient Orc Ancestors to summon Darkened Spirits.", 0, {{"monster", 18688}}}},
         },
@@ -1148,6 +1477,14 @@ function QuestieTBCQuestFixes:Load()
         [10367] = {
             [questKeys.preQuestSingle] = {},
         },
+        [10373] = {
+            [questKeys.startedBy] = {{20722},nil,nil},
+            [questKeys.exclusiveTo] = {5066,5090,5091},
+        },
+        [10374] = {
+            [questKeys.startedBy] = {{20724},nil,nil},
+            [questKeys.exclusiveTo] = {5093,5094,5095},
+        },
         [10382] = {
             [questKeys.extraObjectives] = {{nil, ICON_TYPE_EVENT, "Speak with Gryphoneer Windbellow", 0, {{"monster", 20235}}}},
         },
@@ -1242,6 +1579,10 @@ function QuestieTBCQuestFixes:Load()
         [10519] = {
             [questKeys.triggerEnd] = {"The Cipher of Damnation - History and Truth", {[zoneIDs.SHADOWMOON_VALLEY]={{53.9,23.48}}}},
         },
+        [10520] = {
+            [questKeys.startedBy] = {{16739},nil,nil},
+            [questKeys.exclusiveTo] = {3516,3789,3790},
+        },
         [10522] = {
             [questKeys.requiredSourceItems] = {30426},
         },
@@ -1297,6 +1638,9 @@ function QuestieTBCQuestFixes:Load()
         [10594] = {
             [questKeys.triggerEnd] = {"Singing crystal resonant frequency gauged", {[zoneIDs.BLADES_EDGE_MOUNTAINS]={{59.77,73.83}}}},
         },
+        [10605] = {
+            [questKeys.exclusiveTo] = {1472,1507},
+        },
         [10606] = {
             [questKeys.objectives] = {nil,nil,{{30713,nil},{30712,nil}},nil},
         },
@@ -1320,7 +1664,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.startedBy] = {{21499},nil,nil},
         },
         [10629] = {
-            [questKeys.extraObjectives] = {{nil, ICON_TYPE_EVENT, "Use the Felhound Whistle and kill some Deranged Helboars", 0, {{"monster", 16915}}}},
+            [questKeys.extraObjectives] = {{nil, ICON_TYPE_EVENT, "Use the Felhound Whistle and kill some Deranged Helboars", 0, {{"monster", 16863}}}},
         },
         [10634] = {
             [questKeys.preQuestSingle] = {10633,10644},
@@ -1497,11 +1841,11 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.triggerEnd] = {"Attempt to purify the Darkstone of Terrok", {[zoneIDs.TEROKKAR_FOREST]={{30.84,42.03}}}},
         },
         [10840] = {
-            [questKeys.preQuestSingle] = {10852},
+            [questKeys.preQuestSingle] = {10915,10852},
         },
         [10842] = {
             [questKeys.objectives] = {{{21638, "Vengeful Harbinger defeated"}}},
-            [questKeys.preQuestSingle] = {10852},
+            [questKeys.preQuestSingle] = {10915,10852},
         },
         [10854] = {
             [questKeys.extraObjectives] = {{nil, ICON_TYPE_EVENT, "Use Enchanted Nethervine Crystal on Enslaved Netherwing Drake", 0, {{"monster", 21722}}}}
@@ -1537,7 +1881,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.triggerEnd] = {"Attack thwarted", {[zoneIDs.SHATTRATH_CITY]={{51.62,20.69}}}},
         },
         [10886] = {
-            [questKeys.triggerEnd] = {"Millhouse Manastorm Rescued", {[zoneIDs.NETHERSTORM]={{74.5,57.67}}}},
+            [questKeys.triggerEnd] = {"Millhouse Manastorm Rescued", {[zoneIDs.THE_ARCATRAZ]={{-1,-1}}}},
         },
         [10887] = {
             [questKeys.extraObjectives] = {{{[zoneIDs.TEROKKAR_FOREST]={{33.2,51.8}}}, ICON_TYPE_EVENT, "Help Akuno find his way to the Refugee Caravan in Terokkar Forest."}},
@@ -1593,38 +1937,81 @@ function QuestieTBCQuestFixes:Load()
         [10930] = {
             [questKeys.extraObjectives] = {{nil, ICON_TYPE_SLAY, "Kill Decrepit Clefthoofs and use the Fumper on their corpses", 0, {{"monster", 22105}}}},
         },
+        [10942] = {
+            [questKeys.questLevel] = -1,
+            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
+        },
+        [10943] = {
+            [questKeys.questLevel] = -1,
+            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
+        },
         [10945] = {
+            [questKeys.questLevel] = -1,
             [questKeys.triggerEnd] = {"Salandria taken to Sporeggar", {[zoneIDs.ZANGARMARSH]={{19.22,51.23}}}},
+            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
         },
         [10946] = {
             [questKeys.triggerEnd] = {"Ruse of the Ashtongue", {[zoneIDs.NETHERSTORM]={{73.88,63.76}}}},
         },
         [10950] = {
+            [questKeys.questLevel] = -1,
             [questKeys.triggerEnd] = {"Dornaa taken to the Ring of Observance", {[zoneIDs.TEROKKAR_FOREST]={{39.71,64.6}}}},
+            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
         },
         [10951] = {
+            [questKeys.questLevel] = -1,
             [questKeys.triggerEnd] = {"Salandria taken to the Dark Portal", {[zoneIDs.HELLFIRE_PENINSULA]={{88.33,50.19}}}},
+            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
         },
         [10952] = {
+            [questKeys.questLevel] = -1,
             [questKeys.triggerEnd] = {"Dornaa taken to the Dark Portal", {[zoneIDs.HELLFIRE_PENINSULA]={{88.26,50.32}}}},
+            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
         },
         [10953] = {
+            [questKeys.questLevel] = -1,
             [questKeys.triggerEnd] = {"Salandria taken to the Throne of the Elements", {[zoneIDs.NAGRAND]={{60.5,22.7}}}},
+            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
         },
         [10954] = {
+            [questKeys.questLevel] = -1,
             [questKeys.triggerEnd] = {"Dornaa taken to Aeris Landing", {[zoneIDs.NAGRAND]={{31.47,57.45}}}},
+            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
         },
         [10956] = {
+            [questKeys.questLevel] = -1,
+            [questKeys.preQuestGroup] = {10950,10952,10954},
             [questKeys.triggerEnd] = {"Dornaa taken to the Seat of the Naaru", {[zoneIDs.THE_EXODAR]={{56.65,40.73}}}},
+            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
+        },
+        [10960] = {
+            [questKeys.questLevel] = -1,
+            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
         },
         [10962] = {
+            [questKeys.questLevel] = -1,
+            [questKeys.preQuestGroup] = {10950,10952,10954},
             [questKeys.triggerEnd] = {"Dornaa taken to the Caverns of Time", {[zoneIDs.TANARIS]={{60.52,57.74}}}},
+            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
         },
         [10963] = {
+            [questKeys.questLevel] = -1,
             [questKeys.triggerEnd] = {"Salandria taken to the Caverns of Time", {[zoneIDs.TANARIS]={{60.53,57.72}}}},
+            [questKeys.preQuestGroup] = {10945,10951,10953},
+            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
+        },
+        [10966] = {
+            [questKeys.questLevel] = -1,
+            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
+        },
+        [10967] = {
+            [questKeys.questLevel] = -1,
+            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
         },
         [10968] = {
+            [questKeys.questLevel] = -1,
             [questKeys.triggerEnd] = {"Dornaa taken to Farseer Nobundo", {[zoneIDs.THE_EXODAR]={{30.8,29.88}}}},
+            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
         },
         [10974] = {
             [questKeys.requiredMinRep] = {933,21000},
@@ -1672,6 +2059,36 @@ function QuestieTBCQuestFixes:Load()
         [11010] = {
             [questKeys.extraObjectives] = {{nil, ICON_TYPE_SLAY, "Use the Skyguard Bombs to destroy 15 Fel Cannonball Stacks", 0, {{"object", 185861}}}}
         },
+        [11013] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
+        },
+        [11014] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
+        },
+        [11015] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
+        },
+        [11016] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
+        },
+        [11017] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
+        },
+        [11018] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
+        },
+        [11019] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
+            [questKeys.preQuestSingle] = {11013},
+        },
+        [11020] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
+            [questKeys.requiredSourceItems] = {},
+            [questKeys.extraObjectives] = {
+                {nil, ICON_TYPE_SLAY, "Kill any wildlife in Shadowmoon Valley to collect Fel Gland", 0, {{"monster", 21901},{"monster", 21462},{"monster", 21878},{"monster", 21879}}},
+                {nil, ICON_TYPE_EVENT, "Use Yarzill's Mutton together with the Fel Gland to poison Dragonmaw Peons", 0, {{"monster", 22252}}}
+            }
+        },
         [11023] = {
             [questKeys.requiredLevel] = 70,
             [questKeys.preQuestSingle] = {11010},
@@ -1682,6 +2099,9 @@ function QuestieTBCQuestFixes:Load()
         },
         [11030] = {
             [questKeys.extraObjectives] = {{nil, ICON_TYPE_EVENT, "Purchase 1 Unstable Flask of the Beast for the cost of 10 Apexis Shards", 0, {{"object", 185920}}}}
+        },
+        [11035] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
         },
         [11036] = {
             [questKeys.exclusiveTo] = {10183,11037,11038,11039,11040,11042},
@@ -1702,6 +2122,9 @@ function QuestieTBCQuestFixes:Load()
         [11040] = {
             [questKeys.requiredLevel] = 67,
             [questKeys.exclusiveTo] = {10183,11036,11037,11038,11039,11042},
+        },
+        [11041] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
         },
         [11042] = {
             [questKeys.requiredLevel] = 67,
@@ -1729,6 +2152,12 @@ function QuestieTBCQuestFixes:Load()
         [11048] = {
             [questKeys.exclusiveTo] = {11046,11047},
         },
+        [11049] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
+        },
+        [11050] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
+        },
         [11052] = {
             [questKeys.exclusiveTo] = {10708},
             [questKeys.finishedBy] = {{18481},nil},
@@ -1742,10 +2171,17 @@ function QuestieTBCQuestFixes:Load()
         [11059] = {
             [questKeys.extraObjectives] = {{nil, ICON_TYPE_EVENT, "Use 35 Apexis Shards to activate Apexis Monument. Apexis Guardian will spawn after six rounds", 0, {{"object", 185944}}}}
         },
+        [11060] = {
+            [questKeys.specialFlags] = 1,
+        },
         [11061] = {
             [questKeys.extraObjectives] = {{nil, ICON_TYPE_EVENT, "Purchase 1 Unstable Flask of the Sorcerer for the cost of 10 Apexis Shards", 0, {{"object", 185921}}}}
         },
+        [11063] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
+        },
         [11064] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
             [questKeys.triggerEnd] = {"Murg \"Oldie\" Muckjaw Defeated", {[zoneIDs.SHADOWMOON_VALLEY]={{64.76,85.05}}}},
         },
         [11065] = {
@@ -1757,9 +2193,11 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.extraObjectives] = {{nil, ICON_TYPE_SLAY, "Use Wrangling Rope on weakened Aether Rays", 0, {{"monster", 22181}}}}
         },
         [11067] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
             [questKeys.triggerEnd] = {"Trope the Filth-Belcher Defeated", {[zoneIDs.SHADOWMOON_VALLEY]={{64.75,85}}}},
         },
         [11068] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
             [questKeys.triggerEnd] = {"Corlok the Vet Defeated", {[zoneIDs.SHADOWMOON_VALLEY]={{64.72,84.75}}}},
         },
         [11069] = {
@@ -1767,10 +2205,15 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.triggerEnd] = {"Wing Commander Ichman Defeated", {[zoneIDs.SHADOWMOON_VALLEY]={{64.77,85.09}}}},
         },
         [11070] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
             [questKeys.triggerEnd] = {"Wing Commander Mulverick Defeated", {[zoneIDs.SHADOWMOON_VALLEY]={{64.77,84.36}}}},
         },
         [11071] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
             [questKeys.triggerEnd] = {"Captain Skyshatter Defeated", {[zoneIDs.SHADOWMOON_VALLEY]={{64.71,85.05}}}},
+        },
+        [11077] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
         },
         [11079] = {
             [questKeys.extraObjectives] = {{nil, ICON_TYPE_EVENT, "Use 35 Apexis Shards to activate Fel Crystal Prism", 0, {{"object", 185927}}}}
@@ -1778,14 +2221,28 @@ function QuestieTBCQuestFixes:Load()
         [11080] = {
             [questKeys.triggerEnd] = {"Apexis Emanations attained", {[zoneIDs.BLADES_EDGE_MOUNTAINS]={{28.7,46.64},{27.3,68.39},{31.82,63.62},{33.42,51.9}}}},
         },
+        [11081] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
+        },
         [11082] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
             [questKeys.triggerEnd] = {"Murkblood Information Gathered", {[zoneIDs.SHADOWMOON_VALLEY]={{73.06,82.26},{68.63,79.81}}}},
+        },
+        [11083] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
         },
         [11085] = {
             [questKeys.preQuestSingle] = {},
             [questKeys.triggerEnd] = {"Rescue the Skyguard Prisoner.", {[zoneIDs.TEROKKAR_FOREST]={{69.77,75.98},{62.41,73.85},{73.94,88.3}}}},
         },
+        [11086] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
+        },
+        [11089] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
+        },
         [11090] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
             [questKeys.triggerEnd] = {"Subdue Reth'hedron the Subduer", {[zoneIDs.NAGRAND]={{8.7,42.79}}}},
         },
         [11093] = {
@@ -1793,6 +2250,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.extraObjectives] = {{nil, ICON_TYPE_SLAY, "Use the Nether Ray Cage and slay Blackwind Warp Chasers near the Hungry Nether Ray", 0, {{"monster", 23219}}}}
         },
         [11094] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
             [questKeys.preQuestSingle] = {10211},
             [questKeys.requiredMaxRep]= {934,0},
         },
@@ -1801,10 +2259,12 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.requiredMaxRep]= {934,0},
         },
         [11097] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
             [questKeys.requiredMaxRep]= {934,0},
             [questKeys.triggerEnd] = {"Dragonmaw Forces Defeated", {[zoneIDs.SHADOWMOON_VALLEY]={{56.87,58.18},{64.27,31.01}}}},
         },
         [11099] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
             [questKeys.preQuestSingle] = {10211},
             [questKeys.requiredMaxRep]= {932,0},
         },
@@ -1813,6 +2273,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.requiredMaxRep]= {932,0},
         },
         [11101] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
             [questKeys.preQuestSingle] = {10211},
             [questKeys.requiredMaxRep]= {932,0},
             [questKeys.triggerEnd] = {"Dragonmaw Forces Defeated", {[zoneIDs.SHADOWMOON_VALLEY]={{56.87,58.18},{64.27,31.01}}}},
@@ -1821,6 +2282,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.extraObjectives] = {{nil, ICON_TYPE_SLAY, "Use the Skyguard Bombs to destroy 15 Fel Cannonball Stacks", 0, {{"object", 185861}}}}
         },
         [11108] = {
+            [questKeys.requiredRaces] = raceIDs.ALL,
             [questKeys.triggerEnd] = {"Meeting with Illidan Stormrage", {[zoneIDs.SHADOWMOON_VALLEY]={{65.93,86.15}}}},
         },
         [11119] = {
@@ -1829,6 +2291,9 @@ function QuestieTBCQuestFixes:Load()
         },
         [11123] = {
             [questKeys.preQuestSingle] = {},
+        },
+        [11131] = {
+            [questKeys.triggerEnd] = {"Put Out the Fires", {[zoneIDs.DUN_MOROGH]={{53.1,51.4}},[zoneIDs.ELWYNN_FOREST]={{42,66.5}},[zoneIDs.AZUREMYST_ISLE]={{49.3,51.5}}}},
         },
         [11142] = {
             [questKeys.triggerEnd] = {"Survey Alcaz Island", {[zoneIDs.DUSTWALLOW_MARSH]={{69.96,19.55},{67.36,50.87}}}},
@@ -1845,6 +2310,9 @@ function QuestieTBCQuestFixes:Load()
         [11162] = {
             [questKeys.extraObjectives] = {{nil, ICON_TYPE_EVENT, "Plant the Stonemaul Banner", 0, {{"object", 186336}}}},
         },
+        [11164] = {
+            [questKeys.preQuestSingle] = {11132},
+        },
         [11169] = {
             [questKeys.objectives] = {nil,nil,nil,nil,{{4344,4345},4344,"Totem Tests Performed"}},
         },
@@ -1857,6 +2325,15 @@ function QuestieTBCQuestFixes:Load()
         },
         [11177] = {
             [questKeys.nextQuestInChain] = 1218,
+        },
+        [11178] = {
+            [questKeys.startedBy] = {{23863},nil,{33102,},},
+        },
+        [11180] = {
+            [questKeys.extraObjectives] = {{nil, ICON_TYPE_SLAY, "Information Gathered", 0, {{"monster", 23554},{"monster", 23555}}}},
+        },
+        [11183] = {
+            [questKeys.extraObjectives] = {{{[zoneIDs.DUSTWALLOW_MARSH]={{55.2,26.6}}}, ICON_TYPE_EVENT, "Plant the torch at the end of the dock"}},
         },
         [11185] = {
             [questKeys.startedBy] = {{23881},nil,nil},
@@ -1884,6 +2361,10 @@ function QuestieTBCQuestFixes:Load()
         },
         [11216] = {
             [questKeys.nextQuestInChain] = 9824,
+        },
+        [11242] = {
+            [questKeys.startedBy] = {{23904},nil,nil},
+            [questKeys.finishedBy] = {{24519},nil},
         },
         [11335] = {
             [questKeys.triggerEnd] = {"Victory in Arathi Basin", {
@@ -1937,6 +2418,15 @@ function QuestieTBCQuestFixes:Load()
                 [zoneIDs.ORGRIMMAR]={{79.03,30.65}},
             }},
         },
+        [11356] = {
+            [questKeys.exclusiveTo] = {11360},
+        },
+        [11357] = {
+            [questKeys.exclusiveTo] = {11361},
+        },
+        [11361] = {
+            [questKeys.questLevel] = -1,
+        },
         [11379] = {
             [questKeys.extraObjectives] = {{nil, ICON_TYPE_EVENT, "Cook Demon Broiled Surprise in the remains of a Abyssal Flamebringer in Blade's Edge Mountains", 0, {{"monster", 19973}}}},
         },
@@ -1946,14 +2436,25 @@ function QuestieTBCQuestFixes:Load()
         [11383] = {
             [questKeys.objectives] = {{{17839}},nil,nil,nil,nil},
         },
+        [11403] = {
+            [questKeys.startedBy] = {{23904},nil,nil},
+            [questKeys.finishedBy] = {{23973},nil},
+        },
         [11441] = {
             [questKeys.startedBy] = {{18927,19148,19171,19172,19173},nil,nil}
         },
         [11446] = {
             [questKeys.startedBy] = {{19169,19175,19176,19177,19178,20102},nil,nil}
         },
+        [11481] = {
+            [questKeys.requiredMinRep] = {932,3000},
+        },
+        [11482] = {
+            [questKeys.requiredMinRep] = {934,3000},
+        },
         [11496] = {
-            [questKeys.triggerEnd] = {"Energize a Crystal Ward", {[zoneIDs.SUNWELL_PLATEAU]={{47.7,34.52},{48.43,31.21}}}},
+            [questKeys.extraObjectives] = {{nil, ICON_TYPE_EVENT, "Energize a Crystal Ward", 0, {{"object", 187078}}}},
+            [questKeys.triggerEnd] = {"Energize a Crystal Ward", {}}, -- Dummy to not tirgger objective missing error
         },
         [11502] = {
             [questKeys.requiredMinRep] = {978,0},
@@ -1967,11 +2468,61 @@ function QuestieTBCQuestFixes:Load()
         [11506] = {
             [questKeys.triggerEnd] = {"Secure a Spirit Tower", {[zoneIDs.TEROKKAR_FOREST]={{42.49,54},{32.47,57.86},{48.98,60.29},{47.2,72.29},{40.48,77.99}}}},
         },
+        [11513] = {
+            [questKeys.preQuestSingle] = {},
+        },
+        [11514] = {
+            [questKeys.preQuestSingle] = {},
+        },
+        [11515] = {
+            [questKeys.requiredSourceItems] = {34259},
+            [questKeys.extraObjectives] = {{nil, ICON_TYPE_SLAY, "Use Fel Siphon and then kill the weakened Felblood Initiate", 0, {{"monster", 24918}}}},
+        },
         [11516] = {
             [questKeys.triggerEnd] = {"Legion Gateway Destroyed", {[zoneIDs.HELLFIRE_PENINSULA]={{58.51,18.5}}}},
+            [questKeys.extraObjectives] = {{nil, ICON_TYPE_SLAY, "Kill Incandescent Fel Sparks after summoning your Living Flare", 0, {{"monster", 22323}}}},
+        },
+        [11517] = {
+            [questKeys.exclusiveTo] = {11513,11514},
+            [questKeys.requiredMinRep] = {932,3000},
+        },
+        [11520] = {
+            [questKeys.extraObjectives] = {
+                {nil, ICON_TYPE_EVENT, "Use Razorthorn Flayer Gland on Razorthorn Ravager to tame it", 0, {{"monster", 24922}}},
+                {nil, ICON_TYPE_OBJECT, "Use Expose Razorthorn Root of your tamed Razorthorn Ravager to expose Razorthorn Root", 0, {{"object", 187073}}},
+            },
         },
         [11523] = {
-            [questKeys.triggerEnd] = {"Energize a Crystal Ward", {[zoneIDs.SUNWELL_PLATEAU]={{47.7,34.52},{48.43,31.21}}}},
+            [questKeys.extraObjectives] = {{nil, ICON_TYPE_EVENT, "Energize a Crystal Ward", 0, {{"object", 187078}}}},
+            [questKeys.triggerEnd] = {"Energize a Crystal Ward", {}}, -- Dummy to not tirgger objective missing error
+        },
+        [11524] = {
+            [questKeys.objectives] = {{{24972, "Converted Sentry Deployed"}}},
+        },
+        [11525] = {
+            [questKeys.objectives] = {{{24972, "Converted Sentry Deployed"}}},
+        },
+        [11526] = {
+            [questKeys.preQuestSingle] = {},
+        },
+        [11532] = {
+            [questKeys.extraObjectives] = {{nil, ICON_TYPE_EVENT, "Speak to Ayren Cloudbreaker", 0, {{"monster", 25059}}}},
+        },
+        [11533] = {
+            [questKeys.extraObjectives] = {{nil, ICON_TYPE_EVENT, "Speak to Ayren Cloudbreaker", 0, {{"monster", 25059}}}},
+        },
+        [11534] = {
+            [questKeys.exclusiveTo] = {11513,11514},
+            [questKeys.requiredMinRep] = {934,3000},
+        },
+        [11537] = {
+            [questKeys.objectives] = {{{25003,"Emissary of Hate Impaled"},},nil,nil,nil,{{24999,25001,25002,25008,25068,},25068},},
+        },
+        [11538] = {
+            [questKeys.objectives] = {{{25003,"Emissary of Hate Impaled"},},nil,nil,nil,{{24999,25001,25002,25008,25068,},25068},},
+        },
+        [11544] = {
+            [questKeys.extraObjectives] = {{nil, ICON_TYPE_EVENT, "Break down Ata'mal Metal on the anvil to cleanse it", 0, {{"object", 187111}}}},
         },
         [11580] = {
             [questKeys.startedBy] = {nil,{187559},nil},
@@ -2442,6 +2993,15 @@ function QuestieTBCQuestFixes:Load()
         [11863] = {
             [questKeys.startedBy] = {{25947},nil,nil},
         },
+        [11875] = {
+            [questKeys.preQuestSingle] = {},
+        },
+        [11877] = {
+            [questKeys.preQuestSingle] = {},
+        },
+        [11880] = {
+            [questKeys.preQuestSingle] = {},
+        },
         [11882] = {
             [questKeys.startedBy] = {{25962},nil,nil},
             [questKeys.finishedBy] = {{25975},nil},
@@ -2586,6 +3146,16 @@ function QuestieTBCQuestFixes:Load()
         [11964] = {
             [questKeys.startedBy] = {{16817},nil,nil},
         },
+        [11972] = {
+            [questKeys.startedBy] = {nil,{187892},{35723,},},
+            [questKeys.finishedBy] = {{25697},nil},
+        },
+        [11975] = {
+            [questKeys.questLevel] = -1,
+            [questKeys.triggerEnd] = {"Salandria taken to the Dark Portal", {[zoneIDs.SILVERMOON_CITY]={{76.6,81.2}}}},
+            [questKeys.preQuestGroup] = {10945,10951,10953},
+            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
+        },
         [12012] = {
             [questKeys.startedBy] = {{25324},nil,nil},
             [questKeys.finishedBy] = {{26221},nil},
@@ -2597,6 +3167,56 @@ function QuestieTBCQuestFixes:Load()
         },
         [12062] = {
             [questKeys.preQuestSingle] = {},
+        },
+        [12133] = {
+            [questKeys.name] = "Smash the Pumpkin",
+            [questKeys.startedBy] = {nil,{186887},nil,},
+            [questKeys.finishedBy] = {{24519,},nil,},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.objectivesText] = {"Give the Scorched Holy Symbol to the Costumed Orphan Matron.",},
+            [questKeys.sourceItemId] = 36876,
+            [questKeys.zoneOrSort] = -22,
+            [questKeys.specialFlags] = 1,
+        },
+        [12135] = {
+            [questKeys.name] = "Let the Fires Come!",
+            [questKeys.startedBy] = {{24519},nil,nil,},
+            [questKeys.finishedBy] = {{24519,},nil,},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.objectivesText] = {"The Costumed Orphan Matron wants you to help put out all the village fires after the Headless Horseman lights them. When they are out, speak again to the Costumed Orphan Matron.",},
+            [questKeys.triggerEnd] = {"Put Out the Fires", {[zoneIDs.DUN_MOROGH]={{53.1,51.4}},[zoneIDs.ELWYNN_FOREST]={{42,66.5}},[zoneIDs.AZUREMYST_ISLE]={{49.3,51.5}}}},
+            [questKeys.preQuestSingle] = {11360},
+            [questKeys.zoneOrSort] = -22,
+            [questKeys.specialFlags] = 1,
+        },
+        [12139] = {
+            [questKeys.name] = "Let the Fires Come!",
+            [questKeys.startedBy] = {{23973},nil,nil,},
+            [questKeys.finishedBy] = {{23973,},nil,},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.objectivesText] = {"The Masked Orphan Matron wants you to help put out all the village fires. When they are out, speak again to the Masked Orphan Matron in town.",},
+            [questKeys.triggerEnd] = {"Put Out the Fires", {[zoneIDs.DUROTAR]={{52.6,41.7}},[zoneIDs.TIRISFAL_GLADES]={{60.8,52.5}},[zoneIDs.EVERSONG_WOODS]={{47.4,47}}}},
+            [questKeys.preQuestSingle] = {11361},
+            [questKeys.zoneOrSort] = -22,
+            [questKeys.specialFlags] = 1,
+        },
+        [12155] = {
+            [questKeys.name] = "Smash the Pumpkin",
+            [questKeys.startedBy] = {nil,{186887},nil,},
+            [questKeys.finishedBy] = {{24519,},nil,},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.objectivesText] = {"Give the Scorched Holy Symbol to the Masked Orphan Matron.",},
+            [questKeys.sourceItemId] = 36876,
+            [questKeys.zoneOrSort] = -22,
+            [questKeys.specialFlags] = 1,
         },
         [12192] = {
             [questKeys.name] = "This One Time, When I Was Drunk...",
@@ -2613,20 +3233,733 @@ function QuestieTBCQuestFixes:Load()
         [12194] = {
             [questKeys.preQuestSingle] = {11409,},
         },
+        [12286] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{189303,},nil,},
+            [questKeys.finishedBy] = {nil,{189303,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
         [12318] = {
             [questKeys.startedBy] = {{27584,28329},nil,nil,},
             [questKeys.requiredRaces] = raceIDs.ALL,
             [questKeys.preQuestSingle] = {},
         },
-        [12420] = {
-            [questKeys.name] = "Brew of the Month Club",
-            [questKeys.startedBy] = {nil,{37571,},nil,},
-            [questKeys.finishedBy] = {{27478,},nil,},
+        [12331] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190034,},nil,},
+            [questKeys.finishedBy] = {nil,{190034,},},
             [questKeys.requiredLevel] = 1,
             [questKeys.questLevel] = -1,
             [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
-            [questKeys.objectivesText] = {"Bring the \"Brew of the Month\" club membership form to Larkin Thunderbrew in the Stonefire Tavern in Ironforge.",},
-            [questKeys.sourceItemId] = 37571,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12332] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190036,},nil,},
+            [questKeys.finishedBy] = {nil,{190036,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12333] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190037,},nil,},
+            [questKeys.finishedBy] = {nil,{190037,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12334] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190038,},nil,},
+            [questKeys.finishedBy] = {nil,{190038,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12335] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190039,},nil,},
+            [questKeys.finishedBy] = {nil,{190039,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12336] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190040,},nil,},
+            [questKeys.finishedBy] = {nil,{190040,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12337] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190041,},nil,},
+            [questKeys.finishedBy] = {nil,{190041,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12338] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190042,},nil,},
+            [questKeys.finishedBy] = {nil,{190042,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12339] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190043,},nil,},
+            [questKeys.finishedBy] = {nil,{190043,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12340] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190047,},nil,},
+            [questKeys.finishedBy] = {nil,{190047,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12341] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190045,},nil,},
+            [questKeys.finishedBy] = {nil,{190045,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12342] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190046,},nil,},
+            [questKeys.finishedBy] = {nil,{190046,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12343] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190044,},nil,},
+            [questKeys.finishedBy] = {nil,{190044,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12344] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190048,},nil,},
+            [questKeys.finishedBy] = {nil,{190048,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12345] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190035,},nil,},
+            [questKeys.finishedBy] = {nil,{190035,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12346] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190049,},nil,},
+            [questKeys.finishedBy] = {nil,{190049,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12347] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190050,},nil,},
+            [questKeys.finishedBy] = {nil,{190050,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12348] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190051,},nil,},
+            [questKeys.finishedBy] = {nil,{190051,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12349] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190052,},nil,},
+            [questKeys.finishedBy] = {nil,{190052,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12350] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190053,},nil,},
+            [questKeys.finishedBy] = {nil,{190053,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12351] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190054,},nil,},
+            [questKeys.finishedBy] = {nil,{190054,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12352] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190055,},nil,},
+            [questKeys.finishedBy] = {nil,{190055,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12353] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190056,},nil,},
+            [questKeys.finishedBy] = {nil,{190056,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12354] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190057,},nil,},
+            [questKeys.finishedBy] = {nil,{190057,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12355] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190058,},nil,},
+            [questKeys.finishedBy] = {nil,{190058,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12356] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190059,},nil,},
+            [questKeys.finishedBy] = {nil,{190059,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12357] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190060,},nil,},
+            [questKeys.finishedBy] = {nil,{190060,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12358] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190061,},nil,},
+            [questKeys.finishedBy] = {nil,{190061,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12359] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190062,},nil,},
+            [questKeys.finishedBy] = {nil,{190062,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12360] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190063,},nil,},
+            [questKeys.finishedBy] = {nil,{190063,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12361] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190064,},nil,},
+            [questKeys.finishedBy] = {nil,{190064,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12362] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190065,},nil,},
+            [questKeys.finishedBy] = {nil,{190065,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12363] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190066,},nil,},
+            [questKeys.finishedBy] = {nil,{190066,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12364] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190067,},nil,},
+            [questKeys.finishedBy] = {nil,{190067,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12365] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190068,},nil,},
+            [questKeys.finishedBy] = {nil,{190068,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12366] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190069,},nil,},
+            [questKeys.finishedBy] = {nil,{190069,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12367] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190070,},nil,},
+            [questKeys.finishedBy] = {nil,{190070,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12368] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190071,},nil,},
+            [questKeys.finishedBy] = {nil,{190071,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12369] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190072,},nil,},
+            [questKeys.finishedBy] = {nil,{190072,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12370] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190073,},nil,},
+            [questKeys.finishedBy] = {nil,{190073,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12371] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190074,},nil,},
+            [questKeys.finishedBy] = {nil,{190074,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12373] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190075,},nil,},
+            [questKeys.finishedBy] = {nil,{190075,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12374] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190076,},nil,},
+            [questKeys.finishedBy] = {nil,{190076,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12375] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190077,},nil,},
+            [questKeys.finishedBy] = {nil,{190077,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12376] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190078,},nil,},
+            [questKeys.finishedBy] = {nil,{190078,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12377] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190079,},nil,},
+            [questKeys.finishedBy] = {nil,{190079,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12378] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190080,},nil,},
+            [questKeys.finishedBy] = {nil,{190080,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12379] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190081,},nil,},
+            [questKeys.finishedBy] = {nil,{190081,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12380] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190082,},nil,},
+            [questKeys.finishedBy] = {nil,{190082,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12381] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190083,},nil,},
+            [questKeys.finishedBy] = {nil,{190083,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12382] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190084,},nil,},
+            [questKeys.finishedBy] = {nil,{190084,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12383] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190085,},nil,},
+            [questKeys.finishedBy] = {nil,{190085,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12384] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190086,},nil,},
+            [questKeys.finishedBy] = {nil,{190086,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12385] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190087,},nil,},
+            [questKeys.finishedBy] = {nil,{190087,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12386] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190088,},nil,},
+            [questKeys.finishedBy] = {nil,{190088,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12387] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190089,},nil,},
+            [questKeys.finishedBy] = {nil,{190089,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12388] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190090,},nil,},
+            [questKeys.finishedBy] = {nil,{190090,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12389] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190091,},nil,},
+            [questKeys.finishedBy] = {nil,{190091,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12390] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190096,},nil,},
+            [questKeys.finishedBy] = {nil,{190096,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12391] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190097,},nil,},
+            [questKeys.finishedBy] = {nil,{190097,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12392] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190098,},nil,},
+            [questKeys.finishedBy] = {nil,{190098,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12393] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190099,},nil,},
+            [questKeys.finishedBy] = {nil,{190099,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12394] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190100,},nil,},
+            [questKeys.finishedBy] = {nil,{190100,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12395] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190101,},nil,},
+            [questKeys.finishedBy] = {nil,{190101,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12396] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190102,},nil,},
+            [questKeys.finishedBy] = {nil,{190102,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12397] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190103,},nil,},
+            [questKeys.finishedBy] = {nil,{190103,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12398] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190104,},nil,},
+            [questKeys.finishedBy] = {nil,{190104,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12399] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190105,},nil,},
+            [questKeys.finishedBy] = {nil,{190105,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12400] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190106,},nil,},
+            [questKeys.finishedBy] = {nil,{190106,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12401] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190107,},nil,},
+            [questKeys.finishedBy] = {nil,{190107,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12402] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190108,},nil,},
+            [questKeys.finishedBy] = {nil,{190108,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12403] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190109,},nil,},
+            [questKeys.finishedBy] = {nil,{190109,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12404] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190110,190111},nil},
+            [questKeys.finishedBy] = {nil,{190110,190111}},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12406] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190112,},nil,},
+            [questKeys.finishedBy] = {nil,{190112,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12407] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190113,},nil,},
+            [questKeys.finishedBy] = {nil,{190113,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12408] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190114,},nil,},
+            [questKeys.finishedBy] = {nil,{190114,},},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12409] = {
+            [questKeys.name] = "Candy Bucket",
+            [questKeys.startedBy] = {nil,{190115,190116},nil},
+            [questKeys.finishedBy] = {nil,{190115,190116}},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL,
+            [questKeys.zoneOrSort] = -22,
+        },
+        [12420] = {
+            [questKeys.name] = "Brew of the Month Club",
+            [questKeys.startedBy] = {nil,nil,{37736}},
+            [questKeys.finishedBy] = {{27478},nil},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.objectivesText] = {"Bring the \"Brew of the Month\" club membership form to Larkin Thunderbrew in the Stonefire Tavern in Ironforge."},
+            [questKeys.sourceItemId] = 37736,
+            [questKeys.zoneOrSort] = -370,
+        },
+        [12421] = {
+            [questKeys.name] = "Brew of the Month Club",
+            [questKeys.startedBy] = {nil,nil,{37737}},
+            [questKeys.finishedBy] = {{27489},nil},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = -1,
+            [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
+            [questKeys.objectivesText] = {"Bring the \"Brew of the Month\" club membership form to Ray'ma in the Darkbriar Lodge in Orgrimmar's Valley of Spirits."},
+            [questKeys.sourceItemId] = 37737,
             [questKeys.zoneOrSort] = -370,
         },
         [12513] = {
@@ -2651,7 +3984,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.objectives] = {nil,nil,{{24156}},nil},
             [questKeys.sourceItemId] = 24157,
             [questKeys.preQuestSingle] = {9681,64319},
-            [questKeys.zoneOrSort] = -141,
+            [questKeys.zoneOrSort] = sortKeys.PALADIN,
             [questKeys.nextQuestInChain] = 9685,
             [questKeys.questFlags] = 128,
         },
@@ -2663,8 +3996,16 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.questLevel] = 70,
             [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
             [questKeys.objectivesText] = {"Win a battleground match and return to an Alliance Brigadier General at any Alliance capital city or Shattrath."},
-            [questKeys.triggerEnd] = {"Victory in a battleground match", {[zoneIDs.SHATTRATH_CITY]={{67.41,33.86}}}},
-            [questKeys.zoneOrSort] = -25,
+            [questKeys.triggerEnd] = {"Victory in a battleground match", {
+                [zoneIDs.SHATTRATH_CITY] = {{67.41,33.86}},
+                [zoneIDs.IRONFORGE] = {{69.8,90.6}},
+                [zoneIDs.DARNASSUS] = {{58,34.4}},
+                [zoneIDs.STORMWIND_CITY] = {{79.4,18.0}},
+                [zoneIDs.ALTERAC_MOUNTAINS] = {{39.4,82.2}},
+                [zoneIDs.ARATHI_HIGHLANDS] = {{45.6,45.8}},
+                [zoneIDs.ASHENVALE] = {{61.8,83.8}},
+            }},
+            [questKeys.zoneOrSort] = sortKeys.BATTLEGROUND,
             [questKeys.questFlags] = 64,
             [questKeys.specialFlags] = 1,
         },
@@ -2678,7 +4019,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.requiredRaces] = raceIDs.BLOOD_ELF,
             [questKeys.requiredClasses] = classIDs.PALADIN,
             [questKeys.objectivesText] = {"Speak with Lady Liadrin in Silvermoon City."},
-            [questKeys.zoneOrSort] = -141,
+            [questKeys.zoneOrSort] = sortKeys.PALADIN,
             [questKeys.nextQuestInChain] = 64140,
             [questKeys.questFlags] = 136,
         },
@@ -2692,7 +4033,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.requiredClasses] = classIDs.PALADIN,
             [questKeys.objectivesText] = {"Speak with Lady Liadrin again to accept her offer of sponsorship."},
             [questKeys.preQuestSingle] = {64139},
-            [questKeys.zoneOrSort] = -141,
+            [questKeys.zoneOrSort] = sortKeys.PALADIN,
             [questKeys.nextQuestInChain] = 64141,
             [questKeys.questFlags] = 136,
         },
@@ -2708,7 +4049,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.objectives] = {nil,nil,{{14047,nil},{12360,nil},{8838,nil},{20520,nil}},nil},
             [questKeys.sourceItemId] = 24277,
             [questKeys.preQuestSingle] = {64140},
-            [questKeys.zoneOrSort] = -141,
+            [questKeys.zoneOrSort] = sortKeys.PALADIN,
             [questKeys.nextQuestInChain] = 64142,
             [questKeys.questFlags] = 128,
         },
@@ -2723,7 +4064,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.objectivesText] = {"Lady Liadrin in Silvermoon City wants you to destroy 3 Scourge Meat Wagons and kill 15 Scourge Siege Engineers. "},
             [questKeys.objectives] = {{{17878,nil}},{{182058,"Destroy Scourge Meat Wagons"}},nil,nil},
             [questKeys.preQuestSingle] = {64141},
-            [questKeys.zoneOrSort] = -141,
+            [questKeys.zoneOrSort] = sortKeys.PALADIN,
             [questKeys.nextQuestInChain] = 64143,
             [questKeys.questFlags] = 136,
         },
@@ -2738,7 +4079,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.objectivesText] = {"Lady Liadrin in Silvermoon City wants you to bring her a vial of Tyr's Hand Holy Water. "},
             [questKeys.objectives] = {nil,nil,{{24284,nil}},nil},
             [questKeys.preQuestSingle] = {64142},
-            [questKeys.zoneOrSort] = -141,
+            [questKeys.zoneOrSort] = sortKeys.PALADIN,
             [questKeys.nextQuestInChain] = 64144,
             [questKeys.questFlags] = 136,
         },
@@ -2753,7 +4094,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.objectivesText] = {"Lady Liadrin in Silvermoon City wants you to bring him 1 Arcane Catalyst, 1 Crepuscular Powder, 1 Azerothian Diamond, and 1 Pristine Black Diamond."},
             [questKeys.objectives] = {nil,nil,{{24286,nil},{24285,nil},{12800,nil},{18335,nil}},nil},
             [questKeys.preQuestSingle] = {64143},
-            [questKeys.zoneOrSort] = -141,
+            [questKeys.zoneOrSort] = sortKeys.PALADIN,
             [questKeys.nextQuestInChain] = 64145,
             [questKeys.questFlags] = 136,
         },
@@ -2770,7 +4111,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.extraObjectives] = {{nil, ICON_TYPE_OBJECT, "Use the Extinguishing Mixture near the eternal flame in the Alonsus Chapel to remove the Light's protection.", 0, {{"object", 182068}}}},
             [questKeys.sourceItemId] = 24287,
             [questKeys.preQuestSingle] = {64144},
-            [questKeys.zoneOrSort] = -141,
+            [questKeys.zoneOrSort] = sortKeys.PALADIN,
             [questKeys.questFlags] = 128,
         },
         -------------
@@ -2785,7 +4126,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.objectivesText] = {"Speak with Magister Astalor Bloodsworn in the hidden chamber beneath Blood Knight headquarters."},
             [questKeys.objectives] = {},
             [questKeys.preQuestSingle] = {9678},
-            [questKeys.zoneOrSort] = -141,
+            [questKeys.zoneOrSort] = sortKeys.PALADIN,
             [questKeys.nextQuestInChain] = 63866,
             [questKeys.questFlags] = 136,
         },
@@ -2802,7 +4143,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.objectives] = {{{352, "Speak to Dungar Longdrink, the Gryphon Master"}},nil,nil,nil,nil},
             [questKeys.preQuestSingle] = {64035},
             [questKeys.exclusiveTo] = {64038},
-            [questKeys.zoneOrSort] = zoneIDs.STORMWIND_CITY,
+            [questKeys.zoneOrSort] = sortKeys.REPUTATION,
         },
         [64028] = {
             [questKeys.name] = "A New Beginning",
@@ -2812,7 +4153,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.questLevel] = 58,
             [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
             [questKeys.objectivesText] = {"Meet with your class trainer in Stormwind."},
-            [questKeys.zoneOrSort] = zoneIDs.STORMWIND_CITY,
+            [questKeys.zoneOrSort] = sortKeys.REPUTATION,
         },
         [64031] = {
             [questKeys.name] = "Tools for Survival",
@@ -2824,7 +4165,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.objectivesText] = {"Open the survival kit and equip a weapon."},
             [questKeys.objectives] = {nil,{{400009, "Open the Survival Kit"}, {400010, "Equip a Weapon"}},nil,nil,nil},
             [questKeys.preQuestSingle] = {64028},
-            [questKeys.zoneOrSort] = zoneIDs.STORMWIND_CITY,
+            [questKeys.zoneOrSort] = sortKeys.REPUTATION,
         },
         [64034] = {
             [questKeys.name] = "Combat Training",
@@ -2836,7 +4177,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.objectivesText] = {"Train a spell by speaking to your class trainer."},
             [questKeys.objectives] = {nil,{{400011, "Train a Spell"}},nil,nil,nil},
             [questKeys.preQuestSingle] = {64031},
-            [questKeys.zoneOrSort] = zoneIDs.STORMWIND_CITY,
+            [questKeys.zoneOrSort] = sortKeys.REPUTATION,
         },
         [64035] = {
             [questKeys.name] = "Talented",
@@ -2848,7 +4189,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.objectivesText] = {"Activate the Talents interface and allocate a Talent Point."},
             [questKeys.objectives] = {nil,{{400012, "Train a Spell"}},nil,nil,nil},
             [questKeys.preQuestSingle] = {64034},
-            [questKeys.zoneOrSort] = zoneIDs.STORMWIND_CITY,
+            [questKeys.zoneOrSort] = sortKeys.REPUTATION,
         },
         [64038] = {
             [questKeys.name] = "The Dark Portal",
@@ -2860,7 +4201,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.objectivesText] = {"Find Watch Commander Relthorn Netherwane at the Blasted Lands. He awaits your arrival before the Dark Portal."},
             [questKeys.objectives] = {{{352, "Speak to Dungar Longdrink, the Gryphon Master"}},nil,nil,nil,nil},
             [questKeys.preQuestSingle] = {64035},
-            [questKeys.zoneOrSort] = zoneIDs.STORMWIND_CITY,
+            [questKeys.zoneOrSort] = sortKeys.REPUTATION,
         },
         [64046] = {
             [questKeys.name] = "A New Beginning",
@@ -2870,7 +4211,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.questLevel] = 58,
             [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
             [questKeys.objectivesText] = {"Meet with your class trainer in Orgrimmar."},
-            [questKeys.zoneOrSort] = zoneIDs.ORGRIMMAR,
+            [questKeys.zoneOrSort] = sortKeys.REPUTATION,
         },
         [64047] = {
             [questKeys.name] = "A New Beginning",
@@ -2880,8 +4221,8 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.questLevel] = 58,
             [questKeys.requiredRaces] = raceIDs.TAUREN,
             [questKeys.requiredClasses] = classIDs.DRUID,
-            [questKeys.objectivesText] = {"Meet with your Druid trainer in Thunderbluff."},
-            [questKeys.zoneOrSort] = zoneIDs.THUNDER_BLUFF,
+            [questKeys.objectivesText] = {"Meet with your Druid trainer in Thunder Bluff."},
+            [questKeys.zoneOrSort] = sortKeys.REPUTATION,
         },
         [64048] = {
             [questKeys.name] = "Tools for Survival",
@@ -2893,7 +4234,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.objectivesText] = {"Open the survival kit and equip a weapon."},
             [questKeys.objectives] = {nil,{{400001, "Open the Survival Kit"}, {400002, "Equip a Weapon"}},nil,nil,nil},
             [questKeys.preQuestSingle] = {64046},
-            [questKeys.zoneOrSort] = zoneIDs.ORGRIMMAR,
+            [questKeys.zoneOrSort] = sortKeys.REPUTATION,
         },
         [64049] = {
             [questKeys.name] = "Tools for Survival",
@@ -2906,7 +4247,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.objectivesText] = {"Open the survival kit and equip a weapon."},
             [questKeys.objectives] = {nil,{{400003, "Open the Survival Kit"}, {400004, "Equip a Weapon"}},nil,nil,nil},
             [questKeys.preQuestSingle] = {64047},
-            [questKeys.zoneOrSort] = zoneIDs.THUNDER_BLUFF,
+            [questKeys.zoneOrSort] = sortKeys.REPUTATION,
         },
         [64050] = {
             [questKeys.name] = "Combat Training",
@@ -2918,7 +4259,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.objectivesText] = {"Train a spell by speaking to your class trainer."},
             [questKeys.objectives] = {nil,{{400005, "Train a Spell"}},nil,nil,nil},
             [questKeys.preQuestSingle] = {64048},
-            [questKeys.zoneOrSort] = zoneIDs.ORGRIMMAR,
+            [questKeys.zoneOrSort] = sortKeys.REPUTATION,
         },
         [64051] = {
             [questKeys.name] = "Combat Training",
@@ -2931,7 +4272,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.objectivesText] = {"Train a spell by speaking to your Druid trainer."},
             [questKeys.objectives] = {nil,{{400006, "Train a Spell"}},nil,nil,nil},
             [questKeys.preQuestSingle] = {64049},
-            [questKeys.zoneOrSort] = zoneIDs.THUNDER_BLUFF,
+            [questKeys.zoneOrSort] = sortKeys.REPUTATION,
         },
         [64052] = {
             [questKeys.name] = "Talented",
@@ -2943,7 +4284,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.objectivesText] = {"Activate the Talents interface and allocate five Talent Points."},
             [questKeys.objectives] = {nil,{{400007, "Train a Spell"}},nil,nil,nil},
             [questKeys.preQuestSingle] = {64050},
-            [questKeys.zoneOrSort] = zoneIDs.ORGRIMMAR,
+            [questKeys.zoneOrSort] = sortKeys.REPUTATION,
         },
         [64053] = {
             [questKeys.name] = "Talented",
@@ -2956,7 +4297,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.objectivesText] = {"Activate the Talents interface and allocate five Talent Points."},
             [questKeys.objectives] = {nil,{{400008, "Train a Spell"}},nil,nil,nil},
             [questKeys.preQuestSingle] = {64051},
-            [questKeys.zoneOrSort] = zoneIDs.THUNDER_BLUFF,
+            [questKeys.zoneOrSort] = sortKeys.REPUTATION,
         },
         [64063] = {
             [questKeys.name] = "The Dark Portal",
@@ -2969,7 +4310,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.objectives] = {{{12136, "Visit Snurk Bucksqick by the Zepplin Master"},{1387, "Speak to Thysta at Grom'Gol Base Camp"}},nil,nil,nil,nil},
             [questKeys.preQuestSingle] = {64052},
             [questKeys.exclusiveTo] = {64217},
-            [questKeys.zoneOrSort] = zoneIDs.ORGRIMMAR,
+            [questKeys.zoneOrSort] = sortKeys.REPUTATION,
         },
         [64064] = {
             [questKeys.name] = "Eastern Plaguelands",
@@ -2982,7 +4323,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.objectives] = {{{9564, "Visit Zeppelin Master Frezza"}},nil,nil,nil,nil},
             [questKeys.preQuestSingle] = {64052},
             [questKeys.exclusiveTo] = {64063,64217,64128},
-            [questKeys.zoneOrSort] = zoneIDs.ORGRIMMAR,
+            [questKeys.zoneOrSort] = sortKeys.REPUTATION,
         },
         [64128] = {
             [questKeys.name] = "Eastern Plaguelands",
@@ -2996,7 +4337,7 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.objectives] = {{{9564, "Speak to Tal, the Wind Rider Master"},{9564, "Visit Zeppelin Master Frezza"}},nil,nil,nil,nil},
             [questKeys.preQuestSingle] = {64053},
             [questKeys.exclusiveTo] = {64063,64064,64217},
-            [questKeys.zoneOrSort] = zoneIDs.THUNDER_BLUFF,
+            [questKeys.zoneOrSort] = sortKeys.REPUTATION,
         },
         [64217] = {
             [questKeys.name] = "The Dark Portal",
@@ -3009,7 +4350,129 @@ function QuestieTBCQuestFixes:Load()
             [questKeys.objectives] = {{{12136, "Visit Snurk Bucksqick by the Zepplin Master"},{1387, "Speak to Thysta at Grom'Gol Base Camp"}},nil,nil,nil,nil},
             [questKeys.preQuestSingle] = {64053},
             [questKeys.exclusiveTo] = {64063,64064,64128},
-            [questKeys.zoneOrSort] = zoneIDs.THUNDER_BLUFF,
-        },
+            [questKeys.zoneOrSort] = sortKeys.REPUTATION,
+        }
     }
+end
+
+function _QuestieTBCQuestFixes:InsertMissingQuestIds()
+    QuestieDB.questData[12192] = {} -- This One Time, When I Was Drunk... (Horde)
+    QuestieDB.questData[12420] = {} -- Brew of the Month Club (Alliance)
+    QuestieDB.questData[12421] = {} -- Brew of the Month Club (Horde)
+    QuestieDB.questData[63866] = {} -- Claiming the Light
+    QuestieDB.questData[64139] = {} -- A Summons from Lady Liadrin
+    QuestieDB.questData[64140] = {} -- The Master's Path
+    QuestieDB.questData[64141] = {} -- A Gesture of Commitment
+    QuestieDB.questData[64142] = {} -- A Demonstration of Loyalty
+    QuestieDB.questData[64143] = {} -- True Masters of the Light
+    QuestieDB.questData[64144] = {} -- True Masters of the Light
+    QuestieDB.questData[64145] = {} -- True Masters of the Light
+    QuestieDB.questData[64319] = {} -- A Study in Power
+    QuestieDB.questData[64845] = {} -- Alliance War Effort
+
+    -- Alliance boosted quests
+    QuestieDB.questData[64028] = {} -- A New Beginning
+    QuestieDB.questData[64031] = {} -- Tools for Survival
+    QuestieDB.questData[64034] = {} -- Combat Training
+    QuestieDB.questData[64035] = {} -- Talented
+    QuestieDB.questData[64037] = {} -- Eastern Plaguelands
+    QuestieDB.questData[64038] = {} -- The Dark Portal
+    -- Horde boosted quests
+    QuestieDB.questData[64046] = {} -- A New Beginning
+    QuestieDB.questData[64047] = {} -- A New Beginning
+    QuestieDB.questData[64048] = {} -- Tools for Survival
+    QuestieDB.questData[64049] = {} -- Tools for Survival
+    QuestieDB.questData[64050] = {} -- Combat Training
+    QuestieDB.questData[64051] = {} -- Combat Training
+    QuestieDB.questData[64052] = {} -- Talented
+    QuestieDB.questData[64053] = {} -- Talented
+    QuestieDB.questData[64063] = {} -- The Dark Portal
+    QuestieDB.questData[64064] = {} -- Eastern Plaguelands
+    QuestieDB.questData[64128] = {} -- Eastern Plaguelands
+    QuestieDB.questData[64217] = {} -- The Dark Portal
+
+    -- Halloween Candy quests
+    QuestieDB.questData[12133] = {} -- Smash the Pumpkin
+    QuestieDB.questData[12135] = {} -- Let the Fires Come!
+    QuestieDB.questData[12139] = {} -- Let the Fires Come!
+    QuestieDB.questData[12155] = {} -- Smash the Pumpkin
+
+    QuestieDB.questData[12286] = {} -- Candy Bucket
+    QuestieDB.questData[12331] = {} -- Candy Bucket
+    QuestieDB.questData[12332] = {} -- Candy Bucket
+    QuestieDB.questData[12333] = {} -- Candy Bucket
+    QuestieDB.questData[12334] = {} -- Candy Bucket
+    QuestieDB.questData[12335] = {} -- Candy Bucket
+    QuestieDB.questData[12336] = {} -- Candy Bucket
+    QuestieDB.questData[12337] = {} -- Candy Bucket
+    QuestieDB.questData[12338] = {} -- Candy Bucket
+    QuestieDB.questData[12339] = {} -- Candy Bucket
+    QuestieDB.questData[12340] = {} -- Candy Bucket
+    QuestieDB.questData[12341] = {} -- Candy Bucket
+    QuestieDB.questData[12342] = {} -- Candy Bucket
+    QuestieDB.questData[12343] = {} -- Candy Bucket
+    QuestieDB.questData[12344] = {} -- Candy Bucket
+    QuestieDB.questData[12345] = {} -- Candy Bucket
+    QuestieDB.questData[12346] = {} -- Candy Bucket
+    QuestieDB.questData[12347] = {} -- Candy Bucket
+    QuestieDB.questData[12348] = {} -- Candy Bucket
+    QuestieDB.questData[12349] = {} -- Candy Bucket
+    QuestieDB.questData[12350] = {} -- Candy Bucket
+    QuestieDB.questData[12351] = {} -- Candy Bucket
+    QuestieDB.questData[12352] = {} -- Candy Bucket
+    QuestieDB.questData[12353] = {} -- Candy Bucket
+    QuestieDB.questData[12354] = {} -- Candy Bucket
+    QuestieDB.questData[12355] = {} -- Candy Bucket
+    QuestieDB.questData[12356] = {} -- Candy Bucket
+    QuestieDB.questData[12357] = {} -- Candy Bucket
+    QuestieDB.questData[12358] = {} -- Candy Bucket
+    QuestieDB.questData[12359] = {} -- Candy Bucket
+    QuestieDB.questData[12360] = {} -- Candy Bucket
+    QuestieDB.questData[12361] = {} -- Candy Bucket
+    QuestieDB.questData[12362] = {} -- Candy Bucket
+    QuestieDB.questData[12363] = {} -- Candy Bucket
+    QuestieDB.questData[12364] = {} -- Candy Bucket
+    QuestieDB.questData[12365] = {} -- Candy Bucket
+    QuestieDB.questData[12366] = {} -- Candy Bucket
+    QuestieDB.questData[12367] = {} -- Candy Bucket
+    QuestieDB.questData[12368] = {} -- Candy Bucket
+    QuestieDB.questData[12369] = {} -- Candy Bucket
+    QuestieDB.questData[12370] = {} -- Candy Bucket
+    QuestieDB.questData[12371] = {} -- Candy Bucket
+    QuestieDB.questData[12373] = {} -- Candy Bucket
+    QuestieDB.questData[12374] = {} -- Candy Bucket
+    QuestieDB.questData[12375] = {} -- Candy Bucket
+    QuestieDB.questData[12376] = {} -- Candy Bucket
+    QuestieDB.questData[12377] = {} -- Candy Bucket
+    QuestieDB.questData[12378] = {} -- Candy Bucket
+    QuestieDB.questData[12379] = {} -- Candy Bucket
+    QuestieDB.questData[12380] = {} -- Candy Bucket
+    QuestieDB.questData[12381] = {} -- Candy Bucket
+    QuestieDB.questData[12382] = {} -- Candy Bucket
+    QuestieDB.questData[12383] = {} -- Candy Bucket
+    QuestieDB.questData[12384] = {} -- Candy Bucket
+    QuestieDB.questData[12385] = {} -- Candy Bucket
+    QuestieDB.questData[12386] = {} -- Candy Bucket
+    QuestieDB.questData[12387] = {} -- Candy Bucket
+    QuestieDB.questData[12388] = {} -- Candy Bucket
+    QuestieDB.questData[12389] = {} -- Candy Bucket
+    QuestieDB.questData[12390] = {} -- Candy Bucket
+    QuestieDB.questData[12391] = {} -- Candy Bucket
+    QuestieDB.questData[12392] = {} -- Candy Bucket
+    QuestieDB.questData[12393] = {} -- Candy Bucket
+    QuestieDB.questData[12394] = {} -- Candy Bucket
+    QuestieDB.questData[12395] = {} -- Candy Bucket
+    QuestieDB.questData[12396] = {} -- Candy Bucket
+    QuestieDB.questData[12397] = {} -- Candy Bucket
+    QuestieDB.questData[12398] = {} -- Candy Bucket
+    QuestieDB.questData[12399] = {} -- Candy Bucket
+    QuestieDB.questData[12400] = {} -- Candy Bucket
+    QuestieDB.questData[12401] = {} -- Candy Bucket
+    QuestieDB.questData[12402] = {} -- Candy Bucket
+    QuestieDB.questData[12403] = {} -- Candy Bucket
+    QuestieDB.questData[12404] = {} -- Candy Bucket
+    QuestieDB.questData[12406] = {} -- Candy Bucket
+    QuestieDB.questData[12407] = {} -- Candy Bucket
+    QuestieDB.questData[12408] = {} -- Candy Bucket
+    QuestieDB.questData[12409] = {} -- Candy Bucket
 end

@@ -116,18 +116,27 @@ function Necrosis:MenuAttribute(menu)
 	menuButton:SetAttribute("_onclick", [[
 		self:SetAttribute("lastClick", button)
 		local Etat = self:GetAttribute("state")
+		
+		if  button == "MiddleButton" then
+		
+		
+		
+		
+		end
+		
 		if  Etat == "Ferme" then
 			if button == "RightButton" then
 				self:SetAttribute("state", "ClicDroit")
-			else
+			elseif button == "LeftButton" then
 				self:SetAttribute("state", "Ouvert")
 			end
 		elseif Etat == "Ouvert" then
 			if button == "RightButton" then
 				self:SetAttribute("state", "ClicDroit")
-			else
+			elseif button == "LeftButton" then
 				self:SetAttribute("state", "Ferme")
 			end
+		
 		elseif Etat == "Combat" then
 			for i, button in ipairs(ButtonList) do
 				if button:IsShown() then
@@ -138,7 +147,10 @@ function Necrosis:MenuAttribute(menu)
 			end
 		elseif Etat == "ClicDroit" and button == "LeftButton" then
 			self:SetAttribute("state", "Ferme")
+		
 		end
+		
+		
 	]])
 	
 	menuButton:SetAttribute("_onattributechanged", [[
@@ -261,9 +273,11 @@ function Necrosis:SetPetSpellAttribute(button)
 	if InCombatLockdown() then
 		return
 	end
-
+	
 	local f = _G[button]
+	
 	if f then
+			
 		if Necrosis.Debug.buttons then
 			_G["DEFAULT_CHAT_FRAME"]:AddMessage("SetPetSpellAttribute"
 			.." f'"..tostring(button).."'"
@@ -274,20 +288,37 @@ function Necrosis:SetPetSpellAttribute(button)
 		end
 
 		if f.pet then
+	--print (Necrosis.NameDemon[NecrosisConfig.NecrosisDemonSacrifice],f.high_of )
 			f:SetAttribute("type1", "spell")
 			f:SetAttribute("spell", Necrosis.GetSpellCastName(f.high_of)) 
+						
+			--Dominiation sur clic droit
 			if Necrosis.IsSpellKnown("domination") then 
 				f:SetAttribute("type2", "macro")
 				local str = 
 					"/cast "..Necrosis.GetSpellCastName("domination")
-					.."\n/stopcasting\n/cast "..Necrosis.GetSpellCastName(f.high_of) 
---print(str)
-				f:SetAttribute("macrotext",str)
+					.."\n/stopcasting\n/cast "..Necrosis.GetSpellCastName(f.high_of)
+
+
+				f:SetAttribute("macrotext2",str)
+			if Necrosis.NameDemon[NecrosisConfig.NecrosisDemonSacrifice] == f.high_of 
+			then
+			f:SetAttribute("shift-type2", "spell")
+			str2 = Necrosis.GetSpellCastName("sacrifice")			
+			f:SetAttribute("shift-spell2", str2)
+			--print (str2)
+
 			end
+			
+			end
+				
+		
 		else
 			f:SetAttribute("type", "spell")
-			f:SetAttribute("spell", Necrosis.GetSpellCastName(f.high_of)) 
+			f:SetAttribute("spell", Necrosis.GetSpellCastName(f.high_of))
+--			
 		end
+	
 	else
 	end
 end
@@ -297,13 +328,27 @@ function Necrosis:PetSpellAttribute()
 		return
 	end
 
+	
 	for index = 1, #Necrosis.Warlock_Lists.pets, 1 do
 		local v = Necrosis.Warlock_Lists.pets[index]
 		local f = Necrosis.Warlock_Buttons[v.f_ptr].f
+		
+		if v.high_of == 'sacrifice'
+		then
+			
+			
+			Necrosis:SetPetSpellAttribute(f)
+			
+		end
+		
+		
+		
 		if Necrosis.IsSpellKnown(v.high_of) -- in spell book
 --		and NecrosisConfig.DemonSpellPosition[index] > 0 -- and requested
 		then
+		
 			Necrosis:SetPetSpellAttribute(f)
+			
 		end
 	end
 end
@@ -449,11 +494,14 @@ function Necrosis:StoneAttribute(Steed)
 		
 		if (NecrosisConfig.LeftMount) then
 			local LeftMountName = GetSpellInfo(NecrosisConfig.LeftMount)
-			if LeftMountName == nil
-			then
-				LeftMountName,SpellID = GetItemSpell(NecrosisConfig.LeftMount) 
+			--print (LeftMountName)
+			if LeftMountName == nil -- then mount is not a spell, is item
+			then -- Mount is a item
+			
+				LeftMountName = GetItemInfo(NecrosisConfig.LeftMount)
+				--print (LeftMountName)
 				f:SetAttribute("item1", LeftMountName)
-			else
+			else -- Mount is a spell
 				f:SetAttribute("spell1", LeftMountName)				
 			end
 		else
@@ -476,7 +524,7 @@ function Necrosis:StoneAttribute(Steed)
 			local RightMountName = GetSpellInfo(NecrosisConfig.RightMount)
 			if RightMountName == nil 
 			then 
-			RightMountName,SpellID = GetItemSpell(NecrosisConfig.RightMount) 
+				RightMountName = GetItemInfo(NecrosisConfig.RightMount) 
 				f:SetAttribute("item2", RightMountName)
 			else
 				f:SetAttribute("spell2", RightMountName)
@@ -488,7 +536,7 @@ function Necrosis:StoneAttribute(Steed)
 			local CtrlRightMountName = GetSpellInfo(NecrosisConfig.CtrlRightMount)
 			if CtrlRightMountName == nil 
 			then 
-			CtrlRightMountName,SpellID = GetItemSpell(NecrosisConfig.CtrlRightMount) 
+				CtrlRightMountName = GetItemInfo(NecrosisConfig.CtrlRightMount) 
 				f:SetAttribute("ctrl-item1", CtrlRightMountName)
 			else
 				f:SetAttribute("ctrl-spell1", CtrlRightMountName)
@@ -500,7 +548,8 @@ function Necrosis:StoneAttribute(Steed)
 		if (NecrosisConfig.CtrlLeftMount) then
 			local CtrlLeftMountName = GetSpellInfo(NecrosisConfig.CtrlLeftMount)
 			if CtrlLeftMountName == nil
-			then CtrlLeftMountName,SpellID = GetItemSpell(NecrosisConfig.CtrlLeftMount)
+			then 
+				CtrlLeftMountName = GetItemInfo(NecrosisConfig.CtrlLeftMount)
 				f:SetAttribute("ctrl-item2", CtrlLeftMountName)
 			else
 				f:SetAttribute("ctrl-spell2", CtrlLeftMountName)			
@@ -537,8 +586,9 @@ function Necrosis:StoneAttribute(Steed)
 end
 
 -- Connection Association to the central button if the spell is available || Association de la Connexion au bouton central si le sort est disponible
-function Necrosis:MainButtonAttribute()
+function Necrosis:MainButtonAttribute(self)
 	local f = Necrosis.Warlock_Buttons.main.f
+	
 	f = _G[f]
 	if not f then return end
 
@@ -551,7 +601,7 @@ function Necrosis:MainButtonAttribute()
 	end
 
 	local main_cast = Necrosis.GetSpellCastName(NecrosisConfig.MainSpell) --Necrosis:GetSpellName(NecrosisConfig.MainSpell)
-	 
+	local second_cast = Necrosis.GetSpellCastName(NecrosisConfig.MainSpell2) 
 	
 	if Necrosis.Debug.buttons then
 		_G["DEFAULT_CHAT_FRAME"]:AddMessage("MainButtonAttribute"
@@ -564,6 +614,12 @@ function Necrosis:MainButtonAttribute()
 	if main_cast ~= "" then 
 		f:SetAttribute("type1", "spell")
 		f:SetAttribute("spell", main_cast)
+	end
+	if second_cast ~= "" then 
+		f:SetAttribute("shift-type1", "spell")
+		f:SetAttribute("shift-spell1", second_cast)
+		f:SetAttribute("shift-type2", "spell")
+		f:SetAttribute("shift-spell2", second_cast)
 	end
 
 	f:SetAttribute("type2", "Delete")

@@ -1,4 +1,4 @@
-## Interface: 20501
+## Interface: 90200
 #@non-debug@
 ## Title: Atlas |r|cFF0099FF[Dungeon Locs]|r
 ## Title-deDE: Atlas |r|cFF0099FF[Instanzstandorte]|r
@@ -22,14 +22,18 @@
 # ## Notes: Dungeon Locations
 # ## Notes-zhTW: Atlas 地下城位置地圖插件，顯示各個地下城 (副本) 所在位置
 #@end-debug@
-## Version: v1.49.00
+## Version: v1.50.04
 ## Author: arith, Dynaletik, dubcat
-## X-Date: 2021-05-22T13:40:02Z
+## X-Date: 2022-03-25T17:37:45Z
 ## X-Credits: Dan Gilbert, Lothaer
 ## X-Email: atlas.addon at gmail.com
 ## X-Website: http://www.atlasmod.com
 ## X-Category: Map
 ## RequiredDeps: Atlas
+## SavedVariables: Atlas_DungeonLocsDB
 
 Locale\Locales.xml
-Atlas_DungeonLocs.lua
+Core\Constants.lua
+Core\Core.lua
+Core\Config.lua
+Core\Data.lua

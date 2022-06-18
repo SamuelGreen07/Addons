@@ -10,6 +10,7 @@ local GetCurrencyInfo, GetItemInfo, GetItemCount, GetItemIcon = C_CurrencyInfo.G
 -- ----------------------------------------------------------------------------
 -- AddOn namespace.
 -- ----------------------------------------------------------------------------
+local ALName, ALPrivate = ...
 local AtlasLoot = _G.AtlasLoot
 local Price = AtlasLoot.Button:AddExtraType("Price")
 local AL = AtlasLoot.Locales
@@ -31,11 +32,7 @@ local STRING_GREEN = "|cff1eff00"
 
 local PRICE_INFO = AtlasLoot.Data.VendorPrice.GetPriceInfoList()
 
-local ICON_REPLACE = {
-	["honor"] = UnitFactionGroup("player") == "Horde" and 136782 or 136781,
-	["honorH"] = 136782,
-	["honorA"] = 136781,
-}
+local ICON_REPLACE = ALPrivate.PRICE_ICON_REPLACE
 
 local Cache = {}
 setmetatable(Cache, {__mode = "kv"})
@@ -52,8 +49,10 @@ local function SetContentInfo(frame, typ, value, delimiter)
 			frame:AddText(value..delimiter)
 		elseif PRICE_INFO[typ].currencyID then
 			local info = GetCurrencyInfo(PRICE_INFO[typ].currencyID)
-			frame:AddIcon(ICON_REPLACE[typ] or info.iconFileID, 12)
-			frame:AddText(info.quantity >= tonumber(value) and STRING_GREEN..value..delimiter or STRING_RED..value..delimiter)
+			if info then
+				frame:AddIcon(ICON_REPLACE[typ] or info.iconFileID, 12)
+				frame:AddText(info.quantity >= tonumber(value) and STRING_GREEN..value..delimiter or STRING_RED..value..delimiter)
+			end
 		elseif PRICE_INFO[typ].itemID then
 			PRICE_INFO[typ].icon = GetItemIcon(PRICE_INFO[typ].itemID)
 			SetContentInfo(frame, typ, value, delimiter)
@@ -128,10 +127,12 @@ local function SetTooltip(tooltip, typ, value)
 		--	tooltip:AddLine(TT_HAVE_AND_NEED_GREEN:format(value))
 		elseif PRICE_INFO[typ].currencyID then
 			local info = GetCurrencyInfo(PRICE_INFO[typ].currencyID)
-			if info.iconFileID then
-				tooltip:AddLine(TT_ICON_AND_NAME:format(ICON_REPLACE[typ] or info.iconFileID, info.name or ""))
+			if info then
+				if info.iconFileID then
+					tooltip:AddLine(TT_ICON_AND_NAME:format(ICON_REPLACE[typ] or info.iconFileID, info.name or ""))
+				end
+				tooltip:AddLine(info.quantity >= value and TT_HAVE_AND_NEED_GREEN:format(info.quantity, value) or  TT_HAVE_AND_NEED_RED:format(info.quantity, value))
 			end
-			tooltip:AddLine(info.quantity >= value and TT_HAVE_AND_NEED_GREEN:format(info.quantity, value) or  TT_HAVE_AND_NEED_RED:format(info.quantity, value))
 		elseif PRICE_INFO[typ].itemID then
 			local itemName = GetItemInfo(PRICE_INFO[typ].itemID)
 			tooltip:AddLine(TT_ICON_AND_NAME:format(GetItemIcon(PRICE_INFO[typ].itemID), GetItemInfo(PRICE_INFO[typ].itemID) or ""))

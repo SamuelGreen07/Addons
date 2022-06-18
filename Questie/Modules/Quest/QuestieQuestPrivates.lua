@@ -4,11 +4,24 @@ local _QuestieQuest = QuestieQuest.private
 
 ---@type QuestieDB
 local QuestieDB = QuestieLoader:ImportModule("QuestieDB")
----@type QuestiePlayer
-local QuestiePlayer = QuestieLoader:ImportModule("QuestiePlayer")
 ---@type QuestieCorrections
 local QuestieCorrections = QuestieLoader:ImportModule("QuestieCorrections")
 
+local function _GetIconScaleForMonster()
+    return Questie.db.global.monsterScale or 1
+end
+
+local function _GetIconScaleForObject()
+    return Questie.db.global.objectScale or 1
+end
+
+local function _GetIconScaleForEvent()
+    return Questie.db.global.eventScale or 1.35
+end
+
+local function _GetIconScaleForLoot()
+    return Questie.db.global.lootScale or 1
+end
 
 _QuestieQuest.objectiveSpawnListCallTable = {
     ["killcredit"] = function(npcId, objective, objectiveData)
@@ -47,18 +60,16 @@ _QuestieQuest.objectiveSpawnListCallTable = {
         local enableSpawns = not QuestieCorrections.questNPCBlacklist[npcId]
         local enableWaypoints = enableSpawns and 2 ~= rank -- a rare mob spawn. todo: option for this
 
-        local _GetIconScale = function() return Questie.db.global.monsterScale or 1 end
-
         return {
             [npcId] = {
                 Id = npcId,
                 Name = name,
-                Spawns = enableSpawns and QuestieDB.QueryNPCSingle(npcId, "spawns") or {},
+                Spawns = enableSpawns and spawns or {},
                 Waypoints = enableWaypoints and QuestieDB.QueryNPCSingle(npcId, "waypoints") or {},
                 Hostile = true,
                 Icon = ICON_TYPE_SLAY,
-                GetIconScale = _GetIconScale,
-                IconScale = _GetIconScale(),
+                GetIconScale = _GetIconScaleForMonster,
+                IconScale = _GetIconScaleForMonster(),
                 TooltipKey = "m_" .. npcId, -- todo: use ID based keys
             }
         }
@@ -87,31 +98,24 @@ _QuestieQuest.objectiveSpawnListCallTable = {
             spawns = {}
         end
 
-        local _GetIconScale = function()
-            return Questie.db.global.objectScale or 1
-        end
-
         return {
             [objectId] = {
                 Id = objectId,
                 Name = name,
                 Spawns = spawns,
                 Icon = ICON_TYPE_OBJECT,
-                GetIconScale = _GetIconScale,
-                IconScale = _GetIconScale(),
+                GetIconScale = _GetIconScaleForObject,
+                IconScale = _GetIconScaleForObject(),
                 TooltipKey = "o_" .. objectId,
             }
         }
     end,
     ["event"] = function(id, objective)
-        local spawns = {}
-        if objective.Coordinates then
-            spawns = objective.Coordinates
-        else
+        local spawns = objective.Coordinates
+        if (not spawns) then
             Questie:Error("Missing event data for Objective:", objective.Description, "id:", id)
+            spawns = {}
         end
-
-        local _GetIconScale = function() return Questie.db.global.eventScale or 1.35 end
 
         return {
             [1] = {
@@ -119,8 +123,8 @@ _QuestieQuest.objectiveSpawnListCallTable = {
                 Name = objective.Description or "Event Trigger",
                 Spawns = spawns,
                 Icon = ICON_TYPE_EVENT,
-                GetIconScale = _GetIconScale,
-                IconScale = _GetIconScale(),
+                GetIconScale = _GetIconScaleForEvent,
+                IconScale = _GetIconScaleForEvent(),
             }
         }
     end,
@@ -153,12 +157,12 @@ _QuestieQuest.objectiveSpawnListCallTable = {
                                 ret[id].ItemId = item.Id
                                 if source.Type == "object" then
                                     ret[id].Icon = ICON_TYPE_OBJECT
-                                    ret[id].GetIconScale = function() return Questie.db.global.objectScale or 1 end
-                                    ret[id].IconScale = ret[id]:GetIconScale()
+                                    ret[id].GetIconScale = _GetIconScaleForObject
+                                    ret[id].IconScale = _GetIconScaleForObject()
                                 else
                                     ret[id].Icon = ((not QuestieDB.fakeTbcItemStartId) or itemId < QuestieDB.fakeTbcItemStartId) and ICON_TYPE_LOOT or ICON_TYPE_EVENT
-                                    ret[id].GetIconScale = function() return Questie.db.global.lootScale or 1 end
-                                    ret[id].IconScale = ret[id]:GetIconScale()
+                                    ret[id].GetIconScale = _GetIconScaleForLoot
+                                    ret[id].IconScale = _GetIconScaleForLoot()
                                 end
                                 ret[id].TooltipKey = sourceData.TooltipKey
                                 ret[id].Id = id
@@ -191,18 +195,3 @@ _QuestieQuest.objectiveSpawnListCallTable = {
         return ret
     end
 }
-
-function _QuestieQuest:LevelRequirementsFulfilled(quest, playerLevel, minLevel, maxLevel)
-    return (quest.level == 60 and quest.requiredLevel == 1) or (quest.level >= minLevel or Questie.db.char.lowlevel) and quest.level <= maxLevel and (quest.requiredLevel <= playerLevel or Questie.db.char.manualMinLevelOffset or Questie.db.char.manualMinLevelOffsetAbsolute)
-end
-
--- We always want to show a quest if it is a childQuest and its parent is in the quest log
-function _QuestieQuest:IsParentQuestActive(parentID)
-    if parentID == nil or parentID == 0 then
-        return false
-    end
-    if QuestiePlayer.currentQuestlog[parentID] then
-        return true
-    end
-    return false
-end

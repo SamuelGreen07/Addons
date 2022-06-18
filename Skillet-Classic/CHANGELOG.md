@@ -1,9 +1,9 @@
 # Skillet-Classic  -Ace3-
 
-## [1.36](https://github.com/b-morgan/Skillet-Classic/tree/1.36) (2021-09-28)
-[Full Changelog](https://github.com/b-morgan/Skillet-Classic/compare/1.35...1.36) [Previous Releases](https://github.com/b-morgan/Skillet-Classic/releases)
+## [1.41](https://github.com/b-morgan/Skillet-Classic/tree/1.41) (2021-11-10)
+[Full Changelog](https://github.com/b-morgan/Skillet-Classic/compare/1.40...1.41) [Previous Releases](https://github.com/b-morgan/Skillet-Classic/releases)
 
-- Add AdjustInventory call to ProcessQueue  
-- Add message on profile changes  
-- Log warnings when logging debugs  
-- Update toc  
+- Update TOC  
+- Hide Auctionator button when AH is closed  
+- Add dialog when queuing all or crafting all of infinite recipes.  
+- Add option to always display Enchanting profit/loss  

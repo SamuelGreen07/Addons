@@ -464,7 +464,7 @@ function stAM:InitProfiles()
 
 	ProfileMenu.Buttons = {}
 
-	for i = 1, 10 do
+	for i = 1, 30 do
 		local Pullout = CreateFrame('Frame', nil, ProfileMenu)
 		Pullout:SetWidth(210)
 		Pullout:SetHeight(stAM.db.ButtonHeight)
@@ -491,16 +491,16 @@ function stAM:InitProfiles()
 		Pullout.Load:SetScript('OnClick', function(_, btn)
 			if btn == 'RightButton' then
 				local Dialog = _G.StaticPopupDialogs.STADDONMANAGER_RENAMEPROFILE
-				Dialog.OnAccept = function()
+				Dialog.OnAccept = function(dialog)
 					_G.stAddonManagerProfilesDB[Pullout.Name] = nil
-					stAM:NewAddOnProfile(Dialog.editBox:GetText())
+					stAM:NewAddOnProfile(dialog.editBox:GetText())
 					stAM:UpdateProfiles()
 				end
-				Dialog.EditBoxOnEnterPressed = function()
+				Dialog.EditBoxOnEnterPressed = function(editBox)
 					_G.stAddonManagerProfilesDB[Pullout.Name] = nil
-					stAM:NewAddOnProfile(Dialog:GetText())
+					stAM:NewAddOnProfile(editBox:GetText())
 					stAM:UpdateProfiles()
-					Dialog:GetParent():Hide()
+					editBox:GetParent():Hide()
 				end
 				_G.StaticPopup_Show('STADDONMANAGER_RENAMEPROFILE')
 			else
@@ -545,7 +545,7 @@ function stAM:UpdateProfiles()
 
 	local PreviousButton
 	for i, Button in ipairs(ProfileMenu.Buttons) do
-		local isShown = i <= #stAM.Profiles
+		local isShown = i <= min(#stAM.Profiles, 30)
 		if isShown then
 			Button.Load.Text:SetText(stAM.Profiles[i])
 		end
@@ -562,7 +562,7 @@ function stAM:UpdateProfiles()
 		PreviousButton = Button
 	end
 
-	ProfileMenu:SetHeight((#stAM.Profiles + 2) * (stAM.db.ButtonHeight + 5) + 15)
+	ProfileMenu:SetHeight((min(#stAM.Profiles, 30) + 2) * (stAM.db.ButtonHeight + 5) + 15)
 end
 
 function stAM:ToggleProfiles()

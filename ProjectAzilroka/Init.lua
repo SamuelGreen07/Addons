@@ -2,7 +2,7 @@ local AddOnName = ...
 local _G = _G
 local LibStub = LibStub
 
-local PA = LibStub('AceAddon-3.0'):NewAddon('ProjectAzilroka', 'AceEvent-3.0', 'AceTimer-3.0')
+local PA = LibStub('AceAddon-3.0'):NewAddon('ProjectAzilroka', 'AceConsole-3.0', 'AceEvent-3.0', 'AceTimer-3.0')
 
 _G.ProjectAzilroka = PA
 
@@ -84,6 +84,7 @@ function PA:IsAddOnEnabled(addon, character)
 	if (type(character) == 'boolean' and character == true) then
 		character = nil
 	end
+
 	return GetAddOnEnableState(character, addon) == 2
 end
 
@@ -91,6 +92,7 @@ function PA:IsAddOnPartiallyEnabled(addon, character)
 	if (type(character) == 'boolean' and character == true) then
 		character = nil
 	end
+
 	return GetAddOnEnableState(character, addon) == 1
 end
 
@@ -310,100 +312,10 @@ function PA:SetOutside(obj, anchor, xOffset, yOffset, anchor2)
 	obj:SetPoint('BOTTOMRIGHT', anchor2 or anchor, 'BOTTOMRIGHT', xOffset, -yOffset)
 end
 
-PA.ClassicServerNameByID = {
-	[4703] = 'Amnennar',
-	[4715] = 'Anathema',
-	[4716] = 'Arcanite Reaper',
-	[4742] = 'Ashbringer',
-	[4387] = 'Ashkandi',
-	[4372] = 'Atiesh',
-	[4669] = 'Arugal',
-	[4441] = 'Auberdine',
-	[4376] = 'Azuresong',
-	[4728] = 'Benediction',
-	[4398] = 'Bigglesworth',
-	[4397] = 'Blaumeux',
-	[4746] = 'Bloodfang',
-	[4648] = 'Bloodsail Buccaneers',
-	[4386] = 'Deviate Delight',
-	[4751] = 'Dragonfang',
-	[4756] = "Dragon's Call",
-	[4755] = 'Dreadmist',
-	[4731] = 'Earthfury',
-	[4749] = 'Earthshaker',
-	[4440] = 'Everlook',
-	[4408] = 'Faerlina',
-	[4396] = 'Fairbanks',
-	[4739] = 'Felstriker',
-	[4744] = 'Finkle',
-	[4467] = 'Firemaw',
-	[4706] = 'Flamelash',
-	[4702] = 'Gandling',
-	[4476] = 'Gehennas',
-	[4465] = 'Golemagg',
-	[4647] = 'Grobbulus',
-	[4732] = 'Heartseeker',
-	[4763] = 'Heartstriker',
-	[4406] = 'Herod',
-	[4678] = 'Hydraxian Waterlords',
-	[4698] = 'Incendius',
-	[4758] = 'Judgement',
-	[4700] = 'Kirtonos',
-	[4699] = 'Kromcrush',
-	[4399] = 'Kurinnaxx',
-	[4442] = 'Lakeshire',
-	[4801] = 'Loatheb',
-	[4463] = 'Lucifron',
-	[4813] = 'Mandokir',
-	[4384] = 'Mankrik',
-	[4454] = 'Mirage Raceway',
-	[4701] = 'Mograine',
-	[4373] = 'Myzrael',
-	[4456] = 'Nethergarde Keep',
-	[4729] = 'Netherwind',
-	[4741] = 'Noggenfogger',
-	[4374] = 'Old Blanchy',
-	[4385] = 'Pagle',
-	[4466] = 'Patchwerk',
-	[4453] = 'Pyrewood Village',
-	[4695] = 'Rattlegore',
-	[4455] = 'Razorfen',
-	[4478] = 'Razorgore',
-	[4667] = 'Remulos',
-	[4475] = 'Shazzrah',
-	[4410] = 'Skeram',
-	[4743] = 'Skullflame',
-	[4696] = 'Smolderweb',
-	[4409] = 'Stalagg',
-	[4705] = 'Stonespine',
-	[4726] = 'Sulfuras',
-	[4464] = 'Sulfuron',
-	[4737] = "Sul'thraze",
-	[4757] = 'Ten Storms',
-	[4407] = 'Thalnos',
-	[4714] = 'Thunderfury',
-	[4745] = 'Transcendence',
-	[4477] = 'Venoxis',
-	[4388] = 'Westfall',
-	[4395] = 'Whitemane',
-	[4727] = 'Windseeker',
-	[4670] = 'Yojamba',
-	[4676] = 'Zandalar Tribe',
-	[4452] = 'Хроми',
-	[4704] = 'Змейталак',
-	[4754] = 'Рок-Делар',
-	[4766] = 'Вестник Рока',
-	[4474] = 'Пламегор',
-}
-
 local accountInfo = { gameAccountInfo = {} }
 function PA:GetBattleNetInfo(friendIndex)
 	if PA.Retail then
 		accountInfo = _G.C_BattleNet.GetFriendAccountInfo(friendIndex)
-
-		if accountInfo and accountInfo.gameAccountInfo.wowProjectID == _G.WOW_PROJECT_CLASSIC then
-			accountInfo.gameAccountInfo.realmDisplayName = PA.ClassicServerNameByID[accountInfo.gameAccountInfo.realmID] or accountInfo.gameAccountInfo.realmID
-		end
 
 		return accountInfo
 	else
@@ -442,31 +354,19 @@ function PA:GetBattleNetInfo(friendIndex)
 			zoneName, realmName = strsplit("-", gameText)
 		end
 
-		if client == _G.BNET_CLIENT_WOW then
-			accountInfo.gameAccountInfo.characterName = characterName
-			accountInfo.gameAccountInfo.factionName = faction ~= '' and faction or nil
-			accountInfo.gameAccountInfo.playerGuid = guid
-			accountInfo.gameAccountInfo.wowProjectID = wowProjectID
-			accountInfo.gameAccountInfo.realmID = realmID
-			accountInfo.gameAccountInfo.realmDisplayName = realmName
-			accountInfo.gameAccountInfo.realmName = realmName
-			accountInfo.gameAccountInfo.areaName = zoneName
-			accountInfo.gameAccountInfo.className = class
-			accountInfo.gameAccountInfo.characterLevel = level
-			accountInfo.gameAccountInfo.raceName = race
-		else
-			accountInfo.gameAccountInfo.characterName = nil
-			accountInfo.gameAccountInfo.factionName = nil
-			accountInfo.gameAccountInfo.playerGuid = nil
-			accountInfo.gameAccountInfo.wowProjectID = nil
-			accountInfo.gameAccountInfo.realmID = nil
-			accountInfo.gameAccountInfo.realmDisplayName = nil
-			accountInfo.gameAccountInfo.realmName = nil
-			accountInfo.gameAccountInfo.areaName = nil
-			accountInfo.gameAccountInfo.className = nil
-			accountInfo.gameAccountInfo.characterLevel = nil
-			accountInfo.gameAccountInfo.raceName = nil
-		end
+		local isWow = client == _G.BNET_CLIENT_WOW
+
+		accountInfo.gameAccountInfo.characterName = isWow and characterName
+		accountInfo.gameAccountInfo.factionName = isWow and faction ~= '' and faction
+		accountInfo.gameAccountInfo.playerGuid = isWow and guid
+		accountInfo.gameAccountInfo.wowProjectID = isWow and wowProjectID
+		accountInfo.gameAccountInfo.realmID = isWow and realmID
+		accountInfo.gameAccountInfo.realmDisplayName = isWow and realmName
+		accountInfo.gameAccountInfo.realmName = isWow and realmName
+		accountInfo.gameAccountInfo.areaName = isWow and zoneName
+		accountInfo.gameAccountInfo.className = isWow and class
+		accountInfo.gameAccountInfo.characterLevel = isWow and level
+		accountInfo.gameAccountInfo.raceName = isWow and race
 
 		return accountInfo
 	end
@@ -532,9 +432,7 @@ PA.Options = PA.ACH:Group(PA:Color(PA.Title), nil, 6)
 
 function PA:GetOptions()
 	if _G.ElvUI then
-		PA.AceOptionsPanel.Options.args.ProjectAzilroka = PA.Options
-	else
-		PA.AceOptionsPanel.Options.args = PA:CopyTable(PA.Options.args, PA.AceOptionsPanel.Options.args)
+		_G.ElvUI[1].Options.args.ProjectAzilroka = PA.Options
 	end
 end
 
@@ -570,7 +468,6 @@ function PA:PLAYER_LOGIN()
 
 	PA.AS = _G.AddOnSkins and _G.AddOnSkins[1]
 	PA.EP = LibStub('LibElvUIPlugin-1.0', true)
-	PA.AceOptionsPanel = PA.ElvUI and _G.ElvUI[1] or PA.EC
 
 	PA.Options.childGroups = PA.EC and 'tab' or 'tree'
 
@@ -582,6 +479,9 @@ function PA:PLAYER_LOGIN()
 
 	if PA.EP then
 		PA.EP:RegisterPlugin('ProjectAzilroka', PA.GetOptions)
+	else
+		PA.AC:RegisterOptionsTable('ProjectAzilroka', PA.Options)
+		PA.ACD:AddToBlizOptions('ProjectAzilroka', 'ProjectAzilroka')
 	end
 
 	PA:UpdateCooldownSettings('all')

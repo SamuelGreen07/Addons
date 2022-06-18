@@ -102,13 +102,13 @@ Local.DefaultConfig = {
 		-- 7 = Demon menu
 		-- 8 = Curse menu
 		-- 9 = Destroy Shard
-	DemonSpellPosition = {1, 2, 3, 4, 5, 6, 8, 9, 10, -11},
+	DemonSpellPosition = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
 		-- 1 = Fel Domination || Domination corrompue
 		-- 2 = Summon Imp
 		-- 3 = Summon Voidwalker || Marcheur
 		-- 4 = Summon Succubus
 		-- 5 = Summon Felhunter
-		-- 6 = Felguard || Gangregarde
+		-- 6 = Felguard || Gangregarde<<
 		-- 7 = Infernal
 		-- 8 = Doomguard
 		-- 9 = Enslave || Asservissement
@@ -176,6 +176,12 @@ Local.DefaultConfig = {
 		["NecrosisCurseMenuButton"] = {"CENTER", "UIParent", "CENTER", 121,-100},
 		["NecrosisDestroyShardsButton"] = {"CENTER", "UIParent", "CENTER", 154,-100},
 	},
+	
+	PetShow = {
+	true,true,true,true,true,true,true,true,
+	},
+
+
 	Timers = { -- Order is for options screen; overrides Warlock_Spells Timer
 		[1] = {usage = "armor", show = true},
 		[2] = {usage = "breath", show = true},
@@ -1375,17 +1381,17 @@ _G["DEFAULT_CHAT_FRAME"]:AddMessage("UNIT_SPELLCAST_SENT - set target "
 			NecrosisCreatureAlertButton_elemental:EnableMouse(true)			
 			else
 			NecrosisCreatureAlertButton_demon:SetAlpha(0)
-			NecrosisCreatureAlertButton_demon:EnableMouse(false)
+			NecrosisCreatureAlertButton_demon:EnableMouse(true)
 			
 			NecrosisCreatureAlertButton_elemental:SetAlpha(0) 
-			NecrosisCreatureAlertButton_elemental:EnableMouse(false)
+			NecrosisCreatureAlertButton_elemental:EnableMouse(true)
 	
 			end
 		else
 		NecrosisCreatureAlertButton_demon:SetAlpha(0) 
 		NecrosisCreatureAlertButton_elemental:SetAlpha(0) 	
-		NecrosisCreatureAlertButton_demon:EnableMouse(false)		
-		NecrosisCreatureAlertButton_elemental:EnableMouse(false)	
+		NecrosisCreatureAlertButton_demon:EnableMouse(true)		
+		NecrosisCreatureAlertButton_elemental:EnableMouse(true)	
 		--print(UnitCreatureType("target"))
 
 			
@@ -1681,6 +1687,7 @@ end
 local function AddDominion(start, duration)
 	if not (start > 0 and duration > 0) then
 		GameTooltip:AddLine(Necrosis.TooltipData.DominationCooldown)
+		GameTooltip:AddLine(Necrosis.TooltipData.DominationCooldown2)
 	end
 end
 local function AddMenuTip(Type)
@@ -2023,6 +2030,7 @@ function Necrosis:BuildButtonTooltip(button)
 	elseif (Type == "Imp")			then AddCastAndCost("imp"); AddDominion(start, duration)
 	elseif (Type == "Voidwalker")	then AddCastAndCost("voidwalker"); AddShard(); AddDominion(start, duration)
 	elseif (Type == "Succubus")		then AddCastAndCost("succubus"); AddShard(); AddDominion(start, duration)
+	elseif (Type == "Inccubus")		then AddCastAndCost("inccubus"); AddShard(); AddDominion(start, duration)
 	elseif (Type == "Felhunter")	then AddCastAndCost("felhunter"); AddShard(); AddDominion(start, duration)
 	elseif (Type == "felguard")		then AddCastAndCost("felguard"); AddShard(); AddDominion(start, duration)	
 	elseif (Type == "Infernal")		then AddCastAndCost("inferno"); AddInfernalReagent()
@@ -2135,6 +2143,8 @@ function Necrosis:UpdateMana()
 		end
 		-- pets
 		for i, v in ipairs(Necrosis.Warlock_Lists.pets) do
+			
+			--print (Necrosis.Warlock_Buttons[v.f_ptr],i)
 			local b = Necrosis.Warlock_Buttons[v.f_ptr]
 			local f = _G[b.f]
 			local spell = Necrosis.GetSpell(v.high_of)
@@ -2170,6 +2180,7 @@ _G["DEFAULT_CHAT_FRAME"]:AddMessage("Necrosis:UpdateMana"
 	local usage = "domination" -- 15
 	if Necrosis.IsSpellKnown(usage) then
 		local f = _G[Necrosis.Warlock_Buttons[usage].f]
+		
 		local spell = Necrosis.GetSpell(usage)
 		if f and not Local.BuffActif.Domination then
 --[[
@@ -2532,10 +2543,11 @@ function Necrosis:ButtonSetup()
 			)
 		end
 		local f = _G[fr]
+		local sp = NecrosisConfig.StonePosition[index]
 		if (Necrosis.IsSpellKnown(v.high_of) 	-- in spell book
 		or v.menu                           -- or on menu of spells
 		or v.item)                          -- or item to use
-		and NecrosisConfig.StonePosition[index] > 0 -- and requested
+		and (sp and sp > 0) -- and requested
 		then
 			if not f then
 				f = Necrosis:CreateSphereButtons(Necrosis.Warlock_Buttons[v.f_ptr])
@@ -2682,11 +2694,29 @@ function Necrosis:CreateMenu()
 		end
 
 		for index = 1, #Necrosis.Warlock_Lists.pets, 1 do
+--		
+			if NecrosisConfig.PetShow[index] == true 		then
+				show = NecrosisConfig.PetShow[index]
+			elseif NecrosisConfig.PetShow[index] == false 	then
+				show = NecrosisConfig.PetShow[index]
+			elseif not NecrosisConfig.PetShow[index] 			then
+				show = true
+			else 
+			
+			end
+		--print (show,NecrosisConfig.PetShow[index],#Necrosis.Warlock_Lists.pets)
+		if  show  == true then
+		
 			local v = Necrosis.Warlock_Lists.pets[index]
 			local f = Necrosis.Warlock_Buttons[v.f_ptr].f
-			if Necrosis.IsSpellKnown(v.high_of) -- in spell book
---			and NecrosisConfig.DemonSpellPosition[index] > 0 -- and requested
+			--print (v,f)					
+			if Necrosis.IsSpellKnown(v.high_of) or v.f_ptr == "sacrifice"  -- in spell book or sacrifice
+--			
+
+			--and NecrosisConfig.DemonSpellPosition[index] > 0 -- and requested
+			
 			then
+			
 				if Necrosis.Debug.buttons then
 					_G["DEFAULT_CHAT_FRAME"]:AddMessage("CreateMenu pets"
 					.." f'"..(v.f_ptr or "nyl")..'"'
@@ -2705,7 +2735,7 @@ function Necrosis:CreateMenu()
 				Local.Menu.Pet:insert(menuVariable)
 			end
 		end
-
+		end
 		-- Display the pets menu button || Maintenant que tous les boutons de pet sont placés les uns à côté des autres, on affiche les disponibles
 		if Local.Menu.Pet[1] then
 			local f = _G[Necrosis.Warlock_Buttons.pets.f]

@@ -225,6 +225,43 @@ do
 	})
 	module.db.session_gGUIDs_DEBUG = sessionData
 
+	if ExRT.isClassic then
+		module.db.session_gGUIDs = setmetatable({}, {
+			__index = function (t,k) 
+				return sessionData[k] or nilData
+			end,
+			__newindex = function (t,k,v)
+				local e = sessionData[k]
+				if not e then
+					local n = {}
+					e = setmetatable({},{
+						__index = function (t1,k1) 
+							return n[k1] or type(k1) == "number" and k1 > 0 and n[GetSpellInfo(k1) or ""]
+						end,
+						__newindex = function (t1,k1,v1)
+							n[k1] = v1
+						end
+					})
+					sessionData[k] = e
+				end
+				local reason = true
+				if type(v) == 'table' then
+					if v[3] then
+						reason = {v[3],v[2]}
+					else
+						reason = v[2]
+					end
+					v = v[1]
+				end
+				if type(v)=='string' or v > 0 then
+					e[v] = reason
+				else
+					e[-v] = nil
+				end
+			end
+		})
+	end
+
 	function module:ClearSessionDataReason(name,...)
 		local e = sessionData[name]
 		if not e then
@@ -900,11 +937,16 @@ do
 		{336471,73325},	--priest: Leap of Faith
 		{108293,108291,319454},	--druid: HotW
 		{119910,19647},	--warlock: pet kick
+		{89766,119914},		--warlock: pet kick [warlock kick]
+		{119909,6358},		--warlock: pet 
+		{119907,17767},		--warlock: pet 
+		{119905,89808},		--warlock: pet 
 
 		{307192,213664,216431,216802,216468,338447,301308},	--Healing Potion
 		{338142,338018,338035,326462,326446,326647,326434},
 
 		{115203,243435},	--Fortifying Brew
+		{218164,115450},	--Detox 
 	}
 	if ExRT.isBC then
 		sameSpellsData[#sameSpellsData+1] = {2894,2062}
@@ -1206,7 +1248,7 @@ module.db.petsAbilities = {	--> PetTypes = HUNTERS[ Tenacity [1], Cunning = [2],
 	[L.creatureNames["Felhunter"]] = 		{0,	{19647,24},	{19505,15},	},
 	[L.creatureNames["Fel Imp"]] = 		{0,	{115276,10},	},
 	[L.creatureNames["Imp"]] = 		{0,	{89808,10},	{119899,30,12},	{89792,20},	},
-	[L.creatureNames["Observer"]] = 		{0,	{115781,24},	{115284,15},	},
+	[L.creatureNames["Observer"]] = 		{0,	{19647,24},	{115284,15},	},
 	[L.creatureNames["Shivarra"]] = 		{0,	{115770,25},	{115268,30},	},
 	[L.creatureNames["Succubus"]] = 		{0,	{6360,25},	{6358,30},	},
 	[L.creatureNames["Voidlord"]] = 		{0,	{115236,10}	},
@@ -1217,7 +1259,14 @@ module.db.petsAbilities = {	--> PetTypes = HUNTERS[ Tenacity [1], Cunning = [2],
 module.db.spell_isPetAbility = {}
 for petName,petData in pairs(module.db.petsAbilities) do
 	for i=2,#petData do
-		module.db.spell_isPetAbility[petData[i][1]] = petName
+		if module.db.spell_isPetAbility[petData[i][1]] then
+			if type(module.db.spell_isPetAbility[petData[i][1]]) ~= "table" then
+				module.db.spell_isPetAbility[petData[i][1]] = {module.db.spell_isPetAbility[petData[i][1]]}
+			end
+			module.db.spell_isPetAbility[petData[i][1]][ #module.db.spell_isPetAbility[petData[i][1]] + 1 ] = petName
+		else
+			module.db.spell_isPetAbility[petData[i][1]] = petName
+		end
 	end
 end
 
@@ -1429,9 +1478,7 @@ module.db.itemsBonusToSpell = {
 
 if ExRT.isClassic then
 	module.db.findspecspells = {}
-	module.db.spell_isTalent = {
-		[16190] = true,	
-	}
+	module.db.spell_isTalent = {}
 	module.db.spell_autoTalent = {}
 	module.db.spell_charge_fix = {}
 	module.db.spell_talentReplaceOther = {}
@@ -1459,6 +1506,7 @@ module.db.vars = {
 		[192249]=true,[193530]=true,[194223]=true,[194249]=true,[198067]=true,[198144]=true,
 		[205180]=true,[216331]=true,[227847]=true,[228260]=true,[231895]=true,[265187]=true,
 		[266779]=true,[275699]=true,[288613]=true,[297850]=true,[333957]=true,[335235]=true,
+		[102558]=true,
 	},
 	isWarlock = {},
 	isRogue = {},
@@ -2954,7 +3002,7 @@ local function AfterCombatResetFunction(isArena)
 				uSpecID = 4
 			end
 
-			if (unitSpellData.cd > 0 and (_db.spell_afterCombatReset[unitSpellData.db[1]] or (unitSpellData.db[uSpecID] and unitSpellData.db[uSpecID][2] >= (isArena and 0 or 180) or unitSpellData.cd >= (isArena and 0 or 180)))) and (not _db.spell_afterCombatNotReset[unitSpellData.db[1]] or isArena) then
+			if (unitSpellData.cd > 0 and (_db.spell_afterCombatReset[unitSpellData.db[1]] or (unitSpellData.db[uSpecID] and unitSpellData.db[uSpecID][2] >= (isArena and 0 or 120) or unitSpellData.cd >= (isArena and 0 or 180)))) and (not _db.spell_afterCombatNotReset[unitSpellData.db[1]] or isArena) then
 				unitSpellData.lastUse = 0 
 				unitSpellData.charge = nil 
 
@@ -3042,6 +3090,7 @@ do
 	local saveDataTimer = 0
 	local lastBattleResChargesStatus = nil
 
+	--[[
 	local function sort_f(a,b)
 		if a.column == b.column then
 			if a.sorting == b.sorting then
@@ -3059,6 +3108,22 @@ do
 			end
 		else
 			return a.column < b.column
+		end
+	end
+	]]
+	local function sort_f(a,b)
+		if a.column ~= b.column then
+			return a.column < b.column
+		elseif a.sorting ~= b.sorting then
+			if a.rsort then
+				return (a.sorting or 0) > (b.sorting or 0)
+			else
+				return (a.sorting or 0) < (b.sorting or 0)
+			end
+		elseif a.rsort then
+			return (a.sort or 0) > (b.sort or 0)
+		else
+			return (a.sort or 0) < (b.sort or 0)
 		end
 	end
 
@@ -3179,7 +3244,7 @@ do
 			(db[unitSpecID] or (not db[unitSpecID] and db[4])) and 
 			(not spell_isTalent[spellID] or session_gGUIDs[name][spellID]) and 
 			(not spell_isPvpTalent[spellID] or (session_gGUIDs[name][spellID] and IsPvpTalentsOn(name))) and 
-			(not spell_isPetAbility[spellID] or session_Pets[name] == spell_isPetAbility[spellID] or (session_Pets[name] and petsAbilities[ session_Pets[name] ] and petsAbilities[ session_Pets[name] ][1] == spell_isPetAbility[spellID])) and
+			(not spell_isPetAbility[spellID] or session_Pets[name] == spell_isPetAbility[spellID] or (session_Pets[name] and petsAbilities[ session_Pets[name] ] and petsAbilities[ session_Pets[name] ][1] == spell_isPetAbility[spellID]) or (type(spell_isPetAbility[spellID]) == "table" and session_Pets[name] and ExRT.F.table_find(spell_isPetAbility[spellID],session_Pets[name]))) and
 			(not spell_talentReplaceOther[spellID] or not TalentReplaceOtherCheck(spellID,name)) and
 			(not data.specialCheck or data.specialCheck(data,currTime))
 			) then 
@@ -4662,6 +4727,9 @@ function module.main:UNIT_AURA(unitID)
 		end
 		if not FD_Found then
 			local line = _db.cdsNav[UnitName(unitID)][5384]
+			if ExRT.isClassic and not line then
+				line = _db.cdsNav[UnitName(unitID)][GetSpellInfo(5384)]
+			end
 			if line then
 				CLEUstartCD(line)
 			end
@@ -5632,8 +5700,12 @@ do
 	end
 	if ExRT.isClassic then	--fix for BC Terokkar Tablet of Precision trinket & heroism spell
 		local oldFunc = module.main.SPELL_CAST_SUCCESS
+		local blacklist = {
+			[25937] = true,
+			[33667] = true,
+		}
 		module.main.SPELL_CAST_SUCCESS = function(self,sourceGUID,sourceName,sourceFlags,destGUID,destName,destFlags,spellID,_,_,_,_,spellIDClassic,...)
-			if spellIDClassic == 25937 then
+			if spellIDClassic and blacklist[spellIDClassic] then
 				return
 			end
 			return oldFunc(self,sourceGUID,sourceName,sourceFlags,destGUID,destName,destFlags,spellID,_,_,_,_,spellIDClassic,...)
@@ -6147,9 +6219,16 @@ do
 			local guid = UnitGUID(unitID)
 			local name = UnitName(unitID)
 
-			module.main.SPELL_CAST_SUCCESS(guid,name,0,nil,nil,0,spellID)
+			if not ExRT.isClassic then
+				module.main.SPELL_CAST_SUCCESS(guid,name,0,nil,nil,0,spellID)
+			else
+				module.main.SPELL_CAST_SUCCESS(guid,name,0,nil,nil,0,GetSpellInfo(spellID),nil,nil,nil,nil,spellID)
+			end
 			if spellID == 5384 then
 				local line = CDList[name][5384]
+				if ExRT.isClassic and not line then
+					line = CDList[name][GetSpellInfo(5384)]
+				end
 				if line then
 					line:SetCD(360)
 				end
@@ -6188,7 +6267,10 @@ do
 		local name = UnitCombatlogname(unitID)
 		if _db.spell_ReincarnationFix[name] and not UnitIsDead(unitID) then
 			if not UnitIsGhost(unitID) then
-				module.main.SPELL_CAST_SUCCESS(UnitGUID(unitID),name,0,nil,nil,nil,GetSpellInfo(20608),nil)
+				local hp = UnitHealth(unitID) / max(UnitHealthMax(unitID),1)
+				if hp < 0.45 then
+					module.main.SPELL_CAST_SUCCESS(UnitGUID(unitID),name,0,nil,nil,nil,GetSpellInfo(20608),nil)
+				end
 			end
 			_db.spell_ReincarnationFix[name] = nil
 		end
@@ -6563,7 +6645,7 @@ function module.options:Load()
 			additional[#additional+1] = L.cd2ResurrectTooltip
 		end
 		if module.db.spell_isTalent[ parent.data[1] ] and not parent.isItem and not module.db.spell_covenant[ parent.data[1] ] then
-			additional[#additional+1] = "|cffffffff"..L.cd2AddSpellFrameTalent.."|r"
+			additional[#additional+1] = "|cffffffff"..L.cd2AddSpellFrameTalent.."|r"..(ExRT.isClassic and " |cffff8888(*will be shown only after first usage)|r" or "")
 		end
 		if module.db.spell_dispellsList[ parent.data[1] ] then
 			additional[#additional+1] = "|cffffffaa"..L.cd2AddSpellFrameDispel.."|r"
@@ -11552,7 +11634,7 @@ module.db.AllSpells = {
 	{223306,"PALADIN",		3,	nil,			{223306,12,	5},	nil,			nil,			},	--Bestow Faith
 	{204018,"PALADIN,DEFTAR",	2,	nil,			nil,			{204018,180,	10},	nil,			},	--Blessing of Spellwarding
 	{115750,"PALADIN",		3,	{115750,90,	0},	nil,			nil,			nil,			},	--Blinding Light
-	{231895,"PALADIN,DPS",		3,	nil,			nil,			nil,			{231895,20,	20},	},	--Crusade
+	{231895,"PALADIN,DPS",		3,	nil,			nil,			nil,			{231895,120,	25},	},	--Crusade
 	{343527,"PALADIN",		3,	nil,			nil,			nil,			{343527,60,	0},	},	--Execution Sentence
 	{205191,"PALADIN",		3,	nil,			nil,			nil,			{205191,60,	10},	},	--Eye for an Eye
 	{343721,"PALADIN",		3,	nil,			nil,			nil,			{343721,60,	8},	},	--Final Reckoning
@@ -12074,7 +12156,7 @@ module.db.AllSpells = {
 	{89808,	"PET,WARLOCK,DISPEL",	5,	{89808,10,0}	},
 	{119899,"PET,WARLOCK",		4,	{119899,30,12}	},
 	{89792,	"PET,WARLOCK",		3,	{89792,20,0}	},
-	{115781,"PET,WARLOCK,KICK",	5,	{115781,24,0}	},
+	--{115781,"PET,WARLOCK,KICK",	5,	{115781,24,0}	},
 	{115831,"PET,WARLOCK",		3,	{115831,45,6}	},
 	{115268,"PET,WARLOCK,CC",	3,	{115268,30,0}	},
 	{6358,	"PET,WARLOCK,CC",	3,	{6358,30,0}	},
@@ -12237,8 +12319,9 @@ if ExRT.isBC then
 		{12809,	"WARRIOR",	1,	{12809,	45,	5}},	--Concussion Blow
 		{676,	"WARRIOR",	1,	{676,	60,	10}},	--Disarm
 
-		{11958,	"MAGE",		1,	{11958,	480,	40}},	--Cold Snap
+		{11958,	"MAGE",		1,	{11958,	480,	0}},	--Cold Snap
 		{12472,	"MAGE",		1,	{12472,	180,	20}},	--IV
+		{45438,	"MAGE",		1,	{45438,	300,	10}},	--IB
 
 		{1020,	"PALADIN",	1,	{1020,	300,	12}},	--DS
 		{10310,	"PALADIN",	1,	{10310,	3600,	0}},	--LoH
@@ -12257,11 +12340,22 @@ if ExRT.isBC then
 		{19801, "HUNTER",	1,	{19801,	20,	0}},	--Tranq
 		{34477, "HUNTER",	1,	{34477,	120,	30}},	--MD
 		{19577, "HUNTER",	1,	{19577,	60,	3}},	--MD
+		{5384, 	"HUNTER",	1,	{5384,	30,	0}},	--Feign Death
 		
 		{28275, "PRIEST",	1,	{28275,	360,	180}}, 	--Lightwell
 		{6346, 	"PRIEST",	1,	{6346,	180,	0}}, 	--Fear Ward
 		{32548, "PRIEST",	1,	{32548,	300,	15},	specialCheck=function(_,_,_,r) if r=="Draenei" then return true end end}, 	--Symbol of Hope
+		{10060, "PRIEST",	1,	{10060,	180,	15}},	--Power Infusion
+
+		{5277, 	"ROGUE",	1,	{5277,	300,	15}},	--Evasion
 	}
+	module.db.spell_isTalent[GetSpellInfo(16190) or "spell:16190"] = true	module.db.spell_isTalent[16190] = true
+	module.db.spell_isTalent[GetSpellInfo(10060) or "spell:10060"] = true	module.db.spell_isTalent[10060] = true
+	module.db.spell_isTalent[GetSpellInfo(11958) or "spell:11958"] = true	module.db.spell_isTalent[11958] = true
+
+	module.db.spell_resetOtherSpells[GetSpellInfo(11958) or "spell:11958"] = {GetSpellInfo(45438)}
+	module.db.spell_aura_list[GetSpellInfo(45438) or "spell:45438"] = GetSpellInfo(45438)
+	
 elseif ExRT.isClassic then
 	module.db.AllSpells = {
 		{29166,	"DRUID",	1,	{29166,	360,	20}},	--Озарение

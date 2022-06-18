@@ -1,26 +1,26 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --> global name declaration
-		
-		_ = nil --removing the underline from the global namespace
+
+		_ = nil -- remove underscore from global namespace
 		_detalhes = LibStub("AceAddon-3.0"):NewAddon("_detalhes", "AceTimer-3.0", "AceComm-3.0", "AceSerializer-3.0", "NickTag-1.0")
-		
+
 		local version, build, date, tocversion = GetBuildInfo()
 
-		_detalhes.build_counter = 8783
-		_detalhes.alpha_build_counter = 8783 --if this is higher than the regular counter, use it instead
-		_detalhes.bcc_counter = 27
+		_detalhes.build_counter = 9821
+		_detalhes.alpha_build_counter = 9821 --if this is higher than the regular counter, use it instead
+		_detalhes.bcc_counter = 39
 		_detalhes.dont_open_news = true
 		_detalhes.game_version = version
 		_detalhes.userversion = version .. _detalhes.build_counter
-		_detalhes.realversion = 145 --core version, this is used to check API version for scripts and plugins (see alias below)
+		_detalhes.realversion = 146 --core version, this is used to check API version for scripts and plugins (see alias below)
 		_detalhes.APIVersion = _detalhes.realversion --core version
 		_detalhes.version = _detalhes.userversion .. " (core " .. _detalhes.realversion .. ")" --simple stirng to show to players
-		
+
 		_detalhes.BFACORE = 131 --core version on BFA launch
 		_detalhes.SHADOWLANDSCORE = 143 --core version on Shadowlands launch
-		
+
 		Details = _detalhes
-		
+
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --> initialization stuff
 local _
@@ -33,6 +33,108 @@ do
 	local Loc = _G.LibStub("AceLocale-3.0"):GetLocale( "Details" )
 
 	local news = {
+		{"v9.2.0.9814.146", "May 15th, 2022"},
+		"Added slash command /keystone, this command show keystones of other users with addons using Open Raid library.",
+		"Added a second Title Bar (disabled by default), is recomended to make the Skin Color (under Window Body) full transparent while using it.",
+		"Added Overlay Texture and Color options under Bars: General.",
+		"Added Wallpaper Alignment 'Full Body', this alignment make the wallpaper fill over the title bar.",
+		"Added Auto Alignment for 'Aligned Text Columns', this option is enabled by default.",
+		"Added 'Window Area Border' and 'Row Area Border' under 'Window Body' section in the options panel.",
+		"Added an option to color the Row Border by player class.",
+		"Added new automation auto hide option: Arena.",
+		"Blizzard Death Recap kill ability only shows on Dungeons and Raids now.",
+		"Fixed an issue where player names was overlapping damage numbers with enbaled 'Aligned Text Columns'.",
+		"Fixed a bug on 'DeathLog Min Healing' option where it was reseting to 1 on each logon.",
+		"Fixed several bugs with 'Bar Orientation: Right to Left' (fix by Flamanis).",
+		"Fixed an error on Vanguard plugin.",
+		"Fixed Spec Icons 'Specialization Alpha' offseted by 2 pixels to the right.",
+
+		{"v9.2.0.9778.146", "April 26th, 2022"},
+		--"A cooldown tracker experiment has been added, its options is visible at the Options Panel.",
+		"Added a search box in the '/details scroll' feature.",
+		"When using Details! Death Recap, a message is now printed to chat showing what killed you accordingly to Blizzard Death Recap.",
+		"Fixed some errors while using Mind Control on an arena match.",
+		"Fixed encounter phase detection while using voice packs for boss mods addons.",
+		"Fixed an error after killing a boss encounter on heroic dificulty for the first time.",
+		"Fixed the issue of skins installed after the window has been loaded and the skin was not found at that time.",
+		"API: added 'UNIT_SPEC' and 'UNIT_TALENTS' event to details! event listener.",
+		"API: added Details:GetUnitId(unitName) which return the unitId for a given player name.",
+
+		{"v9.2.0.9735.146", "April 8th, 2022"},
+		"Arena Enemy Player deaths has been greatly improved on this version.",
+		"Added M+ Score into the player info tooltip (hover over the spec icon).",
+		"Fixed windows ungrouping after a /reload (fix by Flamanis).",
+		"Opening a tooltip from a bar or a menu in the title bar will close the All Displays Panel (from right clicking the title bar).",
+		"[TBC] fixed an error given by users using old versions of Details! in the raid.",
+
+		{"v9.2.0.9715.146", "March 6th, 2022"},
+		"More Tiny Threat fixes and implementations (by Treeston)",
+		"Fixed Chinese and Taiwan 'Thousand' abbreviation letter (fix by github user Maioro).",
+
+		{"v9.2.0.9699.146", "March 4th, 2022"},
+		"Align Text Columns now have a warning at the bracket and separators option",
+		"Silence from interrupts shall be counted as a crowd control.",
+		"More phrases in the options panel has been added to translation.",
+		"A revamp has beed started on the erase data prompt.",
+
+		{"v9.2.0.9696.146", "February 24th, 2022"},
+		"Fixed DPS display when using Aligned Text Columns.",
+		"Fixed percent showing even it's disabled when using Aligned Text Columns.",
+
+		{"v9.2.0.9255.146", "February 22th, 2022"},
+		"Added Cosmic Healing Potion to script 'Health Potion & Stone'.",
+
+		{"v9.1.5.9213.146", "February 15th, 2022"},
+		"Added an option to change your own bar color.",
+		"Added 'Ignore this Npc' into the Npc list under the spell list section.",
+		"Bookmark window now uses the same scale than the options panel.",
+		"Class Color window now uses the same scale than the options panel.",
+		"If not casted on the player itself Power Infusion now shows in the buff list of the target.",
+		"Allowed nicknames on custom displays (by Flamanis).",
+		"Aligned Text Columns enabled is now default for new installs.",
+		"Fodder to the flames DH ability won't count damage done by the player on the add summoned.",
+		"Fixed the load time for the Npc Ids panel on the spell list section.",
+		"Fixed all issues with the options panel scale.",
+		"Fixed tooltips overlap when the window is positioned at the top of the screen (fix by Flamanis).",
+		"Fixed auto hide windows which wasn't saving its group when unhiding (fix by Flamanis).",
+		"Fixed some XML Headers which was giving errors on loading (fix by github user h0tw1r3).",
+		"Fixed '/details me' on TBC, which wasn't working correctly (fix by github user Baugstein).",
+		"Fixed a typo on Vanguard plugin (fix by github user cruzerthebruzer).",
+		"Fixed font 'NuevaStd' where something the font didn't work at all.",
+		"Fixed an issue where for some characters the options panel won't open showing an error in the chat instead.",
+		"New API: combat:GetPlayerDeaths(deadPlayerName).",
+		"New API: Details:ShowDeathTooltip(combatObject, deathTable) for Cooltip tooltips.",
+
+		{"v9.1.5.9213.145", "December 9th, 2021"},
+		"Fixed an issue where after reloading, overall data won't show the players nickname.",
+		"Fixed overkill damage on death log tooltip.",
+		"Fixed the percent bars for the healing done target on the player breakdown window.",
+		"Fixed an issue with resource tooltips.",
+
+		{"v9.1.5.9108.145", "November 02th, 2021"},
+		"Necrotic Wake: weapons damage does not count anymore for the player which uses it.",
+		"Necrotic Wake: a new 'fake player' is shown showing the damage done of all weapons during combat.",
+		"Necrotic Wake: these npcs now does not award damage done to players anymore: Brittlebone Mage, Brittlebone Warrior, Brittlebone Crossbowman",
+		"The Other Side: the npc Volatile Memory does not award anymore damage to players.",
+		"Plaguefall: the npcs Fungret Shroomtender and Plaguebound Fallen does not award anymore damage to players.",
+		"Sanguine Affix: the amount of healing done by sanguine pools now shows on all segments (was shown only in the overall).",
+		"Tiny Threat (plugin): fixed an issue when hidding the pull aggro bar makes the first line be invisible.",
+		"Statistics: fixed several small bugs with guild statistics (/details stats).",
+		"Scale slider (top left slider shown on panels) are now more responsible.",
+
+		{"v9.1.0.8888.145", "October 7th, 2021"},
+		"Search has been added into the options panel",
+		"Improvements on overkill amount of damage",
+		"Fonts 'Oswald' and 'NuevaStd' enabled again.",
+		"Added critical hits to Death Log (by C. Raethke)",
+		"Added settings to change the color on death log, they are within the class colors panel.",
+		"Don't show TaintWarning frame if MiniMapBattlefieldFrame is hidden (by Flamanis).",
+
+		{"v9.1.0.8812.145", "September 5th, 2021"},
+		"Fonts 'Oswald' and 'NuevaStd' disabled due to some erros on the client side.",
+		"Death Knight adds now include the icon of the spell whose summoned them.",
+		"Fixes and improvements on the backend of the addon.",
+
 		{"v9.1.0.8782.145", "August 11th, 2021"},
 		"Clicking on the minimap while the options panel is open will close it.",
 		"Fixed Raid Check plugin position when the window is anchored at the top of the monitor.",
@@ -200,12 +302,12 @@ do
 			--	/script Details:OpenPlugin ('Advanced Death Logs'); local a = Details_DeathGraphsModeEnduranceButton and Details_DeathGraphsModeEnduranceButton.MyObject:Click()
 				{Name = "Report What is Shown In the Window", Desc = "Report the current data shown in the window, the number 1 is the window number, replace it to report another window.", MacroText = "/script Details:FastReportWindow(1)"},
 			}
-			
+
 		--> current instances of the exp (need to maintain)
 			_detalhes.InstancesToStoreData = { --mapId
 				[2296] = true, --castle narnia
 				[2450] = true, --sanctum of domination
-				[2450] = true,
+				[2481] = true, --sepulcher of the first ones
 			}
 
 		--> armazena os escudos - Shields information for absorbs
@@ -354,8 +456,12 @@ do
 		--> player detail skin
 			_detalhes.playerdetailwindow_skins = {}
 
-		_detalhes.BitfieldSwapDebuffsIDs = {265646, 272407, 269691, 273401, 269131, 260900, 260926, 284995, 292826, 311367, 310567, 308996, 307832, 327414, 337253}
-		
+		_detalhes.BitfieldSwapDebuffsIDs = {265646, 272407, 269691, 273401, 269131, 260900, 260926, 284995, 292826, 311367, 310567, 308996, 307832, 327414, 337253,
+											36797, 37122, 362397}
+		_detalhes.BitfieldSwapDebuffsSpellIDs = {
+			[360418] = true
+		}
+
 		--> auto run code
 		_detalhes.RunCodeTypes = {
 			{Name = "On Initialization", Desc = "Run code when Details! initialize or when a profile is changed.", Value = 1, ProfileKey = "on_init"},
@@ -489,7 +595,7 @@ do
 			--> name to plugin object
 				_detalhes.ToolBar.NameTable = {}
 				_detalhes.ToolBar.Menu = {}
-		
+
 		--> statusbar -------------------------------------------------------------------
 			--> plugins container
 				_detalhes.StatusBar = {}
@@ -501,25 +607,26 @@ do
 				_detalhes.StatusBar.NameTable = {}
 
 	--> constants
-		--[[global]] DETAILS_HEALTH_POTION_ID = 307192
+		--[[global]] DETAILS_HEALTH_POTION_ID = 307192 -- spiritual healing potion
+		--[[global]] DETAILS_HEALTH_POTION2_ID = 359867 --cosmic healing potion
 		--[[global]] DETAILS_REJU_POTION_ID = 307194
 		--[[global]] DETAILS_MANA_POTION_ID = 307193
 		--[[global]] DETAILS_FOCUS_POTION_ID = 307161
 		--[[global]] DETAILS_HEALTHSTONE_ID = 6262
-		
+
 		--[[global]] DETAILS_INT_POTION_ID = 307162
 		--[[global]] DETAILS_AGI_POTION_ID = 307159
 		--[[global]] DETAILS_STR_POTION_ID = 307164
 		--[[global]] DETAILS_STAMINA_POTION_ID = 307163
-
 		--[[global]] DETAILS_HEALTH_POTION_LIST = {
 			[DETAILS_HEALTH_POTION_ID] = true, --Healing Potion
 			[DETAILS_HEALTHSTONE_ID] = true, --Warlock's Healthstone
 			[DETAILS_REJU_POTION_ID] = true, --Rejuvenation Potion
 			[DETAILS_MANA_POTION_ID] = true, --Mana Potion
-			[323436] = true --Phial of Serenity (from Kyrians)
+			[323436] = true, --Phial of Serenity (from Kyrians)
+			[DETAILS_HEALTH_POTION2_ID] = true,
 		}
-	
+
 		--[[global]] DETAILS_MODE_GROUP = 2
 		--[[global]] DETAILS_MODE_ALL = 3
 
@@ -750,8 +857,8 @@ do
 		SharedMedia:Register ("border", "Details BarBorder 3", [[Interface\AddOns\Details\images\border_3]])
 		SharedMedia:Register ("border", "1 Pixel", [[Interface\Buttons\WHITE8X8]])
 		--misc fonts
-		SharedMedia:Register ("font", "Oswald", [[Interface\Addons\Details\fonts\Oswald-Regular.otf]])
-		SharedMedia:Register ("font", "Nueva Std Cond", [[Interface\Addons\Details\fonts\NuevaStd-Cond.otf]])
+		SharedMedia:Register ("font", "Oswald", [[Interface\Addons\Details\fonts\Oswald-Regular.ttf]])
+		SharedMedia:Register ("font", "Nueva Std Cond", [[Interface\Addons\Details\fonts\Nueva Std Cond.ttf]])
 		SharedMedia:Register ("font", "Accidental Presidency", [[Interface\Addons\Details\fonts\Accidental Presidency.ttf]])
 		SharedMedia:Register ("font", "TrashHand", [[Interface\Addons\Details\fonts\TrashHand.TTF]])
 		SharedMedia:Register ("font", "Harry P", [[Interface\Addons\Details\fonts\HARRYP__.TTF]])

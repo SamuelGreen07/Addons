@@ -1,4 +1,4 @@
-if not WeakAuras.IsCorrectVersion() then return end
+if not WeakAuras.IsCorrectVersion() or not WeakAuras.IsLibsOK() then return end
 local AddonName, Private = ...
 
 local SharedMedia = LibStub("LibSharedMedia-3.0");
@@ -35,12 +35,7 @@ local default = {
   icon_side = "RIGHT",
   icon_color = {1.0, 1.0, 1.0, 1.0},
   frameStrata = 1,
-  zoom = 0,
-  subRegions = {
-    [1] = {
-      ["type"] = "aurabar_bar"
-    }
-  }
+  zoom = 0
 };
 
 WeakAuras.regionPrototype.AddAdjustedDurationToDefault(default);
@@ -481,6 +476,15 @@ local barPrototype = {
     self:UpdateAdditionalBars();
   end,
 
+  ["GetAdditionalBarsInverse"] = function(self)
+    return self.additionalBarsInverse
+  end,
+
+  ["SetAdditionalBarsInverse"] = function(self, value)
+    self.additionalBarsInverse = value;
+    self:UpdateAdditionalBars();
+  end,
+
   ["SetAdditionalBarColor"] = function(self, id, color)
     self.additionalBarsColors[id] = color;
     if self.extraTextures[id] then
@@ -864,6 +868,7 @@ local funcs = {
     else
       self.bar:SetValue(1 - self.bar:GetValue());
     end
+    self.bar:SetAdditionalBarsInverse(not self.bar:GetAdditionalBarsInverse())
     self.subRegionEvents:Notify("InverseChanged")
   end,
   SetOrientation = function(self, orientation)
@@ -990,14 +995,14 @@ local funcs = {
 -- Called when first creating a new region/display
 local function create(parent)
   -- Create overall region (containing everything else)
-  local region = CreateFrame("FRAME", nil, parent);
+  local region = CreateFrame("Frame", nil, parent);
   region.regionType = "aurabar"
   region:SetMovable(true);
   region:SetResizable(true);
   region:SetMinResize(1, 1);
 
   -- Create statusbar (inherit prototype)
-  local bar = CreateFrame("FRAME", nil, region);
+  local bar = CreateFrame("Frame", nil, region);
   Mixin(bar, SmoothStatusBarMixin);
   local fg = bar:CreateTexture(nil, "ARTWORK");
   fg:SetSnapToPixelGrid(false)
@@ -1006,7 +1011,7 @@ local function create(parent)
   bg:SetSnapToPixelGrid(false)
   bg:SetTexelSnappingBias(0)
   bg:SetAllPoints();
-  local fgFrame = CreateFrame("FRAME", nil, bar)
+  local fgFrame = CreateFrame("Frame", nil, bar)
   local spark = bar:CreateTexture(nil, "ARTWORK");
   spark:SetSnapToPixelGrid(false)
   spark:SetTexelSnappingBias(0)
@@ -1026,16 +1031,13 @@ local function create(parent)
   region.bar = bar;
 
   -- Create icon
-  local iconFrame = CreateFrame("FRAME", nil, region);
+  local iconFrame = CreateFrame("Frame", nil, region);
   region.iconFrame = iconFrame;
   local icon = iconFrame:CreateTexture(nil, "OVERLAY");
   icon:SetSnapToPixelGrid(false)
   icon:SetTexelSnappingBias(0)
   region.icon = icon;
   icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark");
-
-  -- Region variables
-  region.values = {};
 
   local oldSetFrameLevel = region.SetFrameLevel;
   function region.SetFrameLevel(self, frameLevel)
@@ -1185,7 +1187,7 @@ local function modify(parent, region, data)
   if tooltipType and data.useTooltip then
     -- Create and enable tooltip-hover frame
     if not region.tooltipFrame then
-      region.tooltipFrame = CreateFrame("frame", nil, region);
+      region.tooltipFrame = CreateFrame("Frame", nil, region);
       region.tooltipFrame:SetAllPoints(icon);
       region.tooltipFrame:SetScript("OnEnter", function()
         Private.ShowMouseoverTooltip(region, region.tooltipFrame);
@@ -1355,42 +1357,18 @@ local function modify(parent, region, data)
   WeakAuras.regionPrototype.modifyFinish(parent, region, data);
 end
 
-local function ValidateRegion(data)
-  data.subRegions = data.subRegions or {}
-  for index, subRegionData in ipairs(data.subRegions) do
-    if subRegionData.type == "aurabar_bar" then
-      return
+local function validate(data)
+  -- pre-migration
+  if data.subRegions then
+    for _, subRegionData in ipairs(data.subRegions) do
+      if subRegionData.type == "aurabar_bar" then
+        subRegionData.type = "subforeground"
+      end
     end
   end
-  tinsert(data.subRegions, 1, {
-    ["type"] = "aurabar_bar"
-  })
+  Private.EnforceSubregionExists(data, "subforeground")
+  Private.EnforceSubregionExists(data, "subbackground")
 end
 
 -- Register new region type with WeakAuras
-WeakAuras.RegisterRegionType("aurabar", create, modify, default, GetProperties, ValidateRegion);
-
-local function subSupports(regionType)
-  return regionType == "aurabar"
-end
-
-local function noop()
-end
-
-local function SetFrameLevel(self, level)
-  self.parent.bar:SetFrameLevel(level)
-  self.parent.iconFrame:SetFrameLevel(level)
-end
-
-local function subCreate()
-  local result = {}
-  result.Update = noop
-  result.SetFrameLevel = SetFrameLevel
-  return result
-end
-
-local function subModify(parent, region)
-  region.parent = parent
-end
-
-WeakAuras.RegisterSubRegionType("aurabar_bar", L["Foreground"], subSupports, subCreate, subModify, noop, noop, {}, nil, {}, false);
+WeakAuras.RegisterRegionType("aurabar", create, modify, default, GetProperties, validate);

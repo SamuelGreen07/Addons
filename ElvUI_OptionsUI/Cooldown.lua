@@ -42,31 +42,35 @@ local function group(order, db, label)
 	mainArgs.colorGroup = colors
 
 	local tColors = ACH:Group(L["Threshold Colors"], nil, 3)
-	tColors.args.expiringColor = ACH:Color(L["Expiring"], L["Color when the text is about to expire"], 1)
-	tColors.args.secondsColor = ACH:Color(L["Seconds"], L["Color when the text is in the seconds format."], 2)
-	tColors.args.minutesColor = ACH:Color(L["Minutes"], L["Color when the text is in the minutes format."], 3)
-	tColors.args.hoursColor = ACH:Color(L["Hours"], L["Color when the text is in the hours format."], 4)
-	tColors.args.daysColor = ACH:Color(L["Days"], L["Color when the text is in the days format."], 5)
-	tColors.args.mmssColor = ACH:Color(L["MM:SS"], nil, 6)
-	tColors.args.hhmmColor = ACH:Color(L["HH:MM"], nil, 7)
+	tColors.args.modRateColor = ACH:Color(E.NewSign..L["Modified Rate"], L["Color when the text is using a modified timer rate."], 1)
+	tColors.args.expiringColor = ACH:Color(L["Expiring"], L["Color when the text is about to expire."], 2)
+	tColors.args.secondsColor = ACH:Color(L["Seconds"], L["Color when the text is in the seconds format."], 3)
+	tColors.args.minutesColor = ACH:Color(L["Minutes"], L["Color when the text is in the minutes format."], 4)
+	tColors.args.hoursColor = ACH:Color(L["Hours"], L["Color when the text is in the hours format."], 5)
+	tColors.args.daysColor = ACH:Color(L["Days"], L["Color when the text is in the days format."], 6)
+	tColors.args.mmssColor = ACH:Color(L["MM:SS"], nil, 7)
+	tColors.args.hhmmColor = ACH:Color(L["HH:MM"], nil, 8)
 	mainArgs.colorGroup.args.timeColors = tColors
 
 	local iColors = ACH:Group(L["Time Indicator Colors"], nil, 4, nil, nil, nil, function() return not (profile(db)).useIndicatorColor end)
 	iColors.args.useIndicatorColor = ACH:Toggle(L["Use Indicator Color"], nil, 0, nil, nil, nil, function(info) return (profile(db))[info[#info]] end, function(info, value) (profile(db))[info[#info]] = value; E:UpdateCooldownSettings(db); end, false)
-	iColors.args.expireIndicator = ACH:Color(L["Expiring"], L["Color when the text is about to expire"], 1)
-	iColors.args.secondsIndicator = ACH:Color(L["Seconds"], L["Color when the text is in the seconds format."], 2)
-	iColors.args.minutesIndicator = ACH:Color(L["Minutes"], L["Color when the text is in the minutes format."], 3)
-	iColors.args.hoursIndicator = ACH:Color(L["Hours"], L["Color when the text is in the hours format."], 4)
-	iColors.args.daysIndicator = ACH:Color(L["Days"], L["Color when the text is in the days format."], 5)
-	iColors.args.hhmmColorIndicator = ACH:Color(L["MM:SS"], nil, 6)
-	iColors.args.mmssColorIndicator = ACH:Color(L["HH:MM"], nil, 7)
+	iColors.args.modRateIndicator = ACH:Color(E.NewSign..L["Modified Rate"], L["Color when the text is using a modified timer rate."], 1)
+	iColors.args.expireIndicator = ACH:Color(L["Expiring"], L["Color when the text is about to expire."], 2)
+	iColors.args.secondsIndicator = ACH:Color(L["Seconds"], L["Color when the text is in the seconds format."], 3)
+	iColors.args.minutesIndicator = ACH:Color(L["Minutes"], L["Color when the text is in the minutes format."], 4)
+	iColors.args.hoursIndicator = ACH:Color(L["Hours"], L["Color when the text is in the hours format."], 5)
+	iColors.args.daysIndicator = ACH:Color(L["Days"], L["Color when the text is in the days format."], 6)
+	iColors.args.hhmmColorIndicator = ACH:Color(L["MM:SS"], nil, 7)
+	iColors.args.mmssColorIndicator = ACH:Color(L["HH:MM"], nil, 8)
 	mainArgs.colorGroup.args.indicatorColors = iColors
 
 	if db == 'global' then
 		mainArgs.reverse = nil
 		mainArgs.colorGroup.args.override = nil
 		mainArgs.colorGroup.disabled = nil
-		mainArgs.colorGroup.name = L["COLORS"]
+		mainArgs.colorGroup.name = L["Colors"]
+
+		mainArgs.roundTime = ACH:Toggle(L["Round Timers"], nil, 1, nil, nil, nil, function(info) return (profile(db))[info[#info]] end, function(info, value) (profile(db))[info[#info]] = value; E:UpdateCooldownSettings(db); end)
 
 		-- keep these two in this order
 		E.Options.args.cooldown.args.hideBlizzard = mainArgs.hideBlizzard
@@ -86,5 +90,5 @@ group(5,  'global',     L["Global"])
 group(6,  'auras',      L["BUFFOPTIONS_LABEL"])
 group(7,  'actionbar',  L["ActionBars"])
 group(8,  'bags',       L["Bags"])
-group(9,  'nameplates', L["NamePlates"])
+group(9,  'nameplates', L["Nameplates"])
 group(10, 'unitframe',  L["UnitFrames"])

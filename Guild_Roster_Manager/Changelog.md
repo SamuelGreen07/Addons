@@ -2,6 +2,15 @@
 
 _______________________
 
+**VERSION R1.9297 RELEASE - February 22, 2022**
+
+* Compatibility update for 9.2.0
+* This is NOT the pending major release. Stay tuned.
+
+**VERSION R1.9296 RELEASE - November 4th, 2021**
+
+* Compatibility fix with 9.1.5, Classic 1.14, and BCC 2.5.2
+* This is NOT the pending major release. Stay tuned.
 
 **VERSION R1.9295 RELEASE - July 5th 2021**
 

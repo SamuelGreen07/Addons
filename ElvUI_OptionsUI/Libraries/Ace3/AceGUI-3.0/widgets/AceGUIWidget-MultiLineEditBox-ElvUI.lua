@@ -1,7 +1,7 @@
 --[[-----------------------------------------------------------------------------
 MultiLineEditBox Widget (Modified to add Syntax highlighting from FAIAP)
 -------------------------------------------------------------------------------]]
-local Type, Version = "MultiLineEditBox-ElvUI", 29
+local Type, Version = "MultiLineEditBox-ElvUI", 30
 local AceGUI = LibStub and LibStub("AceGUI-3.0", true)
 if not AceGUI or (AceGUI:GetWidgetVersion(Type) or 0) >= Version then return end
 
@@ -9,8 +9,6 @@ local _G, pairs = _G, pairs
 local GetCursorInfo, GetSpellInfo, ClearCursor = GetCursorInfo, GetSpellInfo, ClearCursor
 local CreateFrame, UIParent = CreateFrame, UIParent
 -- GLOBALS: ACCEPT, ChatFontNormal, BackdropTemplateMixin
-
-local indent = _G.ElvUI[1].Libs.indent -- ElvUI
 
 --[[-----------------------------------------------------------------------------
 Support functions
@@ -126,8 +124,14 @@ end
 local function OnTextChanged(self, userInput)                                    -- EditBox
 	if userInput then
 		self = self.obj
-		self:Fire("OnTextChanged", self.editBox:GetText())
+
+		local value = self.editBox:GetText()
+		self:Fire("OnTextChanged", value)
 		self.button:Enable()
+
+		if self.textChanged then
+			self.textChanged(value)
+		end
 	end
 end
 
@@ -256,12 +260,12 @@ local methods = {
 		return self.editBox:SetCursorPosition(...)
 	end,
 
-	-- ElvUI block
+	-- ElvUI block, this it to support plugins that use FAIAP
 	["SetSyntaxHighlightingEnabled"] = function(self, enabled)
 		if enabled then
-			indent.enable(self.editBox, nil, 4)
+			AceGUI.luaSyntax.enable(self.editBox, nil, 4)
 		else
-			indent.disable(self.editBox)
+			AceGUI.luaSyntax.disable(self.editBox)
 		end
 	end
 	-- End ElvUI block
@@ -345,7 +349,6 @@ local function Constructor()
 	editBox:SetScript("OnTextChanged", OnTextChanged)
 	editBox:SetScript("OnTextSet", OnTextSet)
 	editBox:SetScript("OnEditFocusGained", OnEditFocusGained)
-
 
 	scrollFrame:SetScrollChild(editBox)
 

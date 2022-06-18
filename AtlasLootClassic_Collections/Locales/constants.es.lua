@@ -4,26 +4,24 @@ if not AL then return end
 
 -- These localization strings are translated on Curseforge: https://www.curseforge.com/wow/addons/atlaslootclassic/localization
 -- Collections
+AL["'%s %s' Vendor"] = "Vendedor de '%s %s'"
 AL["%s Sets"] = "Conjuntos de %s"
 AL["'%s' Vendor"] = "'%s' Vendedor"
 AL["Abyssal Dukes"] = "Duques abisales"
 AL["Abyssal Lords"] = "Lords abisales"
 AL["Abyssal Templars"] = "Templarios abisales"
---[[Translation missing --]]
---[[ AL["Ahune"] = "Ahune"--]] 
+AL["Ahune"] = "Ahune"
 AL["Avalanchion"] = "Avalanchion"
 AL["Azure Templar"] = "Templario azur"
+AL["Badge of Justice"] = "Distintivo de justicia"
 AL["Baron Charr"] = "Barón Charr"
 AL["Baron Kazum"] = "Barón Kazum"
 AL["Box of Chocolates"] = "Caja de bombones"
---[[Translation missing --]]
---[[ AL["Brewfest"] = "Brewfest"--]] 
+AL["Brewfest"] = "Fiesta de la Cerveza"
 AL["Brightly Colored Egg"] = "Huevo de colores vivos"
---[[Translation missing --]]
---[[ AL["Burning Crusade"] = "Burning Crusade"--]] 
+AL["Burning Crusade"] = "Burning Crusade"
 AL["Childrens Week"] = "Semana de los Niños"
---[[Translation missing --]]
---[[ AL["Classic"] = "Classic"--]] 
+AL["Classic"] = "Clásico"
 AL["Crimson Templar"] = "Templario Carmesí"
 AL["Drops"] = "Despoja"
 AL["Dungeon Set %s"] = "Conjunto de mazmorra %s"
@@ -35,19 +33,19 @@ AL["Faction Mounts"] = "Monturas de facción"
 AL["Feast of Winter Veil"] = "El festín del Festival de Invierno"
 AL["Festive Gift"] = "Obsequio festivo"
 AL["First Prize"] = "Primer precio"
---[[Translation missing --]]
---[[ AL["Food"] = "Food"--]] 
+AL["Food"] = "Comida"
 AL["Gaily Wrapped Present"] = "Regalo con envoltorio alegre"
 AL["Gently Shaken Gift"] = "Regalo ligeramente agitado"
 AL["Gift of Adoration"] = "Ofrenda de adoración"
---[[Translation missing --]]
---[[ AL["Graveyard - Headless Horseman"] = "Graveyard - Headless Horseman"--]] 
+AL["Graveyard - Headless Horseman"] = "Cementerio - El Jinete decapitado"
 AL["Gurubashi Arena"] = "Arena Gurubashi"
 AL["Hallow's End"] = "Halloween"
 AL["Harvest Festival"] = "Festival de la Cosecha"
 AL["High Marshal Whirlaxis"] = "Alto mariscal Eje Torbellino"
 AL["Hoary Templar"] = "Templario vetusto"
+AL["Idols"] = "Ídolos"
 AL["Legendarys"] = "Legendarios"
+AL["Librams"] = "Tratados"
 AL["Lord Blackwood"] = "Lord Bosque Negro"
 AL["Lord Skwol"] = "Lord Skwol"
 AL["Love is in the Air"] = "Amor en el aire"
@@ -71,12 +69,14 @@ AL["Silithus Abyssal"] = "Abisal Silithus"
 AL["Smokywood Pastures"] = "Pastos de Bosquehumeante"
 AL["Smokywood Pastures Special Gift"] = "Obsequio especial de Pastos de Bosquehumeante"
 AL["Stranglethorn Fishing Extravaganza"] = "Gran espectáculo de pesca de Tuercespina"
+AL["Sunmote"] = "Mota de sol"
 AL["The Duke of Cynders"] = "Duque de las Brasas"
 AL["The Duke of Fathoms"] = "Duque de las Profundidades"
 AL["The Duke of Shards"] = "Duque de las Esquirlas"
 AL["The Duke of Zephyrs"] = "Duque de los Céfiros"
 AL["The Windreaver"] = "El Atracavientos"
 AL["Tier Sets"] = "Conjuntos de Tier"
+AL["Totems"] = "Tótems"
 AL["Two-Handed Weapons"] = "Armas de dos manos"
 AL["Unobtainable"] = "Inobtenible"
 AL["Wands"] = "Varitas"

@@ -4,7 +4,7 @@ PA.SMB, _G.SquareMinimapButtons = SMB, SMB
 
 SMB.Title = PA.ACL['|cFF16C3F2Square|r |cFFFFFFFFMinimap Buttons|r']
 SMB.Description = PA.ACL['Minimap Button Bar / Minimap Button Skinning']
-SMB.Authors = 'Azilroka    Nihilistzsche    Sinaris    Omega    Durc'
+SMB.Authors = 'Azilroka    Sinaris    Omega    Durc'
 SMB.isEnabled = false
 
 local _G = _G
@@ -73,6 +73,7 @@ SMB.GenericIgnore = {
 	'poiMinimap',
 	'GuildMap3Mini',
 	'LibRockConfig-1.0_MinimapButton',
+	'MinimapLayerFrame', -- Nova World Buffs
 	'NauticusMiniIcon',
 	'WestPointer',
 	'Cork',
@@ -103,20 +104,35 @@ SMB.UnrulyButtons = {
 	'RecipeRadar_MinimapButton',
 }
 
-local ButtonFunctions = { 'SetParent', 'ClearAllPoints', 'SetPoint', 'SetSize', 'SetScale', 'SetFrameStrata', 'SetFrameLevel' }
+local ButtonFunctions = { 'SetParent', 'ClearAllPoints', 'SetPoint', 'SetSize', 'SetScale', 'SetIgnoreParentScale', 'SetFrameStrata', 'SetFrameLevel' }
 
 local RemoveTextureID = {
 	[136430] = true,
 	[136467] = true,
+	[136477] = true,
 	[136468] = true,
 	[130924] = true,
 }
 
 local RemoveTextureFile = {
-	["interface/minimap/minimap-trackingborder"] = true,
-	["interface/minimap/ui-minimap-border"] = true,
-	["interface/minimap/ui-minimap-background"] = true,
+	'interface/characterframe',
+	'border',
+	'background',
+	'alphamask',
+	'highlight'
 }
+
+function SMB:RemoveTexture(texture)
+	if type(texture) == 'string' then
+		for _, path in next, RemoveTextureFile do
+			if strfind(texture, path) or (strfind(texture, 'interface/minimap') and not strfind(texture, 'interface/minimap/tracking')) then
+				return true
+			end
+		end
+	else
+		return RemoveTextureID[texture]
+	end
+end
 
 function SMB:LockButton(Button)
 	for _, Function in pairs(ButtonFunctions) do
@@ -204,7 +220,7 @@ function SMB:HandleBlizzardButtons()
 			end
 		end)
 
-		_G.MiniMapMailFrame:HookScript('OnShow', function() Frame.Icon:SetVertexColor(0, 1, 0)	end)
+		_G.MiniMapMailFrame:HookScript('OnShow', function() Frame.Icon:SetVertexColor(0, 1, 0) end)
 		_G.MiniMapMailFrame:HookScript('OnHide', function() Frame.Icon:SetVertexColor(1, 1, 1) end)
 		_G.MiniMapMailFrame:EnableMouse(false)
 
@@ -405,83 +421,82 @@ function SMB:HandleBlizzardButtons()
 	end
 end
 
-function SMB:SkinMinimapButton(Button)
-	if (not Button) or Button.isSkinned then return end
+function SMB:SkinMinimapButton(button)
+	if (not button) or button.isSkinned then return end
 
-	local Name = Button.GetName and Button:GetName()
-	if not Name then return end
+	local name = button.GetName and button:GetName()
+	if not name then return end
 
-	if tContains(SMB.IgnoreButton, Name) then return end
+	if tContains(SMB.IgnoreButton, name) then return end
 
-	for i = 1, #SMB.GenericIgnore do
-		if strsub(Name, 1, strlen(SMB.GenericIgnore[i])) == SMB.GenericIgnore[i] then return end
+	for _, genericIgnore in next, SMB.GenericIgnore do
+		if strsub(name, 1, strlen(genericIgnore)) == genericIgnore then return end
 	end
 
-	for i = 1, #SMB.PartialIgnore do
-		if strmatch(Name, SMB.PartialIgnore[i]) ~= nil then return end
+	for _, partialIgnore in next, SMB.PartialIgnore do
+		if strmatch(name, partialIgnore) then return end
 	end
 
-	for i = 1, Button:GetNumRegions() do
-		local Region = select(i, Button:GetRegions())
-		if Region.IsObjectType and Region:IsObjectType('Texture') then
-			local Texture = Region.GetTextureFileID and Region:GetTextureFileID()
+	for _, frames in next, { button, button:GetChildren() } do
+		for _, region in next, { frames:GetRegions() } do
+			if region.IsObjectType and region:IsObjectType('Texture') then
+				local texture = region.GetTextureFileID and region:GetTextureFileID()
+				if not texture then
+					texture = strlower(tostring(region:GetTexture()))
+				end
 
-			if RemoveTextureID[Texture] then
-				Region:SetTexture()
-			else
-				Texture = strlower(tostring(Region:GetTexture()))
-				if RemoveTextureFile[Texture] or strfind(Texture, 'interface/characterframe') or (strfind(Texture, 'interface/minimap') and not strfind(Texture, 'interface/minimap/tracking')) or strfind(Texture, 'border') or strfind(Texture, 'background') or strfind(Texture, 'alphamask') or strfind(Texture, 'highlight') then
-					Region:SetTexture()
-					Region:SetAlpha(0)
+				if SMB:RemoveTexture(texture) then
+					region:SetTexture()
+					region:SetAlpha(0)
 				else
-					if SMB.OverrideTexture[Name] then
-						Region:SetTexture(SMB.OverrideTexture[Name])
+					if SMB.OverrideTexture[name] then
+						region:SetTexture(SMB.OverrideTexture[name])
 					end
 
-					Region:ClearAllPoints()
-					Region:SetDrawLayer('ARTWORK')
-					PA:SetInside(Region)
+					region:ClearAllPoints()
+					region:SetDrawLayer('ARTWORK')
+					PA:SetInside(region)
 
-					if not SMB.DoNotCrop[Name] and not Button.ignoreCrop then
-						Region:SetTexCoord(unpack(PA.TexCoords))
-						Button:HookScript('OnLeave', function() Region:SetTexCoord(unpack(PA.TexCoords)) end)
+					if not SMB.DoNotCrop[name] and not button.ignoreCrop then
+						region:SetTexCoord(unpack(PA.TexCoords))
+						button:HookScript('OnLeave', function() region:SetTexCoord(unpack(PA.TexCoords)) end)
 					end
 
-					Region.SetPoint = function() return end
+					region.SetPoint = function() return end
 				end
 			end
 		end
 	end
 
-	Button:SetFrameLevel(Minimap:GetFrameLevel() + 10)
-	Button:SetFrameStrata(Minimap:GetFrameStrata())
-	Button:SetSize(SMB.db.IconSize, SMB.db.IconSize)
+	button:SetFrameLevel(Minimap:GetFrameLevel() + 10)
+	button:SetFrameStrata(Minimap:GetFrameStrata())
+	button:SetSize(SMB.db.IconSize, SMB.db.IconSize)
 
-	if not Button.ignoreTemplate then
-		PA:SetTemplate(Button)
+	if not button.ignoreTemplate then
+		PA:SetTemplate(button)
 
 		if SMB.db.Shadows then
-			PA:CreateShadow(Button)
+			PA:CreateShadow(button)
 		end
 	end
 
 	--Button:SetScript('OnDragStart', SMB.OnDragStart)
 	--Button:SetScript('OnDragStop', SMB.OnDragStop)
 
-	Button:HookScript('OnEnter', function()
+	button:HookScript('OnEnter', function()
 		if SMB.Bar:IsShown() then
 			UIFrameFadeIn(SMB.Bar, 0.2, SMB.Bar:GetAlpha(), 1)
 		end
 	end)
-	Button:HookScript('OnLeave', function(s)
+	button:HookScript('OnLeave', function(s)
 		PA:SetTemplate(s)
 		if SMB.Bar:IsShown() and SMB.db.BarMouseOver then
 			UIFrameFadeOut(SMB.Bar, 0.2, SMB.Bar:GetAlpha(), 0)
 		end
 	end)
 
-	Button.isSkinned = true
-	tinsert(SMB.Buttons, Button)
+	button.isSkinned = true
+	tinsert(SMB.Buttons, button)
 end
 
 SMB.ButtonCounts = {}
@@ -502,8 +517,8 @@ function SMB:GrabMinimapButtons(forceUpdate)
 			for i = 1, NumChildren do
 				local object = select(i, Frame:GetChildren())
 				if object then
-					local name = object:GetName()
-					local width = object:GetWidth()
+					local name = object.GetName and object:GetName()
+					local width = object.GetWidth and object:GetWidth()
 					if name and width > 15 and width < 60 and (object:IsObjectType('Button') or object:IsObjectType('Frame')) then
 						SMB:SkinMinimapButton(object)
 					end
@@ -540,7 +555,7 @@ function SMB:Update()
 	SMB.Bar:SetFrameLevel(SMB.db.Level)
 	SMB:ToggleBar_FrameStrataLevel(true)
 
-	for _, Button in pairs(SMB.Buttons) do
+	for _, Button in next, SMB.Buttons do
 		if Button:IsVisible() then
 			AnchorX, ActualButtons = AnchorX + 1, ActualButtons + 1
 
@@ -553,6 +568,7 @@ function SMB:Update()
 			PA:SetTemplate(Button)
 
 			Button:SetParent(SMB.Bar)
+			Button:SetIgnoreParentScale(false)
 			Button:ClearAllPoints()
 			Button:SetPoint(Anchor, SMB.Bar, Anchor, DirMult * (Spacing + ((Size + Spacing) * (AnchorX - 1))), (- Spacing - ((Size + Spacing) * (AnchorY - 1))))
 			Button:SetSize(Size, Size)
@@ -613,8 +629,6 @@ function SMB:GetOptions()
 	SquareMinimapButtons.args.General.args.MBB.args.ButtonSpacing = PA.ACH:Range(PA.ACL['Button Spacing'], nil, 5, { min = -1, max = 10, step = 1 })
 	SquareMinimapButtons.args.General.args.MBB.args.ButtonsPerRow = PA.ACH:Range(PA.ACL['Buttons Per Row'], nil, 6, { min = 1, max = 100, step = 1 })
 	SquareMinimapButtons.args.General.args.MBB.args.Shadows = PA.ACH:Toggle(PA.ACL['Shadows'], nil, 7)
-	SquareMinimapButtons.args.General.args.MBB.args.ReverseDirection = PA.ACH:Toggle(PA.ACL['Reverse Direction'], nil, 8)
-	SquareMinimapButtons.args.General.args.MBB.args.ReverseDirection = PA.ACH:Toggle(PA.ACL['Reverse Direction'], nil, 8)
 	SquareMinimapButtons.args.General.args.MBB.args.ReverseDirection = PA.ACH:Toggle(PA.ACL['Reverse Direction'], nil, 8)
 	SquareMinimapButtons.args.General.args.Strata = PA.ACH:Select(PA.ACL['Frame Strata'], nil, 3, { BACKGROUND = 'BACKGROUND', LOW = 'LOW', MEDIUM = 'MEDIUM', HIGH = 'HIGH', DIALOG = 'DIALOG', FULLSCREEN = 'FULLSCREEN', FULLSCREEN_DIALOG = 'FULLSCREEN_DIALOG', TOOLTIP = 'TOOLTIP' })
 	SquareMinimapButtons.args.General.args.Level = PA.ACH:Range(PA.ACL['Frame Level'], nil, 4, { min = 0, max = 255, step = 1 })

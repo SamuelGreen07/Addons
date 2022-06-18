@@ -16,6 +16,16 @@ local loadstring = loadstring --> lua local
 
 local IS_WOW_PROJECT_MAINLINE = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 local IS_WOW_PROJECT_NOT_MAINLINE = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE
+local IS_WOW_PROJECT_CLASSIC_ERA = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+local IS_WOW_PROJECT_CLASSIC_TBC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+
+local UnitCastingInfo = UnitCastingInfo
+local UnitChannelInfo = UnitChannelInfo
+
+if IS_WOW_PROJECT_CLASSIC_ERA then
+    UnitCastingInfo = CastingInfo
+    UnitChannelInfo = ChannelInfo
+end
 
 local PixelUtil = PixelUtil or DFPixelUtil
 
@@ -1574,9 +1584,10 @@ function DF:IconPick (callback, close_when_select, param1, param2)
 		DF.IconPickFrame.preview:Hide()
 		
 		--serach
-		DF.IconPickFrame.searchLabel =  DF:NewLabel (DF.IconPickFrame, nil, "$parentSearchBoxLabel", nil, "search:", font, size, color)
+		DF.IconPickFrame.searchLabel =  DF:NewLabel (DF.IconPickFrame, nil, "$parentSearchBoxLabel", nil, "Search:")
 		DF.IconPickFrame.searchLabel:SetPoint ("topleft", DF.IconPickFrame, "topleft", 12, -36)
 		DF.IconPickFrame.searchLabel:SetTemplate (DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE"))
+		DF.IconPickFrame.searchLabel.fontsize = 12
 		
 		DF.IconPickFrame.search = DF:NewTextEntry (DF.IconPickFrame, nil, "$parentSearchBox", nil, 140, 20)
 		DF.IconPickFrame.search:SetPoint ("left", DF.IconPickFrame.searchLabel, "right", 2, 0)
@@ -1599,6 +1610,7 @@ function DF:IconPick (callback, close_when_select, param1, param2)
 		--manually enter the icon path
 		DF.IconPickFrame.customIcon = DF:CreateLabel (DF.IconPickFrame, "Icon Path:", DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE"))
 		DF.IconPickFrame.customIcon:SetPoint ("bottomleft", DF.IconPickFrame, "bottomleft", 12, 16)
+		DF.IconPickFrame.customIcon.fontsize = 12
 		
 		DF.IconPickFrame.customIconEntry = DF:CreateTextEntry (DF.IconPickFrame, function()end, 200, 20, "CustomIconEntry", _, _, DF:GetTemplate ("dropdown", "OPTIONS_DROPDOWN_TEMPLATE"))
 		DF.IconPickFrame.customIconEntry:SetPoint ("left", DF.IconPickFrame.customIcon, "right", 2, 0)
@@ -1642,11 +1654,13 @@ function DF:IconPick (callback, close_when_select, param1, param2)
 		local MACRO_ICON_FILENAMES = {}
 		local SPELLNAMES_CACHE = {}
 		
+		local texturePathGetter = DF.IconPickFrame:CreateTexture(nil, "overlay")
+
 		DF.IconPickFrame:SetScript ("OnShow", function()
 			
 			MACRO_ICON_FILENAMES [1] = "INV_MISC_QUESTIONMARK"
 			local index = 2
-		
+	
 			for i = 1, GetNumSpellTabs() do
 				local tab, tabTex, offset, numSpells, _ = GetSpellTabInfo (i)
 				offset = offset + 1
@@ -1681,7 +1695,7 @@ function DF:IconPick (callback, close_when_select, param1, param2)
 			GetLooseMacroIcons (MACRO_ICON_FILENAMES)
 			GetMacroIcons (MACRO_ICON_FILENAMES)
 			GetMacroItemIcons (MACRO_ICON_FILENAMES)
-			
+
 			--reset the custom icon text entry
 			DF.IconPickFrame.customIconEntry:SetText ("")
 			--reset the search text entry
@@ -1821,6 +1835,10 @@ function DF:IconPick (callback, close_when_select, param1, param2)
 			DF.IconPickFrame.buttons [#DF.IconPickFrame.buttons+1] = newcheck
 			newcheck:SetScript ("OnEnter", onenter)
 			newcheck:SetScript ("OnLeave", onleave)
+		end
+
+		for _, button in ipairs(DF.IconPickFrame.buttons) do
+			button:SetBackdropBorderColor(0, 0, 0, 1)
 		end
 		
 		local scroll = CreateFrame ("ScrollFrame", "DetailsFrameworkIconPickFrameScroll", DF.IconPickFrame, "ListScrollFrameTemplate", "BackdropTemplate")
@@ -1972,24 +1990,88 @@ local SimplePanel_frame_backdrop_border_color = {0, 0, 0, 1}
 
 --with_label was making the frame stay in place while its parent moves
 --the slider was anchoring to with_label and here here were anchoring the slider again
-function DF:CreateScaleBar (frame, config)
-	local scaleBar, text = DF:CreateSlider (frame, 120, 14, 0.6, 1.6, 0.1, config.scale, true, "ScaleBar", nil, "Scale:", DF:GetTemplate ("slider", "OPTIONS_SLIDER_TEMPLATE"), DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE"))
+function DF:CreateScaleBar(frame, config) --~scale
+	local scaleBar, text = DF:CreateSlider(frame, 120, 14, 0.6, 1.6, 0.1, config.scale, true, "ScaleBar", nil, "Scale:", DF:GetTemplate ("slider", "OPTIONS_SLIDER_TEMPLATE"), DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE"))
 	scaleBar.thumb:SetWidth(24)
+	scaleBar:SetValueStep(0.1)
+	scaleBar:SetObeyStepOnDrag(true)
+	scaleBar.mouseDown = false
+	rawset(scaleBar, "lockdown", true)
 
-	text:SetPoint ("topleft", frame, "topleft", 12, -7)
-	scaleBar:SetFrameLevel (DF.FRAMELEVEL_OVERLAY)
-	scaleBar.OnValueChanged = function (_, _, value)
-		config.scale = value
-		if (not scaleBar.IsValueChanging) then
-			frame:SetScale (config.scale)
+	--create a custom editbox to enter the scale from text
+	local editbox = CreateFrame("editbox", nil, scaleBar.widget, "BackdropTemplate")
+	editbox:SetSize(40, 20)
+	editbox:SetJustifyH("center")
+	editbox:SetBackdrop({bgFile = [[Interface\ACHIEVEMENTFRAME\UI-GuildAchievement-Parchment-Horizontal-Desaturated]],
+	edgeFile = [[Interface\Buttons\WHITE8X8]],
+	tile = true, edgeSize = 1, tileSize = 64})
+	editbox:SetFontObject("GameFontHighlightSmall")
+	editbox:SetBackdropColor(0, 0, 0, 1)
+
+	editbox:SetScript("OnEditFocusGained", function()
+	end)
+
+	editbox:SetScript("OnEnterPressed", function()
+		editbox:ClearFocus()
+		editbox:Hide()
+		local text = editbox:GetText()
+		local newScale = DF.TextToFloor(text)
+
+		if (newScale) then
+			config.scale = newScale
+			scaleBar:SetValue(newScale)
+			frame:SetScale(newScale)
+			editbox.defaultValue = newScale
 		end
-	end
-	scaleBar:SetHook ("OnMouseUp", function()
-		frame:SetScale (config.scale)
 	end)
 	
-	scaleBar:SetAlpha (0.70)
+	editbox:SetScript("OnEscapePressed", function()
+		editbox:ClearFocus()
+		editbox:Hide()
+		editbox:SetText(editbox.defaultValue)
+	end)
+
+	scaleBar:SetScript("OnMouseDown", function(_, mouseButton)
+		if (mouseButton == "RightButton") then
+			editbox:Show()
+			editbox:SetAllPoints()
+			editbox:SetText(config.scale)
+			editbox:SetFocus(true)
+			editbox.defaultValue = config.scale
+
+		elseif (mouseButton == "LeftButton") then
+			scaleBar.mouseDown  = true
+		end
+	end)
+
+	scaleBar:SetScript("OnMouseUp", function(_, mouseButton)
+		if (mouseButton == "LeftButton") then
+			scaleBar.mouseDown  = false
+			frame:SetScale(config.scale)
+			editbox.defaultValue = config.scale
+		end
+	end)
+
+	text:SetPoint("topleft", frame, "topleft", 12, -7)
+	scaleBar:SetFrameLevel(DF.FRAMELEVEL_OVERLAY)
+	scaleBar.OnValueChanged = function(_, _, value)
+		if (scaleBar.mouseDown) then
+			config.scale = value
+		end
+	end
 	
+	scaleBar:SetAlpha(0.70)
+	editbox.defaultValue = config.scale
+	editbox:SetFocus(false)
+	editbox:SetAutoFocus(false)
+	editbox:ClearFocus()
+
+	C_Timer.After(1, function()
+		editbox:SetFocus(false)
+		editbox:SetAutoFocus(false)
+		editbox:ClearFocus()
+	end)
+
 	return scaleBar
 end
 
@@ -3898,6 +3980,10 @@ DF.TabContainerFunctions.SelectIndex = function (self, fixedParam, menuIndex)
 		mainFrame.AllButtons[menuIndex].selectedUnderlineGlow:Show()
 	end
 	mainFrame.CurrentIndex = menuIndex
+
+	if (mainFrame.hookList.OnSelectIndex) then
+		DF:QuickDispatch(mainFrame.hookList.OnSelectIndex, mainFrame, mainFrame.AllButtons[menuIndex])
+	end
 end
 
 DF.TabContainerFunctions.SetIndex = function (self, index)
@@ -3909,7 +3995,7 @@ local tab_container_on_show = function (self)
 	self.SelectIndex (self.AllButtons[index], nil, index)
 end
 
-function DF:CreateTabContainer (parent, title, frame_name, frame_list, options_table)
+function DF:CreateTabContainer (parent, title, frame_name, frameList, options_table, hookList)
 	
 	local options_text_template = DF:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE")
 	local options_dropdown_template = DF:GetTemplate ("dropdown", "OPTIONS_DROPDOWN_TEMPLATE")
@@ -3918,18 +4004,19 @@ function DF:CreateTabContainer (parent, title, frame_name, frame_list, options_t
 	local options_button_template = DF:GetTemplate ("button", "OPTIONS_BUTTON_TEMPLATE")
 	
 	options_table = options_table or {}
-	local frame_width = parent:GetWidth()
+	local frameWidth = parent:GetWidth()
 	local frame_height = parent:GetHeight()
 	local y_offset = options_table.y_offset or 0
 	local button_width = options_table.button_width or 160
 	local button_height = options_table.button_height or 20
-	local button_anchor_x = options_table.button_x or 230
-	local button_anchor_y = options_table.button_y or -32
+	local buttonAnchorX = options_table.button_x or 230
+	local buttonAnchorY = options_table.button_y or -32
 	local button_text_size = options_table.button_text_size or 10
 	
 	local mainFrame = CreateFrame ("frame", frame_name, parent.widget or parent, "BackdropTemplate")
 	mainFrame:SetAllPoints()
 	DF:Mixin (mainFrame, DF.TabContainerFunctions)
+	mainFrame.hookList = hookList
 	
 	local mainTitle = DF:CreateLabel (mainFrame, title, 24, "white")
 	mainTitle:SetPoint ("topleft", mainFrame, "topleft", 10, -30 + y_offset)
@@ -3949,7 +4036,7 @@ function DF:CreateTabContainer (parent, title, frame_name, frame_list, options_t
 		mainFrame.CanCloseWithRightClick = true
 	end
 	
-	for i, frame in ipairs (frame_list) do
+	for i, frame in ipairs (frameList) do
 		local f = CreateFrame ("frame", "$parent" .. frame.name, mainFrame, "BackdropTemplate")
 		f:SetAllPoints()
 		f:SetFrameLevel (210)
@@ -3958,7 +4045,7 @@ function DF:CreateTabContainer (parent, title, frame_name, frame_list, options_t
 		local title = DF:CreateLabel (f, frame.title, 16, "silver")
 		title:SetPoint ("topleft", mainTitle, "bottomleft", 0, 0)
 		
-		local tabButton = DF:CreateButton (mainFrame, DF.TabContainerFunctions.SelectIndex, button_width, button_height, frame.title, i, nil, nil, nil, nil, false, button_tab_template)
+		local tabButton = DF:CreateButton (mainFrame, DF.TabContainerFunctions.SelectIndex, button_width, button_height, frame.title, i, nil, nil, nil, "$parentTabButton" .. frame.name, false, button_tab_template)
 		PixelUtil.SetSize (tabButton, button_width, button_height)
 		tabButton:SetFrameLevel (220)
 		tabButton.textsize = button_text_size
@@ -3993,10 +4080,13 @@ function DF:CreateTabContainer (parent, title, frame_name, frame_list, options_t
 	end
 	
 	--order buttons
-	local x = button_anchor_x
-	local y = button_anchor_y
-	local space_for_buttons = frame_width - (#frame_list*3) - button_anchor_x
+	local x = buttonAnchorX
+	local y = buttonAnchorY
+	local spaceBetweenButtons = 3
+
+	local space_for_buttons = frameWidth - (#frameList * spaceBetweenButtons) - buttonAnchorX
 	local amount_buttons_per_row = floor (space_for_buttons / button_width)
+
 	local last_button = mainFrame.AllButtons[1]
 	
 	mainFrame.AllButtons[1]:SetPoint ("topleft", mainTitle, "topleft", x, y)
@@ -4008,7 +4098,7 @@ function DF:CreateTabContainer (parent, title, frame_name, frame_list, options_t
 		x = x + button_width + 2
 		
 		if (i % amount_buttons_per_row == 0) then
-			x = button_anchor_x
+			x = buttonAnchorX
 			y = y - button_height - 1
 		end
 	end
@@ -4329,6 +4419,10 @@ DF.ScrollBoxFunctions.GetData = function (self)
 end
 
 DF.ScrollBoxFunctions.GetFrames = function (self)
+	return self.Frames
+end
+
+DF.ScrollBoxFunctions.GetLines = function (self) --alias of GetFrames
 	return self.Frames
 end
 
@@ -5132,6 +5226,7 @@ DF.IconRowFunctions = {
 		
 		if (not iconFrame) then
 			local newIconFrame = CreateFrame ("frame", "$parentIcon" .. self.NextIcon, self, "BackdropTemplate")
+			newIconFrame.parentIconRow = self
 			
 			newIconFrame.Texture = newIconFrame:CreateTexture (nil, "artwork")
 			PixelUtil.SetPoint (newIconFrame.Texture, "topleft", newIconFrame, "topleft", 1, -1)
@@ -5177,7 +5272,7 @@ DF.IconRowFunctions = {
 		
 		local anchor = self.options.anchor
 		local anchorTo = self.NextIcon == 1 and self or self.IconPool [self.NextIcon - 1]
-		local xPadding = self.NextIcon == 1 and self.options.left_padding or self.options.icon_padding
+		local xPadding = self.NextIcon == 1 and self.options.left_padding or self.options.icon_padding or 1
 		local growDirection = self.options.grow_direction
 
 		if (growDirection == 1) then --grow to right
@@ -5202,15 +5297,28 @@ DF.IconRowFunctions = {
 		return iconFrame
 	end,
 	
-	SetIcon = function (self, spellId, borderColor, startTime, duration, forceTexture, descText, count, debuffType, caster, canStealOrPurge)
+	--adds only if not existing already in the cache
+	AddSpecificIcon = function (self, identifierKey, spellId, borderColor, startTime, duration, forceTexture, descText, count, debuffType, caster, canStealOrPurge, spellName, isBuff)
+		if not identifierKey or identifierKey == "" then
+			return
+		end
+		
+		if not self.AuraCache[identifierKey] then
+			local icon = self:SetIcon (spellId, borderColor, startTime, duration, forceTexture, descText, count, debuffType, caster, canStealOrPurge, spellName, isBuff or false)
+			icon.identifierKey = identifierKey
+			self.AuraCache[identifierKey] = true
+		end
+	end,
 	
-		local spellName, _, spellIcon
+	SetIcon = function (self, spellId, borderColor, startTime, duration, forceTexture, descText, count, debuffType, caster, canStealOrPurge, spellName, isBuff)
 	
-		if (not forceTexture) then
-			spellName, _, spellIcon = GetSpellInfo (spellId)
-		else
+		local actualSpellName, _, spellIcon = GetSpellInfo (spellId)
+	
+		if forceTexture then
 			spellIcon = forceTexture
 		end
+		
+		spellName = spellName or actualSpellName or "unknown_aura"
 		
 		if (spellIcon) then
 			local iconFrame = self:GetIcon()
@@ -5229,30 +5337,37 @@ DF.IconRowFunctions = {
 				if (self.options.show_text) then
 					iconFrame.CountdownText:Show()
 					
-					local formattedTime = floor (startTime + duration - GetTime())
+					local now = GetTime()
 					
-					if (formattedTime >= 3600) then
-						formattedTime = floor (formattedTime / 3600) .. "h"
-						
-					elseif (formattedTime >= 60) then
-						formattedTime = floor (formattedTime / 60) .. "m"
-						
-					else
-						formattedTime = floor (formattedTime)
-					end
+					iconFrame.timeRemaining = startTime + duration - now
+					iconFrame.expirationTime = startTime + duration
+					
+					local formattedTime = (iconFrame.timeRemaining > 0) and self.options.decimal_timer and iconFrame.parentIconRow.FormatCooldownTimeDecimal(iconFrame.timeRemaining) or iconFrame.parentIconRow.FormatCooldownTime(iconFrame.timeRemaining) or ""
+					iconFrame.CountdownText:SetText (formattedTime)
 					
 					iconFrame.CountdownText:SetPoint (self.options.text_anchor or "center", iconFrame, self.options.text_rel_anchor or "center", self.options.text_x_offset or 0, self.options.text_y_offset or 0)
 					DF:SetFontSize (iconFrame.CountdownText, self.options.text_size)
 					DF:SetFontFace (iconFrame.CountdownText, self.options.text_font)
 					DF:SetFontOutline (iconFrame.CountdownText, self.options.text_outline)
-					iconFrame.CountdownText:SetText (formattedTime)
+					
+					if self.options.on_tick_cooldown_update then
+						iconFrame.lastUpdateCooldown = now
+						iconFrame:SetScript("OnUpdate", self.OnIconTick)
+					else
+						iconFrame:SetScript("OnUpdate", nil)
+					end
 					
 				else
+					iconFrame:SetScript("OnUpdate", nil)
 					iconFrame.CountdownText:Hide()
 				end
 				
+				iconFrame.Cooldown:SetReverse (self.options.cooldown_reverse)
 				iconFrame.Cooldown:SetHideCountdownNumbers (self.options.surpress_blizzard_cd_timer)
 			else
+				iconFrame.timeRemaining = nil
+				iconFrame.expirationTime = nil
+				iconFrame:SetScript("OnUpdate", nil)
 				iconFrame.CountdownText:Hide()
 			end
 			
@@ -5295,6 +5410,16 @@ DF.IconRowFunctions = {
 			iconFrame.debuffType = debuffType
 			iconFrame.caster = caster
 			iconFrame.canStealOrPurge = canStealOrPurge
+			iconFrame.isBuff = isBuff
+			iconFrame.spellName = spellName
+			
+			iconFrame.identifierKey = nil -- only used for "specific" add/remove
+			
+			--add the spell into the cache
+			self.AuraCache [spellId or -1] = true
+			self.AuraCache [spellName] = true
+			self.AuraCache.canStealOrPurge = self.AuraCache.canStealOrPurge or canStealOrPurge
+			self.AuraCache.hasEnrage = self.AuraCache.hasEnrage or debuffType == "" --yes, enrages are empty-string...
 
 			--> show the frame
 			self:Show()
@@ -5303,12 +5428,149 @@ DF.IconRowFunctions = {
 		end
 	end,
 	
-	ClearIcons = function (self)
-		for i = 1, self.NextIcon -1 do
-			self.IconPool [i]:Hide()
+	OnIconTick = function (self, deltaTime)
+		local now = GetTime()
+		if (self.lastUpdateCooldown + 0.05) <= now then
+			self.timeRemaining = self.expirationTime - now
+			if self.timeRemaining > 0 then
+				if self.parentIconRow.options.decimal_timer then
+					self.CountdownText:SetText (self.parentIconRow.FormatCooldownTimeDecimal(self.timeRemaining))
+				else
+					self.CountdownText:SetText (self.parentIconRow.FormatCooldownTime(self.timeRemaining))
+				end
+			else
+				self.CountdownText:SetText ("")
+			end
+			self.lastUpdateCooldown = now
 		end
-		self.NextIcon = 1
-		self:Hide()
+	end,
+	
+	FormatCooldownTime = function (formattedTime)
+		if (formattedTime >= 3600) then
+			formattedTime = floor (formattedTime / 3600) .. "h"
+			
+		elseif (formattedTime >= 60) then
+			formattedTime = floor (formattedTime / 60) .. "m"
+			
+		else
+			formattedTime = floor (formattedTime)
+		end
+		return formattedTime
+	end,
+	
+	FormatCooldownTimeDecimal = function (formattedTime)
+        if formattedTime < 10 then
+            return ("%.1f"):format(formattedTime)
+        elseif formattedTime < 60 then
+            return ("%d"):format(formattedTime)
+        elseif formattedTime < 3600 then
+            return ("%d:%02d"):format(formattedTime/60%60, formattedTime%60)
+        elseif formattedTime < 86400 then
+            return ("%dh %02dm"):format(formattedTime/(3600), formattedTime/60%60)
+        else
+            return ("%dd %02dh"):format(formattedTime/86400, (formattedTime/3600) - (floor(formattedTime/86400) * 24))
+        end
+	end,
+	
+	RemoveSpecificIcon = function (self, identifierKey)
+		if not identifierKey or identifierKey == "" then
+			return
+		end
+	
+		table.wipe (self.AuraCache)
+	
+		local iconPool = self.IconPool
+		local countStillShown = 0
+		for i = 1, self.NextIcon -1 do
+			local iconFrame = iconPool[i]
+			if iconFrame.identifierKey and iconFrame.identifierKey == identifierKey then
+				iconFrame:Hide()
+				iconFrame:ClearAllPoints()
+				iconFrame.identifierKey = nil
+			else
+				self.AuraCache [iconFrame.spellId] = true
+				self.AuraCache [iconFrame.spellName] = true
+				self.AuraCache.canStealOrPurge = self.AuraCache.canStealOrPurge or iconFrame.canStealOrPurge
+				self.AuraCache.hasEnrage = self.AuraCache.hasEnrage or iconFrame.debuffType == "" --yes, enrages are empty-string...
+				countStillShown = countStillShown + 1
+			end
+		end
+		
+		self:AlignAuraIcons()
+		
+	end,
+	
+	ClearIcons = function (self, resetBuffs, resetDebuffs)
+		resetBuffs = resetBuffs ~= false
+		resetDebuffs = resetDebuffs ~= false
+		table.wipe (self.AuraCache)
+		
+		local iconPool = self.IconPool
+		for i = 1, self.NextIcon -1 do
+			local iconFrame = iconPool[i]
+			if iconFrame.isBuff == nil then
+				iconFrame:Hide()
+				iconFrame:ClearAllPoints()
+			elseif resetBuffs and iconFrame.isBuff then
+				iconFrame:Hide()
+				iconFrame:ClearAllPoints()
+			elseif resetDebuffs and not iconFrame.isBuff then
+				iconFrame:Hide()
+				iconFrame:ClearAllPoints()
+			else
+				self.AuraCache [iconFrame.spellId] = true
+				self.AuraCache [iconFrame.spellName] = true
+				self.AuraCache.canStealOrPurge = self.AuraCache.canStealOrPurge or iconFrame.canStealOrPurge
+				self.AuraCache.hasEnrage = self.AuraCache.hasEnrage or iconFrame.debuffType == "" --yes, enrages are empty-string...
+			end
+		end
+		
+		self:AlignAuraIcons()
+		
+	end,
+	
+	AlignAuraIcons = function (self)
+		
+		local iconPool = self.IconPool
+		local iconAmount = #iconPool
+		local countStillShown = 0
+		
+		table.sort (iconPool, function(i1, i2) return i1:IsShown() and not i2:IsShown() end)
+		
+		if iconAmount == 0 then
+			self:Hide()
+		else
+			-- re-anchor not hidden
+			for i = 1, iconAmount do
+				local iconFrame = iconPool[i]
+				local anchor = self.options.anchor
+				local anchorTo = i == 1 and self or self.IconPool [i - 1]
+				local xPadding = i == 1 and self.options.left_padding or self.options.icon_padding or 1
+				local growDirection = self.options.grow_direction
+				
+				countStillShown = countStillShown + (iconFrame:IsShown() and 1 or 0)
+				
+				iconFrame:ClearAllPoints()
+				if (growDirection == 1) then --grow to right
+					if (i == 1) then
+						PixelUtil.SetPoint (iconFrame, "left", anchorTo, "left", xPadding, 0)
+					else
+						PixelUtil.SetPoint (iconFrame, "left", anchorTo, "right", xPadding, 0)
+					end
+					
+				elseif (growDirection == 2) then --grow to left
+					if (i == 1) then
+						PixelUtil.SetPoint (iconFrame, "right", anchorTo, "right", xPadding, 0)
+					else
+						PixelUtil.SetPoint (iconFrame, "right", anchorTo, "left", xPadding, 0)
+					end
+					
+				end
+			end
+		end
+		
+		self.NextIcon = countStillShown + 1
+		
 	end,
 	
 	GetIconGrowDirection = function (self)
@@ -5390,12 +5652,16 @@ local default_icon_row_options = {
 	grow_direction = 1, --1 = to right 2 = to left
 	surpress_blizzard_cd_timer = false,
 	surpress_tulla_omni_cc = false,
+	on_tick_cooldown_update = true,
+	decimal_timer = false,
+	cooldown_reverse = false,
 }
 
 function DF:CreateIconRow (parent, name, options)
 	local f = CreateFrame("frame", name, parent, "BackdropTemplate")
 	f.IconPool = {}
 	f.NextIcon = 1
+	f.AuraCache = {}
 	
 	DF:Mixin (f, DF.IconRowFunctions)
 	DF:Mixin (f, DF.OptionsFunctions)
@@ -7229,7 +7495,7 @@ DF.StatusBarFunctions = {
 		{"UNIT_HEALTH", true},
 		{"UNIT_MAXHEALTH", true},
 		{(IS_WOW_PROJECT_NOT_MAINLINE) and "UNIT_HEALTH_FREQUENT", true}, -- this one is classic-only...
-		{(IS_WOW_PROJECT_MAINLINE) and "UNIT_HEAL_PREDICTION", true},
+		{"UNIT_HEAL_PREDICTION", true},
 		{(IS_WOW_PROJECT_MAINLINE) and "UNIT_ABSORB_AMOUNT_CHANGED", true},
 		{(IS_WOW_PROJECT_MAINLINE) and "UNIT_HEAL_ABSORB_AMOUNT_CHANGED", true},
 	}
@@ -7260,8 +7526,8 @@ DF.StatusBarFunctions = {
 				
 				--> check for settings and update some events
 				if (not self.Settings.ShowHealingPrediction) then
+					self:UnregisterEvent ("UNIT_HEAL_PREDICTION")
 					if IS_WOW_PROJECT_MAINLINE then
-						self:UnregisterEvent ("UNIT_HEAL_PREDICTION")
 						self:UnregisterEvent ("UNIT_HEAL_ABSORB_AMOUNT_CHANGED")
 					end
 					self.incomingHealIndicator:Hide()
@@ -7346,22 +7612,22 @@ DF.StatusBarFunctions = {
 		self:RunHooksForWidget ("OnHealthMaxChange", self, self.displayedUnit)
 	end
 
-	healthBarMetaFunctions.UpdateHealth = function (self)
+	healthBarMetaFunctions.UpdateHealth = function(self)
 		-- update max health regardless to avoid weird wrong values on UpdateMaxHealth sometimes
 		-- local maxHealth = UnitHealthMax (self.displayedUnit)
 		-- self:SetMinMaxValues (0, maxHealth)
 		-- self.currentHealthMax = maxHealth
 		
-		local health = UnitHealth (self.displayedUnit)
+		self.oldHealth = self.currentHealth
+		local health = UnitHealth(self.displayedUnit)
 		self.currentHealth = health
-		PixelUtil.SetStatusBarValue (self, health)
+		PixelUtil.SetStatusBarValue(self, health)
 
 		self:RunHooksForWidget ("OnHealthChange", self, self.displayedUnit)
 	end
 	
 	--health and absorbs prediction
 	healthBarMetaFunctions.UpdateHealPrediction = function (self)
-		if IS_WOW_PROJECT_NOT_MAINLINE then return end
 		local currentHealth = self.currentHealth
 		local currentHealthMax = self.currentHealthMax
 		local healthPercent = currentHealth / currentHealthMax
@@ -7377,7 +7643,7 @@ DF.StatusBarFunctions = {
 			--incoming heal on the unit from all sources
 			local unitHealIncoming = self.displayedUnit and UnitGetIncomingHeals (self.displayedUnit) or 0
 			--heal absorbs
-			local unitHealAbsorb = self.displayedUnit and UnitGetTotalHealAbsorbs (self.displayedUnit) or 0
+			local unitHealAbsorb = IS_WOW_PROJECT_MAINLINE and self.displayedUnit and UnitGetTotalHealAbsorbs (self.displayedUnit) or 0
 		
 			if (unitHealIncoming > 0) then
 				--calculate what is the percent of health incoming based on the max health the player has
@@ -7401,7 +7667,7 @@ DF.StatusBarFunctions = {
 			end
 		end
 		
-		if (self.Settings.ShowShields) then
+		if (self.Settings.ShowShields and IS_WOW_PROJECT_MAINLINE) then
 			--damage absorbs
 			local unitDamageAbsorb = self.displayedUnit and UnitGetTotalAbsorbs (self.displayedUnit) or 0
 		
@@ -8128,6 +8394,9 @@ DF.CastFrameFunctions = {
 			if (self.casting) then
 				local name, text, texture, startTime = UnitCastingInfo (self.unit)
 				if (name) then
+					--[[if not self.spellStartTime then
+						self:UpdateCastingInfo(self.unit)
+					end]]--
 					self.value = GetTime() - self.spellStartTime
 				end
 
@@ -8136,6 +8405,9 @@ DF.CastFrameFunctions = {
 			elseif (self.channeling) then
 				local name, text, texture, endTime = UnitChannelInfo (self.unit)
 				if (name) then
+					--[[if not self.spellEndTime then
+						self:UpdateChannelInfo(self.unit)
+					end]]--
 					self.value = self.spellEndTime - GetTime()
 				end
 
@@ -8329,10 +8601,12 @@ DF.CastFrameFunctions = {
 		
 		if (isChannel) then
 			self.channeling = true
+			self:UpdateChannelInfo(unit)
 			return self.unit == arg1 and "UNIT_SPELLCAST_CHANNEL_START"
 			
 		elseif (isRegularCast) then
 			self.casting = true
+			self:UpdateCastingInfo(unit)
 			return self.unit == arg1 and "UNIT_SPELLCAST_START"
 			
 		else
@@ -8346,15 +8620,8 @@ DF.CastFrameFunctions = {
 		end
 	end,
 	
-	UNIT_SPELLCAST_START = function (self, unit)
-
-		local name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible, spellID
-		if IS_WOW_PROJECT_MAINLINE then
-			name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible, spellID = UnitCastingInfo (unit)
-		else
-			name, text, texture, startTime, endTime, isTradeSkill, castID, spellID = UnitCastingInfo (unit)
-			notInterruptible = false
-		end
+	UpdateCastingInfo = function (self, unit)
+		local name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible, spellID = UnitCastingInfo (unit)
 		
 		--> is valid?
 		if (not self:IsValid (unit, name, isTradeSkill, true)) then
@@ -8382,7 +8649,7 @@ DF.CastFrameFunctions = {
 			self:SetAlpha (1)
 			self.Icon:SetTexture (texture)
 			self.Icon:Show()
-			self.Text:SetText (text)
+			self.Text:SetText (text or name)
 			
 			if (self.Settings.ShowCastTime and self.Settings.CanLazyTick) then
 				self.percentText:Show()
@@ -8406,12 +8673,18 @@ DF.CastFrameFunctions = {
 		--> update the interrupt cast border
 		self:UpdateInterruptState()
 		
+	end,
+	
+	UNIT_SPELLCAST_START = function (self, unit)
+
+		self:UpdateCastingInfo(unit)
+		
 		self:RunHooksForWidget ("OnCastStart", self, self.unit, "UNIT_SPELLCAST_START")
 	end,
 	
-	UNIT_SPELLCAST_CHANNEL_START = function (self, unit, ...)
+	UpdateChannelInfo = function (self, unit, ...)
 		local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID
-		if IS_WOW_PROJECT_MAINLINE then
+		if not IS_WOW_PROJECT_CLASSIC_TBC then
 			name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID = UnitChannelInfo (unit)
 		else
 			name, text, texture, startTime, endTime, isTradeSkill, spellID = UnitChannelInfo (unit)
@@ -8467,6 +8740,12 @@ DF.CastFrameFunctions = {
 			
 		--> update the interrupt cast border
 		self:UpdateInterruptState()
+		
+	end,
+	
+	UNIT_SPELLCAST_CHANNEL_START = function (self, unit, ...)
+		
+		self:UpdateChannelInfo(unit, ...)
 
 		self:RunHooksForWidget ("OnCastStart", self, self.unit, "UNIT_SPELLCAST_CHANNEL_START")
 	end,
@@ -8627,6 +8906,90 @@ DF.CastFrameFunctions = {
 	end,
 
 }
+
+-- for classic era use LibClassicCasterino:
+local LibCC = LibStub ("LibClassicCasterino", true)
+if IS_WOW_PROJECT_CLASSIC_ERA and LibCC then
+	local fCast = CreateFrame("frame")
+
+	local getCastBar = function (unitId)
+		local plateFrame = C_NamePlate.GetNamePlateForUnit (unitId)
+		if (not plateFrame) then
+			return
+		end
+
+		local castBar = plateFrame.unitFrame and plateFrame.unitFrame.castBar
+		if (not castBar) then
+			return
+		end
+
+		return castBar
+	end
+
+	local triggerCastEvent = function (castBar, event, unitId, ...)
+		if (castBar and castBar.OnEvent) then
+			castBar.OnEvent (castBar, event, unitId)
+		end
+	end
+
+	local funcCast = function (event, unitId, ...)
+		local castBar = getCastBar (unitId)
+		if (castBar) then
+			triggerCastEvent (castBar, event, unitId)
+		end
+	end
+
+	fCast.UNIT_SPELLCAST_START = function (self, event, unitId, ...)
+		triggerCastEvent (getCastBar (unitId), event, unitId)
+	end
+
+	fCast.UNIT_SPELLCAST_STOP = function (self, event, unitId, ...)
+		triggerCastEvent (getCastBar (unitId), event, unitId)
+	end
+
+	fCast.UNIT_SPELLCAST_DELAYED = function (self, event, unitId, ...)
+		triggerCastEvent (getCastBar (unitId), event, unitId)
+	end
+
+	fCast.UNIT_SPELLCAST_FAILED = function (self, event, unitId, ...)
+		triggerCastEvent (getCastBar (unitId), event, unitId)
+	end
+
+	fCast.UNIT_SPELLCAST_INTERRUPTED = function (self, event, unitId, ...)
+		triggerCastEvent (getCastBar (unitId), event, unitId)
+	end
+
+	fCast.UNIT_SPELLCAST_CHANNEL_START = function (self, event, unitId, ...)
+		triggerCastEvent (getCastBar (unitId), event, unitId)
+	end
+
+	fCast.UNIT_SPELLCAST_CHANNEL_UPDATE = function (self, event, unitId, ...)
+		triggerCastEvent (getCastBar (unitId), event, unitId)
+	end
+
+	fCast.UNIT_SPELLCAST_CHANNEL_STOP = function (self, event, unitId, ...)
+		triggerCastEvent (getCastBar (unitId), event, unitId)
+	end
+
+	if LibCC then
+		LibCC.RegisterCallback(fCast,"UNIT_SPELLCAST_START", funcCast)
+		LibCC.RegisterCallback(fCast,"UNIT_SPELLCAST_DELAYED", funcCast) -- only for player
+		LibCC.RegisterCallback(fCast,"UNIT_SPELLCAST_STOP", funcCast)
+		LibCC.RegisterCallback(fCast,"UNIT_SPELLCAST_FAILED", funcCast)
+		LibCC.RegisterCallback(fCast,"UNIT_SPELLCAST_INTERRUPTED", funcCast)
+		LibCC.RegisterCallback(fCast,"UNIT_SPELLCAST_CHANNEL_START", funcCast)
+		LibCC.RegisterCallback(fCast,"UNIT_SPELLCAST_CHANNEL_UPDATE", funcCast) -- only for player
+		LibCC.RegisterCallback(fCast,"UNIT_SPELLCAST_CHANNEL_STOP", funcCast)
+
+		UnitCastingInfo = function(unit)
+			return LibCC:UnitCastingInfo (unit)
+		end	
+
+		UnitChannelInfo = function(unit)
+			return LibCC:UnitChannelInfo (unit)
+		end	
+	end
+end -- end classic era
 
 -- ~castbar
 
@@ -9518,6 +9881,8 @@ DF.TimeLineBlockFunctions = {
 		--dataIndex stores which line index from the data this line will use
 		--lineData store members: .text .icon .timeline
 		local lineData = data.lines [self.dataIndex]
+
+		self.spellId = lineData.spellId
 		
 		--if there's an icon, anchor the text at the right side of the icon
 		--this is the title and icon of the title
@@ -9659,6 +10024,14 @@ DF.TimeLineFunctions = {
 			line = CreateFrame ("frame", "$parentLine" .. index, self.body, "BackdropTemplate")
 			DF:Mixin (line, DF.TimeLineBlockFunctions)
 			self.lines [index] = line
+
+			local lineHeader = CreateFrame("frame", nil, line, "BackdropTemplate")
+			lineHeader:SetPoint("topleft", line, "topleft", 0, 0)
+			lineHeader:SetPoint("bottomleft", line, "bottomleft", 0, 0)
+			lineHeader:SetScript("OnEnter", self.options.header_on_enter)
+			lineHeader:SetScript("OnLeave", self.options.header_on_leave)
+
+			line.lineHeader = lineHeader
 			
 			--store the individual textures that shows the timeline information
 			line.blocks = {}
@@ -9759,6 +10132,7 @@ DF.TimeLineFunctions = {
 		for i = 1, #self.data.lines do
 			local line = self:GetLine (i)
 			line.dataIndex = i --this index is used inside the line update function to know which data to get
+			line.lineHeader:SetWidth(self.options.header_width)
 			line:SetBlocksFromData() --the function to update runs within the line object
 		end
 		
@@ -9780,15 +10154,14 @@ DF.TimeLineFunctions = {
 }
 
 --creates a regular scroll in horizontal position
-function DF:CreateTimeLineFrame (parent, name, options, timelineOptions)
-
+function DF:CreateTimeLineFrame(parent, name, options, timelineOptions)
 	local width = options and options.width or timeline_options.width
 	local height = options and options.height or timeline_options.height
 	local scrollWidth = 800 --placeholder until the timeline receives data
 	local scrollHeight = 800 --placeholder until the timeline receives data
 
-	local frameCanvas = CreateFrame ("scrollframe", name, parent, "BackdropTemplate")
-	DF:Mixin (frameCanvas, DF.TimeLineFunctions)
+	local frameCanvas = CreateFrame("scrollframe", name, parent, "BackdropTemplate")
+	DF:Mixin(frameCanvas, DF.TimeLineFunctions)
 	
 	frameCanvas.data = {}
 	frameCanvas.lines = {}
@@ -9815,10 +10188,11 @@ function DF:CreateTimeLineFrame (parent, name, options, timelineOptions)
 	frameCanvas.elapsedTimeFrame = DF:CreateElapsedTimeFrame (frameBody, frameCanvas:GetName() and frameCanvas:GetName() .. "ElapsedTimeFrame", timelineOptions)
 	
 	--create horizontal slider
-		local horizontalSlider = CreateFrame ("slider", nil, parent, "BackdropTemplate")
+		local horizontalSlider = CreateFrame ("slider", frameCanvas:GetName() .. "HorizontalSlider", parent, "BackdropTemplate")
 		horizontalSlider.bg = horizontalSlider:CreateTexture (nil, "background")
 		horizontalSlider.bg:SetAllPoints (true)
 		horizontalSlider.bg:SetTexture (0, 0, 0, 0.5)
+		frameCanvas.horizontalSlider = horizontalSlider
 
 		horizontalSlider:SetBackdrop (frameCanvas.options.slider_backdrop)
 		horizontalSlider:SetBackdropColor (unpack (frameCanvas.options.slider_backdrop_color))
@@ -9844,11 +10218,9 @@ function DF:CreateTimeLineFrame (parent, name, options, timelineOptions)
 				frameCanvas:SetHorizontalScroll (stepValue)
 			end
 		end)
-		
-		frameCanvas.horizontalSlider = horizontalSlider
 	
 	--create scale slider
-		local scaleSlider = CreateFrame ("slider", nil, parent, "BackdropTemplate")
+		local scaleSlider = CreateFrame("slider", frameCanvas:GetName() .. "ScaleSlider", parent, "BackdropTemplate")
 		scaleSlider.bg = scaleSlider:CreateTexture (nil, "background")
 		scaleSlider.bg:SetAllPoints (true)
 		scaleSlider.bg:SetTexture (0, 0, 0, 0.5)
@@ -9882,10 +10254,11 @@ function DF:CreateTimeLineFrame (parent, name, options, timelineOptions)
 		end)
 
 	--create vertical slider
-		local verticalSlider = CreateFrame ("slider", nil, parent, "BackdropTemplate")
+		local verticalSlider = CreateFrame ("slider", frameCanvas:GetName() .. "VerticalSlider", parent, "BackdropTemplate")
 		verticalSlider.bg = verticalSlider:CreateTexture (nil, "background")
 		verticalSlider.bg:SetAllPoints (true)
 		verticalSlider.bg:SetTexture (0, 0, 0, 0.5)
+		frameCanvas.verticalSlider = verticalSlider
 		
 		verticalSlider:SetBackdrop (frameCanvas.options.slider_backdrop)
 		verticalSlider:SetBackdropColor (unpack (frameCanvas.options.slider_backdrop_color))
@@ -9906,8 +10279,6 @@ function DF:CreateTimeLineFrame (parent, name, options, timelineOptions)
 		verticalSlider:SetScript ("OnValueChanged", function (self)
 		      frameCanvas:SetVerticalScroll (self:GetValue())
 		end)
-		
-		frameCanvas.verticalSlider = verticalSlider
 
 	--mouse scroll
 		frameCanvas:EnableMouseWheel (true)
