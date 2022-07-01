@@ -12,6 +12,7 @@ local segmentos = _detalhes.segmentos
 --lua locals
 local _math_ceil = math.ceil
 local _math_floor = math.floor
+local floor = _math_floor
 local _math_max = math.max
 local _ipairs = ipairs
 local _pairs = pairs
@@ -4053,6 +4054,10 @@ end
 
 _detalhes.barras_criadas = 0
 
+local getActor = function(self)
+	return self.minha_tabela
+end
+
 --> search key: ~row ~barra  ~newbar ~createbar ~createrow
 function gump:CreateNewLine (instancia, index)
 
@@ -4067,6 +4072,8 @@ function gump:CreateNewLine (instancia, index)
 	newLine.instance_id = instancia.meu_id
 	newLine.animacao_fim = 0
 	newLine.animacao_fim2 = 0
+
+	newLine.GetActor = getActor
 	
 	--> set point, almost irrelevant here, it recalc this on SetBarGrowDirection()
 	local y = instancia.row_height * (index-1)
@@ -4349,10 +4356,23 @@ function Details:RefreshTitleBar()
 
 	local texturePath = SharedMedia:Fetch("statusbar", texture)
 
-	self.baseframe.titleBar:SetShown(shown)
-	self.baseframe.titleBar:SetHeight(height)
-	self.baseframe.titleBar.texture:SetTexture(texturePath)
-	self.baseframe.titleBar.texture:SetVertexColor(DetailsFramework:ParseColors(color))
+	local titleBar = self.baseframe.titleBar
+	titleBar:SetShown(shown)
+
+	--menu_attribute_string is nil in tbc (20 jun 2022)
+	if (not self.menu_attribute_string) then
+		return
+	end
+
+	if (shown) then
+		titleBar:SetHeight(height)
+		titleBar.texture:SetTexture(texturePath)
+		titleBar.texture:SetVertexColor(DetailsFramework:ParseColors(color))
+
+		self.menu_attribute_string:SetParent(titleBar)
+	else
+		self.menu_attribute_string:SetParent(self.baseframe)
+	end
 end
 
 function _detalhes:SetBarModel (upper_enabled, upper_model, upper_alpha, lower_enabled, lower_model, lower_alpha)
@@ -4424,7 +4444,41 @@ function _detalhes:SetBarSpecIconSettings (enabled, iconfile, fulltrack)
 	self:ReajustaGump()
 end
 
-function _detalhes:SetBarSettings (height, texture, colorclass, fixedcolor, backgroundtexture, backgroundcolorclass, backgroundfixedcolor, alpha, iconfile, barstart, spacement, texture_custom)
+function Details:SetBarArenaRoleIconSettings(show_icon, icon_size_offset)
+	if (type(show_icon) ~= "boolean") then
+		show_icon = self.row_info.show_arena_role_icon
+	end
+
+	if (not icon_size_offset or type(icon_size_offset) ~= "number") then
+		icon_size_offset = self.row_info.arena_role_icon_size_offset
+	end
+
+	self.row_info.show_arena_role_icon = show_icon
+	self.row_info.arena_role_icon_size_offset = icon_size_offset
+
+	self:InstanceReset()
+	self:InstanceRefreshRows()
+	self:ReajustaGump()
+end
+
+function Details:SetBarFactionIconSettings(show_faction_icon, faction_icon_size_offset)
+	if (type(show_faction_icon) ~= "boolean") then
+		show_faction_icon = self.row_info.show_faction_icon
+	end
+
+	if (not faction_icon_size_offset or type(faction_icon_size_offset) ~= "number") then
+		faction_icon_size_offset = self.row_info.faction_icon_size_offset
+	end
+
+	self.row_info.show_faction_icon = show_faction_icon
+	self.row_info.faction_icon_size_offset = faction_icon_size_offset
+
+	self:InstanceReset()
+	self:InstanceRefreshRows()
+	self:ReajustaGump()
+end
+
+function _detalhes:SetBarSettings (height, texture, colorclass, fixedcolor, backgroundtexture, backgroundcolorclass, backgroundfixedcolor, alpha, iconfile, barstart, spacement, texture_custom, icon_size_offset)
 	
 	--> bar start
 	if (type (barstart) == "boolean") then
@@ -4499,6 +4553,10 @@ function _detalhes:SetBarSettings (height, texture, colorclass, fixedcolor, back
 		c [1], c [2], c [3], c [4] = red, green, blue, alpha
 	end
 
+	if (icon_size_offset and type(icon_size_offset) == "number") then
+		self.row_info.icon_size_offset = icon_size_offset
+	end
+
 	self:InstanceReset()
 	self:InstanceRefreshRows()
 	self:ReajustaGump()
@@ -4558,7 +4616,7 @@ end
 
 --/script _detalhes:InstanceRefreshRows (_detalhes.tabela_instancias[1])
 
---> on update function
+--onupdate function for 'Fast Updates' feature
 local fast_ps_func = function (self)
 	local instance = self.instance
 	
@@ -4566,8 +4624,16 @@ local fast_ps_func = function (self)
 		return
 	end
 	
-	local combat_time = instance.showing:GetCombatTime()
-	local ps_type = _detalhes.ps_abbreviation
+	local combatTime = instance.showing:GetCombatTime()
+	local abbreviationType = _detalhes.ps_abbreviation
+	local abbreviationFunc = tok_functions[abbreviationType]
+
+	local isInLineTextEnabled = instance.use_multi_fontstrings
+	local instanceShowDataSettings = instance.row_info.textR_show_data
+
+	local showingAllData = instanceShowDataSettings[3] and instanceShowDataSettings[2] and instanceShowDataSettings[1]
+	local showingTotalAndPS = not instanceShowDataSettings[3] and instanceShowDataSettings[2] and instanceShowDataSettings[1]
+	local showingOnlyPS = not instanceShowDataSettings[3] and instanceShowDataSettings[2] and not instanceShowDataSettings[1]
 
 	if (instance.rows_fit_in_window) then
 		for i = 1, instance.rows_fit_in_window do --instance:GetNumRows()
@@ -4575,14 +4641,21 @@ local fast_ps_func = function (self)
 			if (row and row:IsShown()) then
 				local actor = row.minha_tabela
 				if (actor) then
-					local dps_text = row.ps_text
-					if (dps_text) then
-						local new_dps = _math_floor (actor.total / combat_time)
-						local formated_dps = tok_functions [ps_type] (_, new_dps)
 
-						--row.lineText4:SetText (row.lineText4:GetText():gsub (dps_text, formated_dps))
-						row.lineText4:SetText (( row.lineText4:GetText() or "" ):gsub (dps_text, formated_dps))
-						row.ps_text = formated_dps
+					local currentDps = floor(actor.total / combatTime) --can also be hps
+					if (isInLineTextEnabled) then
+						if (showingAllData) then
+							row.lineText3:SetText(abbreviationFunc(nil, currentDps))
+						elseif (showingTotalAndPS or showingOnlyPS) then
+							row.lineText4:SetText(abbreviationFunc(nil, currentDps))
+						end
+					else
+						local dpsText = row.ps_text
+						if (dpsText) then
+							local formatedDps = abbreviationFunc(nil, currentDps)
+							row.lineText4:SetText((row.lineText4:GetText() or ""):gsub(dpsText, formatedDps))
+							row.ps_text = formatedDps
+						end
 					end
 				end
 			end

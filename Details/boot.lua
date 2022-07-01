@@ -1,14 +1,14 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --> global name declaration
 
-		_ = nil -- remove underscore from global namespace
+		_ = nil
 		_detalhes = LibStub("AceAddon-3.0"):NewAddon("_detalhes", "AceTimer-3.0", "AceComm-3.0", "AceSerializer-3.0", "NickTag-1.0")
 
 		local version, build, date, tocversion = GetBuildInfo()
 
-		_detalhes.build_counter = 9821
-		_detalhes.alpha_build_counter = 9821 --if this is higher than the regular counter, use it instead
-		_detalhes.bcc_counter = 39
+		_detalhes.build_counter = 9825
+		_detalhes.alpha_build_counter = 9825 --if this is higher than the regular counter, use it instead
+		_detalhes.bcc_counter = 41
 		_detalhes.dont_open_news = true
 		_detalhes.game_version = version
 		_detalhes.userversion = version .. _detalhes.build_counter

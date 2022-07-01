@@ -1,12 +1,10 @@
-## Interface: 11401
-## Interface-Classic: 11401
-## Interface-BCC: 20502
+## Interface: 20504
 ## Title: Skillet-Classic |cff7fff7f -Ace3-|r
 ## Notes: A replacement tradeskill window
 ## Notes-esES: Una sustitucion de la ventana de Habilidades de Comercio
 ## Notes-ruRU: Заменяет окно профессий на более функциональное.
 ## Author: bsmorgan
-## Version: 1.41
+## Version: 1.45
 ## X-Category: Tradeskill
 ## X-License GPL v3 or later
 ## X-Curse-Project-ID: 447401
@@ -79,6 +77,7 @@ Plugins\MissingTradeSkillsList.lua
 Plugins\AuctionDB.lua
 Plugins\Auctioneer.lua
 Plugins\AuctionLite.lua
+Plugins\CancelForm.lua
 #### Addons not ported to Classic
 ## Plugins\AckisRecipeList.lua
 ## Plugins\TradeSkillInfo.lua
