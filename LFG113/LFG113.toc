@@ -1,0 +1,24 @@
+## Interface: 20504
+## Title: LFG113
+## Author: Joseph Forrest
+## Version 2.22
+## SavedVariables: LFG113Saved
+## SavedVariablesPerCharacter: LFG113BlackList, LFG113Searches, LFG113Premades, LFG113Ratings, LFG113InstanceKeys, LFG113Quests
+
+# Localization.
+local\locals.xml
+
+# Global Variables
+Variables.lua
+
+# Version Information
+notes\Changelog.lua
+
+#Communications
+Communication\Communication.xml
+
+#Quests
+local\quests.lua
+
+# Main program
+Main.lua

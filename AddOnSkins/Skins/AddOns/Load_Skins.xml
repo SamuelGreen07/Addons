@@ -1,30 +1,32 @@
 <Ui>
-	<Script file="Ace3.lua"/>
 	<Script file="acb_Castbar.lua"/>
+	<Script file="Ace3.lua"/>
 	<Script file="AchieveIt.lua"/>
 	<Script file="ACP.lua"/>
 	<Script file="AllTheThings.lua"/>
 	<Script file="Altoholic.lua"/>
 	<Script file="Analyst.lua"/>
 	<Script file="AppearanceTooltip.lua"/>
-	<!--Script file="Archy.lua"/-->
+	<Script file="Archy.lua"/>
 	<Script file="ArgusEliteTracker.lua"/>
 	<Script file="ArkInventory.lua"/>
 	<Script file="Atlas.lua"/>
 	<Script file="AtlasLoot.lua"/>
+	<Script file="Auctionator.lua"/>
 	<Script file="Auctioneer.lua"/>
 	<Script file="AuctionLite.lua"/>
 	<Script file="AutoBar.lua"/>
 	<Script file="AutoEquipQuestItem.lua"/>
 	<Script file="AzerothAutoPilot.lua"/>
 	<Script file="Baggins.lua"/>
-	<Script file="Bagnon.lua"/>
 	<Script file="BagSync.lua"/>
 	<Script file="Bartender4.lua"/>
 	<Script file="BattlePetBreedID.lua"/>
 	<Script file="BGDefender.lua"/>
 	<Script file="BigWigs.lua"/>
+	<Script file="BtWLoadouts.lua"/>
 	<Script file="BtWQuests.lua"/>
+	<Script file="BuffomatClassicTBC.lua"/>
 	<Script file="BugSack.lua"/>
 	<Script file="BuyEmAll.lua"/>
 	<Script file="Capping.lua"/>
@@ -46,9 +48,12 @@
 	<Script file="DressUp.lua"/>
 	<Script file="EasyMail.lua"/>
 	<Script file="Easy_Obliterate.lua"/>
+	<Script file="EavesDrop.lua"/>
 	<Script file="EnchantCheck.lua"/>
 	<Script file="EnergyWatch.lua"/>
+	<Script file="EssenceSetManager.lua"/>
 	<Script file="Examiner.lua"/>
+	<Script file="ExtendedCharacterStats.lua"/>
 	<Script file="ExtraQuestButton.lua"/>
 	<Script file="ExtVendor.lua"/>
 	<Script file="FlightMapEnhanced.lua"/>
@@ -67,6 +72,7 @@
 	<Script file="InspectEquip.lua"/>
 	<Script file="InstanceProfits.lua"/>
 	<Script file="InvenMount.lua"/>
+	<Script file="ItemRack.lua"/>
 	<Script file="KarniCrap.lua"/>
 	<Script file="Keyed.lua"/>
 	<Script file="Libraries.lua"/>
@@ -106,6 +112,8 @@
 	<Script file="QuestPointer.lua"/>
 	<Script file="QuikEmotes.lua"/>
 	<Script file="RaiderIO.lua"/>
+	<Script file="RareScanner.lua"/>
+	<Script file="RCLootCouncil.lua"/>
 	<Script file="Recount.lua"/>
 	<Script file="Scrap.lua"/>
 	<Script file="SearingPlasmaTracker.lua"/>
@@ -131,6 +139,7 @@
 	<Script file="TomTom.lua"/>
 	<Script file="Tongues.lua"/>
 	<Script file="TrainAll.lua"/>
+	<Script file="TrinketMenu.lua"/>
 	<Script file="Vendomatic.lua"/>
 	<Script file="WardrobeSort.lua"/>
 	<Script file="WhisperPop.lua"/>
@@ -142,7 +151,4 @@
 	<Script file="xMerchant.lua"/>
 	<Script file="XPBarNone.lua"/>
 	<Script file="Zygor.lua"/>
-
-	<Include file="Classic\Load_Skins.xml"/>
-	<Include file="Retail\Load_Skins.xml"/>
 </Ui>

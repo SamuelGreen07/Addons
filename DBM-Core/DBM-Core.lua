@@ -67,7 +67,7 @@ local function showRealDate(curseDate)
 end
 
 DBM = {
-	Revision = parseCurseDate("20220624161607"),
+	Revision = parseCurseDate("20220701203314"),
 }
 
 local fakeBWVersion, fakeBWHash
@@ -6774,6 +6774,11 @@ do
 		return isSeasonal
 	end
 	bossModPrototype.IsSeasonal = DBM.IsSeasonal
+end
+
+--Catch all to basically allow encounter mods to use pre retail changes within mods
+function bossModPrototype:IsClassic()
+	return not isRetail
 end
 
 --Pretty much ANYTHING that has a heroic mode

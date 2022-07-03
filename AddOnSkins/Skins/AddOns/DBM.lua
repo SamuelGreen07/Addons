@@ -1,6 +1,6 @@
 local AS = unpack(AddOnSkins)
 
-if not (AS:CheckAddOn('DBM-Core') and AS:CheckAddOn('DBM-StatusBarTimers') and AS:CheckAddOn('DBM-DefaultSkin')) then return end
+if not (AS:CheckAddOn('DBM-Core') and AS:CheckAddOn('DBM-StatusBarTimers')) then return end
 
 function AS:DBM(event, addon)
 	if event == 'PLAYER_ENTERING_WORLD' then
@@ -8,10 +8,10 @@ function AS:DBM(event, addon)
 			for bar in self:GetBarIterator() do
 				if not bar.injected then
 					hooksecurefunc(bar, "Update", function()
-						local sparkEnabled = bar.owner.options.Style ~= "BigWigs" and bar.owner.options.Spark
+						local sparkEnabled = DBT.Options.Spark
 						if not (AS:CheckOption('DBMSkinHalf') and sparkEnabled) then return end
 						local spark = _G[bar.frame:GetName().."BarSpark"]
-						spark:SetSize(12, bar.owner.options.Height*3/2 - 2)
+						spark:SetSize(12, ((bar.enlarged and DBT.Options.HugeHeight or DBT.Options.Height) * 3) - 2)
 						local a, b, c, d = spark:GetPoint()
 						spark:SetPoint(a, b, c, d, 0)
 					end)
@@ -22,14 +22,21 @@ function AS:DBM(event, addon)
 						local icon2 = _G[frame:GetName()..'BarIcon2']
 						local name = _G[frame:GetName()..'BarName']
 						local timer = _G[frame:GetName()..'BarTimer']
+						local iconSize = bar.enlarged and DBT.Options.HugeHeight or DBT.Options.Height
+						if AS:CheckOption('DBMSkinHalf') then
+							iconSize = iconSize * 2
+						end
+						iconSize = iconSize - 2
 
 						AS:SkinTexture(icon1, true)
 						icon1:ClearAllPoints()
-						icon1:SetPoint('BOTTOMRIGHT', frame, 'BOTTOMLEFT', AS:AdjustForTheme(-2), 1)
+						icon1:SetPoint('BOTTOMRIGHT', frame, 'BOTTOMLEFT', AS:AdjustForTheme(-1), 1)
+						icon1:SetSize(iconSize, iconSize)
 
 						AS:SkinTexture(icon2, true)
 						icon2:ClearAllPoints()
-						icon2:SetPoint('BOTTOMLEFT', frame, 'BOTTOMRIGHT', AS:AdjustForTheme(2), 1)
+						icon2:SetPoint('BOTTOMLEFT', frame, 'BOTTOMRIGHT', AS:AdjustForTheme(1), 1)
+						icon2:SetSize(iconSize, iconSize)
 
 						AS:SetInside(tbar, frame)
 
@@ -46,28 +53,15 @@ function AS:DBM(event, addon)
 						timer:SetShadowColor(0, 0, 0, 0)
 
 						if AS:CheckOption('DBMSkinHalf') then
-							if (not bar.owner.options.BarYOffset or bar.owner.options.BarYOffset and bar.owner.options.BarYOffset < 13) then
-								bar.owner.options.BarYOffset = 13
-							end
-
-							if (not bar.owner.options.HugeBarYOffset or bar.owner.options.HugeBarYOffset and bar.owner.options.HugeBarYOffset < 13) then
-								bar.owner.options.HugeBarYOffset = 13
-							end
-
-							frame:SetHeight(bar.owner.options.Height / 3)
 							name:SetPoint('BOTTOMLEFT', frame, 'TOPLEFT', 0, 3)
 							timer:SetPoint('BOTTOMRIGHT', frame, 'TOPRIGHT', -1, 1)
 						else
-							frame:SetHeight(bar.owner.options.Height)
 							name:SetPoint('LEFT', frame, 'LEFT', 4, 0)
 							timer:SetPoint('RIGHT', frame, 'RIGHT', -4, 0)
 						end
 
-						timer:SetFont(AS.LSM:Fetch('font', AS:CheckOption('DBMFont')), AS:CheckOption('DBMFontSize'), AS:CheckOption('DBMFontFlag'))
-						name:SetFont(AS.LSM:Fetch('font', AS:CheckOption('DBMFont')), AS:CheckOption('DBMFontSize'), AS:CheckOption('DBMFontFlag'))
-
-						if bar.owner.options.IconLeft then icon1.Backdrop:Show() else icon1.Backdrop:Hide() end
-						if bar.owner.options.IconRight then icon2.Backdrop:Show() else icon2.Backdrop:Hide() end
+						if DBT.Options.IconLeft then icon1.Backdrop:Show() else icon1.Backdrop:Hide() end
+						if DBT.Options.IconRight then icon2.Backdrop:Show() else icon2.Backdrop:Hide() end
 
 						bar.injected = true
 					end)
@@ -79,12 +73,8 @@ function AS:DBM(event, addon)
 		local function SkinRange(self, range, filter, forceshow, redCircleNumPlayers)
 			if DBM.Options.DontShowRangeFrame and not forceshow then return end
 			if DBMRangeCheck then
-				if AS:CheckOption('DBMRadarTrans') then
-					DBMRangeCheckRadar.background:Hide()
-				else
-					AS:SetTemplate(DBMRangeCheck)
-					AS:SetTemplate(DBMRangeCheckRadar)
-				end
+				AS:SetTemplate(DBMRangeCheck)
+				AS:SetTemplate(DBMRangeCheckRadar)
 			end
 		end
 
@@ -98,21 +88,26 @@ function AS:DBM(event, addon)
 		hooksecurefunc(DBT, 'CreateBar', SkinBars)
 		hooksecurefunc(DBM.RangeCheck, 'Show', SkinRange)
 		hooksecurefunc(DBM.InfoFrame, 'Show', SkinInfo)
-	end
 
-	if addon == 'DBM-GUI' then
-		DBM_GUI_OptionsFrame:HookScript('OnShow', function()
-			AS:SkinFrame(DBM_GUI_OptionsFrame)
-			AS:SkinFrame(DBM_GUI_OptionsFrameBossMods)
-			AS:SkinFrame(DBM_GUI_OptionsFrameDBMOptions)
-			AS:SkinFrame(DBM_GUI_OptionsFramePanelContainer)
-		end)
-		AS:SkinTab(DBM_GUI_OptionsFrameTab1)
-		AS:SkinTab(DBM_GUI_OptionsFrameTab2)
-		AS:SkinButton(DBM_GUI_OptionsFrameOkay, true)
-		AS:SkinButton(DBM_GUI_OptionsFrameWebsiteButton, true)
-		AS:SkinScrollBar(DBM_GUI_OptionsFramePanelContainerFOVScrollBar)
-		AS:UnregisterSkinEvent('DBM', event)
+		if AS:CheckOption('DBMSkinHalf') then
+			local halfBarskin = DBT:RegisterSkin("AddOnSkins Half-Bar")
+			if DBT.Options.BarYOffset < 18 then
+				halfBarskin.Options.BarYOffset = 18
+			end
+			if DBT.Options.HugeBarYOffset < 18 then
+				halfBarskin.Options.HugeBarYOffset = 18
+			end
+			halfBarskin.Defaults.Height = 10
+			halfBarskin.Defaults.HugeHeight = 10
+			halfBarskin.Options.IconLocked = true
+			DBT:SetSkin("AddOnSkins Half-Bar")
+		else
+			local skin = DBT:RegisterSkin("AddOnSkins")
+			skin.Defaults.Height = 30
+			skin.Defaults.HugeHeight = 30
+			skin.Options.IconLocked = true
+			DBT:SetSkin("AddOnSkins")
+		end
 	end
 end
 

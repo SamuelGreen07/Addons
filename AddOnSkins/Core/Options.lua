@@ -1,148 +1,26 @@
-local AS, ASL = unpack(AddOnSkins)
+local AS, ASL = unpack(_G.AddOnSkins)
 
--- Cache global variables
---Lua functions
-local CopyTable = CopyTable
-local sort, pairs, gsub, strfind, strlower, strtrim, tostring, unpack = sort, pairs, gsub, strfind, strlower, strtrim, tostring, unpack
-local tinsert = table.insert
---WoW API / Variables
+local wipe = wipe
+local tinsert = tinsert
+local sort = sort
+local pairs = pairs
+local strfind = strfind
+local strlower = strlower
+local strtrim = strtrim
+local unpack = unpack
+
 local GetAddOnMetadata = GetAddOnMetadata
 local GENERAL = GENERAL
 local hooksecurefunc = hooksecurefunc
--- GLOBALS:
+local tContains = tContains
+local CopyTable = CopyTable
 
-local DEVELOPER_STRING = ''
-local LINE_BREAK = '\n'
+local ACH = AS.Libs.ACH
 
-AS.ChangeLog = {
-	['4.00'] = {
-		'Core: API, Options & Embed',
-		'Removed: WeakAura & TellMeWhen',
-		'Added: ApparenceTooltip & Zygor',
-		'Updated: Blizzard Skins & Various Skin Updates',
-	},
-	['4.01'] = {
-		'Core: API & Options',
-		'Updated: Classic Quest Log',
-	},
-	['4.02'] = {
-		'Core: Options',
-		'Updated: Island Party Pose, Ace3, Parchment Remover',
-		'Added: WeakAuras, Immersion',
-	},
-	['4.03'] = {
-		'Core: API',
-		'Updated: Blizzard Character Skin',
-		'Removed: Parchment Remover (Added directly into ElvUI now)',
-	},
-	["4.04"] = {
-		'Core: API',
-	},
-	['4.05'] = {
-		'Core: API 8.1',
-		'Updated: Azeroth Auto Pilot, Talent Set Manager, Blizzard Skins, NugRunning, FlyoutButtonCustom',
-		'Added: Collection Shop',
-		'Fixed: Tukui 18 Embed',
-	},
-	['4.06'] = {
-		'Curse Issues',
-	},
-	['4.07'] = {
-		'Fixed Curse Issues',
-	},
-	['4.08'] = {
-		'Core: Themes & Shadows',
-		'Updated: Allied Races, AzeriteUI, World Map, Quest',
-	},
-	['4.09'] = {
-		'Core: SetTexture(), StatusBarColor, NavButtons',
-		'Updated: Immersion, PetTracker, Inspect, Error Frame, FlyPlateBuffs, WA, AddOnManger, ClassicQuestLog, MyRolePlay, Collections',
-	},
-	['4.10'] = {
-		'Updated: WA Font',
-	},
-	['4.11'] = { 'N/A' },
-	['4.12'] = { 'N/A' },
-	['4.13'] = {
-		'Added: Changelog Screen',
-		'Updated: Ace3, AdiBags, Clique, Guild Roster Manager, Macro, Spell Book, Quest, TradeSkill, Talents',
-	},
-	['4.14'] = {
-		'Updated: API',
-	},
-	['4.15'] = {
-		'Fixed: Comparing a string to a number',
-	},
-	['4.16'] = {
-		'Fixed: UI Widgets Error Spam',
-		' ',
-		'More updates will follow this weekend',
-	},
-	['4.17'] = {
-		'Removed: WeakAuras (Due to breaking WeakAuras)',
-		'Added: ArkInvetory',
-		'Fixes: Blizzard Skins - World Map, Alerts, PvP Match',
-		'Fixes: Energy Watch Reborn, Pawn',
-	},
-	['4.18'] = {
-		'N/A',
-	},
-	['4.19'] = {
-		'N/A',
-	},
-	['4.20'] = {
-		'N/A',
-	},
-	['4.21'] = {
-		'Removed: WeakAuras (Due to breaking WeakAuras)',
-		'Added: ArkInvetory',
-		'Fixes: Blizzard Skins - World Map, Alerts, PvP Match',
-		'Fixes: Energy Watch Reborn, Pawn',
-	},
-	['4.22'] = {
-		'Updated: Ace3, GRM',
-		'Take account to ElvUI TexCoords',
-		'Fix: Blizzard Communites Skin',
-		'Fix: Pawn Tooltip',
-	},
-	['4.23'] = {
-		'N/A',
-	},
-	['4.24'] = {
-		'Changelog tweaks',
-		'ElvUI TexCoords',
-	},
-	['4.25'] = {
-		'Updated: Auctionator, LibQTip',
-	},
-	[''] = {
-		'',
-	},
-}
-
-local DEVELOPERS = {
-	'AcidWeb', 'Affli', 'Aldarana', 'Arstraea',
-	'Blazeflack', 'Brian Thurlow',
-	'Cadayron','Camealion', 'Catok', 'CJO',
-	'Darth Predator', 'Dec', 'Drii',
-	'Edoc', 'efaref', 'Elv',
-	'Jasje', 'Jason Longwell', 'Jens Jacobsen',
-	'Kemat1an', 'Kkthnx', 'Konungr',
-	'Lockslap', 'Ludius', 'luminnas', 'lolarennt',
-	'MaXiMiUS', 'Merathilis', 'Merith', 'MrRuben5',
-	'Outofammo',
-	'Pat', 'Pezzer13', 'Paul',
-	'Rakkhin', 'Repooc', 'Roktaal',
-	'Shestak', 'Shadowcall', 'Sinaris', 'Simpy',
-	'Tercioo', 'Torch', 'Tukz',
-	'Warmexx',
-	'Vito Sansevero',
-}
+local DEVELOPERS = { 'AcidWeb', 'Affli', 'Aldarana', 'Arstraea', 'Blazeflack', 'Brian Thurlow', 'Cadayron', 'Camealion', 'Catok', 'CJO', 'Darth Predator', 'Dec', 'Drii', 'Edoc', 'efaref', 'Elv', 'Jasje', 'Jason Longwell', 'Jens Jacobsen', 'Kemat1an', 'Kkthnx', 'Konungr', 'Lockslap', 'Ludius', 'luminnas', 'lolarennt', 'MaXiMiUS', 'Merathilis', 'Merith', 'MrRuben5', 'Outofammo', 'Pat', 'Pezzer13', 'Paul', 'Rakkhin', 'Repooc', 'Roktaal', 'Shestak', 'Shadowcall', 'Sinaris', 'Simpy', 'Tercioo', 'Torch', 'Tukz', 'Warmexx', 'Vito Sansevero' }
 
 sort(DEVELOPERS, function(a, b) return strlower(a) < strlower(b) end)
-for _, devName in pairs(DEVELOPERS) do
-	DEVELOPER_STRING = DEVELOPER_STRING..devName..'    '
-end
+local DEVELOPER_STRING = table.concat(DEVELOPERS, '|n')
 
 local DefaultTemplates = { ClassColor = 'Class Color', Custom = 'Custom', Default = 'Default', Transparent = 'Transparent' }
 local Embeds = { NONE = 'None', Details = 'Details', Omen = 'Omen', Skada = 'Skada', Recount = 'Recount', TinyDPS = 'TinyDPS' }
@@ -223,749 +101,86 @@ local BlizzardNames = {
 	Blizzard_WorldStateScore = 'World State Score',
 }
 
-AS.Options = {
-	order = 6,
-	type = 'group',
-	name = AS.Title,
-	childGroups = 'tab',
-	args = {
-		general = {
-			type = 'group',
-			name = GENERAL,
-			order = 0,
-			get = function(info) return AS:CheckOption(info[#info]) end,
-			set = function(info, value) AS:SetOption(info[#info], value) AS:UpdateSettings() AS.NeedReload = true end,
-			args = {
-				Header = {
-					order = 0,
-					type = 'header',
-					name = AS:GetColor(GENERAL),
-				},
-				LoginMsg = {
-					type = 'toggle',
-					name = ASL['Login Message'],
-					order = 1,
-				},
-				SkinDebug = {
-					type = 'toggle',
-					name = ASL['Enable Skin Debugging'],
-					order = 2,
-				},
-				Parchment = {
-					type = 'toggle',
-					name = ASL['Parchment']..' (WIP)', -- This doesn't need localized. Once I'm done doing the extra skinning I'll remove it.
-					order = 3,
-				},
-				Theme = {
-					name = ASL['Themes'],
-					order = 4,
-					type = 'select',
-					values = {
-						['PixelPerfect'] = 'Pixel Perfect',
-						['TwoPixel'] = 'Two Pixel',
-						['ThickBorder'] = 'Thick Border',
-					},
-				},
-				Shadows = {
-					name = ASL['Shadows'],
-					order = 7,
-					type = 'toggle',
-				},
-				SkinTemplate = {
-					name = ASL['Skin Template'],
-					order = 8,
-					type = 'select',
-					values = DefaultTemplates,
-				},
-				Textures = {
-					type = 'group',
-					name = 'Textures',
-					guiInline = true,
-					order = 9,
-					get = function(info) return AS:CheckOption(info[#info]) end,
-					set = function(info, value) AS:SetOption(info[#info], value) AS:UpdateSettings() AS.NeedReload = true end,
-					args = {
-						BackgroundTexture = {
-							type = 'select',
-							dialogControl = 'LSM30_Statusbar',
-							order = 1,
-							name = 'Background Texture',
-							values = AS.LSM:HashTable('statusbar'),
-							disabled = function() return AS:CheckOption('ElvUIStyle', 'ElvUI') end,
-						},
-						StatusBarTexture = {
-							type = 'select',
-							dialogControl = 'LSM30_Statusbar',
-							order = 2,
-							name = 'StatusBar Texture',
-							values = AS.LSM:HashTable('statusbar'),
-							disabled = function() return AS:CheckOption('ElvUIStyle', 'ElvUI') end,
-						},
-						CropIcons = {
-							name = ASL['Crop Icons'],
-							desc = ASL['Turn off for Full Icons'],
-							order = 3,
-							type = 'toggle',
-						},
-					},
-				},
-				Colors = {
-					type = 'group',
-					name = 'Colors',
-					guiInline = true,
-					order = 9,
-					get = function(info) return unpack(AS:CheckOption(info[#info])) end,
-					set = function(info, r, g, b, a) AS:SetOption(info[#info], { r, g, b, a }) AS:UpdateSettings() end,
-					args = {
-						CustomBackdropColor = {
-							type = 'color',
-							order = 1,
-							hasAlpha = true,
-							name = 'Backdrop Color',
-							desc = 'Only Available with Custom Template',
-							disabled = function() return (AS:CheckOption('SkinTemplate') ~= 'Custom') or AS:CheckOption('ElvUIStyle') end,
-						},
-						CustomBorderColor = {
-							type = 'color',
-							order = 2,
-							name = 'Border Color',
-							desc = 'Only Available with Custom Template',
-							disabled = function() return (AS:CheckOption('SkinTemplate') ~= 'Custom') or AS:CheckOption('ElvUIStyle') end,
-						},
-						HighlightColor = {
-							type = 'color',
-							order = 3,
-							name = 'Highlight',
-						},
-						SelectedColor = {
-							type = 'color',
-							order = 4,
-							name = 'Selected / Checked',
-						},
-						StatusBarColor = {
-							type = 'color',
-							order = 5,
-							name = 'Status Bars',
-						},
-					},
-				},
-				dbm = {
-					type = 'group',
-					name = 'DBM Options',
-					guiInline = true,
-					order = 10,
-					get = function(info) return AS:CheckOption(info[#info]) end,
-					set = function(info, value) AS:SetOption(info[#info], value) end,
-					args = {
-						DBMFont = {
-							type = 'select', dialogControl = 'LSM30_Font',
-							order = 1,
-							name = ASL['DBM Font'],
-							values = AS.LSM:HashTable('font'),
-						},
-						DBMFontSize = {
-							type = 'range',
-							order = 2,
-							name = ASL['DBM Font Size'],
-							min = 8, max = 18, step = 1,
-						},
-						DBMFontFlag = {
-							name = ASL['DBM Font Flag'],
-							order = 3,
-							type = 'select',
-							values = {
-								['NONE'] = 'None',
-								['OUTLINE'] = 'OUTLINE',
-								['THICKOUTLINE'] = 'THICKOUTLINE',
-								['MONOCHROME'] = 'MONOCHROME',
-								['MONOCHROMEOUTLINE'] = 'MONOCHROMEOUTLINE',
-							},
-						},
-						DBMSkinHalf = {
-							type = 'toggle',
-							name = ASL['DBM Half-bar Skin'],
-							order = 4,
-						},
-						DBMRadarTrans = {
-							type = 'toggle',
-							name = ASL['DBM Transparent Radar'],
-							order = 5,
-						},
-					},
-				},
-			},
-		},
-		addons = {
-			order = 1,
-			type = 'group',
-			name = ASL['AddOn Skins'],
-			get = function(info) return AS:CheckOption(info[#info]) end,
-			set = function(info, value) AS:SetOption(info[#info], value) AS.NeedReload = true end,
-			args = {
-				description = {
-					type = 'header',
-					name = AS:GetColor(ASL['AddOn Skins']),
-					order = 0,
-				},
-			},
-		},
-		blizzard = {
-			order = 2,
-			type = 'group',
-			name = ASL['Blizzard Skins'],
-			get = function(info) return AS:CheckOption(info[#info]) end,
-			set = function(info, value) AS:SetOption(info[#info], value) AS.NeedReload = true end,
-			args = {
-				enableAll = {
-					order = 1,
-					type = 'execute',
-					name = 'Enable All',
-					func = function()
-						for SkinName in pairs(BlizzardSkins) do
-							AS:SetOption(SkinName, true)
-							if AS:CheckAddOn('ElvUI') then
-								AS:SetElvUIBlizzardSkinOption(SkinName, false)
-							end
-						end
-					end,
-				},
-				disableAll = {
-					order = 2,
-					type = 'execute',
-					name = 'Disable All',
-					func = function()
-						for SkinName in pairs(BlizzardSkins) do
-							AS:SetOption(SkinName, false)
-							if AS:CheckAddOn('ElvUI') then
-								AS:SetElvUIBlizzardSkinOption(SkinName, true)
-							end
-						end
-					end,
-				},
-				description = {
-					type = 'header',
-					name = AS:GetColor(ASL['Blizzard Skins']),
-					order = 3,
-				},
-				skins = {
-					order = 4,
-					type = 'group',
-					name = ASL['Blizzard Skins'],
-					guiInline = true,
-					get = function(info) return AS:CheckOption(info[#info]) end,
-					set = function(info, value) AS:SetOption(info[#info], value) AS.NeedReload = true end,
-					args = {},
-				}
-			},
-		},
-		embed = {
-			order = 4,
-			type = 'group',
-			name = ASL['Embed Settings'],
-			get = function(info) return AS:CheckOption(info[#info]) end,
-			set = function(info, value) AS:SetOption(info[#info], value) AS:Embed_Check() end,
-			args = {
-				EmbedHeader = {
-					order = 0,
-					type = 'header',
-					name = AS:GetColor(ASL['Embed Settings']),
-				},
-				EmbedSystemMessage = {
-					type = 'toggle',
-					name = ASL['Embed System Message'],
-					order = 1,
-				},
-				HideChatFrame = {
-					name = ASL['Hide Chat Frame'],
-					order = 2,
-					type = 'select',
-					values = function() return AS:GetChatWindowInfo() end,
-					disabled = function() return not (AS:CheckOption('EmbedSystemDual') or AS:CheckOption('EmbedSystem')) end,
-				},
-				EmbedRightChat = {
-					type = 'toggle',
-					name = ASL['Embed into Right Chat Panel'],
-					order = 3,
-				},
-				EmbedBelowTop = {
-					type = 'toggle',
-					name = ASL['Embed Below Top Tab'],
-					order = 4,
-				},
-				EmbedBackdrop = {
-					type = 'toggle',
-					name = ASL['Backdrop'],
-					order = 5,
-				},
-				EmbedBackdropTransparent = {
-					type = 'toggle',
-					name = ASL['Transparent Backdrop'],
-					order = 6,
-				},
-				spacer1 = {
-					order = 7,
-					type = 'header',
-					name = '',
-				},
-				EmbedSystem = {
-					order = 8,
-					type = 'toggle',
-					name = ASL['One Window Embed System'],
-					disabled = function() return AS:CheckOption('EmbedSystemDual') end,
-				},
-				EmbedMain = {
-					order = 9,
-					type = 'select',
-					name = ASL['Embed for One Window'],
-					disabled = function() return not AS:CheckOption('EmbedSystem') end,
-					values = Embeds,
-				},
-				spacer2 = {
-					order = 10,
-					type = 'header',
-					name = '',
-				},
-				EmbedSystemDual = {
-					order = 11,
-					type = 'toggle',
-					name = ASL['Two Window Embed System'],
-					disabled = function() return AS:CheckOption('EmbedSystem') end,
-				},
-				EmbedLeft = {
-					order = 12,
-					type = 'select',
-					name = ASL["Window One Embed"],
-					disabled = function() return not AS:CheckOption('EmbedSystemDual') end,
-					values = Embeds,
-				},
-				EmbedLeftWidth = {
-					type = 'range',
-					order = 13,
-					name = ASL['Window One Width'],
-					min = 100, max = 300, step = 1,
-					disabled = function() return not AS:CheckOption('EmbedSystemDual') end,
-				},
-				EmbedRight = {
-					order = 14,
-					type = 'select',
-					name = ASL["Window Two Embed"],
-					disabled = function() return not AS:CheckOption('EmbedSystemDual') end,
-					values = Embeds,
-				},
-				spacer3 = {
-					order = 15,
-					type = 'header',
-					name = 'Strata, Level and Combat Options',
-				},
-				EmbedFrameStrata = {
-					name = ASL['Embed Frame Strata'],
-					order = 16,
-					type = 'select',
-					values = {
-						['1-BACKGROUND'] = 'BACKGROUND',
-						['2-LOW'] = 'LOW',
-						['3-MEDIUM'] = 'MEDIUM',
-						['4-HIGH'] = 'HIGH',
-						['5-DIALOG'] = 'DIALOG',
-						['6-FULLSCREEN'] = 'FULLSCREEN',
-						['7-FULLSCREEN_DIALOG'] = 'FULLSCREEN_DIALOG',
-						['8-TOOLTIP'] = 'TOOLTIP',
-					},
-					disabled = function() return not (AS:CheckOption('EmbedSystemDual') or AS:CheckOption('EmbedSystem')) end,
-				},
-				EmbedFrameLevel = {
-					name = ASL['Embed Frame Level'],
-					order = 17,
-					type = 'range',
-					min = 1,
-					max = 255,
-					step = 1,
-					disabled = function() return not (AS:CheckOption('EmbedSystemDual') or AS:CheckOption('EmbedSystem')) end,
-				},
-				EmbedOoC = {
-					type = 'toggle',
-					name = ASL['Out of Combat (Hide)'],
-					order = 18,
-				},
-				EmbedOoCDelay = {
-					name = ASL['Embed OoC Delay'],
-					order = 19,
-					type = 'range',
-					min = 1, max = 30, step = 1,
-					disabled = function() return not ((AS:CheckOption('EmbedSystemDual') or AS:CheckOption('EmbedSystem')) and AS:CheckOption('EmbedOoC')) end,
-				},
-			},
-		},
-		importlinks = {
-			type = 'group',
-			name = 'Import Links',
-			order = 6,
-			args = {
-				WAIconLink = {
-					type = 'input',
-					order = 1,
-					width = 'full',
-					name = "WeakAura Icon Border Link by Hekili",
-					get = function() return 'https://wago.io/IconSkins' end,
-				},
-			},
-		},
-		about = {
-			type = 'group',
-			name = ASL['About/Help'],
-			order = -2,
-			childGroups = 'tab',
-			args = {
-				credits = {
-					type = 'group',
-					name = 'Credits',
-					order = 0,
-					args = {
-						AuthorHeader = {
-							order = 0,
-							type = 'header',
-							name = 'Authors:',
-						},
-						Authors = {
-							order = 1,
-							type = 'description',
-							name = AS.Authors,
-							fontSize = 'large',
-						},
-						DevelopersHeader = {
-							order = 2,
-							type = 'header',
-							name = 'Developers:',
-						},
-						Developers = {
-							order = 3,
-							type = 'description',
-							name = DEVELOPER_STRING,
-							fontSize = 'medium',
-						},
-					},
-				},
-				links = {
-					type = 'group',
-					name = ASL['Links'],
-					order = 1,
-					args = {
-						tukuilink = {
-							order = 5,
-							type = 'input',
-							width = 'full',
-							name = ASL['Download Link'],
-							get = function() return 'https://www.tukui.org/addons.php?id=3' end,
-						},
-						gitlablink = {
-							order = 7,
-							type = 'input',
-							width = 'full',
-							name = ASL['GitLab Link / Report Errors'],
-							get = function() return 'https://git.tukui.org/Azilroka/AddOnSkins' end,
-						},
-					},
-				},
-				skins = {
-					type = 'group',
-					name = ASL['Skins'],
-					order = 2,
-					args = {},
-				},
-				changelog = {
-					type = 'group',
-					name = ASL['Changelog'],
-					order = 3,
-					args = {},
-				},
-			},
-		},
-	},
-}
+AS.Options = ACH:Group(AS.Title, nil, 6, 'tab')
+AS.Options.args.general = ACH:Group(GENERAL, nil, 0, nil, function(info) return AS:CheckOption(info[#info]) end, function(info, value) AS:SetOption(info[#info], value) AS:UpdateSettings() AS.NeedReload = true end)
+AS.Options.args.general.args.general = ACH:Group(' ', nil, 1)
+AS.Options.args.general.args.general.inline = true
+AS.Options.args.general.args.general.args.LoginMsg = ACH:Toggle(ASL['Login Message'], nil, 1)
+AS.Options.args.general.args.general.args.SkinDebug = ACH:Toggle(ASL['Enable Skin Debugging'], nil, 2)
 
-local Skins = {
-	['Available'] = {
-		"acb_Castbar",
-		"Achieve It",
-		"Addon Control Panel",
-		"AdiBags",
-		"AllTheThings",
-		"Altoholic",
-		"Analyst",
-		"Appearance Tooltip",
-		"Argus Elite Tracker",
-		"ArkInventory",
-		"Atlas",
-		"AtlasLoot",
-		"Auctionator",
-		"Auctioneer",
-		"Auction Lite",
-		"AutoBar",
-		"Auto Equip Quest Item",
-		"Azeroth Auto Pilot",
-		"Baggins",
-		"Bagnon",
-		"BagSync",
-		"Bartender4",
-		"BattlePetBreedID",
-		"BGDefender",
-		"BigWigs",
-		"BtWQuests",
-		"BugSack",
-		"BuyEmAll",
-		"Capping",
-		"Chocolate Bar",
-		"Classic Guild Frame",
-		"Classic Quest Log",
-		"Class OrderHalls Complete",
-		"Clique",
-		"Color Picker Plus",
-		"Coolline",
-		"Cork",
-		"Critline",
-		"Deadly Boss Mods",
-		"DejaCharacterStats",
-		"Details",
-		"Dominos",
-		"Dresser",
-		"DressUp",
-		"EasyMail",
-		"Easy Obliterate",
-		"Enchant Check",
-		"Energy Watch",
-		"Examiner",
-		"Extra Quest Button",
-		"Extended Vendor",
-		"Flight Map Enhanced",
-		"FlyoutButton Custom",
-		"Global Ignore List",
-		"Gryphon Heart Items",
-		"Guild Roster Manager",
-		"GupPet",
-		"Hack",
-		"Healium",
-		"Hekili",
-		"Immersion",
-		"Inbox Mail Bag",
-		"Incoming",
-		"Inspect Equip",
-		"Instance Profits",
-		"InvenMount",
-		"Karni's Crap Filter",
-		"Keyed",
-		"Lightheaded",
-		"LinkWrangler",
-		"Lucky Charms 2",
-		"Ludwig",
-		"MageNuggets",
-		"Mail Commander",
-		"Master Plan",
-		"Minimal Archaeology",
-		"Model Pique",
-		"MogIt",
-		"MoveAnything",
-		"Mizus Raid Tools",
-		"My RolePlay",
-		"Mythic Keystone Status",
-		"No No Go Go",
-		"NugRunning",
-		"Numeration",
-		"Ogri'Lazy",
-		"Omen",
-		"One Click Enchant Scroll",
-		"oRA3",
-		"OrderHall Commander",
-		"Outfitter",
-		"Ovale",
-		"Overachiever",
-		"Pawn",
-		"Pet Battle Teams",
-		"Pet Journal Enhanced",
-		"PetTracker",
-		"Postal",
-		"Premade Groups Filter",
-		"Quartz",
-		"Quest Completist",
-		"Quest Guru",
-		"Quest Pointer",
-		"Quik Emotes",
-		"Recount",
-		"Scrap",
-		"Searing Plasma Tracker",
-		"Server Hop",
-		"SexyCooldown",
-		"ShieldBars",
-		"SilverDragon",
-		"Simulationcraft",
-		"Skada",
-		"Skillet",
-		"Soundtrack",
-		"Spy",
-		"Storyline",
-		"Swatter",
-		"Talented",
-		"Talentless",
-		"Talent Set Manager",
-		"tdBattlePetScript",
-		"TinyDPS",
-		"TinyInspect",
-		"TitanPanel",
-		"Tome Of Teleportation",
-		"TomTom",
-		"Tongues",
-		"TrainAll",
-		"Vendomatic",
-		"WardrobeSort",
-		"WeakAuras",
-		"WhisperPop",
-		"Wholly",
-		"World Boss Status",
-		"World Quest Tab",
-		"WowLua",
-		"WoWPro",
-		"xMerchant",
-		"XPBarNone",
-		"Zygor",
-	},
-	['Removed'] = {
-		"AdiCastBar",
-		"Advanced Icon Selector",
-		"AffDots",
-		"alDamageMeter",
-		"Arcanometer",
-		"Advanced Trade Skill Window",
-		"Better Quest",
-		"BigBrother",
-		"Balance Power Tracker",
-		"Bulk Order",
-		"CLCInfo",
-		"CLCProt",
-		"CLCRet",
-		"Combustion Helper",
-		"Creator",
-		"DeusVox Encounters",
-		"DKDots",
-		"EavesDrop",
-		"Every Gold To Banker",
-		"Face Shooter",
-		"Factionizer",
-		"Flight Map",
-		"GCGambler",
-		"Grinder",
-		"Guild Member Info Trade Skills",
-		"Ignition",
-		"KeepingTabs",
-		"LegacyQuest",
-		"LootCouncilLite",
-		"LootLog",
-		"MrTrader",
-		"Odyssey",
-		"Poisoner",
-		"PowerAuras",
-		"Prayer of Mending Tracker",
-		"ProfessionTabs",
-		"Quest Item Bar",
-		"Raid Invite Organizer",
-		"Raid Targets",
-		"Rare Announcer",
-		"Rare Coordinator",
-		"Rares Tip",
-		"RCLootCouncil",
-		"Reagent Maker",
-		"ReforgeLite",
-		"Reforgenator",
-		"Reforgerade",
-		"Shield Monitor",
-		"Social Tabs",
-		"Spine Counter",
-		"Storm Earth and Fire",
-		"Symbiosis",
-		"SymbiosisTip",
-		"TradeTabs",
-		"Raven",
-		"VanasKoS",
-		"VengeanceStatus",
-		"wTetriNET",
-	},
-	['Incompatible'] = {
-		'Castbars',
-	},
-	['Denied'] = {
-		"Ackis Recipe List",
-		"Collectinator",
-		"JS' Hunter Bar",
-		"Norganna Slidebar",
-		"Panda",
-		"TradeSkillMaster",
-		"QuickMark",
-		"BattlegroundTargets",
-		"ButtonForge",
-		"Button Timers",
-		"Carbonite",
-		"Cellular",
-		"DeathNote",
-		"EPGP",
-		"EPGPLootMaster",
-		"EventHorizon",
-		"FarmIt",
-		"FloTotemBar",
-		"ForteXorcist",
-		"Gladius",
-		"Grid",
-		"GroupCalendar5",
-		"Hagakure Cooldowns",
-		"Healbot",
-		"hpetbattleany",
-		"LoseControl",
-		"Mapster",
-		"Need To Know",
-		"OPie",
-		"RaidCheckList",
-		"RoguePowerBars",
-		"Steal, Purge, & Dispel",
-		"Tanker",
-		"Tbag-Shefki",
-		"Vuhdo",
-		"WoW Instant Messenger",
-		"XBar",
-		"XLoot",
-		"NameplateSCT",
-		"Hermes",
-		"Lightwell Counter",
-		"Total RP 2",
-		"Upgrade List",
-	},
-}
+AS.Options.args.general.args.Theme = ACH:Select(ASL['Themes'], nil, 2, { PixelPerfect = 'Thin Border', TwoPixel = 'Two Pixel', ThickBorder = 'Thick Border' })
+AS.Options.args.general.args.SkinTemplate = ACH:Select(ASL['Template'], nil, 3, function() local tbl = CopyTable(DefaultTemplates) if AS:CheckOption('ElvUIStyle', 'ElvUI') then tbl.Custom = nil end return tbl end)
 
-for Version, Table in pairs(AS.ChangeLog) do
-	AS.Options.args.about.args.changelog.args[Version] = {
-		type = 'group',
-		name = Version,
-		args = {},
-	}
-	for i, Change in pairs(Table) do
-		AS.Options.args.about.args.changelog.args[Version].args[tostring(i)] = {
-			type = 'description',
-			name = Change,
-			fontSize = 'large',
-		}
-	end
-end
+AS.Options.args.general.args.Textures = ACH:Group('Textures', nil, 4)
+AS.Options.args.general.args.Textures.inline = true
+AS.Options.args.general.args.Textures.args.BackgroundTexture = ACH:SharedMediaStatusbar('Background Texture', nil, 1, nil, nil, nil, nil, function() return AS:CheckOption('ElvUIStyle', 'ElvUI') end)
+AS.Options.args.general.args.Textures.args.StatusBarTexture = ACH:SharedMediaStatusbar('StatusBar Texture', nil, 2, nil, nil, nil, nil, function() return AS:CheckOption('ElvUIStyle', 'ElvUI') end)
+AS.Options.args.general.args.Textures.args.CropIcons = ACH:Toggle(ASL['Crop Icons'], nil, 3)
+AS.Options.args.general.args.Textures.args.Parchment = ACH:Toggle(ASL['Parchment']..' (WIP)', nil, 3)
+AS.Options.args.general.args.Textures.args.Shadows = ACH:Toggle(ASL['Shadows'], nil, 4)
+AS.Options.args.general.args.Textures.args.DBMSkinHalf = ACH:Toggle(ASL['DBM Half-bar Skin'], nil, 5)
 
-for Name, Table in pairs(Skins) do
-	AS.Options.args.about.args.skins.args[Name] = {
-		type = 'group',
-		name = Name,
-		args = {},
-	}
-	for i, Change in pairs(Table) do
-		AS.Options.args.about.args.skins.args[Name].args[tostring(i)] = {
-			type = 'description',
-			name = Change,
-			fontSize = 'large',
-		}
-	end
-end
+AS.Options.args.general.args.Colors = ACH:Group('Colors', nil, 5, nil, function(info) return unpack(AS:CheckOption(info[#info])) end, function(info, r, g, b, a) AS:SetOption(info[#info], { r, g, b, a }) AS:UpdateSettings() end)
+AS.Options.args.general.args.Colors.inline = true
+AS.Options.args.general.args.Colors.args.CustomBackdropColor = ACH:Color('Backdrop Color', nil, 1, true, nil, nil, nil, nil, function() return (AS:CheckOption('SkinTemplate') ~= 'Custom') or AS:CheckOption('ElvUIStyle', 'ElvUI') end)
+AS.Options.args.general.args.Colors.args.CustomBorderColor = ACH:Color('Border Color', nil, 2, true, nil, nil, nil, nil, function() return (AS:CheckOption('SkinTemplate') ~= 'Custom') or AS:CheckOption('ElvUIStyle', 'ElvUI') end)
+AS.Options.args.general.args.Colors.args.HighlightColor = ACH:Color('Highlight', nil, 3)
+AS.Options.args.general.args.Colors.args.SelectedColor = ACH:Color('Selected / Checked', nil, 4)
+AS.Options.args.general.args.Colors.args.StatusBarColor = ACH:Color('Status Bars', nil, 5)
+
+AS.Options.args.skins = ACH:Group(ASL['Skins'], nil, 1, nil, function(info) return AS:CheckOption(info[#info]) end, function(info, value) AS:SetOption(info[#info], value) AS.NeedReload = true end)
+AS.Options.args.skins.args.addons = ACH:MultiSelect(ASL['AddOns'], nil, 1, nil, nil, nil, function(_, key) return AS:CheckOption(key) end, function(_, key, value) AS:SetOption(key, value) AS.NeedReload = true end)
+AS.Options.args.skins.args.blizzard = ACH:MultiSelect(ASL['Blizzard'], nil, 2, nil, nil, nil, function(_, key) return AS:CheckOption(key) end, function(_, key, value) AS:SetOption(key, value) AS.NeedReload = true end)
+AS.Options.args.skins.args.blizzardEnableAll = ACH:Execute('Blizzard: Enable All', nil, 3, function() for SkinName in pairs(BlizzardSkins) do AS:SetOption(SkinName, true) end end)
+AS.Options.args.skins.args.blizzardDisableAll = ACH:Execute('Blizzard: Disable All', nil, 4, function() for SkinName in pairs(BlizzardSkins) do AS:SetOption(SkinName, false) end end)
+
+AS.Options.args.embed = ACH:Group(ASL['Embed Settings'], nil, 4, nil, function(info) return AS:CheckOption(info[#info]) end, function(info, value) AS:SetOption(info[#info], value) AS:Embed_Check() end)
+AS.Options.args.embed.args.EmbedIsHidden = ACH:Toggle(ASL['|cFFFF0000Embed is currently HIDDEN|r'], nil, 0, nil, nil, 'full', nil, nil, nil, function() return not AS:CheckOption('EmbedIsHidden') end)
+
+AS.Options.args.embed.args.General = ACH:Group('General', nil, 1)
+AS.Options.args.embed.args.General.inline = true
+AS.Options.args.embed.args.General.args.EmbedSystemMessage = ACH:Toggle(ASL['Embed System Message'], nil, 1)
+AS.Options.args.embed.args.General.args.EmbedRightChat = ACH:Toggle(ASL['Embed into Right Chat Panel'], nil, 2)
+AS.Options.args.embed.args.General.args.HideChatFrame = ACH:Select(ASL['Hide Chat Frame'], nil, 3, function() return AS:GetChatWindowInfo() end, nil, nil, nil, nil, function() return not (AS:CheckOption('EmbedSystemDual') or AS:CheckOption('EmbedSystem')) end)
+AS.Options.args.embed.args.General.args.EmbedBelowTop = ACH:Toggle(ASL['Embed Below Top Tab'], nil, 4)
+AS.Options.args.embed.args.General.args.EmbedBackdrop = ACH:Toggle(ASL['Backdrop'], nil, 5)
+AS.Options.args.embed.args.General.args.EmbedBackdropTransparent = ACH:Toggle(ASL['Transparent Backdrop'], nil, 6)
+
+AS.Options.args.embed.args.SingleEmbedSystem = ACH:Group('One Window Embed System', nil, 4)
+AS.Options.args.embed.args.SingleEmbedSystem.inline = true
+AS.Options.args.embed.args.SingleEmbedSystem.args.EmbedSystem = ACH:Toggle(ASL['Enable'], nil, 9, nil, nil, nil, nil, nil, function() return AS:CheckOption('EmbedSystemDual') end)
+AS.Options.args.embed.args.SingleEmbedSystem.args.EmbedMain = ACH:Select(ASL['Embed'], nil, 10, Embeds, nil, nil, nil, nil, function() return not AS:CheckOption('EmbedSystem') end)
+
+AS.Options.args.embed.args.DualEmbedSystem = ACH:Group('Two Window Embed System', nil, 5)
+AS.Options.args.embed.args.DualEmbedSystem.inline = true
+AS.Options.args.embed.args.DualEmbedSystem.args.EmbedSystemDual = ACH:Toggle(ASL['Enable'], nil, 1, nil, nil, nil, nil, nil, function() return AS:CheckOption('EmbedSystem') end)
+AS.Options.args.embed.args.DualEmbedSystem.args.EmbedLeft = ACH:Select(ASL["Window One Embed"], nil, 2, Embeds, nil, nil, nil, nil, function() return not AS:CheckOption('EmbedSystemDual') end)
+AS.Options.args.embed.args.DualEmbedSystem.args.EmbedLeftWidth = ACH:Range(ASL['Window One Width'], nil, 3, { min = 100, max = 300, step = 1 }, nil, nil, nil, function() return not AS:CheckOption('EmbedSystemDual') end)
+AS.Options.args.embed.args.DualEmbedSystem.args.EmbedRight = ACH:Select(ASL["Window Two Embed"], nil, 4, Embeds, nil, nil, nil, nil, function() return not AS:CheckOption('EmbedSystemDual') end)
+
+AS.Options.args.embed.args.OoC = ACH:Group('Out of Combat', nil, 6)
+AS.Options.args.embed.args.OoC.inline = true
+AS.Options.args.embed.args.OoC.args.EmbedOoC = ACH:Toggle(ASL['Hide'], nil, 1)
+AS.Options.args.embed.args.OoC.args.EmbedOoCDelay = ACH:Range(ASL['Hide Delay'], nil, 2, { min = 1, max = 30, step = 1 })
+
+AS.Options.args.embed.args.strataLevel = ACH:Group('Strata and Frame Level', nil, 7)
+AS.Options.args.embed.args.strataLevel.inline = true
+AS.Options.args.embed.args.strataLevel.args.EmbedFrameStrata = ACH:Select(ASL['Embed Frame Strata'], nil, 1, { ['1-BACKGROUND'] = 'BACKGROUND', ['2-LOW'] = 'LOW', ['3-MEDIUM'] = 'MEDIUM', ['4-HIGH'] = 'HIGH' }, nil, nil, nil, nil, function() return not (AS:CheckOption('EmbedSystemDual') or AS:CheckOption('EmbedSystem')) end)
+AS.Options.args.embed.args.strataLevel.args.EmbedFrameLevel = ACH:Range(ASL['Embed Frame Level'], nil, 2, { min = 1, max = 255, step = 1 }, nil, nil, nil, function() return not (AS:CheckOption('EmbedSystemDual') or AS:CheckOption('EmbedSystem')) end)
+
+AS.Options.args.about = ACH:Group(ASL['About/Help'], nil, -2, 'tab')
+
+AS.Options.args.about.args.links = ACH:Group(ASL['Links'], nil, 1)
+AS.Options.args.about.args.links.inline = true
+AS.Options.args.about.args.links.args.tukuilink = ACH:Input(ASL['Download Link'], nil, 1, nil, 'full', function() return 'https://www.tukui.org/addons.php?id=3' end)
+AS.Options.args.about.args.links.args.gitlablink = ACH:Input(ASL['GitLab Link / Report Errors'], nil, 2, nil, 'full', function() return 'https://github.com/Azilroka/AddOnSkins' end)
+
+AS.Options.args.about.args.credits = ACH:Group(ASL['Credits'], nil, -1)
+AS.Options.args.about.args.credits.inline = true
+AS.Options.args.about.args.credits.args.AuthorHeader = ACH:Header('Authors:', 0)
+AS.Options.args.about.args.credits.args.Authors = ACH:Description(AS.Authors, 1, 'large')
+AS.Options.args.about.args.credits.args.CreditsHeader = ACH:Header('Credits:', 2)
+AS.Options.args.about.args.credits.args.Credits = ACH:Description(DEVELOPER_STRING, 3, 'medium')
 
 function AS:BuildProfile()
 	local Embed = AS:CheckAddOn('Details') and 'Details' or AS:CheckAddOn('Skada') and 'Skada' or AS:CheckAddOn('Recount') and 'Recount' or ''
@@ -973,136 +188,116 @@ function AS:BuildProfile()
 	local Defaults = {
 		profile = {
 		-- Embeds
-			['EmbedBackdrop'] = true,
-			['EmbedBackdropTransparent'] = true,
-			['EmbedBelowTop'] = false,
-			['EmbedFrameLevel'] = 10,
-			['EmbedFrameStrata'] = '2-LOW',
-			['EmbedIsHidden'] = false,
-			['EmbedLeftWidth'] = 200,
-			['EmbedOoC'] = false,
-			['EmbedOoCDelay'] = 10,
-			['EmbedRightChat'] = true,
-			['EmbedSystem'] = false,
-			['EmbedSystemDual'] = false,
-			['EmbedLeft'] = Embed,
-			['EmbedRight'] = Embed,
-			['EmbedMain'] = Embed,
+			EmbedBackdrop = true,
+			EmbedBackdropTransparent = true,
+			EmbedBelowTop = false,
+			EmbedFrameLevel = 10,
+			EmbedFrameStrata = '2-LOW',
+			EmbedIsHidden = false,
+			EmbedLeftWidth = 200,
+			EmbedOoC = false,
+			EmbedOoCDelay = 10,
+			EmbedRightChat = true,
+			EmbedSystem = false,
+			EmbedSystemDual = false,
+			EmbedLeft = Embed,
+			EmbedRight = Embed,
+			EmbedMain = Embed,
 		-- Misc
-			['BackgroundTexture'] = 'Blizzard Raid Bar',
-			['ClassColor'] = false,
-			['CropIcons'] = true,
-			['CustomBackdropColor'] = { .5, .5, .5, .8 },
-			['CustomBorderColor'] = { 0, 0, 0 },
-			['DBMFont'] = 'Arial Narrow',
-			['DBMFontFlag'] = 'OUTLINE',
-			['DBMFontSize'] = 12,
-			['DBMRadarTrans'] = false,
-			['DBMSkinHalf'] = false,
-			['ElvUIStyle'] = AS:CheckAddOn('ElvUI') and true or false,
-			['EmbedSystemMessage'] = true,
-			['HideChatFrame'] = 'NONE',
-			['HighlightColor'] = { 1, .8, .1 },
-			['LoginMsg'] = false,
-			['Parchment'] = false,
-			['SelectedColor'] = { 0, 0.44, .87 },
-			['Shadows'] = true,
-			['SkinDebug'] = false,
-			['SkinTemplate'] = 'Transparent',
-			['StatusBarColor'] = { .01, .39, .1 },
-			['StatusBarTexture'] = 'Blizzard Raid Bar',
-			['Theme'] = 'PixelPerfect',
+			BackgroundTexture = 'Blizzard Raid Bar',
+			ClassColor = false,
+			CropIcons = true,
+			CustomBackdropColor = { .5, .5, .5, .8 },
+			CustomBorderColor = { 0, 0, 0 },
+			DBMFont = 'Arial Narrow',
+			DBMFontFlag = 'OUTLINE',
+			DBMFontSize = 12,
+			DBMRadarTrans = false,
+			DBMSkinHalf = false,
+			ElvUIStyle = AS:CheckAddOn('ElvUI') and true or false,
+			EmbedSystemMessage = true,
+			HideChatFrame = 'NONE',
+			HighlightColor = { 1, .8, .1 },
+			LoginMsg = false,
+			Parchment = false,
+			SelectedColor = { 0, 0.44, .87 },
+			Shadows = true,
+			SkinDebug = false,
+			SkinTemplate = 'Transparent',
+			StatusBarColor = { .01, .39, .1 },
+			StatusBarTexture = 'Blizzard Raid Bar',
+			Theme = 'PixelPerfect',
 		},
 	}
 
-	for skin in pairs(AS.register) do
-		if AS:CheckAddOn('ElvUI') and strfind(skin, 'Blizzard_') then
-			Defaults.profile[skin] = false
-		else
-			Defaults.profile[skin] = true
+	for _, tbl in pairs({ 'preload', 'register'}) do
+		for skin in pairs(AS[tbl]) do
+			if AS:CheckAddOn('ElvUI') and strfind(skin, 'Blizzard_') then
+				Defaults.profile[skin] = false
+			else
+				Defaults.profile[skin] = true
+			end
 		end
 	end
 
-	for skin in pairs(AS.preload) do
-		if AS:CheckAddOn('ElvUI') and strfind(skin, 'Blizzard_') then
-			Defaults.profile[skin] = false
-		else
-			Defaults.profile[skin] = true
-		end
-	end
+	AS.data = AS.Libs.ADB:New('AddOnSkinsDB', Defaults, true)
 
-	self.data = LibStub('AceDB-3.0'):New('AddOnSkinsDB', Defaults, true)
-
-	self.data.RegisterCallback(AS, 'OnProfileChanged', 'SetupProfile')
-	self.data.RegisterCallback(AS, 'OnProfileCopied', 'SetupProfile')
-	self.db = self.data.profile
+	AS.data.RegisterCallback(AS, 'OnProfileChanged', 'SetupProfile')
+	AS.data.RegisterCallback(AS, 'OnProfileCopied', 'SetupProfile')
+	AS.db = AS.data.profile
 end
 
 function AS:SetupProfile()
-	self.db = self.data.profile
+	AS.db = AS.data.profile
 end
 
 function AS:BuildOptions()
-	local function GenerateOptionTable(skinName)
-		local text = strfind(skinName, 'Blizzard_') and (BlizzardNames[skinName] or strtrim(skinName:gsub('^Blizzard_(.+)','%1'):gsub('(%l)(%u%l)','%1 %2'))) or GetAddOnMetadata(skinName, 'Title') or strtrim(skinName:gsub('(%l)(%u%l)','%1 %2'))
-		local options = {
-			type = 'toggle',
-			name = text,
-		}
-		if AS:CheckAddOn('ElvUI') and strfind(skinName, 'Blizzard_') then
-			options.set = function(info, value) AS:SetOption(info[#info], value) AS:SetElvUIBlizzardSkinOption(info[#info], not value) AS.NeedReload = true end
-		end
-		return options
-	end
-
 	local skins = {}
 
 	for skinName in pairs(AS.register) do
 		tinsert(skins, skinName)
 	end
 
-	for skinName in pairs(AS.preload) do
-		tinsert(skins, skinName)
+	for skinName, data in pairs(AS.preload) do
+		if not data.addon or data.addon and not tContains(skins, data.addon) then
+			tinsert(skins, skinName)
+		end
 	end
-
-	sort(skins)
 
 	for _, skinName in pairs(skins) do
 		if strfind(skinName, 'Blizzard_') then
 			BlizzardSkins[skinName] = true
-			AS.Options.args.blizzard.args.skins.args[skinName] = GenerateOptionTable(skinName)
+			AS.Options.args.skins.args.blizzard.values[skinName] = strfind(skinName, 'Blizzard_') and (BlizzardNames[skinName] or strtrim(skinName:gsub('^Blizzard_(.+)','%1'):gsub('(%l)(%u%l)','%1 %2')))
 		else
-			AS.Options.args.addons.args[skinName] = GenerateOptionTable(skinName)
+			AS.Options.args.skins.args.addons.values[skinName] = GetAddOnMetadata(skinName, 'Title') or strtrim(skinName:gsub('(%l)(%u%l)','%1 %2'))
 		end
 	end
 
+	wipe(skins)
+
 	if AS:CheckAddOn('ElvUI') then
-		AS.Options.args.general.args.ElvUIStyle = {
-			type = 'toggle',
-			name = 'ElvUI Style',
-			order = 5,
-		}
+		AS.Options.args.general.args.Textures.args.ElvUIStyle = ACH:Toggle('ElvUI Style', nil, 0)
 
 		if AS:CheckAddOn('ElvUI_MerathilisUI') then
-			local AddOnTemplate = CopyTable(DefaultTemplates)
-			AddOnTemplate['MerathilisUI'] = '|cffff7d0aMerathilisUI|r'
-
-			AS.Options.args.general.args.SkinTemplate.values = function() return (AS:CheckOption('ElvUIStyle') and AddOnTemplate or DefaultTemplates) end
+			DefaultTemplates['MerathilisUI'] = '|cffff7d0aMerathilisUI|r'
 		end
+	end
+
+	if not AS:CheckAddOn('ElvUI') then
+		AS.Libs.AC:RegisterOptionsTable('AddOnSkins', AS.Options)
+		AS.Libs.ACD:AddToBlizOptions('AddOnSkins', 'AddOnSkins')
 	end
 end
 
 function AS:GetOptions()
-	local Ace3OptionsPanel = AS:CheckAddOn('ElvUI') and ElvUI[1] or Enhanced_Config
-	Ace3OptionsPanel.Options.args.addonskins = AS.Options
-
-	AS.Options.args.profiles = LibStub('AceDBOptions-3.0'):GetOptionsTable(AS.data)
+	AS.Options.args.profiles = _G.LibStub('AceDBOptions-3.0'):GetOptionsTable(AS.data)
 	AS.Options.args.profiles.order = -2
 
 	if AS:CheckAddOn('ElvUI') then
-		hooksecurefunc(LibStub('AceConfigDialog-3.0-ElvUI'), 'CloseAll', function(self, appName)
+		_G.ElvUI[1].Options.args.addonskins = AS.Options
+		hooksecurefunc(_G.LibStub('AceConfigDialog-3.0-ElvUI'), 'CloseAll', function()
 			if AS.NeedReload then
-				ElvUI[1]:StaticPopup_Show("PRIVATE_RL")
+				_G.ElvUI[1]:StaticPopup_Show("PRIVATE_RL")
 			end
 		end)
 	end

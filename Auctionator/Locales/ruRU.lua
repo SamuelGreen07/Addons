@@ -8,8 +8,7 @@ L["ALREADY_PURCHASED_X"] = "Уже купил %s"
 L["ALT_LEFT_CLICK"] = "Alt ЛКМ"
 L["ALT_RIGHT_CLICK"] = "Alt ПКМ"
 L["ANY_LOWER"] = "любой"
---[[Translation missing --]]
-L["ANY_UPPER"] = "Any"
+L["ANY_UPPER"] = "Любой"
 L["AUCTION"] = "Аукцион"
 L["AUCTION_DURATION_12"] = "12 часов"
 L["AUCTION_DURATION_24"] = "24 часа"
@@ -32,8 +31,7 @@ L["BUYING_X_FOR_X"] = "Покупка %s за %s"
 L["BUYOUT_AUCTION_INFO"] = "%s выкуп за %s"
 L["BUYOUT_PRICE"] = "Цена Выкупа"
 L["CANCEL"] = "Отмена"
---[[Translation missing --]]
-L["CANCEL_SEARCH"] = "Cancel Search"
+L["CANCEL_SEARCH"] = "Отменить поиск"
 L["CANCEL_UNDERCUT"] = "Отмена аукциона"
 L["CANCELLING_TAB"] = "Отмена"
 L["CANCELLING_TAB_HEADER"] = "Auctionator - Отмена Аукциона"
@@ -108,12 +106,9 @@ L["CONFIG_SELLING_BAG_SELECT_SHORTCUT"] = "на предмете в вашей �
 L["CONFIG_SELLING_BUY_SHORTCUT"] = "на аукционе, который вам не принадлежит, вы его купите"
 L["CONFIG_SELLING_CANCEL_SHORTCUT"] = "на аукционе вы отмените его"
 L["CONFIG_SELLING_CATEGORY"] = "Продажа"
---[[Translation missing --]]
-L["CONFIG_SELLING_CONFIRM_LOW_PRICE"] = "Confirm posting items at an unusually low price"
---[[Translation missing --]]
-L["CONFIG_SELLING_CONFIRM_LOW_PRICE_TOOLTIP_HEADER"] = "Confirm Posting Low Price"
---[[Translation missing --]]
-L["CONFIG_SELLING_CONFIRM_LOW_PRICE_TOOLTIP_TEXT"] = "Lets you remove the confirmation dialog that appears when posting an item at an unusually low price."
+L["CONFIG_SELLING_CONFIRM_LOW_PRICE"] = "Подтвердить размещение товаров по необычно низкой цене"
+L["CONFIG_SELLING_CONFIRM_LOW_PRICE_TOOLTIP_HEADER"] = "Подтвердить публикацию низкой цены"
+L["CONFIG_SELLING_CONFIRM_LOW_PRICE_TOOLTIP_TEXT"] = "Позволяет удалить диалоговое окно подтверждения, которое появляется при размещении товара по необычно низкой цене."
 L["CONFIG_SELLING_DEFAULT_QUANTITY_SUFFIX"] = "Установите 0 для макс. количества"
 L["CONFIG_SELLING_DEFAULT_QUANTITY_TOOLTIP_HEADER"] = "Количество выставленных предметов по умолчанию"
 L["CONFIG_SELLING_DEFAULT_QUANTITY_TOOLTIP_TEXT"] = "Это позволяет изменить сумму по умолчанию, используемую при выставлении на аукцион предмета. Установите значение на 0, чтобы использовать максимально возможную сумму."
@@ -169,10 +164,8 @@ L["CONFIG_UNDERCUT_SCAN_NOT_LIFO_TOOLTIP_HEADER"] = "Экипировка/Пит
 L["CONFIG_UNDERCUT_SCAN_NOT_LIFO_TOOLTIP_TEXT"] = "Оставьте это включенным, чтобы включить любых питомцев и экипировку в сканирование снижения цены. Выключите его, чтобы исключить питомцев и экипировку."
 L["CONFIG_VENDOR_TOOLTIP"] = "Показать всплывающие подсказки торговцев."
 L["CONFIRM"] = "Подтвердить"
---[[Translation missing --]]
-L["CONFIRM_POST_BELOW_VENDOR"] = "You can make more gold selling this to a vendor. Are you sure you want to post at that price?"
---[[Translation missing --]]
-L["CONFIRM_POST_LOW_PRICE"] = "The price of %s looks a bit low. Are you sure you want to post at that price?"
+L["CONFIRM_POST_BELOW_VENDOR"] = "Вы можете заработать больше золота, продав это торговцу. Вы уверены, что хотите выставить по этой цене?"
+L["CONFIRM_POST_LOW_PRICE"] = "Цена на %s выглядит заниженной. Вы уверены, что хотите выставить по этой цене?"
 L["CONTRIBUTORS_HEADER"] = "Помощники"
 L["COPY_ITEM_ADDED"] = "Скопировано %s в %s"
 L["COPY_NO_LIST_SELECTED"] = "Не могу скопировать предмет. Список покупок не выбран"
@@ -461,8 +454,7 @@ L["TOO_MANY_SEARCH_RESULTS"] = "Слишком много результатов
 L["TOO_SMALL_PERCENTAGE"] = "%% должно быть  >= 0 (при условии %s)"
 L["TOTAL_ITEMS_COLORED"] = "Всего |cFFAAAAFF %s предметов|r"
 L["TOTAL_ON_SALE"] = "Всего в продаже: %s"
---[[Translation missing --]]
-L["TOTAL_PENDING"] = "(%s pending)"
+L["TOTAL_PENDING"] = "(%s в ожидании)"
 L["TOTAL_PRICE"] = "Итоговая цена:"
 L["TRANSLATORS_BRAZIL_PORTUGUEUSE"] = "Португальский"
 L["TRANSLATORS_FRENCH"] = "Французский"

@@ -83,9 +83,11 @@ function AS:Altoholic(event, addon)
 		}
 
 		for _, Button in pairs(Buttons) do
-			AS:StyleButton(AltoholicTabCharacters_MenuIcons[Button])
-			AS:CreateBackdrop(AltoholicTabCharacters_MenuIcons[Button])
-			AS:SkinTexture(AltoholicTabCharacters_MenuIcons[Button].Icon)
+			if AltoholicTabCharacters_MenuIcons[Button] then
+				AS:StyleButton(AltoholicTabCharacters_MenuIcons[Button])
+				AS:CreateBackdrop(AltoholicTabCharacters_MenuIcons[Button])
+				AS:SkinTexture(AltoholicTabCharacters_MenuIcons[Button].Icon)
+			end
 		end
 
 		AS:EnumObjects(
@@ -122,18 +124,12 @@ function AS:Altoholic(event, addon)
 
 	if addon == "Altoholic_Guild" then
 		AS:SkinFrame(AltoholicTabGuild.Members)
-		AS:SkinFrame(AltoholicTabGuild.Bank)
+		if AltoholicTabGuild.Bank then AS:SkinFrame(AltoholicTabGuild.Bank) end
 		AS:SkinScrollBar(AltoholicTabGuild.Members.ScrollFrame.ScrollBar)
 		AS:StripTextures(AltoholicTabGuild.Members.ScrollFrame, true)
 
 		AS:EnumObjects(function(index) return AltoholicTabGuild['MenuItem'..index] end, function(obj) AS:SkinButton(obj, true) end)
-		AS:EnumObjects(
-			{
-				function(index) return AltoholicTabGuild.Bank['Entry'..index] end,
-				function(obj, index) return obj['Item'..index] end,
-			},
-			function(obj) SkinItemButton(obj) end
-		)
+		AS:EnumObjects({ function(index) return AS.Retail and AltoholicTabGuild.Bank['Entry'..index] end, function(obj, index) return obj['Item'..index] end }, function(obj) SkinItemButton(obj) end)
 
 		AS:EnumObjects(function(index) return AltoholicTabGuild.Members['Item'..index] end, function(obj) SkinItemButton(obj) end)
 		AS:EnumObjects(function(index) return AltoholicTabGuild["SortButtons"]["Sort"..index] end, function(obj) AS:SkinButton(obj) end)
@@ -144,8 +140,6 @@ function AS:Altoholic(event, addon)
 		AS:StripTextures(AltoholicTabAchievements.ScrollFrame, true)
 		AS:SkinScrollBar(AltoholicTabAchievements.Achievements.ScrollFrame.ScrollBar)
 		AS:SkinScrollBar(AltoholicTabAchievements.ScrollFrame.ScrollBar)
-		AS:SkinDropDownBox(AltoholicTabAchievements.SelectRealm)
-		AltoholicTabAchievements.SelectRealm:SetPoint("TOPLEFT", AltoholicFrame, "TOPLEFT", 205, -57)
 
 		AS:EnumObjects(function(index) return AltoholicTabAchievements['Entry'..index] end, function(obj) return AS:SkinButton(obj, true) end)
 		AS:EnumObjects(
@@ -176,7 +170,6 @@ function AS:Altoholic(event, addon)
 		AS:StripTextures(AltoholicFrameGrids.ScrollFrame, true)
 		AS:SkinBackdropFrame(AltoholicFrameGrids)
 		AS:SkinScrollBar(AltoholicFrameGrids.ScrollFrame.ScrollBar)
-		AS:SkinDropDownBox(AltoholicTabGrids.SelectRealm)
 
 		AS:EnumObjects(
 			{

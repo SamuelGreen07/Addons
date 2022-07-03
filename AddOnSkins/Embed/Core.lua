@@ -1,25 +1,43 @@
-local AS = unpack(AddOnSkins)
+local AS = unpack(_G.AddOnSkins)
 
--- Cache global variables
---Lua functions
 local _G = _G
-local format, pairs = format, pairs
-local strmatch, strsub = strmatch, strsub
---WoW API / Variables
-local CreateFrame, UIParent = CreateFrame, UIParent
-local FCF_GetNumActiveChatFrames = FCF_GetNumActiveChatFrames
+local format = format
+local pairs = pairs
+local strmatch = strmatch
+local strsub = strsub
+
+local CreateFrame = CreateFrame
 local FCF_IsValidChatFrame = FCF_IsValidChatFrame
+local FCF_IsChatWindowIndexActive = FCF_IsChatWindowIndexActive
+local FCF_GetChatWindowInfo = FCF_GetChatWindowInfo
 local hooksecurefunc = hooksecurefunc
--- GLOBALS:
+local UIParent = UIParent
+
+local NUM_CHAT_WINDOWS = NUM_CHAT_WINDOWS
 
 AS.ChatFrameHider = CreateFrame('Frame')
 AS.ChatFrameHider:Hide()
+
 local EmbedSystem_MainWindow, EmbedSystem_LeftWindow, EmbedSystem_RightWindow
 
+if not FCF_IsChatWindowIndexActive then
+	function FCF_IsChatWindowIndexActive(chatWindowIndex)
+		local shown = select(7, FCF_GetChatWindowInfo(chatWindowIndex));
+		if shown then
+			return true;
+		end
+
+		local chatFrame = _G["ChatFrame"..chatWindowIndex];
+		return (chatFrame and chatFrame.isDocked);
+	end
+end
+
 function AS:GetChatWindowInfo()
-	local ChatTabInfo = {['NONE'] = 'NONE'}
-	for i = 1, FCF_GetNumActiveChatFrames() do
-		ChatTabInfo["ChatFrame"..i] = _G["ChatFrame"..i.."Tab"]:GetText()
+	local ChatTabInfo = { NONE = 'NONE'}
+	for i = 1, NUM_CHAT_WINDOWS do
+		if i ~= 2 and FCF_IsChatWindowIndexActive(i) then
+			ChatTabInfo["ChatFrame"..i] = _G["ChatFrame"..i.."Tab"]:GetText()
+		end
 	end
 	return ChatTabInfo
 end
@@ -81,14 +99,11 @@ function AS:EmbedInit()
 				end
 			end)
 
-			UIParent:GetScript('OnShow')(UIParent)
-
 			for _, Function in pairs({"FCF_Close", "FCF_OpenNewWindow", "FCF_SetWindowName"}) do
 				hooksecurefunc(Function, function()
 					if AS:CheckOption('HideChatFrame') ~= 'NONE' and not FCF_IsValidChatFrame(_G[AS:CheckOption('HideChatFrame')]) then
 						AS:SetOption('HideChatFrame', 'NONE')
 					end
-					AS.Options.args.embed.args.HideChatFrame.values = AS:GetChatWindowInfo()
 				end)
 			end
 		end
@@ -129,6 +144,7 @@ function AS:Embed_Check(Message)
 	end
 
 	AS:EmbedSystem_WindowResize()
+	EmbedSystem_MainWindow:SetShown(not (AS:CheckOption('EmbedIsHidden') or AS:CheckOption('EmbedOoC')))
 
 	for _, Window in pairs({EmbedSystem_MainWindow, EmbedSystem_LeftWindow, EmbedSystem_RightWindow}) do
 		Window:SetFrameStrata(strsub(AS:CheckOption('EmbedFrameStrata'), 3))

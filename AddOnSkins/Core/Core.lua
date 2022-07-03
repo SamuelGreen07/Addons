@@ -23,11 +23,11 @@ function AS:CheckOption(optionName, ...)
 		if not AS:CheckAddOn(addon) then return false end
 	end
 
-	return self.db[optionName]
+	return AS.db[optionName]
 end
 
 function AS:SetOption(optionName, value)
-	self.db[optionName] = value
+	AS.db[optionName] = value
 
 	if AddOnSkinsDS[AS.Version] and AddOnSkinsDS[AS.Version][optionName] == true then
 		AddOnSkinsDS[AS.Version][optionName] = nil
@@ -47,9 +47,7 @@ function AS:RGBToHex(r, g, b, header)
 end
 
 function AS:GetClassColor(class)
-	if not class then return end
-
-	local color = (_G.CUSTOM_CLASS_COLORS and _G.CUSTOM_CLASS_COLORS[class]) or _G.RAID_CLASS_COLORS[class]
+	local color = (_G.CUSTOM_CLASS_COLORS and _G.CUSTOM_CLASS_COLORS[class]) or _G.RAID_CLASS_COLORS[class or 'PRIEST']
 	if type(color) ~= 'table' then return end
 
 	if not color.colorStr then
@@ -201,8 +199,9 @@ function AS:RegisterSkinForPreload(addonName, skinFunc, addon1)
 end
 
 function AS:RunPreload(addonName)
-	if AS:CheckOption(addonName, addonName) and AS.preload[addonName] then
-		pcall(AS.preload[addonName].func, self, 'ADDON_LOADED', AS.preload[addonName].addon or addonName)
+	local preloadData = AS.preload[addonName]
+	if preloadData and AS:CheckOption(preloadData.addon or addonName) then
+		pcall(preloadData.func, self, 'ADDON_LOADED', addonName)
 	end
 end
 
@@ -248,22 +247,27 @@ function AS:UnregisterSkinEvent(addonName, event)
 end
 
 function AS:UpdateMedia()
-	AS.Blank = AS.LSM:Fetch('background', 'Solid')
-	AS.Font = AS.LSM:Fetch('font', "Friz Quadrata TT")
-	AS.PixelFont = AS.LSM:Fetch('font', "Arial Narrow")
-	AS.NormTex = AS.LSM:Fetch('statusbar', "Blizzard")
-	AS.BackdropColor = { .2, .2, .2, .8}
+	AS.Blank = AS.Libs.LSM:Fetch('background', 'Solid')
+	AS.Font = AS.Libs.LSM:Fetch('font', "Friz Quadrata TT")
+	AS.PixelFont = AS.Libs.LSM:Fetch('font', "Arial Narrow")
+	AS.NormTex = AS.Libs.LSM:Fetch('statusbar', "Blizzard")
+	AS.BackdropColor = { .2, .2, .2, .8 }
 	AS.BorderColor = { 0, 0, 0 }
 	AS.Color = AS.ClassColor
 	AS.HideShadows = false
+
+	if AS:CheckOption('SkinTemplate') == 'Custom' then
+		AS.BackdropColor = AS:CheckOption('CustomBackdropColor')
+		AS.BorderColor = AS:CheckOption('CustomBorderColor')
+	end
 end
 
 function AS:GetPixelScale()
 	AS.mult = max(0.4, min(1.15, 768 / AS.ScreenHeight))
 end
 
-function AS:StartSkinning(event)
-	AS:UnregisterEvent(event)
+function AS:StartSkinning()
+	AS:UnregisterEvent('PLAYER_ENTERING_WORLD')
 	AS:GetPixelScale()
 
 	AS.Color = AS:CheckOption('ClassColor') and AS.ClassColor or { 0, 0.44, .87, 1 }
@@ -291,20 +295,20 @@ function AS:StartSkinning(event)
 	end
 
 	for addonName, funcs in AS:OrderedPairs(AS.skins) do
-		if AS:CheckAddOn('ElvUI') and AS:GetElvUIBlizzardSkinOption(addonName) then
-			AS:SetOption(addonName, false)
-		end
-
-		-- Check forced Blizzard AddOns
-		if AS:CheckOption(addonName) and strfind(addonName, 'Blizzard_') and IsAddOnLoaded(addonName) then
+		-- Check Blizzard
+		if AS:CheckOption(addonName) and strfind(addonName, 'Blizzard_') then
 			for _, func in ipairs(funcs) do
-				AS:CallSkin(addonName, func, 'ADDON_LOADED', addonName)
+				if IsAddOnLoaded(addonName) then
+					AS:CallSkin(addonName, func, 'ADDON_LOADED', addonName)
+				end
+
+				AS:CallSkin(addonName, func, 'PLAYER_ENTERING_WORLD')
 			end
 		end
 
-		if AS:CheckOption(addonName) then
+		if AS:CheckOption(addonName) and (AS:CheckAddOn(addonName) or addonName == 'Libraries' or addonName == 'Ace3') then
 			for _, func in ipairs(funcs) do
-				AS:CallSkin(addonName, func, event)
+				AS:CallSkin(addonName, func, 'PLAYER_ENTERING_WORLD')
 			end
 		end
 	end
@@ -333,7 +337,7 @@ function AS:Init(event, addon)
 
 		AS:UpdateMedia()
 
-		self:RunPreload(addon)
+		AS:RunPreload(addon)
 	end
 
 	if event == 'PLAYER_LOGIN' then
@@ -352,8 +356,8 @@ function AS:Init(event, addon)
 
 		AS:RegisterEvent('PLAYER_ENTERING_WORLD', 'StartSkinning')
 
-		if AS.LSM then
-			AS.LSM:Register('statusbar', 'Solid', [[Interface\Buttons\WHITE8X8]])
+		if AS.Libs.LSM then
+			AS.Libs.LSM:Register('statusbar', 'Solid', [[Interface\Buttons\WHITE8X8]])
 		end
 
 		if AS.Retail then
@@ -386,7 +390,7 @@ function AS:AcceptFrame(MainText, Function)
 	end
 	AcceptFrame.Text:SetText(MainText)
 	AcceptFrame:SetSize(AcceptFrame.Text:GetStringWidth() + 100, AcceptFrame.Text:GetStringHeight() + 60)
-	AcceptFrame.Accept:SetScript('OnClick', Function or function(self) AcceptFrame:Hide() end)
+	AcceptFrame.Accept:SetScript('OnClick', Function or function() AcceptFrame:Hide() end)
 	AcceptFrame:Show()
 end
 
