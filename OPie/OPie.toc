@@ -1,4 +1,4 @@
-## Interface: 90005
+## Interface: 20504
 ## Title: OPie
 ## Version: Xe 6
 ## Notes: Group abilities into rings that appear when you hold down a binding.
