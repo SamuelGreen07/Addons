@@ -1,3 +1,44 @@
+2.5.120 - 24th August 2022
+- The 'Hide action button text' option ('Text') is now two options - 'Hide keybind text' and 'Hide macro text'.
+- For 'Show flight times' ('Interface'), you can now control whether flight report windows are shown using a new setting in the configuration panel.
+- If you use ElvUI, Leatrix Plus options which are not compatible with specific ElvUI modules will now be disabled and locked while those ElvUI modules are enabled.  The option tooltip will tell you which ElvUI module is causing the Leatrix Plus option to be disabled.  Disabling the relevant ElvUI module will make the Leatrix Plus setting available again.
+- Fixed a minor issue with 'Show Wowhead links' ('Interface') and Questie which sometimes caused the quest link to not be updated.
+- Wrath: For 'Enhance quest log' ('Interface'), quest levels are now shown in the quest details pane in addition to the quest list.
+- Added lots and lots of flight times.  There are now 3515 flight times stored in Leatrix Plus for BCC and Wrath.
+
+2.5.119 - 17th August 2022
+- Wrath: Added a new option 'Hide alerts' ('Frames').  If checked, alert frames will not be shown.  When you earn an achievement, a message will be shown in chat instead (just like retail).
+- Wrath: Added Northrend zone and dungeon music to the media section.  Most of the dungeon tracks are sound kits.
+- Wrath: For 'Accept resurrection' ('Automation'), you will not accept a resurrection request automatically if you are in the Thaddius fight (Naxxramas) and someone in your group has a positive or negative charge.
+- For 'Show flight times' ('Interface'), the flight progress bar will now always hide when you land.  The flight report window will now show if the minimum time difference between the saved flight time and the actual flight time is 15 seconds (up from 5).
+- Fixed a minor issue with 'Show cooldowns' ('Interface') which caused buff spell IDs to show in debuff tooltips.
+- Added a massive number of flight times.  There are now 3476 flight times stored in Leatrix Plus for BCC and Wrath.
+
+2.5.118 - 10th August 2022
+- Updated for Wrath of the Lich King Beta.
+- Wrath: Show Wowhead links (Interface) will now show achievement links as well as quest links.
+- Wrath: Show druid power bar is disabled since it's now included in the default UI.
+- If you use 'Automate quests' ('Automation') with a Mac, you can now assign the override key to be the command key if you wish.
+- Added a massive number of flight times.  There are now 2959 flight times stored in Leatrix Plus for BCC and Wrath.
+- For Wrath, it's best to use alpha releases during Wrath Beta/prepatch so that you get the latest development updates.  To switch to alpha releases, open CurseForge App, right-click Leatrix Plus in your Wrath addon listing and change release type to Alpha.  You can change it back to Release once Wrath is live for everyone.
+
+2.5.117 - 3rd August 2022
+- Added lots of flight times.  There are now 2551 flight times stored in Leatrix Plus for BCC.
+- Leatrix Plus will be updated for Wrath Classic in August 2022.
+
+2.5.116 - 27th July 2022
+- For 'Enhance minimap', added a new setting to hide the tracking button while the pointer is not over the minimap.  The clock and zone text bar will now be shown on top when using square minimap.  Some structural changes to the code.
+- Added lots of flight times.  There are now 2530 flight times stored in Leatrix Plus for BCC.
+- Leatrix Plus will now attempt to run on Wrath Beta but note that it hasn't been tested and there are no Wrath features yet.
+
+2.5.115 - 20th July 2022
+- Removed the compatibility fix for ClassicCodex addon.
+- Added lots of flight times.  There are now 2507 flight times stored in Leatrix Plus for BCC.
+
+2.5.114 - 13th July 2022
+- For 'Enhance tooltip' ('Interface'), there is a new setting to hide the health bar.  It's disabled by default.
+- Added lots of flight times.  There are now 2492 flight times stored in Leatrix Plus for BCC.
+
 2.5.113 - 6th July 2022
 - Added lots of flight times.  There are now 2473 flight times stored in Leatrix Plus for BCC.
 

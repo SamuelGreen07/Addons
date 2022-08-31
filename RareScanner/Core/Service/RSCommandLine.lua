@@ -47,10 +47,6 @@ SlashCmdList["RARESCANNER_CMD"] = function(command, ...)
 		RSCommandLine.CmdToggleRares()
 	elseif (command == RSConstants.CMD_TOGGLE_RARES_ALERTS) then
 		RSCommandLine.CmdToggleRaresAlerts()
-	elseif (command == RSConstants.CMD_TOGGLE_EVENTS) then
-		RSCommandLine.CmdToggleEvents()
-	elseif (command == RSConstants.CMD_TOGGLE_EVENTS_ALERTS) then
-		RSCommandLine.CmdToggleEventsAlerts()
 	elseif (command == RSConstants.CMD_TOGGLE_TREASURES) then
 		RSCommandLine.CmdToggleTreasures()
 	elseif (command == RSConstants.CMD_TOGGLE_TREASURES_ALERTS) then
@@ -63,11 +59,9 @@ SlashCmdList["RARESCANNER_CMD"] = function(command, ...)
 	else
 		print("|cFFFBFF00"..AL["CMD_HELP1"])
 		print("|cFFFBFF00   "..SLASH_RARESCANNER_CMD1.." "..RSConstants.CMD_TOGGLE_MAP_ICONS.." |cFF00FFFB"..AL["CMD_HELP2"])
-		print("|cFFFBFF00   "..SLASH_RARESCANNER_CMD1.." "..RSConstants.CMD_TOGGLE_EVENTS.." |cFF00FFFB"..AL["CMD_HELP3"])
 		print("|cFFFBFF00   "..SLASH_RARESCANNER_CMD1.." "..RSConstants.CMD_TOGGLE_TREASURES.." |cFF00FFFB"..AL["CMD_HELP4"])
 		print("|cFFFBFF00   "..SLASH_RARESCANNER_CMD1.." "..RSConstants.CMD_TOGGLE_RARES.." |cFF00FFFB"..AL["CMD_HELP5"])
 		print("|cFFFBFF00   "..SLASH_RARESCANNER_CMD1.." "..RSConstants.CMD_TOGGLE_ALERTS.." |cFF00FFFB"..AL["CMD_HELP6"])
-		print("|cFFFBFF00   "..SLASH_RARESCANNER_CMD1.." "..RSConstants.CMD_TOGGLE_EVENTS_ALERTS.." |cFF00FFFB"..AL["CMD_HELP7"])
 		print("|cFFFBFF00   "..SLASH_RARESCANNER_CMD1.." "..RSConstants.CMD_TOGGLE_TREASURES_ALERTS.." |cFF00FFFB"..AL["CMD_HELP8"])
 		print("|cFFFBFF00   "..SLASH_RARESCANNER_CMD1.." "..RSConstants.CMD_TOGGLE_RARES_ALERTS.." |cFF00FFFB"..AL["CMD_HELP9"])
 	end
@@ -118,26 +112,6 @@ function RSCommandLine.CmdToggleRaresAlerts()
 	else
 		private.db.general.scanRares = true
 		RSLogger:PrintMessage(AL["CMD_ENABLE_RARES_ALERTS"])
-	end
-end
-
-function RSCommandLine.CmdToggleEvents()
-	if (private.db.map.displayEventIcons) then
-		private.db.map.displayEventIcons = false
-		RSLogger:PrintMessage(AL["CMD_HIDE_EVENTS"])
-	else
-		private.db.map.displayEventIcons = true
-		RSLogger:PrintMessage(AL["CMD_SHOW_EVENTS"])
-	end
-end
-
-function RSCommandLine.CmdToggleEventsAlerts()
-	if (private.db.general.scanEvents) then
-		private.db.general.scanEvents = false
-		RSLogger:PrintMessage(AL["CMD_DISABLE_EVENTS_ALERTS"])
-	else
-		private.db.general.scanEvents = true
-		RSLogger:PrintMessage(AL["CMD_ENABLE_EVENTS_ALERTS"])
 	end
 end
 

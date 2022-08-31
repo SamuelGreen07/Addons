@@ -146,6 +146,20 @@ _QuestieAuto.disallowedQuests = {
     [10922] = true, -- Digging Through Bones
     [10975] = true, -- Purging the Chambers of Bash'ir
     [11085] = true, -- Escape from Skettis
+    [11189] = true, -- One Last Time
+    [11241] = true, -- Trail of Fire
+    [11570] = true, -- Escape from the Winterfin Caverns
+    [11673] = true, -- Get Me Outa Here!
+    [11930] = true, -- Across Transborea
+    [12082] = true, -- Dun-da-Dun-tah!
+    [12570] = true, -- Fortunate Misunderstandings
+    [12832] = true, -- Bitter Departure
+    [13221] = true, -- I'm Not Dead Yet!
+    [13229] = true, -- I'm Not Dead Yet!
+    [13284] = true, -- Assault by Ground
+    [13301] = true, -- Assault by Ground
+    [13481] = true, -- Let's Get Out of Here!
+    [13482] = true, -- Let's Get Out of Here
     -- Netherwing Drake quests
     [11109] = true,
     [11110] = true,
@@ -169,4 +183,10 @@ _QuestieAuto.disallowedQuests = {
     -- Aldor/scryer quests
     [10551] = true,
     [10552] = true,
+    -- PvP token quests
+    [8367] = true,
+    [8388] = true,
+    [8371] = true,
+    [8385] = true,
+    [64845] = true,
 }

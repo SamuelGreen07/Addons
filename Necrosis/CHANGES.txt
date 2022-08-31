@@ -1,12 +1,10 @@
-lightweight tag 9fc86325919c1d066a293cd15a5c1c04f6562c12 7.6.9.34
+lightweight tag 65712f2f7c0174e33bfe31f9af61a11dda139889 7.6.9.35
 Author:	CKNOEP <c.knoepffler@free.fr>
-Date:	Sun Feb 13 10:07:28 2022 +0100
+Date:	Sun Jul 17 08:09:18 2022 +0200
 
-commit 9fc86325919c1d066a293cd15a5c1c04f6562c12
+commit 65712f2f7c0174e33bfe31f9af61a11dda139889
 Author: CKNOEP <c.knoepffler@free.fr>
-Date:   Sun Feb 13 10:07:28 2022 +0100
+Date:   Sun Jul 17 08:09:18 2022 +0200
 
-    fix elemetal button
-    
-    fix elemetal button drag and drop fucntion
+    TOC
 

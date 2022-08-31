@@ -1,4 +1,4 @@
--- $Id: Data.lua 81 2022-03-24 14:15:10Z arithmandar $
+-- $Id: Data.lua 102 2022-08-27 09:58:37Z arithmandar $
 --[[
 
 	Atlas, a World of Warcraft instance map browser
@@ -234,27 +234,27 @@ data.maps = {
 	DLOutland = {
 		ZoneName = { BZ["Outland"] },
 		LargeMap = "DLOutland",
-		{ WHIT.." 1) "..BZ["Gruul's Lair"]..ALC["Comma"].._RED..BZ["Blade's Edge Mountains"], 10001 },
-		{ WHIT.." 2) "..BZ["Tempest Keep"]..ALC["Comma"].._RED..BZ["Netherstorm"], 10002 },
-		{ WHIT..INDENT..BZ["The Mechanar"] },
-		{ WHIT..INDENT..BZ["The Botanica"] },
-		{ WHIT..INDENT..BZ["The Arcatraz"] },
-		{ WHIT..INDENT..BZ["Tempest Keep"] },
-		{ WHIT.." 3) "..BZ["Coilfang Reservoir"]..ALC["Comma"].._RED..BZ["Zangarmarsh"], 10003 },
-		{ WHIT..INDENT..BZ["The Slave Pens"] },
-		{ WHIT..INDENT..BZ["The Underbog"] },
-		{ WHIT..INDENT..BZ["The Steamvault"] },
-		{ WHIT..INDENT..BZ["Serpentshrine Cavern"] },
-		{ WHIT.." 4) "..BZ["Hellfire Citadel"]..ALC["Comma"].._RED..BZ["Hellfire Peninsula"], 10004 },
+		{ WHIT.." 1) "..BZ["Hellfire Citadel"]..ALC["Comma"].._RED..BZ["Hellfire Peninsula"], 10001 },
 		{ WHIT..INDENT..BZ["Hellfire Ramparts"] },
 		{ WHIT..INDENT..BZ["The Blood Furnace"] },
 		{ WHIT..INDENT..BZ["The Shattered Halls"] },
 		{ WHIT..INDENT..BZ["Magtheridon's Lair"] },
-		{ WHIT.." 5) "..BZ["Auchindoun"]..ALC["Comma"].._RED..BZ["Terokkar Forest"], 10005 },
+		{ WHIT.." 2) "..BZ["Coilfang Reservoir"]..ALC["Comma"].._RED..BZ["Zangarmarsh"], 10002 },
+		{ WHIT..INDENT..BZ["The Slave Pens"] },
+		{ WHIT..INDENT..BZ["The Underbog"] },
+		{ WHIT..INDENT..BZ["The Steamvault"] },
+		{ WHIT..INDENT..BZ["Serpentshrine Cavern"] },
+		{ WHIT.." 3) "..BZ["Auchindoun"]..ALC["Comma"].._RED..BZ["Terokkar Forest"], 10003 },
 		{ WHIT..INDENT..BZ["Mana-Tombs"] },
 		{ WHIT..INDENT..BZ["Auchenai Crypts"] },
 		{ WHIT..INDENT..BZ["Sethekk Halls"] },
 		{ WHIT..INDENT..BZ["Shadow Labyrinth"] },
+		{ WHIT.." 4) "..BZ["Gruul's Lair"]..ALC["Comma"].._RED..BZ["Blade's Edge Mountains"], 10004 },
+		{ WHIT.." 5) "..BZ["Tempest Keep"]..ALC["Comma"].._RED..BZ["Netherstorm"], 10005 },
+		{ WHIT..INDENT..BZ["The Mechanar"] },
+		{ WHIT..INDENT..BZ["The Botanica"] },
+		{ WHIT..INDENT..BZ["The Arcatraz"] },
+		{ WHIT..INDENT..BZ["Tempest Keep"] },
 		{ WHIT.." 6) "..BZ["Black Temple"]..ALC["Comma"].._RED..BZ["Shadowmoon Valley"], 10006 },
 	},
 	DLNorthrend = {
@@ -430,29 +430,29 @@ data.maps = {
 /////////////////////////////////////////////]]
 data.coords = {
 	DLEast = {
-		{  "1",  10001, 349,   6, 559,  17, "Raid" }, -- Sunwell Plateau
-		{  "2",  10002, 335,  12, 541,  27, "Dungeon" }, -- Magisters' Terrace
-		{  "3",  10003, 361, 123, 601, 162, "Dungeon" }, -- Zul'Aman
-		{  "4",  10004, 327, 142, 521, 175, "Dungeon" }, -- Stratholme
-		{  "5",  10005, 267, 151, 458, 196, "Dungeon" }, -- Scarlet Monastery
-		{  "6",  10006, 304, 179, 501, 235, "Dungeon" }, -- Scholomance
-		{  "7",  10007, 222, 212, 403, 276, "Dungeon" }, -- Shadowfang Keep
-		{  "8",  10008, 181, 264, 345, 338, "Raid" }, -- Baradin Hold
-		{  "9",  10009, 324, 286, 523, 364, "Dungeon" }, -- Grim Batol
-		{ "10",  10010, 335, 303, 551, 389, "Raid" }, -- The Bastion of Twilight
+		{  "1",  10001, 342, 20, 559,  17, "Raid" }, -- Sunwell Plateau
+		{  "2",  10002, 330, 27, 541,  27, "Dungeon" }, -- Magisters' Terrace
+		{  "3",  10003, 355, 128, 601, 162, "Dungeon" }, -- Zul'Aman
+		{  "4",  10004, 321, 146, 521, 175, "Dungeon" }, -- Stratholme
+		{  "5",  10005, 265, 158, 458, 196, "Dungeon" }, -- Scarlet Monastery
+		{  "6",  10006, 300, 183, 501, 235, "Dungeon" }, -- Scholomance
+		{  "7",  10007, 222, 215, 403, 276, "Dungeon" }, -- Shadowfang Keep
+		{  "8",  10008, 182, 263, 345, 338, "Raid" }, -- Baradin Hold
+		{  "9",  10009, 317, 282, 523, 364, "Dungeon" }, -- Grim Batol
+		{ "10",  10010, 330, 300, 551, 389, "Raid" }, -- The Bastion of Twilight
 		{ "11",  10011, 240, 306, 428, 397, "Dungeon" }, -- Gnomeregan
-		{ "12",  10012, 150, 321, 307, 407, "Dungeon" }, -- The Abyssal Maw
-		{ "13",  10013, 316, 325, 520, 420, "Dungeon" }, -- Uldaman
-		{ "14",  10014, 274, 355, 465, 456, "Raid" }, -- Blackrock Mountain
-		{ "15",  10015, 237, 374, 424, 474, "Dungeon" }, -- The Stockade
-		{ "16",  10016, 326, 411, 534, 523, "Dungeon" }, -- Sunken Temple
-		{ "17",  10017, 223, 420, 400, 541, "Dungeon" }, -- The Deadmines
-		{ "18",  10018, 291, 422, 484, 539, "Raid" }, -- Karazhan
-		{ "19",  10019, 279, 439, 475, 554, "Dungeon" }, -- Zul'Gurub
-		{ "1'",  10020, 261, 206, 448, 260, "Battlegrounds" }, -- Alterac Valley
-		{ "2'",  10021, 324, 221, 528, 283, "Battlegrounds" }, -- Arathi Basin
-		{ "2'",  10021, 304, 231, 507, 291, "Battlegrounds" }, -- Arathi Basin
-		{ "3'",  10022, 177, 252, 336, 319, "Battlegrounds" }, -- Tol Barad
+		{ "12",  10012, 154, 318, 307, 407, "Dungeon" }, -- The Abyssal Maw
+		{ "13",  10013, 310, 320, 520, 420, "Dungeon" }, -- Uldaman
+		{ "14",  10014, 271, 351, 465, 456, "Raid" }, -- Blackrock Mountain
+		{ "15",  10015, 235, 369, 424, 474, "Dungeon" }, -- The Stockade
+		{ "16",  10016, 319, 400, 534, 523, "Dungeon" }, -- Sunken Temple
+		{ "17",  10017, 224, 413, 400, 541, "Dungeon" }, -- The Deadmines
+		{ "18",  10018, 285, 414, 484, 539, "Raid" }, -- Karazhan
+		{ "19",  10019, 276, 430, 475, 554, "Dungeon" }, -- Zul'Gurub
+		{ "1'",  10020, 256, 208, 448, 260, "Battlegrounds" }, -- Alterac Valley
+		{ "2'",  10021, 293, 230, 528, 283, "Battlegrounds" }, -- Arathi Basin
+		{ "2'",  10021, 316, 223, 507, 291, "Battlegrounds" }, -- Arathi Basin
+		{ "3'",  10022, 178, 252, 336, 319, "Battlegrounds" }, -- Tol Barad
 	},
 	DLWest = {
 		{  "1",  10001, 280, 183, 523, 224, "Raid" }, -- Firelands
@@ -471,30 +471,30 @@ data.coords = {
 		{ "14",  10014, 254, 471, 486, 623, "Dungeon" }, -- Lost City of the Tol'vir
 		{ "15",  10015, 223, 483, 446, 635, "Raid" }, -- Throne of the Four Winds
 		{ "16",  10016, 271, 485, 509, 638, "Dungeon" }, -- The Vortex Pinnacle
-		{ "1'",  10017, 269, 236, 507, 297, "Battlegrounds" }, -- Warsong Gulch
+		{ "1'",  10017, 269, 234, 507, 297, "Battlegrounds" }, -- Warsong Gulch
 	},
 	DLOutland = {
-		{ "1", 10001, 224,  78, 424, 116, "Raid" }, -- Gruul's Lair
-		{ "2", 10002, 410, 102, 659, 148, "Raid" }, -- Tempest Keep
-		{ "3", 10003, 146, 219, 336, 292, "Raid" }, -- Coilfang Reservoir
-		{ "4", 10004, 324, 259, 555, 340, "Raid" }, -- Hellfire Citadel
-		{ "5", 10005, 239, 400, 448, 515, "Raid" }, -- Auchindoun
+		{ "1", 10001, 324, 259, 555, 340, "Raid" }, -- Hellfire Citadel
+		{ "2", 10002, 146, 219, 336, 292, "Raid" }, -- Coilfang Reservoir
+		{ "3", 10003, 239, 400, 448, 515, "Raid" }, -- Auchindoun
+		{ "4", 10004, 224,  78, 424, 116, "Raid" }, -- Gruul's Lair
+		{ "5", 10005, 410, 102, 659, 148, "Raid" }, -- Tempest Keep
 		{ "6", 10006, 449, 411, 714, 529, "Raid" }, -- Black Temple
 	},
 	DLNorthrend = {
-		{ "1",   10001, 307, 114, 577, 107, "Raid" }, -- Ulduar
-		{ "2",   10002, 242, 129, 470, 131, "Raid" }, -- Crusaders' Coliseum
-		{ "3",   10003, 422, 187, 778, 220, "Dungeon" }, -- Gundrak
-		{ "4",   10004, 198, 218, 403, 290, "Raid" }, -- Icecrown Citadel
-		{ "5",   10005, 252, 223, 479, 287, "Dungeon" }, -- The Violet Hold
-		{ "6",   10006, 174, 237, 355, 307, "Raid" }, -- Vault of Archavon
-		{ "7",   10007, 337, 256, 628, 345, "Dungeon" }, -- Drak'Tharon Keep
-		{ "8",   10008,  34, 287, 126, 392, "Raid" }, -- The Nexus
-		{ "9",   10009, 195, 291, 389, 401, "Dungeon" }, -- Azjol-Nerub
-		{ "10",  10010, 258, 297, 500, 407, "Raid" }, -- Wyrmrest Temple
-		{ "11",  10011, 309, 287, 586, 399, "Raid" }, -- Naxxramas
-		{ "12",  10012, 432, 377, 786, 546, "Dungeon" }, -- Utgarde Keep
-		{ "1'",  10013, 176, 268, 356, 340, "Battlegrounds" }, -- Wintergrasp
+		{ "1",   10001, 303, 127, 577, 107, "Raid" }, -- Ulduar
+		{ "2",   10002, 244, 146, 470, 131, "Raid" }, -- Crusaders' Coliseum
+		{ "3",   10003, 404, 194, 778, 220, "Dungeon" }, -- Gundrak
+		{ "4",   10004, 208, 230, 403, 290, "Raid" }, -- Icecrown Citadel
+		{ "5",   10005, 254, 230, 479, 287, "Dungeon" }, -- The Violet Hold
+		{ "6",   10006, 186, 241, 355, 307, "Raid" }, -- Vault of Archavon
+		{ "7",   10007, 333, 260, 628, 345, "Dungeon" }, -- Drak'Tharon Keep
+		{ "8",   10008,  60, 284, 126, 392, "Raid" }, -- The Nexus
+		{ "9",   10009, 204, 289, 389, 401, "Dungeon" }, -- Azjol-Nerub
+		{ "10",  10010, 260, 292, 500, 407, "Raid" }, -- Wyrmrest Temple
+		{ "11",  10011, 304, 284, 586, 399, "Raid" }, -- Naxxramas
+		{ "12",  10012, 413, 363, 786, 546, "Dungeon" }, -- Utgarde Keep
+		{ "1'",  10013, 184, 260, 356, 340, "Battlegrounds" }, -- Wintergrasp
 	},
 	DLDeepholm = {
 		{ "1", 10001, 298, 311  }, -- The Stonecore
@@ -552,8 +552,8 @@ data.coords = {
 		{ "7",  10107, 368, 235, 649, 318, "PvP" }, 
 	},
 	DLArgus = {
-		{ 1, 10001, 254, 134, 663, 190, "Dungeon" },
-		{ 2, 10002, 123, 328, 280, 305, "Raid" },
+		{ 1, 10001, 136, 102, 663, 190, "Dungeon" },
+		{ 2, 10002, 162, 350, 280, 305, "Raid" },
 	},
 	DLNazjatar = {
 		{ 1, 10001, 211, 60 },
@@ -570,6 +570,6 @@ data.coords = {
 		{ 9, 10009, 73, 268 },
 	},
 	DLZerethMortis = {
-		{ 1, 10001, 425, 273 },
+		{ 1, 10001, 424, 236 },
 	},
 }

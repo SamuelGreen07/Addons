@@ -37,7 +37,7 @@ local function GetOwned(entries)
   return false
 end
 
-function AuctionatorDirectSearchProviderMixin:CreateSearchTerm(term)
+function AuctionatorDirectSearchProviderMixin:CreateSearchTerm(term, config)
   Auctionator.Debug.Message("AuctionatorDirectSearchProviderMixin:CreateSearchTerm()", term)
 
   local parsed = Auctionator.Search.SplitAdvancedSearch(term)
@@ -64,7 +64,9 @@ function AuctionatorDirectSearchProviderMixin:CreateSearchTerm(term)
         min = parsed.minPrice,
         max = parsed.maxPrice,
       },
-    }
+    },
+    -- Force searchAllPages when the config UI forces it
+    searchAllPages = Auctionator.Config.Get(Auctionator.Config.Options.SHOPPING_ALWAYS_LOAD_MORE) or config.searchAllPages or false,
   }
 end
 
@@ -74,6 +76,8 @@ function AuctionatorDirectSearchProviderMixin:GetSearchProvider()
   --Run the query, and save extra filter data for processing
   return function(searchTerm)
     self.gotAllResults = false
+    self.aborted = false
+    self.searchAllPages = searchTerm.searchAllPages
     self.currentFilter = searchTerm.extraFilters
     self.resultsByKey = {}
     self.individualResults = {}
@@ -111,6 +115,7 @@ function AuctionatorDirectSearchProviderMixin:AddFinalResults()
       totalQuantity = GetQuantity(entries),
       containsOwnerItem = GetOwned(entries),
       entries = entries,
+      complete = not self.aborted,
     }
     local item = Item:CreateFromItemID(GetItemInfoInstant(key))
     item:ContinueOnItemLoad(function()
@@ -147,7 +152,8 @@ function AuctionatorDirectSearchProviderMixin:ProcessSearchResults(pageResults)
 
   if self:HasCompleteTermResults() then
     self:AddFinalResults()
-  elseif Auctionator.Config.Get(Auctionator.Config.Options.SHOPPING_EXCLUDE_RESULTS_FOR_SPEED) then
+  elseif not self.searchAllPages then
+    self.aborted = true
     Auctionator.AH.AbortQuery()
   end
 

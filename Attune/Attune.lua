@@ -8,8 +8,8 @@
 --
 -------------------------------------------------------------------------
 
--- Done in 254
---	Added the quest for Magister's Terrace Heroic
+-- Done in 255
+--	Updated to cater for honored and revered rep keys
 
 
 -------------------------------------------------------------------------
@@ -30,7 +30,7 @@ local attunelocal_minimapicon = LibStub("LibDBIcon-1.0")
 local attunelocal_brokervalue = nil
 local attunelocal_brokerlabel = nil
 
-local attunelocal_version = "254"  					-- change here, and in TOC x2
+local attunelocal_version = "255"  					-- change here, and in TOC x2
 local attunelocal_prefix = "Attune_Channel"			-- used for addon chat communications
 local attunelocal_versionprefix = "Attune_Version"	-- used for addon version check
 local attunelocal_syncprefix = "Attune_Sync"		-- used for addon version check
@@ -1156,7 +1156,16 @@ function Attune:BAG_UPDATE(event)
 				if s.COUNT ~= nil then countNeeded = s.COUNT end
 
 				Attune_DB.toons[attunelocal_charKey].items[s.ID_WOWHEAD] = GetItemCount(s.ID_WOWHEAD, 1)
-					if Attune_DB.toons[attunelocal_charKey].items[s.ID_WOWHEAD] >= countNeeded then   --check bags and bank
+
+				-- Bandaid to fix the honored/revered key issue
+				if s.ID_WOWHEAD == "185686" and Attune_DB.toons[attunelocal_charKey].items[s.ID_WOWHEAD] == 0 then Attune_DB.toons[attunelocal_charKey].items[s.ID_WOWHEAD] = GetItemCount("30637", 1) end -- Thrallmar
+				if s.ID_WOWHEAD == "185687" and Attune_DB.toons[attunelocal_charKey].items[s.ID_WOWHEAD] == 0 then Attune_DB.toons[attunelocal_charKey].items[s.ID_WOWHEAD] = GetItemCount("30622", 1) end -- Honor Hold
+				if s.ID_WOWHEAD == "185690" and Attune_DB.toons[attunelocal_charKey].items[s.ID_WOWHEAD] == 0 then Attune_DB.toons[attunelocal_charKey].items[s.ID_WOWHEAD] = GetItemCount("30623", 1) end -- Cenarion
+				if s.ID_WOWHEAD == "185691" and Attune_DB.toons[attunelocal_charKey].items[s.ID_WOWHEAD] == 0 then Attune_DB.toons[attunelocal_charKey].items[s.ID_WOWHEAD] = GetItemCount("30633", 1) end -- Lower City
+				if s.ID_WOWHEAD == "185692" and Attune_DB.toons[attunelocal_charKey].items[s.ID_WOWHEAD] == 0 then Attune_DB.toons[attunelocal_charKey].items[s.ID_WOWHEAD] = GetItemCount("30634", 1) end -- Shatar
+				if s.ID_WOWHEAD == "185693" and Attune_DB.toons[attunelocal_charKey].items[s.ID_WOWHEAD] == 0 then Attune_DB.toons[attunelocal_charKey].items[s.ID_WOWHEAD] = GetItemCount("30635", 1) end -- KoT
+				
+				if Attune_DB.toons[attunelocal_charKey].items[s.ID_WOWHEAD] >= countNeeded then   --check bags and bank
 
 					if Attune_DB.toons[attunelocal_charKey].done[s.ID_ATTUNE .. "-" .. s.ID] == nil then
 						local faction = UnitFactionGroup("player")

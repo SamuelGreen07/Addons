@@ -3,13 +3,11 @@ AuctionatorConfigShoppingAltFrameMixin = CreateFromMixins(AuctionatorConfigShopp
 function AuctionatorConfigShoppingAltFrameMixin:OnShow()
   AuctionatorConfigShoppingFrameMixin.OnShow(self)
 
-  self.FullRefresh:SetChecked(Auctionator.Config.Get(Auctionator.Config.Options.SHOPPING_SHOW_ALL_RESULTS))
-  self.ExcludeResultsForSpeed:SetChecked(Auctionator.Config.Get(Auctionator.Config.Options.SHOPPING_EXCLUDE_RESULTS_FOR_SPEED))
+  self.AlwaysLoadMore:SetChecked(Auctionator.Config.Get(Auctionator.Config.Options.SHOPPING_ALWAYS_LOAD_MORE))
 end
 
 function AuctionatorConfigShoppingAltFrameMixin:Save()
   AuctionatorConfigShoppingFrameMixin.Save(self)
 
-  Auctionator.Config.Set(Auctionator.Config.Options.SHOPPING_SHOW_ALL_RESULTS, self.FullRefresh:GetChecked())
-  Auctionator.Config.Set(Auctionator.Config.Options.SHOPPING_EXCLUDE_RESULTS_FOR_SPEED, self.ExcludeResultsForSpeed:GetChecked())
+  Auctionator.Config.Set(Auctionator.Config.Options.SHOPPING_ALWAYS_LOAD_MORE, self.AlwaysLoadMore:GetChecked())
 end

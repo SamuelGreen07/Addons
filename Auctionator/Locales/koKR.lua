@@ -92,15 +92,18 @@ L["CONFIG_LIFO_CATEGORY"] = "판매: 일반"
 L["CONFIG_MAIL_TOOLTIP"] = "우체통 툴팁을 표시함"
 L["CONFIG_NOT_LIFO_CATEGORY"] = "판매: 장비/펫"
 L["CONFIG_PET_TOOLTIP"] = "툴팁에 펫 가격 표시"
-L["CONFIG_PRICE_HISTORY"] = "날짜별 판매 가격을 표시하기 (재시작 필요)"
-L["CONFIG_PRICE_HISTORY_TOOLTIP_HEADER"] = "판매 가격 표시"
-L["CONFIG_PRICE_HISTORY_TOOLTIP_TEXT"] = "체크 해제시 판매 탭 하단의 날짜 별 판매 가격 숨김."
 L["CONFIG_PROFILE_CATEGORY"] = "프로필"
 L["CONFIG_PROFILE_TEXT"] = "캐릭터 별 프로필 설정을 변경합니다."
 L["CONFIG_PROFILE_TOGGLE"] = "이 캐릭터만 적용"
 L["CONFIG_QUANTITIES_CATEGORY"] = "판매: 수량"
 L["CONFIG_QUANTITIES_TEXT"] = "다른 아이템 범주에 사용되는 기본 수량을 선택합니다."
 L["CONFIG_RESET_STACK_SIZE_MEMORY"] = "묶음 갯수 기록 재설정"
+--[[Translation missing --]]
+L["CONFIG_SAVE_LAST_DURATION_AS_DEFAULT"] = "Save the last used auction duration as the default"
+--[[Translation missing --]]
+L["CONFIG_SAVE_LAST_DURATION_AS_DEFAULT_TOOLTIP_HEADER"] = "Overwrite default duration with last used"
+--[[Translation missing --]]
+L["CONFIG_SAVE_LAST_DURATION_AS_DEFAULT_TOOLTIP_TEXT"] = "Overwrite default duration with last used"
 L["CONFIG_SCAN_SETTINGS"] = "검색설정"
 L["CONFIG_SCANNING"] = "검색설정"
 L["CONFIG_SELLING_ALL_ITEMS_CATEGORY"] = "판매: 모든 아이템"
@@ -158,27 +161,15 @@ L["CONFIG_SELLING_SHOW_BID_PRICE_TOOLTIP_TEXT"] = "Controls whether the bid pric
 L["CONFIG_SELLING_SKIP_SHORTCUT"] = "A shortcut to skip posting the currently selected item is"
 --[[Translation missing --]]
 L["CONFIG_SELLING_TBC_ALL_ITEMS"] = "Options to set the default posting settings for all items."
---[[Translation missing --]]
-L["CONFIG_SELLING_TBC_SHOW_ALL_RESULTS"] = "Include auctions not needed to get the minimum price in results"
---[[Translation missing --]]
-L["CONFIG_SELLING_TBC_SHOW_ALL_RESULTS_TOOLTIP_HEADER"] = "Show All Results"
---[[Translation missing --]]
-L["CONFIG_SELLING_TBC_SHOW_ALL_RESULTS_TOOLTIP_TEXT"] = "Enabling this setting causes all pages of results to be searched and all the auctions found to be listed, even though only the first page is needed to determine the minimum price."
 L["CONFIG_SELLING_TEXT"] = "판매하기 탭의 설정을 변경합니다."
+--[[Translation missing --]]
+L["CONFIG_SHOPPING_ALWAYS_LOAD_MORE"] = "Always load all available results."
+--[[Translation missing --]]
+L["CONFIG_SHOPPING_ALWAYS_LOAD_MORE_TOOLTIP_HEADER"] = "Always load more"
+--[[Translation missing --]]
+L["CONFIG_SHOPPING_ALWAYS_LOAD_MORE_TOOLTIP_TEXT"] = "While still getting an accurate minimum price some pages are skipped to speed up the shopping search. This prevents any pages from being skipped and ensures all possible results display."
 L["CONFIG_SHOPPING_CATEGORY"] = "구매목록"
 L["CONFIG_SHOPPING_LIST"] = "구매목록 설정"
---[[Translation missing --]]
-L["CONFIG_SHOPPING_LIST_EXCLUDE_RESULTS_FOR_SPEED"] = "Ignore results that aren't on the first page of the current search"
---[[Translation missing --]]
-L["CONFIG_SHOPPING_LIST_EXCLUDE_RESULTS_FOR_SPEED_TOOLTIP_HEADER"] = "Exclude Results for Speed"
---[[Translation missing --]]
-L["CONFIG_SHOPPING_LIST_EXCLUDE_RESULTS_FOR_SPEED_TOOLTIP_TEXT"] = "Ignoring results that are not on the first page may cause some expensive items to not appear. Quantities in the price history and search results will be inaccurate."
---[[Translation missing --]]
-L["CONFIG_SHOPPING_LIST_FULL_REFRESH"] = "Refresh all pages when clicking the Refresh button"
---[[Translation missing --]]
-L["CONFIG_SHOPPING_LIST_FULL_REFRESH_TOOLTIP_HEADER"] = "Refresh All Pages"
---[[Translation missing --]]
-L["CONFIG_SHOPPING_LIST_FULL_REFRESH_TOOLTIP_TEXT"] = "Only the first page is needed to determine the cheapest price, if you are only interested in the cheapest price and don't need to see the rest of the results you can turn this option off for a speed boost."
 L["CONFIG_SHOPPING_LIST_MISSING_TERMS"] = "결과에 결과 없음 구매 목록의 용어 표시"
 L["CONFIG_SHOPPING_LIST_MISSING_TERMS_TOOLTIP_HEADER"] = "결과가 없는 검색"
 L["CONFIG_SHOPPING_LIST_MISSING_TERMS_TOOLTIP_TEXT"] = "검색어에 결과가 없으면 사용 가능한 항목이 0인 항목이 결과에 추가해 이를 표시합니다."
@@ -198,6 +189,8 @@ L["CONFIRM"] = "확인"
 L["CONFIRM_POST_BELOW_VENDOR"] = "You can make more gold selling this to a vendor. Are you sure you want to post at that price?"
 --[[Translation missing --]]
 L["CONFIRM_POST_LOW_PRICE"] = "The price of %s looks a bit low. Are you sure you want to post at that price?"
+--[[Translation missing --]]
+L["CONFIRM_POST_PRICE_DROP"] = "The unit price of %s is a large price drop. Are you sure you want to post at that price?"
 L["CONTRIBUTORS_HEADER"] = "기증자"
 L["COPY_ITEM_ADDED"] = "%s 을 %s 로 복사"
 L["COPY_NO_LIST_SELECTED"] = "아이템을 복사할 수 없습니다. 선택한 구매 목록이 없습니다"
@@ -207,6 +200,8 @@ L["CRAFTED_LEVEL"] = "제작 레벨"
 L["CREATE"] = "목록 생성"
 L["CREATE_LIST_DIALOG"] = "새로운 목록을 생성합니다."
 L["CURRENT"] = "현재"
+--[[Translation missing --]]
+L["CURRENT_PRICES"] = "Current Prices"
 L["CUSTOM_KEYBOARD_SHORTCUTS"] = "사용자 정의 키보드 단축키"
 L["DATE"] = "날짜"
 L["DAY_1"] = "일요일"
@@ -249,6 +244,10 @@ L["FINISHED_PROCESSING"] = "불러오기 완료"
 L["FULL_SCAN_ALTERNATE_FAILED"] = "일반 검색 실패"
 L["FULL_SCAN_BUTTON"] = "전체 검색"
 L["FULL_SCAN_FAILED"] = "전체 검색 실패"
+--[[Translation missing --]]
+L["FULL_SCAN_FAILED_REPLICATE"] = "Full scan (replicate mode) failed to complete."
+--[[Translation missing --]]
+L["FULL_SCAN_FAILED_SUMMARY"] = "Full scan (summary mode) failed to complete."
 L["FULL_SCAN_IN_PROGRESS"] = "전체 검색 진행 중."
 L["GEAR_VENDOR_PRICE_MULTIPLIER"] = "상점에 판매하는 가격의 배수로 장비를 판매"
 L["HIDE"] = "숨기기"
@@ -273,6 +272,10 @@ L["LIST_EXTENDED_SEARCH_HEADER"] = "확장 검색 옵션"
 L["LIST_IMPORT_HEADER"] = "목록 가져오기"
 L["LIST_SEARCH_START"] = "검색중... (%s초)"
 L["LIST_SEARCH_STATUS"] = "검색완료 (%s초)"
+--[[Translation missing --]]
+L["LOAD_HIGHER_PRICES"] = "Load higher prices"
+--[[Translation missing --]]
+L["LOAD_MORE_RESULTS"] = "Load more results"
 L["MAIL_TOOLTIP_TOOLTIP_HEADER"] = "우체통 툴팁"
 L["MAIL_TOOLTIP_TOOLTIP_TEXT"] = "우체통에 있는 아이템에 대한 경매 정보를 마우스를 올려 확인 할 수 있습니다."
 L["MAX"] = "최대"
@@ -301,6 +304,8 @@ L["NONE"] = "없음"
 L["NONE_LEFT"] = "아무것도 없음"
 L["NUMBER_SEPARATOR"] = ","
 L["OPEN_ADDON_OPTIONS"] = "애드온 설정 열기"
+--[[Translation missing --]]
+L["OPEN_IN_SHOPPING_TAB"] = "Open in Shopping Tab"
 L["OWNED_COLUMN"] = "소유 여부"
 L["PERCENTAGE"] = "퍼센티지"
 L["PERCENTAGE_SUFFIX"] = "% 최저가"
@@ -510,6 +515,36 @@ L["SPLASH_9108_FEATURES_8"] = "A reagents search button on the crafting window w
 L["SPLASH_9108_FEATURES_9"] = "Can cancel own auctions, both inside the buying screens and on the dedicated tab with an undercut scan."
 --[[Translation missing --]]
 L["SPLASH_9108_FEATURES_HEADER"] = "Features of the classic release"
+--[[Translation missing --]]
+L["SPLASH_9225_ALL_VERSIONS_1"] = "Uses seen vendor prices when calculating crafting costs."
+--[[Translation missing --]]
+L["SPLASH_9225_ALL_VERSIONS_2"] = "Right-click any auction in the Cancelling tab to search for competing auctions."
+--[[Translation missing --]]
+L["SPLASH_9225_ALL_VERSIONS_3"] = "Quality filters for Shopping searches."
+--[[Translation missing --]]
+L["SPLASH_9225_ALL_VERSIONS_4"] = "Shift-click any column headers to reset sorting."
+--[[Translation missing --]]
+L["SPLASH_9225_ALL_VERSIONS_5"] = "Selling tab warns when posting an item below vendor price."
+--[[Translation missing --]]
+L["SPLASH_9225_ALL_VERSIONS_HEADER"] = "Recent features for all versions"
+--[[Translation missing --]]
+L["SPLASH_9225_CLASSIC_1"] = "Now loads fewer pages from the AH when selling or shopping, saving time on busy realms."
+--[[Translation missing --]]
+L["SPLASH_9225_CLASSIC_2"] = "Option for right-clicking an item in your bag to be a way to select it for the selling tab."
+--[[Translation missing --]]
+L["SPLASH_9225_CLASSIC_3"] = "Optional \"Seller(s)\" column when posting or buying auctions (right-click column headers to enable)."
+--[[Translation missing --]]
+L["SPLASH_9225_CLASSIC_4"] = "Blizzard Enchant view shows crafting cost when you are at the AH."
+--[[Translation missing --]]
+L["SPLASH_9225_CLASSIC_5"] = "Click on the item's icon in the Shopping buy screen to view it in the vanilla AH."
+--[[Translation missing --]]
+L["SPLASH_9225_CLASSIC_HEADER"] = "Recent features for Classic"
+--[[Translation missing --]]
+L["SPLASH_9225_DESCRIPTION"] = "Numerous improvements, including selling and shopping on busy classic realms becoming much faster."
+--[[Translation missing --]]
+L["SPLASH_9225_RETAIL_1"] = "Selling tab warns when posting a commodity for an abnormally low price compared to the others listed."
+--[[Translation missing --]]
+L["SPLASH_9225_RETAIL_HEADER"] = "Recent features for Retail"
 L["SPLASH_HIDE_MESSAGE"] = "다음 업데이트까지 보이지 않기"
 L["SPLASH_SCREEN_HEADER"] = "옥셔네이터에 오신걸 환영합니다!"
 L["STACK_AUCTION_INFO"] = "%s  (전체 %s, 각 %s)"
@@ -520,6 +555,10 @@ L["STACK_TOOLTIP_TOOLTIP_HEADER"] = "가격 표시 설정"
 L["STACK_TOOLTIP_TOOLTIP_TEXT"] = "쉬프트를 누르고 있을 때 물건 전체의 경매가를 표시합니다. (ex. 20개짜리 영약 20개의 가격) 체크해제 시 1개의 가격만 표시됩니다."
 L["STARTING_FULL_SCAN"] = "전체 검색 시작"
 L["STARTING_FULL_SCAN_ALTERNATE"] = "일반 검색 시작"
+--[[Translation missing --]]
+L["STARTING_FULL_SCAN_REPLICATE"] = "Starting a full scan (replicate mode)."
+--[[Translation missing --]]
+L["STARTING_FULL_SCAN_SUMMARY"] = "Starting a full scan (summary mode)."
 L["STARTING_PRICE_PERCENTAGE"] = "시작 가격"
 L["STARTING_PRICE_PERCENTAGE_SUFFIX"] = "묶음 가격 %"
 L["STARTING_PRICE_PERCENTAGE_TOOLTIP_HEADER"] = "입찰 시작가"
@@ -550,6 +589,8 @@ L["TRANSLATORS_RUSSIAN"] = "러시아어"
 L["TRANSLATORS_SIMPLIFIED_CHINESE"] = "중국어 간체"
 L["TRANSLATORS_SPANISH"] = "스페인어"
 L["TRANSLATORS_TRADITIONAL_CHINESE"] = "중국어 번체"
+--[[Translation missing --]]
+L["UNDERCUT_BID"] = "Bid"
 L["UNDERCUT_NO"] = "X"
 L["UNDERCUT_PREFERENCE"] = "최저가 선호"
 L["UNDERCUT_SCAN"] = "최저가 검색"

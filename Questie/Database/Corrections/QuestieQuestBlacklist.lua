@@ -26,6 +26,11 @@ function QuestieQuestBlacklist:Load()
         [4603] = true, -- Duplicate of 2953
         [4604] = true, -- Duplicate of 2953
         [8856] = true, -- Duplicate of 8497
+        [64143] = true, -- Duplicate of 9735
+        [13053] = true, -- Removed
+        [11402] = true, -- GM Island quest
+        [11189] = true, -- Removed
+        [13417] = true, -- Duplicate of 12973
         [936] = QuestieCorrections.CLASSIC_ONLY,
         -- Welcome! quests (Collectors Edition)
         [5805] = true,
@@ -287,7 +292,7 @@ function QuestieQuestBlacklist:Load()
         [8983] = true,
         [8984] = true,
         -- TBC event quests
-        [9249] = QuestieCorrections.TBC_ONLY,
+        [9249] = true,
         [10938] = true,
         [10939] = true,
         [10940] = true,
@@ -345,6 +350,7 @@ function QuestieQuestBlacklist:Load()
         [11581] = true,
         [11583] = true,
         [11584] = true,
+        [11657] = true,
         [11691] = true,
         [11696] = true,
         [11731] = true,
@@ -586,12 +592,57 @@ function QuestieQuestBlacklist:Load()
         [12420] = true,
         [12421] = true,
         ----------------
+        --- Wotlk event quests
+        --- Noblegarden
+        [13479] = true,
+        [13480] = true,
+        [13502] = true,
+        [13503] = true,
+
+        --- Love is in the Air
+        [14488] = true,
+        [24597] = true,
+        [24609] = true,
+        [24610] = true,
+        [24611] = true,
+        [24612] = true,
+        [24613] = true,
+        [24614] = true,
+        [24615] = true,
+        [24629] = true,
+        [24635] = true,
+        [24636] = true,
+        [24655] = true,
+        [24804] = true,
+
+        --- Children's Week
+        [13926] = true,
+        [13927] = true,
+
+        --- Hallow's End
+        [13463] = true,
+        [13472] = true,
+        [13473] = true,
+
+        --- Pilgrim's Bounty
+        [12784] = true,
+        [12808] = true,
+        [13483] = true,
+        [13484] = true,
+        [14036] = true,
+        [14022] = true,
+
+        --- Brewfest
+        [13931] = true,
+        [13932] = true,
+        -------------------
 
         --mount replacement
         [7662] = true,
         [7663] = true,
         [7660] = true,
         [7661] = true,
+
         -- PvP Quests which are not in the game anymore
         -----------------------------------------------
         -- Vanquish the Invaders
@@ -1004,6 +1055,50 @@ function QuestieQuestBlacklist:Load()
         -- Phase 4 Zul'Aman
         [11195] = true, -- Not in the game
         [11196] = true, -- Not in the game
+
+        ----- Wotlk -------------- Wotlk quests --------------- Wotlk -----
+        ----- Wotlk ------------- starting here -------------- Wotlk -----
+        --- Phase 2 Ulduar / Argent Tournament
+        [13633] = true,
+        [13634] = true,
+        [13667] = true,
+        [13668] = true,
+        [13682] = true,
+        [13789] = true,
+        [13790] = true,
+        [13809] = true,
+        [13810] = true,
+        [13811] = true,
+        [13846] = true,
+        [13861] = true,
+        [13862] = true,
+        [14101] = true,
+        [14102] = true,
+        [14104] = true,
+        [14105] = true,
+        [14107] = true,
+        [14108] = true,
+
+        --- Phase 3 Trial of the Crusader
+        [14199] = true, -- Proof of Demise: The Black Knight (Daily heroic)
+
+        --- Phase 4 Icecrown Citadel
+        [24506] = true, -- Inside the Frozen Citadel
+        [26012] = true, -- Trouble at Wyrmrest
+
+        -- new raid weekly quests
+        [24579] = true,
+        [24580] = true,
+        [24581] = true,
+        [24582] = true,
+        [24583] = true,
+        [24584] = true,
+        [24585] = true,
+        [24586] = true,
+        [24587] = true,
+        [24588] = true,
+        [24589] = true,
+        [24590] = true,
     }
 
     if Questie.IsSoM then

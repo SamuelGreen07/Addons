@@ -154,6 +154,7 @@ Para mais informações sobre personalizar o Pawn, favor veja o arquivo de ajuda
 		["SpellHitInfo"] = "Spell Hit.  Increases the chance that your damaging spells hit the target, especially bosses.",
 		--[[Translation missing --]]
 		["SpellPenetrationInfo"] = "Spell Penetration. Negates an enemy's resistances to your spells.",
+		["SpellPowerInfo"] = "",
 		["SpiritInfo"] = "Spirit.  Affects your out-of-combat mana regeneration.",
 		["StaminaInfo"] = "Vigor. Aumenta sua vida.",
 		["StrengthInfo"] = "Força. Aumenta o poder das habilidades de algumas classes.",
@@ -430,6 +431,7 @@ Para mais informações sobre personalizar o Pawn, favor veja o arquivo de ajuda
 		["SpellPenetrationClassic"] = "^Equipado: Reduz em # as resistências mágicas dos alvos dos seus feitiços%.$",
 		["SpellPenetrationShort"] = "^%+?# Penetração de Feitiço$",
 		["SpellPower"] = "^%+?# d?e? ?Poder [mM]ágico$",
+		["SpellPower2"] = "^Equipado: Aumenta em # o poder mágico.$",
 		["Spirit"] = "^%+?# d?e? ?Espírito$",
 		["Staff"] = "^Cajado$",
 		["Stamina"] = "^%+?# d?e? ?Vigor$",
@@ -764,7 +766,7 @@ PawnLocal.Specs =
 
 -- Special case: wands actually use different text on live versus classic.
 -- So, patch things up here.
-if VgerCore.IsClassic or VgerCore.IsBurningCrusade then
+if VgerCore.IsClassic or VgerCore.IsBurningCrusade or VgerCore.IsWrath then
 
 	local TooltipParsing_Classic =
 	{

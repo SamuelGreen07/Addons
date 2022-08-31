@@ -8,13 +8,16 @@
 ## Notes-zhCN: 哆啦A梦的百宝袋
 ## Notes-zhTW: 哆啦A夢的百寶袋
 
-## Version: 2.5.113
+## Version: 2.5.120
 ## Author: Leatrix
 ## SavedVariables: LeaPlusDB
+
+## OptionalDeps: ElvUI
 
 ## X-Curse-Project-ID: 463863
 
 Leatrix_Plus_Library.lua
 Leatrix_Plus_Locale.lua
+Leatrix_Plus_Media.lua
 Leatrix_Plus_Flight.lua
 Leatrix_Plus.lua

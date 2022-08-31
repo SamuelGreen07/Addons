@@ -149,6 +149,7 @@ Weitere Informationen zur Anpassung von Pawn findet ihr in der Hilfedatei (Readm
 		["SpellDamageInfo"] = "Zauberschaden. Erhöht den durch deine Angriffszauber verursachten Schaden.",
 		["SpellHitInfo"] = "Zaubertreffer. Erhöht die Wahrscheinlichkeit, dass deine Schadenszauber das Ziel treffen, insbesondere Bosse.",
 		["SpellPenetrationInfo"] = "Zauberdurchdringung. Macht die Widerstände eines Feindes gegen deine Zauber zunichte.",
+		["SpellPowerInfo"] = "Zauberschaden. Erhöht den durch deine Angriffszauber verursachten Schaden.",
 		["SpiritInfo"] = "Willenskraft. Beeinflusst die Manaregeneration außerhalb des Kampfes.",
 		["StaminaInfo"] = "Ausdauer. Erhöht die Gesundheit.",
 		["StrengthInfo"] = "Stärke. Verstärkt Eure Angriffe und Fähigkeiten.",
@@ -425,6 +426,7 @@ Weitere Informationen zur Anpassung von Pawn findet ihr in der Hilfedatei (Readm
 		["SpellPenetrationClassic"] = "^Anlegen: Reduziert die Magiewiderstände der Ziele Eurer Zauber um #%.$",
 		["SpellPenetrationShort"] = "^%+?# Zauberdurchschlagskraft$",
 		["SpellPower"] = "^%+?# Zaubermacht$",
+		["SpellPower2"] = "^Anlegen: Erhöht die Zaubermacht um #%.$",
 		["Spirit"] = "^%+?# Willenskraft$",
 		["Staff"] = "^Stab$",
 		["Stamina"] = "^%+?# Ausdauer$",
@@ -681,7 +683,7 @@ Weitere Informationen zu dieser Einstellung findest du in der Readme-Datei.]=],
 
 -- Special case: weapon speed and Mail use different words on Classic.
 -- So, patch things up here.
-if VgerCore.IsClassic or VgerCore.IsBurningCrusade then
+if VgerCore.IsClassic or VgerCore.IsBurningCrusade or VgerCore.IsWrath then
 	PawnLocal.Mail = "Schwere Rüstung"
 	PawnLocal.MailInfo = "Punkte, die zugewiesen werden sollen, wenn der Gegenstand Schwere Rüstung ist."
 	PawnLocal.TooltipParsing.Mail = "^Schwere Rüstung$"

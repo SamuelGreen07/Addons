@@ -11,6 +11,7 @@ local RSLootDB = private.ImportLib("RareScannerLootDB")
 
 -- RareScanner general libraries
 local RSLogger = private.ImportLib("RareScannerLogger")
+local RSConstants = private.ImportLib("RareScannerConstants")
 local RSUtils = private.ImportLib("RareScannerUtils")
 local RSTooltipScanners = private.ImportLib("RareScannerTooltipScanners")
 
@@ -20,17 +21,19 @@ local RSTooltipScanners = private.ImportLib("RareScannerTooltipScanners")
 
 local function IsEquipable(itemClassID, itemSubClassID, itemEquipLoc)
 	local _, _, classIndex = UnitClass("player");
+	local isEquipable = false
 	for categoryID, subcategories in pairs(private.CLASS_PROFICIENCIES[classIndex]) do
-		if (categoryID == itemClassID and not RSUtils.Contains(subcategories, itemSubClassID)) then
-			return false
+		if (categoryID == itemClassID and RSUtils.Contains(subcategories, itemSubClassID)) then
+			isEquipable = true
+			break
 		end
 	end
 	-- check if cloth and not cloak
-	if (itemClassID == Enum.ItemClass.Armor and itemSubClassID == Enum.ItemArmorSubclass.Cloth and not RSUtils.Contains(private.CLOTH_CHARACTERES, classIndex) and itemEquipLoc ~= "INVTYPE_CLOAK") then --check if its cloth and not cloak
-		return false
+	if (not isEquipable and itemClassID == Enum.ItemClass.Armor and itemSubClassID == Enum.ItemArmorSubclass.Cloth and itemEquipLoc == "INVTYPE_CLOAK") then --check if its cloth and not cloak
+		return true
 	end
 
-	return true
+	return isEquipable
 end
 
 local function IsToy(itemLink, itemID)

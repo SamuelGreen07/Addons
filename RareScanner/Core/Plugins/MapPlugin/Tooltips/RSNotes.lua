@@ -25,5 +25,4 @@ function RSNotes.GetNote(entityID, mapID)
 	elseif (AL[string.format("NOTE_%s_%s", entityID, mapID)] ~= string.format("NOTE_%s_%s", entityID, mapID)) then
 		return AL[string.format("NOTE_%s_%s", entityID, mapID)]
 	end
-	
 end

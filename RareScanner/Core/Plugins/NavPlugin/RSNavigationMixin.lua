@@ -69,7 +69,7 @@ function RSNavigationMixin:AddNext(vignetteInfo)
 
 		-- Refresh waypoint
 		RSTomtom.AddTomtomWaypointFromVignette(vignetteInfo)
-		-- If the navigation cache only contains one item, adds waypoint
+	-- If the navigation cache only contains one item, adds waypoint
 	elseif (table.getn(navigationCache) == 1) then
 		RSTomtom.AddTomtomWaypointFromVignette(vignetteInfo)
 	end

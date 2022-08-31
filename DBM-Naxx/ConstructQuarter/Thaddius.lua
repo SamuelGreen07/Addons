@@ -2,7 +2,7 @@
 local mod	= DBM:NewMod("Thaddius", "DBM-Naxx", 2)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20220701213657")
+mod:SetRevision("20220806052609")
 mod:SetCreatureID(15928)
 mod:SetEncounterID(1120)
 mod:SetModelID(16137)
@@ -17,10 +17,12 @@ mod:RegisterEventsInCombat(
 --TODO, UNIT_AURA might not work in classic? I didn't see any warnings on stream. May have to just do UnitDebuff() on self when cast finishes
 local warnShiftSoon			= mod:NewSoonAnnounce(28089, 5, 3)
 local warnShiftCasting		= mod:NewCastAnnounce(28089, 4)
-local warnChargeChanged		= mod:NewSpecialWarning("WarningChargeChanged")
-local warnChargeNotChanged	= mod:NewSpecialWarning("WarningChargeNotChanged", false)
 local warnThrow				= mod:NewSpellAnnounce(28338, 2)
 local warnThrowSoon			= mod:NewSoonAnnounce(28338, 1)
+
+local warnChargeChanged		= mod:NewSpecialWarning("WarningChargeChanged")
+local warnChargeNotChanged	= mod:NewSpecialWarning("WarningChargeNotChanged", false)
+local yellShift				= mod:NewShortPosYell(28089, DBM_CORE_L.AUTO_YELL_CUSTOM_POSITION)
 
 local enrageTimer			= mod:NewBerserkTimer(300)
 local timerNextShift		= mod:NewCDTimer(25.9, 28089, nil, nil, nil, 2, nil, DBM_COMMON_L.DEADLY_ICON)--25.9-34
@@ -30,7 +32,7 @@ local timerThrow			= mod:NewCDTimer(20.6, 28338, nil, nil, nil, 5, nil, DBM_COMM
 if not DBM.Options.GroupOptionsBySpell then
 	mod:AddMiscLine(DBM_CORE_L.OPTION_CATEGORY_DROPDOWNS)
 end
-mod:AddDropdownOption("ArrowsEnabled", {"Never", "TwoCamp", "ArrowsRightLeft", "ArrowsInverse"}, "ArrowsRightLeft", "misc", nil, 28089)
+mod:AddDropdownOption("AirowsEnabled", {"Never", "TwoCamp", "ArrowsRightLeft", "ArrowsInverse"}, "Never", "misc", nil, 28089)
 
 local currentCharge
 local down = 0
@@ -66,14 +68,16 @@ function mod:UNIT_AURA()
 	if self.vb.phase ~=2 or (GetTime() - lastShift) > 5 or (GetTime() - lastShift) < 3 then return end
 	local charge
 	local i = 1
-	while DBM:UnitDebuff("player", i) do
-		local _, icon, count = DBM:UnitDebuff("player", i)
+	while UnitDebuff("player", i) do
+		local _, icon, count, _, _, _, _, _, _, _, _, _, _, _, _, count2 = UnitDebuff("player", i)
 		if icon == "Interface\\Icons\\Spell_ChargeNegative" or icon == 135768 then--Not sure if classic will return data ID or path, so include both
-			if count > 1 then return end
+			if (count2 or count) > 1 then return end
 			charge = L.Charge1
+			yellShift:Yell(7, "- -")
 		elseif icon == "Interface\\Icons\\Spell_ChargePositive" or icon == 135769 then--Not sure if classic will return data ID or path, so include both
-			if count > 1 then return end
+			if (count2 or count) > 1 then return end
 			charge = L.Charge2
+			yellShift:Yell(6, "+ +")
 		end
 		i = i + 1
 	end
@@ -82,19 +86,19 @@ function mod:UNIT_AURA()
 		--Did not Change
 		if charge == currentCharge then
 			warnChargeNotChanged:Show()
-			if self.Options.ArrowsEnabled == "ArrowsInverse" then
+			if self.Options.AirowsEnabled == "ArrowsInverse" then
 				self:ShowLeftArrow()
-			elseif self.Options.ArrowsEnabled == "ArrowsRightLeft" then
+			elseif self.Options.AirowsEnabled == "ArrowsRightLeft" then
 				self:ShowRightArrow()
 			end
 		--Changed
 		else
 			warnChargeChanged:Show(charge)
-			if self.Options.ArrowsEnabled == "ArrowsInverse" then
+			if self.Options.AirowsEnabled == "ArrowsInverse" then
 				self:ShowRightArrow()
-			elseif self.Options.ArrowsEnabled == "ArrowsRightLeft" then
+			elseif self.Options.AirowsEnabled == "ArrowsRightLeft" then
 				self:ShowLeftArrow()
-			elseif self.Options.ArrowsEnabled == "TwoCamp" then
+			elseif self.Options.AirowsEnabled == "TwoCamp" then
 				self:ShowUpArrow()
 			end
 		end

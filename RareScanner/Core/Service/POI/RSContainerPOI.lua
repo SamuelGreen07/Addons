@@ -20,6 +20,9 @@ local RSLogger = private.ImportLib("RareScannerLogger")
 local RSTimeUtils = private.ImportLib("RareScannerTimeUtils")
 local RSUtils = private.ImportLib("RareScannerUtils")
 
+-- RareScanner services
+local RSRecentlySeenTracker = private.ImportLib("RareScannerRecentlySeenTracker")
+
 
 ---============================================================================
 -- Not discovered entities
@@ -60,7 +63,6 @@ function RSContainerPOI.GetContainerPOI(containerID, mapID, containerInfo, alrea
 		POI.x, POI.y = RSContainerDB.GetInternalContainerCoordinates(containerID, mapID)
 	end
 	POI.foundTime = alreadyFoundInfo and alreadyFoundInfo.foundTime
-	POI.isOpened = RSContainerDB.IsContainerOpened(containerID)
 	POI.isDiscovered = POI.isOpened or alreadyFoundInfo ~= nil
 	if (containerInfo) then
 		POI.worldmap = containerInfo.worldmap
@@ -69,10 +71,14 @@ function RSContainerPOI.GetContainerPOI(containerID, mapID, containerInfo, alrea
 	-- Textures
 	if (POI.isOpened) then
 		POI.Texture = RSConstants.BLUE_CONTAINER_TEXTURE
-	elseif (RSGeneralDB.IsRecentlySeen(containerID)) then
+	elseif (RSRecentlySeenTracker.IsRecentlySeen(containerID, POI.x, POI.y)) then
 		POI.Texture = RSConstants.PINK_CONTAINER_TEXTURE
-	elseif (not POI.isDiscovered) then
+	elseif (not POI.isDiscovered and not POI.achievementLink) then
 		POI.Texture = RSConstants.RED_CONTAINER_TEXTURE
+	elseif (not POI.isDiscovered and POI.achievementLink) then
+		POI.Texture = RSConstants.YELLOW_CONTAINER_TEXTURE
+	elseif (POI.achievementLink) then
+		POI.Texture = RSConstants.GREEN_CONTAINER_TEXTURE
 	else
 		POI.Texture = RSConstants.NORMAL_CONTAINER_TEXTURE
 	end
@@ -94,13 +100,20 @@ local function IsContainerPOIFiltered(containerID, mapID, zoneQuestID, onWorldMa
 		return true
 	end
 
-	-- A 'not discovered' container will be setted as opened when the action is detected while loading the addon and its questID is completed
-	local containerOpened = RSContainerDB.IsContainerOpened(containerID)
+	-- Skip if the entity appears only while a quest event is going on and it isnt active
+	if (zoneQuestID) then
+		local active = false
+		for _, questID in ipairs(zoneQuestID) do
+			if (C_TaskQuest.IsActive(questID) or C_QuestLog.IsQuestFlaggedCompleted(questID)) then
+				active = true
+				break
+			end
+		end
 
-	-- Skip if opened and not showing opened entities
-	if (containerOpened and not RSConfigDB.IsShowingOpenedContainers()) then
-		RSLogger:PrintDebugMessageEntityID(containerID, string.format("Saltado Contenedor [%s]: Esta abierto.", containerID))
-		return true
+		if (not active) then
+			RSLogger:PrintDebugMessageEntityID(containerID, string.format("Saltado Contenedor [%s]: Evento asociado no esta activo.", containerID))
+			return true
+		end
 	end
 
 	return false
@@ -147,14 +160,6 @@ function RSContainerPOI.GetMapAlreadyFoundContainerPOI(containerID, alreadyFound
 	end
 
 	local containerInfo = RSContainerDB.GetInternalContainerInfo(containerID)
-	local containerOpened = RSContainerDB.IsContainerOpened(containerID)
-
-	-- Skip if the entity has been seen before the max amount of time that the player want to see the icon on the map
-	-- This filter doesnt apply to opened entities or worldmap containers
-	if (not containerOpened and (containerInfo and not containerInfo.worldmap) and RSConfigDB.IsMaxSeenTimeContainerFilterEnabled() and time() - alreadyFoundInfo.foundTime > RSTimeUtils.MinutesToSeconds(RSConfigDB.GetMaxSeenContainerTimeFilter())) then
-		RSLogger:PrintDebugMessageEntityID(containerID, string.format("Saltado Contenedor [%s]: Visto hace demasiado tiempo.", containerID))
-		return
-	end
 
 	-- Skip if the entity belongs to a different map that the one displaying
 	-- First checks with the already found information

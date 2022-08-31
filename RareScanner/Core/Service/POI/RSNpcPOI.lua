@@ -17,6 +17,8 @@ local RSLogger = private.ImportLib("RareScannerLogger")
 local RSTimeUtils = private.ImportLib("RareScannerTimeUtils")
 local RSUtils = private.ImportLib("RareScannerUtils")
 
+-- RareScanner services
+local RSRecentlySeenTracker = private.ImportLib("RareScannerRecentlySeenTracker")
 
 ---============================================================================
 -- Not discovered entities
@@ -64,7 +66,6 @@ function RSNpcPOI.GetNpcPOI(npcID, mapID, npcInfo, alreadyFoundInfo)
 		POI.x, POI.y = RSNpcDB.GetInternalNpcCoordinates(npcID, mapID)
 	end
 	POI.foundTime = alreadyFoundInfo and alreadyFoundInfo.foundTime
-	POI.isDead = RSNpcDB.IsNpcKilled(npcID)
 	POI.isDiscovered = POI.isDead or alreadyFoundInfo ~= nil
 	POI.isFriendly = RSNpcDB.IsInternalNpcFriendly(npcID)
 	if (npcInfo) then
@@ -76,10 +77,14 @@ function RSNpcPOI.GetNpcPOI(npcID, mapID, npcInfo, alreadyFoundInfo)
 		POI.Texture = RSConstants.BLUE_NPC_TEXTURE
 	elseif (POI.isFriendly) then
 		POI.Texture = RSConstants.LIGHT_BLUE_NPC_TEXTURE
-	elseif (RSGeneralDB.IsRecentlySeen(npcID)) then
+	elseif (RSRecentlySeenTracker.IsRecentlySeen(npcID, POI.x, POI.y)) then
 		POI.Texture = RSConstants.PINK_NPC_TEXTURE
-	elseif (not POI.isDiscovered) then
+	elseif (not POI.isDiscovered and not POI.achievementLink) then
 		POI.Texture = RSConstants.RED_NPC_TEXTURE
+	elseif (not POI.isDiscovered and POI.achievementLink) then
+		POI.Texture = RSConstants.YELLOW_NPC_TEXTURE
+	elseif (POI.achievementLink) then
+		POI.Texture = RSConstants.GREEN_NPC_TEXTURE
 	else
 		POI.Texture = RSConstants.NORMAL_NPC_TEXTURE
 	end
@@ -89,6 +94,13 @@ end
 
 local function IsNpcPOIFiltered(npcID, mapID, artID, zoneQuestID, questTitles, onWorldMap, onMinimap)
 	local name = RSNpcDB.GetNpcName(npcID)
+	
+	-- Skip if part of a disabled event
+	if (RSNpcDB.IsDisabledEvent(npcID)) then
+		RSLogger:PrintDebugMessageEntityID(npcID, string.format("Saltado NPC [%s]: Parte de un evento desactivado.", npcID))
+		return true
+	end
+	
 	-- Skip if filtering by name in the world map search box
 	if (name and RSGeneralDB.GetWorldMapTextFilter() and not RSUtils.Contains(name, RSGeneralDB.GetWorldMapTextFilter())) then
 		RSLogger:PrintDebugMessageEntityID(npcID, string.format("Saltado NPC [%s]: Filtrado por nombre [%s][%s].", npcID, name, RSGeneralDB.GetWorldMapTextFilter()))
@@ -110,12 +122,10 @@ local function IsNpcPOIFiltered(npcID, mapID, artID, zoneQuestID, questTitles, o
 	-- Skip if the entity appears only while a quest event is going on and it isnt active
 	if (zoneQuestID) then
 		local active = false
-		if (RSUtils.Contains(C_QuestLog.GetActiveThreatMaps(), mapID)) then
-			for _, questID in ipairs(zoneQuestID) do
-				if (C_TaskQuest.IsActive(questID) or C_QuestLog.IsQuestFlaggedCompleted(questID)) then
-					active = true
-					break
-				end
+		for _, questID in ipairs(zoneQuestID) do
+			if (C_TaskQuest.IsActive(questID) or C_QuestLog.IsQuestFlaggedCompleted(questID)) then
+				active = true
+				break
 			end
 		end
 
@@ -137,22 +147,6 @@ local function IsNpcPOIFiltered(npcID, mapID, artID, zoneQuestID, questTitles, o
 	if (RSUtils.Contains(questTitles, npcName)) then
 		RSLogger:PrintDebugMessageEntityID(npcID, string.format("Saltado NPC [%s]: Tiene misión del mundo activa.", npcID))
 		return true
-	end
-
-	-- A 'not discovered' NPC will be setted as killed when the kill is detected while loading the addon and its questID is completed
-	local npcDead = RSNpcDB.IsNpcKilled(npcID)
-
-	-- Skip if dead 
-	if (npcDead) then
-		-- and not showing dead entities in 'not reseteable' maps
-		if (RSConfigDB.IsShowingDeadNpcsInReseteableZones() and not RSMapDB.IsReseteableKillMapID(mapID, artID)) then
-			RSLogger:PrintDebugMessageEntityID(npcID, string.format("Saltado NPC [%s]: Esta muerto (zona no reseteable).", npcID))
-			return true
-		--  and not showing dead entities
-		elseif (not RSConfigDB.IsShowingDeadNpcsInReseteableZones() and not RSConfigDB.IsShowingDeadNpcs()) then
-			RSLogger:PrintDebugMessageEntityID(npcID, string.format("Saltado NPC [%s]: Esta muerto.", npcID))
-			return true
-		end
 	end
 
 	return false
@@ -180,7 +174,7 @@ function RSNpcPOI.GetMapNotDiscoveredNpcPOIs(mapID, questTitles, onWorldMap, onM
 			RSLogger:PrintDebugMessageEntityID(npcID, string.format("Saltado NPC N/D [%s]: Era un NPC personalizado y ya no existe.", npcID))
 			filtered = true
 		end
-		
+
 		-- Skip if it was discovered in this session
 		if (not filtered and RSGeneralDB.GetAlreadyFoundEntity(npcID)) then
 			RemoveNotDiscoveredNpc(npcID)
@@ -196,8 +190,11 @@ function RSNpcPOI.GetMapNotDiscoveredNpcPOIs(mapID, questTitles, onWorldMap, onM
 		
 		-- Skip if it doesnt have coordinates. This could happend if it is a custom NPC
 		if (not filtered and (not npcInfo.x or not npcInfo.y)) then
-			RSLogger:PrintDebugMessageEntityID(npcID, string.format("Saltado NPC N/D [%s]: No disponía de coordenadas.", npcID))
-			filtered = true
+			local x, y = RSNpcDB.GetInternalNpcCoordinates(npcID, mapID)
+			if (not x or not y) then
+				RSLogger:PrintDebugMessageEntityID(npcID, string.format("Saltado NPC N/D [%s]: No disponía de coordenadas.", npcID))
+				filtered = true
+			end
 		end
 
 		-- Skip if common filters
@@ -217,14 +214,6 @@ function RSNpcPOI.GetMapAlreadyFoundNpcPOI(npcID, alreadyFoundInfo, mapID, quest
 	end
 
 	local npcInfo = RSNpcDB.GetInternalNpcInfo(npcID)
-	local npcDead = RSNpcDB.IsNpcKilled(npcID)
-
-	-- Skip if the entity has been seen before the max amount of time that the player want to see the icon on the map
-	-- This filter doesnt apply to dead entities or worldmap npcs
-	if (not npcDead and (npcInfo and not npcInfo.worldmap) and RSConfigDB.IsMaxSeenTimeFilterEnabled() and time() - alreadyFoundInfo.foundTime > RSTimeUtils.MinutesToSeconds(RSConfigDB.GetMaxSeenTimeFilter())) then
-		RSLogger:PrintDebugMessageEntityID(npcID, string.format("Saltado NPC [%s]: Visto hace demasiado tiempo.", npcID))
-		return
-	end
 
 	-- Skip if the entity belongs to a different map that the one displaying
 	-- First checks with the already found information

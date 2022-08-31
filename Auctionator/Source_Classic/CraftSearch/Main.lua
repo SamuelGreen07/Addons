@@ -41,9 +41,9 @@ function Auctionator.CraftSearch.GetCraftReagentsTotal()
     if link ~= nil then
       local unitPrice
 
-      local dbKey = Auctionator.Utilities.BasicDBKeyFromLink(link)
-      if AUCTIONATOR_VENDOR_PRICE_CACHE[dbKey] ~= nil then
-        unitPrice = AUCTIONATOR_VENDOR_PRICE_CACHE[dbKey]
+      local vendorPrice = Auctionator.API.v1.GetVendorPriceByItemLink(AUCTIONATOR_L_REAGENT_SEARCH, link)
+      if vendorPrice ~= nil then
+        unitPrice = vendorPrice
       else
         unitPrice = Auctionator.API.v1.GetAuctionPriceByItemLink(AUCTIONATOR_L_REAGENT_SEARCH, link)
       end
@@ -58,6 +58,6 @@ function Auctionator.CraftSearch.GetCraftReagentsTotal()
 end
 
 function Auctionator.CraftSearch.GetInfoText()
-  local price = WHITE_FONT_COLOR:WrapTextInColorCode(Auctionator.Utilities.CreateMoneyString(Auctionator.CraftSearch.GetCraftReagentsTotal()))
+  local price = WHITE_FONT_COLOR:WrapTextInColorCode(GetMoneyString(Auctionator.CraftSearch.GetCraftReagentsTotal(), true))
   return AUCTIONATOR_L_TO_CRAFT_COLON .. " " .. price
 end

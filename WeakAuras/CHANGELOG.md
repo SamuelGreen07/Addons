@@ -1,39 +1,20 @@
-# [4.0.2](https://github.com/WeakAuras/WeakAuras2/tree/4.0.2) (2022-06-01)
+# [4.1.2](https://github.com/WeakAuras/WeakAuras2/tree/4.1.2) (2022-08-29)
 
-[Full Changelog](https://github.com/WeakAuras/WeakAuras2/compare/4.0.1...4.0.2)
+[Full Changelog](https://github.com/WeakAuras/WeakAuras2/compare/4.1.1...4.1.2)
 
 ## Highlights
 
- - bug fixes 
+ - More Wrath fixes 
 
 ## Commits
 
-InfusOnWoW (4):
+asakawa (1):
 
-- Work around invalid geometry even harder
-- Tweak visibility handling again
-- Tweak Profiling output
-- Fix Time formatting flooring the seconds, instead of ceiling them
+- Add the LoC type NONE
 
-Jens N (1):
+mrbuds (3):
 
-- Fixed issue with "Array"-type options in aura groups
-
-Stanzilla (2):
-
-- Update TOC for Patch 9.2.5
-- CI: Speed up build times by using `plain-copy` for model path files
-
-mrbuds (10):
-
-- clean more unused variables
-- fix chat message_voice condition not displayed correctly in options
-- remove BackdropTemplateMixin workaround
-- bufftrigger2: rename local frame to Buff2Frame
-- cleanup unused variables and functions
-- CreateFrame: use same casing for frameType
-- replace deprecated function C_LegendaryCrafting.GetRuneforgePowersByClassAndSpec
-- none of the time formatters have 2 arguments
-- rename WeakAuras.lua "frame" to "WeakAurasFrame"
-- Fix assignement ambiguity
+- Fix error in talent lazy migration, when use_talent is true but talent.single is nil
+- Talent load condition skip testing talents not existing for player class
+- Aura trigger: fix options not available for current version of the game handled as if they were
 

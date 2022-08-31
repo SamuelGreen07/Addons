@@ -42,6 +42,18 @@
         </Anchors>
       </Frame>
 
+      <Button parentKey="LoadAllPagesButton" inherits="AuctionatorLoadAllButton" text="AUCTIONATOR_L_LOAD_HIGHER_PRICES">
+        <Anchors>
+          <Anchor point="BOTTOMLEFT" relativeKey="$parent.Inset"/>
+          <Anchor point="TOPRIGHT" relativeKey="$parent.Inset" relativePoint="BOTTOMRIGHT" y="20"/>
+        </Anchors>
+        <Scripts>
+          <OnClick>
+            self:GetParent():LoadAllPages()
+          </OnClick>
+        </Scripts>
+      </Button>
+
       <Button inherits="UIPanelDynamicResizeButtonTemplate" text="AUCTIONATOR_L_HISTORY" parentKey="HistoryButton">
         <Anchors>
           <Anchor point="TOP" relativeKey="$parent.SearchResultsListing" relativePoint="BOTTOM"/>

@@ -12,6 +12,7 @@ local RSGuideDB = private.ImportLib("RareScannerGuideDB")
 
 -- RareScanner service libraries
 local RSTooltip = private.ImportLib("RareScannerTooltip")
+local RSMinimap = private.ImportLib("RareScannerMinimap")
 
 -- RareScanner services
 local RSGuidePOI = private.ImportLib("RareScannerGuidePOI")
@@ -75,36 +76,32 @@ function RSGroupPinMixin:ShowOverlay(childPOI)
 	end
 
 	if (overlay) then
+		-- Checks if the overlay is already shown, in which case is already active in the minimap
+		local hasOverlayActive = RSGeneralDB.HasOverlayActive(childPOI.entityID);
+		
+		local r, g, b, replacedEntityID = RSGeneralDB.AddOverlayActive(childPOI.entityID)
+		
+		-- Cleans the replaced overlay
+		if (replacedEntityID) then
+			for pin in self:GetMap():EnumeratePinsByTemplate("RSOverlayTemplate") do
+				if (pin:GetEntityID() == replacedEntityID) then
+					self:GetMap():RemovePin(pin)
+				end
+			end
+			
+			-- Cleans the replaced overly in the minimap
+			RSMinimap.RemoveOverlay(replacedEntityID)
+		end
+		
+		-- Adds the new one
 		for _, coordinates in ipairs (overlay) do
 			local x, y = strsplit("-", coordinates)
-			self:GetMap():AcquirePin("RSOverlayTemplate", tonumber(x), tonumber(y), childPOI);
+			self:GetMap():AcquirePin("RSOverlayTemplate", tonumber(x), tonumber(y), r, g, b, childPOI);
 		end
-		RSGeneralDB.SetOverlayActive(childPOI.entityID)
-	else
-		RSGeneralDB.RemoveOverlayActive()
-	end
-end
-
-function RSGroupPinMixin:ShowGuide(childPOI)
-	-- Guide
-	local guide = nil
-	if (childPOI.isNpc) then
-		guide = RSGuideDB.GetNpcGuide(childPOI.entityID)
-	elseif (childPOI.isContainer) then
-		guide = RSGuideDB.GetContainerGuide(childPOI.entityID)
-	else
-		guide = RSGuideDB.GetEventGuide(childPOI.entityID)
-	end
-
-	if (guide) then
-		for pinType, info in pairs (guide) do
-			if (not info.questID or not C_QuestLog.IsQuestFlaggedCompleted(info.questID)) then
-				local POI = RSGuidePOI.GetGuidePOI(childPOI.entityID, pinType, info)
-				self:GetMap():AcquirePin("RSGuideTemplate", POI, self);
-			end
+		
+		-- Adds the new one to the minimap
+		if (not hasOverlayActive) then
+			RSMinimap.AddOverlay(childPOI.entityID)
 		end
-		RSGeneralDB.SetGuideActive(childPOI.entityID)
-	else
-		RSGeneralDB.RemoveGuideActive()
 	end
 end

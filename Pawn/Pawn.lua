@@ -7,10 +7,10 @@
 -- Main non-UI code
 ------------------------------------------------------------
 
-PawnVersion = 2.0538
+PawnVersion = 2.0600
 
 -- Pawn requires this version of VgerCore:
-local PawnVgerCoreVersionRequired = 1.13
+local PawnVgerCoreVersionRequired = 1.15
 
 -- Floating point math
 local PawnEpsilon = 0.0000000001
@@ -207,13 +207,13 @@ function PawnInitialize()
 		end)
 
 	-- Main game tooltip
-	if not VgerCore.IsShadowlands then
+	if not VgerCore.IsMainline then
 		-- SetAuctionItem was removed in 8.3.0 but is still there on Classic.  The (incorrect) way that BankItems hooks this function
 		-- causes the detection to fail, so just directly check the version.
 		hooksecurefunc(GameTooltip, "SetAuctionItem", function(self, ...) PawnUpdateTooltip("GameTooltip", "SetAuctionItem", ...) end)
 		hooksecurefunc(GameTooltip, "SetAuctionSellItem", function(self, ...) PawnUpdateTooltip("GameTooltip", "SetAuctionSellItem", ...) end)
 	end
-	if VgerCore.IsShadowlands then
+	if VgerCore.IsMainline then
 		hooksecurefunc(GameTooltip, "SetItemKey", function(self, ItemID, ItemLevel, Suffix, ...) PawnUpdateTooltip("GameTooltip", "SetItemKey", ItemID, ItemLevel, Suffix, ...) end)
 	end
 	hooksecurefunc(GameTooltip, "SetBagItem", function(self, ...) PawnUpdateTooltip("GameTooltip", "SetBagItem", ...) end)
@@ -265,6 +265,9 @@ function PawnInitialize()
 		end)
 	if GameTooltip.SetWeeklyReward then
 		hooksecurefunc(GameTooltip, "SetWeeklyReward", function(self, ...) PawnUpdateTooltip("GameTooltip", "SetWeeklyReward", ...) end)
+	end
+	if C_ItemInteraction and C_ItemInteraction.SetItemConversionOutputTooltip then
+		hooksecurefunc(C_ItemInteraction, "SetItemConversionOutputTooltip", function(self, ...) PawnUpdateTooltip("GameTooltip", "__ItemInteraction_SetItemConversionOutputTooltip_ignored", ...) end)
 	end
 	hooksecurefunc(GameTooltip, "Hide",
 		function(self, ...)
@@ -632,7 +635,7 @@ function PawnInitializeOptions()
 	end
 	if PawnCommon.LastVersion < 2.0101 then
 		-- The new Bag Upgrade Advisor is on by default, but it's not supported in Classic.
-		if VgerCore.IsShadowlands then
+		if VgerCore.IsMainline then
 			PawnCommon.ShowBagUpgradeAdvisor = true
 		else
 			PawnCommon.ShowBagUpgradeAdvisor = false
@@ -652,7 +655,7 @@ function PawnInitializeOptions()
 	end
 	if PawnCommon.LastVersion < 2.0244 then
 		-- The "show item level upgrades" option is new for 2.2.44 and on by default, but NOT in Classic.
-		if VgerCore.IsShadowlands then
+		if VgerCore.IsMainline then
 			PawnCommon.ShowItemLevelUpgrades = true
 		else
 			PawnCommon.ShowItemLevelUpgrades = false
@@ -674,8 +677,8 @@ function PawnInitializeOptions()
 		local FrostDK = PawnCommon.Scales["\"MrRobot\":DEATHKNIGHT2"]
 		if FrostDK then FrostDK.DoNotShow2HUpgrades = false end
 	end
-	if ((VgerCore.IsShadowlands) and PawnCommon.LastVersion < PawnMrRobotLastUpdatedVersion) or
-		((VgerCore.IsClassic or VgerCore.IsBurningCrusade) and PawnCommon.LastVersion < PawnClassicLastUpdatedVersion) then
+	if ((VgerCore.IsMainline) and PawnCommon.LastVersion < PawnMrRobotLastUpdatedVersion) or
+		((VgerCore.IsClassic or VgerCore.IsBurningCrusade or VgerCore.IsWrath) and PawnCommon.LastVersion < PawnClassicLastUpdatedVersion) then
 		-- If the Ask Mr. Robot scales have been updated since the last time they used Pawn, re-scan gear.
 		PawnInvalidateBestItems()
 	end
@@ -710,7 +713,7 @@ end
 -- Once per new version of Pawn that adds keybindings, bind the new actions to default keys.
 function PawnSetDefaultKeybindings()
 	-- SaveBindings doesn't work on WoW Classic.
-	if not VgerCore.IsShadowlands then return end
+	if not VgerCore.IsMainline then return end
 
 	-- It's possible that this will happen before the main initialization code, so we need to ensure that the
 	-- default Pawn options have been set already.  Doing this multiple times is harmless.
@@ -1133,7 +1136,7 @@ function PawnRecalculateScaleTotal(ScaleName)
 		ThisScaleBestGems.PrismaticSocketValue[ItemLevel] = BestPrismatic
 
 		-- Classic Era and the retail realms don't have colored sockets, so don't bother trying to calculate for those.
-		if not VgerCore.IsClassic and not VgerCore.IsShadowlands then
+		if not VgerCore.IsClassic and not VgerCore.IsMainline then
 			local BestRed
 			BestRed, ThisScaleBestGems.RedSocket[ItemLevel] = PawnFindBestGems(ScaleName, GemData, true, false, false)
 			ThisScaleBestGems.RedSocketValue[ItemLevel] = BestRed
@@ -1149,7 +1152,7 @@ function PawnRecalculateScaleTotal(ScaleName)
 	end
 
 	-- Now the meta gems.
-	if not VgerCore.IsClassic and not VgerCore.IsShadowlands then
+	if not VgerCore.IsClassic and not VgerCore.IsMainline then
 		for _, QualityLevelData in pairs(PawnMetaGemQualityLevels) do
 			local ItemLevel = QualityLevelData[1]
 			local GemData = QualityLevelData[2]
@@ -1243,13 +1246,13 @@ function PawnGetItemData(ItemLink)
 		return
 	end
 	if CachedItem and CachedItem.Values then
-		if VgerCore.IsShadowlands then
+		if VgerCore.IsMainline then
 			return CachedItem
 		end
 	end
 	-- If Item is non-null but Item.Values is null, we're not done yet!
 	local Item
-	if VgerCore.IsShadowlands then
+	if VgerCore.IsMainline then
 		Item = CachedItem
 	end
 	-- On Classic versions, we don't know for sure yet if our cached item is workable: it might have had incomplete data. We'll continue as if we didn't find anything in the
@@ -2620,7 +2623,7 @@ function PawnGetItemValue(Item, ItemLevel, SocketBonus, ScaleName, DebugMessages
 	local ThisValue, Stat, Quantity
 	for Stat, Quantity in pairs(Item) do
 		ThisValue = ScaleValues[Stat]
-		if VgerCore.IsShadowlands then
+		if VgerCore.IsMainline then
 			-- When not in Classic:
 			-- Attack Power gets converted into Strength or Agility, whichever is most valuable.
 			-- BUG: Since Attack Power doesn't appear in the Values tab, it also won't show on the Compare tab.  The Compare tab
@@ -3136,15 +3139,19 @@ function PawnCorrectScaleErrors(ScaleName)
 	ThisScale.IsRelic = nil
 	ThisScale.BonusArmor = nil
 	ThisScale.Multistrike = nil
-	ThisScale.SpellPower = nil
 
 	-- These were introduced in Classic versions.
-	if not (VgerCore.IsClassic or VgerCore.IsBurningCrusade) then
+	if not (VgerCore.IsClassic or VgerCore.IsBurningCrusade or VgerCore.IsWrath) then
 		ThisScale.SpellPenetration = nil
 	end
-	if not VgerCore.IsBurningCrusade then
+	if not (VgerCore.IsBurningCrusade or VgerCore.IsWrath) then
 		ThisScale.ExpertiseRating = nil
 		ThisScale.ResilienceRating = nil
+	end
+
+	-- Spell power appeared in Wrath but disappeared again later.
+	if not VgerCore.IsWrath then
+		ThisScale.SpellPower = nil
 	end
 
 	-- Pawn 1.9.7 makes it impossible to ignore primary stats, since they're on all armor now.
@@ -3162,6 +3169,15 @@ function PawnCorrectScaleErrors(ScaleName)
 
 	-- Patch 9.2 removed the effects of domination shards outside of the Maw.
 	ThisScale.DominationSocket = nil
+
+	-- Wrath Classic merges SpellDamage and Healing into SpellPower, and melee and spell ratings.
+	if VgerCore.IsWrath then
+		PawnCombineStats(ThisScale, "SpellPower", "SpellDamage")
+		PawnCombineStats(ThisScale, "SpellPower", "Healing")
+		PawnCombineStats(ThisScale, "HitRating", "SpellHitRating")
+		PawnCombineStats(ThisScale, "CritRating", "SpellCritRating")
+		PawnCombineStats(ThisScale, "HasteRating", "SpellHasteRating")
+	end
 end
 
 -- Replaces one incorrect stat with a correct stat.
@@ -4603,7 +4619,7 @@ function PawnIsPlayingWith(TargetName, TargetRealm)
 	if Test then
 		UnitID = "player"
 	else
-		if not VgerCore.IsShadowlands then return end
+		if not VgerCore.IsMainline then return end
 		if PawnCommon.HasPlayedWithVger then return end
 		local Show
 		Show, UnitID = PawnIsPlayingWith("Vger", "Azjol-Nerub")
@@ -5518,7 +5534,7 @@ function PawnAddPluginScaleFromTemplate(ProviderInternalName, ClassID, SpecID, S
 	end
 
 	local Template = PawnFindScaleTemplate(ClassID, SpecID)
-	if not Template then VgerCore.Fail("Can't add this plugin scale because the class" .. tostring(LocalizedClassName) .. " ID " .. tostring(ClassID) .. " and/or spec " .. tostring(LocalizedSpecName) .. " ID " .. tostring(SpecID) .. " wasn't found.") return end
+	if not Template then VgerCore.Fail("Can't add this plugin scale because the class " .. tostring(LocalizedClassName) .. " ID " .. tostring(ClassID) .. " and/or spec " .. tostring(LocalizedSpecName) .. " ID " .. tostring(SpecID) .. " wasn't found.") return end
 
 	-- Build up the values table.
 	local ScaleValues = PawnGetStatValuesForTemplate(Template)

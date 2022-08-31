@@ -34,6 +34,7 @@ function QuestieFramePool:SetIcons()
     ICON_TYPE_LOOT =  QuestieLib.AddonPath.."Icons\\loot.blp"
     ICON_TYPE_EVENT =  QuestieLib.AddonPath.."Icons\\event.blp"
     ICON_TYPE_OBJECT =  QuestieLib.AddonPath.."Icons\\object.blp"
+    ICON_TYPE_TALK = QuestieLib.AddonPath.."Icons\\chatbubblegossipicon.blp"
 
     -- TODO Add all types (we gotta stop using globals, needs refactoring)
     ICON_TYPE_AVAILABLE =  QuestieLib.AddonPath.."Icons\\available.blp"
@@ -198,13 +199,11 @@ function QuestieFramePool:CreateWaypoints(iconFrame, waypointTable, lineWidth, c
     for _, waypointSubTable in pairs(waypointTable) do
         lastPos = nil
         for _, waypoint in pairs(waypointSubTable) do
-            if (lastPos == nil) then
-                lastPos = waypoint;
-            else
+            if lastPos then
                 local lineFrame = QuestieFramePool:CreateLine(iconFrame, lastPos[1], lastPos[2], waypoint[1], waypoint[2], lWidth, col, areaId)
                 tinsert(lineFrameList, lineFrame);
-                lastPos = waypoint;
             end
+            lastPos = waypoint
         end
     end
     return lineFrameList;
@@ -251,7 +250,7 @@ function QuestieFramePool:CreateLine(iconFrame, startX, startY, endX, endY, line
     lineFrame.type = "line"
 
     --Include the line in the iconFrame.
-    if (iconFrame.data.lineFrames == nil) then
+    if not iconFrame.data.lineFrames then
         iconFrame.data.lineFrames = {};
     end
     tinsert(iconFrame.data.lineFrames, lineFrame);

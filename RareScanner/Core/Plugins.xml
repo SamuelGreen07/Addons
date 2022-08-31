@@ -2,6 +2,7 @@
 
 	<!-- Plugins -->
 	<Include file="Plugins\LootPlugin\RSLootTemplate.xml"/>
+	<!-- <Include file="Plugins\NavPlugin\RSNavigationTemplate.xml"/> -->
 	<Include file="Plugins\MapPlugin\RSEntityPinTemplate.xml"/>
 	<Include file="Plugins\MapPlugin\RSGroupPinTemplate.xml"/>
 	<Include file="Plugins\MapPlugin\RSOverlayTemplate.xml"/>

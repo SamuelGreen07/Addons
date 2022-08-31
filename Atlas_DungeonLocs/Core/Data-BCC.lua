@@ -1,4 +1,4 @@
--- $Id: Data-BCC.lua 83 2022-03-25 17:37:45Z arithmandar $
+-- $Id: Data-BCC.lua 102 2022-08-27 09:58:37Z arithmandar $
 --[[
 
 	Atlas, a World of Warcraft instance map browser
@@ -65,35 +65,35 @@ horde.coords = {}
 data.maps = {
 	DLEast_BCC = {
 		ZoneName = { BZ["Eastern Kingdoms"] },
-		{ BLUE.." A) "..BZ["Alterac Valley"]..ALC["Comma"].._RED..BZ["Hillsbrad Foothills"], 10001 },
-		{ BLUE.." B) "..BZ["Arathi Basin"]..ALC["Comma"].._RED..BZ["Arathi Highlands"], 10002 },
-		{ WHIT.." 1) "..BZ["Magisters' Terrace"]..ALC["Comma"].._RED..BZ["Isle of Quel'Danas"], 10003 },
-		{ WHIT..INDENT..BZ["Sunwell Plateau"]..ALC["Comma"].._RED..BZ["Isle of Quel'Danas"], 10004 },
-		{ WHIT.." 2) "..BZ["Zul'Aman"]..ALC["Comma"].._RED..BZ["Ghostlands"], 10005 },
-		{ WHIT.." 3) "..BZ["Scarlet Monastery"]..ALC["Comma"].._RED..BZ["Tirisfal Glades"], 10006 },
-		{ WHIT.." 4) "..BZ["Stratholme"]..ALC["Comma"].._RED..BZ["Eastern Plaguelands"], 10007 },
-		{ WHIT..INDENT..BZ["Naxxramas"]..ALC["Comma"].._RED..BZ["Stratholme"], 10008 },
-		{ WHIT.." 5) "..BZ["Scholomance"]..ALC["Comma"].._RED..BZ["Western Plaguelands"], 10009 },
-		{ WHIT.." 6) "..BZ["Shadowfang Keep"]..ALC["Comma"].._RED..BZ["Silverpine Forest"], 10010 },
-		{ WHIT.." 7) "..BZ["Gnomeregan"]..ALC["Comma"].._RED..BZ["Dun Morogh"], 10011 },
-		{ WHIT.." 8) "..BZ["Uldaman"]..ALC["Comma"].._RED..BZ["Badlands"], 10012 },
-		{ WHIT.." 7) "..BZ["Blackrock Mountain"]..ALC["Comma"].._RED..BZ["Searing Gorge"]..ALC["Slash"]..BZ["Burning Steppes"], 10013 },
-		{ WHIT..INDENT..BZ["Blackrock Depths"], 10014 },
-		{ WHIT..INDENT..BZ["Blackrock Spire"], 10015 },
-		{ WHIT..INDENT..BZ["The Molten Core"], 10016 },
-		{ WHIT..INDENT..BZ["Blackwing Lair"], 10017 },
-		{ WHIT.."10) "..BZ["The Stockade"]..ALC["Comma"].._RED..BZ["Stormwind City"], 10018 },
-		{ WHIT.."11) "..BZ["The Deadmines"]..ALC["Comma"].._RED..BZ["Westfall"], 10019 },
-		{ WHIT.."12) "..BZ["Zul'Gurub"]..ALC["Comma"].._RED..BZ["Northern Stranglethorn"], 10020 },
-		{ WHIT.."13) "..BZ["Sunken Temple"]..ALC["Comma"].._RED..BZ["Swamp of Sorrows"], 10021 },
-		{ WHIT.."14) "..BZ["Karazhan"]..ALC["Comma"].._RED..BZ["Deadwind Pass"], 10022 },
+		{ BLUE.." A) "..BZ["Alterac Valley"]..ALC["Comma"].._RED..BZ["Hillsbrad Foothills"], 20001 },
+		{ BLUE.." B) "..BZ["Arathi Basin"]..ALC["Comma"].._RED..BZ["Arathi Highlands"], 20002 },
+		{ WHIT.." 1) "..BZ["Magisters' Terrace"]..ALC["Comma"].._RED..BZ["Isle of Quel'Danas"], 10001 },
+		{ WHIT..INDENT..BZ["Sunwell Plateau"]..ALC["Comma"].._RED..BZ["Isle of Quel'Danas"] },
+		{ WHIT.." 2) "..BZ["Zul'Aman"]..ALC["Comma"].._RED..BZ["Ghostlands"], 10002 },
+		{ WHIT.." 3) "..BZ["Scarlet Monastery"]..ALC["Comma"].._RED..BZ["Tirisfal Glades"], 10003 },
+		{ WHIT.." 4) "..BZ["Stratholme"]..ALC["Comma"].._RED..BZ["Eastern Plaguelands"], 10004 },
+		{ WHIT..INDENT..BZ["Naxxramas"]..ALC["Comma"].._RED..BZ["Stratholme"] },
+		{ WHIT.." 5) "..BZ["Scholomance"]..ALC["Comma"].._RED..BZ["Western Plaguelands"], 10005 },
+		{ WHIT.." 6) "..BZ["Shadowfang Keep"]..ALC["Comma"].._RED..BZ["Silverpine Forest"], 10006 },
+		{ WHIT.." 7) "..BZ["Gnomeregan"]..ALC["Comma"].._RED..BZ["Dun Morogh"], 10007 },
+		{ WHIT.." 8) "..BZ["Uldaman"]..ALC["Comma"].._RED..BZ["Badlands"], 10008 },
+		{ WHIT.." 9) "..BZ["Blackrock Mountain"]..ALC["Comma"].._RED..BZ["Searing Gorge"]..ALC["Slash"]..BZ["Burning Steppes"], 10009 },
+		{ WHIT..INDENT..BZ["Blackrock Depths"] },
+		{ WHIT..INDENT..BZ["Blackrock Spire"] },
+		{ WHIT..INDENT..BZ["The Molten Core"] },
+		{ WHIT..INDENT..BZ["Blackwing Lair"] },
+		{ WHIT.."10) "..BZ["The Stockade"]..ALC["Comma"].._RED..BZ["Stormwind City"], 10010 },
+		{ WHIT.."11) "..BZ["The Deadmines"]..ALC["Comma"].._RED..BZ["Westfall"], 10011 },
+		{ WHIT.."12) "..BZ["Zul'Gurub"]..ALC["Comma"].._RED..BZ["Northern Stranglethorn"], 10012 },
+		{ WHIT.."13) "..BZ["Sunken Temple"]..ALC["Comma"].._RED..BZ["Swamp of Sorrows"], 10013 },
+		{ WHIT.."14) "..BZ["Karazhan"]..ALC["Comma"].._RED..BZ["Deadwind Pass"], 10014 },
 		{ "" },
 		{ BLUE..L["Blue"]..ALC["Colon"]..ORNG..BATTLEGROUNDS },
 		{ WHIT..L["White"]..ALC["Colon"]..ORNG..L["Instances"] },
 	},
 	DLWest_BCC = {
 		ZoneName = { BZ["Kalimdor"] },
-		{ BLUE.." A) "..BZ["Warsong Gulch"]..ALC["Comma"].._RED..BZ["Ashenvale"], 10000 },
+		{ BLUE.." A) "..BZ["Warsong Gulch"]..ALC["Comma"].._RED..BZ["Ashenvale"], 20001 },
 		{ WHIT.." 1) "..BZ["Blackfathom Deeps"]..ALC["Comma"].._RED..BZ["Ashenvale"], 10001 },
 		{ WHIT.." 2) "..BZ["Ragefire Chasm"]..ALC["Comma"].._RED..BZ["Orgrimmar"], 10002 },
 		{ WHIT.." 3) "..BZ["Wailing Caverns"]..ALC["Comma"].._RED..BZ["Northern Barrens"], 10003 },
@@ -105,10 +105,10 @@ data.maps = {
 		{ WHIT.." 9) "..BZ["Zul'Farrak"]..ALC["Comma"].._RED..BZ["Tanaris"], 10009 },
 		{ WHIT.."10) "..BZ["Temple of Ahn'Qiraj"]..ALC["Comma"].._RED..BZ["Silithus"], 10010 },
 		{ WHIT.."11) "..BZ["Ruins of Ahn'Qiraj"]..ALC["Comma"].._RED..BZ["Silithus"], 10011 },
-		{ WHIT.."10) "..BZ["Caverns of Time"]..", ".._RED..BZ["Tanaris"], 10012 };
-		{ WHIT..INDENT..BZ["Old Hillsbrad Foothills"], 10013 };
-		{ WHIT..INDENT..BZ["The Black Morass"], 10014 };
-		{ WHIT..INDENT..BZ["Hyjal Summit"], 10015 };
+		{ WHIT.."12) "..BZ["Caverns of Time"]..", ".._RED..BZ["Tanaris"], 10012 };
+		{ WHIT..INDENT..BZ["Old Hillsbrad Foothills"] };
+		{ WHIT..INDENT..BZ["The Black Morass"] };
+		{ WHIT..INDENT..BZ["Hyjal Summit"] };
 		{ "" },
 		{ BLUE..L["Blue"]..ALC["Colon"]..ORNG..BATTLEGROUNDS },
 		{ WHIT..L["White"]..ALC["Colon"]..ORNG..L["Instances"] },
@@ -141,4 +141,22 @@ data.maps = {
 }
 
 data.coords = {
+	DLEast_BCC = {
+		{ "A", 20001, 227, 201 },
+		{ "B", 20002, 268, 236 },
+		{ 1, 10001, 293, 33 },
+		{ 2, 10002, 308, 128 },
+		{ 3, 10003, 227, 159 },
+		{ 4, 10004, 278, 150 },
+		{ 5, 10005, 258, 186 },
+		{ 6, 10006, 184, 212 },
+		{ 7, 10007, 197, 303 },
+		{ 8, 10008, 274, 325 },
+		{ 9, 10009, 241, 350 },
+		{ 10, 10010, 195, 371 },
+		{ 11, 10011, 183, 417 },
+		{ 12, 10012, 239, 425 },
+		{ 13, 10013, 276, 400 },
+		{ 14, 10014, 256, 409 },
+	},
 }

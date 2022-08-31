@@ -55,12 +55,27 @@ function RSUtils.JoinTables(table1, table2)
 end
 
 function RSUtils.GetTableLength(table)
+	if (not table) then
+		return 0
+	end
+	
 	local getN = 0
 	for n in pairs(table) do 
     	getN = getN + 1 
 	end
 	
   	return getN
+end
+
+function RSUtils.CloneTable(src, dest)
+	for index, value in pairs(src) do
+		if (type(value) == "table") then
+			dest[index] = {}
+			RSUtils.CloneTable(value, dest[index])
+		else
+			dest[index] = value
+		end
+	end
 end
 
 ---============================================================================
@@ -105,14 +120,27 @@ function RSUtils.StartsWith(string, start)
 	return string.sub(string,1,string.len(start)) == start
 end
 
+function RSUtils.Lpad(s, l, c)
+	if (type(s) ~= "string") then
+		s = tostring(s)
+	end
+	
+	local res = string.rep(c or ' ', l - #s) .. s
+	return res, res ~= s
+end
+
 ---============================================================================
 -- Arithmetic utils
 ---============================================================================
 
-function RSUtils.Distance(POIa, POIb)
-	local dx = POIa.x - POIb.x
-	local dy = POIa.y - POIb.y
+function RSUtils.DistanceBetweenCoords(x1, x2, y1, y2)
+	local dx = RSUtils.FixCoord(x1) - RSUtils.FixCoord(x2)
+	local dy = RSUtils.FixCoord(y1) - RSUtils.FixCoord(y2)
 	return math.sqrt ( (dx * dx) + (dy * dy) )
+end
+
+function RSUtils.Distance(POIa, POIb)
+	return RSUtils.DistanceBetweenCoords(POIa.x, POIb.x, POIa.y, POIb.y)
 end
 
 ---
@@ -122,4 +150,16 @@ end
 ---
 function RSUtils.TextColor(text, color)
 	return string.format("|cff%s%s|r", color, text)
+end
+
+---============================================================================
+-- Adjust coordinates to the new format
+---============================================================================
+
+function RSUtils.FixCoord(coord)
+	if (tonumber(coord) <= 1) then
+		return tonumber(coord)
+	else
+		return tonumber("0."..coord);
+	end
 end

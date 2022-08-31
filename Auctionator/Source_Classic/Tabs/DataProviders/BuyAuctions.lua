@@ -66,9 +66,8 @@ function AuctionatorBuyAuctionsDataProviderMixin:SetUpEvents()
 end
 
 function AuctionatorBuyAuctionsDataProviderMixin:SetAuctions(entries)
-  self.allAuctions = Auctionator.Utilities.Slice(entries, 1, #entries)
-
-  self:PopulateAuctions()
+  self.allAuctions = {}
+  self:ImportAdditionalResults(entries)
 end
 
 function AuctionatorBuyAuctionsDataProviderMixin:SetQuery(itemLink)
@@ -90,6 +89,10 @@ end
 
 function AuctionatorBuyAuctionsDataProviderMixin:SetRequestAllResults(newValue)
   self.requestAllResults = newValue
+end
+
+function AuctionatorBuyAuctionsDataProviderMixin:GetRequestAllResults()
+  return self.requestAllResults
 end
 
 function AuctionatorBuyAuctionsDataProviderMixin:ReceiveEvent(eventName, eventData, ...)
@@ -129,7 +132,7 @@ function AuctionatorBuyAuctionsDataProviderMixin:ImportAdditionalResults(results
   for _, entry in ipairs(results) do
     local itemID = entry.info[Auctionator.Constants.AuctionItemInfo.ItemID]
     local itemString = Auctionator.Search.GetCleanItemLink(entry.itemLink)
-    if self.searchKey == itemString then
+    if self.searchKey == itemString and Auctionator.Utilities.ToUnitPrice(entry) ~= 0 then
       table.insert(self.allAuctions, entry)
     end
   end

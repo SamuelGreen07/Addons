@@ -1,4 +1,4 @@
-ˇ$Id: ChangeLog.txt 83 2022-03-25 17:37:45Z arithmandar $
+ˇ$Id: ChangeLog.txt 104 2022-08-28 08:37:29Z arithmandar $
 Atlas, a World of Warcraft instance map browser
 Copyright 2005 ~ 2010 - Dan Gilbert <dan.b.gilbertat gmail dot com>
 Copyright 2010 - Lothaer <lothayerat gmail dot com>, Atlas Team
@@ -7,6 +7,42 @@ Copyright 2011 ~ 2022 - Arith Hsu, Atlas Team <atlas.addon at gmail dot com>
 ==============
 = Change Log =
 ==============
+
+v1.51.07 (Aug. 28, 2022)
+------------------------
+- Maps revamped
+
+v1.51.06 (Aug. 22, 2022)
+------------------------
+- BCC / WOLTKC Caverns of Time number fixed
+
+v1.51.05 (Aug. 22, 2022)
+------------------------
+- BCC / WOLTKC Caverns of Time number fixed
+
+v1.51.04 (Aug. 22, 2022)
+------------------------
+- BCC / WOLTKC Blackrock Mountain number fixed
+- WOLTKC dungeon location update
+  - removed Naxxramas from Eastern Kingdoms
+  - added The Culling of Stratholme to Carvens of Time
+
+v1.51.03 (Aug. 20, 2022)
+------------------------
+- Fixed syntax error while in WOLTKC
+
+v1.51.02 (Aug. 17, 2022)
+------------------------
+- Toc update to support WoW 9.2.7
+
+v1.51.01 (Jul. 24, 2022)
+------------------------
+- Support WOLTKC
+
+v1.51.00 (Jul. 23, 2022)
+------------------------
+- Retail ToC update to support WoW 9.2.5
+- Classic ToC update to support WoW 1.14.3
 
 v1.50.04 (Mar. 26, 2022)
 ------------------------

@@ -1,4 +1,4 @@
-## Interface: 20504
+## Interface: 30400
 
 ## Title: BigWigs [|cffeda55fThe Sunwell|r]
 ## Title-deDE: BigWigs [|cffeda55fDer Sonnenbrunnen|r]
@@ -22,7 +22,7 @@
 ## Notes-ruRU: Модуль BigWigs Солнечного Колодца
 ## Notes-zhCN: BigWigs 太阳之井模块
 ## Notes-zhTW: BigWigs 太陽之井高地模組
-## Version: v41.1-classic
+## Version: v42.2-classic
 
 ## LoadOnDemand: 1
 ## Dependencies: BigWigs

@@ -28,11 +28,7 @@ function Auctionator.ReagentSearch.CacheVendorPrices()
           if dbKey ~= nil and price ~= 0 and numAvailable == -1 then
             local oldPrice = AUCTIONATOR_VENDOR_PRICE_CACHE[dbKey]
             local newPrice = price / stack
-            if oldPrice ~= nil then
-              AUCTIONATOR_VENDOR_PRICE_CACHE[dbKey] = math.min(oldPrice, newPrice)
-            else
-              AUCTIONATOR_VENDOR_PRICE_CACHE[dbKey] = newPrice
-            end
+            AUCTIONATOR_VENDOR_PRICE_CACHE[dbKey] = newPrice
           elseif dbKey ~= nil then
             AUCTIONATOR_VENDOR_PRICE_CACHE[dbKey] = nil
           end
@@ -49,15 +45,15 @@ function Auctionator.ReagentSearch.GetInfoText()
     local profit = Auctionator.ReagentSearch.GetAHProfit()
     local price
     if profit >= 0 then
-      price = WHITE_FONT_COLOR:WrapTextInColorCode(Auctionator.Utilities.CreateMoneyString(profit))
+      price = WHITE_FONT_COLOR:WrapTextInColorCode(GetMoneyString(profit, true))
     else
-      price = RED_FONT_COLOR:WrapTextInColorCode("-" .. Auctionator.Utilities.CreateMoneyString(-profit))
+      price = RED_FONT_COLOR:WrapTextInColorCode("-" .. GetMoneyString(-profit, true))
     end
 
     return AUCTIONATOR_L_PROFIT_COLON .. " " .. price
 
   else
-    local price = WHITE_FONT_COLOR:WrapTextInColorCode(Auctionator.Utilities.CreateMoneyString(Auctionator.ReagentSearch.GetSkillReagentsTotal()))
+    local price = WHITE_FONT_COLOR:WrapTextInColorCode(GetMoneyString(Auctionator.ReagentSearch.GetSkillReagentsTotal(), true))
 
     return AUCTIONATOR_L_TO_CRAFT_COLON .. " " .. price
   end

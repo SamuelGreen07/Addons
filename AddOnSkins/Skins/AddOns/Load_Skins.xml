@@ -85,7 +85,6 @@
 	<Script file="MinimalArchaeology.lua"/>
 	<Script file="ModelPique.lua"/>
 	<Script file="MogIt.lua"/>
-	<Script file="MoveAnything.lua"/>
 	<Script file="MRT.lua"/>
 	<Script file="MyRolePlay.lua"/>
 	<Script file="MythicKeystoneStatus.lua"/>
@@ -151,4 +150,5 @@
 	<Script file="xMerchant.lua"/>
 	<Script file="XPBarNone.lua"/>
 	<Script file="Zygor.lua"/>
+	<Script file="WIM.lua"/>
 </Ui>

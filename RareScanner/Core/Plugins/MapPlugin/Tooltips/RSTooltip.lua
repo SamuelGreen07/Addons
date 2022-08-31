@@ -16,7 +16,6 @@ local RSTooltip = private.NewLib("RareScannerTooltip")
 local RSNpcDB = private.ImportLib("RareScannerNpcDB")
 local RSContainerDB = private.ImportLib("RareScannerContainerDB")
 local RSGeneralDB = private.ImportLib("RareScannerGeneralDB")
-local RSEventDB = private.ImportLib("RareScannerEventDB")
 local RSConfigDB = private.ImportLib("RareScannerConfigDB")
 local RSGuideDB = private.ImportLib("RareScannerGuideDB")
 
@@ -27,8 +26,10 @@ local RSUtils = private.ImportLib("RareScannerUtils")
 local RSTimeUtils = private.ImportLib("RareScannerTimeUtils")
 
 -- RareScanner service libraries
+local RSLootTooltip = private.ImportLib("RareScannerLootTooltip")
 local RSNotes = private.ImportLib("RareScannerNotes")
 local RSLoot = private.ImportLib("RareScannerLoot")
+local RSLootTooltip = private.ImportLib("RareScannerLootTooltip")
 
 --=====================================================
 -- LibQtip provider for groups
@@ -94,25 +95,33 @@ ItemToolTip.shoppingTooltips = { ItemToolTipComp1, ItemToolTipComp2 }
 
 local function showItemToolTip(cell, args)
 	local itemID, itemLink, itemClassID, itemSubClassID = unpack(args)
-	ItemToolTip:SetScale(0.7 * RSConfigDB.GetWorldMapTooltipsScale())
-	ItemToolTip:SetOwner(cell:GetParent(), "ANCHOR_LEFT", -10)
+	ItemToolTip:SetScale(RSConfigDB.GetWorldMapLootAchievTooltipsScale())
+	if (RSConfigDB.GetWorldMapLootAchievTooltipPosition() == "ANCHOR_LEFT") then
+		ItemToolTip:SetOwner(cell:GetParent():GetParent():GetParent(), "ANCHOR_BOTTOMLEFT", 0, cell:GetParent():GetParent():GetParent():GetHeight())	
+	elseif (RSConfigDB.GetWorldMapLootAchievTooltipPosition() == "ANCHOR_RIGHT") then
+		ItemToolTip:SetOwner(cell:GetParent():GetParent():GetParent(), "ANCHOR_BOTTOMRIGHT", 0, cell:GetParent():GetParent():GetParent():GetHeight())	
+	elseif (RSConfigDB.GetWorldMapLootAchievTooltipPosition() == "ANCHOR_TOPLEFT") then
+		ItemToolTip:SetOwner(cell:GetParent():GetParent():GetParent(), "ANCHOR_LEFT")	
+	elseif (RSConfigDB.GetWorldMapLootAchievTooltipPosition() == "ANCHOR_TOPRIGHT") then
+		ItemToolTip:SetOwner(cell:GetParent():GetParent():GetParent(), "ANCHOR_RIGHT")	
+	else
+		ItemToolTip:SetOwner(cell:GetParent():GetParent():GetParent(), RSConfigDB.GetWorldMapLootAchievTooltipPosition())	
+	end
+
 	ItemToolTip:SetHyperlink(itemLink)
-		
-	if (RSConfigDB.IsShowingLootTooltipsCommands()) then
-		ItemToolTip:AddLine(string.format(AL["LOOT_TOGGLE_FILTER"], GetItemClassInfo(itemClassID), GetItemSubClassInfo(itemClassID, itemSubClassID)), 1,1,0)
-		ItemToolTip:AddLine(AL["LOOT_TOGGLE_INDIVIDUAL_FILTER"], 1,1,0)
-	end
+	ItemToolTip:SetFrameLevel(cell:GetParent():GetParent():GetParent():GetFrameLevel() + 100)
 	
-	if (RSConstants.DEBUG_MODE) then
-		ItemToolTip:AddLine(itemID, 1,1,0)
-	end
+	-- Adds extra information
+	RSLootTooltip.AddRareScannerInformation(ItemToolTip, itemLink, itemID, itemClassID, itemSubClassID)
 	ItemToolTip:Show()
 end
 
 local function showItemComparationTooltip(cell)
 	if (IsShiftKeyDown() and ItemToolTip:IsShown()) then
-		ItemToolTipComp1:SetScale(0.7 * RSConfigDB.GetWorldMapTooltipsScale())
-		ItemToolTipComp2:SetScale(0.7 * RSConfigDB.GetWorldMapTooltipsScale())
+		ItemToolTipComp1:SetScale(RSConfigDB.GetWorldMapLootAchievTooltipsScale())
+		ItemToolTipComp2:SetScale(RSConfigDB.GetWorldMapLootAchievTooltipsScale())
+		ItemToolTipComp1:SetFrameLevel(2100)
+		ItemToolTipComp2:SetFrameLevel(2100)
 		GameTooltip_OnTooltipSetShoppingItem(ItemToolTip)
 		GameTooltip_ShowCompareItem(ItemToolTip)
 		cell:SetPropagateKeyboardInput(false)
@@ -163,8 +172,8 @@ local function filterItem(cell, args)
 end
 
 local function showAchievementTooltip(cell, achievementLink)
-	ItemToolTip:SetScale(0.7 * RSConfigDB.GetWorldMapTooltipsScale())
-	ItemToolTip:SetOwner(cell:GetParent(), "ANCHOR_LEFT")
+	ItemToolTip:SetScale(RSConfigDB.GetWorldMapLootAchievTooltipsScale())
+	ItemToolTip:SetOwner(cell:GetParent():GetParent():GetParent(), "ANCHOR_LEFT")
 	ItemToolTip:SetHyperlink(achievementLink)
 	ItemToolTip:Show()
 end
@@ -308,11 +317,11 @@ local function AddGuideTooltip(tooltip, pin)
 	-- Guide
 	local guide = false
 	if (pin.POI.isNpc) then
-		guide = RSGuideDB.GetNpcGuide(pin.POI.entityID)
+		guide = RSGuideDB.GetNpcGuide(pin.POI.entityID, pin.POI.mapID)
 	elseif (pin.POI.isContainer) then
-		guide = RSGuideDB.GetContainerGuide(pin.POI.entityID)
+		guide = RSGuideDB.GetContainerGuide(pin.POI.entityID, pin.POI.mapID)
 	else
-		guide = RSGuideDB.GetEventGuide(pin.POI.entityID)
+		guide = RSGuideDB.GetEventGuide(pin.POI.entityID, pin.POI.mapID)
 	end
 
 	if (guide) then
@@ -410,29 +419,23 @@ function RSTooltip.ShowSimpleTooltip(pin, parentTooltip)
 
 	-- NPC name
 	local line = tooltip:AddLine()
-	tooltip:SetCell(line, 1, RSUtils.TextColor(pin.POI.name, "3399FF"), nil, "LEFT", 10)
+	if (pin.POI.name) then
+		tooltip:SetCell(line, 1, RSUtils.TextColor(pin.POI.name, "3399FF"), nil, "LEFT", 10)
+	else
+		tooltip:SetCell(line, 1, RSUtils.TextColor(UKNOWNBEING, "3399FF"), nil, "LEFT", 10)
+	end
 
 	-- Debug
 	if (RSConstants.DEBUG_MODE) then
 		line = tooltip:AddLine()
 		tooltip:SetCell(line, 1, RSUtils.TextColor(pin.POI.entityID, "FFFFCC"), nil, "LEFT", 10)
-		local hasQuestID = false
-		if (pin.POI.isNpc and RSNpcDB.GetNpcQuestIdFound(pin.POI.entityID) or (RSNpcDB.GetInternalNpcInfo(pin.POI.entityID) and RSNpcDB.GetInternalNpcInfo(pin.POI.entityID).questID)) then
-			hasQuestID = true
-		elseif (pin.POI.isContainer and RSContainerDB.GetContainerQuestIdFound(pin.POI.entityID) or (RSContainerDB.GetInternalContainerInfo(pin.POI.entityID) and RSContainerDB.GetInternalContainerInfo(pin.POI.entityID).questID)) then
-			hasQuestID = true
-		elseif (RSEventDB.GetEventQuestIdFound(pin.POI.entityID) or (RSEventDB.GetInternalEventInfo(pin.POI.entityID) and RSEventDB.GetInternalEventInfo(pin.POI.entityID).questID)) then
-			hasQuestID = true
-		end
-		
-		if (not hasQuestID) then
-			line = tooltip:AddLine()
-			tooltip:SetCell(line, 1, RSUtils.TextColor("No tiene QUESTID", "FF0000"), nil, "LEFT", 10)
-		end
 	end
 
 	-- Last time seen
 	AddLastTimeSeenTooltip(tooltip, pin)
+
+	-- Adds lines for special events
+	RSTooltip.AddSpecialEventsLines(pin, tooltip)
 
 	-- Notes
 	AddNotesTooltip(tooltip, pin)
