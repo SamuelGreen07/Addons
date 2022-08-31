@@ -29,7 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ]]
 local MAJOR_VERSION = "LibActionButton-1.0-ElvUI"
-local MINOR_VERSION = 28 -- the real minor version is 80
+local MINOR_VERSION = 29 -- the real minor version is 83
 
 if not LibStub then error(MAJOR_VERSION .. " requires LibStub.") end
 local lib, oldversion = LibStub:NewLibrary(MAJOR_VERSION, MINOR_VERSION)
@@ -40,8 +40,11 @@ local type, error, tostring, tonumber, assert, select = type, error, tostring, t
 local setmetatable, wipe, unpack, pairs, next = setmetatable, wipe, unpack, pairs, next
 local str_match, format, tinsert, tremove = string.match, format, tinsert, tremove
 
+local _, _, _, toc = GetBuildInfo()
+
 local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
-local WoWBCC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC)
+local WoWBCC = toc >= 20500 and toc < 30000 -- TODO: Wrath
+local WoWWrath = toc >= 30400 and toc < 40000 -- TODO: Wrath
 local WoWRetail = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
 
 local KeyBound = LibStub("LibKeyBound-1.0", true)
@@ -388,7 +391,6 @@ function Generic:NewHeader(header)
 	WrapOnClick(self)
 end
 
-
 -----------------------------------------------------------
 --- state management
 
@@ -685,7 +687,7 @@ function InitializeEventHandler()
 	lib.eventFrame:RegisterEvent("PET_BAR_HIDEGRID")
 	lib.eventFrame:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
 	lib.eventFrame:RegisterEvent("UPDATE_BINDINGS")
-	lib.eventFrame:RegisterEvent("UPDATE_SHAPESHIFT_FORMS")
+	lib.eventFrame:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
 	lib.eventFrame:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
 
 	lib.eventFrame:RegisterEvent("ACTIONBAR_UPDATE_STATE")
@@ -707,15 +709,18 @@ function InitializeEventHandler()
 	lib.eventFrame:RegisterEvent("SPELL_UPDATE_CHARGES")
 	lib.eventFrame:RegisterEvent("SPELL_UPDATE_ICON")
 
-	if not WoWClassic and not WoWBCC then
-		lib.eventFrame:RegisterEvent("UPDATE_VEHICLE_ACTIONBAR")
+	if WoWRetail then
 		lib.eventFrame:RegisterEvent("ARCHAEOLOGY_CLOSED")
-		lib.eventFrame:RegisterEvent("UNIT_ENTERED_VEHICLE")
-		lib.eventFrame:RegisterEvent("UNIT_EXITED_VEHICLE")
 		lib.eventFrame:RegisterEvent("COMPANION_UPDATE")
 		lib.eventFrame:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW")
 		lib.eventFrame:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE")
 		lib.eventFrame:RegisterEvent("UPDATE_SUMMONPETS_ACTION")
+	end
+
+	if WoWRetail or WoWWrath then
+		lib.eventFrame:RegisterEvent("UPDATE_VEHICLE_ACTIONBAR")
+		lib.eventFrame:RegisterEvent("UNIT_ENTERED_VEHICLE")
+		lib.eventFrame:RegisterEvent("UNIT_EXITED_VEHICLE")
 	end
 
 	-- With those two, do we still need the ACTIONBAR equivalents of them?
@@ -730,6 +735,7 @@ function InitializeEventHandler()
 	lib.eventFrame:SetScript("OnUpdate", OnUpdate)
 end
 
+local _lastFormUpdate = GetTime()
 function OnEvent(frame, event, arg1, ...)
 	if (event == "UNIT_INVENTORY_CHANGED" and arg1 == "player") or event == "LEARNED_SPELL_IN_TAB" then
 		local tooltipOwner = GameTooltip_GetOwnerForbidden()
@@ -743,8 +749,24 @@ function OnEvent(frame, event, arg1, ...)
 				Update(button)
 			end
 		end
-	elseif event == "PLAYER_ENTERING_WORLD" or event == "UPDATE_SHAPESHIFT_FORMS" or event == "UPDATE_VEHICLE_ACTIONBAR" then
+	elseif event == "PLAYER_ENTERING_WORLD" or event == "UPDATE_VEHICLE_ACTIONBAR" then
 		ForAllButtons(Update)
+	elseif event == "UPDATE_SHAPESHIFT_FORM" then
+		-- XXX: throttle these updates since Blizzard broke the event and its now extremely spammy in some clients
+		local _time = GetTime()
+		if (_time - _lastFormUpdate) < 1 then
+			return
+		end
+		_lastFormUpdate = _time
+
+		-- the attack icon can change when shapeshift form changes, so need to do a quick update here
+		-- for performance reasons don't run full updates here, though
+		for button in next, ButtonRegistry do
+			local texture = button:GetTexture()
+			if texture then
+				button.icon:SetTexture(texture)
+			end
+		end
 	elseif event == "ACTIONBAR_SHOWGRID" or event == "PET_BAR_SHOWGRID" then
 		ShowGrid(event)
 	elseif event == "ACTIONBAR_HIDEGRID" or event == "PET_BAR_HIDEGRID" then
@@ -1207,7 +1229,7 @@ end
 
 function UpdateUsable(self)
 	local isLevelLinkLocked
-	if not WoWClassic and not WoWBCC and self._state_type == "action" then
+	if WoWRetail and self._state_type == "action" then
 		isLevelLinkLocked = C_LevelLink.IsActionLocked(self._state_action)
 		if not self.icon:IsDesaturated() then
 			self.icon:SetDesaturated(isLevelLinkLocked)
@@ -1731,7 +1753,7 @@ Custom.GetSpellId              = function(self) return nil end
 Custom.RunCustom               = function(self, unit, button) return self._state_action.func(self, unit, button) end
 
 --- WoW Classic overrides
-if WoWClassic or WoWBCC then
+if not WoWRetail then
 	UpdateOverlayGlow = function() end
 end
 

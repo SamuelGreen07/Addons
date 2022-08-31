@@ -19,9 +19,7 @@ local microBar = CreateFrame('Frame', 'ElvUI_MicroBar', E.UIParent)
 microBar:SetSize(100, 100)
 
 local function onLeaveBar()
-	if AB.db.microbar.mouseover then
-		E:UIFrameFadeOut(microBar, 0.2, microBar:GetAlpha(), 0)
-	end
+	return AB.db.microbar.mouseover and E:UIFrameFadeOut(microBar, 0.2, microBar:GetAlpha(), 0)
 end
 
 local watcher = 0
@@ -248,6 +246,11 @@ function AB:SetupMicroBar()
 	-- With this method we might don't taint anything. Instead of using :Kill()
 	_G.MainMenuBarPerformanceBar:SetAlpha(0)
 	_G.MainMenuBarPerformanceBar:SetScale(0.00001)
+
+	if E.Wrath then
+		_G.PVPMicroButtonTexture:ClearAllPoints()
+		_G.PVPMicroButtonTexture:Point('TOP', _G.PVPMicroButton, 'TOP', 6, -1)
+	end
 
 	E:CreateMover(microBar, 'MicrobarMover', L["Micro Bar"], nil, nil, nil, 'ALL,ACTIONBARS', nil, 'actionbar,microbar')
 end

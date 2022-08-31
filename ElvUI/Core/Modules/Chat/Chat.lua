@@ -314,25 +314,23 @@ do --this can save some main file locals
 	if E.Classic then
 		-- Simpy
 		z['Simpy-Myzrael']			= itsSimpy -- Warlock
-		-- Luckyone Classic Era
-		z['Luckyone-Shazzrah']		= ElvGreen -- Hunter
-		z['Luckydruid-Shazzrah']	= ElvGreen -- Druid
 		-- Luckyone Season of Mastery
 		z['Luckyone-Dreadnaught']	= ElvGreen -- Hunter
-	elseif E.TBC then
+	elseif E.Wrath then
 		-- Simpy
 		z['Cutepally-Myzrael']		= itsSimpy -- Paladin
 		-- Luckyone
-		z['Luckyone-Shazzrah']		= ElvBlue -- Hunter 1
-		z['Luckyfear-Shazzrah']		= ElvBlue -- Warlock
-		z['Luckydruid-Shazzrah']	= ElvBlue -- Druid
-		z['Luckypriest-Shazzrah']	= ElvBlue -- Priest
-		z['Luckyshaman-Shazzrah']	= ElvBlue -- Shaman
-		z['Luckyone-Gehennas']		= ElvBlue -- Hunter 2
+		z['Luckyone-Gehennas']		= ElvBlue -- Hunter
 		z['Luckydruid-Gehennas']	= ElvBlue -- Druid
 		z['Luckypriest-Gehennas']	= ElvBlue -- Priest
 		z['Luckyshaman-Gehennas']	= ElvBlue -- Shaman
-		z['Luckyhunter-Gehennas']	= ElvBlue -- Hunter 3
+		z['Luckyhunter-Gehennas']	= ElvBlue -- Hunter
+		z['Luckyd-Golemagg']		= ElvBlue -- Druid
+		z['Luckyp-Golemagg']		= ElvBlue -- Priest
+		z['Luckysh-Golemagg']		= ElvBlue -- Shaman
+		z['Unluckyone-Golemagg']	= ElvBlue -- Hunter
+		z['Luckyone-Giantstalker']	= ElvBlue -- Druid
+		z['Luckyone-Thekal']		= ElvBlue -- Druid
 	elseif E.Retail then
 		-- Elv
 		z['Elv-Spirestone']			= itsElv
@@ -361,7 +359,7 @@ do --this can save some main file locals
 		z['Merathilîs-Shattrath']	= ElvBlue	-- [Alliance] Shaman
 		z['Róhal-Shattrath']		= ElvGreen	-- [Alliance] Hunter
 		-- Luckyone
-		z['Luckyone-LaughingSkull']		= ElvBlue -- Druid
+		z['Luckyone-LaughingSkull']		= ElvBlue -- Druid H
 		z['Luckypriest-LaughingSkull']	= ElvBlue -- Priest
 		z['Luckymonkas-LaughingSkull']	= ElvBlue -- Monk
 		z['Luckydk-LaughingSkull']		= ElvBlue -- DK
@@ -373,6 +371,7 @@ do --this can save some main file locals
 		z['Luckywl-LaughingSkull']		= ElvBlue -- Warlock
 		z['Luckyrogue-LaughingSkull']	= ElvBlue -- Rogue
 		z['Luckypala-LaughingSkull']	= ElvBlue -- Paladin
+		z['Luckydruid-LaughingSkull']	= ElvBlue -- Druid A
 		-- Simpy
 		z['Arieva-Cenarius']			= itsSimpy -- Hunter
 		z['Buddercup-Cenarius']			= itsSimpy -- Rogue
@@ -440,12 +439,10 @@ do --this can save some main file locals
 		z['Teepac-Area52']		= TyroneBiggums
 		z['Teekettle-Area52']	= TyroneBiggums
 		-- Mis (NOTE: I will forever have the picture you accidently shared of the manikin wearing a strapon burned in my brain)
+		z['Twunkie-Area52']			= itsMis
+		z['Misoracle-Area52']		= itsMis
+		z['Mismayhem-Area52']		= itsMis
 		z['Misdîrect-Spirestone']	= itsMis
-		z['Misoracle-Spirestone']	= itsMis
-		z['MisLight-Spirestone']	= itsMis
-		z['MisDivine-Spirestone']	= itsMis
-		z['MisMayhem-Spirestone']	= itsMis
-		z['Mismonk-Spirestone']		= itsMis
 		z['Misillidan-Spirestone']	= itsMis
 		z['Mispel-Spirestone']		= itsMis
 		z['Misdecay-Spirestone']	= itsMis
@@ -817,20 +814,21 @@ function CH:StyleChat(frame)
 	editbox:SetAltArrowKeyMode(CH.db.useAltKey)
 	editbox:SetAllPoints(_G.LeftChatDataPanel)
 	editbox:HookScript('OnTextChanged', CH.EditBoxOnTextChanged)
-	CH:SecureHook(editbox, 'AddHistoryLine', 'ChatEdit_AddHistory')
+	editbox:HookScript('OnEditFocusGained', CH.EditBoxFocusGained)
+	editbox:HookScript('OnEditFocusLost', CH.EditBoxFocusLost)
+	editbox:HookScript('OnKeyDown', CH.EditBoxOnKeyDown)
+	editbox:Hide()
 
 	--Work around broken SetAltArrowKeyMode API
 	editbox.historyLines = ElvCharacterDB.ChatEditHistory
 	editbox.historyIndex = 0
-	editbox:HookScript('OnKeyDown', CH.EditBoxOnKeyDown)
-	editbox:Hide()
 
-	editbox:HookScript('OnEditFocusGained', CH.EditBoxFocusGained)
-	editbox:HookScript('OnEditFocusLost', CH.EditBoxFocusLost)
+	--[[ Don't need to do this since SetAltArrowKeyMode is broken, keep before AddHistory hook
+	for _, text in ipairs(editbox.historyLines) do
+			editbox:AddHistoryLine(text)
+	end]]
 
-	for _, text in pairs(editbox.historyLines) do
-		editbox:AddHistoryLine(text)
-	end
+	CH:SecureHook(editbox, 'AddHistoryLine', 'ChatEdit_AddHistory')
 
 	--copy chat button
 	local copyButton = CreateFrame('Frame', format('ElvUI_CopyChatButton%d', id), frame)
@@ -949,7 +947,7 @@ end
 function CH:CopyChat(frame)
 	if not _G.CopyChatFrame:IsShown() then
 		local _, fontSize = _G.FCF_GetChatWindowInfo(frame:GetID())
-		if fontSize < 10 then fontSize = 12 end
+
 		_G.FCF_SetChatWindowFontSize(frame, frame, 0.01)
 		_G.CopyChatFrame:Show()
 		local lineCt = CH:GetLines(frame)
@@ -2020,7 +2018,7 @@ function CH:ChatFrame_MessageEventHandler(frame, event, arg1, arg2, arg3, arg4, 
 				showLink = nil
 
 				-- fix blizzard formatting errors from localization strings
-				arg1 = gsub(arg1, '%%%d', '%%s') -- replace %1 to %s (russian client specific?) [broken since BFA?]
+				-- arg1 = gsub(arg1, '%%%d', '%%s') -- replace %1 to %s (russian client specific?) [broken since BFA?]
 				arg1 = gsub(arg1, '(%d%%)([^%%%a])', '%1%%%2') -- escape percentages that need it [broken since SL?]
 				arg1 = gsub(arg1, '(%d%%)$', '%1%%') -- escape percentages on the end
 			else
@@ -2531,7 +2529,7 @@ function CH:UpdateChatKeywords()
 
 	for stringValue in gmatch(keywords, '[^,]+') do
 		if stringValue ~= '' then
-			CH.Keywords[stringValue] = true
+			CH.Keywords[stringValue == "%MYNAME%" and E.myname or stringValue] = true
 		end
 	end
 end

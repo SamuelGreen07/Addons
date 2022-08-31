@@ -27,7 +27,7 @@ local GetBindingKey = GetBindingKey
 local SetBinding = SetBinding
 local SaveBindings = SaveBindings
 local GetCurrentBindingSet = GetCurrentBindingSet
-local GetSpecialization = not E.Retail and LCS.GetSpecialization or GetSpecialization
+local GetSpecialization = (E.Classic or E.TBC and LCS.GetSpecialization) or GetSpecialization
 
 local ERR_NOT_IN_COMBAT = ERR_NOT_IN_COMBAT
 local LE_PARTY_CATEGORY_HOME = LE_PARTY_CATEGORY_HOME
@@ -64,8 +64,7 @@ E.myLocalizedRace, E.myrace = UnitRace('player')
 E.myname = UnitName('player')
 E.myrealm = GetRealmName()
 E.mynameRealm = format('%s - %s', E.myname, E.myrealm) -- contains spaces/dashes in realm (for profile keys)
-E.myspec = GetSpecialization()
-E.wowpatch, E.wowbuild, E.wowdate, E.wowtoc = GetBuildInfo()
+E.myspec = E.Retail and GetSpecialization()
 E.wowbuild = tonumber(E.wowbuild)
 E.physicalWidth, E.physicalHeight = GetPhysicalScreenSize()
 E.screenWidth, E.screenHeight = GetScreenWidth(), GetScreenHeight()
@@ -288,17 +287,22 @@ function E:GetColorTable(data)
 	end
 end
 
-function E:UpdateMedia()
-	if not E.db.general or not E.private.general then return end --Prevent rare nil value errors
+function E:UpdateMedia(mediaType)
+	if not E.db.general or not E.private.general then return end
 
-	-- Fonts
 	E.media.normFont = LSM:Fetch('font', E.db.general.font)
 	E.media.combatFont = LSM:Fetch('font', E.private.general.dmgfont)
-
-	-- Textures
 	E.media.blankTex = LSM:Fetch('background', 'ElvUI Blank')
 	E.media.normTex = LSM:Fetch('statusbar', E.private.general.normTex)
 	E.media.glossTex = LSM:Fetch('statusbar', E.private.general.glossTex)
+
+	if mediaType then -- callback from SharedMedia: LSM.Register
+		if mediaType == 'font' then
+			E:UpdateBlizzardFonts()
+		end
+
+		return
+	end
 
 	-- Colors
 	E.media.bordercolor = E:SetColorTable(E.media.bordercolor, E:UpdateClassColor(E.db.general.bordercolor))
@@ -379,13 +383,6 @@ function E:GeneralMedia_ApplyToAll()
 	E.db.unitframe.units.raid40.rdebuffs.font = font
 
 	E:StaggeredUpdateAll()
-end
-
-do	--Update font/texture paths when they are registered by the addon providing them
-	--This helps fix most of the issues with fonts or textures reverting to default because the addon providing them is loading after ElvUI.
-	--We use a wrapper to avoid errors in :UpdateMedia because 'self' is passed to the function with a value other than ElvUI.
-	local function LSMCallback() E:UpdateMedia() end
-	LSM.RegisterCallback(E, 'LibSharedMedia_Registered', LSMCallback)
 end
 
 function E:ValueFuncCall()
@@ -1337,6 +1334,14 @@ function E:DBConvertSL()
 			E.global.unitframe.aurafilters[name].type = infoTable.type
 		end
 	end
+
+	-- rune convert
+	for _, data in ipairs({E.db.unitframe.colors.classResources.DEATHKNIGHT, E.db.nameplates.colors.classResources.DEATHKNIGHT}) do
+		if data.r or data.g or data.b then
+			data[0].r, data[0].g, data[0].b = data.r, data.g, data.b
+			data.r, data.g, data.b = nil, nil, nil
+		end
+	end
 end
 
 function E:UpdateDB()
@@ -1407,6 +1412,10 @@ function E:UpdateActionBars(skipCallback)
 
 	if E.Retail then
 		ActionBars:UpdateExtraButtons()
+	end
+
+	if E.Wrath and E.myclass == 'SHAMAN' then
+		ActionBars:UpdateTotemBindings()
 	end
 
 	if not skipCallback then
@@ -1486,6 +1495,8 @@ function E:UpdateMisc(skipCallback)
 	if E.Retail then
 		Blizzard:SetObjectiveFrameHeight()
 		Totems:PositionAndSize()
+	elseif E.Wrath then
+		ActionBars:PositionAndSizeTotemBar()
 	elseif E.TBC then
 		Totems:PositionAndSize()
 	end
@@ -1910,8 +1921,11 @@ function E:Initialize()
 	E:Contruct_StaticPopups()
 
 	if E.Retail then
-		E.Libs.DualSpec:EnhanceDatabase(E.data, 'ElvUI')
 		E:Tutorials()
+	end
+
+	if E.Retail or E.Wrath then
+		E.Libs.DualSpec:EnhanceDatabase(E.data, 'ElvUI')
 	end
 
 	E.initialized = true

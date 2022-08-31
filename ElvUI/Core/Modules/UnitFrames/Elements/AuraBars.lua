@@ -3,6 +3,7 @@ local UF = E:GetModule('UnitFrames')
 local LSM = E.Libs.LSM
 
 local _G = _G
+local wipe = wipe
 local ipairs = ipairs
 local unpack = unpack
 local strfind = strfind
@@ -43,6 +44,12 @@ end
 function UF:AuraBars_UpdateBar(bar)
 	local bars = bar:GetParent()
 	bar.db = bars.db
+
+	if bar.auraInfo then
+		wipe(bar.auraInfo)
+	else
+		bar.auraInfo = {}
+	end
 
 	bar:SetReverseFill(bars.reverseFill)
 	bar.spark:ClearAllPoints()
@@ -167,7 +174,7 @@ function UF:Configure_AuraBars(frame)
 		local p2 = detached and p1 or (buffs or debuffs) and attachTo.anchorPoint or 'TOPLEFT'
 		if p2 == 'TOP' or p2 == 'BOTTOM' then
 			bars.initialAnchor = 'BOTTOM'
-			bars:Point(p2, attachTo, p2, (bars.height / 2) + -(detached and px or UF.BORDER), yOffset)
+			bars:Point(p2, attachTo, p2, (bars.height * 0.5) + -(detached and px or UF.BORDER), yOffset)
 		else
 			local right = strfind(p2, 'RIGHT')
 			local p3, p4 = below and 'TOP' or 'BOTTOM', right and 'RIGHT' or 'LEFT'

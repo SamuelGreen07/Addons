@@ -26,19 +26,17 @@ local NUM_LE_BAG_FILTER_FLAGS = NUM_LE_BAG_FILTER_FLAGS
 local commandNames = {
 	[-1] = 'TOGGLEBACKPACK',
 	[0] = 'TOGGLEBAG4',
-	'TOGGLEBAG3', -- 1
-	'TOGGLEBAG2', -- 2
-	'TOGGLEBAG1'  -- 3
+	'TOGGLEBAG3',	-- 1
+	'TOGGLEBAG2',	-- 2
+	'TOGGLEBAG1'	-- 3
 }
 
 function B:BagBar_OnEnter()
-	if not E.db.bags.bagBar.mouseover then return end
-	E:UIFrameFadeIn(B.BagBar, 0.2, B.BagBar:GetAlpha(), 1)
+	return E.db.bags.bagBar.mouseover and E:UIFrameFadeIn(B.BagBar, 0.2, B.BagBar:GetAlpha(), 1)
 end
 
 function B:BagBar_OnLeave()
-	if not E.db.bags.bagBar.mouseover then return end
-	E:UIFrameFadeOut(B.BagBar, 0.2, B.BagBar:GetAlpha(), 0)
+	return E.db.bags.bagBar.mouseover and E:UIFrameFadeOut(B.BagBar, 0.2, B.BagBar:GetAlpha(), 0)
 end
 
 function B:BagButton_OnEnter()
@@ -111,7 +109,7 @@ function B:SizeAndPositionBagBar()
 	local firstButton, lastButton
 	for i, button in ipairs(B.BagBar.buttons) do
 		if E.Retail then
-			button.filterIcon.FilterBackdrop:Size(bagBarSize / 2)
+			button.filterIcon.FilterBackdrop:Size(bagBarSize * 0.5)
 		end
 
 		button:Size(bagBarSize)
