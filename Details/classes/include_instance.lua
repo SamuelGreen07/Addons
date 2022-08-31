@@ -422,7 +422,8 @@ _detalhes.instance_defaults = {
 			texcoord = {0, 1, 0, 1},
 			width = 0,
 			height = 0,
-			overlay = {1, 1, 1, 1}
+			overlay = {1, 1, 1, 1},
+			level = 2,
 		},
 	--tooltip amounts
 	tooltip = {

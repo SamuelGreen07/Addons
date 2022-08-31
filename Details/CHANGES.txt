@@ -1,0 +1,10 @@
+tag c0a2c848d65b0b1943803e18282e70cb424e25fc DetailsRetail.v9.2.7.10015.146
+Author:	Tercio Jose <terciob19@hotmail.com>
+Date:	Wed Aug 31 12:18:20 2022 -0300
+
+commit 09845aa96d9895aeda2c6c330d60934cf637dcd6
+Author: Tercio Jose <terciob19@hotmail.com>
+Date:   Wed Aug 31 12:17:58 2022 -0300
+
+    BCC cleanups and /slash reporting retail build counter
+
