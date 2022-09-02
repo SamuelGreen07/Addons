@@ -6,7 +6,7 @@ local previousItemID = -1
 local itemIcons = ""
 local iconSize
 
-local ITEM_VENDOR_FLAG = ItemProfConstants.VENDOR_ITEM_FLAG
+--local ITEM_VENDOR_FLAG = ItemProfConstants.VENDOR_ITEM_FLAG
 local ITEM_DMF_FLAG = ItemProfConstants.DMF_ITEM_FLAG
 local ITEM_PROF_FLAGS = ItemProfConstants.ITEM_PROF_FLAGS
 local QUEST_FLAG = ItemProfConstants.QUEST_FLAG
@@ -17,7 +17,7 @@ local showProfs
 local showQuests
 local profFilter
 local questFilter
-local includeVendor
+--local includeVendor
 local showDMF
 
 ItemProfConstants.configTooltipIconsRealm = GetRealmName()
@@ -27,7 +27,7 @@ ItemProfConstants.configTooltipIconsChar = UnitName( "player" )
 
 local function CreateItemIcons( itemFlags )
 
-	
+--[[
 	if not includeVendor then
 		-- Return if the item has the vendor flag
 		local isVendor = bit.band( itemFlags, ITEM_VENDOR_FLAG )
@@ -35,7 +35,7 @@ local function CreateItemIcons( itemFlags )
 			return nil
 		end
 	end
-	
+--]]	
 	
 	local t = {}
 	
@@ -143,7 +143,7 @@ function ItemProfConstants:ConfigChanged()
 	showQuests = ItemTooltipIconsConfig[ ItemProfConstants.configTooltipIconsRealm ][ ItemProfConstants.configTooltipIconsChar ].showQuests
 	profFilter = ItemTooltipIconsConfig[ ItemProfConstants.configTooltipIconsRealm ][ ItemProfConstants.configTooltipIconsChar ].profFlags
 	questFilter = ItemTooltipIconsConfig[ ItemProfConstants.configTooltipIconsRealm ][ ItemProfConstants.configTooltipIconsChar ].questFlags
-	includeVendor = ItemTooltipIconsConfig[ ItemProfConstants.configTooltipIconsRealm ][ ItemProfConstants.configTooltipIconsChar ].includeVendor
+	--includeVendor = ItemTooltipIconsConfig[ ItemProfConstants.configTooltipIconsRealm ][ ItemProfConstants.configTooltipIconsChar ].includeVendor
 	iconSize = ItemTooltipIconsConfig[ ItemProfConstants.configTooltipIconsRealm ][ ItemProfConstants.configTooltipIconsChar ].iconSize
 	showDMF = ItemTooltipIconsConfig[ ItemProfConstants.configTooltipIconsRealm ][ ItemProfConstants.configTooltipIconsChar ].showDMF
 	

@@ -3,7 +3,7 @@
 	L.Functions = {}
 
 	-- Default Values
-	L.Variables = { ["version"] = "Version 2.22", ["author"] = "Joseph Forrest", ["date"] = "09/20/2019", ["update"] = "01/19/2022" }
+	L.Variables = { ["version"] = "Version 3.01", ["author"] = "Joseph Forrest", ["date"] = "09/20/2019", ["update"] = "08/30/2022" }
 
 	-- Visual Frames
 	L.Frames = {}
@@ -38,13 +38,12 @@
 	L.Variables.needsRatings = {} --  { player, ... } When someone leaves or you leave group that HAS been in an instance with you.
 
 	L.Variables.InstancesSorted = { "any", "rfc", "wc", "vc", "sfk", "bfd", "stocks", "gnomer", "rfk", "internalsm", "sm gy", "sm lib", "sm arm", "sm cath", "rfd", "internalulda", "ulda front", "ulda back", "zf", "internalmara", "mara purple", "mara orange", "mara princess", "st", "internalbrd", "brd anger", "brd arena", "brd golem", "lbrs", "ubrs", "internaldm", "dm west", "dm north", "dm east", "dm tribute", "internalstrat", "strat live", "strat dead", "scholo",
-		"ramparts", "furnace", "shattered", "slavepens", "theunderbog", "thesteamvaults", "manatombs", "auchenaicrypts", "sethekkhalls", "shadowlabyrinth", "escapefromdurnholde", "blackmorass", "openingofthedarkportal", "themechanar", "thebotanica", "thearcatraz", "magistersterrace",
-		"hramparts", "hfurnace", "hshattered", "hslavepens", "htheunderbog", "hthesteamvaults", "hmanatombs", "hauchenaicrypts", "hsethekkhalls", "hshadowlabyrinth", "hescapefromdurnholde", "hblackmorass", "hopeningofthedarkportal", "hthemechanar", "hthebotanica", "hthearcatraz", "hmagistersterrace" }
-	L.Variables.RaidsSorted = { "any", "ony", "zg", "mc", "bwl", "aq20", "aq40", "naxx",
-		"magtheridonslair", "serpentshrinecavern", "theeye", "karazhan", "gruulslair", "thebattleformounthyjal", "blacktemple", "zulaman", "sunwellplateau", "doomwalker", "doomlordkazzak" }
-	L.Variables.PVPSorted = { "any", "world", "av", "wg", "ab",
-		"eyeofthestorm" }
-
+			"ramparts", "furnace", "shattered", "slavepens", "theunderbog", "thesteamvaults", "manatombs", "auchenaicrypts", "sethekkhalls", "shadowlabyrinth", "escapefromdurnholde", "blackmorass", "openingofthedarkportal", "themechanar", "thebotanica", "thearcatraz", "magistersterrace",
+			"hramparts", "hfurnace", "hshattered", "hslavepens", "htheunderbog", "hthesteamvaults", "hmanatombs", "hauchenaicrypts", "hsethekkhalls", "hshadowlabyrinth", "hescapefromdurnholde", "hblackmorass", "hopeningofthedarkportal", "hthemechanar", "hthebotanica", "hthearcatraz", "hmagistersterrace",
+			"upgardekeep", "thenexus", "azjolnerub", "ahnkahet", "draktharan", "theviolethold", "gundrak", "hallsofstone", "hallsoflightning", "theoculus", "utgardepinnacle", "cullingofstratholme", "trialofthechampion", "hallsofreflection", "pitofsaron", "forgeofsouls" }
+	L.Variables.RaidsSorted = { "any", "ony", "zg", "mc", "bwl", "aq20", "aq40", "naxx", "magtheridonslair", "serpentshrinecavern", "theeye", "karazhan", "gruulslair", "thebattleformounthyjal", "blacktemple", "zulaman", "sunwellplateau", "doomwalker", "doomlordkazzak",
+			"naxxramas", "obsidiansanctum", "vaultofarchavon", "eyeofeternity", "ulduar", "trialofthecrusader", "onyxiaslair", "icecrowncitadel", "rubysanctum" }
+	L.Variables.PVPSorted = { "any", "world", "av", "wg", "ab", "eyeofthestorm" }
 	L.Variables.PlayerClass = { -- Roles = Tank, Healer, DPS
 		["warrior"]		= { ["roles"] = { true, false, true }, ["map"] = { ["sx"] = .625, ["ex"] = .75, ["sy"] = 0, ["ey"] = .25 } },	-- warrior { tank = { "protection" }, heals = {}, dps = { "arms", "fury" } }
 		["paladin"]		= { ["roles"] = { true, true, true }, ["map"] = { ["sx"] = .625, ["ex"] = .75, ["sy"] = .5, ["ey"] = .75 } },	-- paladin { tank = { "protection" }, heals = { "holy" }, dps = { "reribution" } }
@@ -56,6 +55,7 @@
 		["warlock"]		= { ["roles"] = { false, false, true }, ["map"]  = { ["sx"] = .75, ["ex"] = .875, ["sy"] = .75, ["ey"] = 1 } },	-- warlock { tank = {}, heals = {}, dps = { "affliction" , "demonology", "destruction" } }
 		["lock"]		= { ["roles"] = { false, false, true }, ["map"]  = { ["sx"] = .75, ["ex"] = .875, ["sy"] = .75, ["ey"] = 1 } },	-- warlock { tank = {}, heals = {}, dps = { "affliction" , "demonology", "destruction" } }
 		["druid"]		= { ["roles"] = { true, true, true }, ["map"] = { ["sx"] = .625, ["ex"] = .75, ["sy"] = .75, ["ey"] = 1 } },	-- druid { tank = { "feral" }, heals = { "restoration" }, dps = { "balance", "feral" } }
+		["deathnight"]	= { ["roles"] = { true, false, true }, ["map"] = { ["sx"] = .75, ["ex"] = .875, ["sy"] = .5, ["ey"] = .75 } }, -- DK
 	}
 
 	L.Variables.PlayerRace = {

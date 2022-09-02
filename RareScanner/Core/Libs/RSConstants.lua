@@ -24,14 +24,14 @@ RSConstants.LOOT_ITEM_ID = nil
 -- Current versions
 ---============================================================================
 
-RSConstants.CURRENT_DB_VERSION = 3
-RSConstants.CURRENT_LOOT_DB_VERSION = 3
+RSConstants.CURRENT_DB_VERSION = 1
+RSConstants.CURRENT_LOOT_DB_VERSION = 1
 
 ---============================================================================
 -- Current maps (newer)
 ---============================================================================
 
-RSConstants.CURRENT_MAP_ID = 1945 --Outland
+RSConstants.CURRENT_MAP_ID = 113 --Northrend
 
 ---============================================================================
 -- Special events
@@ -142,6 +142,7 @@ RSConstants.PROFILE_DEFAULTS = {
 			displayMinimapIcons = true,
 			waypointTomtom = false,
 			tooltipsScale = 1.0,
+			tooltipsAchievements = true,
 			tooltipsNotes = true,
 			tooltipsSeen = true,
 			tooltipsCommands = true,

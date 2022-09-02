@@ -988,6 +988,14 @@ function RSConfigDB.SetWorldMapTooltipsScale(value)
 	private.db.map.tooltipsScale = value
 end
 
+function RSConfigDB.IsShowingTooltipsAchievements()
+	return private.db.map.tooltipsAchievements
+end
+
+function RSConfigDB.SetShowingTooltipsAchievements(value)
+	private.db.map.tooltipsAchievements = value
+end
+
 function RSConfigDB.IsShowingTooltipsNotes()
 	return private.db.map.tooltipsNotes
 end

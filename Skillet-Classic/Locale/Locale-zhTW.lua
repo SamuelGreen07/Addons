@@ -279,6 +279,10 @@ L["Unlearned"] = "尚未學會"
 L["Use Action Bar button to change professions"] = "請使用快捷列按鈕來切換專業"
 L["USEALTCURRVENDITEMSDESC"] = "使用其他貨幣購買的商人物品會被視為商人提供的"
 L["USEALTCURRVENDITEMSNAME"] = "使用其他貨幣購買的商人物品"
+--[[Translation missing --]]
+L["USEBANKASALTDESC"] = "Use the contents of the bank as if it was another alternate."
+--[[Translation missing --]]
+L["USEBANKASALTNAME"] = "Use bank as another alt"
 L["USEBLIZZARDFORFOLLOWERSDESC"] = "要塞追隨者專業使用暴雪UI"
 L["USEBLIZZARDFORFOLLOWERSNAME"] = "追隨者使用暴雪UI"
 L["USEGUILDBANKASALTDESC"] = "將公會銀行當作其他分身使用"

@@ -231,6 +231,19 @@ local function AddLastTimeSeenTooltip(tooltip, pin)
 	end
 end
 
+local function AddAchievementTooltip(tooltip, pin)
+	if (not RSConfigDB.IsShowingTooltipsAchievements()) then
+		return
+	end
+	
+	if (pin.POI.achievementLink) then
+		local line = tooltip:AddLine()
+		tooltip:SetCell(line, 1, RSUtils.TextColor(string.format(AL["MAP_TOOLTIP_ACHIEVEMENT"], pin.POI.achievementLink), "FFFFCC"), nil, "LEFT", 10, nil, nil, nil, RSConstants.TOOLTIP_MAX_WIDTH)
+		tooltip:SetCellScript(line, 1, "OnEnter", showAchievementTooltip, pin.POI.achievementLink)
+		tooltip:SetCellScript(line, 1, "OnLeave", hideItemToolTip)
+	end
+end
+
 local function AddNotesTooltip(tooltip, pin)
 	if (not RSConfigDB.IsShowingTooltipsNotes()) then
 		return
@@ -436,6 +449,9 @@ function RSTooltip.ShowSimpleTooltip(pin, parentTooltip)
 
 	-- Adds lines for special events
 	RSTooltip.AddSpecialEventsLines(pin, tooltip)
+
+	-- Achievement
+	AddAchievementTooltip(tooltip, pin)
 
 	-- Notes
 	AddNotesTooltip(tooltip, pin)

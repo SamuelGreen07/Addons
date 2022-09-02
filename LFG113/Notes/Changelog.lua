@@ -6,6 +6,14 @@
 ***     Benefits will be a fast and customizable interface
 ***     Addons can be made to use the current data via interface
 
+Version 3.01 08/30/22
+- Changed keybind from "I" to "ALT-I".
+- Added Instances and raids for Wrath
+- Made changes to image mapping for menu mouse over and select.
+- Updated for newest version.
+- Removed Right-click menu options until I can find another hook.
+- You can listen but can not broadcast on LookingForGroup Channel until you join with Wraths LFG tool.
+- IF I'm missing any keywords let me know in a message and I will incorporate them.
 
 Version 2.22 01/18/22
 - Updated for newest wow version TBC

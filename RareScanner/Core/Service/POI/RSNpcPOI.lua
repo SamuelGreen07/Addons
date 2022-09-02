@@ -8,6 +8,7 @@ local RSNpcPOI = private.NewLib("RareScannerNpcPOI")
 -- RareScanner database libraries
 local RSNpcDB = private.ImportLib("RareScannerNpcDB")
 local RSGeneralDB = private.ImportLib("RareScannerGeneralDB")
+local RSAchievementDB = private.ImportLib("RareScannerAchievementDB")
 local RSConfigDB = private.ImportLib("RareScannerConfigDB")
 local RSMapDB = private.ImportLib("RareScannerMapDB")
 
@@ -68,6 +69,7 @@ function RSNpcPOI.GetNpcPOI(npcID, mapID, npcInfo, alreadyFoundInfo)
 	POI.foundTime = alreadyFoundInfo and alreadyFoundInfo.foundTime
 	POI.isDiscovered = POI.isDead or alreadyFoundInfo ~= nil
 	POI.isFriendly = RSNpcDB.IsInternalNpcFriendly(npcID)
+	POI.achievementLink = RSAchievementDB.GetNotCompletedAchievementLinkByMap(npcID, mapID)
 	if (npcInfo) then
 		POI.worldmap = npcInfo.worldmap
 	end

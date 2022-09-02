@@ -270,6 +270,10 @@ L["Unlearned"] = "Non-appris"
 L["Use Action Bar button to change professions"] = "Utilisez le bouton de la barre d'action pour changer de profession"
 L["USEALTCURRVENDITEMSDESC"] = "Les objets du vendeur achetés avec d'autres devises sont considérés comme fournis par le vendeur."
 L["USEALTCURRVENDITEMSNAME"] = "Utiliser des objets fournisseur achetés avec d'autres devises"
+--[[Translation missing --]]
+L["USEBANKASALTDESC"] = "Use the contents of the bank as if it was another alternate."
+--[[Translation missing --]]
+L["USEBANKASALTNAME"] = "Use bank as another alt"
 L["USEBLIZZARDFORFOLLOWERSDESC"] = "Utilisez l'interface Blizzard pour les compétences de suivant de fief"
 L["USEBLIZZARDFORFOLLOWERSNAME"] = "Utiliser l'interface Blizzard pour les suivants"
 L["USEGUILDBANKASALTDESC"] = "Utilisez le contenu de la banque de guilde comme s'il s'agissait d'un autre remplaçant."

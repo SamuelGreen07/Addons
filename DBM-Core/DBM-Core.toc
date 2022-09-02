@@ -1,4 +1,4 @@
-## Interface: 20504
+## Interface: 30400
 ## X-Min-Interface: 90207
 ## X-Min-Interface-Classic: 11403
 ## X-Min-Interface-BCC: 20504
@@ -21,7 +21,7 @@
 ## LoadOnDemand: 0
 ## DefaultState: enabled
 ## Author: MysticalOS, QartemisT
-## Version: 07f5a30
+## Version: d87d644
 ## X-Website: https://deadlybossmods.com
 
 Libs\LibStub\LibStub.lua

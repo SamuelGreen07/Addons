@@ -270,6 +270,10 @@ L["Unlearned"] = "Sin aprender"
 L["Use Action Bar button to change professions"] = "Usa el botón de la barra de acción para cambiar de profesión"
 L["USEALTCURRVENDITEMSDESC"] = "Los objetos del vendedor comprados con monedas alternativas se consideran suministrados por el vendedor."
 L["USEALTCURRVENDITEMSNAME"] = "Usar objetos de vendedores comprados con monedas alternativas"
+--[[Translation missing --]]
+L["USEBANKASALTDESC"] = "Use the contents of the bank as if it was another alternate."
+--[[Translation missing --]]
+L["USEBANKASALTNAME"] = "Use bank as another alt"
 L["USEBLIZZARDFORFOLLOWERSDESC"] = "Usa la interfaz de usuario de Blizzard para las habilidades comerciales de los seguidores de la guarnición"
 L["USEBLIZZARDFORFOLLOWERSNAME"] = "Usar la interfaz de usuario de Blizzard para los seguidores"
 L["USEGUILDBANKASALTDESC"] = "Usa el contenido del banco de hermandad como si fuera otra alternativa."

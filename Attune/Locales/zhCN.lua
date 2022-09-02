@@ -188,7 +188,11 @@ Lang["DelUnder70_TEXT"] = "删除70岁以下的字符"
 Lang["DelUnder70_DESC"] = "删除所有收集的有关70级以下玩家的信息。"
 Lang["DelUnder70_CONF"] = "真的要删除70级以下的所有角色吗？"
 Lang["DelUnder70_DONE"] = "所有低于70的结果均已删除."
-
+--302
+Lang["AnnounceAchieve_TEXT"] = "在公会聊天中宣布成就"
+Lang["AnnounceAchieve_DESC"] = "获得成就时发送公会消息。"
+Lang["AchieveCompleteGuild"] = "##LINK## 声望已达到! (##POINTS## 总积分)" 
+					
 
 -- TREEVIEW
 Lang["World of Warcraft"] = "经典旧世"

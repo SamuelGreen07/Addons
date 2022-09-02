@@ -299,6 +299,10 @@ L["Unlearned"] = "Noch nicht erlernt"
 L["Use Action Bar button to change professions"] = "Use Action Bar button to change professions"
 L["USEALTCURRVENDITEMSDESC"] = "Händlermaterialien die mit alternativen Zahlungsmittel erworben werden, werden als vom Händler bereitgestellt berücksichtigt."
 L["USEALTCURRVENDITEMSNAME"] = "Händlermaterialien mit alternativen Zahlungsmitteln erwerben"
+--[[Translation missing --]]
+L["USEBANKASALTDESC"] = "Use the contents of the bank as if it was another alternate."
+--[[Translation missing --]]
+L["USEBANKASALTNAME"] = "Use bank as another alt"
 L["USEBLIZZARDFORFOLLOWERSDESC"] = "Benutze das Blizzard UI für die Handelsfertigkeiten der Garnisonsanhänger"
 L["USEBLIZZARDFORFOLLOWERSNAME"] = "Benutze das Blizzard UI für Anhänger"
 L["USEGUILDBANKASALTDESC"] = "Nutze den Inhalt der Gildenbank, als ob sie ein Twink wäre."

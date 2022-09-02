@@ -1,10 +1,30 @@
+3.0.02 - 31st August 2022
+- For 'Enhance quest log' ('Interface'), there is a new setting that lets you choose whether the quest log should be taller or not.
+- Fix for 'Enhance minimap' calendar button #2.
+- Added some flight times.  There are now 3541 flight times stored in Leatrix Plus for Wrath Classic.
+
+3.0.01 - 31st August 2022
+- Added a new option 'Manage durability' ('Frames').  If enabled, you can move and scale the armored man durability frame.
+- Fixed an issue with 'Enhance minimap' missing calendar button.
+- Fixed an issue with 'Enhance quest log' incorrect quest title.
+- Added some flight times.  There are now 3539 flight times stored in Leatrix Plus for Wrath Classic.
+
+3.0.00 - 29th August 2022
+- Welcome to Wrath of the Lich King!
+- Removed BCC transitional code.
+- Added a new option called 'Manage timer' ('Frames').  The 'Manage frames' option no longer includes the timer bar.
+- For 'Enhance minimap' ('Interface'), added a new setting that will allow you to adjust the minimap cluster scale without it affecting the minimap scale.
+- Removed the 'Hide the clock' setting (part of 'Enhance minimap') and the 'Show free bag slots' setting as they are now both included in the default UI (interface settings display menu).
+- Tweaks to the ElvUI locks.
+- Added a few flight times.  There are now 3521 flight times stored in Leatrix Plus for Wrath Classic.
+
 2.5.120 - 24th August 2022
 - The 'Hide action button text' option ('Text') is now two options - 'Hide keybind text' and 'Hide macro text'.
 - For 'Show flight times' ('Interface'), you can now control whether flight report windows are shown using a new setting in the configuration panel.
 - If you use ElvUI, Leatrix Plus options which are not compatible with specific ElvUI modules will now be disabled and locked while those ElvUI modules are enabled.  The option tooltip will tell you which ElvUI module is causing the Leatrix Plus option to be disabled.  Disabling the relevant ElvUI module will make the Leatrix Plus setting available again.
 - Fixed a minor issue with 'Show Wowhead links' ('Interface') and Questie which sometimes caused the quest link to not be updated.
 - Wrath: For 'Enhance quest log' ('Interface'), quest levels are now shown in the quest details pane in addition to the quest list.
-- Added lots and lots of flight times.  There are now 3515 flight times stored in Leatrix Plus for BCC and Wrath.
+- Added lots and lots of flight times.  There are now 3515 flight times stored in Leatrix Plus for BCC and Wrath Classic.
 
 2.5.119 - 17th August 2022
 - Wrath: Added a new option 'Hide alerts' ('Frames').  If checked, alert frames will not be shown.  When you earn an achievement, a message will be shown in chat instead (just like retail).
@@ -12,14 +32,14 @@
 - Wrath: For 'Accept resurrection' ('Automation'), you will not accept a resurrection request automatically if you are in the Thaddius fight (Naxxramas) and someone in your group has a positive or negative charge.
 - For 'Show flight times' ('Interface'), the flight progress bar will now always hide when you land.  The flight report window will now show if the minimum time difference between the saved flight time and the actual flight time is 15 seconds (up from 5).
 - Fixed a minor issue with 'Show cooldowns' ('Interface') which caused buff spell IDs to show in debuff tooltips.
-- Added a massive number of flight times.  There are now 3476 flight times stored in Leatrix Plus for BCC and Wrath.
+- Added a massive number of flight times.  There are now 3476 flight times stored in Leatrix Plus for BCC and Wrath Classic.
 
 2.5.118 - 10th August 2022
 - Updated for Wrath of the Lich King Beta.
 - Wrath: Show Wowhead links (Interface) will now show achievement links as well as quest links.
 - Wrath: Show druid power bar is disabled since it's now included in the default UI.
 - If you use 'Automate quests' ('Automation') with a Mac, you can now assign the override key to be the command key if you wish.
-- Added a massive number of flight times.  There are now 2959 flight times stored in Leatrix Plus for BCC and Wrath.
+- Added a massive number of flight times.  There are now 2959 flight times stored in Leatrix Plus for BCC and Wrath Classic.
 - For Wrath, it's best to use alpha releases during Wrath Beta/prepatch so that you get the latest development updates.  To switch to alpha releases, open CurseForge App, right-click Leatrix Plus in your Wrath addon listing and change release type to Alpha.  You can change it back to Release once Wrath is live for everyone.
 
 2.5.117 - 3rd August 2022

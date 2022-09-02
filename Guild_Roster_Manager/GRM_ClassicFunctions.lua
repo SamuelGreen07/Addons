@@ -117,7 +117,7 @@ end
 -- Purpose:         Porting GRM to Classic needs to have this consideration for non-existent features, like the calendar, in the original Warcraft release.
 GRM_UI.DisableFramesForClassic = function()
 
-    if GRM_G.BuildVersion < 30000 then  -- Not introduced until WOTLK
+    if GRM_G.BuildVersion <= 40000 then  -- Not introduced until WOTLK
 
         -- Event stuff
         GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_ScanningOptionsFrame.GRM_RosterReportUpcomingEventsCheckButton:Disable();

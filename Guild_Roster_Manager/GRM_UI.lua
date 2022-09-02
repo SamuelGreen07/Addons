@@ -15161,7 +15161,7 @@ if GRM_G.BuildVersion >= 30000 then  -- < 2 = Classic and < 3 = TBC - no calenda
     UI_CalendarTrigger:RegisterEvent("GUILD_ROSTER_UPDATE");
     UI_CalendarTrigger:RegisterEvent("PLAYER_GUILD_UPDATE");
     UI_CalendarTrigger:SetScript ( "OnEvent" , function ()
-        if CalendarCreateEventFrame and CalendarViewEventFrame then
+        if CalendarCreateEventFrame and CalendarViewEventFrame and CalendarViewEventInviteListScrollFrameScrollBar and CalendarCreateEventInviteListScrollFrameScrollBar then
             if not GRM_G.CalendarRegistered then
                 -- View Window
                 CalendarViewEventInviteListScrollFrameScrollBar:HookScript ( "OnValueChanged" , GRM_UI.CalendarEventOpenRefresh );

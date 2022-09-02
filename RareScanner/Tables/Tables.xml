@@ -4,5 +4,6 @@
 	<Script file="NpcInfoTables.lua"/>
 	<Script file="ContainerInfoTables.lua"/>
 	<Script file="ContainerLootTables.lua"/>
+	<Script file="AchievementTables.lua"/>
 	<Script file="LootQuestsTables.lua"/>
 </Ui>

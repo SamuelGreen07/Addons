@@ -8,7 +8,7 @@ local NUM_QUEST_FILTERS = ItemProfConstants.NUM_QUEST_FLAGS
 
 local profsCheck
 local questCheck
-local vendorCheck
+--local vendorCheck
 local dmfCheck
 local classQuestLabel
 local profQuestLabel
@@ -21,7 +21,7 @@ local QUEST_CHECK = {}
 
 local configDefaultShowProfs = true
 local configDefaultShowQuests = true
-local configDefaultProfFlags = 0x1FF
+local configDefaultProfFlags = 0x3FF
 local configDefaultQuestFlags = 0x3FFFFF
 local configDefaultIncludeVendor = false
 local configDefaultIconSize = 16
@@ -57,7 +57,7 @@ local function SaveAndQuit()
 	userVariables.showQuests = questCheck:GetChecked()
 	userVariables.profFlags = profFlags
 	userVariables.questFlags = questFlags
-	userVariables.includeVendor = vendorCheck:GetChecked()
+	--userVariables.includeVendor = vendorCheck:GetChecked()
 	userVariables.iconSize = iconSizeSlider:GetValue()
 	userVariables.showDMF = dmfCheck:GetChecked()
 
@@ -102,7 +102,7 @@ local function RefreshWidgets()
 	-- Sync the widgets state with the config variables
 	profsCheck:SetChecked( userVariables.showProfs )
 	questCheck:SetChecked( userVariables.showQuests )
-	vendorCheck:SetChecked( userVariables.includeVendor )
+	--vendorCheck:SetChecked( userVariables.includeVendor )
 	dmfCheck:SetChecked( userVariables.showDMF )
 	local profFlags = userVariables.profFlags
 	local questFlags = userVariables.questFlags
@@ -209,19 +209,19 @@ local function CreateProfessionWidgets()
 	-- Checkbox alignment offsets
 	local x0 = 45
 	local x1 = 245
-	local x2 = 445
 	local y0 = -70
 	local dy = -20
 
-	PROF_CHECK[ 1 ] = CreateCheckbox( "ItemTooltipIconsConfigCheck0a", x0, y0+(2*dy), " Cooking", nil )
+	PROF_CHECK[ 1 ] = CreateCheckbox( "ItemTooltipIconsConfigCheck0a", x0, y0+dy, " Cooking", nil )
 	PROF_CHECK[ 2 ] = CreateCheckbox( "ItemTooltipIconsConfigCheck0b", x1, y0+(2*dy), " First Aid", nil )
 	PROF_CHECK[ 4 ] = CreateCheckbox( "ItemTooltipIconsConfigCheck0c", x0, y0, " Alchemy", nil )
-	PROF_CHECK[ 8 ] = CreateCheckbox( "ItemTooltipIconsConfigCheck0d", x0, y0+dy, " Blacksmithing", nil )
-	PROF_CHECK[ 16 ] = CreateCheckbox( "ItemTooltipIconsConfigCheck0e", x1, y0, " Enchanting", nil )
-	PROF_CHECK[ 32 ] = CreateCheckbox( "ItemTooltipIconsConfigCheck0f", x1, y0+dy, " Engineering", nil )
-	PROF_CHECK[ 64 ] = CreateCheckbox( "ItemTooltipIconsConfigCheck0g", x2, y0+dy, " Leatherworking", nil )
-	PROF_CHECK[ 128 ] = CreateCheckbox( "ItemTooltipIconsConfigCheck0h", x2, y0+(2*dy), " Tailoring", nil )
-	PROF_CHECK[ 256 ] = CreateCheckbox( "ItemTooltipIconsConfigCheck0i", x2, y0, " Jewelcrafting", nil )
+	PROF_CHECK[ 8 ] = CreateCheckbox( "ItemTooltipIconsConfigCheck0d", x1, y0, " Blacksmithing", nil )
+	PROF_CHECK[ 16 ] = CreateCheckbox( "ItemTooltipIconsConfigCheck0e", x1, y0+dy, " Enchanting", nil )
+	PROF_CHECK[ 32 ] = CreateCheckbox( "ItemTooltipIconsConfigCheck0f", x0, y0+(2*dy), " Engineering", nil )
+	PROF_CHECK[ 64 ] = CreateCheckbox( "ItemTooltipIconsConfigCheck0g", x0, y0+(4*dy), " Leatherworking", nil )
+	PROF_CHECK[ 128 ] = CreateCheckbox( "ItemTooltipIconsConfigCheck0h", x1, y0+(4*dy), " Tailoring", nil )
+	PROF_CHECK[ 256 ] = CreateCheckbox( "ItemTooltipIconsConfigCheck0i", x1, y0+(3*dy), " Jewelcrafting", nil )
+	PROF_CHECK[ 512 ] = CreateCheckbox( "ItemTooltipIconsConfigCheck0j", x0, y0+(3*dy), " Inscription", nil )
 end
 
 local function CreateQuestWidgets() 
@@ -311,8 +311,8 @@ dialogHeader:SetText( "These options allow you control which icons are displayed
 
 CreateProfessionWidgets()
 CreateQuestWidgets()
-vendorCheck = CreateCheckbox( "ItemTooltipIconsConfigCheck2", 20, -470, " Vendor Items", "Display icons on items sold by vendors" )
-dmfCheck = CreateCheckbox( "ItemTooltipIconsConfigCheck3", 20, -490, " Darkmoon Faire Ticket Items", "Display a ticket icon if the item can be exchanged for Darkmoon Faire tickets" )
+--vendorCheck = CreateCheckbox( "ItemTooltipIconsConfigCheck2", 20, -470, " Vendor Items", "Display icons on items sold by vendors" )
+dmfCheck = CreateCheckbox( "ItemTooltipIconsConfigCheck3", 20, -470, " Darkmoon Faire Ticket Items", "Display a ticket icon if the item can be exchanged for Darkmoon Faire tickets" )
 CreateIconResizeWidgets()
 
 

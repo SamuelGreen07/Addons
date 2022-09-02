@@ -8,13 +8,21 @@
 --
 -------------------------------------------------------------------------
 
--- Done in 255
---	Updated to cater for honored and revered rep keys
-
+-- Done in 303
+--  Updated ToC for Wrath of the Lich King	
+--  Added the Wrathgate event (Horde and Alliance)
+--	Added the Knights of the Ebon Blade phasing quests (Horde and Alliance)
+--	Added the Sons of Hodir quests (Horde and Alliance)
+--  Added Eye of Eternity attunement 
+--  Fixed an issue where an Interacting or Killing step wouldn't register
+--  Added a guild announcement for completed Achievements (can be disabled in the options) 
+--  Removed a silly debug print that was showing guild names
 
 -------------------------------------------------------------------------
 -- ADDON VARIABLES
 -------------------------------------------------------------------------
+
+local addonName, addon = ...
 
 Attune = LibStub("AceAddon-3.0"):NewAddon("Attune", "AceConsole-3.0", "AceEvent-3.0", "AceComm-3.0")
 Attune_Data = {};							-- Attunements / steps / tooltips
@@ -30,7 +38,7 @@ local attunelocal_minimapicon = LibStub("LibDBIcon-1.0")
 local attunelocal_brokervalue = nil
 local attunelocal_brokerlabel = nil
 
-local attunelocal_version = "255"  					-- change here, and in TOC x2
+local attunelocal_version = tostring(GetAddOnMetadata(addonName, "Version"))
 local attunelocal_prefix = "Attune_Channel"			-- used for addon chat communications
 local attunelocal_versionprefix = "Attune_Version"	-- used for addon version check
 local attunelocal_syncprefix = "Attune_Sync"		-- used for addon version check
@@ -113,6 +121,8 @@ local attunelocal_raidsize = 0					-- selected Raid size
 local attunelocal_raidcount = 1  				-- selected raid, number of raid groups to show
 
 local attunelocal_inactivity = 60*60*24*30		-- number of seconds to account for inactivity
+
+local attunelocal_achieveDelayDone = false		-- Wait a few seconds to avoid the barrage of achieves when one first logs in
 
 local patch = 0
 
@@ -202,9 +212,18 @@ local attune_options = {
 					desc = Lang["ShowOther_DESC"],
 					get = function(info) return Attune_DB.showOtherChat end,
 					set = function(info, val) Attune_DB.showOtherChat = val end,
-					width = "full",
-					order = 20,
+					width = 1.65,
+					order = 19,
 				},
+				announceAchieveCompleted = {
+					type = "toggle",
+					name = Lang["AnnounceAchieve_TEXT"],
+					desc = Lang["AnnounceAchieve_DESC"],
+					get = function(info) return Attune_DB.announceAchieveCompleted end,
+					set = function(info, val) Attune_DB.announceAchieveCompleted = val end,
+					width = 1.65,
+					order = 20,
+				},				
 				spacer2 = {
 					type = "description",
 					name = " ",
@@ -505,7 +524,10 @@ function Attune:OnEnable()
 	self:RegisterEvent("UPDATE_FACTION")
 	self:RegisterEvent("BAG_UPDATE")
 	self:RegisterEvent("GOSSIP_SHOW")
+	self:RegisterEvent("QUEST_DETAIL")
+	self:RegisterEvent("ACHIEVEMENT_EARNED")
 	
+		
 	_, _, _, patch	 = GetBuildInfo()
 	
 	if Attune_DB == nil then Attune_DB = {} end
@@ -522,6 +544,7 @@ function Attune:OnEnable()
 	if Attune_DB.showResponses == nil then Attune_DB.showResponses = true end
 	if Attune_DB.showStepReached == nil then Attune_DB.showStepReached = true end
 	if Attune_DB.announceAttuneCompleted == nil then Attune_DB.announceAttuneCompleted = true end
+	if Attune_DB.announceAchieveCompleted == nil then Attune_DB.announceAchieveCompleted = true end
 	if Attune_DB.showOtherChat == nil then Attune_DB.showOtherChat = true end
 	if Attune_DB.maxListSize == nil then Attune_DB.maxListSize = "20" end
 	if Attune_DB.logs == nil then Attune_DB.logs = {} end
@@ -644,6 +667,9 @@ function Attune:OnEnable()
 		Attune:SendCommMessage(attunelocal_versionprefix, attunelocal_version, "YELL", "");
 	end)
 
+	C_Timer.After(15, function()
+		attunelocal_achieveDelayDone = true -- after 10s the spam should have been done
+	end)
 
 	-- sending a couple version checks to make sure people update to the latest version
 
@@ -804,6 +830,20 @@ function Attune:OnDisable()
 	self:Print("|cffff00ff[Attune]|r "..Lang["Addon disabled"])
 end
 
+
+-------------------------------------------------------------------------
+-- EVENT: Fired when an achievement is gained
+-------------------------------------------------------------------------
+
+function Attune:ACHIEVEMENT_EARNED(event, id)
+	--send a guild message when an achievement is earned 
+	guildName, guildRankName, guildRankIndex = GetGuildInfo("player");
+	if guildName ~= nil then attunelocal_myguild = guildName end
+
+	if Attune_DB.announceAchieveCompleted and attunelocal_myguild ~= "" and attunelocal_achieveDelayDone then SendChatMessage(Lang["AchieveCompleteGuild"]:gsub("##LINK##", GetAchievementLink(id)):gsub("##POINTS##", GetTotalAchievementPoints()) , "GUILD") end
+
+end
+
 -------------------------------------------------------------------------
 -- EVENT: Addon Chat message is received
 -------------------------------------------------------------------------
@@ -870,7 +910,7 @@ function Attune:COMBAT_LOG_EVENT_UNFILTERED(event, arg1, arg2, arg3, arg4)
 					end
 					--print(npc_id)
 		
-					if s.ID_WOWHEAD == npc_id then
+					if ""..s.ID_WOWHEAD == ""..npc_id then
 						-- checking that predecessors are done (meaning this step is ISNext)
 						local isNext = true
 						local followOR = false
@@ -894,6 +934,7 @@ function Attune:COMBAT_LOG_EVENT_UNFILTERED(event, arg1, arg2, arg3, arg4)
 							if Attune_DB.toons[attunelocal_charKey].done[s.ID_ATTUNE .. "-" .. s.ID] == nil then
 								for k, a in pairs(Attune_Data.attunes) do
 									if a.ID == s.ID_ATTUNE then
+										local faction = UnitFactionGroup("player")
 										if a.FACTION == faction or a.FACTION == 'Both' then
 											--mark step as done
 											Attune_DB.toons[attunelocal_charKey].done[s.ID_ATTUNE .. "-" .. s.ID] = 1
@@ -1064,8 +1105,13 @@ end
 -------------------------------------------------------------------------
 -- EVENT: Interact with NPC
 -------------------------------------------------------------------------
-
+function Attune:QUEST_DETAIL(event)
+	--print("QUEST_DETAIL")
+	Attune:GOSSIP_SHOW(event)
+end
+-------------------------------------------------------------------------
 function Attune:GOSSIP_SHOW(event)
+	--print("GOSSIP")
 	--print(UnitGUID("target"))
 	local npc_id = -1
 	if UnitGUID("target") ~= nil then
@@ -1449,6 +1495,16 @@ function Attune_CheckComplete(newComplete)
 
 	if att.done["250-110"] and att.attuned["250"] ~= 100 	then att.done["250-120"] = 1; 	Attune_SendPushInfo("250-120"); 	att.attuned["250"] = 100; Attune_UpdateTreeGroup("250"); newComplete = true;  end	-- Ogrila
 	if att.done["260-110"] and att.attuned["260"] ~= 100 	then att.done["260-120"] = 1; 	Attune_SendPushInfo("260-120"); 	att.attuned["260"] = 100; Attune_UpdateTreeGroup("260"); newComplete = true;  end	-- Netherwing
+
+
+	if att.done["300-290"] and att.attuned["300"] ~= 100 	then att.done["300-300"] = 1; 	Attune_SendPushInfo("300-300"); 	att.attuned["300"] = 100; Attune_UpdateTreeGroup("300"); newComplete = true;  end	-- Wrathgate Horde
+	if att.done["310-400"] and att.attuned["310"] ~= 100 	then att.done["310-410"] = 1; 	Attune_SendPushInfo("310-410"); 	att.attuned["310"] = 100; Attune_UpdateTreeGroup("310"); newComplete = true;  end	-- Wrathgate Alliance
+	if att.done["330-380"] and att.attuned["330"] ~= 100 	then att.done["330-390"] = 1; 	Attune_SendPushInfo("330-390"); 	att.attuned["330"] = 100; Attune_UpdateTreeGroup("330"); newComplete = true;  end	-- Sons of Hodir
+	if att.done["340-140"] and att.attuned["340"] ~= 100 	then att.done["340-150"] = 1; 	Attune_SendPushInfo("340-150"); 	att.attuned["340"] = 100; Attune_UpdateTreeGroup("340"); newComplete = true;  end	-- Ebon Blade Horde
+	if att.done["350-140"] and att.attuned["350"] ~= 100 	then att.done["350-150"] = 1; 	Attune_SendPushInfo("350-150"); 	att.attuned["350"] = 100; Attune_UpdateTreeGroup("350"); newComplete = true;  end	-- Ebon Blade Alliance
+	if att.done["370-50"] and att.attuned["370"] ~= 100 	then att.done["370-60"] = 1; 	Attune_SendPushInfo("370-60"); 		att.attuned["370"] = 100; Attune_UpdateTreeGroup("370"); att.done["360-55"] = 1; newComplete = true;  end	-- Malygos 25 -- this also pushes the sub attunement in Maly 10
+	if att.done["360-55"] 									then att.done["360-50"] = 1; 	Attune_SendPushInfo("360-50"); 		newComplete = true;  end	-- Malygos 10 (granted via Malygos 25)
+	if att.done["360-50"] and att.attuned["360"] ~= 100 	then att.done["360-60"] = 1; 	Attune_SendPushInfo("360-60"); 		att.attuned["360"] = 100; Attune_UpdateTreeGroup("360"); newComplete = true;  end	-- Malygos 10 (granted via quest)
 
 	if newComplete then 
 		for i, s in Attune_spairs(Attune_Data.steps, function(t,a,b) 	return tonumber(t[b].ID) > tonumber(t[a].ID) end) do

@@ -281,6 +281,10 @@ L["Unlearned"] = "Неизучено"
 L["Use Action Bar button to change professions"] = "Использовать кнопку панели действий для смены профессии"
 L["USEALTCURRVENDITEMSDESC"] = "Товары продавцов, купленные в альтернативных валютах, считаются поставщиками."
 L["USEALTCURRVENDITEMSNAME"] = "Используйте товары продавца, купленные в другой валюте"
+--[[Translation missing --]]
+L["USEBANKASALTDESC"] = "Use the contents of the bank as if it was another alternate."
+--[[Translation missing --]]
+L["USEBANKASALTNAME"] = "Use bank as another alt"
 L["USEBLIZZARDFORFOLLOWERSDESC"] = "Использовать для соратников в гарнизоне интерфейс Blizzard"
 L["USEBLIZZARDFORFOLLOWERSNAME"] = "Использовать для соратников интерфейс Blizzard"
 L["USEGUILDBANKASALTDESC"] = "Использовать содержимое банка гильдии, как если бы он был альтернативный."

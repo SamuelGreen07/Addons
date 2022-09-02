@@ -8,17 +8,13 @@
 ## Notes-zhCN: 哆啦A梦的百宝袋
 ## Notes-zhTW: 哆啦A夢的百寶袋
 
-## Version: 2.5.120
+## Version: 3.0.02
 ## Author: Leatrix
 ## SavedVariables: LeaPlusDB
 
 ## OptionalDeps: ElvUI
 
 ## X-Curse-Project-ID: 463863
-
-# --------------------------------------------------------------------------
-# This file is here temporarily and can be deleted once the prepatch is live
-# --------------------------------------------------------------------------
 
 Leatrix_Plus_Library.lua
 Leatrix_Plus_Locale.lua

@@ -108,6 +108,10 @@ private.CLASS_PROFICIENCIES = {
 		[Enum.ItemClass.Weapon] = { Enum.ItemWeaponSubclass.Staff, Enum.ItemWeaponSubclass.Fishingpole, Enum.ItemWeaponSubclass.Dagger, Enum.ItemWeaponSubclass.Mace1H, Enum.ItemWeaponSubclass.Generic, Enum.ItemWeaponSubclass.Wand },
 		[Enum.ItemClass.Armor] = { Enum.ItemArmorSubclass.Cloth, Enum.ItemArmorSubclass.Cosmetic, Enum.ItemArmorSubclass.Generic, Enum.ItemArmorSubclass.Relic }
 	};
+	[6] = { --DeathKnight
+		[Enum.ItemClass.Weapon] = { Enum.ItemWeaponSubclass.Polearm, Enum.ItemWeaponSubclass.Fishingpole, Enum.ItemWeaponSubclass.Sword2H, Enum.ItemWeaponSubclass.Sword1H, Enum.ItemWeaponSubclass.Axe2H, Enum.ItemWeaponSubclass.Axe1H, Enum.ItemWeaponSubclass.Mace2H, Enum.ItemWeaponSubclass.Mace1H, Enum.ItemWeaponSubclass.Generic },
+		[Enum.ItemClass.Armor] = { Enum.ItemArmorSubclass.Plate, Enum.ItemArmorSubclass.Cosmetic, Enum.ItemArmorSubclass.Generic, Enum.ItemArmorSubclass.Relic }
+	};
 	[7] = { --Shaman
 		[Enum.ItemClass.Weapon] = { Enum.ItemWeaponSubclass.Unarmed, Enum.ItemWeaponSubclass.Staff, Enum.ItemWeaponSubclass.Fishingpole, Enum.ItemWeaponSubclass.Dagger, Enum.ItemWeaponSubclass.Axe2H, Enum.ItemWeaponSubclass.Axe1H, Enum.ItemWeaponSubclass.Mace2H, Enum.ItemWeaponSubclass.Mace1H, Enum.ItemWeaponSubclass.Generic },
 		[Enum.ItemClass.Armor] = { Enum.ItemArmorSubclass.Mail, Enum.ItemArmorSubclass.Shield, Enum.ItemArmorSubclass.Cosmetic, Enum.ItemArmorSubclass.Generic, Enum.ItemArmorSubclass.Relic }
@@ -2296,8 +2300,19 @@ local function GetMapOptions()
 							end,
 							width = "full",
 						},
-						notes = {
+						achievementsInfo = {
 							order = 2,
+							type = "toggle",
+							name = AL["MAP_TOOLTIPS_ACHIEVEMENT"],
+							desc = AL["MAP_TOOLTIPS_ACHIEVEMENT_DESC"],
+							get = function() return RSConfigDB.IsShowingTooltipsAchievements() end,
+							set = function(_, value)
+								RSConfigDB.SetShowingTooltipsAchievements(value)
+							end,
+							width = "full",
+						},
+						notes = {
+							order = 3,
 							type = "toggle",
 							name = AL["MAP_TOOLTIPS_NOTES"],
 							desc = AL["MAP_TOOLTIPS_NOTES_DESC"],
@@ -2308,7 +2323,7 @@ local function GetMapOptions()
 							width = "full",
 						},
 						loot = {
-							order = 3,
+							order = 4,
 							type = "toggle",
 							name = AL["MAP_TOOLTIPS_LOOT"],
 							desc = AL["MAP_TOOLTIPS_LOOT_DESC"],
@@ -2319,7 +2334,7 @@ local function GetMapOptions()
 							width = "full",
 						},
 						lastTimeSeen = {
-							order = 4,
+							order = 5,
 							type = "toggle",
 							name = AL["MAP_TOOLTIPS_SEEN"],
 							desc = AL["MAP_TOOLTIPS_SEEN_DESC"],
@@ -2330,7 +2345,7 @@ local function GetMapOptions()
 							width = "full",
 						},
 						commands = {
-							order = 5,
+							order = 6,
 							type = "toggle",
 							name = AL["MAP_TOOLTIPS_COMMANDS"],
 							desc = AL["MAP_TOOLTIPS_COMMANDS_DESC"],
@@ -2341,12 +2356,12 @@ local function GetMapOptions()
 							width = "full",
 						},
 						separatorLootAchievements = {
-							order = 6,
+							order = 7,
 							type = "header",
 							name = AL["MAP_TOOLTIPS_LOOT_ACHIEVEMENT"],
 						},
 						lootAchievementsScale = {
-							order = 7,
+							order = 8,
 							type = "range",
 							name = AL["MAP_TOOLTIPS_LOOT_ACHIEVEMENT_SCALE"],
 							desc = AL["MAP_TOOLTIPS_LOOT_ACHIEVEMENT_SCALE_DESC"],
@@ -2360,7 +2375,7 @@ local function GetMapOptions()
 							width = "full"
 						},
 						lootAchievementsPosition = {
-							order = 8,
+							order = 9,
 							type = "select",
 							name = AL["MAP_TOOLTIPS_LOOT_ACHIEVEMENT_POSITION"],
 							desc = AL["MAP_TOOLTIPS_LOOT_ACHIEVEMENT_POSITION_DESC"],

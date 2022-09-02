@@ -12,6 +12,7 @@ local AL = LibStub("AceLocale-3.0"):GetLocale("RareScanner");
 -- RareScanner database libraries
 local RSContainerDB = private.ImportLib("RareScannerContainerDB")
 local RSGeneralDB = private.ImportLib("RareScannerGeneralDB")
+local RSAchievementDB = private.ImportLib("RareScannerAchievementDB")
 local RSConfigDB = private.ImportLib("RareScannerConfigDB")
 
 -- RareScanner internal libraries
@@ -64,6 +65,7 @@ function RSContainerPOI.GetContainerPOI(containerID, mapID, containerInfo, alrea
 	end
 	POI.foundTime = alreadyFoundInfo and alreadyFoundInfo.foundTime
 	POI.isDiscovered = POI.isOpened or alreadyFoundInfo ~= nil
+	POI.achievementLink = RSAchievementDB.GetNotCompletedAchievementLinkByMap(containerID, mapID)
 	if (containerInfo) then
 		POI.worldmap = containerInfo.worldmap
 	end

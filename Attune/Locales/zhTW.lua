@@ -188,7 +188,11 @@ Lang["DelUnder70_TEXT"] = "刪除70等以下的角色"
 Lang["DelUnder70_DESC"] = "刪除所有收集的有關70級以下玩家的信息。"
 Lang["DelUnder70_CONF"] = "真的要刪除70級以下的所有角色嗎？"
 Lang["DelUnder70_DONE"] = "所有低於70的角色均已刪除。"
-
+--302
+Lang["AnnounceAchieve_TEXT"] = "在公會聊天中宣布成就"
+Lang["AnnounceAchieve_DESC"] = "獲得成就時發送公會消息。"
+Lang["AchieveCompleteGuild"] = "##LINK## 聲望已達到! (##POINTS## 總積分)" 
+					
 
 -- TREEVIEW
 Lang["World of Warcraft"] = "魔獸世界"

@@ -356,11 +356,14 @@
 			return newImage
 		end
 
-		newButton.topMouseover = ImgBar (.33, .595, .906, .915, "TOPLEFT")
-		newButton.bottomMouseover = ImgBar (.33, .595, .877, .886, "BOTTOMLEFT")
-		newButton.topSelected = ImgBar (.01, .27, .867, .876, "TOPLEFT")
-		newButton.bottomSelected = ImgBar (.01, .27, .838, .847, "BOTTOMLEFT")
-
+		--newButton.topMouseover = ImgBar (.33, .595, .906, .915, "TOPLEFT")
+		--newButton.bottomMouseover = ImgBar (.33, .595, .877, .886, "BOTTOMLEFT")
+		--newButton.topSelected = ImgBar (.01, .27, .867, .876, "TOPLEFT")
+		--newButton.bottomSelected = ImgBar (.01, .27, .838, .847, "BOTTOMLEFT")
+		newButton.bottomSelected = ImgBar (0, .28, .834, .847, "TOPLEFT")
+		newButton.topSelected = ImgBar (0, .28, .8084, .8214, "BOTTOMLEFT")
+		newButton.topMouseover = ImgBar (.33, .595, .8285, .8415, "TOPLEFT")
+		newButton.bottomMouseover = ImgBar (.33, .595, .803, .816, "BOTTOMLEFT")
 		newButton.button =  CreateFrame ("Button", nil, newButton, BackdropTemplateMixin and "BackdropTemplate")
 		newButton.button:SetSize (_width, _height - 16)
 		newButton.button:SetPoint ("TOPLEFT", 1, -8)
@@ -457,7 +460,9 @@
 				for Index = 1, #InstanceSorted, 1 do
 					key, value = InstanceSorted [Index], (LFG113InstanceKeys [InstanceSorted [Index]] == nil and Instance [InstanceSorted [Index]] or LFG113InstanceKeys [InstanceSorted [Index]])
 					if value[9] then
-						if submenu[value[9]] == nil and (value[9] == L.Locals.CurrentLocal ["Clients"]["1"] or (version >= 2 and (value[9] == L.Locals.CurrentLocal ["Clients"]["2"].." Normal" or value[9] == L.Locals.CurrentLocal ["Clients"]["2"].." Heroic" or value[9] == L.Locals.CurrentLocal ["Clients"]["2"]))) then
+						if submenu[value[9]] == nil and (value[9] == L.Locals.CurrentLocal ["Clients"]["1"] or
+								(version >= 2 and (value[9] == L.Locals.CurrentLocal ["Clients"]["2"].." Normal" or value[9] == L.Locals.CurrentLocal ["Clients"]["2"].." Heroic" or value[9] == L.Locals.CurrentLocal ["Clients"]["2"])) or
+								(version >= 3 and (value[9] == L.Locals.CurrentLocal ["Clients"]["3"].." Normal" or value[9] == L.Locals.CurrentLocal ["Clients"]["3"].." Heroic" or value[9] == L.Locals.CurrentLocal ["Clients"]["3"]))) then
 							submenu[value[9]] = 1;
 							info.hasArrow = true; -- creates submenus
 							info.notCheckable = true;
@@ -3138,8 +3143,8 @@
 		L.Frames.mainFrame.Settings.topTabs ["General"].forceKeybind:SetScript("OnClick", function(self)
 				if LFG113Saved ["enableSound"] then PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON) end
 				LFG113Saved ["ForceKeybind"] = self:GetChecked()
-				if LFG113Saved ["ForceKeybind"]  then SetBinding ("I", "LFG113_TOGGLE")
-				else SetBinding ("I")
+				if LFG113Saved ["ForceKeybind"]  then SetBinding ("ALT-I", "LFG113_TOGGLE")
+				else SetBinding ("ALT-I")
 				end
 			end)
 
@@ -3909,10 +3914,10 @@
 							NewUserAlert ()
 						end)
 
-					--print (not GetBindingByKey("I"))
+					--print (not GetBindingByKey("ALT-I"))
 					--print (LFG113Saved ["ForceKeybind"] )
-					--print (not GetBindingByKey("I") or LFG113Saved ["ForceKeybind"])
-					if LFG113Saved ["ForceKeybind"] then SetBinding ("I", "LFG113_TOGGLE") end
+					--print (not GetBindingByKey("ALT-I") or LFG113Saved ["ForceKeybind"])
+					if LFG113Saved ["ForceKeybind"] then SetBinding ("ALT-I", "LFG113_TOGGLE") end
 
 					if not (UnitIsGroupLeader ("player") or GetNumGroupMembers() == 0) then	UpdateDisplayFrame () end
 					if LFG113Saved ["useRatingSystem"] then RecordPlayerInformation() end
@@ -3927,19 +3932,20 @@
 					ChatFrame1:AddMessage (L.Locals.CurrentLocal ["txtLoaded"] .. " " .. L.Variables.version, 0, 1, 1)
 					ChatFrame1:AddMessage (DisplayReady, 0, 1, 1)
 
-					if LFG113Saved ["hooksecurefunc"] then
-						UnitPopupButtons["LFG113_ADD_TO"] = { text = "LFG113", distIndex = 0, nested = 1 }
-						UnitPopupButtons["ADD_TO_PREME"] = { text = L.Locals.CurrentLocal ["txtAddToPremade"], distIndex = 0 }
-						UnitPopupButtons["ADD_TO_BLACKLIST"] = { text = L.Locals.CurrentLocal ["txtAddToBlackList"], distIndex = 0 }
-						UnitPopupButtons["SHARE_BLACKLIST"] = { text = L.Locals.CurrentLocal ["txtShareBlackList"], distIndex = 0 }
-						UnitPopupButtons["SHARE_RATING"] = { text = L.Locals.CurrentLocal ["txtShareRating"], distIndex = 0 }
-						table.insert (UnitPopupMenus["FRIEND"], #UnitPopupMenus["FRIEND"]-1, "LFG113_ADD_TO")
-						table.insert (UnitPopupMenus["PARTY"], #UnitPopupMenus["PARTY"]-1, "LFG113_ADD_TO")
-						table.insert (UnitPopupMenus["PLAYER"], #UnitPopupMenus["PLAYER"]-1, "LFG113_ADD_TO")
-						table.insert (UnitPopupMenus["RAID"], #UnitPopupMenus["RAID"]-1, "LFG113_ADD_TO")
-						UnitPopupMenus ["LFG113_ADD_TO"] = { "ADD_TO_PREME", "ADD_TO_BLACKLIST", "SHARE_BLACKLIST", "SHARE_RATING"}
-						hooksecurefunc("UnitPopup_OnClick", MySubMenu_Setup) --UnitPopup_HideButtons
-					end
+					-- WOW removed UnitPopupButtons in WOTLK Classic?
+					--if LFG113Saved ["hooksecurefunc"] then
+					--	UnitPopupButtons["LFG113_ADD_TO"] = { text = "LFG113", distIndex = 0, nested = 1 }
+					--	UnitPopupButtons["ADD_TO_PREME"] = { text = L.Locals.CurrentLocal ["txtAddToPremade"], distIndex = 0 }
+					--	UnitPopupButtons["ADD_TO_BLACKLIST"] = { text = L.Locals.CurrentLocal ["txtAddToBlackList"], distIndex = 0 }
+					--	UnitPopupButtons["SHARE_BLACKLIST"] = { text = L.Locals.CurrentLocal ["txtShareBlackList"], distIndex = 0 }
+					--	UnitPopupButtons["SHARE_RATING"] = { text = L.Locals.CurrentLocal ["txtShareRating"], distIndex = 0 }
+					--	table.insert (UnitPopupMenus["FRIEND"], #UnitPopupMenus["FRIEND"]-1, "LFG113_ADD_TO")
+					--	table.insert (UnitPopupMenus["PARTY"], #UnitPopupMenus["PARTY"]-1, "LFG113_ADD_TO")
+					--	table.insert (UnitPopupMenus["PLAYER"], #UnitPopupMenus["PLAYER"]-1, "LFG113_ADD_TO")
+					--	table.insert (UnitPopupMenus["RAID"], #UnitPopupMenus["RAID"]-1, "LFG113_ADD_TO")
+					--	UnitPopupMenus ["LFG113_ADD_TO"] = { "ADD_TO_PREME", "ADD_TO_BLACKLIST", "SHARE_BLACKLIST", "SHARE_RATING"}
+					--	hooksecurefunc("UnitPopup_OnClick", MySubMenu_Setup) --UnitPopup_HideButtons
+					--end
 				end)
 			elseif event == "GROUP_ROSTER_UPDATE"  then
 				if L.Variables.GroupRosterSecondFire == nil then L.Variables.GroupRosterSecondFire = true

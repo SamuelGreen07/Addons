@@ -1,6 +1,9 @@
 # Skillet-Classic  -Ace3-
 
-## [1.46](https://github.com/b-morgan/Skillet-Classic/tree/1.46) (2022-07-03)
-[Full Changelog](https://github.com/b-morgan/Skillet-Classic/compare/1.45...1.46) [Previous Releases](https://github.com/b-morgan/Skillet-Classic/releases)
+## [1.47](https://github.com/b-morgan/Skillet-Classic/tree/1.47) (2022-08-30)
+[Full Changelog](https://github.com/b-morgan/Skillet-Classic/compare/1.46...1.47) [Previous Releases](https://github.com/b-morgan/Skillet-Classic/releases)
 
-- Make AddToQueue global  
+- Remove Burning Crusade Classic build  
+- Update for Wrath  
+- Add option to "Use bank as another alt"  
+- Update for Wrath-Classic  

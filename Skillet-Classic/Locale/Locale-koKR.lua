@@ -292,6 +292,10 @@ L["Unlearned"] = "배우지 않음"
 L["Use Action Bar button to change professions"] = "Use Action Bar button to change professions"
 L["USEALTCURRVENDITEMSDESC"] = "다른 화폐로 구입한 상인 아이템은 상인 공급으로 간주됩니다."
 L["USEALTCURRVENDITEMSNAME"] = "다른 화폐로 구입한 상인 아이템 사용"
+--[[Translation missing --]]
+L["USEBANKASALTDESC"] = "Use the contents of the bank as if it was another alternate."
+--[[Translation missing --]]
+L["USEBANKASALTNAME"] = "Use bank as another alt"
 L["USEBLIZZARDFORFOLLOWERSDESC"] = "주둔지 추종자 전문 기술에 블리자드 UI를 사용합니다."
 L["USEBLIZZARDFORFOLLOWERSNAME"] = "추종자에 블리자드 UI 사용"
 L["USEGUILDBANKASALTDESC"] = "길드 금고의 내용물을 마치 또 다른 캐릭처럼 사용합니다."

@@ -2,6 +2,22 @@
 
 _______________________
 
+**VERSION R1.92991 RELEASE - September 1st, 2022**
+
+* Fixed an issue that affected class name colorization in Classic, as well as the hotkey binding for the guild pane. I repeat, GRM does **NOT** overwrite any keybinds at all, and even goes out of its way to ensure the default guild pane hotkey in Classic is not only not used at all, but not shared with the Push-to-Talk hotkey, if there even is one.
+* Fixed an issue that could cause classic build errors if they ever released TBC again. Just better compartmentalizing of the various Classic builds so that I can have 1 single GRM build compatible with ALL Classic builds and Retail.
+
+
+**VERSION R1.9299 RELEASE - September 1st, 2022**
+
+* Fixed an issue that affected some localization clients with spamming of the GuildInfo to the chat. This now future proofs the parsing of the data with some pattern matching instead, in case Blizz decide's to change their translation a 3rd time!
+
+**VERSION R1.9298 RELEASE - September 1st, 2022**
+
+* Compatibility update for WOTLK Classic and for Retail
+* Please note, the calendar feature of WOTLK has not been fully implemented by Blizzard so events cannot yet be created until they are. As such, the feature will still be disabled, like with TBC and Classic era until it is fully updated and implemented. This should hopefully happen in the first mini patch in WOTLK.
+* This is NOT the pending major release. Stay tuned.
+
 **VERSION R1.9297 RELEASE - February 22, 2022**
 
 * Compatibility update for 9.2.0
@@ -3772,7 +3788,7 @@ Note... lots being worked on, this is just a minor update to resolve this bug.
 
 **QUALITY OF LIFE**
 
-QoL1: AddAlt "autocomplete" is now significantly smarter. It will not just alphabetize it, but will do partial word matches to names, it color codes the names to their class, and if they are already grouped as an alt/main it indicates it with <A> or <M> tags
+QoL1: AddAlt "autocomplete" is now significantly smarter. It will not just alphabetize it, but will do partial word matches to names, it color codes the names to their class, and if they are already grouped as an alt/main it indicates it with alt or main tags
 
 QoL2: Options Window has been a bit overhauled, with sub-tabs for each category. While they are mostly "empty" now, there is a lot of room for further customization as needed as more features are added without getting too cluttered.
 

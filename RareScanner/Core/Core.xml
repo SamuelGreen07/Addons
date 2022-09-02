@@ -17,6 +17,7 @@
 	<Include file="Data\RSNpcDB.lua"/>
 	<Include file="Data\RSConfigDB.lua"/>
 	<Include file="Data\RSGeneralDB.lua"/>
+	<Include file="Data\RSAchievementDB.lua"/>
 	<Include file="Data\RSLootDB.lua"/>
 	<Include file="Data\RSGuideDB.lua"/>
 	

@@ -29,10 +29,10 @@ GRML = {};
 GRM_G = {}; 
 
 -- Addon Details:
-GRM_G.Version = "R1.9297";
-GRM_G.PatchDay = 1645595649;             -- In Epoch Time
-GRM_G.PatchDayString = "1645595649";     -- 2 Versions saves on conversion computational costs... just keep one stored in memory. Extremely minor gains, but very useful if syncing thousands of pieces of data in large guilds.
-GRM_G.Patch = "9.2.0";
+GRM_G.Version = "R1.92991";
+GRM_G.PatchDay = 1662051074;             -- In Epoch Time
+GRM_G.PatchDayString = "1662051074";     -- 2 Versions saves on conversion computational costs... just keep one stored in memory. Extremely minor gains, but very useful if syncing thousands of pieces of data in large guilds.
+GRM_G.Patch = "9.2.7";
 GRM_G.LvlCap = GetMaxPlayerLevel();
 GRM_G.BuildVersion = select ( 4 , GetBuildInfo() ); -- Technically the build level or the patch version as an integer.
 
@@ -1086,10 +1086,11 @@ end
 ----- END OF BUILD COMPAT... ----------
 ---------------------------------------
 
--- What it Deos:    Initializes chat coloring controls for classic
+-- Method:          SetClassChatColoring()
+-- What it Does:    Initializes chat coloring controls for classic
 -- Purpose:         Quality of life control
 GRM.SetClassChatColoring = function()
-    if GRM_G.BuildVersion < 23000 then
+    if GRM_G.BuildVersion < 40000 then
         local num = 0;
         
         if not GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].colorizeClassicRosterNames then
@@ -2478,7 +2479,7 @@ end
 GRM.CreateGuildCreationDatePattern = function()
     local pattern = GUILD_INFO_TEMPLATE;
 
-    if GRM_G.BuildVersion >= 80000 or GRM_G.Region == "deDE" or GRM_G.Region == "frFR" or GRM_G.Region == "koKR" then
+    if GRM_G.BuildVersion >= 30000 or GRM_G.Region == "deDE" or GRM_G.Region == "frFR" or GRM_G.Region == "koKR" then
         for i = 1 , 5 do
             pattern = string.gsub ( pattern  , "%%" .. i .. "$d" , "(%%d+)" );
         end
@@ -2497,16 +2498,18 @@ GRM.SetSystemMessageFilter = function ( _ , _ , msg , ... )
     GRM_G.SystemMessageTest = true;
 
     if time() - GRM_G.IsOnLogonDelay > 1 and not GRM_G.TempBanSystemMessage then
+        GRM_G.guildInfoSystemMessage = GRM_G.guildInfoSystemMessage or string.sub ( GUILD_INFO_TEMPLATE , 1 , string.find ( GUILD_INFO_TEMPLATE , "%%" ) - 1 );        
+
         -- GUILD INFO FILTER (GuildInfo())
-        if ( GRM_G.MsgFilterDelay and ( string.find ( msg , GRM.L ( "Guild: " ) ) ~= nil or string.find ( msg , GRM.L ( "Guild created " ) ) ~= nil ) ) then       -- These may need to be localized. I have not yet tested if other regions return same info. It IS system info.
-            if string.find ( msg , GRM.L ( "Guild created " ) ) ~= nil and ( ( time() - GRM_G.SystemMsgThrottle ) > 1 ) then
+        if GRM_G.MsgFilterDelay and ( string.find ( msg , GRM_G.guildInfoSystemMessage ) ~= nil or string.find ( msg , 
+        GRM.Trim ( CHAT_GUILD_SEND ) ) ~= nil ) then       -- These may need to be localized. I have not yet tested if other regions return same info. It IS system info.
+            if string.find ( msg , GRM_G.guildInfoSystemMessage ) ~= nil and ( ( time() - GRM_G.SystemMsgThrottle ) > 1 ) then
                 GRM_G.SystemMsgThrottle = time();
                 GRM_G.CreationDatePattern = GRM_G.CreationDatePattern or GRM.CreateGuildCreationDatePattern();
 
                 local a , b , c , _ , numUniqueAccounts = string.match ( msg , GRM_G.CreationDatePattern );
                 local month , day , year;
                 -- a , b , c can be either day, month, or year, depending on the Region formatting for the note.
-                -- string.match ( "Guild created 8-31-2019, 4 players, 4 accounts" , GRM_G.CreationDatePattern )
                 if GRM_G.Region == "deDE" or GRM_G.Region == "esES" or GRM_G.Region == "esMX" or GRM_G.Region == "frFR" then
                     day = a;
                     month = b;
@@ -3711,7 +3714,7 @@ GRM.DelayMinimapButtonOpen = function ( messageDisplayed , message2Displayed )
             GRM.Report ( GRM.L ( "Database Still Loading. GRM will open automatically when finished." ) );
             message2Displayed = true;
         end
-        if not messageDisplayed then
+        if GRM_G.inCombat and not messageDisplayed then
             GRM.Report ( GRM.L ( "GRM window will open when combat ends." ) );
             messageDisplayed = true;
         end
@@ -5623,7 +5626,7 @@ end
 -- Purpose:         To enable class coloring in Classic, which is a very useful feature
 GRM.UpdateMemberDetailNameClassColor = function()
     
-    if GRM_G.BuildVersion < 23000 and GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].colorizeClassicRosterNames then
+    if GRM_G.BuildVersion < 40000 and GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].colorizeClassicRosterNames then
         local class = select ( 11 , GetGuildRosterInfo ( GRM_G.RosterSelection ) );
         local colors = GRM.GetClassColorRGB ( class , false );
 
@@ -5739,9 +5742,6 @@ GRM.InitializeOldRosterButtons = function( classicSpecific )
             end
         end);
 
-        -- if GRM_G.BuildVersion < 40000 then
-        --     button:HookScript ( "OnValueChanged" , GRM.RecolorText );
-        -- end
     end
 end
 
@@ -6024,21 +6024,35 @@ GRM.MemberListBlizTooltip_Update = function( self , isOldRoster , classID , name
     end
 end
 
--- Method:          GRM.BuildGuildRosterHotkeyAndMacro()
+-- Method:          GRM.BuildGuildRosterHotkeyAndMacro ( int , bool )
 -- What it Does:    Adds tooltip and creates macro compatibiltiy to hotkey the CTRL-J just like live servers
 -- Purpose:         Continuity in experience with GRM from latest expansion live to Classic live
-GRM.BuildGuildRosterHotkeyAndMacro = function()
+GRM.BuildGuildRosterHotkeyAndMacro = function ( count , noPTT )
+    count = count or 1;
+    noPTT = noPTT or false;
 
-    local hotkeyTemp = select ( 3 , GetBinding(197) );
+    local keyNum = 197;
+    local hotkeyTemp = select ( 3 , GetBinding(keyNum) );
     local listOfKeybinds = { "J" , ";" };
     local keybinds = "";
 
-    if C_VoiceChat.GetPushToTalkBinding() == nil then
-        C_Timer.After ( 0.5 , GRM.BuildGuildRosterHotkeyAndMacro );
+    if not noPTT and C_VoiceChat.GetPushToTalkBinding() == nil then
+        C_Timer.After ( 0.5 , function()
+            count = count + 1;
+
+            if count > 30 then
+                noPTT = true;
+            end
+            GRM.BuildGuildRosterHotkeyAndMacro ( count , noPTT );   -- Checked for 15 seconds, PTT keybind still nil, so it is not API not just loading.
+        end);
         return;
     else
 
-        local PushToTalkHotKey = C_VoiceChat.GetPushToTalkBinding()[1];
+        local PushToTalkHotKey = "";
+
+        if not noPTT then
+            PushToTalkHotKey = C_VoiceChat.GetPushToTalkBinding()[1];
+        end
 
         -- Initialize the hook on the GuildMicroButton
         GuildMicroButton:HookScript ( "OnClick" , function ()
@@ -6061,7 +6075,7 @@ GRM.BuildGuildRosterHotkeyAndMacro = function()
         end);
 
         GuildMicroButton:SetScript ( "OnEnter" , function( self )
-            local hotkey = select ( 3 , GetBinding(197) );                  -- This is the hotkey to open guild and community interface.
+            local hotkey = select ( 3 , GetBinding(keyNum) );                  -- This is the hotkey to open guild and community interface.
             local tooltipTopLine = GRM.L ( "Guild & Communities" );
 
             if hotkey ~= nil then
@@ -6115,19 +6129,38 @@ GRM.BuildGuildRosterHotkeyAndMacro = function()
     end
 end
 
--- Method:          GRM.BuildGuildRosterHotkeyAndMacroCLASSIC()
+-- Method:          GRM.BuildGuildRosterHotkeyAndMacroCLASSIC ( int , boolean )
 -- What it Does:    Adds tooltip and creates macro compatibiltiy to hotkey the CTRL-J just like live servers
 -- Purpose:         Continuity in experience with GRM from latest expansion live to Classic live
-GRM.BuildGuildRosterHotkeyAndMacroCLASSIC = function()
-    local keyBind = select ( 3 , GetBinding(184) );
+GRM.BuildGuildRosterHotkeyAndMacroCLASSIC = function( count , noPTT )
+    count = count or 1;
+    noPTT = noPTT or false;
+    
+    local keyNum = 184;
+    if GRM_G.BuildVersion >= 30000 then
+        keyNum = 209;
+    end
+    local keyBindGuild = select ( 3 , GetBinding(keyNum) );
     local listOfKeybinds = { "J" , ";" };
 
-    if C_VoiceChat.GetPushToTalkBinding() == nil then
-        C_Timer.After ( 0.5 , GRM.BuildGuildRosterHotkeyAndMacroCLASSIC );
+    if not noPTT and C_VoiceChat.GetPushToTalkBinding() == nil then
+        C_Timer.After ( 0.5 , function()
+            count = count + 1;
+
+            if count > 30 then
+                noPTT = true;
+            end
+            GRM.BuildGuildRosterHotkeyAndMacroCLASSIC ( count , noPTT );   -- Checked for 15 seconds, PTT keybind still nil, so it is not API not just loading.
+        end);
         return;
     else
-        local PushToTalkHotKey = C_VoiceChat.GetPushToTalkBinding()[1];
-        if keyBind == nil then
+        local PushToTalkHotKey = "";
+
+        if not noPTT then
+            PushToTalkHotKey = C_VoiceChat.GetPushToTalkBinding()[1];
+        end
+
+        if keyBindGuild == nil then
             -- No keybind set, let's verify the first keybind is not in use anywhere...
             for i = 1 , #listOfKeybinds do
                 if GetBindingByKey ( listOfKeybinds[i] ) == nil and listOfKeybinds[i] ~= PushToTalkHotKey then
@@ -6138,8 +6171,8 @@ GRM.BuildGuildRosterHotkeyAndMacroCLASSIC = function()
         end
         
         SocialsMicroButton:SetScript ( "OnEnter" , function( self )
-            local hotkeySocial = select ( 3 , GetBinding ( 181 ) );                  -- This is the hotkey to open guild and community interface.
-            local hotkeyRoster = select ( 3 , GetBinding ( 184 ) ); 
+            local hotkeySocial = select ( 3 , GetBinding ( keyNum - 3 ) );                  -- This is the hotkey to open guild and community interface.
+            local hotkeyRoster = select ( 3 , GetBinding ( keyNum ) ); 
             local tooltipTopLine = GRM.L ( "Social" );
 
             if hotkeySocial ~= nil then
@@ -12178,7 +12211,7 @@ GRM.GetGuildEventString = function ( index , playerName , initRank , finRank , c
     local eventType = { "demote" , "promote" , "invite" , "join" , "quit" , "remove" };
     local logEntryMetaData = { false };
 
-    if GRM_G.BuildVersion >= 23000 then -- Cata 2.3
+    if GRM_G.BuildVersion >= 30000 then -- Cata 2.3
         QueryGuildEventLog();
 
         if index == 1 or index == 2 then
@@ -19500,7 +19533,7 @@ GRM.KickPromoteOrJoinPlayer = function ( _ , msg , text , clubMemberID )
             -- Player joins the guild
             elseif string.find ( text , GRM.L ( "joined the guild." ) ) ~= nil and IsInGuild() then
                 if GRM_G.BuildVersion < 80000 then
-                    if GRM_G.BuildVersion >= 40000 then -- Cata to Legion
+                    if GRM_G.BuildVersion >= 30000 then -- WOTLK to Legion
                         QueryGuildEventLog();
                     end
                     GRM_G.changeHappenedExitScan = true;
@@ -24451,7 +24484,7 @@ GRM.TriggerTrackingCheck = function()
             GRM.TrackingIntegrityCheck();
         end
         GRM.GuildRoster();
-        if GRM_G.BuildVersion >= 40000 then
+        if GRM_G.BuildVersion >= 30000 then
             QueryGuildEventLog();
         end
     end
@@ -24560,7 +24593,7 @@ GRM.SlashCommandScan = function()
     GRM.Report ( GRM.L ( "GRM:" ) .. " " .. GRM.L ( "Scanning for Guild Changes Now. One Moment..." ) );
     GRM_G.ManualScanEnabled = true;
     GRM.GuildRoster();
-    if GRM_G.BuildVersion >= 40000 then
+    if GRM_G.BuildVersion >= 30000 then
         QueryGuildEventLog();
     end
     C_Timer.After ( 5 , GRM.TriggerTrackingCheck );
@@ -25342,7 +25375,7 @@ GRM.ScanIntegrityCheck = function()
     if IsInGuild() and ( time() - GRM_G.TimeAtCompletion ) > GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].scanDelay then
         if GRM_G.BuildVersion < 30000 or ( GRM_G.BuildVersion >= 30000 and not GRM.IsCalendarEventEditOpen() ) then
             GRM.GuildRoster();
-            if GRM_G.BuildVersion >= 40000 then
+            if GRM_G.BuildVersion >= 30000 then
                 QueryGuildEventLog();
             end
         end
@@ -25491,14 +25524,14 @@ GRM.finalLoadSteps = function()
     -- The following event registartion is purely for UI registeration and activation... General tracking does not need the UI, but CommunitiesFrame should be visible bnefore triggering
     -- Each of the following events might trigger on event update.
 
-    if GRM_G.BuildVersion >= 40000 then
+    if GRM_G.BuildVersion >= 30000 then
         UI_Events:RegisterEvent ( "GUILD_EVENT_LOG_UPDATE" );
     else
         UI_Events:RegisterEvent ( "GUILD_ROSTER_UPDATE" );
     end
 
     UI_Events:SetScript ( "OnEvent" , function ( _ , event )
-        if ( GRM_G.BuildVersion >= 40000 and event == "GUILD_EVENT_LOG_UPDATE" ) or ( GRM_G.BuildVersion < 40000 and event == "GUILD_ROSTER_UPDATE" ) then
+        if ( GRM_G.BuildVersion >= 30000 and event == "GUILD_EVENT_LOG_UPDATE" ) or ( GRM_G.BuildVersion < 30000 and event == "GUILD_ROSTER_UPDATE" ) then
             GRM.Tracking();
         end
     end);
@@ -25508,7 +25541,7 @@ GRM.finalLoadSteps = function()
         GRM_G.GroupSyncRestrictionControl = true;
     end
 
-    if GRM_G.BuildVersion >= 40000 then
+    if GRM_G.BuildVersion >= 30000 then
         GRM.GuildRoster();
         QueryGuildEventLog();
     else
@@ -25553,7 +25586,7 @@ GRM.ReactivateAddon = function()
 
     GRM.SetGuildInfoDetails();
     GRM.GuildRoster();
-    if GRM_G.BuildVersion >= 40000 then
+    if GRM_G.BuildVersion >= 30000 then
         QueryGuildEventLog();
     end
     
@@ -25597,7 +25630,7 @@ GRM.ManageGuildStatus = function ()
                 GRM_G.IsNewToon = true;                             -- Ensures if a player leaves a guild and joins another, it syncs the new settings to the guild
                 GRM_G.guildRankNames = nil;                         -- reset guild rank names.
 
-                if GRM_G.BuildVersion >= 40000 then
+                if GRM_G.BuildVersion >= 30000 then
                     UI_Events:UnregisterEvent ( "GUILD_EVENT_LOG_UPDATE" );         -- This prevents it from doing an unnecessary tracking call if not in guild.
                 end
                 if GRMsync.MessageTracking ~= nil then
@@ -25698,7 +25731,7 @@ GRM.SettingsLoadedFinishDataLoad = function()
     if IsInGuild() then
         Initialization:UnregisterEvent ("PLAYER_ENTERING_WORLD");
         GRM.GuildRoster();                                       -- Initial queries...
-        if GRM_G.BuildVersion >= 40000 then
+        if GRM_G.BuildVersion >= 30000 then
             QueryGuildEventLog();
         end
         C_Timer.After ( 2 , GRM.GR_LoadAddon );                 -- Queries do not return info immediately, gives server a 5 second delay.
