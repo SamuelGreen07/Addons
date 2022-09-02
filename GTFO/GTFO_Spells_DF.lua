@@ -1,21 +1,14 @@
 --------------------------------------------------------------------------
--- GTFO_FF_BFA.lua 
+-- GTFO_Spells_DF.lua 
 --------------------------------------------------------------------------
 --[[
-GTFO Friendly Fire List - Battle for Azeroth
+GTFO Spell List - Dragonflight
 ]]--
 
 if (not (GTFO.ClassicMode or GTFO.BurningCrusadeMode or GTFO.WrathMode)) then
 
--- **********************
--- * Battle for Azeroth *
--- **********************
-
-
-GTFO.FFSpellID["291338"] = {
-  --desc = "Blooddrinker (Madness: Bloodthirsty)";
-  sound = 4;
-};
-
+--- ************************
+--- * Dragon Isles (World) *
+--- ************************
 
 end

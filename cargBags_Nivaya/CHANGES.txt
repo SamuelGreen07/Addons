@@ -1,0 +1,23 @@
+------------------------------------------------------------------------
+r83 | humfras | 2022-09-02 19:57:43 +0000 (Fri, 02 Sep 2022) | 1 line
+Changed paths:
+   M /trunk/cargBags/base/core.lua
+   M /trunk/cargBags/base/implementation.lua
+   M /trunk/cargBags/base/itembutton.lua
+   M /trunk/cargBags/base-add/filters.sieve.lua
+   M /trunk/cargBags/mixins-add/default.scaffold.lua
+   M /trunk/cargBags/mixins-add/itemkeys/equipSets.lua
+   M /trunk/cargBags/mixins-add/plugins/bagBar.lua
+   M /trunk/cargBags_Nivaya.lua
+   M /trunk/cargBags_Nivaya.toc
+   A /trunk/cargBags_Nivaya_TBC.toc
+   A /trunk/cargBags_Nivaya_Vanilla.toc
+   A /trunk/cargBags_Nivaya_Wrath.toc
+   M /trunk/config.lua
+   M /trunk/filters.lua
+   M /trunk/localization.lua
+   M /trunk/style.lua
+
+update for WotLK classic
+------------------------------------------------------------------------
+

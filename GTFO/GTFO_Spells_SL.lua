@@ -5,7 +5,7 @@
 GTFO Spell List - Shadowlands
 ]]--
 
-if (not (GTFO.ClassicMode or GTFO.BurningCrusadeMode)) then
+if (not (GTFO.ClassicMode or GTFO.BurningCrusadeMode or GTFO.WrathMode)) then
 
 --- ***********************
 --- * Shadowlands (World) *
@@ -238,6 +238,7 @@ GTFO.SpellID["360677"] = {
   --desc = "Fleeting Flames";
   sound = 1;
 };
+
 
 --- **********************
 --- * Halls of Atonement *
@@ -479,6 +480,7 @@ GTFO.SpellID["320366"] = {
 GTFO.SpellID["333485"] = {
   --desc = "Disease Cloud (Rotspew)";
   sound = 1;
+  casterOnly = true;
   test = true;
 };
 
@@ -520,9 +522,14 @@ GTFO.SpellID["332332"] = {
 
 GTFO.SpellID["332672"] = {
   --desc = "Bladestorm (Atal'ai Deathwalker)";
-  sound = 1;
-  tankSound = 0;
-  test = true;
+  soundChallenge = 1;
+  tankSoundChallenge = 2;
+};
+
+GTFO.SpellID["332157"] = {
+  --desc = "Spinning Up (Headless Client)";
+  soundChallenge = 1;
+  tankSoundChallenge = 2;
 };
 
 GTFO.SpellID["323569"] = {
@@ -585,6 +592,11 @@ GTFO.SpellID["353633"] = {
 
 GTFO.SpellID["352676"] = {
   --desc = "Slice (Trap)";
+  sound = 1;
+};
+
+GTFO.SpellID["368015"] = {
+  --desc = "Bloated Rot Pool";
   sound = 1;
 };
 
@@ -994,7 +1006,6 @@ GTFO.SpellID["365683"] = {
   sound = 1;
 };
 
-
 GTFO.SpellID["360425"] = {
   --desc = "Unholy Ground (The Jailer)";
   sound = 1;
@@ -1005,5 +1016,21 @@ GTFO.SpellID["365174"] = {
   --desc = "Defile (The Jailer)";
   sound = 1;
 };
+
+-- Testing only
+GTFO.SpellID["320067"] = {
+  --desc = "Faerie Dust (Shimmerbough Ritualist)";
+  applicationOnly = true;
+  sound = 1;
+  tankSound = 4;
+};
+
+GTFO.SpellID["320081"] = {
+  --desc = "Whimsy Barb (Shimmerbough Ritualist)";
+  applicationOnly = true;
+  sound = 2;
+  tankSound = 3;
+};
+
 
 end

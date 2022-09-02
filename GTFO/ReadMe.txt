@@ -1737,3 +1737,26 @@ Change Log:
 
 4.66.6
 * Fixed BC ToC
+
+4.67
+* Updated for patch 9.2.5
+* Added support for targeting specific Mythic+ key thresholds
+* Added Shadowlands spells (world)
+* Added SL spells for De Other Side
+
+4.67.1
+* Added Shadowlands spells (world)
+* Added SL spells for Torghast
+* Added Legion spells for Return to Karazhan
+* Added WoD spells for Draenor (world)
+
+4.67.2
+* Added SL spells for Sepulcher of the First Ones
+* Added SL spells for Torghast
+* Added WoD spells for Iron Docks
+* Added WoD spells for Grimrail Depot
+
+4.68
+* Wrath Classic support
+* Dragonflight support (initial)
+

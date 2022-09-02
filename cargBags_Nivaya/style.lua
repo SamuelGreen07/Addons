@@ -4,9 +4,10 @@ local cargBags = ns.cargBags
 local _
 local L = cBnivL
 
-local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
-local isTBC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+local isClassic = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE
 local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+
+local LE_ITEM_CLASS_KEY = LE_ITEM_CLASS_KEY or Enum.ItemClass.Key
 
 local BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate" or nil
 
@@ -255,7 +256,7 @@ JS:SetScript("OnEvent", function() SellJunk() end)
 
 -- Restack Items
 local restackItems
-if isClassic or isTBC then
+if isClassic then
 	
 	local ContainerID = { bags = { 0 }, bank = { -1 }, guild = { 42 } }
 	for i = 1, NUM_BAG_SLOTS do table.insert(ContainerID.bags, i) end
@@ -769,7 +770,7 @@ function MyContainer:OnCreate(name, settings)
 		self.BagBar = bagButtons
 		
 		-- keyring button
-		if (isClassic or isTBC) and tBag then
+		if isClassic and tBag then
 			self.keyRing = createIconButton("Keyring", self, Textures.Keyring, "BOTTOMRIGHT", KEYRING, tBag)
 			self.keyRing:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", 0, 0)
 			self.keyRing:SetScript("OnClick", function()
@@ -923,7 +924,7 @@ function MyContainer:OnCreate(name, settings)
 
 	-- Item drop target
 	if (tBag or tBank or tReagent) then
-		if isClassic or isTBC then
+		if isClassic then
 			self.DropTarget = CreateFrame("Button", self.name.."DropTarget", self, "ItemButtonTemplate")
 		else
 			self.DropTarget = CreateFrame("ItemButton", self.name.."DropTarget", self)

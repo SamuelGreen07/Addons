@@ -1,8 +1,7 @@
 local addon, ns = ...
 local cargBags = ns.cargBags
 
-local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
-local isTBC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+local isClassic = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE
 local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 
 local BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate" or nil

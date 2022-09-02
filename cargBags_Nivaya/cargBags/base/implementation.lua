@@ -20,8 +20,7 @@
 local addon, ns = ...
 local cargBags = ns.cargBags
 
-local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
-local isTBC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+local isClassic = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE
 local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 
 local animaSpells = {
@@ -33,6 +32,22 @@ local animaSpells = {
 local function IsAnimaItem(itemId)
 	local n,spellId = GetItemSpell(itemId or 0)
 	return spellId and animaSpells[spellId]
+end
+
+local korthianRelictSpells = {
+	[356931] = true,	--currently unused
+	[356933] = true,
+	[356934] = true,
+	[356935] = true,	--currently unused
+	[356936] = true,
+	[356937] = true,	--currently unused
+	[356938] = true,
+	[356939] = true,
+	[356940] = true,
+}
+local function IsKorthianRelictItem(itemId)
+	local n,spellId = GetItemSpell(itemId or 0)
+	return spellId and korthianRelictSpells[spellId]
 end
 
 --[[!
@@ -357,7 +372,7 @@ function Implementation:GetCustomItemInfo(bagID, slotID, i)
 		local _
 		i.texture, i.count, i.locked, i.quality, i.readable, _, _, _, _, i.id = GetContainerItemInfo(bagID, slotID)
 		i.cdStart, i.cdFinish, i.cdEnable = GetContainerItemCooldown(bagID, slotID)
-		if isClassic or isTBC then
+		if isClassic then
 			i.isQuestItem, i.questID, i.questActive = nil, nil, nil
 			i.isInSet, i.setName = nil, nil
 		else
@@ -369,7 +384,7 @@ function Implementation:GetCustomItemInfo(bagID, slotID, i)
 		-- last return value here, "texture", doesn't show for battle pets
 		local texture
 		i.name, i.link, i.rarity, i.level, i.minLevel, i.type, i.subType, i.stackCount, i.equipLoc, texture, i.sellPrice, i.classID, i.subClassID  = GetItemInfo(clink)
-		if isClassic or isTBC then
+		if isClassic then
 			if i.type == cBnivL.Quest then
 				i.isQuestItem = true
 			end
@@ -386,7 +401,7 @@ function Implementation:GetCustomItemInfo(bagID, slotID, i)
 		end
 		-- get the item spell to determine if the item is an Artifact Power boosting item
 		if isRetail and ns.options.filterArtifactPower and IsAnimaItem(i.id) then	--IsArtifactPowerItem(i.id) then
-			i.type = ANIMA
+			i.type = POWER_TYPE_ANIMA
 		end
 		-- texture
 		i.texture = i.texture or texture
@@ -403,10 +418,12 @@ function Implementation:GetCustomItemInfo(bagID, slotID, i)
 				i.id = tonumber(id) or 0
 				i.name = name
 				i.minLevel = level
-			elseif (clink:find("keystone")) then
+			elseif (clink:find("Hkeystone")) then
 				local data, name = strsplit("[", clink)
 				i.name = strsplit("]", name)
-				if not i.id then i.id = 138019 end
+				if not i.id then
+					i.id = 180653	--138019
+				end
 				_, _, i.rarity, i.level, i.minLevel, i.type, i.subType, i.stackCount, i.equipLoc, texture, i.sellPrice  = GetItemInfo(i.id)
 			end
 		end

@@ -20,8 +20,7 @@
 local addon, ns = ...
 local cargBags = ns.cargBags
 
-local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
-local isTBC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+local isClassic = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE
 
 local _G = _G
 
@@ -38,8 +37,8 @@ local ItemButton = cargBags:NewClass("ItemButton", nil, "Button")
 ]]
 function ItemButton:GetTemplate(bagID)
 	bagID = bagID or self.bagID
-	return (bagID == -3 and "ReagentBankItemButtonGenericTemplate") or (bagID == -1 and "BankItemButtonGenericTemplate") or (bagID and "ContainerFrameItemButtonTemplate") or ((isClassic or isTBC) and "ItemButtonTemplate" or ""),
-      (bagID == -3 and ReagentBankFrame) or (bagID == -1 and BankFrame) or (bagID and _G["ContainerFrame"..bagID + ((isClassic or isTBC) and 2 or 1)]);
+	return (bagID == -3 and "ReagentBankItemButtonGenericTemplate") or (bagID == -1 and "BankItemButtonGenericTemplate") or (bagID and "ContainerFrameItemButtonTemplate") or (isClassic and "ItemButtonTemplate" or ""),
+      (bagID == -3 and ReagentBankFrame) or (bagID == -1 and BankFrame) or (bagID and _G["ContainerFrame"..bagID + (isClassic and 2 or 1)]);
 end 
 
 local mt_gen_key = {__index = function(self,k) self[k] = {}; return self[k]; end}
@@ -77,7 +76,7 @@ function ItemButton:Create(tpl, parent)
 	local name = ("%sSlot%d"):format(impl.name, impl.numSlots)
 
 	local button
-	if isClassic or isTBC then
+	if isClassic then
 		button = setmetatable(CreateFrame("Button", name, parent, tpl), self.__index)
 	else
 		button = setmetatable(CreateFrame("ItemButton", name, parent, tpl), self.__index)

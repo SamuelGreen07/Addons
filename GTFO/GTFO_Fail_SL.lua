@@ -5,7 +5,7 @@
 GTFO Fail List - Shadowlands
 ]]--
 
-if (not (GTFO.ClassicMode or GTFO.BurningCrusadeMode)) then
+if (not (GTFO.ClassicMode or GTFO.BurningCrusadeMode or GTFO.WrathMode)) then
 
 --- ***********************
 --- * Shadowlands (World) *
@@ -437,6 +437,39 @@ GTFO.SpellID["368175"] = {
   applicationOnly = true;
   sound = 3;
 };
+
+GTFO.SpellID["315543"] = {
+  --desc = "Bonestorm (Book Tornado)";
+  sound = 3;
+};
+
+GTFO.SpellID["338020"] = {
+  --desc = "Molten Surge (Maw Infernous)";
+  sound = 3;
+};
+
+GTFO.SpellID["337756"] = {
+  --desc = "Fiery Brimstone (Maw Infernous)";
+  sound = 3;
+};
+
+GTFO.SpellID["315220"] = {
+  --desc = "Cursed Mirror!";
+  sound = 3;
+};
+
+GTFO.SpellID["373391"] = {
+  --desc = "Nightmare (Nathrezim Infiltrator)";
+  applicationOnly = true;
+  sound = 3;
+};
+
+GTFO.SpellID["373429"] = {
+  --desc = "Carrion Swarm (Nathrezim Infiltrator)";
+  applicationOnly = true;
+  sound = 3;
+};
+
 
 --- **********************
 --- * Halls of Atonement *
@@ -1185,7 +1218,31 @@ GTFO.SpellID["352684"] = {
   sound = 3;
 };
 
+GTFO.SpellID["354166"] = {
+  --desc = "Soul Tormentor (Vault Sentinel)";
+  sound = 3;
+};
 
+GTFO.SpellID["354659"] = {
+  --desc = "Blighted Detonation (Fragment of Troz'igal)";
+  sound = 3;
+};
+
+GTFO.SpellID["353328"] = {
+  --desc = "Soul Ruin (Empowered Mawsworn Woebringer)";
+  sound = 3;
+};
+
+GTFO.SpellID["354511"] = {
+  --desc = "Exploding Soul (Troz'igal the Oppressor)";
+  sound = 3;
+};
+
+GTFO.SpellID["354490"] = {
+  --desc = "Torturing Swipe (Troz'igal the Oppressor)";
+  applicationOnly = true;
+  sound = 3;
+};
 
 --- ******************
 --- * Castle Nathria *
@@ -1740,6 +1797,11 @@ GTFO.SpellID["366692"] = {
   sound = 3;
 };
 
+GTFO.SpellID["361941"] = {
+  --desc = "Crushed (Vigilant Guardian)";
+  sound = 3;
+};
+
 GTFO.SpellID["360999"] = {
   --desc = "Wave of Disintegration (Vigilant Custodian)";
   sound = 3;
@@ -2065,15 +2127,45 @@ GTFO.SpellID["360241"] = {
   sound = 3;
 };
 
+GTFO.SpellID["360008"] = {
+  --desc = "Cloud of Carrion (Mal'Ganis)";
+  applicationOnly = true;
+  sound = 3;
+};
+
+GTFO.SpellID["368569"] = {
+  --desc = "Dark Bombardment (Mawsworn Vanguard)";
+  sound = 3;
+};
+
 GTFO.SpellID["359868"] = {
   --desc = "Shattering Blast (The Jailer)";
   sound = 3;
   tankSound = 0;
+  applicationOnly = true;
 };
 
 GTFO.SpellID["365371"] = {
   --desc = "Tormenting Echo (The Jailer)";
   sound = 3;
+};
+
+GTFO.SpellID["366132"] = {
+  --desc = "Tyranny (The Jailer)";
+  applicationOnly = true;
+  sound = 3;
+  minimumStacks = 1;
+};
+
+GTFO.SpellID["362415"] = {
+  --desc = "Torment (The Jailer)";
+	soundFunction = function() -- Warn only if you get hit more than once within 5 seconds
+		if (GTFO_FindEvent("JailerTorment")) then
+			return 3;
+		end
+		GTFO_AddEvent("JailerTorment", 5);
+		return 0;
+	end
 };
 
 

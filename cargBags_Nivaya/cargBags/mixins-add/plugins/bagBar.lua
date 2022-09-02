@@ -36,8 +36,7 @@ local addon, ns = ...
 local cargBags = ns.cargBags
 local Implementation = cargBags.classes.Implementation
 
-local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
-local isTBC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+local isClassic = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE
 
 local BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate" or nil
 
@@ -58,7 +57,7 @@ function BagButton:Create(bagID)
     local name = addon.."BagButton"..buttonNum
 
     local button
-	if isClassic or isTBC then
+	if isClassic then
 		button = setmetatable(CreateFrame("CheckButton", name, nil, "ItemButtonTemplate"), self.__index)
 	else
 		button = setmetatable(CreateFrame("ItemButton", name, nil), self.__index)
@@ -240,7 +239,7 @@ local disabled = {
 	[-1] = true,
 	[0] = true,
 }
-if isClassic then
+if isClassic and GetClassicExpansionLevel() == 0 then	--is Vanilla WoW
 	disabled[11] = true
 end
 
