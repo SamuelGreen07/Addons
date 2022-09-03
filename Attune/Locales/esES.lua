@@ -192,6 +192,7 @@ Lang["DelUnder70_DONE"] = "Todos los resultados por debajo de nivel 70 eliminado
 Lang["AnnounceAchieve_TEXT"] = "Anunciar logros en el chat del gremio"
 Lang["AnnounceAchieve_DESC"] = "Envía un mensaje de hermandad cuando obtengas un logro."
 Lang["AchieveCompleteGuild"] = "##LINK## completada! (##POINTS## puntos totales)" 
+Lang["AchieveSurvey"] = "¿Te gustaría que |cFFFFD100Attune|r anunciara tus logros en el chat del gremio?"
 					
 
 -- TREEVIEW

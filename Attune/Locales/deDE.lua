@@ -214,6 +214,8 @@ Lang["DelUnder70_DONE"] = "Alle Spieler unter 70 gelöscht."
 Lang["AnnounceAchieve_TEXT"] = "Kündigen Sie Erfolge im Gildenchat an"
 Lang["AnnounceAchieve_DESC"] = "Kündige fertige Erfolg in der Gilde an"
 Lang["AchieveCompleteGuild"] = "##LINK## erfolgreich! (##POINTS## Gesamtpunktzahl)" 
+Lang["AchieveSurvey"] = "Möchtest du, dass |cFFFFD100Attune|r deine Erfolge im Gildenchat ankündigt?"
+
 			
 
 -- TREEVIEW

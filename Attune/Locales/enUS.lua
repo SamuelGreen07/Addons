@@ -214,6 +214,7 @@ Lang["DelUnder70_DONE"] = "All results under 70 deleted."
 Lang["AnnounceAchieve_TEXT"] = "Announce Achievements in guild chat"
 Lang["AnnounceAchieve_DESC"] = "Send a guild message when an achievement is earned."
 Lang["AchieveCompleteGuild"] = "##LINK## complete! (##POINTS## points total)" 
+Lang["AchieveSurvey"] = "Would you like |cFFFFD100Attune|r to announce your achievements in guild chat?"
 					
 
 -- TREEVIEW

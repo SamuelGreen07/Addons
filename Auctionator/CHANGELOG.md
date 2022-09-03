@@ -1,17 +1,9 @@
 # Auctionator
 
-## [9.2.32](https://github.com/Auctionator/Auctionator/tree/9.2.32) (2022-09-02)
-[Full Changelog](https://github.com/Auctionator/Auctionator/compare/9.2.31...9.2.32) 
+## [9.2.33](https://github.com/Auctionator/Auctionator/tree/9.2.33) (2022-09-03)
+[Full Changelog](https://github.com/Auctionator/Auctionator/compare/9.2.32...9.2.33) 
 
-- Fixes for previous commit  
-- Classic: Selling: Remove loading when an item fails to be selected  
-- Classic: Selling: Avoid prices remaining onscreen when swapping to a new item  
-    This happened on megaservers because the throttle was so long it left  
-    the old item's search results up and visible, looking like nothing was  
-    happening.  
-- [Fixes #1190] Classic: ReagentSearch: Use non-exact search for enchant reagents and scroll  
-- Alter .pkgmeta\_wrath  
-- Stop doing TBC builds  
-- Classic: Remove delay when cancelling auctions  
-- [Fixes #1188] Selling: Option for split panel view  
-- Mainline: Include raw scan data in incremental scan complete event  
+- Remove tocs for tbc and wrath from mainline build  
+- Attempt to work around Blizzard bug making Auctionator not show up  
+- Classic: Buy: Clear loading state of search data provider  
+- ReagentSearch: Search for names of items that are transmute results  

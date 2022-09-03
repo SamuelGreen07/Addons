@@ -192,6 +192,7 @@ Lang["DelUnder70_DONE"] = "所有低于70的结果均已删除."
 Lang["AnnounceAchieve_TEXT"] = "在公会聊天中宣布成就"
 Lang["AnnounceAchieve_DESC"] = "获得成就时发送公会消息。"
 Lang["AchieveCompleteGuild"] = "##LINK## 声望已达到! (##POINTS## 总积分)" 
+Lang["AchieveSurvey"] = "你想|cFFFFD100Attune|r 在公会聊天中公布你的成就吗？"
 					
 
 -- TREEVIEW

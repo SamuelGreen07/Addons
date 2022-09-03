@@ -192,6 +192,7 @@ Lang["DelUnder70_DONE"] = "所有低於70的角色均已刪除。"
 Lang["AnnounceAchieve_TEXT"] = "在公會聊天中宣布成就"
 Lang["AnnounceAchieve_DESC"] = "獲得成就時發送公會消息。"
 Lang["AchieveCompleteGuild"] = "##LINK## 聲望已達到! (##POINTS## 總積分)" 
+Lang["AchieveSurvey"] = "你想|cFFFFD100Attune|r 在公會聊天中宣布你的成就嗎？"
 					
 
 -- TREEVIEW

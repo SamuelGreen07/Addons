@@ -8,15 +8,8 @@
 --
 -------------------------------------------------------------------------
 
--- Done in 303
---  Updated ToC for Wrath of the Lich King	
---  Added the Wrathgate event (Horde and Alliance)
---	Added the Knights of the Ebon Blade phasing quests (Horde and Alliance)
---	Added the Sons of Hodir quests (Horde and Alliance)
---  Added Eye of Eternity attunement 
---  Fixed an issue where an Interacting or Killing step wouldn't register
---  Added a guild announcement for completed Achievements (can be disabled in the options) 
---  Removed a silly debug print that was showing guild names
+-- Done in 304
+--  THere is now a confirmation box to know whether you want Attune to announce achievements in guild chat
 
 -------------------------------------------------------------------------
 -- ADDON VARIABLES
@@ -553,6 +546,8 @@ function Attune:OnEnable()
 	if Attune_DB.autosurvey == nil then Attune_DB.autosurvey = false end
 	if Attune_DB.websiteUrl == nil then Attune_DB.websiteUrl = "https://tbc.wowhead.com" end
 	if TreeExpandStatus == nil then TreeExpandStatus = {} end
+	if Attune_DB.announceAchieveSurvey == nil then Attune_DB.announceAchieveSurvey = false end
+	
 
 	--raid planner
 	if Attune_DB.raidShowMains == nil then Attune_DB.raidShowMains = true end
@@ -743,6 +738,32 @@ function Attune:OnEnable()
 
 	attunelocal_minimapicon:Register("Attune_Broker", Attune_Broker, Attune_DB.minimapbuttonpos)
 	if Attune_DB.minimapbuttonpos.hide then attunelocal_minimapicon:Hide("Attune_Broker"); attunelocal_minimapicon:Hide("Attune_Broker") else attunelocal_minimapicon:Show("Attune_Broker");attunelocal_minimapicon:Show("Attune_Broker") end
+
+
+
+	C_Timer.After(10, function()
+		if not Attune_DB.announceAchieveSurvey then
+			StaticPopupDialogs["ACHIEVEANNOUNCE_CONFIRM"] = {
+				text = Lang["\n"..Lang["AchieveSurvey"].."\n\n"],
+				button1 = Lang["Yes"],
+				button2 = Lang["No"],
+				timeout = 0,
+				hasEditBox = false,
+				whileDead = true,
+				hideOnEscape = true,
+				preferredIndex = 3,  -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+				OnAccept = function()
+					Attune_DB.announceAchieveSurvey = true
+					Attune_DB.announceAchieveCompleted = true
+				end,
+				OnCancel = function (_,reason)
+					Attune_DB.announceAchieveSurvey = true
+					Attune_DB.announceAchieveCompleted = false
+				end,
+			}
+			StaticPopup_Show ("ACHIEVEANNOUNCE_CONFIRM")
+		end
+	end)
 
 
 	--Attune_CreateRepWidget()
