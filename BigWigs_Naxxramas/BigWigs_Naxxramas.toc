@@ -1,4 +1,4 @@
 ## Interface: 30400
 
 ## Title: BigWigs [|cffeda55fNaxxramas|r] (Classic Era Only)
-## Version: v42.2-classic
+## Version: v43-classic

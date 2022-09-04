@@ -2,7 +2,7 @@
 
 ## Title: BigWigs |cffff0000[WRONG VERSION]|r
 ## Author: Funkydude, Nebula, Elvador, Justwait
-## Version: v42.2-classic
+## Version: v43-classic
 
 ## X-Category: Raid
 ## X-License: All Rights Reserved: You are free to fork and modify on GitHub, please ask us about anything else.
