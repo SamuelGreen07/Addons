@@ -132,8 +132,8 @@ end
 -- we can't just increase the # of the first command if it happens to be the same recipe without making sure
 -- the additional queue entry doesn't require some additional craftable reagents
 --
-function Skillet:AddToQueue(command)
-	DA.DEBUG(0,"AddToQueue("..DA.DUMP1(command)..")")
+function Skillet:AddToQueue(command, first)
+	DA.DEBUG(0,"AddToQueue("..DA.DUMP1(command).."), "..tostring(first))
 	local queue = Skillet.db.realm.queueData[Skillet.currentPlayer]
 	if (not command.complex) then		-- we can add this queue entry to any of the other entries
 		local added
@@ -145,7 +145,11 @@ function Skillet:AddToQueue(command)
 			end
 		end
 		if not added then
-			table.insert(queue, command)
+			if first then
+				table.insert(queue, 1, command)
+			else
+				table.insert(queue, command)
+			end
 		end
 	elseif queue and #queue>0 then
 		local i=#queue
@@ -155,10 +159,18 @@ function Skillet:AddToQueue(command)
 		if queue[i].op == "iterate" and queue[i].recipeID == command.recipeID then
 			queue[i].count = queue[i].count + command.count
 		else
-			table.insert(queue, command)
+			if first then
+				table.insert(queue, 1, command)
+			else
+				table.insert(queue, command)
+			end
 		end
 	else
-		table.insert(queue, command)
+		if first then
+			table.insert(queue, 1, command)
+		else
+			table.insert(queue, command)
+		end
 	end
 end
 
@@ -184,7 +196,10 @@ function Skillet:QueueAppendCommand(command, queueCraftables)
 		end -- for
 		DA.DEBUG(2,"newInQueue["..tostring(level).."]["..tostring(recipe.itemID).."]= "..tostring(self.newInQueue[level][recipe.itemID]).." ("..tostring(recipe.name)..")")
 		self.newInQueue[level][recipe.itemID] = (self.newInQueue[level][recipe.itemID] or 0) + command.count * (recipe.numMade or 0)
-		self:AddToQueue(command)
+--
+-- Enchants get queued at the front of the queue
+--
+		self:AddToQueue(command, command.tradeID == 7411)
 	end
 	DA.DEBUG(0,"QueueAppendCommand: level= "..tostring(command.level))
 	if not command.level then
@@ -225,7 +240,7 @@ end
 
 function Skillet:ClearQueue()
 	DA.DEBUG(0,"ClearQueue()")
-	if #self.db.realm.queueData[self.currentPlayer]>0 then
+	if #self.db.realm.queueData[self.currentPlayer] > 0 then
 		self.db.realm.queueData[self.currentPlayer] = {}
 		self.skippedQueue = {}
 		self.db.realm.reagentsInQueue[self.currentPlayer] = {}
@@ -247,7 +262,7 @@ function Skillet:PrintSaved()
 			for qpos,command in pairs(queue) do
 				size = size + 1
 			end
-			print("name= "..tostring(name)..", size= "..tostring(size))
+			DA.MARK2("name= "..tostring(name)..", size= "..tostring(size))
 		end
 	end
 end
@@ -259,14 +274,14 @@ function Skillet:PrintQueue(name)
 	DA.DEBUG(0,"PrintQueue("..tostring(name)..")");
 	local queue
 	if name then
-		print("name= "..tostring(name))
+		DA.MARK2("name= "..tostring(name))
 		queue = self.db.profile.SavedQueues[name].queue
 	else
 		queue = self.db.realm.queueData[self.currentPlayer]
 	end
 	if queue then
 		for qpos,command in pairs(queue) do
-			print("qpos= "..tostring(qpos)..", skipped= "..tostring(self.skippedQueue[qpos])..", command= "..DA.DUMP1(command))
+			DA.MARK2("qpos= "..tostring(qpos)..", skipped= "..tostring(self.skippedQueue[qpos])..", command= "..DA.DUMP1(command))
 		end
 	end
 end
@@ -286,6 +301,7 @@ function Skillet:ProcessQueue(altMode)
 	self:ProcessQueuePlugins()
 --
 -- find the first queue entry that is craftable
+-- Note: In Classic Era Enchanting queue entries are never craftable
 --
 	repeat
 		command = queue[qpos]
@@ -294,31 +310,35 @@ function Skillet:ProcessQueue(altMode)
 			local recipe = self:GetRecipe(command.recipeID)
 			local craftable = true
 			local skillIndex = skillIndexLookup[command.recipeID]
-			local cooldown
-			if skillIndex then
-				cooldown = GetTradeSkillCooldown(skillIndex)
-			end
-			if cooldown then
-				Skillet:Print(L["Skipping"],recipe.name,"-",L["has cooldown of"],SecondsToTime(cooldown))
-				self.skippedQueue[qpos] = true
+			if isClassic and recipe.tradeID == 7411 then
 				craftable = false
 			else
-				for i=1,#recipe.reagentData,1 do
-					local reagent = recipe.reagentData[i]
-					local reagentName = GetItemInfo(reagent.id) or reagent.id
-					DA.DEBUG(1,"id= "..tostring(reagent.id)..", reagentName="..tostring(reagentName)..", numNeeded="..tostring(reagent.numNeeded))
-					local numInBoth = GetItemCount(reagent.id, true)
-					local numInBags = GetItemCount(reagent.id, false)
-					local numInBank =  numInBoth - numInBags
-					DA.DEBUG(1,"numInBoth= "..tostring(numInBoth)..", numInBags="..tostring(numInBags)..", numInBank="..tostring(numInBank))
-					if numInBags < reagent.numNeeded then
-						Skillet:Print(L["Skipping"],recipe.name,"-",L["need"],reagent.numNeeded,"x",reagentName,"("..L["have"],numInBags..")")
-						self.skippedQueue[qpos] = true
-						craftable = false
-						break
-					end
-				end -- for
-			end -- cooldown
+				local cooldown
+				if skillIndex then
+					cooldown = GetTradeSkillCooldown(skillIndex)
+				end
+				if cooldown then
+					Skillet:Print(L["Skipping"],recipe.name,"-",L["has cooldown of"],SecondsToTime(cooldown))
+					self.skippedQueue[qpos] = true
+					craftable = false
+				else
+					for i=1,#recipe.reagentData,1 do
+						local reagent = recipe.reagentData[i]
+						local reagentName = GetItemInfo(reagent.id) or reagent.id
+						DA.DEBUG(1,"id= "..tostring(reagent.id)..", reagentName="..tostring(reagentName)..", numNeeded="..tostring(reagent.numNeeded))
+						local numInBoth = GetItemCount(reagent.id, true)
+						local numInBags = GetItemCount(reagent.id, false)
+						local numInBank =  numInBoth - numInBags
+						DA.DEBUG(1,"numInBoth= "..tostring(numInBoth)..", numInBags="..tostring(numInBags)..", numInBank="..tostring(numInBank))
+						if numInBags < reagent.numNeeded then
+							Skillet:Print(L["Skipping"],recipe.name,"-",L["need"],reagent.numNeeded,"x",reagentName,"("..L["have"],numInBags..")")
+							self.skippedQueue[qpos] = true
+							craftable = false
+							break
+						end
+					end -- for
+				end -- cooldown
+			end -- not enchanting
 			if craftable then break end		-- exit the repeat loop, this command is craftable
 		end -- iterate
 		qpos = qpos + 1
@@ -481,9 +501,30 @@ end
 
 --
 -- Adds one item to the queue and then starts the queue
+-- If enchants are not being queued, clear all enchants from the queue
+-- before adding this one
 --
 function Skillet:EnchantItem()
 	DA.DEBUG(0,"EnchantItem()")
+	if not self.db.profile.queue_crafts then
+		local queue = self.db.realm.queueData[self.currentPlayer]
+		if queue then
+			local qpos = #queue
+			DA.DEBUG(1,"EnchantItem: qpos= "..tostring(qpos))
+			if qpos > 0 then
+				repeat
+					local command = queue[qpos]
+					DA.DEBUG(1,"EnchantItem: qpos= "..tostring(qpos)..", command= "..DA.DUMP1(command))
+					if command and command.op == "iterate" then
+						if command.tradeID == 7411 then
+							self:RemoveFromQueue(qpos)
+						end
+					end
+					qpos = qpos - 1
+				until qpos <= 0
+			end
+		end
+	end
 	self:CreateItems(1)
 end
 
@@ -525,11 +566,31 @@ function Skillet:UNIT_SPELLCAST_FAILED_QUIET(event, unit, castGUID, spellID)
 	DA.TRACE("UNIT_SPELLCAST_FAILED_QUIET("..tostring(unit)..", "..tostring(castGUID)..", "..tostring(spellID)..")")
 	self.castSpellID = spellID
 	self.castSpellName = GetSpellInfo(spellID)
-	DA.TRACE("spellName= "..tostring(self.castSpellName)..", processingSpell= "..tostring(self.processingSpell))
+	DA.TRACE("tradeID= "..tostring(self.currentTrade)..", spellName= "..tostring(self.castSpellName)..", processingSpell= "..tostring(self.processingSpell))
 	if unit == "player" and self.processingSpell and self.processingSpell == self.castSpellName then
-		Skillet:StopCast(self.castSpellName,false)
+		if self.currentTrade == 7411 and TradeFrame:IsShown() then
+			DA.TRACE("TradeFrame:IsShown()")
+			self.tradeEnchant = true
+		else
+			Skillet:StopCast(self.castSpellName,false)
+		end
 	end
 end
+
+--
+-- Trade window close, the counts may need to be updated.
+-- This could be because an enchant has used up mats or the player
+-- may have received more mats.
+--
+function Skillet:TRADE_CLOSED()
+	DA.TRACE("TRADE_CLOSED()")
+	if self.currentTrade == 7411 and self.tradeEnchant then
+		self.tradeEnchant = false
+		Skillet:StopCast(self.castSpellName,true)
+	end
+	self:BAG_UPDATE("FAKE_BAG_UPDATE", 0)
+end
+
 
 function Skillet:UNIT_SPELLCAST_INTERRUPTED(event, unit, castGUID, spellID)
 	DA.TRACE("UNIT_SPELLCAST_INTERRUPTED("..tostring(unit)..", "..tostring(castGUID)..", "..tostring(spellID)..")")
@@ -630,8 +691,8 @@ function Skillet:StopCast(spell, success)
 			end
 			if command.op == "iterate" then
 				command.count = command.count - 1
+				DA.DEBUG(0,"StopCast "..tostring(command.count))
 				if command.count < 1 then
-					DA.DEBUG(0,"StopCast "..tostring(command.count).." < 1")
 					self.queueCasting = false
 					self.processingSpell = nil
 					self.processingPosition = nil
@@ -693,6 +754,7 @@ function Skillet:ScanQueuedReagents()
 			end
 		end
 	end
+	--DA.DEBUG(1,"ScanQueuedReagents: reagentInQueue= "..DA.DUMP1(reagentsInQueue))
 	self.db.realm.reagentsInQueue[self.currentPlayer] = reagentsInQueue
 end
 

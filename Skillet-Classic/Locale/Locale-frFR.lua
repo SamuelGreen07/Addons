@@ -85,6 +85,10 @@ L["Draenor Engineering"] = "Ingénierie de Draenor"
 L["Empty Group"] = "Groupe vide"
 L["Enabled"] = "Activé"
 L["Enchant"] = "Enchanter"
+--[[Translation missing --]]
+L["ENCHANTSCROLLSDESC"] = "Use the enchant scroll item for links"
+--[[Translation missing --]]
+L["ENCHANTSCROLLSNAME"] = "Use enchant scrolls"
 L["ENHANCHEDRECIPEDISPLAYDESC"] = "Si activé, les noms de recettes auront un ou plusieurs '+' derrière leur nom pour indiquer la difficulté de la recette."
 L["ENHANCHEDRECIPEDISPLAYNAME"] = "Montrer la difficulté des recettes comme texte"
 L["Expand all groups"] = "Développer tous les groupes"
@@ -113,6 +117,10 @@ L["HIDEBLIZZARDFRAMENAME"] = "Cacher la fenêtre de Blizzard"
 L["Ignore"] = "Ignorer"
 L["IGNOREBANKEDREAGENTSDESC"] = "Ignorer les composants en banque lors de la mise en file d'attente de composants artisanaux"
 L["IGNOREBANKEDREAGENTSNAME"] = "Ignorer les composants en banque"
+--[[Translation missing --]]
+L["IGNORECHANGEDESC"] = "Ignore first profession change"
+--[[Translation missing --]]
+L["IGNORECHANGENAME"] = "Ignore first profession change"
 L["IGNORECLEARDESC"] = "Supprimer toutes les entrées de la liste des Matériaux Ignorés"
 L["Ignored List"] = "Liste ignorée"
 L["Ignored Materials Clear"] = "Vider les Matériaux Ignorés"
@@ -207,6 +215,8 @@ L["SCALETOOLTIPDESC"] = "Définissez l'échelle des infobulles des compétences 
 L["SCALETOOLTIPNAME"] = "Mettre à l'échelle toutes les infobulles"
 L["Scan completed"] = "Balayage terminé"
 L["Scanning tradeskill"] = "Balayage en cours"
+--[[Translation missing --]]
+L["Scroll of"] = "Scroll of"
 L["Search"] = "Recherche"
 L["Select All"] = "Tout sélectionner"
 L["Select None"] = "Ne rien sélectionner"

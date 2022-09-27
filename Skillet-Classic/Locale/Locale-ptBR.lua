@@ -86,6 +86,10 @@ L["Draenor Engineering"] = "Engenharia Draenor"
 L["Empty Group"] = "Grupo vazio"
 L["Enabled"] = "Hablitado"
 L["Enchant"] = "Encantamento"
+--[[Translation missing --]]
+L["ENCHANTSCROLLSDESC"] = "Use the enchant scroll item for links"
+--[[Translation missing --]]
+L["ENCHANTSCROLLSNAME"] = "Use enchant scrolls"
 L["ENHANCHEDRECIPEDISPLAYDESC"] = "Quando habilitado, aparecera um ou mais caractere '+' ao lado da receita pra indicar a dificuldade"
 L["ENHANCHEDRECIPEDISPLAYNAME"] = "Mostrar dificuldade da receita como um texto"
 L["Expand all groups"] = "Expandir todos os grupos"
@@ -114,6 +118,10 @@ L["HIDEBLIZZARDFRAMENAME"] = "Ocultar quadro da Blizzard"
 L["Ignore"] = "Ignorar"
 L["IGNOREBANKEDREAGENTSDESC"] = "Ignore reagentes no banco ao enfileirar reagentes fabricáveis"
 L["IGNOREBANKEDREAGENTSNAME"] = "Ignore reagentes no banco"
+--[[Translation missing --]]
+L["IGNORECHANGEDESC"] = "Ignore first profession change"
+--[[Translation missing --]]
+L["IGNORECHANGENAME"] = "Ignore first profession change"
 L["IGNORECLEARDESC"] = "Limpa todas as entradas na lista de Materiais Ignorados"
 L["Ignored List"] = "Lista de ignorados"
 L["Ignored Materials Clear"] = "Limpar Materiais Ignorados"
@@ -208,6 +216,8 @@ L["SCALETOOLTIPDESC"] = "Defina a escala das dicas de habilidade e reagente para
 L["SCALETOOLTIPNAME"] = "Escalar todas as dicas"
 L["Scan completed"] = "Verificação concluida"
 L["Scanning tradeskill"] = "Verificando as receitas"
+--[[Translation missing --]]
+L["Scroll of"] = "Scroll of"
 L["Search"] = "Procurar"
 L["Select All"] = "Selecionar todos"
 L["Select None"] = "Limpar seleção"

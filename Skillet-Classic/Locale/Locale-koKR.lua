@@ -94,6 +94,10 @@ L["Draenor Engineering"] = "드레노어 기계공학"
 L["Empty Group"] = "빈 그룹"
 L["Enabled"] = "사용함"
 L["Enchant"] = "마법부여"
+--[[Translation missing --]]
+L["ENCHANTSCROLLSDESC"] = "Use the enchant scroll item for links"
+--[[Translation missing --]]
+L["ENCHANTSCROLLSNAME"] = "Use enchant scrolls"
 L["ENHANCHEDRECIPEDISPLAYDESC"] = "사용하면, 레시피 이름에 난이도를 나타내는 '+' 문자가 하나 이상 붙습니다."
 L["ENHANCHEDRECIPEDISPLAYNAME"] = "레시피 난이도 문자로 표시"
 L["Expand all groups"] = "모든 그룹 펼침"
@@ -113,8 +117,7 @@ L["From Selection"] = "From Selection"
 L["Glyph "] = "문양 "
 L["Gold earned"] = "금전 획득"
 L["Grouping"] = "분류"
---[[Translation missing --]]
-L["Guild bank"] = "Guild bank"
+L["Guild bank"] = "길드 은행"
 L["has cooldown of"] = "has cooldown of"
 L["have"] = "소지"
 L["Hide trivial"] = "회색 제작템 숨기기"
@@ -126,6 +129,10 @@ L["Ignore"] = "무시"
 L["IGNOREBANKEDREAGENTSDESC"] = "Ignore banked reagents when queuing craftable reagents"
 --[[Translation missing --]]
 L["IGNOREBANKEDREAGENTSNAME"] = "Ignore banked reagents"
+--[[Translation missing --]]
+L["IGNORECHANGEDESC"] = "Ignore first profession change"
+--[[Translation missing --]]
+L["IGNORECHANGENAME"] = "Ignore first profession change"
 L["IGNORECLEARDESC"] = "무시할 재료 목록에서 모든 항목을 지웁니다."
 L["Ignored List"] = "무시 목록"
 L["Ignored Materials Clear"] = "무시 재료 지우기"
@@ -227,6 +234,8 @@ L["SCALETOOLTIPDESC"] = "레시피 툴팁(전역 UI 크기)과 일치하도록 �
 L["SCALETOOLTIPNAME"] = "모든 툴팁 크기"
 L["Scan completed"] = "조사가 완료되었습니다."
 L["Scanning tradeskill"] = "전문기술 조사"
+--[[Translation missing --]]
+L["Scroll of"] = "Scroll of"
 L["Search"] = "검색"
 L["Select All"] = "모두 선택"
 L["Select None"] = "선택 안 함"

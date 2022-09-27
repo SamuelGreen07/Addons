@@ -738,7 +738,7 @@
 				elseif ( IsShiftKeyDown() ) then
 				<!-- This will put a link to the *item* that can be created with this trade skill
 					 into the current chat edit box -->
-					ChatEdit_InsertLink(link)
+					Skillet:ReagentButtonShiftClick(self, Skillet.selectedSkill, self:GetID())
 				else
 				<!-- generic click action -->
 					Skillet:ReagentButtonOnClick(self, Skillet.selectedSkill, self:GetID())
@@ -1161,6 +1161,7 @@
 						Skillet:InventoryFilterButtons_Hide()
 						SkilletSearchBox:SetText("")
 						SkilletSearchBox:ClearFocus()
+						Skillet.data.tooltipCache = {}
 					</OnClick>
 				</Scripts>
 			</Button>

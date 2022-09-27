@@ -89,6 +89,10 @@ L["Draenor Engineering"] = "Дренорское инженерное дело"
 L["Empty Group"] = "Пустая группа"
 L["Enabled"] = "Включено"
 L["Enchant"] = "Зачаровать"
+--[[Translation missing --]]
+L["ENCHANTSCROLLSDESC"] = "Use the enchant scroll item for links"
+--[[Translation missing --]]
+L["ENCHANTSCROLLSNAME"] = "Use enchant scrolls"
 L["ENHANCHEDRECIPEDISPLAYDESC"] = "Если включено, то к названию рецепта будет добавлен один или несколько символов '+', указывая на сложность рецепта."
 L["ENHANCHEDRECIPEDISPLAYNAME"] = "Отображать сложность рецепта текстом"
 L["Expand all groups"] = "Развернуть все группы"
@@ -118,6 +122,10 @@ L["HIDEBLIZZARDFRAMENAME"] = "Скрывать окно Blizzard"
 L["Ignore"] = "Игнорировать"
 L["IGNOREBANKEDREAGENTSDESC"] = "Игнорировать реагенты в банке при создании очереди крафта"
 L["IGNOREBANKEDREAGENTSNAME"] = "Игнорировать реагенты в банке"
+--[[Translation missing --]]
+L["IGNORECHANGEDESC"] = "Ignore first profession change"
+--[[Translation missing --]]
+L["IGNORECHANGENAME"] = "Ignore first profession change"
 L["IGNORECLEARDESC"] = "Удалить всё из списка игнорируемых материалов."
 L["Ignored List"] = "Список игнор."
 L["Ignored Materials Clear"] = "Очистить список игнорируемых материалов"
@@ -217,6 +225,8 @@ L["SCALETOOLTIPNAME"] = [=[Масштабировать все всплываю�
 ]=]
 L["Scan completed"] = "Сканирование завершено"
 L["Scanning tradeskill"] = "Сканирование профессии"
+--[[Translation missing --]]
+L["Scroll of"] = "Scroll of"
 L["Search"] = "Поиск"
 L["Select All"] = "Выбрать все"
 L["Select None"] = "Отменить выбор"

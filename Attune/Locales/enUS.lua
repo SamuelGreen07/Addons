@@ -211,10 +211,14 @@ Lang["DelUnder70_DESC"] = "Delete all the gathered information about players und
 Lang["DelUnder70_CONF"] = "Really delete all characters under level 70?"
 Lang["DelUnder70_DONE"] = "All results under 70 deleted."
 --302
-Lang["AnnounceAchieve_TEXT"] = "Announce Achievements in guild chat.                                Threshold:"
+Lang["AnnounceAchieve_TEXT"] = "Announce Achievements in guild chat.                             Threshold:"
 Lang["AnnounceAchieve_DESC"] = "Send a guild message when an achievement is earned rewarding at least that amount of points."
-Lang["AchieveCompleteGuild"] = "##LINK## complete! (##POINTS## points total)" 
-Lang["AchieveSurvey"] = "Would you like |cFFFFD100Attune|r to announce your achievements in guild chat?"
+Lang["AchieveCompleteGuild"] = "##LINK## complete!" 
+Lang["AchieveCompletePoints"] = "(##POINTS## points total)" 
+Lang["AchieveSurvey"] = "Would you like |cFFFFD100Attune|r to announce |cFFFFD100##WHO##|r's achievements in guild chat?"
+--306
+Lang["showDeprecatedAttunes_TEXT"] = "Show deprecated attunements"
+Lang["showDeprecatedAttunes_DESC"] = "Keep the older attunements (Onyxia 40, Naxxramas 40) visible in the list"
 					
 
 -- TREEVIEW
@@ -259,6 +263,7 @@ Lang["Magisters' Terrace Heroic"] = "Magisters' Terrace Heroic"
 Lang["Magisters' Terrace"] = "Magisters' Terrace"
 Lang["MgT_Desc"] = "All players need to complete the dungeon on normal mode to be able to run it in heroic mode."
 Lang["Isle of Quel'Danas"] = "Isle of Quel'Danas"
+Lang["Wrath of the Lich King"] = "Wrath of the Lich King"
 
 
 -- GENERIC
@@ -700,8 +705,8 @@ Lang["Q1_9637"] = "Kalynna's Request"			-- https://www.thegeekcrusade-serveur.co
 Lang["Q2_9637"] = "Kalynna Lathred wants you to retrieve the Tome of Dusk from Grand Warlock Nethekurse in the Shattered Halls of Hellfire Citadel and the Book of Forgotten Names from Darkweaver Syth in the Sethekk Halls in Auchindoun."
 Lang["Q1_9644"] = "Nightbane"			-- https://www.thegeekcrusade-serveur.com/db/?quest=9644
 Lang["Q2_9644"] = "Go to the Master's Terrace in Karazhan and use Kalynna's Urn to summon Nightbane. Retrieve the Faint Arcane Essence from Nightbane's corpse and bring it to Archmage Alturus."
-Lang["Q1_10901"] = "The Cudgel of Kar'desh"			-- https://www.thegeekcrusade-serveur.com/db/?quest=10901
-Lang["Q2_10901"] = "Skar'this the Heretic in the heroic Slave Pens of Coilfang Reservoir wants you to bring him the Earthen Signet and the Blazing Signet."
+Lang["Q1_10901|13431"] = "The Cudgel of Kar'desh"			-- https://www.thegeekcrusade-serveur.com/db/?quest=10901|13431
+Lang["Q2_10901|13431"] = "Skar'this the Heretic in the heroic Slave Pens of Coilfang Reservoir wants you to bring him the Earthen Signet and the Blazing Signet."
 Lang["Q1_10900"] = "The Mark of Vashj"			-- https://www.thegeekcrusade-serveur.com/db/?quest=10900
 Lang["Q2_10900"] = ""
 Lang["Q1_10681"] = "The Hand of Gul'dan"			-- https://www.thegeekcrusade-serveur.com/db/?quest=10681
@@ -762,12 +767,12 @@ Lang["Q1_10885"] = "Trial of the Naaru: Strength"			-- https://www.thegeekcrusad
 Lang["Q2_10885"] = "A'dal in Shattrath City wants you to recover Kalithresh's Trident and Murmur's Essence.\n\nThis quest must be completed in Heroic dungeon difficulty."
 Lang["Q1_10886"] = "Trial of the Naaru: Tenacity"			-- https://www.thegeekcrusade-serveur.com/db/?quest=10886
 Lang["Q2_10886"] = "A'dal in Shattrath City wants you to rescue Millhouse Manastorm from the Arcatraz of Tempest Keep.\n\nThis quest must be completed in Heroic dungeon difficulty."
-Lang["Q1_10888"] = "Trial of the Naaru: Magtheridon"			-- https://www.thegeekcrusade-serveur.com/db/?quest=10888
-Lang["Q2_10888"] = "A'dal in Shattrath City wants you to slay Magtheridon."
+Lang["Q1_10888|13430"] = "Trial of the Naaru: Magtheridon"			-- https://www.thegeekcrusade-serveur.com/db/?quest=10888|13430
+Lang["Q2_10888|13430"] = "A'dal in Shattrath City wants you to slay Magtheridon."
 Lang["Q1_10680"] = "The Hand of Gul'dan"			-- https://www.thegeekcrusade-serveur.com/db/?quest=10680
 Lang["Q2_10680"] = "Speak with Earthmender Torlok at the Altar of Damnation in Shadowmoon Valley."
-Lang["Q1_10445"] = "The Vials of Eternity"			-- https://www.thegeekcrusade-serveur.com/db/?quest=10445
-Lang["Q2_10445"] = "Soridormi at Caverns of Time wants you to retrieve Vashj's Vial Remnant from Lady Vashj at Coilfang Reservoir and Kael's Vial Remnant from Kael'thas Sunstrider at Tempest Keep."
+Lang["Q1_10445|13432"] = "The Vials of Eternity"			-- https://www.thegeekcrusade-serveur.com/db/?quest=10445|13432
+Lang["Q2_10445|13432"] = "Soridormi at Caverns of Time wants you to retrieve Vashj's Vial Remnant from Lady Vashj at Coilfang Reservoir and Kael's Vial Remnant from Kael'thas Sunstrider at Tempest Keep."
 Lang["Q1_10568"] = "Tablets of Baa'ri"			-- https://www.thegeekcrusade-serveur.com/db/?quest=10568
 Lang["Q2_10568"] = "Anchorite Ceyla at the Altar of Sha'tar wants you to collect 12 Baa'ri Tablets from the ground and from Ashtongue Workers at the Ruins of Baa'ri.\n\nCompleting quests with the Aldor will cause your Scryers reputation level to decrease."
 Lang["Q1_10683"] = "Tablets of Baa'ri"			-- https://www.thegeekcrusade-serveur.com/db/?quest=10683
@@ -806,8 +811,8 @@ Lang["Q1_10948"] = "The Hostage Soul"			-- https://www.thegeekcrusade-serveur.co
 Lang["Q2_10948"] = "Travel to Shattrath City to tell A'dal about Akama's request."
 Lang["Q1_10949"] = "Entry Into the Black Temple"			-- https://www.thegeekcrusade-serveur.com/db/?quest=10949
 Lang["Q2_10949"] = "Travel to the entrance to the Black Temple in Shadowmoon Valley and speak to Xi'ri."
-Lang["Q1_10985"] = "A Distraction for Akama"			-- https://www.thegeekcrusade-serveur.com/db/?quest=10985
-Lang["Q2_10985"] = "Ensure that Akama and Maiev enter the Black Temple in Shadowmoon Valley after Xi'ri's forces create a distraction."
+Lang["Q1_10985|13429"] = "A Distraction for Akama"			-- https://www.thegeekcrusade-serveur.com/db/?quest=10985|13429
+Lang["Q2_10985|13429"] = "Ensure that Akama and Maiev enter the Black Temple in Shadowmoon Valley after Xi'ri's forces create a distraction."
 --v243
 Lang["Q1_10984"] = "Speak with the Ogre"			-- https://www.thegeekcrusade-serveur.com/db/?quest=10984
 Lang["Q2_10984"] = "Speak with the Ogre, Grok, in the Lower City section of Shattrath City."
@@ -1371,4 +1376,5 @@ Lang["O_2"] = "It's a tiny glowing red dot on the ground\nin front of the gates 
 --v247
 Lang["O_3"] = "The shrine is located at the end of a corridor\nthat starts from the upper level of the Ring of Law."
 Lang["O_189311"] = "|cFFFFFFFFFlesh-bound Tome|r\n|cFF808080Starts a new quest|r\n\nThe book is on the floor of the crypt,\nnext to where Necrolord Amarion is (78.3, 52.3).\n\nOnce you have the quest, hurry up and get out\nof the crypt as mobs will spawn and attack you"
+Lang["Flesh-bound Tome"] = "Flesh-bound Tome"
 

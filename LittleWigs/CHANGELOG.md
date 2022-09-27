@@ -1,8 +1,12 @@
 # LittleWigs
 
-## [v10-classic](https://github.com/BigWigsMods/LittleWigs/tree/v10-classic) (2022-05-12)
-[Full Changelog](https://github.com/BigWigsMods/LittleWigs/compare/v9-classic...v10-classic) [Previous Releases](https://github.com/BigWigsMods/LittleWigs/releases)
+## [v9.2.20](https://github.com/BigWigsMods/LittleWigs/tree/v9.2.20) (2022-09-26)
+[Full Changelog](https://github.com/BigWigsMods/LittleWigs/compare/v9.2.19...v9.2.20) [Previous Releases](https://github.com/BigWigsMods/LittleWigs/releases)
 
-- TheArcatraz/Skyriss: Fix warmup icons  
-- MagistersTerrace/KaelthasSunstrider: Fix warmup icon  
-- Don't package the TBC toc  
+- WotLK: Update throttles to use args.time  
+- WotLK/Gundrak/Moorabi: Scan for boss unit  
+- WotLK: Don't use CheckBossStatus in Classic  
+- WotLK: Limit unit event calls  
+- Also fix running from source on classic  
+- Fix options when running LittleWigs from source (#757)  
+- Workflow: Enable Wago again  

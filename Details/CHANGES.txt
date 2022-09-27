@@ -1,22 +1,16 @@
-tag 4da0b460463e4b40fa12a222ffe4df409d61dc41 DetailsRetail.v9.2.7.10018.146
+tag edd94eacb78540dfe2aa7d2f6a9f0399bf04ff77 Details.DF.SL.Wrath.10031.146
 Author:	Tercio Jose <terciob19@hotmail.com>
-Date:	Wed Aug 31 19:15:29 2022 -0300
+Date:	Tue Sep 27 08:33:16 2022 -0300
 
-commit 27ca0d6df73caa348f61ca1e3b95c7e33a050e31
+commit e10d009139c3f10bc90523c5b4a44c343d15dbbe
 Author: Tercio Jose <terciob19@hotmail.com>
-Date:   Wed Aug 31 19:15:06 2022 -0300
+Date:   Tue Sep 27 08:32:32 2022 -0300
 
-    Version Bump
+    Updating LibOpenRaid in an attempt to fix a bug.
 
-commit 57bc1895a68c20dec674bee86c0f882eb4d50076
-Author: Colton Schlosser <1498529+cltnschlosser@users.noreply.github.com>
-Date:   Wed Aug 31 17:10:58 2022 -0500
+commit bc481bef4898177ca700ae46c753b117f375b7c0
+Author: Tercio Jose <terciob19@hotmail.com>
+Date:   Mon Sep 26 22:10:46 2022 -0300
 
-    Fix IsWotLKWow typo
-
-commit 57bc1895a68c20dec674bee86c0f882eb4d50076
-Author: Colton Schlosser <1498529+cltnschlosser@users.noreply.github.com>
-Date:   Wed Aug 31 17:10:58 2022 -0500
-
-    Fix IsWotLKWow typo
+    Fixed unknown .displayName after startup
 

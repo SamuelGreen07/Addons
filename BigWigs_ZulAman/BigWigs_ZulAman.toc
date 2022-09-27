@@ -22,7 +22,7 @@
 ## Notes-ruRU: BigWigs Zul'Aman Modules
 ## Notes-zhCN: BigWigs Zul'Aman Modules
 ## Notes-zhTW: BigWigs Zul'Aman Modules
-## Version: v43-classic
+## Version: v44.1-classic
 
 ## LoadOnDemand: 1
 ## Dependencies: BigWigs

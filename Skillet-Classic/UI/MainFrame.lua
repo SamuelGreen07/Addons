@@ -1,4 +1,8 @@
 local addonName,addonTable = ...
+local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+local isBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+local isWrath = Skillet.build == "Wrath"
 local DA = LibStub("AceAddon-3.0"):GetAddon("Skillet") -- for DebugAids.lua
 --[[
 Skillet: A tradeskill window replacement.
@@ -196,6 +200,7 @@ function Skillet:RestoreEnchantButton(show)
 end
 
 function Skillet:EnablePauseButton()
+	DA.DEBUG(0,"EnablePauseButton()")
 	if not self.isCraft then
 		SkilletStartQueueButton:Hide()
 		SkilletPauseQueueButton:Show()
@@ -204,9 +209,10 @@ function Skillet:EnablePauseButton()
 end
 
 function Skillet:DisablePauseButton()
+	DA.DEBUG(0,"DisablePauseButton()")
 	if not self.isCraft then
-		SkilletStartQueueButton:Show()
 		SkilletPauseQueueButton:Hide()
+		SkilletStartQueueButton:Show()
 	end
 end
 
@@ -557,6 +563,9 @@ end
 function Skillet:ConfigureRecipeControls()
 	DA.DEBUG(0,"ConfigureRecipeControls()")
 	--DA.DEBUG(1,"ConfigureRecipeControls: build= "..tostring(Skillet.build)..", currentTrade= "..tostring(Skillet.currentTrade))
+	if self.queueCasting then
+		return
+	end
 	if Skillet.isCraft then
 		if Skillet.db.profile.queue_crafts then
 			SkilletQueueButton:Show()
@@ -585,7 +594,7 @@ function Skillet:ConfigureRecipeControls()
 			SkilletEnchantButton:Disable()		-- because DoCraft is restricted
 			SkilletEnchantButton:Show()
 		end
-	elseif Skillet.build == "Wrath" and Skillet.currentTrade == 7411 then
+	elseif Skillet.currentTrade == 7411 then
 		if Skillet.db.profile.queue_crafts then
 			SkilletQueueButton:Show()
 			SkilletEmptyQueueButton:Show()
@@ -614,6 +623,7 @@ function Skillet:ConfigureRecipeControls()
 		SkilletCreateAllButton:Show()
 		SkilletCreateButton:Show()
 		SkilletQueueParent:Show()
+		SkilletPauseQueueButton:Hide()
 		SkilletStartQueueButton:Show()
 		SkilletEmptyQueueButton:Show()
 		SkilletItemCountInputBox:Show()
@@ -663,9 +673,9 @@ function Skillet:TradeButton_OnEnter(button)
 	else
 		local rank, maxRank = data.rank, data.maxRank
 		GameTooltip:AddLine("["..tostring(rank).."/"..tostring(maxRank).."]",0,1,0)
---		if tradeID == self.currentTrade then
---			GameTooltip:AddLine(L["shift-click to link"])
---		end
+		if tradeID == self.currentTrade then
+			GameTooltip:AddLine(L["shift-click to link"])
+		end
 		local buttonIcon = _G[button:GetName().."Icon"]
 		local r,g,b = buttonIcon:GetVertexColor()
 		if g == 0 then
@@ -1404,8 +1414,8 @@ function Skillet:SkillButton_OnEnter(button)
 			altlink = GetSpellLink(skill.recipeID)
 			quantity = recipe.numMade
 		else
-			--DA.DEBUG(1,"recipe= "..DA.DUMP1(recipe,1))
-			--DA.DEBUG(1,"skill= "..DA.DUMP1(skill,1))
+			DA.DEBUG(1,"recipe= "..DA.DUMP1(recipe,1))
+			DA.DEBUG(1,"skill= "..DA.DUMP1(skill,1))
 		end
 		if Skillet.isCraft then
 --
@@ -1431,6 +1441,18 @@ function Skillet:SkillButton_OnEnter(button)
 					tip:AddLine(desc, 1,1,1, true)
 				end
 			end
+		elseif self.currentTrade == 7411 and recipe.itemID == 0 then
+--
+-- Wrath Enchanting tooltip is built with special API calls
+--
+			tip:AddLine(skill.name, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, false);
+			if skillIndex then
+				tip:AddLine(" ")
+				local desc = GetTradeSkillDescription(skillIndex)
+				if (desc) then
+					tip:AddLine(desc, 1,1,1, true)
+				end
+			end
 		else
 --
 -- TradeSkill tooltip
@@ -1447,6 +1469,7 @@ function Skillet:SkillButton_OnEnter(button)
 				end
 			end
 		end
+
 		if IsShiftKeyDown() then
 			if recipe.itemID == 0 then
 				Skillet:Tooltip_ShowCompareItem(tip, GetInventoryItemLink("player", recipe.slot), "left")
@@ -1542,11 +1565,19 @@ function Skillet:SkillButton_OnEnter(button)
 	end
 	local text = string.format("[%s/%s/%s]", L["inventory"], L["bank"], L["craftable"])
 	tip:AddDoubleLine("\n", text)
-	local text = string.format("itemID= %d",recipe.itemID)
+	local item = string.format("itemID= %d",recipe.itemID)
+	local spell = string.format("spellID= %d",recipe.spellID)
+	local scroll = string.format("scrollID= %d",recipe.scrollID)
 	if Skillet.isCraft then
-		text = string.format("spellID= %d",recipe.itemID)
+		item = string.format("spellID= %d",recipe.itemID)
 	end
-	tip:AddDoubleLine("\n", text)
+	if recipe.itemID ~= 0 then
+		tip:AddDoubleLine(spell, item)
+	elseif recipe.scrollID then
+		tip:AddDoubleLine(spell, scroll)
+	else
+		tip:AddLine(spell)
+	end
 	tip:Show()
 	button.locked = false
 end
@@ -1574,6 +1605,12 @@ function Skillet:SetTradeSkillToolTip(skillIndex, buttonID)
 			if recipe and recipe.itemID ~= 0 then
 				Skillet:AddItemNotesToTooltip(GameTooltip, recipe.itemID)
 			end
+		end
+	elseif Skillet.currentTrade == 7411 and recipe.itemID == 0 then
+		if Skillet.db.profile.enchant_scrolls and recipe.scrollID then
+			GameTooltip:SetItemByID(recipe.scrollID)
+		else
+			GameTooltip:AddLine(GetTradeSkillDescription(skillIndex))
 		end
 	else
 		if recipe then
@@ -1806,8 +1843,12 @@ function Skillet:UpdateDetailsWindow(skillIndex)
 --
 	if Skillet.isCraft then
 		texture = GetCraftIcon(skillIndex)
-	else
+	elseif recipe.itemID ~= 0 then
 		texture = GetItemIcon(recipe.itemID)
+	elseif Skillet.db.profile.enchant_scrolls and recipe.scrollID ~= 0 then
+		texture = GetItemIcon(recipe.scrollID)
+	else
+		texture = GetTradeSkillIcon(skillIndex)
 	end
 	SkilletSkillIcon:SetNormalTexture(texture)
 	SkilletSkillIcon:Show()
@@ -2578,6 +2619,20 @@ function Skillet:ReagentButtonSkillSelect(player, id)
 		if newRecipe then
 			Skillet:PushSkill(Skillet.currentPlayer, Skillet.currentTrade, Skillet.selectedSkill)
 			Skillet:SetTradeSkill(player, newRecipe.tradeID, skillIndexLookup[id])
+		end
+	end
+end
+
+--
+-- Called when the reagent button is shift-clicked
+--
+function Skillet:ReagentButtonShiftClick(button, skillIndex, reagentIndex)
+	DA.DEBUG(0,"ReagentButtonShiftClick("..tostring(button)..", "..tostring(skillIndex)..", "..tostring(reagentIndex)..")")
+	local link = Skillet:GetTradeSkillReagentItemLink(skillIndex, reagentIndex)
+	if not ChatEdit_InsertLink(link) then
+		local name = GetItemInfo(link)
+		if SkilletSearchBox:HasFocus() then
+			SkilletSearchBox:SetText(name)
 		end
 	end
 end

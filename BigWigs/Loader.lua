@@ -17,7 +17,7 @@ public.isClassic = public.isBCC or public.isWrath
 -- Generate our version variables
 --
 
-local BIGWIGS_VERSION = 43
+local BIGWIGS_VERSION = 44
 local BIGWIGS_RELEASE_STRING, BIGWIGS_VERSION_STRING = "", ""
 local versionQueryString, versionResponseString = "Q^%d^%s^%d^%s", "V^%d^%s^%d^%s"
 local customGuildName = false
@@ -32,7 +32,7 @@ do
 	local RELEASE = "RELEASE"
 
 	local releaseType = RELEASE
-	local myGitHash = "21b22ee" -- The ZIP packager will replace this with the Git hash.
+	local myGitHash = "aa68c37" -- The ZIP packager will replace this with the Git hash.
 	local releaseString = ""
 	--[=[@alpha@
 	-- The following code will only be present in alpha ZIPs.
@@ -973,14 +973,14 @@ do
 	local DBMdotDisplayVersion   -- "N.N.N" for a release and "N.N.N alpha" for the alpha duration.
 	local DBMdotReleaseRevision  -- Hardcoded time, manually changed every release, they use it to track the highest release version, a new DBM release is the only time it will change.
 	if public.isClassicEra then
-		DBMdotRevision = "20220902053646"
+		DBMdotRevision = "20220915015107"
 		DBMdotDisplayVersion = "1.14.26"
 		DBMdotReleaseRevision = "20220801000000"
 		public.dbmPrefix = "D4C"
 	else
-		DBMdotRevision = "20220902053646"
-		DBMdotDisplayVersion = "3.4.8"
-		DBMdotReleaseRevision = "20220901000000"
+		DBMdotRevision = "20220915015107"
+		DBMdotDisplayVersion = "3.4.10"
+		DBMdotReleaseRevision = "20220914000000"
 		public.dbmPrefix = "D4WC"
 	end
 

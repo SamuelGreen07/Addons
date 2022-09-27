@@ -17,6 +17,8 @@ L["AUCTION_TOOLTIP_TOOLTIP_HEADER"] = "Informações de Leilão na Caixa de Text
 L["AUCTION_TOOLTIP_TOOLTIP_TEXT"] = "Mostrar informações de leilão na caixa de texto quando o mouse passar sobre o iten."
 L["AUCTIONATOR"] = "Auctionator"
 L["AUTHOR_HEADER"] = "Autor"
+--[[Translation missing --]]
+L["BID_ONLY_AVAILABLE"] = "bid only available"
 L["BID_PRICE"] = "Lance atual"
 L["BIDDER"] = "Licitante"
 L["BIDDING_AUCTION_INFO"] = "%s com um lance inicial de %s"
@@ -98,6 +100,8 @@ L["CONFIG_PET_TOOLTIP"] = "Mostrar caixa de texto para bichos de estimação"
 L["CONFIG_PROFILE_CATEGORY"] = "Perfil"
 L["CONFIG_PROFILE_TEXT"] = "Definir definições para cada personagem."
 L["CONFIG_PROFILE_TOGGLE"] = "Aplicar definições apenas para este personagem."
+--[[Translation missing --]]
+L["CONFIG_PROSPECT_TOOLTIP"] = "Show prospect value for ore from jewelcrafting in tooltips"
 L["CONFIG_QUANTITIES_CATEGORY"] = [=[Vendendo: Quantidades
 ]=]
 L["CONFIG_QUANTITIES_TEXT"] = [=[Escolha a quantidade padrão usada para as diferentes categorias de itens.
@@ -136,6 +140,12 @@ L["CONFIG_SELLING_GEAR_USE_ILVL_VARIANTS_TOOLTIP_TEXT"] = "Normalmente, equipame
 L["CONFIG_SELLING_GEAR_VENDOR_PRICE_MULTIPLIER_SUFFIX"] = "Marque 0 para não definir um preço."
 L["CONFIG_SELLING_GEAR_VENDOR_PRICE_MULTIPLIER_TOOLTIP_HEADER"] = "Preço do Vendedor de Equipamento como Padrão"
 L["CONFIG_SELLING_GEAR_VENDOR_PRICE_MULTIPLIER_TOOLTIP_TEXT"] = "Isso permite definir um preço padrão para o equipamento como um múltiplo do preço do vendedor. Isso é usado para qualquer equipamento para o qual o Auctionator não tenha um preço. Marque 0 para não definir um preço."
+--[[Translation missing --]]
+L["CONFIG_SELLING_GREY_POST_BUTTON"] = "Grey (disable) the post button when a post may fail"
+--[[Translation missing --]]
+L["CONFIG_SELLING_GREY_POST_BUTTON_TOOLTIP_HEADER"] = "Grey post button"
+--[[Translation missing --]]
+L["CONFIG_SELLING_GREY_POST_BUTTON_TOOLTIP_TEXT"] = "When a post may fail the post button will be greyed out (disabled). Turn this option off to avoid waiting for the button to enable so you can attempt to post sooner."
 L["CONFIG_SELLING_ICON_SIZE"] = "Tamanho do ícone da bolsa (necessário recarregar)"
 L["CONFIG_SELLING_ICON_SIZE_TOOLTIP_HEADER"] = "Tamanho dos ícones"
 L["CONFIG_SELLING_ICON_SIZE_TOOLTIP_TEXT"] = "Isso permite aumentar os ícones dos itens da bolsa na aba de vendas (até 50) ou menores (até 10). O tamanho padrão é 42."
@@ -154,6 +164,12 @@ L["CONFIG_SELLING_SHOW_BID_PRICE"] = "Mostrar a opção de oferta quando estiver
 L["CONFIG_SELLING_SHOW_BID_PRICE_TOOLTIP_HEADER"] = "Opções de Oferta"
 L["CONFIG_SELLING_SHOW_BID_PRICE_TOOLTIP_TEXT"] = "Controla se opção de oferta aparece quando estiver postando um item."
 L["CONFIG_SELLING_SKIP_SHORTCUT"] = "Atalho para pular o item selecionado é"
+--[[Translation missing --]]
+L["CONFIG_SELLING_SPLIT_PANELS"] = "Show split panel view between current prices and historical prices"
+--[[Translation missing --]]
+L["CONFIG_SELLING_SPLIT_PANELS_TOOLTIP_HEADER"] = "Split Panels View"
+--[[Translation missing --]]
+L["CONFIG_SELLING_SPLIT_PANELS_TOOLTIP_TEXT"] = "Normally the historical prices are on a tab inside the Selling tab, instead this makes the current prices always visible, but the historical prices show as a panel below them."
 L["CONFIG_SELLING_TBC_ALL_ITEMS"] = [=[Opções para definir as configurações de lançamento padrão para todos os itens.
 ]=]
 L["CONFIG_SELLING_TEXT"] = "Opções para alterar o comportamento da guia Venda"
@@ -323,6 +339,8 @@ L["PERCENTAGE_TOOLTIP_TEXT"] = "A porcentagem de subcotação que será usada pa
 L["PET_TOOLTIP_TOOLTIP_HEADER"] = "Caixa de Texto de Bichos de Estimação"
 L["PET_TOOLTIP_TOOLTIP_TEXT"] = "Mostrar informações do Auctionator para bichos de estimação em gaiolas."
 L["POST"] = "Postar"
+--[[Translation missing --]]
+L["POST_ATTEMPT_FAILED"] = "Your last post attempt didn't work. Try again."
 L["PRICE"] = "Preço"
 L["PRICE_INCREASE_WARNING"] = [=[Preço aumentado em %s, aguardando %ss
 ]=]
@@ -330,6 +348,12 @@ L["PROFILE_TOGGLE_TOOLTIP_HEADER"] = "Ativar definições específicas para cada
 L["PROFILE_TOGGLE_TOOLTIP_TEXT"] = "Faz mudanças para as configurações do Auctionator afetar apenas este personagem."
 L["PROFIT_COLON"] = [=[Lucro:
 ]=]
+--[[Translation missing --]]
+L["PROSPECT"] = "Prospect"
+--[[Translation missing --]]
+L["PROSPECT_TOOLTIP_TOOLTIP_HEADER"] = "Prospect Tooltip Information"
+--[[Translation missing --]]
+L["PROSPECT_TOOLTIP_TOOLTIP_TEXT"] = "Show jewelcrafting prospecting estimated value in tooltip on mouseover."
 L["PURCHASED_X_XX"] = [=[Comprado %s x%s
 ]=]
 L["QUANTITY"] = "Quantidade"
@@ -595,6 +619,8 @@ L["TRANSLATORS_RUSSIAN"] = "Russo"
 L["TRANSLATORS_SIMPLIFIED_CHINESE"] = "Chinês Simplificado"
 L["TRANSLATORS_SPANISH"] = "Espanhol"
 L["TRANSLATORS_TRADITIONAL_CHINESE"] = "Chinês Tradicional"
+--[[Translation missing --]]
+L["TRANSLATORS_TURKISH_INFO"] = "Turkish (available separately)"
 L["UNDERCUT_BID"] = "Oferta"
 L["UNDERCUT_NO"] = "Não"
 L["UNDERCUT_PREFERENCE"] = [=[Preferência de sub-corte

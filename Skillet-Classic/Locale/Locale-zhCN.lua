@@ -95,6 +95,10 @@ L["Draenor Engineering"] = "德拉诺工程"
 L["Empty Group"] = "空白组"
 L["Enabled"] = "启用"
 L["Enchant"] = "附魔"
+--[[Translation missing --]]
+L["ENCHANTSCROLLSDESC"] = "Use the enchant scroll item for links"
+--[[Translation missing --]]
+L["ENCHANTSCROLLSNAME"] = "Use enchant scrolls"
 L["ENHANCHEDRECIPEDISPLAYDESC"] = "启用时,配方名称后将显示一个或数个'+'来表示其难度"
 L["ENHANCHEDRECIPEDISPLAYNAME"] = "以文字显示配方难度"
 L["Expand all groups"] = "展开所有分组"
@@ -127,6 +131,10 @@ L["Ignore"] = "忽略"
 L["IGNOREBANKEDREAGENTSDESC"] = "Ignore banked reagents when queuing craftable reagents"
 --[[Translation missing --]]
 L["IGNOREBANKEDREAGENTSNAME"] = "Ignore banked reagents"
+--[[Translation missing --]]
+L["IGNORECHANGEDESC"] = "Ignore first profession change"
+--[[Translation missing --]]
+L["IGNORECHANGENAME"] = "Ignore first profession change"
 L["IGNORECLEARDESC"] = "从忽略的材料列表中清除所有条目。"
 L["Ignored List"] = "忽略的列表"
 L["Ignored Materials Clear"] = "忽略的材料清除"
@@ -228,6 +236,8 @@ L["SCALETOOLTIPDESC"] = "设定专业技能和材料的鼠标提示缩放大小�
 L["SCALETOOLTIPNAME"] = "缩放所有鼠标提示"
 L["Scan completed"] = "扫描完成"
 L["Scanning tradeskill"] = "扫描商业技能中..."
+--[[Translation missing --]]
+L["Scroll of"] = "Scroll of"
 L["Search"] = "搜索"
 L["Select All"] = "全选"
 L["Select None"] = "取消选择"

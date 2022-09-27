@@ -2,6 +2,7 @@ local addonName,addonTable = ...
 local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 local isBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+local isWrath = Skillet.build == "Wrath"
 local DA
 if isRetail then
 	DA = _G[addonName] -- for DebugAids.lua
@@ -132,7 +133,7 @@ plugin.options =
 		useSearchExact = {
 			type = "toggle",
 			name = "useSearchExact",
-			desc = "Use MultiSearchExact instead of MultSearch in Auction House shopping list (retail only)",
+			desc = "Use MultiSearchExact instead of MultSearch in Auction House shopping list",
 			get = function()
 				return Skillet.db.profile.plugins.ATR.useSearchExact
 			end,
@@ -204,6 +205,21 @@ plugin.options =
 			end,
 			order = 11
 		},
+		calcProfitAhTax = {
+			type = "toggle",
+			name = "calcProfitAhTax",
+			desc = "Calc profit after AH Tax(5%)",
+			get = function()
+				return Skillet.db.profile.plugins.ATR.calcProfitAhTax
+			end,
+			set = function(self,value)
+				Skillet.db.profile.plugins.ATR.calcProfitAhTax = value
+				if value then
+					Skillet.db.profile.plugins.ATR.calcProfitAhTax = value
+				end
+			end,
+			order = 12,
+		},
 		buyFactor = {
 			type = "range",
 			name = "buyFactor",
@@ -240,6 +256,7 @@ plugin.options =
 --
 local buyFactorDef = 4
 local markupDef = 1.05
+local ahtaxDef = 0.95
 
 function plugin.OnInitialize()
 	if not Skillet.db.profile.plugins.ATR then
@@ -276,11 +293,20 @@ function plugin.GetExtraText(skill, recipe)
 	if not recipe then return end
 	local itemID = recipe.itemID
 --
--- Check for Enchanting. Most recipes don't produce an item but
--- we still should get reagent prices.
+-- Check for Enchanting. 
+--   In Classic Era, Most recipes don't produce an item but we still should get reagent prices.
+--   In Wrath, Enchants can be applied to vellum to produce scrolls so use the scroll price instead.
 --
-	if recipe.tradeID == 7411 and itemID then
-		itemID = Skillet.EnchantSpellToItem[itemID] or 0
+	if Skillet.isCraft then
+		--DA.DEBUG(0,"GetExtraText: itemID= "..tostring(itemID)..", type= "..type(itemID))
+		--DA.DEBUG(0,"GetExtraText: recipe.name= "..tostring(recipe.name)..", recipe.spellID= "..tostring(recipe.spellID)..", recipe.scrollID= "..tostring(recipe.scrollID))
+		if itemID then
+			itemID = Skillet.EnchantSpellToItem[itemID] or 0
+			--DA.DEBUG(0,"GetExtraText: Change via EnchantSpellToItem, itemID= "..tostring(itemID))
+		end
+	elseif recipe.tradeID == 7411 and itemID == 0 then
+		itemID = recipe.scrollID
+		--DA.DEBUG(0,"GetExtraText: Change to scrollID, itemID= "..tostring(itemID))
 	end
 	if Skillet.db.profile.plugins.ATR.enabled and itemID then
 --
@@ -384,7 +410,8 @@ function plugin.GetExtraText(skill, recipe)
 -- If we craft this item, will we make a profit?
 --
 		if buyout then
-			local profit = buyout - cost
+			local ah_tax = Skillet.db.profile.plugins.ATR.calcProfitAhTax and ahtaxDef or 1
+			local profit = buyout * ah_tax - cost
 			if Skillet.db.profile.plugins.ATR.showProfitValue or Skillet.db.profile.plugins.ATR.showProfitPercentage then
 				label = label.."\n"
 				extra_text = extra_text.."\n"
@@ -414,10 +441,17 @@ function plugin.RecipeNameSuffix(skill, recipe)
 -- Check for Enchanting. Most recipes don't produce an item but
 -- we still should get reagent prices.
 --
-	if recipe.tradeID == 7411 and itemID then
-		itemID = Skillet.EnchantSpellToItem[itemID] or 0
+	if Skillet.isCraft then
+		--DA.DEBUG(0,"RecipeNameSuffix: itemID= "..tostring(itemID)..", type= "..type(itemID))
+		--DA.DEBUG(0,"RecipeNameSuffix: recipe.name= "..tostring(recipe.name)..", recipe.spellID= "..tostring(recipe.spellID)..", recipe.scrollID= "..tostring(recipe.scrollID))
+		if itemID then
+			itemID = Skillet.EnchantSpellToItem[itemID] or 0
+			--DA.DEBUG(0,"RecipeNameSuffix: Change via EnchantSpellToItem, itemID= "..tostring(itemID))
+		end
+	elseif recipe.tradeID == 7411 and itemID == 0 then
+		itemID = recipe.scrollID
+		--DA.DEBUG(0,"RecipeNameSuffix: Change to scrollID, itemID= "..tostring(itemID))
 	end
-	--DA.DEBUG(0,"RecipeNameSuffix: itemID= "..tostring(itemID)..", type= "..type(itemID))
 	local itemName
 	if itemID then itemName = GetItemInfo(itemID) end
 	--DA.DEBUG(0,"RecipeNameSuffix: itemName= "..tostring(itemName)..", type= "..type(itemName))
@@ -471,7 +505,8 @@ function plugin.RecipeNameSuffix(skill, recipe)
 			local markup = Skillet.db.profile.plugins.ATR.markup or markupDef
 			cost = cost * markup
 		end
-		profit = buyout - cost
+		local ah_tax = Skillet.db.profile.plugins.ATR.calcProfitAhTax and ahtaxDef or 1
+		profit = buyout * ah_tax - cost
 		if Skillet.db.profile.plugins.ATR.showProfitValue then
 			if Skillet.db.profile.plugins.ATR.useShort then
 				text = Skillet:FormatMoneyShort(profit, true, Skillet.db.profile.plugins.ATR.colorCode)
@@ -518,6 +553,8 @@ function Skillet:AuctionatorSearch(whichOne)
 	DA.DEBUG(0, "AuctionatorSearch("..tostring(whichOne)..")")
 	local shoppingListName
 	local items = {}
+	local recipe = Skillet:GetRecipeDataByTradeIndex(Skillet.currentTrade, Skillet.selectedSkill)
+	DA.DEBUG(1,"AuctionatorSearch: recipe= "..DA.DUMP1(recipe))
 	if whichOne then
 		shoppingListName = L["Shopping List"]
 		local list = Skillet:GetShoppingList(nil, nil, false)
@@ -534,24 +571,34 @@ function Skillet:AuctionatorSearch(whichOne)
 			end
 		end
 	else
-		local recipe, recipeId = Skillet:GetRecipeDataByTradeIndex(Skillet.currentTrade, Skillet.selectedSkill)
 		if not recipe then
 			return
 		end
 		local itemID = recipe.itemID
 --
--- Check for Enchanting and add the Enchant name if no item is produced.
+-- Check for Enchanting. For Wrath, Add the scroll for the enchant instead
 --
-		if recipe.tradeID == 7411 and itemID then
+		if Skillet.isCraft and itemID then
 			itemID = Skillet.EnchantSpellToItem[itemID] or 0
 		end
-		shoppingListName = GetItemInfo(itemID)
-		if (shoppingListName == nil) then
-			shoppingListName = Skillet:GetRecipeName(recipeId)
+		if itemID ~= 0 then
+			shoppingListName = GetItemInfo(itemID)
+		else
+			shoppingListName = recipe.name
 		end
 		if (shoppingListName) then
-			table.insert (items, shoppingListName)
+			if recipe.tradeID == 7411 and not Skillet.isCraft then
+				if recipe.scrollID then
+					local scrollName = GetItemInfo(recipe.scrollID)
+					table.insert(items, scrollName)
+				end
+			else
+				table.insert(items, shoppingListName)
+			end
 		end
+--
+-- Add the reagent names
+--
 		local i
 		for i=1,#recipe.reagentData do
 			local reagent = recipe.reagentData[i]

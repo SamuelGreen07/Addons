@@ -85,6 +85,10 @@ L["Draenor Engineering"] = "Draenor Ingeniería"
 L["Empty Group"] = "Grupo Vacío"
 L["Enabled"] = "Activa"
 L["Enchant"] = "Encantar"
+--[[Translation missing --]]
+L["ENCHANTSCROLLSDESC"] = "Use the enchant scroll item for links"
+--[[Translation missing --]]
+L["ENCHANTSCROLLSNAME"] = "Use enchant scrolls"
 L["ENHANCHEDRECIPEDISPLAYDESC"] = "Cuando está habilitado, los nombres de las recetas tendrán uno o más caracteres '+' anexados a su nombre para indicar la dificultad de la receta."
 L["ENHANCHEDRECIPEDISPLAYNAME"] = "Mostrar dificultad de la receta como texto"
 L["Expand all groups"] = "Expandir todos los grupos"
@@ -113,6 +117,10 @@ L["HIDEBLIZZARDFRAMENAME"] = "Ocultar marco de Blizzard"
 L["Ignore"] = "Ignorar"
 L["IGNOREBANKEDREAGENTSDESC"] = "Ignora los componentes en el banco al poner en cola componentes fabricables"
 L["IGNOREBANKEDREAGENTSNAME"] = "Ignora los componentes en el banco"
+--[[Translation missing --]]
+L["IGNORECHANGEDESC"] = "Ignore first profession change"
+--[[Translation missing --]]
+L["IGNORECHANGENAME"] = "Ignore first profession change"
 L["IGNORECLEARDESC"] = "Borra todas las entradas de la lista de materiales ignorados."
 L["Ignored List"] = "Ignorados"
 L["Ignored Materials Clear"] = "Materiales ignorados borrados"
@@ -207,6 +215,8 @@ L["SCALETOOLTIPDESC"] = "Establezca la escala del tooltip de habilidades y compo
 L["SCALETOOLTIPNAME"] = "Escalar todos los tooltips"
 L["Scan completed"] = "Escaneo completado"
 L["Scanning tradeskill"] = "Escaneando profesión"
+--[[Translation missing --]]
+L["Scroll of"] = "Scroll of"
 L["Search"] = "Buscar"
 L["Select All"] = "Seleccionar todo"
 L["Select None"] = "Deseleccionar"

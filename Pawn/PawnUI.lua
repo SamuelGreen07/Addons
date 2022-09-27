@@ -28,6 +28,7 @@ local PawnUIShortcutItems = {}
 local PawnUIGemQualityLevel
 
 local PawnUITotalScaleLines = 0
+local PawnUIIsShowingNoneWarning = false
 local PawnUITotalComparisonLines = 0
 local PawnUITotalGemLines = 0
 
@@ -41,6 +42,7 @@ local _
 -- "Constants"
 ------------------------------------------------------------
 
+local PawnUIScaleSelectorNoneWarningHeight = 80 -- the "no scales selected" warning is this tall
 local PawnUIScaleLineHeight = 16 -- each scale line is 16 pixels tall
 local PawnUIScaleSelectorPaddingBottom = 5 -- add 5 pixels of padding to the bottom of the scrolling area
 
@@ -216,8 +218,23 @@ function PawnUIFrame_ScaleSelector_Refresh()
 	PawnUITotalScaleLines = 0
 
 	-- Get a sorted list of scale data and display it all.
-	local NewSelectedScale, FirstScale, ScaleData, LastHeader, _
-	for _, ScaleData in pairs(PawnGetAllScalesEx()) do
+	local ScaleData
+	local ScaleList = PawnGetAllScalesEx()
+	PawnUIIsShowingNoneWarning = true
+	for _, ScaleData in pairs(ScaleList) do
+		if ScaleData.IsVisible then
+			PawnUIIsShowingNoneWarning = false
+			break
+		end
+	end
+	if PawnUIIsShowingNoneWarning then
+		PawnUIFrame_ScaleSelector_NoneWarning:Show()
+	else
+		PawnUIFrame_ScaleSelector_NoneWarning:Hide()
+	end
+
+	local NewSelectedScale, FirstScale, LastHeader, _
+	for _, ScaleData in pairs(ScaleList) do
 		local ScaleName = ScaleData.Name
 		if ScaleName == PawnUICurrentScale then NewSelectedScale = ScaleName end
 		if not FirstScale then FirstScale = ScaleName end
@@ -230,7 +247,7 @@ function PawnUIFrame_ScaleSelector_Refresh()
 		PawnUIFrame_ScaleSelector_AddScaleLine(ScaleName, ScaleData.LocalizedName, ScaleData.IsVisible)
 	end
 
-	PawnUIScaleSelectorScrollContent:SetHeight(PawnUIScaleLineHeight * PawnUITotalScaleLines + PawnUIScaleSelectorPaddingBottom)
+	PawnUIScaleSelectorScrollContent:SetHeight(PawnUIScaleLineHeight + PawnUIScaleLineHeight * PawnUITotalScaleLines + PawnUIScaleSelectorPaddingBottom)
 
 	-- If the scale that they previously selected isn't in the list, or they didn't have a previously-selected
 	-- scale, just select the first visible one, or the first one if there's no visible scale.
@@ -273,7 +290,7 @@ function PawnUIFrame_ScaleSelector_AddLineCore(Text)
 	PawnUITotalScaleLines = PawnUITotalScaleLines + 1
 	local LineName = "PawnUIScaleLine" .. PawnUITotalScaleLines
 	local Line = CreateFrame("Button", LineName, PawnUIScaleSelectorScrollContent, "PawnUIFrame_ScaleSelector_ItemTemplate")
-	Line:SetPoint("TOPLEFT", PawnUIScaleSelectorScrollContent, "TOPLEFT", 0, -PawnUIScaleLineHeight * (PawnUITotalScaleLines - 1))
+	Line:SetPoint("TOPLEFT", PawnUIScaleSelectorScrollContent, "TOPLEFT", 0, -PawnUIScaleLineHeight * (PawnUITotalScaleLines - 1) - (PawnUIIsShowingNoneWarning and PawnUIScaleSelectorNoneWarningHeight or 0))
 	Line:SetText(Text)
 	return Line, LineName
 end
@@ -2439,6 +2456,39 @@ end
 -- Usage: <OnLoad function="PawnUIRegisterRightClickOnLoad" />
 function PawnUIRegisterRightClickOnLoad(self)
 	self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+end
+
+-- Create the tab strip under the Pawn UI.
+-- We need to do this in Lua because there's no tab template that exists in every version of the game.
+function PawnUICreateTabs()
+	local TabCount = #PawnUITabList
+	local TabTemplate
+	if VgerCore.IsDragonflight then
+		TabTemplate = "PanelTabButtonTemplate"
+	else
+		TabTemplate = "CharacterFrameTabButtonTemplate"
+	end
+
+	local LastTab
+	for i = 1, TabCount do
+		local ThisTab = CreateFrame("Button", "PawnUIFrameTab" .. i, PawnUIFrame, TabTemplate, i)
+		ThisTab:SetText(PawnUITabLabels[i])
+		if i == 1 then
+			ThisTab:SetPoint("LEFT", PawnUIFrame, "BOTTOMLEFT", 196, -8)
+		else
+			ThisTab:SetPoint("LEFT", LastTab, "RIGHT", -16, 0)
+		end
+		ThisTab:SetScript("OnClick", PawnUITab_OnClick)
+		LastTab = ThisTab
+	end
+
+	PanelTemplates_SetNumTabs(PawnUIFrame, TabCount)
+end
+
+function PawnUITab_OnClick(self)
+	local TabNumber = self:GetID()
+	PlaySound(SOUNDKIT.IG_CHARACTER_INFO_TAB)
+	PawnUISwitchToTab(PawnUITabList[TabNumber])
 end
 
 -- Switches to a tab by its Page.

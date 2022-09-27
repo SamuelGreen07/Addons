@@ -101,6 +101,10 @@ L["Draenor Engineering"] = "Draenoringenieurskunst"
 L["Empty Group"] = "Leere Gruppe"
 L["Enabled"] = "Aktiviert"
 L["Enchant"] = "Verzaubern"
+--[[Translation missing --]]
+L["ENCHANTSCROLLSDESC"] = "Use the enchant scroll item for links"
+--[[Translation missing --]]
+L["ENCHANTSCROLLSNAME"] = "Use enchant scrolls"
 L["ENHANCHEDRECIPEDISPLAYDESC"] = "Wenn aktiviert, werden an Rezeptnamen ein oder mehrere '+' Symbole angehängt, in Abhängigkeit von der Schwierigkeit des Rezepts."
 L["ENHANCHEDRECIPEDISPLAYNAME"] = "Rezeptschwierigkeit als Text anzeigen"
 L["Expand all groups"] = "Alle Gruppen ausklappen"
@@ -133,6 +137,10 @@ L["Ignore"] = "Ignorieren"
 L["IGNOREBANKEDREAGENTSDESC"] = "Ignore banked reagents when queuing craftable reagents"
 --[[Translation missing --]]
 L["IGNOREBANKEDREAGENTSNAME"] = "Ignore banked reagents"
+--[[Translation missing --]]
+L["IGNORECHANGEDESC"] = "Ignore first profession change"
+--[[Translation missing --]]
+L["IGNORECHANGENAME"] = "Ignore first profession change"
 L["IGNORECLEARDESC"] = "Entfernt alle Einträge aus der Liste Ignorierte Materialien"
 L["Ignored List"] = "Ignorierliste"
 L["Ignored Materials Clear"] = "Liste Ignorierte Materialien leeren"
@@ -234,6 +242,8 @@ L["SCALETOOLTIPDESC"] = "Ändert die Skalierung des Fertigkeiten- und Reagenzien
 L["SCALETOOLTIPNAME"] = "Skaliere alle Tooltips"
 L["Scan completed"] = "Scan abgeschlossen"
 L["Scanning tradeskill"] = "Scanne Berufe"
+--[[Translation missing --]]
+L["Scroll of"] = "Scroll of"
 L["Search"] = "Suchen"
 L["Select All"] = "Alle auswählen"
 L["Select None"] = "Nichts auswählen"

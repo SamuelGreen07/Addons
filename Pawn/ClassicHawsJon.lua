@@ -9,7 +9,7 @@
 
 local ScaleProviderName = "Classic"
 
-PawnClassicLastUpdatedVersion = 2.0602
+PawnClassicLastUpdatedVersion = 2.0607
 
 
 function PawnClassicScaleProvider_AddScales()
@@ -468,8 +468,8 @@ function PawnClassicScaleProvider_AddScales()
 			ScaleProviderName,
 			2, -- Paladin
 			2, -- Protection
-			{ Strength=0.64, Agility=0.8, Dps=0, MeleeDps=1.77, RangedDps=0, Ap=0.064, Rap=0, FeralAp=0, HitRating=0.78, ExpertiseRating=0.27, CritRating=0.6, HasteRating=0.42, ArmorPenetration=0.14,
-			Intellect=0.5, Mana=0.045, Spirit=0.05, Mp5=1, FireSpellDamage=0, FrostSpellDamage=0, ArcaneSpellDamage=0, ShadowSpellDamage=0, NatureSpellDamage=0, HolySpellDamage=0.44, SpellPower=0.44, SpellPenetration=0.03,
+			{ Strength=0.74, Agility=0.8, Dps=0, MeleeDps=1.77, RangedDps=0, Ap=0.13, Rap=0, FeralAp=0, HitRating=0.78, ExpertiseRating=0.27, CritRating=0.6, HasteRating=0.42, ArmorPenetration=0.14,
+			Intellect=0.5, Mana=0.045, Spirit=0.05, Mp5=1, FireSpellDamage=0, FrostSpellDamage=0, ArcaneSpellDamage=0, ShadowSpellDamage=0, NatureSpellDamage=0, HolySpellDamage=0.4, SpellPower=0.4, SpellPenetration=0.03,
 			Stamina=1, Health=0.09, Hp5=2, Armor=0.02, DefenseRating=0.7, DodgeRating=0.7, ParryRating=0.6, BlockRating=0.6, BlockValue=0.15, ResilienceRating=0.2, AllResist=1, FireResist=0.2, FrostResist=0.2, ArcaneResist=0.2, ShadowResist=0.2, NatureResist=0.2,
 			MetaSocket=35, }
 		)
@@ -489,7 +489,7 @@ function PawnClassicScaleProvider_AddScales()
 			5, -- Priest
 			1, -- Discipline
 			{ Strength=0, Agility=0.05, Dps=0, MeleeDps=0, RangedDps=0, Ap=0, Rap=0, FeralAp=0, HitRating=0, ExpertiseRating=0, CritRating=0.68, HasteRating=0.59, ArmorPenetration=0,
-			Intellect=1, Mana=0.055, Spirit=0.42, Mp5=1.8, FireSpellDamage=0, FrostSpellDamage=0, ArcaneSpellDamage=0, ShadowSpellDamage=0, NatureSpellDamage=0, HolySpellDamage=0, SpellPower=58, SpellPenetration=0,
+			Intellect=1, Mana=0.055, Spirit=0.42, Mp5=1.8, FireSpellDamage=0, FrostSpellDamage=0, ArcaneSpellDamage=0, ShadowSpellDamage=0, NatureSpellDamage=0, HolySpellDamage=0, SpellPower=0.58, SpellPenetration=0,
 			Stamina=0.3, Health=0.03, Hp5=1, Armor=0.005, DefenseRating=0.05, DodgeRating=0.05, ParryRating=0.05, BlockRating=0, BlockValue=0, ResilienceRating=0.2, AllResist=0.2, FireResist=0.04, FrostResist=0.04, ArcaneResist=0.04, ShadowResist=0.04, NatureResist=0.04,
 			MetaSocket=35, }
 		)
@@ -670,15 +670,15 @@ function PawnClassicScaleProvider_AddScales()
 
 	-- Since Pawn doesn't have an Automatic mode on Classic, enable the template scales when logging in for the first time
 	-- IF the player hasn't already added a non-provider scale.
-	if PawnClassicScaleProviderOptions.LastAdded < 2 then
+	-- For death knights only, do a one-time re-show on 2.6.5 since for some reason it wasn't working for some people.
+	if PawnClassicScaleProviderOptions.LastAdded < 2 or (Class == "DEATHKNIGHT" and PawnClassicScaleProviderOptions.LastAdded < 3) then
 		PawnSetAllScaleProviderScalesVisible(ScaleProviderName, false)
 		if PawnGetVisibleScaleCount() == 0 then
 			PawnEnableAllScalesForClass()
 		end
 	end
 
-	-- These scales are new, and we don't need any upgrade logic yet.
-	PawnClassicScaleProviderOptions.LastAdded = 2
+	PawnClassicScaleProviderOptions.LastAdded = 3
 
 	-- After this function terminates there's no need for it anymore, so cause it to self-destruct to save memory.
 	PawnClassicScaleProvider_AddScales = nil

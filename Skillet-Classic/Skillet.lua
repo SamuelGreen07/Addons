@@ -37,6 +37,7 @@ Skillet.project = WOW_PROJECT_ID
 local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 local isBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+local isWrath = Skillet.build == "Wrath"
 
 Skillet.isCraft = false			-- true for the Blizzard Craft UI, false for the Blizzard TradeSkill UI
 Skillet.lastCraft = false		-- help events know when to call ConfigureRecipeControls()
@@ -68,14 +69,16 @@ local defaults = {
 		display_shopping_list_at_bank = true,
 		display_shopping_list_at_auction = true,
 		display_shopping_list_at_merchant = true,
-		display_shopping_list_at_guildbank = false,		-- in BCC only
-		use_guildbank_as_alt = false,					-- in BCC only
+		display_shopping_list_at_guildbank = false,		-- not in Classic
+		use_guildbank_as_alt = false,					-- not in Classic
 		use_bank_as_alt = false,
 		use_blizzard_for_followers = false,				-- not in Classic
 		hide_blizzard_frame = true,						-- primarily for debugging
 		support_crafting = true,
+		ignore_change = false,							-- not in Classic
 		queue_crafts = false,
 		include_craftbuttons = true,
+		enchant_scrolls = false,
 		include_tradebuttons = true,
 		search_includes_reagents = true,
 		interrupt_clears_queue = false,
@@ -300,7 +303,7 @@ function Skillet:OnInitialize()
 	local dataVersion = 5
 	local queueVersion = 1
 	local customVersion = 1
-	local recipeVersion = 3
+	local recipeVersion = 4
 	local _,wowBuild,_,wowVersion = GetBuildInfo();
 	self.wowBuild = wowBuild
 	self.wowVersion = wowVersion
@@ -428,6 +431,7 @@ end
 -- increment to trigger a call.
 --
 function Skillet:FlushAllData()
+	DA.DEBUG(0,"FlushAllData()");
 	Skillet.data = {}
 	Skillet.db.realm.tradeSkills = {}
 	Skillet.db.realm.auctionData = {}
@@ -448,6 +452,7 @@ end
 -- good cause.
 --
 function Skillet:FlushCustomData()
+	DA.DEBUG(0,"FlushCustomData()");
 	Skillet.db.profile.groupDB = {}
 	Skillet.db.profile.groupSN = {}
 end
@@ -458,6 +463,7 @@ end
 -- queue and should have minimal impact.
 --
 function Skillet:FlushQueueData()
+	DA.DEBUG(0,"FlushQueueData()");
 	Skillet.db.realm.queueData = {}
 	Skillet.db.realm.reagentsInQueue = {}
 end
@@ -469,6 +475,7 @@ end
 -- primary reason this function exists.
 --
 function Skillet:FlushRecipeData()
+	DA.DEBUG(0,"FlushRecipeData()");
 	Skillet.db.global.recipeDB = {}
 	Skillet.db.global.itemRecipeUsedIn = {}
 	Skillet.db.global.itemRecipeSource = {}
@@ -493,7 +500,6 @@ function Skillet:InitializeMissingVendorItems()
 		[4399]	= "Wooden Stock",
 		[3857]	= "Coal",
 		[52188] = "Jeweler's Setting",
-		[38682] = "Enchanting Vellum",
 	}
 end
 
@@ -698,7 +704,7 @@ function Skillet:OnEnable()
 	self:RegisterEvent("PLAYERBANKSLOTS_CHANGED")
 	self:RegisterEvent("BANKFRAME_CLOSED")
 
-	if isBCC then
+	if not isClassic then
 		self:RegisterEvent("GUILDBANKFRAME_OPENED")
 		self:RegisterEvent("GUILDBANKBAGSLOTS_CHANGED")
 		self:RegisterEvent("GUILDBANKFRAME_CLOSED")
@@ -727,6 +733,22 @@ function Skillet:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
 	self:RegisterEvent("UI_ERROR_MESSAGE")
 	self:RegisterEvent("UI_INFO_MESSAGE")
+--	self:RegisterEvent("GET_ITEM_INFO_RECEIVED");
+--
+-- more useful for debugging (for now)
+--
+	self:RegisterEvent("TRADE_SHOW");
+	self:RegisterEvent("TRADE_CLOSED")
+	self:RegisterEvent("TRADE_MONEY_CHANGED")
+	self:RegisterEvent("TRADE_TARGET_ITEM_CHANGED");
+	self:RegisterEvent("TRADE_PLAYER_ITEM_CHANGED")
+	self:RegisterEvent("TRADE_REPLACE_ENCHANT")
+	self:RegisterEvent("TRADE_POTENTIAL_BIND_ENCHANT");
+	self:RegisterEvent("TRADE_REQUEST")
+	self:RegisterEvent("TRADE_REQUEST_CANCEL")
+	self:RegisterEvent("TRADE_UPDATE");
+	self:RegisterEvent("TRADE_ACCEPT_UPDATE")
+
 --
 -- Debugging cleanup if enabled
 --
@@ -796,6 +818,7 @@ function Skillet:PLAYER_ENTERING_WORLD()
 	SkilletWho.wowBuild = wowBuild
 	SkilletWho.wowVersion = wowVersion
 	SkilletWho.guid = guid
+	SkilletWho.version = Skillet.version
 	if guid then
 		local kind, server, ID = strsplit("-", guid)
 		DA.DEBUG(1,"player="..tostring(player)..", faction="..tostring(faction)..", guid="..tostring(guid)..", server="..tostring(server))
@@ -821,7 +844,7 @@ function Skillet:PLAYER_ENTERING_WORLD()
 end
 
 function Skillet:ADDON_ACTION_BLOCKED()
-	DA.TRACE("ADDON_ACTION_BLOCKED")
+	DA.TRACE("ADDON_ACTION_BLOCKED()")
 --	print("|cf0f00000Skillet-Classic|r: Combat lockdown restriction." ..
 --								  " Leave combat and try again.")
 --	self:HideAllWindows()
@@ -1029,22 +1052,24 @@ function Skillet:OnDisable()
 end
 
 function Skillet:IsTradeSkillLinked()
---[[
---
--- Not implemented in Classic
---
-	local isGuild = IsTradeSkillGuild()
-	local isLinked, linkedPlayer = IsTradeSkillLinked()
-	DA.DEBUG(0,"IsTradeSkillLinked, isGuild="..tostring(isGuild)..", isLinked="..tostring(isLinked)..", linkedPlayer="..tostring(linkedPlayer))
+	local isLinked = false
+	local linkedPlayer
+	local isGuild = false
+	if IsTradeSkillLinked then
+		isLinked, linkedPlayer = IsTradeSkillLinked()
+	end
+	if IsTradeSkillGuild then 
+		isGuild = IsTradeSkillGuild()
+	end
+	DA.DEBUG(0,"IsTradeSkillLinked, isLinked="..tostring(isLinked)..", linkedPlayer="..tostring(linkedPlayer)..", isGuild="..tostring(isGuild))
 	if isLinked or isGuild then
 		if not linkedPlayer then
 			if isGuild then
 				linkedPlayer = "Guild Recipes" -- This can be removed when InitializeDatabase gets smarter.
 			end
 		end
-		return true, linkedPlayer, isGuild
+		return isLinked, linkedPlayer, isGuild
 	end
-]]--
 	return false, nil, false
 end
 
@@ -1116,7 +1141,7 @@ function Skillet:SkilletShow()
 	end
 	DA.DEBUG(0,"name= '"..tostring(name).."', rank= "..tostring(rank)..", maxRank= "..tostring(maxRank))
 	if name then self.currentTrade = self.tradeSkillIDsByName[name] end
-	if self:IsSupportedTradeskill(self.currentTrade) then
+	if self:IsSupportedTradeskill(self.currentTrade) and not self.linkedSkill then
 		DA.DEBUG(0,"SkilletShow: "..self.currentTrade..", name= '"..tostring(name).."', rank= "..tostring(rank)..", maxRank= "..tostring(maxRank))
 		self.selectedSkill = nil
 		self.dataScanned = false
@@ -1141,6 +1166,7 @@ function Skillet:SkilletShow()
 		end
 --
 -- Processing will continue in SkilletShowWindow when the TRADE_SKILL_UPDATE or CRAFT_UPDATE event fires
+-- (Wrath needs a little help)
 --
 		if self.build == "Wrath" then
 			if self.isCraft then
@@ -1156,7 +1182,7 @@ function Skillet:SkilletShow()
 --
 		if self.castSpellID == 5149 then
 			return
-		elseif not self:IsModKey1Down() and not UnitAffectingCombat("player") then
+		elseif not self:IsModKey1Down() and not UnitAffectingCombat("player") and not self.linkedSkill then
 			DA.DEBUG(0,"SkilletShow: "..tostring(self.currentTrade).." ("..tostring(name)..") is not supported")
 			DA.DEBUG(0,"tradeSkillIDsByName= "..DA.DUMP(self.tradeSkillIDsByName))
 		end
@@ -1245,13 +1271,51 @@ function Skillet:UNIT_INVENTORY_CHANGED(event, unit)
 	end
 end
 
+function Skillet:GET_ITEM_INFO_RECEIVED(event, itemID, success)
+	DA.TRACE("GET_ITEM_INFO_RECEIVED( "..tostring(itemID)..", "..tostring(success).." )")
+end
+
 --
--- Trade window close, the counts may need to be updated.
--- This could be because an enchant has used up mats or the player
--- may have received more mats.
+-- Trade window events (debugging only for now)
 --
-function Skillet:TRADE_CLOSED()
-	self:BAG_UPDATE("FAKE_BAG_UPDATE", 0)
+function Skillet:TRADE_SHOW()
+	DA.TRACE("TRADE_SHOW()")
+end
+
+function Skillet:TRADE_MONEY_CHANGED()
+	DA.TRACE("TRADE_MONEY_CHANGED()")
+end
+
+function Skillet:TRADE_PLAYER_ITEM_CHANGED(event, tradeSlotIndex)
+	DA.TRACE("TRADE_PLAYER_ITEM_CHANGED( "..tostring(tradeSlotIndex).." )")
+end
+
+function Skillet:TRADE_TARGET_ITEM_CHANGED(event, tradeSlotIndex)
+	DA.TRACE("TRADE_TARGET_ITEM_CHANGED( "..tostring(tradeSlotIndex).." )")
+end
+
+function Skillet:TRADE_REPLACE_ENCHANT()
+	DA.TRACE("TRADE_REPLACE_ENCHANT()")
+end
+
+function Skillet:TRADE_POTENTIAL_BIND_ENCHANT(event, canBecomeBoundForTrade)
+	DA.TRACE("TRADE_POTENTIAL_BIND_ENCHANT( "..tostring(canBecomeBoundForTrade).." )")
+end
+
+function Skillet:TRADE_REQUEST(event, name)
+	DA.TRACE("TRADE_REQUEST( "..tostring(name).." )")
+end
+
+function Skillet:TRADE_REQUEST_CANCEL()
+	DA.TRACE("TRADE_REQUEST_CANCEL()")
+end
+
+function Skillet:TRADE_UPDATE()
+	DA.TRACE("TRADE_UPDATE()")
+end
+
+function Skillet:TRADE_ACCEPT_UPDATE(event, playerAccepted, targetAccepted)
+	DA.TRACE("TRADE_ACCEPT_UPDATE( "..tostring(playerAccepted)..", "..tostring(targetAccepted).." )")
 end
 
 local function indexBags()
@@ -1397,13 +1461,15 @@ function Skillet:ChangeTradeSkill(tradeID, tradeName)
 		if tradeID == 2575 then spellID = 2656 end		-- Ye old Mining vs. Smelting issue
 		local spell = self:GetTradeName(spellID)
 		DA.DEBUG(1,"tradeID= "..tostring(tradeID)..", tradeName= "..tostring(tradeName)..", Mining= "..tostring(Mining)..", Smelting= "..tostring(Smelting))
-		if not self.db.realm.tradeSkills[self.currentPlayer][tradeID].count or self.db.realm.tradeSkills[self.currentPlayer][tradeID].count < 1 then
-			DA.DEBUG(1,"ChangeTradeSkill: executing ChangeTrade("..tostring(tradeID).."), count= "..tostring(self.db.realm.tradeSkills[self.currentPlayer][tradeID].count)..", tradeName= "..tostring(tradeName))
-			self.db.realm.tradeSkills[self.currentPlayer][tradeID].count = 1
-			self.closingTrade = true
-			self:SkilletClose()
-			StaticPopup_Show("SKILLET_IGNORE_CHANGE")
-			return
+		if Skillet.db.profile.ignore_change or isClassic then
+			if not self.db.realm.tradeSkills[self.currentPlayer][tradeID].count or self.db.realm.tradeSkills[self.currentPlayer][tradeID].count < 1 then
+				DA.DEBUG(1,"ChangeTradeSkill: executing ChangeTrade("..tostring(tradeID).."), count= "..tostring(self.db.realm.tradeSkills[self.currentPlayer][tradeID].count)..", tradeName= "..tostring(tradeName))
+				self.db.realm.tradeSkills[self.currentPlayer][tradeID].count = 1
+				self.closingTrade = true
+				self:SkilletClose()
+				StaticPopup_Show("SKILLET_IGNORE_CHANGE")
+				return
+			end
 		end
 		DA.DEBUG(1,"ChangeTradeSkill: executing CastSpellByName("..tostring(spell)..")")
 		self.processingSpell = spell

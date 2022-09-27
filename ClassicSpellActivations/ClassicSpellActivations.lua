@@ -6,11 +6,14 @@ f:SetScript("OnEvent", function(self, event, ...)
     return self[event](self, event, ...)
 end)
 
+local APILevel = math.floor(select(4,GetBuildInfo())/10000)
+
 local UnitGUID = UnitGUID
 local bit_band = bit.band
 local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
 local AFFILIATION_MINE = COMBATLOG_OBJECT_AFFILIATION_MINE
 local _, class = UnitClass("player")
+ns.configs = {}
 
 local procCombatLog
 local registeredFrames = {}
@@ -19,6 +22,7 @@ local activations = {}
 local LocalizedOverpower = GetSpellInfo(7384)
 local LocalizedRevenge = GetSpellInfo(6572)
 local LocalizedRampage = GetSpellInfo(29801)
+local LocalizedSlam = GetSpellInfo(1464)
 local LocalizedRiposte = GetSpellInfo(14251)
 local LocalizedCounterattack = GetSpellInfo(19306)
 -- local LocalizedExecute = GetSpellInfo(20662)
@@ -28,104 +32,83 @@ local LocalizedEarthShock = GetSpellInfo(8042)
 local LocalizedFlameShock = GetSpellInfo(8050)
 local LocalizedFrostShock = GetSpellInfo(8056)
 local LBG
+local LCG
 
-local spellNamesByID = {
-    [7384] = "Overpower",
-    [7887] = "Overpower",
-    [11584] = "Overpower",
-    [11585] = "Overpower",
+local spellNamesByID = {}
+local reverseSpellRanks = {}
+local function AddSpellName(name, ...)
+    local ranks = { ... }
+    local numArgs = #ranks
+    for i=1, #ranks do
+        local spellID = select(i, ...)
+        spellNamesByID[spellID] = name
+    end
+    reverseSpellRanks[name] = ranks
+end
+-- Wrath
+-- Priest: Serendipity
+-- Druid: Predatory Swiftness, Eclipses
+-- DK: Frost procs
 
-    [6572] = "Revenge",
-    [6574] = "Revenge",
-    [7379] = "Revenge",
-    [11600] = "Revenge",
-    [11601] = "Revenge",
-    [25288] = "Revenge",
-    [25269] = "Revenge",
-    [30357] = "Revenge",
+AddSpellName("VictoryRush", 34428 )
+AddSpellName("Overpower", 11585, 11584, 7887, 7384 ) -- 7384 - only Wrath rank
+AddSpellName("Rampage", 30033, 30030, 29801 ) -- TBC only
+AddSpellName("Slam", 1464, 8820, 11604, 11605, 25241, 25242, 47474)
 
-    [29801] = "Rampage",
-    [30030] = "Rampage",
-    [30033] = "Rampage",
+AddSpellName("Riposte", 14251 )
+AddSpellName("Counterattack", 27067, 20910, 20909, 19306 )
+AddSpellName("KillCommand", 34026 )
+AddSpellName("MongooseBite", 36916, 14271, 14270, 14269, 1495 )
 
-    [34428] = "VictoryRush",
+AddSpellName("FrostShock", 49236, 49235, 25464, 10473, 10472, 8058, 8056)
+AddSpellName("FlameShock", 49233, 49232, 29228, 25457, 10448, 10447, 8053, 8052, 8050)
+AddSpellName("EarthShock", 49231, 49230, 25454, 10414, 10413, 10412, 8046, 8045, 8044, 8042)
 
-    [14251] = "Riposte",
+AddSpellName("HammerOfWrath", 48806, 48805, 27180, 24274, 24239, 24275)
+AddSpellName("Exorcism", 48801, 48800, 27138, 10314, 10313, 10312, 5615, 5614, 879)
 
-    [19306] = "Counterattack",
-    [20909] = "Counterattack",
-    [20910] = "Counterattack",
-    [27067] = "Counterattack",
+AddSpellName("ShadowBolt", 47809, 47808, 27209, 25307, 11661, 11660, 11659, 7641, 1106, 1088, 705, 695, 686)
+AddSpellName("Incinerate", 47838, 47837, 32231, 29722)
 
-    [34026] = "KillCommand",
+AddSpellName("Execute", 47471, 47470, 25236, 25234, 20662, 20661, 20660, 20658, 5308)
+AddSpellName("Revenge", 57823, 30357, 25288, 25269, 11601, 11600, 7379, 6574, 6572)
+AddSpellName("ShieldSlam", 47488, 47487, 30356, 25258, 23925, 23924, 23923, 23922)
 
-    [20662] = "Execute",
-    [20661] = "Execute",
-    [20660] = "Execute",
-    [20658] = "Execute",
-    [5308] = "Execute",
-    [25234] = "Execute",
-    [25236] = "Execute",
+AddSpellName("ArcaneMissiles", 42846, 42843, 38704, 38699, 27075, 25345, 10212, 10211, 8417, 8416, 5145, 5144, 5143)
+AddSpellName("FrostBolt", 42842, 42841, 38697, 27072, 27071, 25304, 10181, 10180, 10179, 8408, 8407, 8406, 7322, 837, 205, 116)
+AddSpellName("IceLance", 42914, 42913, 30455)
+AddSpellName("FrostfireBolt", 47610, 44614 )
+AddSpellName("Fireball", 42833, 42832, 38692, 27070, 25306, 10151, 10150, 10149, 10148, 8402, 8401, 8400, 3140, 145, 143, 133)
+AddSpellName("Pyroblast", 42891, 42890, 33938, 27132, 18809, 12526, 12525, 12524, 12523, 12522, 12505, 11366)
+AddSpellName("Flamestrike", 42926, 42925, 27086, 10216, 10215, 8423, 8422, 2121, 2120)
 
-    [686] = "ShadowBolt",
-    [695] = "ShadowBolt",
-    [705] = "ShadowBolt",
-    [1088] = "ShadowBolt",
-    [1106] = "ShadowBolt",
-    [7641] = "ShadowBolt",
-    [11659] = "ShadowBolt",
-    [11660] = "ShadowBolt",
-    [11661] = "ShadowBolt",
-    [25307] = "ShadowBolt",
-    [27209] = "ShadowBolt",
+AddSpellName("FlashOfLight", 48785, 48784, 27137, 19943, 19942, 19941, 19940, 19939, 19750)
+AddSpellName("DrainSoul", 47855, 27217, 11675, 8289, 8288, 1120)
+AddSpellName("SoulFire", 47825, 47824, 30545, 27211, 17924, 6353)
 
-    [1495] = "MongooseBite",
-    [14269] = "MongooseBite",
-    [14270] = "MongooseBite",
-    [14271] = "MongooseBite",
-    [36916] = "MongooseBite",
+AddSpellName("Starfire", 48465, 48464, 26986, 25298, 9876, 9875, 8951, 8950, 8949, 2912)
+AddSpellName("Wrath", 48461, 48459, 26985, 26984, 9912, 8905, 6780, 5180, 5179, 5178, 5177, 5176)
+AddSpellName("GreaterHeal", 48063, 48062, 25314, 25213, 25210, 10965, 10964, 10963, 2060)
 
-    [879] = "Exorcism",
-    [5614] = "Exorcism",
-    [5615] = "Exorcism",
-    [10312] = "Exorcism",
-    [10313] = "Exorcism",
-    [10314] = "Exorcism",
-    [27138] = "Exorcism",
 
-    [24275] = "HammerOfWrath",
-    [24274] = "HammerOfWrath",
-    [24239] = "HammerOfWrath",
-    [27180] = "HammerOfWrath",
+local function OnAuraStateChange(conditionFunc, actions)
+    local state = -1
+    return function()
+        local name, _, count, _, duration, expirationTime = conditionFunc()
+        local newState = name ~= nil
+        if newState ~= state then
+            actions(newState, duration, expirationTime)
+            state = newState
+        end
+    end
+end
 
-    [8042] = "EarthShock",
-    [8044] = "EarthShock",
-    [8045] = "EarthShock",
-    [8046] = "EarthShock",
-    [10412] = "EarthShock",
-    [10413] = "EarthShock",
-    [10414] = "EarthShock",
-    [25454] = "EarthShock",
-
-    [8050] = "FlameShock",
-    [8052] = "FlameShock",
-    [8053] = "FlameShock",
-    [10447] = "FlameShock",
-    [10448] = "FlameShock",
-    [29228] = "FlameShock",
-    [25457] = "FlameShock",
-
-    [8056] = "FrostShock",
-    [8058] = "FrostShock",
-    [10472] = "FrostShock",
-    [10473] = "FrostShock",
-    [25464] = "FrostShock",
-}
 
 f:RegisterEvent("PLAYER_LOGIN")
 function f:PLAYER_LOGIN()
 
-    if class == "WARRIOR" or class == "ROGUE" or class == "HUNTER" or class == "WARLOCK" or class == "PALADIN" or class == "SHAMAN" then
+    -- if class == "WARRIOR" or class == "ROGUE" or class == "HUNTER" or class == "WARLOCK" or class == "PALADIN" or class == "SHAMAN" then
+    if true then
         self:RegisterEvent("SPELLS_CHANGED")
         self:SPELLS_CHANGED()
 
@@ -152,10 +135,10 @@ function f:PLAYER_LOGIN()
 
         local LAB2 = LibStub("LibActionButton-1.0-ElvUI", true) -- ElvUI support
         if LAB2 then
-            LBG = LibStub("LibButtonGlow-1.0", true)
+            LCG = LibStub("LibCustomGlow-1.0", true)
             self:RegisterForActivations(LAB2.eventFrame)
             LAB2:RegisterCallback("OnButtonUpdate", function(event, self)
-                ns.LAB_UpdateOverlayGlow(self)
+                ns.LAB_UpdateOverlayGlowLibCustomGlow(self)
             end)
         end
 
@@ -196,184 +179,10 @@ local function FindAura(unit, spellID, filter)
     end
 end
 
-local hadShadowTrance
-local hadFocused
-local hadBacklash
 function f:SPELLS_CHANGED()
-    if class == "WARRIOR" then
-        self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-        self:SetScript("OnUpdate", self.timerOnUpdate)
-
-        local hasOverpower = ns.findHighestRank("Overpower")
-        local hasRevenge = ns.findHighestRank("Revenge")
-        local hasRampage = ns.findHighestRank("Rampage")
-        local hasVictoryRush = ns.findHighestRank("VictoryRush")
-
-        local CheckOverpower = ns.CheckOverpower
-        local CheckRevenge = ns.CheckRevenge
-        local CheckRampage = ns.CheckRampage
-        procCombatLog = function(...)
-            if hasOverpower then
-                CheckOverpower(...)
-            end
-            if hasRevenge then
-                CheckRevenge(...)
-            end
-            if hasRampage then
-                CheckRampage(...)
-            end
-        end
-
-        if not hasOverpower and not hasRevenge and not hasRampage then
-            self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-            self:SetScript("OnUpdate", nil)
-        end
-
-        if hasVictoryRush then
-            self:RegisterEvent("SPELL_UPDATE_USABLE")
-            local wasUsable = IsUsableSpell(34428)
-            self.SPELL_UPDATE_USABLE = function()
-                local isUsable = IsUsableSpell(34428)
-                if wasUsable ~= isUsable then
-                    if isUsable then
-                        f:Activate("VictoryRush", 20, true)
-                    else
-                        f:Deactivate("VictoryRush")
-                    end
-                    wasUsable = isUsable
-                end
-            end
-        end
-
-        if ns.findHighestRank("Execute") then
-            self:RegisterEvent("PLAYER_TARGET_CHANGED")
-            self:RegisterUnitEvent("UNIT_HEALTH", "target")
-            self.PLAYER_TARGET_CHANGED = ns.ExecuteCheck
-            self.UNIT_HEALTH = ns.ExecuteCheck
-        else
-            self:UnregisterEvent("PLAYER_TARGET_CHANGED")
-            self:UnregisterEvent("UNIT_HEALTH")
-        end
-    elseif class == "ROGUE" then
-        if ns.findHighestRank("Riposte") then
-            self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-            procCombatLog = ns.CheckRiposte
-            self:SetScript("OnUpdate", self.timerOnUpdate)
-        else
-            self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-            self:SetScript("OnUpdate", nil)
-        end
-
-    elseif class == "PALADIN" then
-        if ns.findHighestRank("Exorcism") then
-            self:RegisterEvent("PLAYER_TARGET_CHANGED")
-            self.PLAYER_TARGET_CHANGED = ns.PaladinExorcismCheck
-            self:SetScript("OnUpdate", self.timerOnUpdate)
-
-            if ns.findHighestRank("HammerOfWrath") then
-                self:RegisterUnitEvent("UNIT_HEALTH", "target")
-                self.PLAYER_TARGET_CHANGED = function(...)
-                    ns.PaladinExorcismCheck(...)
-                    ns.HOWCheck(...)
-                end
-                self.UNIT_HEALTH = ns.HOWCheck
-            end
-        end
-
-    elseif class == "HUNTER" then
-
-        local hasMongooseBite = ns.findHighestRank("MongooseBite")
-        local hasCounterattack = ns.findHighestRank("Counterattack")
-        local hasKillCommand = ns.findHighestRank("KillCommand")
-
-        self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-        self:SetScript("OnUpdate", self.timerOnUpdate)
-        if hasMongooseBite or hasCounterattack or hasKillCommand then
-            local CheckCounterattack = ns.CheckCounterattack
-            local CheckMongooseBite = ns.CheckMongooseBite
-            local CheckKillCommand = ns.CheckKillCommand
-            procCombatLog = function(...)
-                if hasCounterattack then
-                    CheckCounterattack(...)
-                end
-                if hasMongooseBite then
-                    CheckMongooseBite(...)
-                end
-                if hasKillCommand then
-                    CheckKillCommand(...)
-                end
-            end
-        else
-            self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-            self:SetScript("OnUpdate", nil)
-        end
-    elseif class == "WARLOCK" then
-        self:SetScript("OnUpdate", self.timerOnUpdate)
-        local hasNightfallTalent = IsPlayerSpell(18094) or IsPlayerSpell(18095)
-        local hasBacklashTalent = IsPlayerSpell(34939) or IsPlayerSpell(34938) or IsPlayerSpell(34935)
-        if hasNightfallTalent or hasBacklashTalent then
-            self:RegisterUnitEvent("UNIT_AURA", "player")
-            self:SetScript("OnUpdate", self.timerOnUpdate)
-            self.UNIT_AURA = function(self, event, unit)
-                if hasNightfallTalent then
-                    local name, _, _, _, duration, expirationTime = FindAura(unit, 17941, "HELPFUL") -- Shadow Trance
-                    local haveShadowTrance = name ~= nil
-                    if hadShadowTrance ~= haveShadowTrance then
-                        if haveShadowTrance then
-                            f:Activate("ShadowBolt", duration, true)
-                        else
-                            f:Deactivate("ShadowBolt")
-                        end
-                        hadShadowTrance = haveShadowTrance
-                    end
-                end
-                if hasBacklashTalent then
-                    local name, _, _, _, duration, expirationTime = FindAura(unit, 34936, "HELPFUL") -- Backlash
-                    local haveBacklash = name ~= nil
-                    if hadBacklash ~= haveBacklash then
-                        if haveBacklash then
-                            f:Activate("ShadowBolt", duration, true)
-                            f:Activate("Incinerate", duration, true)
-                        else
-                            f:Deactivate("ShadowBolt")
-                            f:Deactivate("Incinerate")
-                        end
-                        hadBacklash = haveBacklash
-                    end
-                end
-            end
-        else
-            self:SetScript("OnUpdate", nil)
-            self:UnregisterEvent("UNIT_AURA")
-        end
-    elseif class == "SHAMAN" then
-        self:SetScript("OnUpdate", self.timerOnUpdate)
-        local hasShamanisticFocusTalent = IsPlayerSpell(43338)
-        if hasShamanisticFocusTalent then
-            self:RegisterUnitEvent("UNIT_AURA", "player")
-            self:SetScript("OnUpdate", self.timerOnUpdate)
-            self.UNIT_AURA = function(self, event, unit)
-                if hasShamanisticFocusTalent then
-                    local name, _, _, _, duration, expirationTime = FindAura(unit, 43339, "HELPFUL") -- Focused
-                    local haveFocused = name ~= nil
-                    if hadFocused ~= haveFocused then
-                        if haveFocused then
-                            f:Activate("EarthShock", duration, true)
-                            f:Activate("FlameShock", duration, true)
-                            f:Activate("FrostShock", duration, true)
-                        else
-                            f:Deactivate("EarthShock")
-                            f:Deactivate("FlameShock")
-                            f:Deactivate("FrostShock")
-                        end
-                        hadFocused = haveFocused
-                    end
-                end
-            end
-        else
-            self:SetScript("OnUpdate", nil)
-            self:UnregisterEvent("UNIT_AURA")
-        end
+    local config = ns.configs[class]
+    if config then
+        config(self)
     end
 end
 
@@ -421,6 +230,19 @@ function ns.LAB_UpdateOverlayGlow(self)
     end
 end
 
+function ns.LAB_UpdateOverlayGlowLibCustomGlow(self)
+    local spellId = self:GetSpellId()
+    if spellId and IsSpellOverlayed(spellId) then
+        if LCG then
+            LCG.ButtonGlow_Start(self)
+        end
+    else
+        if LCG then
+            LCG.ButtonGlow_Stop(self)
+        end
+    end
+end
+
 function f:FanoutEvent(event, ...)
     for frame, _ in pairs(registeredFrames) do
         local eventHandler = frame:GetScript("OnEvent")
@@ -430,24 +252,7 @@ function f:FanoutEvent(event, ...)
     end
 end
 
-local reverseSpellRanks = {
-    Overpower = { 11585, 11584, 7887, 7384 },
-    Revenge = { 30357, 25269, 5269, 25288, 11601, 11600, 7379, 6574, 6572 },
-    Rampage = { 30033, 30030, 29801},
-    Riposte = { 14251 },
-    Counterattack = { 27067, 20910, 20909, 19306 },
-    KillCommand = { 34026 },
-    Execute = { 25236, 25234, 20662, 20661, 20660, 20658, 5308 },
-    ShadowBolt = { 27209, 25307, 11661, 11660, 11659, 7641, 1106, 1088, 705, 695, 686 },
-    Incinerate = { 32231, 29722 },
-    MongooseBite = { 36916, 14271, 14270, 14269, 1495 },
-    Exorcism = { 27138, 10314, 10313, 10312, 5615, 5614, 879 },
-    HammerOfWrath = { 27180, 24239, 24274, 24275 },
-    VictoryRush = { 34428 },
-    EarthShock = { 25454, 10414, 10413, 10412, 8046, 8045, 8044, 8042 },
-    FlameShock = { 25457, 29228, 10448, 10447, 8053, 8052, 8050 },
-    FrostShock = { 25464, 10473, 10472, 8058, 8056 },
-}
+
 function ns.findHighestRank(spellName)
     for _, spellID in ipairs(reverseSpellRanks[spellName]) do
         if IsPlayerSpell(spellID) then return spellID end
@@ -455,12 +260,18 @@ function ns.findHighestRank(spellName)
 end
 local findHighestRank = ns.findHighestRank
 
-function f:Activate(spellName, duration, keepExpiration)
-    local state = activations[spellName]
-    if not state then
+function f:Activate(spellName, actID, duration, keepExpiration)
+    local states = activations[spellName]
+    if not states then
         activations[spellName] = {}
-        state = activations[spellName]
+        states = activations[spellName]
     end
+    local state = states[actID]
+    if not state then
+        states[actID] = {}
+        state = states[actID]
+    end
+    local expirationTime = state
     if not state.active then
         state.active = true
         state.expirationTime = duration and GetTime() + duration
@@ -471,12 +282,17 @@ function f:Activate(spellName, duration, keepExpiration)
         state.expirationTime = duration and GetTime() + duration
     end
 end
-function f:Deactivate(spellName)
-    local state = activations[spellName]
+function f:Deactivate(spellName, actID)
+    local states = activations[spellName]
+    if not states then return end
+    local state = states[actID]
     if state and state.active == true then
-        state.active = false
-        state.expirationTime = nil
+        states[actID] = nil
+        -- state.active = false
+        -- state.expirationTime = nil
+    end
 
+    if not next(states) then
         local highestRankSpellID = findHighestRank(spellName)
         self:FanoutEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", highestRankSpellID)
     end
@@ -495,9 +311,11 @@ function f.timerOnUpdate(self, elapsed)
     end
 
     local now = GetTime()
-    for spellName, state in pairs(activations) do
-        if state.expirationTime and now >= state.expirationTime then
-            f:Deactivate(spellName)
+    for spellName, states in pairs(activations) do
+        for actID, state in pairs(states) do
+            if state.expirationTime and now >= state.expirationTime then
+                f:Deactivate(spellName, actID)
+            end
         end
     end
 end
@@ -525,12 +343,12 @@ function ns.ExecuteCheck(self, event, unit)
         local executeID = ns.findHighestRank("Execute")
 
         if h > 0 and (h/hm < 0.2 or IsUsableSpell(executeID)) then
-            f:Activate("Execute", 10)
+            f:Activate("Execute", "Health", 10)
         else
-            f:Deactivate("Execute")
+            f:Deactivate("Execute", "Health")
         end
     else
-        f:Deactivate("Execute")
+        f:Deactivate("Execute", "Health")
     end
 end
 
@@ -544,7 +362,7 @@ function ns.CheckOverpower(eventType, isSrcPlayer, isDstPlayer, ...)
                 missedType = select(4, ...)
             end
             if missedType == "DODGE" then
-                f:Activate("Overpower", 5)
+                f:Activate("Overpower", "Dodge", 5)
             end
 
         end
@@ -552,7 +370,8 @@ function ns.CheckOverpower(eventType, isSrcPlayer, isDstPlayer, ...)
         if eventType == "SPELL_CAST_SUCCESS" then
             local spellName = select(2, ...)
             if spellName == LocalizedOverpower then
-                f:Deactivate("Overpower")
+                f:Deactivate("Overpower", "Dodge")
+                f:Deactivate("Overpower", "TasteForBlood")
             end
         end
     end
@@ -568,13 +387,13 @@ function ns.CheckRevenge(eventType, isSrcPlayer, isDstPlayer, ...)
                 missedType = select(4, ...)
             end
             if missedType == "BLOCK" or missedType == "DODGE" or missedType == "PARRY" then
-                f:Activate("Revenge", 5)
+                f:Activate("Revenge", "Parry", 5)
             end
         end
         if eventType == "SWING_DAMAGE" then
             local blocked = select(5, ...)
             if blocked then
-                f:Activate("Revenge", 5)
+                f:Activate("Revenge", "Parry", 5)
             end
         end
     end
@@ -582,7 +401,7 @@ function ns.CheckRevenge(eventType, isSrcPlayer, isDstPlayer, ...)
     if isSrcPlayer and eventType == "SPELL_CAST_SUCCESS" then
         local spellName = select(2, ...)
         if spellName == LocalizedRevenge then
-            f:Deactivate("Revenge")
+            f:Deactivate("Revenge", "Parry")
         end
     end
 end
@@ -597,10 +416,129 @@ function ns.CheckRampage(eventType, isSrcPlayer, isDstPlayer, ...)
                 isCrit = select(10, ...)
             end
             if isCrit == true then
-                f:Activate("Rampage", 5)
+                f:Activate("Rampage", "Crit", 5)
             end
 
         end
+    end
+end
+
+local CheckTasteForBlood = OnAuraStateChange(function() return FindAura("player", 60503, "HELPFUL") end,
+    function(present, duration)
+        if present then
+            f:Activate("Overpower", "TasteForBlood", duration, true)
+        else
+            f:Deactivate("Overpower", "TasteForBlood")
+        end
+    end
+)
+local CheckSuddenDeath = OnAuraStateChange(function() return FindAura("player", 52437, "HELPFUL") end,
+    function(present, duration)
+        if present then
+            f:Activate("Execute", "SuddenDeath", duration, true)
+        else
+            f:Deactivate("Execute", "SuddenDeath")
+        end
+    end
+)
+local CheckSwordAndBoard = OnAuraStateChange(function() return FindAura("player", 50227, "HELPFUL") end,
+    function(present, duration)
+        if present then
+            f:Activate("ShieldSlam", "Reset", duration, true)
+        else
+            f:Deactivate("ShieldSlam", "Reset")
+        end
+    end
+)
+local CheckBloodsurge = OnAuraStateChange(function() return FindAura("player", 46916, "HELPFUL") end,
+    function(present, duration)
+        if present then
+            f:Activate("Slam", "Bloodsurge", duration, true)
+        else
+            f:Deactivate("Slam", "Bloodsurge")
+        end
+    end
+)
+
+ns.configs.WARRIOR = function(self)
+    self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+    self:SetScript("OnUpdate", self.timerOnUpdate)
+
+    local hasOverpower = ns.findHighestRank("Overpower")
+    local hasRevenge = ns.findHighestRank("Revenge")
+    local hasRampage = ns.findHighestRank("Rampage")
+    local hasVictoryRush = ns.findHighestRank("VictoryRush")
+    local hasShieldSlam = ns.findHighestRank("ShieldSlam")
+
+    local CheckOverpower = ns.CheckOverpower
+    local CheckRevenge = ns.CheckRevenge
+    local CheckRampage = ns.CheckRampage
+    procCombatLog = function(...)
+        if hasOverpower then
+            CheckOverpower(...)
+        end
+        if hasRevenge then
+            CheckRevenge(...)
+        end
+        if hasRampage then
+            CheckRampage(...)
+        end
+    end
+
+    if not hasOverpower and not hasRevenge and not hasRampage then
+        self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+        self:SetScript("OnUpdate", nil)
+    end
+
+    if ns.findHighestRank("Execute") then
+        self:RegisterEvent("PLAYER_TARGET_CHANGED")
+        self:RegisterUnitEvent("UNIT_HEALTH", "target")
+        self.PLAYER_TARGET_CHANGED = ns.ExecuteCheck
+        self.UNIT_HEALTH = ns.ExecuteCheck
+    else
+        self:UnregisterEvent("PLAYER_TARGET_CHANGED")
+        self:UnregisterEvent("UNIT_HEALTH")
+    end
+
+    if hasVictoryRush or ns.findHighestRank("Execute") then
+        self:RegisterEvent("SPELL_UPDATE_USABLE")
+        local wasUsable = IsUsableSpell(34428)
+        local wasUsableExecute = IsUsableSpell("Execute")
+        self.SPELL_UPDATE_USABLE = function()
+            local isUsable = IsUsableSpell(34428)
+            if wasUsable ~= isUsable then
+                if isUsable then
+                    f:Activate("VictoryRush", "Usable", 20, true)
+                else
+                    f:Deactivate("VictoryRush", "Usable")
+                end
+                wasUsable = isUsable
+            end
+        end
+    end
+
+    local hasTasteForBloodTalent = IsPlayerSpell(56636) or IsPlayerSpell(56637) or IsPlayerSpell(56638)
+    local hasSuddenDeathTalent = IsPlayerSpell(29723) or IsPlayerSpell(29725) or IsPlayerSpell(29724)
+    local hasSwordAndBoardTalent = IsPlayerSpell(46951) or IsPlayerSpell(46952) or IsPlayerSpell(46953)
+    local hasBloodsurgeTalent = IsPlayerSpell(46913) or IsPlayerSpell(46914) or IsPlayerSpell(46915)
+    if hasTasteForBloodTalent or hasSuddenDeathTalent or hasSwordAndBoardTalent or hasBloodsurgeTalent then
+        self:RegisterUnitEvent("UNIT_AURA", "player")
+        self.UNIT_AURA = function(self, event, unit)
+            if hasTasteForBloodTalent then
+                CheckTasteForBlood()
+            end
+            if hasSuddenDeathTalent then
+                CheckSuddenDeath()
+            end
+            if hasSwordAndBoardTalent then
+                CheckSwordAndBoard()
+            end
+            if hasBloodsurgeTalent then
+            	CheckBloodsurge()
+            end
+        end
+    else
+        self:UnregisterEvent("UNIT_AURA")
     end
 end
 
@@ -618,7 +556,7 @@ function ns.CheckRiposte(eventType, isSrcPlayer, isDstPlayer, ...)
                 missedType = select(4, ...)
             end
             if missedType == "PARRY" then
-                f:Activate("Riposte", 5)
+                f:Activate("Riposte", "Parry", 5)
             end
         end
     end
@@ -626,8 +564,19 @@ function ns.CheckRiposte(eventType, isSrcPlayer, isDstPlayer, ...)
     if isSrcPlayer and eventType == "SPELL_CAST_SUCCESS" then
         local spellName = select(2, ...)
         if spellName == LocalizedRiposte then -- Riposte
-            f:Deactivate("Riposte")
+            f:Deactivate("Riposte", "Parry")
         end
+    end
+end
+
+ns.configs.ROGUE = function(self)
+    if ns.findHighestRank("Riposte") then
+        self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+        procCombatLog = ns.CheckRiposte
+        self:SetScript("OnUpdate", self.timerOnUpdate)
+    else
+        self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+        self:SetScript("OnUpdate", nil)
     end
 end
 
@@ -645,7 +594,7 @@ function ns.CheckCounterattack(eventType, isSrcPlayer, isDstPlayer, ...)
                 missedType = select(4, ...)
             end
             if missedType == "PARRY" then
-                f:Activate("Counterattack", 5)
+                f:Activate("Counterattack", "Parry", 5)
             end
         end
     end
@@ -653,7 +602,7 @@ function ns.CheckCounterattack(eventType, isSrcPlayer, isDstPlayer, ...)
     if isSrcPlayer and eventType == "SPELL_CAST_SUCCESS" then
         local spellName = select(2, ...)
         if spellName == LocalizedCounterattack then
-            f:Deactivate("Counterattack", 5)
+            f:Deactivate("Counterattack", "Parry", 5)
         end
     end
 end
@@ -668,7 +617,7 @@ function ns.CheckMongooseBite(eventType, isSrcPlayer, isDstPlayer, ...)
                 missedType = select(4, ...)
             end
             if missedType == "DODGE" then
-                f:Activate("MongooseBite", 5)
+                f:Activate("MongooseBite", "Dodge", 5)
             end
         end
     end
@@ -676,7 +625,7 @@ function ns.CheckMongooseBite(eventType, isSrcPlayer, isDstPlayer, ...)
     if isSrcPlayer and eventType == "SPELL_CAST_SUCCESS" then
         local spellName = select(2, ...)
         if spellName == LocalizedMongooseBite then
-            f:Deactivate("MongooseBite", 5)
+            f:Deactivate("MongooseBite", "Dodge", 5)
         end
     end
 end
@@ -694,10 +643,38 @@ function ns.CheckKillCommand(eventType, isSrcPlayer, isDstPlayer, ...)
                 isCrit = select(10, ...)
             end
             if isCrit == true then
-                f:Activate("KillCommand", 5)
+                f:Activate("KillCommand", "Crit", 5)
             end
 
         end
+    end
+end
+
+ns.configs.HUNTER = function(self)
+    local hasMongooseBite = APILevel <= 2 ns.findHighestRank("MongooseBite")
+    local hasCounterattack = ns.findHighestRank("Counterattack")
+    local hasKillCommand = APILevel == 2 and ns.findHighestRank("KillCommand")
+
+    self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+    self:SetScript("OnUpdate", self.timerOnUpdate)
+    if hasMongooseBite or hasCounterattack or hasKillCommand then
+        local CheckCounterattack = ns.CheckCounterattack
+        local CheckMongooseBite = ns.CheckMongooseBite
+        local CheckKillCommand = ns.CheckKillCommand
+        procCombatLog = function(...)
+            if hasCounterattack then
+                CheckCounterattack(...)
+            end
+            if hasMongooseBite then
+                CheckMongooseBite(...)
+            end
+            if hasKillCommand then
+                CheckKillCommand(...)
+            end
+        end
+    else
+        self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+        self:SetScript("OnUpdate", nil)
     end
 end
 
@@ -742,9 +719,9 @@ do
 
         if newState ~= exorcismCooldownState then
             if newState == false then
-                f:Activate("Exorcism", 5)
+                f:Activate("Exorcism", "NPCType", 5)
             else
-                f:Deactivate("Exorcism")
+                f:Deactivate("Exorcism", "NPCType")
             end
         end
         exorcismCooldownState = newState
@@ -756,7 +733,7 @@ do
             exorcismTickerFunc()
             periodicCheck = exorcismTickerFunc
         else
-            f:Deactivate("Exorcism")
+            f:Deactivate("Exorcism", "NPCType")
             periodicCheck = nil
         end
     end
@@ -767,11 +744,371 @@ function ns.HOWCheck(self, event, unit)
         local h = UnitHealth("target")
         local hm = UnitHealthMax("target")
         if h > 0 and h/hm <= 0.2 then
-            f:Activate("HammerOfWrath", 10)
+            f:Activate("HammerOfWrath", "Health", 10)
         else
-            f:Deactivate("HammerOfWrath")
+            f:Deactivate("HammerOfWrath", "Health")
         end
     else
-        f:Deactivate("HammerOfWrath")
+        f:Deactivate("HammerOfWrath", "Health")
     end
+end
+
+local CheckArtOfWar = OnAuraStateChange(function() return FindAura("player", 59578, "HELPFUL") end,
+    function(present, duration)
+        if present then
+            f:Activate("FlashOfLight", "ArtOfWar", duration, true)
+            f:Activate("Exorcism", "ArtOfWar", duration, true)
+        else
+            f:Deactivate("FlashOfLight", "ArtOfWar")
+            f:Deactivate("Exorcism", "ArtOfWar")
+        end
+    end
+)
+
+ns.configs.PALADIN = function(self)
+    self:SetScript("OnUpdate", self.timerOnUpdate)
+
+    local hasArtOfWar = IsPlayerSpell(53486) or IsPlayerSpell(53488)
+
+    if ns.findHighestRank("Exorcism") then
+        self:RegisterEvent("PLAYER_TARGET_CHANGED")
+        self.PLAYER_TARGET_CHANGED = ns.PaladinExorcismCheck
+
+        if ns.findHighestRank("HammerOfWrath") then
+            self:RegisterUnitEvent("UNIT_HEALTH", "target")
+            self.PLAYER_TARGET_CHANGED = function(...)
+                if not hasArtOfWar then
+                    ns.PaladinExorcismCheck(...)
+                end
+                ns.HOWCheck(...)
+            end
+            self.UNIT_HEALTH = ns.HOWCheck
+        end
+    end
+
+    if hasArtOfWar then
+        self:RegisterUnitEvent("UNIT_AURA", "player")
+        self:SetScript("OnUpdate", self.timerOnUpdate)
+        self.UNIT_AURA = function(self, event, unit)
+            if hasArtOfWar then
+                CheckArtOfWar()
+            end
+        end
+    else
+        self:UnregisterEvent("UNIT_AURA")
+    end
+end
+
+-----------------
+-- WARLOCK
+-----------------
+local CheckNightfall = OnAuraStateChange(function() return FindAura("player", 17941, "HELPFUL") end,
+    function(present, duration)
+        if present then
+            f:Activate("ShadowBolt", "Nightfall", duration, true)
+        else
+            f:Deactivate("ShadowBolt", "Nightfall")
+        end
+    end
+)
+local CheckBacklash = OnAuraStateChange(function() return FindAura("player", 34936, "HELPFUL") end,
+    function(present, duration)
+        if present then
+            f:Activate("ShadowBolt", "Backlash", duration, true)
+            f:Activate("Incinerate", "Backlash", duration, true)
+        else
+            f:Deactivate("ShadowBolt", "Backlash")
+            f:Deactivate("Incinerate", "Backlash")
+        end
+    end
+)
+local CheckDecimation = OnAuraStateChange(function() return FindAura("player", 63167, "HELPFUL") end,
+    function(present, duration)
+        if present then
+            f:Activate("SoulFire", "Decimation", duration, true)
+        else
+            f:Deactivate("SoulFire", "Decimation")
+        end
+    end
+)
+local CheckMoltenCore = OnAuraStateChange(function() return FindAura("player", 71165, "HELPFUL") end,
+    function(present, duration)
+        if present then
+            f:Activate("Incinerate", "MoltenCore", duration, true)
+        else
+            f:Deactivate("Incinerate", "MoltenCore")
+        end
+    end
+)
+
+function ns.DrainSoulExecuteCheck(self, event, unit)
+    if UnitExists("target") and not UnitIsFriend("player", "target") then
+        local h = UnitHealth("target")
+        local hm = UnitHealthMax("target")
+        local executeID = ns.findHighestRank("DrainSoul")
+
+        if h > 0 and (h/hm < 0.25) then
+            f:Activate("DrainSoul", "Health", 10)
+        else
+            f:Deactivate("DrainSoul", "Health")
+        end
+    else
+        f:Deactivate("DrainSoul", "Health")
+    end
+end
+
+ns.configs.WARLOCK = function(self)
+    self:SetScript("OnUpdate", self.timerOnUpdate)
+
+
+    if ns.findHighestRank("DrainSoul") then
+        self:RegisterEvent("PLAYER_TARGET_CHANGED")
+        self:RegisterUnitEvent("UNIT_HEALTH", "target")
+        self.PLAYER_TARGET_CHANGED = ns.DrainSoulExecuteCheck
+        self.UNIT_HEALTH = ns.DrainSoulExecuteCheck
+    else
+        self:UnregisterEvent("PLAYER_TARGET_CHANGED")
+        self:UnregisterEvent("UNIT_HEALTH")
+    end
+
+    local hasNightfallTalent = IsPlayerSpell(18094) or IsPlayerSpell(18095) -- for all classic game versions
+    local hasBacklashTalent = IsPlayerSpell(34939) or IsPlayerSpell(34938) or IsPlayerSpell(34935) -- starts with BC
+    local hasDecimation = IsPlayerSpell(63156) or IsPlayerSpell(63158)
+    local hasMoltenCore = IsPlayerSpell(47245) or IsPlayerSpell(47246) or IsPlayerSpell(47247)
+    local hasGlyphOfCorruption = IsPlayerSpell(56218) -- Nightfall proc from glyph of corruption
+    if hasNightfallTalent or hasBacklashTalent or hasDecimation or hasMoltenCore or hasGlyphOfCorruption then
+        self:RegisterUnitEvent("UNIT_AURA", "player")
+        self:SetScript("OnUpdate", self.timerOnUpdate)
+        self.UNIT_AURA = function(self, event, unit)
+            if hasNightfallTalent or hasGlyphOfCorruption then
+                CheckNightfall()
+            end
+            if hasBacklashTalent then
+                CheckBacklash()
+            end
+            if hasDecimation then
+                CheckDecimation()
+            end
+            if hasMoltenCore then
+                CheckMoltenCore()
+            end
+        end
+    else
+        self:SetScript("OnUpdate", nil)
+        self:UnregisterEvent("UNIT_AURA")
+    end
+end
+
+
+-----------------
+-- SHAMAN
+-----------------
+if APILevel == 2 then
+
+local CheckShamanisticFocus = OnAuraStateChange(function() return FindAura("player", 43339, "HELPFUL") end,
+    function(present, duration)
+        if present then
+            f:Activate("EarthShock", "ShamFocus", duration, true)
+            f:Activate("FlameShock", "ShamFocus", duration, true)
+            f:Activate("FrostShock", "ShamFocus", duration, true)
+        else
+            f:Deactivate("EarthShock", "ShamFocus")
+            f:Deactivate("FlameShock", "ShamFocus")
+            f:Deactivate("FrostShock", "ShamFocus")
+        end
+    end
+)
+
+ns.configs.SHAMAN = function(self)
+    self:SetScript("OnUpdate", self.timerOnUpdate)
+    local hasShamanisticFocusTalent = IsPlayerSpell(43338)
+    if hasShamanisticFocusTalent then
+        self:RegisterUnitEvent("UNIT_AURA", "player")
+        self:SetScript("OnUpdate", self.timerOnUpdate)
+        self.UNIT_AURA = function(self, event, unit)
+            if hasShamanisticFocusTalent then
+                CheckShamanisticFocus()
+            end
+        end
+    else
+        self:SetScript("OnUpdate", nil)
+        self:UnregisterEvent("UNIT_AURA")
+    end
+end
+
+end
+
+
+-----------------
+-- MAGE
+-----------------
+
+if APILevel == 3 then
+    local CheckFingers = OnAuraStateChange(function() return FindAura("player", 74396, "HELPFUL") end,
+        function(present, duration)
+            if present then
+                f:Activate("IceLance", "Fingers", duration, true)
+            else
+                f:Deactivate("IceLance", "Fingers")
+            end
+        end
+    )
+    local CheckBarrage = OnAuraStateChange(function() return FindAura("player", 44401, "HELPFUL") end,
+        function(present, duration)
+            if present then
+                f:Activate("ArcaneMissiles", "Barrage", duration, true)
+            else
+                f:Deactivate("ArcaneMissiles", "Barrage")
+            end
+        end
+    )
+    local CheckBrainFreeze = OnAuraStateChange(function() return FindAura("player", 57761, "HELPFUL") end,
+        function(present, duration)
+            if present then
+                f:Activate("Fireball", "BrainFreeze", duration, true)
+                f:Activate("FrostfireBolt", "BrainFreeze", duration, true)
+            else
+                f:Deactivate("Fireball", "BrainFreeze")
+                f:Deactivate("FrostfireBolt", "BrainFreeze")
+            end
+        end
+    )
+    local CheckHotStreak = OnAuraStateChange(function() return FindAura("player", 48108, "HELPFUL") end,
+        function(present, duration)
+            if present then
+                f:Activate("Pyroblast", "HotStreak", duration, true)
+            else
+                f:Deactivate("Pyroblast", "HotStreak")
+            end
+        end
+    )
+    local CheckFirestarter = OnAuraStateChange(function() return FindAura("player", 54741, "HELPFUL") end,
+        function(present, duration)
+            if present then
+                f:Activate("Flamestrike", "Firestarter", duration, true)
+            else
+                f:Deactivate("Flamestrike", "Firestarter")
+            end
+        end
+    )
+    ns.configs.MAGE = function(self)
+        self:SetScript("OnUpdate", self.timerOnUpdate)
+        local hasFingersOfFrost = IsPlayerSpell(44543) or IsPlayerSpell(44545)
+        local hasMissileBarrage = IsPlayerSpell(44404) or IsPlayerSpell(54486) or IsPlayerSpell(54488) or IsPlayerSpell(54489) or IsPlayerSpell(54490)
+        local hasBrainFreeze = IsPlayerSpell(44546) or IsPlayerSpell(44548) or IsPlayerSpell(44549)
+        local hasHotStreak = IsPlayerSpell(44445) or IsPlayerSpell(44446) or IsPlayerSpell(44448)
+        local hasFirestarter = IsPlayerSpell(44442) or IsPlayerSpell(44443)
+
+        -- if hasFingersOfFrost then
+
+        self:RegisterUnitEvent("UNIT_AURA", "player")
+        self:SetScript("OnUpdate", self.timerOnUpdate)
+        self.UNIT_AURA = function(self, event, unit)
+            if hasFingersOfFrost then
+                CheckFingers()
+            end
+            if hasMissileBarrage then
+                CheckBarrage()
+            end
+            if hasBrainFreeze then
+                CheckBrainFreeze()
+            end
+            if hasHotStreak then
+                CheckHotStreak()
+            end
+            if hasFirestarter then
+                CheckFirestarter()
+            end
+        end
+        -- else
+        --     self:SetScript("OnUpdate", nil)
+        --     self:UnregisterEvent("UNIT_AURA")
+        -- end
+    end
+
+end
+
+
+-----------------
+-- DRUID
+-----------------
+
+if APILevel == 3 then
+    local CheckSolarEclipse = OnAuraStateChange(function() return FindAura("player", 48517, "HELPFUL") end,
+        function(present, duration)
+            if present then
+                f:Activate("Wrath", "SolarEclipse", duration, true)
+            else
+                f:Deactivate("Wrath", "SolarEclipse")
+            end
+        end
+    )
+    local CheckLunarEclipse = OnAuraStateChange(function() return FindAura("player", 48518, "HELPFUL") end,
+        function(present, duration)
+            if present then
+                f:Activate("Starfire", "SolarEclipse", duration, true)
+            else
+                f:Deactivate("Starfire", "SolarEclipse")
+            end
+        end
+    )
+
+    ns.configs.DRUID = function(self)
+        self:SetScript("OnUpdate", self.timerOnUpdate)
+        local hasEclipse = IsPlayerSpell(48516) or IsPlayerSpell(48521) or IsPlayerSpell(48525)
+        if hasEclipse then
+            self:RegisterUnitEvent("UNIT_AURA", "player")
+            self:SetScript("OnUpdate", self.timerOnUpdate)
+            self.UNIT_AURA = function(self, event, unit)
+                if hasEclipse then
+                    CheckSolarEclipse()
+                    CheckLunarEclipse()
+                end
+            end
+        else
+            self:SetScript("OnUpdate", nil)
+            self:UnregisterEvent("UNIT_AURA")
+        end
+    end
+
+end
+
+-----------------
+-- PRIEST
+-----------------
+
+if APILevel == 3 then
+    local CheckSerendipity = OnAuraStateChange(
+        function()
+            local name, _, count, _, duration, expirationTime = FindAura("player", 63734, "HELPFUL")
+            if count == 3 then
+                return name, _, count, _, duration, expirationTime
+            end
+        end,
+        function(present, duration)
+            if present then
+                f:Activate("GreaterHeal", "Serendipity", duration, true)
+            else
+                f:Deactivate("GreaterHeal", "Serendipity")
+            end
+        end
+    )
+
+    ns.configs.PRIEST = function(self)
+        self:SetScript("OnUpdate", self.timerOnUpdate)
+        local hasSerendipityRank3 = IsPlayerSpell(63737)
+        if hasSerendipityRank3 then
+            self:RegisterUnitEvent("UNIT_AURA", "player")
+            self:SetScript("OnUpdate", self.timerOnUpdate)
+            self.UNIT_AURA = function(self, event, unit)
+                if hasSerendipityRank3 then
+                    CheckSerendipity()
+                end
+            end
+        else
+            self:SetScript("OnUpdate", nil)
+            self:UnregisterEvent("UNIT_AURA")
+        end
+    end
+
 end

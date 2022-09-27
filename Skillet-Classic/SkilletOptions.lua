@@ -21,6 +21,7 @@ local L = Skillet.L
 local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 local isBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+local isWrath = Skillet.build == "Wrath"
 
 --
 -- All the options that we allow the user to control.
@@ -304,8 +305,22 @@ Skillet.options =
 					set = function(self,value)
 						Skillet.db.profile.support_crafting = value
 					end,
-					width = "full",
+					width = 1.5,
 					order = 31
+				},
+				ignore_change = {
+					hidden = isClassic,
+					type = "toggle",
+					name = L["IGNORECHANGENAME"],
+					desc = L["IGNORECHANGEDESC"],
+					get = function()
+						return Skillet.db.profile.ignore_change
+					end,
+					set = function(self,value)
+						Skillet.db.profile.ignore_change = value
+					end,
+					width = 1.5,
+					order = 32
 				},
 				include_craftbuttons = {
 					type = "toggle",
@@ -318,7 +333,7 @@ Skillet.options =
 						Skillet.db.profile.include_craftbuttons = value
 					end,
 					width = "full",
-					order = 32
+					order = 33
 				},
 				queue_crafts = {
 					type = "toggle",
@@ -331,8 +346,22 @@ Skillet.options =
 						Skillet.db.profile.queue_crafts = value
 						Skillet:ConfigureRecipeControls()
 					end,
-					width = "full",
-					order = 33
+					width = 1.5,
+					order = 34
+				},
+				enchant_scrolls = {
+					hidden = isClassic,
+					type = "toggle",
+					name = L["ENCHANTSCROLLSNAME"],
+					desc = L["ENCHANTSCROLLSDESC"],
+					get = function()
+						return Skillet.db.profile.enchant_scrolls
+					end,
+					set = function(self,value)
+						Skillet.db.profile.enchant_scrolls = value
+					end,
+					width = 1.5,
+					order = 35
 				},
 				include_tradebuttons = {
 					type = "toggle",
@@ -345,7 +374,7 @@ Skillet.options =
 						Skillet.db.profile.include_tradebuttons = value
 					end,
 					width = "full",
-					order = 34
+					order = 36
 				},
 				search_includes_reagents = {
 					type = "toggle",
@@ -359,7 +388,7 @@ Skillet.options =
 						Skillet.data.tooltipCache = {}
 					end,
 					width = "full",
-					order = 35
+					order = 37
 				},
 				use_guildbank_as_alt = {
 					hidden = isClassic,
@@ -374,7 +403,7 @@ Skillet.options =
 						Skillet:UpdateTradeSkillWindow()
 					end,
 					width = 1.5,
-					order = 36
+					order = 38
 				},
 				use_bank_as_alt = {
 					hidden = isClassic,
@@ -389,7 +418,7 @@ Skillet.options =
 						Skillet:UpdateTradeSkillWindow()
 					end,
 					width = 1.5,
-					order = 37
+					order = 39
 				},
 			}
 		},
