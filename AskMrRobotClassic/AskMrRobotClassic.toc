@@ -1,7 +1,7 @@
-## Interface: 20504
+## Interface: 30400
 ## Title: Ask Mr. Robot Classic
 ## Author: Team Robot, Inc.
-## Version: 7
+## Version: 10
 ## Notes: Gear import/export, combat logging, and more.
 ## URL: www.askmrrobot.com/classic
 ## SavedVariables: AskMrRobotDbClassic

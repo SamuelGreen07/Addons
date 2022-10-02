@@ -119,6 +119,10 @@ L["Hide trivial"] = "Скрыть низкоуровневые"
 L["Hide uncraftable"] = "Скрыть несоздаваемые"
 L["HIDEBLIZZARDFRAMEDESC"] = "Скрывать окно умений Blizzard при открытии окна Skillet"
 L["HIDEBLIZZARDFRAMENAME"] = "Скрывать окно Blizzard"
+--[[Translation missing --]]
+L["HIGHERVELLUMDESC"] = "Use a higher level of vellum when correct vellum is unavailable."
+--[[Translation missing --]]
+L["HIGHERVELLUMNAME"] = "Use higher vellum"
 L["Ignore"] = "Игнорировать"
 L["IGNOREBANKEDREAGENTSDESC"] = "Игнорировать реагенты в банке при создании очереди крафта"
 L["IGNOREBANKEDREAGENTSNAME"] = "Игнорировать реагенты в банке"
@@ -225,8 +229,6 @@ L["SCALETOOLTIPNAME"] = [=[Масштабировать все всплываю�
 ]=]
 L["Scan completed"] = "Сканирование завершено"
 L["Scanning tradeskill"] = "Сканирование профессии"
---[[Translation missing --]]
-L["Scroll of"] = "Scroll of"
 L["Search"] = "Поиск"
 L["Select All"] = "Выбрать все"
 L["Select None"] = "Отменить выбор"

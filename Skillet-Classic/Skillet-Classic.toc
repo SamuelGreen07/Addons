@@ -4,7 +4,7 @@
 ## Notes-esES: Una sustitucion de la ventana de Habilidades de Comercio
 ## Notes-ruRU: Заменяет окно профессий на более функциональное.
 ## Author: bsmorgan
-## Version: 1.49
+## Version: 1.50
 ## X-Category: Tradeskill
 ## X-License GPL v3 or later
 ## X-Curse-Project-ID: 447401
@@ -13,7 +13,7 @@
 ## X-Website: https://www.curseforge.com/wow/addons/skillet-classic
 ## SavedVariables: SkilletDB
 ## SavedVariablesPerCharacter: SkilletWho, SkilletDBPC, SkilletMemory, SkilletProfile
-## OptionalDeps: Ace3, LibDialog-1.0, LibWindow-1.1, LibPeriodicTable-3.1, TradeSkillMaster, Auctionator, BootyBayGazette, MissingTradeSkillsList, BeanCounter
+## OptionalDeps: Ace3, LibDialog-1.0, LibWindow-1.1, LibPeriodicTable-3.1, TradeSkillMaster, Auctionator, BootyBayGazette, MissingTradeSkillsList, BeanCounter, DataStore
 ## X-Embeds: Ace3, LibStub, CallbackHandler-1.0, LibDialog-1.0, LibWindow-1.1, LibPeriodicTable-3.1
 
 ## LoadManagers: AddonLoader
@@ -72,12 +72,14 @@ DebugAids.lua
 #### Plugins
 Plugins\BeanCounter.lua
 Plugins\Auctionator.lua
-Plugins\BootyBayGazette.lua
 Plugins\MissingTradeSkillsList.lua
 Plugins\AuctionDB.lua
 Plugins\Auctioneer.lua
 Plugins\AuctionLite.lua
-Plugins\CancelForm.lua
+Plugins\DataStoreAuctions.lua
+#### Obsolete or Unused Addons
+## Plugins\CancelForm.lua
+## Plugins\BootyBayGazette.lua
 #### Addons not ported to Classic
 ## Plugins\AckisRecipeList.lua
 ## Plugins\TradeSkillInfo.lua

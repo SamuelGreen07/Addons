@@ -121,6 +121,10 @@ L["Hide trivial"] = "Nascondi Banali"
 L["Hide uncraftable"] = "Nascondi non creabili"
 L["HIDEBLIZZARDFRAMEDESC"] = "Hide Blizzard TradeSkill frame when showing Skillet frame"
 L["HIDEBLIZZARDFRAMENAME"] = "Hide Blizzard Frame"
+--[[Translation missing --]]
+L["HIGHERVELLUMDESC"] = "Use a higher level of vellum when correct vellum is unavailable."
+--[[Translation missing --]]
+L["HIGHERVELLUMNAME"] = "Use higher vellum"
 L["Ignore"] = "Ignore"
 --[[Translation missing --]]
 L["IGNOREBANKEDREAGENTSDESC"] = "Ignore banked reagents when queuing craftable reagents"
@@ -231,8 +235,6 @@ L["SCALETOOLTIPDESC"] = "Set scale of skill and reagent tooltips to match recipe
 L["SCALETOOLTIPNAME"] = "Scale All Tooltips"
 L["Scan completed"] = "Scansione Completa"
 L["Scanning tradeskill"] = "Scansionamento Professioni"
---[[Translation missing --]]
-L["Scroll of"] = "Scroll of"
 L["Search"] = "Search"
 L["Select All"] = "Select All"
 L["Select None"] = "Select None"

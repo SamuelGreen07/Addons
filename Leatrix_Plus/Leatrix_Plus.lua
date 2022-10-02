@@ -1,5 +1,5 @@
 ﻿----------------------------------------------------------------------
--- 	Leatrix Plus 3.0.09 (27th September 2022)
+-- 	Leatrix Plus 3.0.18 (2nd October 2022)
 ----------------------------------------------------------------------
 
 --	01:Functns, 02:Locks, 03:Restart, 20:Live, 30:Isolated, 40:Player
@@ -19,7 +19,7 @@
 	local void
 
 	-- Version
-	LeaPlusLC["AddonVer"] = "3.0.09"
+	LeaPlusLC["AddonVer"] = "3.0.18"
 
 	-- Get locale table
 	local void, Leatrix_Plus = ...
@@ -1362,6 +1362,17 @@
 				end
 			end
 
+			-- Create tables for specific NPC IDs
+			local npcTable = {
+
+				-- Stable masters (https://www.wowhead.com/wotlk/npcs?filter=27;1;0)
+				9988, 21518, 15131, 10055, 21517, 11069, 9985, 22469, 19476, 21336, 10060, 16586, 16094, 18250, 16824, 23392, 15722, 9977, 19018, 9987, 19368, 6749, 10058, 22468, 11104, 9986, 13617, 10046, 10048, 10051, 10053, 10054, 17485, 18244, 10045, 24974, 16665, 25037, 16656, 10057, 18984, 9984, 11105, 10056, 16185, 10059, 16764, 11119, 14741, 10085, 10061, 19019, 10052, 10047, 10063, 9979, 17666, 11117, 10049, 17896, 9983, 24905, 9989, 9982, 10050, 9980, 9981, 10062, 9976, 9978, 13616,
+
+				-- Dalaran: Brassbolt Mechawrench (Alliance) and Reginald Arcfire (Horde) (engineer auctioneers)
+				35594, 35607,
+
+			}
+
 			-- Create gossip event frame
 			local gossipFrame = CreateFrame("FRAME")
 
@@ -1389,6 +1400,11 @@
 						then
 							SkipGossip()
 							return
+						else
+							-- Skip gossip for specific NPCs
+							if GetNumGossipOptions() == 1 and GetNumGossipAvailableQuests() == 0 and GetNumGossipActiveQuests() == 0 and tContains(npcTable, tonumber(npcID)) and not IsShiftKeyDown() then
+								SelectGossipOption(1)
+							end
 						end
 					end
 				end
@@ -4978,7 +4994,9 @@
 		if LeaPlusLC["ShowFlightTimes"] == "On" then
 
 			-- Load flight data
-			Leatrix_Plus:LoadFlightData()
+			Leatrix_Plus["FlightData"] = {}
+			Leatrix_Plus:LoadFlightDataAlliance()
+			Leatrix_Plus:LoadFlightDataHorde()
 
 			-- Minimum time difference (in seconds) to flight data entry before flight report window is shown
 			local timeBuffer = 15
@@ -5262,6 +5280,13 @@
 									mybar:SetLabel(barName)
 								end
 
+								-- Set flight bar fill mode
+								if LeaPlusLC["FlightBarFillBar"] == "On" then
+									mybar:SetFill(true)
+								else
+									mybar:SetFill(false)
+								end
+
 								mybar:EnableMouse(false)
 								mybar:SetDuration(duration)
 								mybar:Start()
@@ -5422,9 +5447,10 @@
 			LeaPlusLC:MakeTx(FlightPanel, "Settings", 16, -72)
 			LeaPlusLC:MakeCB(FlightPanel, "FlightBarBackground", "Show background", 16, -92, false, "If checked, the flight progress bar background texture will be shown.")
 			LeaPlusLC:MakeCB(FlightPanel, "FlightBarDestination", "Show destination", 16, -112, false, "If checked, the flight progress bar destination will be shown.")
+			LeaPlusLC:MakeCB(FlightPanel, "FlightBarFillBar", "Fill instead of drain", 16, -132, false, "If checked, the flight progress bar background will fill instead of drain.")
 
-			LeaPlusLC:MakeTx(FlightPanel, "Contribute", 16, -152)
-			LeaPlusLC:MakeCB(FlightPanel, "FlightBarContribute", "Help contribute flight times", 16, -172, false, "If checked, you will be prompted to submit missing flight times.")
+			LeaPlusLC:MakeTx(FlightPanel, "Contribute", 16, -172)
+			LeaPlusLC:MakeCB(FlightPanel, "FlightBarContribute", "Help contribute flight times", 16, -192, false, "If checked, you will be prompted to submit missing flight times.")
 
 			LeaPlusLC:MakeTx(FlightPanel, "Scale", 356, -72)
 			LeaPlusLC:MakeSL(FlightPanel, "FlightBarScale", "Drag to set the flight progress bar scale.", 1, 5, 0.1, 356, -92, "%.2f")
@@ -5465,6 +5491,21 @@
 			-- Set progress bar background when option is clicked and on startup
 			LeaPlusCB["FlightBarBackground"]:HookScript("OnClick", SetProgressBarBackground)
 			SetProgressBarBackground()
+
+			-- Set progress bar fill mode
+			local function SetProgressBarFillMode()
+				if LeaPlusLC.FlightProgressBar then
+					if LeaPlusLC["FlightBarFillBar"] == "On" then
+						LeaPlusLC.FlightProgressBar:SetFill(true)
+					else
+						LeaPlusLC.FlightProgressBar:SetFill(false)
+					end
+				end
+			end
+
+			-- Set progress bar fill mode when option is clicked and on startup
+			LeaPlusCB["FlightBarFillBar"]:HookScript("OnClick", SetProgressBarFillMode)
+			SetProgressBarFillMode()
 
 			-- Set progress bar destination
 			local function SetProgressBarDestination()
@@ -5536,6 +5577,7 @@
 				-- Reset checkboxes
 				LeaPlusLC["FlightBarBackground"] = "On"
 				LeaPlusLC["FlightBarDestination"] = "On"
+				LeaPlusLC["FlightBarFillBar"] = "Off"; SetProgressBarFillMode()
 				LeaPlusLC["FlightBarContribute"] = "On"
 				-- Reset live progress bar
 				if LeaPlusLC.FlightProgressBar then
@@ -12194,6 +12236,8 @@
 				LeaPlusLC:LoadVarChk("ShowFlightTimes", "Off")				-- Show flight times
 				LeaPlusLC:LoadVarChk("FlightBarBackground", "On")			-- Show flight times bar background
 				LeaPlusLC:LoadVarChk("FlightBarDestination", "On")			-- Show flight times bar destination
+				LeaPlusLC:LoadVarChk("FlightBarFillBar", "Off")				-- Show flight times bar fill mode
+
 				LeaPlusLC:LoadVarChk("FlightBarContribute", "On")			-- Show flight times contribute
 				LeaPlusLC:LoadVarAnc("FlightBarA", "TOP")					-- Show flight times anchor
 				LeaPlusLC:LoadVarAnc("FlightBarR", "TOP")					-- Show flight times relative
@@ -12563,6 +12607,8 @@
 			LeaPlusDB["ShowFlightTimes"]		= LeaPlusLC["ShowFlightTimes"]
 			LeaPlusDB["FlightBarBackground"]	= LeaPlusLC["FlightBarBackground"]
 			LeaPlusDB["FlightBarDestination"]	= LeaPlusLC["FlightBarDestination"]
+			LeaPlusDB["FlightBarFillBar"]		= LeaPlusLC["FlightBarFillBar"]
+
 			LeaPlusDB["FlightBarContribute"]	= LeaPlusLC["FlightBarContribute"]
 			LeaPlusDB["FlightBarA"]				= LeaPlusLC["FlightBarA"]
 			LeaPlusDB["FlightBarR"]				= LeaPlusLC["FlightBarR"]
@@ -13783,32 +13829,6 @@
 					LeaPlusLC.MarkerFrame.Toggle = false
 				end
 				return
-			elseif str == "af" then
-				-- Automatically follow player target using ticker
-				if LeaPlusLC.followTick then
-					-- Existing ticker is active so cancel it
-					LeaPlusLC.followTick:Cancel()
-					LeaPlusLC.followTick = nil
-					FollowUnit("player")
-					LeaPlusLC:Print("AutoFollow disabled.")
-				else
-					-- No ticker is active so create one
-					local targetName, targetRealm = UnitName("target")
-					if not targetName or not UnitIsPlayer("target") or UnitIsUnit("player", "target") then
-						LeaPlusLC:Print("Invalid target.")
-						return
-					end
-					if targetRealm then targetName = targetName .. "-" .. targetRealm end
-					if LeaPlusLC.followTick then
-						LeaPlusLC.followTick:Cancel()
-					end
-					FollowUnit(targetName, true)
-					LeaPlusLC.followTick = C_Timer.NewTicker(0.5, function()
-						FollowUnit(targetName, true)
-					end)
-					LeaPlusLC:Print(L["AutoFollow"] .. ": |cffffffff" .. targetName .. "|r.")
-				end
-				return
 			elseif str == "pos" then
 				-- Map POI code builder
 				local mapID = C_Map.GetBestMapForUnit("player") or nil
@@ -14662,6 +14682,7 @@
 				LeaPlusDB["ShowFlightTimes"] = "On"				-- Show flight times
 				LeaPlusDB["FlightBarBackground"] = "Off"		-- Show flight times bar background
 				LeaPlusDB["FlightBarDestination"] = "On"		-- Show flight times bar destination
+				LeaPlusDB["FlightBarFillBar"] = "Off"			-- Show flight times bar fill mode
 				LeaPlusDB["FlightBarContribute"] = "On"			-- Show flight times contribute
 
 				-- Interface: Manage frames
@@ -14941,7 +14962,7 @@
 
 	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Character"					, 	146, -72);
 	LeaPlusLC:MakeCB(LeaPlusLC[pg], "AutomateQuests"			,	"Automate quests"				,	146, -92, 	false,	"If checked, quests will be selected, accepted and turned-in automatically.|n|nQuests which have a gold requirement will not be turned-in automatically.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "AutomateGossip"			,	"Automate gossip"				,	146, -112, 	false,	"If checked, you can hold down the alt key while opening a gossip window to automatically select a single gossip item.|n|nIf the gossip item type is banker, taxi, trainer, vendor or battlemaster, gossip will be skipped without needing to hold the alt key.  You can hold the shift key down to prevent this.")
+	LeaPlusLC:MakeCB(LeaPlusLC[pg], "AutomateGossip"			,	"Automate gossip"				,	146, -112, 	false,	"If checked, you can hold down the alt key while opening a gossip window to automatically select a single gossip item.|n|nIf the gossip item type is banker, taxi, trainer, vendor, battlemaster or stable master, gossip will be skipped without needing to hold the alt key.  You can hold the shift key down to prevent this.")
 	LeaPlusLC:MakeCB(LeaPlusLC[pg], "AutoAcceptSummon"			,	"Accept summon"					, 	146, -132, 	false,	"If checked, summon requests will be accepted automatically unless you are in combat.")
 	LeaPlusLC:MakeCB(LeaPlusLC[pg], "AutoAcceptRes"				,	"Accept resurrection"			, 	146, -152, 	false,	"If checked, resurrection requests will be accepted automatically.")
 	LeaPlusLC:MakeCB(LeaPlusLC[pg], "AutoReleasePvP"			,	"Release in PvP"				, 	146, -172, 	false,	"If checked, you will release automatically after you die in a battleground.|n|nYou will not release automatically if you have the ability to self-resurrect.")

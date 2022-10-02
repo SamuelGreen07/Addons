@@ -69,15 +69,15 @@ local function showRealDate(curseDate)
 end
 
 DBM = {
-	Revision = parseCurseDate("20220920052610"),
+	Revision = parseCurseDate("20220930021857"),
 }
 
 local fakeBWVersion, fakeBWHash
 local bwVersionResponseString = "V^%d^%s"
 -- The string that is shown as version
 if isRetail then
-	DBM.DisplayVersion = "9.2.35 alpha"
-	DBM.ReleaseRevision = releaseDate(2022, 9, 14) -- the date of the latest stable version that is available, optionally pass hours, minutes, and seconds for multiple releases in one day
+	DBM.DisplayVersion = "9.2.36 alpha"
+	DBM.ReleaseRevision = releaseDate(2022, 9, 29) -- the date of the latest stable version that is available, optionally pass hours, minutes, and seconds for multiple releases in one day
 	fakeBWVersion, fakeBWHash = 243, "d58ab26"
 elseif isClassic then
 	DBM.DisplayVersion = "1.14.27 alpha"
@@ -88,8 +88,8 @@ elseif isBCC then
 	DBM.ReleaseRevision = releaseDate(2022, 8, 1) -- the date of the latest stable version that is available, optionally pass hours, minutes, and seconds for multiple releases in one day
 	fakeBWVersion, fakeBWHash = 41, "287b8dd"
 elseif isWrath then
-	DBM.DisplayVersion = "3.4.12"
-	DBM.ReleaseRevision = releaseDate(2022, 9, 20) -- the date of the latest stable version that is available, optionally pass hours, minutes, and seconds for multiple releases in one day
+	DBM.DisplayVersion = "3.4.14"
+	DBM.ReleaseRevision = releaseDate(2022, 9, 29) -- the date of the latest stable version that is available, optionally pass hours, minutes, and seconds for multiple releases in one day
 	fakeBWVersion, fakeBWHash = 41, "287b8dd"
 end
 DBM.HighestRelease = DBM.ReleaseRevision --Updated if newer version is detected, used by update nags to reflect critical fixes user is missing on boss pulls
@@ -3181,18 +3181,32 @@ function DBM:READY_CHECK()
 	self:Schedule(4, self.TransitionToDungeonBGM, self)
 end
 
-function DBM:PLAYER_SPECIALIZATION_CHANGED()
-	local lastSpecID = currentSpecID
-	self:SetCurrentSpecInfo()
-	if currentSpecID ~= lastSpecID then--Don't fire specchanged unless spec actually has changed.
-		self:SpecChanged()
-		if isRetail and IsInGroup() then
-			self:RoleCheck(false)
+do
+	local function throttledTalentCheck(self)
+		local lastSpecID = currentSpecID
+		self:SetCurrentSpecInfo()
+		if currentSpecID ~= lastSpecID then--Don't fire specchanged unless spec actually has changed.
+			self:SpecChanged()
+			if isRetail and IsInGroup() then
+				self:RoleCheck(false)
+			end
 		end
 	end
+
+	--Retail API doesn't need throttle
+	function DBM:PLAYER_SPECIALIZATION_CHANGED()
+		self:Unschedule(throttledTalentCheck)
+		throttledTalentCheck(self)
+	end
+	--Throttle checks on talent point updates so that if multiple CHARACTER_POINTS_CHANGED fire in succession
+	--It doesnt spam DBMs code and cause performance lag
+	function DBM:CHARACTER_POINTS_CHANGED() -- Classic/BCC support
+		self:Unschedule(throttledTalentCheck)
+		self:Schedule(2, throttledTalentCheck, self)
+	end
+	--Throttle this api too.
+	DBM.PLAYER_TALENT_UPDATE = DBM.CHARACTER_POINTS_CHANGED -- Wrath support
 end
-DBM.CHARACTER_POINTS_CHANGED = DBM.PLAYER_SPECIALIZATION_CHANGED -- Classic/BCC support
-DBM.PLAYER_TALENT_UPDATE = DBM.PLAYER_SPECIALIZATION_CHANGED -- Wrath support
 
 do
 	local function AcceptPartyInvite()
@@ -4644,7 +4658,7 @@ do
 	function DBM:RAID_BOSS_WHISPER(msg)
 		--Make it easier for devs to detect whispers they are unable to see
 		--TINTERFACE\\ICONS\\ability_socererking_arcanewrath.blp:20|t You have been branded by |cFFF00000|Hspell:156238|h[Arcane Wrath]|h|r!"
-		if IsInGroup() and not _G["BigWigs"] then
+		if msg and msg ~= "" and IsInGroup() and not _G["BigWigs"] then
 			SendAddonMessage("Transcriptor", msg, IsInGroup(2) and "INSTANCE_CHAT" or IsInRaid() and "RAID" or "PARTY")--Send any emote to transcriptor, even if no spellid
 		end
 	end
@@ -7420,19 +7434,19 @@ do
 		--Just return true if interrupt filtering is disabled (and it's actually for an interrupt)
 		if DBM.Options.FilterInterrupt2 == "None" and not checkOnlyTandF then return true end
 
-		local unitID = (UnitGUID("target") == sourceGUID) and "target" or isRetail and (UnitGUID("focus") == sourceGUID) and "focus"
+		local unitID = (UnitGUID("target") == sourceGUID) and "target" or not isClassic and (UnitGUID("focus") == sourceGUID) and "focus"
 
 		--Just return true if target or focus is ONLY requirement (not an interrupt check) and we already confirmed T and F
 		if unitID and checkOnlyTandF then return true end--checkOnlyTandF means this isn't an interrupt check at all, skip all the rest and return true if we met TandF rquirement
 
-		--Just return false if target or focus target is required and source isn't our target or focus, no need to do further checks
 		--TandF required in all checks except "None" or if ignoreTandF is passed
+		--Just return false if source isn't our target or focus, no need to do further checks
 		if not ignoreTandF and not unitID then
 			return false
 		end
 
 		--Check if cooldown check is actually required
-		local cooldownRequired = checkCooldown
+		local cooldownRequired = checkCooldown--First set to default value defined by arg
 		if cooldownRequired and ((DBM.Options.FilterInterrupt2 == "onlyTandF") or self.isTrashMod and (DBM.Options.FilterInterrupt2 == "TandFandBossCooldown")) then
 			cooldownRequired = false
 		end
@@ -7442,7 +7456,7 @@ do
 			for spellID, _ in pairs(interruptSpells) do
 				--For an inverse check, don't need to check if it's known, if it's on cooldown it's known
 				--This is possible since no class has 2 interrupt spells (well, actual interrupt spells)
-				if (GetSpellCooldown(spellID)) ~= 0 then--Spell is known and on cooldown
+				if (GetSpellCooldown(spellID)) ~= 0 then--Spell is on cooldown
 					InterruptAvailable = false
 				end
 			end
@@ -7450,7 +7464,7 @@ do
 		if InterruptAvailable then
 			--Check if it's casting something that's not interruptable at the moment
 			--needed for torghast since many mobs can have interrupt immunity with same spellIds as other mobs that can be interrupted
-			if unitID then
+			if isRetail and unitID then
 				if UnitCastingInfo(unitID) then
 					local _, _, _, _, _, _, _, notInterruptible = UnitCastingInfo(unitID)
 					if notInterruptible then return false end

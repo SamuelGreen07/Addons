@@ -71,6 +71,12 @@ L.StatsShort = {
 }
 
 L.InstanceNames = {
+	[616] = "Eye of Eternity",
+	[615] = "Obsidian Sanctum",
+	[603] = "Ulduar",
+	[649] = "Trial of the Crusader",
+	[631] = "Icecrown Citadel",
+	[724] = "Ruby Sanctum",
     [249] = "Onyxia",
     [409] = "Molten Core",
     [469] = "Blackwing Lair",
@@ -90,7 +96,10 @@ L.InstanceNames = {
 }
 
 L.DifficultyNames = {
-	[1] = "Normal"
+	[1] = "Normal 10",
+    [2] = "Normal 25",
+    [3] = "Heroic 10",
+    [4] = "Heroic 25"
 }
 
 L.WeaponTypes = {

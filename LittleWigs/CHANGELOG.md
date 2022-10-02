@@ -1,12 +1,9 @@
 # LittleWigs
 
-## [v9.2.20](https://github.com/BigWigsMods/LittleWigs/tree/v9.2.20) (2022-09-26)
-[Full Changelog](https://github.com/BigWigsMods/LittleWigs/compare/v9.2.19...v9.2.20) [Previous Releases](https://github.com/BigWigsMods/LittleWigs/releases)
+## [v9.2.25](https://github.com/BigWigsMods/LittleWigs/tree/v9.2.25) (2022-10-02)
+[Full Changelog](https://github.com/BigWigsMods/LittleWigs/compare/v9.2.24...v9.2.25) [Previous Releases](https://github.com/BigWigsMods/LittleWigs/releases)
 
-- WotLK: Update throttles to use args.time  
-- WotLK/Gundrak/Moorabi: Scan for boss unit  
-- WotLK: Don't use CheckBossStatus in Classic  
-- WotLK: Limit unit event calls  
-- Also fix running from source on classic  
-- Fix options when running LittleWigs from source (#757)  
-- Workflow: Enable Wago again  
+- Dragonflight/Neltharus/WarlordSargha: Add boss module (#783)  
+- Dragonflight/Neltharus/ChargathBaneOfScales: Add boss module (#785)  
+- Dragonflight/Neltharus/Magmatusk: Add boss module (#784)  
+- WotLK/AzjolNerub/Krikthir: Frenzy is at 20% not 10%, cleanups  

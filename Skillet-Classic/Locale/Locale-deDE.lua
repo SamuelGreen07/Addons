@@ -132,6 +132,10 @@ L["Hide trivial"] = "Graue verstecken"
 L["Hide uncraftable"] = "Nur herstellbare"
 L["HIDEBLIZZARDFRAMEDESC"] = "Blende das Blizzard Tradeskill Fenster aus, wenn das Skillet Fenster angezeigt wird"
 L["HIDEBLIZZARDFRAMENAME"] = "Blizzard Fenster ausblenden"
+--[[Translation missing --]]
+L["HIGHERVELLUMDESC"] = "Use a higher level of vellum when correct vellum is unavailable."
+--[[Translation missing --]]
+L["HIGHERVELLUMNAME"] = "Use higher vellum"
 L["Ignore"] = "Ignorieren"
 --[[Translation missing --]]
 L["IGNOREBANKEDREAGENTSDESC"] = "Ignore banked reagents when queuing craftable reagents"
@@ -242,8 +246,6 @@ L["SCALETOOLTIPDESC"] = "Ändert die Skalierung des Fertigkeiten- und Reagenzien
 L["SCALETOOLTIPNAME"] = "Skaliere alle Tooltips"
 L["Scan completed"] = "Scan abgeschlossen"
 L["Scanning tradeskill"] = "Scanne Berufe"
---[[Translation missing --]]
-L["Scroll of"] = "Scroll of"
 L["Search"] = "Suchen"
 L["Select All"] = "Alle auswählen"
 L["Select None"] = "Nichts auswählen"

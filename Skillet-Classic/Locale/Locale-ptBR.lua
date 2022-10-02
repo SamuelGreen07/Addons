@@ -115,6 +115,10 @@ L["Hide trivial"] = "Esconder triviais"
 L["Hide uncraftable"] = "Esconde não produziveis"
 L["HIDEBLIZZARDFRAMEDESC"] = "Ocultar o quadro da profissão Blizzard ao exibir o quadro Skillet"
 L["HIDEBLIZZARDFRAMENAME"] = "Ocultar quadro da Blizzard"
+--[[Translation missing --]]
+L["HIGHERVELLUMDESC"] = "Use a higher level of vellum when correct vellum is unavailable."
+--[[Translation missing --]]
+L["HIGHERVELLUMNAME"] = "Use higher vellum"
 L["Ignore"] = "Ignorar"
 L["IGNOREBANKEDREAGENTSDESC"] = "Ignore reagentes no banco ao enfileirar reagentes fabricáveis"
 L["IGNOREBANKEDREAGENTSNAME"] = "Ignore reagentes no banco"
@@ -216,8 +220,6 @@ L["SCALETOOLTIPDESC"] = "Defina a escala das dicas de habilidade e reagente para
 L["SCALETOOLTIPNAME"] = "Escalar todas as dicas"
 L["Scan completed"] = "Verificação concluida"
 L["Scanning tradeskill"] = "Verificando as receitas"
---[[Translation missing --]]
-L["Scroll of"] = "Scroll of"
 L["Search"] = "Procurar"
 L["Select All"] = "Selecionar todos"
 L["Select None"] = "Limpar seleção"

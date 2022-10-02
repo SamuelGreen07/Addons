@@ -126,6 +126,10 @@ L["Hide trivial"] = "隐藏无价值的"
 L["Hide uncraftable"] = "隐藏不能制作的"
 L["HIDEBLIZZARDFRAMEDESC"] = "当显示Skillet框体时，隐藏暴雪专业技能框体。"
 L["HIDEBLIZZARDFRAMENAME"] = "隐藏暴雪框体"
+--[[Translation missing --]]
+L["HIGHERVELLUMDESC"] = "Use a higher level of vellum when correct vellum is unavailable."
+--[[Translation missing --]]
+L["HIGHERVELLUMNAME"] = "Use higher vellum"
 L["Ignore"] = "忽略"
 --[[Translation missing --]]
 L["IGNOREBANKEDREAGENTSDESC"] = "Ignore banked reagents when queuing craftable reagents"
@@ -236,8 +240,6 @@ L["SCALETOOLTIPDESC"] = "设定专业技能和材料的鼠标提示缩放大小�
 L["SCALETOOLTIPNAME"] = "缩放所有鼠标提示"
 L["Scan completed"] = "扫描完成"
 L["Scanning tradeskill"] = "扫描商业技能中..."
---[[Translation missing --]]
-L["Scroll of"] = "Scroll of"
 L["Search"] = "搜索"
 L["Select All"] = "全选"
 L["Select None"] = "取消选择"

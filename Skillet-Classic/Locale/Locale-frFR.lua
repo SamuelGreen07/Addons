@@ -114,6 +114,10 @@ L["Hide trivial"] = "Cacher les triviaux"
 L["Hide uncraftable"] = "Cacher les non-réalisables"
 L["HIDEBLIZZARDFRAMEDESC"] = "Cacher la fenêtre de métier de Blizzard lorsque celle de Skillet est visible"
 L["HIDEBLIZZARDFRAMENAME"] = "Cacher la fenêtre de Blizzard"
+--[[Translation missing --]]
+L["HIGHERVELLUMDESC"] = "Use a higher level of vellum when correct vellum is unavailable."
+--[[Translation missing --]]
+L["HIGHERVELLUMNAME"] = "Use higher vellum"
 L["Ignore"] = "Ignorer"
 L["IGNOREBANKEDREAGENTSDESC"] = "Ignorer les composants en banque lors de la mise en file d'attente de composants artisanaux"
 L["IGNOREBANKEDREAGENTSNAME"] = "Ignorer les composants en banque"
@@ -215,8 +219,6 @@ L["SCALETOOLTIPDESC"] = "Définissez l'échelle des infobulles des compétences 
 L["SCALETOOLTIPNAME"] = "Mettre à l'échelle toutes les infobulles"
 L["Scan completed"] = "Balayage terminé"
 L["Scanning tradeskill"] = "Balayage en cours"
---[[Translation missing --]]
-L["Scroll of"] = "Scroll of"
 L["Search"] = "Recherche"
 L["Select All"] = "Tout sélectionner"
 L["Select None"] = "Ne rien sélectionner"

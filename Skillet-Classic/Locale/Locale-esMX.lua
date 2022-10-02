@@ -114,6 +114,10 @@ L["Hide trivial"] = "Ocultar trivial"
 L["Hide uncraftable"] = "Ocultar los que no son posible fabricar"
 L["HIDEBLIZZARDFRAMEDESC"] = "Oculta el marco de Blizzard al mostrar el marco de Skillet"
 L["HIDEBLIZZARDFRAMENAME"] = "Ocultar marco de Blizzard"
+--[[Translation missing --]]
+L["HIGHERVELLUMDESC"] = "Use a higher level of vellum when correct vellum is unavailable."
+--[[Translation missing --]]
+L["HIGHERVELLUMNAME"] = "Use higher vellum"
 L["Ignore"] = "Ignorar"
 L["IGNOREBANKEDREAGENTSDESC"] = "Ignora los componentes en el banco al poner en cola componentes fabricables"
 L["IGNOREBANKEDREAGENTSNAME"] = "Ignora los componentes en el banco"
@@ -215,8 +219,6 @@ L["SCALETOOLTIPDESC"] = "Establezca la escala del tooltip de habilidades y compo
 L["SCALETOOLTIPNAME"] = "Escalar todos los tooltips"
 L["Scan completed"] = "Escaneo completado"
 L["Scanning tradeskill"] = "Escaneando profesión"
---[[Translation missing --]]
-L["Scroll of"] = "Scroll of"
 L["Search"] = "Buscar"
 L["Select All"] = "Seleccionar todo"
 L["Select None"] = "Deseleccionar"

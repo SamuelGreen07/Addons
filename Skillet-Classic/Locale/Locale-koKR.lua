@@ -124,6 +124,10 @@ L["Hide trivial"] = "회색 제작템 숨기기"
 L["Hide uncraftable"] = "제작할 수 없는 아이템 숨기기"
 L["HIDEBLIZZARDFRAMEDESC"] = "Skillet 창으로 보는중이면 Blizzard 전문 기술 창을 숨깁니다."
 L["HIDEBLIZZARDFRAMENAME"] = "Blizzard 창 숨김"
+--[[Translation missing --]]
+L["HIGHERVELLUMDESC"] = "Use a higher level of vellum when correct vellum is unavailable."
+--[[Translation missing --]]
+L["HIGHERVELLUMNAME"] = "Use higher vellum"
 L["Ignore"] = "무시"
 --[[Translation missing --]]
 L["IGNOREBANKEDREAGENTSDESC"] = "Ignore banked reagents when queuing craftable reagents"
@@ -234,8 +238,6 @@ L["SCALETOOLTIPDESC"] = "레시피 툴팁(전역 UI 크기)과 일치하도록 �
 L["SCALETOOLTIPNAME"] = "모든 툴팁 크기"
 L["Scan completed"] = "조사가 완료되었습니다."
 L["Scanning tradeskill"] = "전문기술 조사"
---[[Translation missing --]]
-L["Scroll of"] = "Scroll of"
 L["Search"] = "검색"
 L["Select All"] = "모두 선택"
 L["Select None"] = "선택 안 함"
