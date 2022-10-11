@@ -1,5 +1,5 @@
 ﻿----------------------------------------------------------------------
--- 	Leatrix Plus 3.0.18 (2nd October 2022)
+-- 	Leatrix Plus 3.0.28 (11th October 2022)
 ----------------------------------------------------------------------
 
 --	01:Functns, 02:Locks, 03:Restart, 20:Live, 30:Isolated, 40:Player
@@ -19,7 +19,7 @@
 	local void
 
 	-- Version
-	LeaPlusLC["AddonVer"] = "3.0.18"
+	LeaPlusLC["AddonVer"] = "3.0.28"
 
 	-- Get locale table
 	local void, Leatrix_Plus = ...
@@ -302,6 +302,21 @@
 		CfgBtn.tiptext = L["Click to configure the settings for this option."]
 		CfgBtn:SetScript("OnEnter", LeaPlusLC.ShowTooltip)
 		CfgBtn:SetScript("OnLeave", GameTooltip_Hide)
+	end
+
+	-- Create a help button to the right of a fontstring
+	function LeaPlusLC:CreateHelpButton(frame, panel, parent, tip)
+		LeaPlusLC:CfgBtn(frame, panel)
+		LeaPlusCB[frame]:ClearAllPoints()
+		LeaPlusCB[frame]:SetPoint("LEFT", parent, "RIGHT", -parent:GetWidth() + parent:GetStringWidth(), 0)
+		LeaPlusCB[frame]:SetSize(25, 25)
+		LeaPlusCB[frame].t:SetTexture("Interface\\COMMON\\help-i.blp")
+		LeaPlusCB[frame].t:SetTexCoord(0, 1, 0, 1)
+		LeaPlusCB[frame].t:SetVertexColor(0.9, 0.8, 0.0)
+		LeaPlusCB[frame]:SetHighlightTexture("Interface\\COMMON\\help-i.blp")
+		LeaPlusCB[frame]:GetHighlightTexture():SetTexCoord(0, 1, 0, 1)
+		LeaPlusCB[frame].tiptext = L[tip]
+		LeaPlusCB[frame]:SetScript("OnEnter", LeaPlusLC.TipSee)
 	end
 
 	-- Show a footer
@@ -782,9 +797,25 @@
 					"dwarfhorn.ogg#566064",
 				},
 
+				-- Vaults
+				["MuteVaults"] = {
+
+					-- Mechanical guild vault idle sound (such as those found in Booty Bay and Winterspring)
+					"sound/doodad/guildvault_goblin_01stand.ogg#566289",
+
+				},
+
 				-- Ready check (sound/interface/)
 				["MuteReady"] = {
 					"levelup2.ogg#567478",
+				},
+
+				-- Bikes
+				["MuteBikes"] = {
+
+					-- Mekgineer's Chopper/Mechano Hog/Chauffeured (sound/vehicles/motorcyclevehicle, sound/vehicles)
+					"motorcyclevehicleattackthrown.ogg#569858", "motorcyclevehiclejumpend1.ogg#569863", "motorcyclevehiclejumpend2.ogg#569857", "motorcyclevehiclejumpend3.ogg#569855", "motorcyclevehiclejumpstart1.ogg#569856", "motorcyclevehiclejumpstart2.ogg#569862", "motorcyclevehiclejumpstart3.ogg#569860", "motorcyclevehicleloadthrown.ogg#569861", "motorcyclevehiclestand.ogg#569859", "motorcyclevehiclewalkrun.ogg#569854", "vehicle_ground_gearshift_1.ogg#598748", "vehicle_ground_gearshift_2.ogg#598736", "vehicle_ground_gearshift_3.ogg#569852", "vehicle_ground_gearshift_4.ogg#598745", "vehicle_ground_gearshift_5.ogg#569845",
+
 				},
 
 				-- Events
@@ -870,7 +901,20 @@
 
 				},
 
-				-- Striders (footsteps are in another setting)
+				-- Travelers (gnimo sounds are handled in SetupMute() as they are shared with striders)
+				["MuteTravelers"] = {
+
+					-- Traveler's Tundra Mammoth (sound/creature/npcdraeneimalestandard, sound/creature/goblinmalezanynpc, sound/creature/trollfemalelaidbacknpc, sound/creature/trollfemalelaidbacknpc)
+					"npcdraeneimalestandardvendor01.ogg#557341", "npcdraeneimalestandardvendor02.ogg#557335", "npcdraeneimalestandardvendor03.ogg#557328", "npcdraeneimalestandardvendor04.ogg#557331", "npcdraeneimalestandardvendor05.ogg#557325", "npcdraeneimalestandardvendor06.ogg#557324",
+					"npcdraeneimalestandardfarewell01.ogg#557342", "npcdraeneimalestandardfarewell02.ogg#557326", "npcdraeneimalestandardfarewell03.ogg#557322", "npcdraeneimalestandardfarewell05.ogg#557332", "npcdraeneimalestandardfarewell06.ogg#557338", "npcdraeneimalestandardfarewell08.ogg#557334",
+					"goblinmalezanynpcvendor01.ogg#550818", "goblinmalezanynpcvendor02.ogg#550817", "goblinmalezanynpcgreeting01.ogg#550805", "goblinmalezanynpcgreeting02.ogg#550813", "goblinmalezanynpcgreeting03.ogg#550819", "goblinmalezanynpcgreeting04.ogg#550806", "goblinmalezanynpcgreeting05.ogg#550820", "goblinmalezanynpcgreeting06.ogg#550809",
+					"goblinmalezanynpcfarewell01.ogg#550807", "goblinmalezanynpcfarewell03.ogg#550808", "goblinmalezanynpcfarewell04.ogg#550812",
+					"trollfemalelaidbacknpcvendor01.ogg#562812","trollfemalelaidbacknpcvendor02.ogg#562802", "trollfemalelaidbacknpcgreeting01.ogg#562815","trollfemalelaidbacknpcgreeting02.ogg#562814", "trollfemalelaidbacknpcgreeting03.ogg#562816", "trollfemalelaidbacknpcgreeting04.ogg#562807", "trollfemalelaidbacknpcgreeting05.ogg#562804", "trollfemalelaidbacknpcgreeting06.ogg#562803",
+					"trollfemalelaidbacknpcfarewell01.ogg#562809", "trollfemalelaidbacknpcfarewell02.ogg#562808", "trollfemalelaidbacknpcfarewell03.ogg#562813", "trollfemalelaidbacknpcfarewell04.ogg#562817", "trollfemalelaidbacknpcfarewell05.ogg#562806",
+
+				},
+
+				-- Striders (footsteps are in another setting) (wound sounds are handled in SetupMute() as they are shared with travelers)
 				["MuteStriders"] = {
 
 					-- sound/creature/mechastrider/
@@ -879,9 +923,6 @@
 					"smechastriderattackb.ogg#555123",
 					"mechastriderattackc.ogg#555132",
 					"mechastriderloop.ogg#555124",
-					"mechastriderwounda.ogg#555128",
-					"mechastriderwoundb.ogg#555129",
-					"mechastriderwoundc.ogg#555130",
 					"mechastriderwoundcrit.ogg#555131",
 
 				},
@@ -897,6 +938,18 @@
 					"gnomespidertankwoundd.ogg#550511",
 					"gnomespidertankwounde.ogg#550504",
 					"gnomespidertankwoundf.ogg#550498",
+
+				},
+
+				-- Netherdrakes
+				["MuteNetherdrakes"] = {
+
+					-- sound/creature/netherdrake/
+					"hugewingflap1.ogg#556477",
+					"hugewingflap2.ogg#556479",
+					"hugewingflap3.ogg#556476",
+					"netherdrakea.ogg#556475",
+					"netherdrakeb.ogg#556478",
 
 				},
 
@@ -925,26 +978,30 @@
 			LeaPlusLC:MakeCB(SoundPanel, "MuteTrains", "Trains", 16, -132, false, "If checked, train sounds will be muted.")
 			LeaPlusLC:MakeCB(SoundPanel, "MuteEvents", "Events", 16, -152, false, "If checked, holiday event sounds will be muted.|n|nThis applies to Headless Horseman.")
 			LeaPlusLC:MakeCB(SoundPanel, "MuteChimes", "Chimes", 16, -172, false, "If checked, clock hourly chimes will be muted.")
-			LeaPlusLC:MakeCB(SoundPanel, "MuteReady", "Ready", 16, -192, false, "If checked, the ready check sound will be muted.")
+			LeaPlusLC:MakeCB(SoundPanel, "MuteVaults", "Vaults", 16, -192, false, "If checked, the mechanical guild vault idle sound will be muted.")
+			LeaPlusLC:MakeCB(SoundPanel, "MuteReady", "Ready", 16, -212, false, "If checked, the ready check sound will be muted.")
 
-			LeaPlusLC:MakeTx(SoundPanel, "Mounts", 140, -72)
-			LeaPlusLC:MakeCB(SoundPanel, "MuteGyrocopters", "Gyrocopters", 140, -92, false, "If checked, gyrocopters will be muted.|n|nThis applies to the engineering flying machine mounts.")
-			LeaPlusLC:MakeCB(SoundPanel, "MuteStriders", "Mechstriders", 140, -112, false, "If checked, mechanostriders will be quieter.")
-			LeaPlusLC:MakeCB(SoundPanel, "MuteMechSteps", "Mechsteps", 140, -132, false, "If checked, footsteps for mechanical mounts will be muted.")
+			LeaPlusLC:MakeTx(SoundPanel, "Mounts", 150, -72)
+			LeaPlusLC:MakeCB(SoundPanel, "MuteBikes", "Bikes", 150, -92, false, "If checked, bike mount sounds will be muted.|n|nThis applies to Mekgineer's Chopper and Mechano-hog.")
+			LeaPlusLC:MakeCB(SoundPanel, "MuteTravelers", "Travelers", 150, -112, false, "If checked, traveling merchant greetings and farewells will be muted.|n|nThis applies to Traveler's Tundra Mammoth.")
+			LeaPlusLC:MakeCB(SoundPanel, "MuteGyrocopters", "Gyrocopters", 150, -132, false, "If checked, gyrocopters will be muted.|n|nThis applies to the engineering flying machine mounts.")
+			LeaPlusLC:MakeCB(SoundPanel, "MuteStriders", "Mechstriders", 150, -152, false, "If checked, mechanostriders will be quieter.")
+			LeaPlusLC:MakeCB(SoundPanel, "MuteMechSteps", "Mechsteps", 150, -172, false, "If checked, footsteps for mechanical mounts will be muted.")
+			LeaPlusLC:MakeCB(SoundPanel, "MuteNetherdrakes", "Netherdrakes", 150, -192, false, "If checked, netherdrakes will be quieter.")
 
-			LeaPlusLC:MakeTx(SoundPanel, "Pets", 264, -72)
-			LeaPlusLC:MakeCB(SoundPanel, "MuteYawns", "Yawns", 264, -92, false, "If checked, yawns from hunter pet cats will be muted.")
-			LeaPlusLC:MakeCB(SoundPanel, "MuteScreech", "Screech", 264, -112, false, "If checked, Screech will be muted.|n|nThis is a spell used by some flying pets.")
+			LeaPlusLC:MakeTx(SoundPanel, "Pets", 284, -72)
+			LeaPlusLC:MakeCB(SoundPanel, "MuteYawns", "Yawns", 284, -92, false, "If checked, yawns from hunter pet cats will be muted.")
+			LeaPlusLC:MakeCB(SoundPanel, "MuteScreech", "Screech", 284, -112, false, "If checked, Screech will be muted.|n|nThis is a spell used by some flying pets.")
 
-			LeaPlusLC:MakeTx(SoundPanel, "Misc", 388, -72)
-			LeaPlusLC:MakeCB(SoundPanel, "MuteAdal", "A'dal", 388, -92, false, "If checked, A'dal in Shattrath City will be muted.")
-			LeaPlusLC:MakeCB(SoundPanel, "MuteRipper", "Ripper", 388, -112, false, "If checked, the Arcanite Ripper guitar sound will be muted.")
+			LeaPlusLC:MakeTx(SoundPanel, "Misc", 418, -72)
+			LeaPlusLC:MakeCB(SoundPanel, "MuteAdal", "A'dal", 418, -92, false, "If checked, A'dal in Shattrath City will be muted.")
+			LeaPlusLC:MakeCB(SoundPanel, "MuteRipper", "Ripper", 418, -112, false, "If checked, the Arcanite Ripper guitar sound will be muted.")
 
 			-- Set click width for sounds checkboxes
 			for k, v in pairs(muteTable) do
-				LeaPlusCB[k].f:SetWidth(80)
-				if LeaPlusCB[k].f:GetStringWidth() > 80 then
-					LeaPlusCB[k]:SetHitRectInsets(0, -70, 0, 0)
+				LeaPlusCB[k].f:SetWidth(90)
+				if LeaPlusCB[k].f:GetStringWidth() > 90 then
+					LeaPlusCB[k]:SetHitRectInsets(0, -80, 0, 0)
 				else
 					LeaPlusCB[k]:SetHitRectInsets(0, -LeaPlusCB[k].f:GetStringWidth() + 4, 0, 0)
 				end
@@ -964,6 +1021,18 @@
 							UnmuteSoundFile(soundID)
 						end
 					end
+				end
+				-- Handle special cases where sounds overlap
+				if LeaPlusLC["MuteGameSounds"] == "On" and (LeaPlusLC["MuteTravelers"] == "On" or LeaPlusLC["MuteStriders"] == "On") then
+					-- Mute travelers and mute striders share same sounds
+					MuteSoundFile(555128) -- mechastriderwounda
+					MuteSoundFile(555129) -- mechastriderwoundb
+					MuteSoundFile(555130) -- mechastriderwoundc
+				else
+					-- Mute travelers and mute striders share same sounds
+					UnmuteSoundFile(555128) -- mechastriderwounda
+					UnmuteSoundFile(555129) -- mechastriderwoundb
+					UnmuteSoundFile(555130) -- mechastriderwoundc
 				end
 			end
 
@@ -2152,6 +2221,16 @@
 			titleTX:SetWordWrap(false)
 			titleTX:SetJustifyH("LEFT")
 
+			-- Show help button for exclusions
+			LeaPlusLC:CreateHelpButton("SellJunkExcludeHelpButton", SellJunkFrame, titleTX, "Enter item IDs separated by commas.  Item IDs can be found in item tooltips while this panel is showing.|n|nJunk items entered here will not be sold automatically.|n|nWhite items entered here will be sold automatically.|n|nThe editbox tooltip will show you more information about the items you have entered.")
+
+			-- Teehee
+			local willPlay, soundHandle
+			LeaPlusCB["SellJunkExcludeHelpButton"]:HookScript("OnClick", function()
+				if soundHandle then StopSound(soundHandle) end
+				willPlay, soundHandle = PlaySoundFile(GetRandomArgument(540425, 540452, 540434, 540445, 540432, 540449, 540420, 540415, 540441, 540435, 540413, 540268, 540428, 540436, 540412, 540443, 540408, 540410, 540422, 540417, 540448, 540411))
+			end)
+
 			local eb = CreateFrame("Frame", nil, SellJunkFrame, "BackdropTemplate")
 			eb:SetSize(200, 180)
 			eb:SetPoint("TOPLEFT", 350, -92)
@@ -2172,7 +2251,7 @@
 			eb.Text:SetWidth(150)
 			eb.Text:SetPoint("TOPLEFT", eb.scroll)
 			eb.Text:SetPoint("BOTTOMRIGHT", eb.scroll)
-			eb.Text:SetMaxLetters(300)
+			eb.Text:SetMaxLetters(600)
 			eb.Text:SetFontObject(GameFontNormalLarge)
 			eb.Text:SetAutoFocus(false)
 			eb.Text:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
@@ -2223,12 +2302,17 @@
 			end)
 
 			-- Editbox tooltip
-			local tipPrefix = L["Enter junk item IDs separated by commas."] .. "|n" .. L["Item IDs can be found in item toolips."] .. "|n" .. L["These items will not be sold."]
+			local tipPrefix = ""
 
 			-- Function to make tooltip string
 			local function MakeTooltipString()
 
-				local msg = ""
+				local keepMsg = ""
+				local sellMsg = ""
+				local dupMsg = ""
+				local novalueMsg = ""
+				local incompatMsg = ""
+
 				local tipString = eb.Text:GetText()
 				if tipString and tipString ~= "" then
 					tipString = tipString:gsub("[^,%d]", "")
@@ -2237,13 +2321,51 @@
 						if tipList[i] then
 							tipList[i] = tonumber(tipList[i])
 							if tipList[i] and tipList[i] > 0 and tipList[i] < 999999999 then
-								local void, tLink = GetItemInfo(tipList[i])
+								local void, tLink, Rarity, void, void, void, void, void, void, void, ItemPrice = GetItemInfo(tipList[i])
 								if tLink and tLink ~= "" then
 									local linkCol = string.sub(tLink, 1, 10)
 									if linkCol then
 										local linkName = tLink:match("%[(.-)%]")
-										if linkName then
-											msg = msg .. linkCol .. linkName .. " (" .. tipList[i] .. ")".. "|r|n"
+										if linkName and ItemPrice then
+											if ItemPrice > 0 then
+												if Rarity == 0 then
+													-- Junk item
+													if string.find(keepMsg, "%(" .. tipList[i] .. "%)") then
+														-- Duplicate (ID appears more than once in list)
+														dupMsg = dupMsg .. linkCol .. linkName .. " (" .. tipList[i] .. ")" .. "|r|n"
+													else
+														-- Add junk item to keep list
+														keepMsg = keepMsg .. linkCol .. linkName .. " (" .. tipList[i] .. ")" .. "|r|n"
+													end
+												elseif Rarity == 1 then
+													-- White item
+													if string.find(sellMsg, "%(" .. tipList[i] .. "%)") then
+														-- Duplicate (ID appears more than once in list)
+														dupMsg = dupMsg .. linkCol .. linkName .. " (" .. tipList[i] .. ")" .. "|r|n"
+													else
+														-- Add non-junk item to sell list
+														sellMsg = sellMsg .. linkCol .. linkName .. " (" .. tipList[i] .. ")" .. "|r|n"
+													end
+												else
+													-- Incompatible item (not junk or white)
+													if string.find(incompatMsg, "%(" .. tipList[i] .. "%)") then
+														-- Duplicate (ID appears more than once in list)
+														dupMsg = dupMsg .. linkCol .. linkName .. " (" .. tipList[i] .. ")" .. "|r|n"
+													else
+														-- Add item to incompatible list
+														incompatMsg = incompatMsg .. linkCol .. linkName .. " (" .. tipList[i] .. ")" .. "|r|n"
+													end
+												end
+											else
+												-- Item has no sell price so cannot be sold
+												if string.find(novalueMsg, "%(" .. tipList[i] .. "%)") then
+													-- Duplicate (ID appears more than once in list)
+													dupMsg = dupMsg .. linkCol .. linkName .. " (" .. tipList[i] .. ")" .. "|r|n"
+												else
+													-- Add item to cannot be sold list
+													novalueMsg = novalueMsg .. linkCol .. linkName .. " (" .. tipList[i] .. ")" .. "|r|n"
+												end
+											end
 										end
 									end
 								end
@@ -2252,9 +2374,16 @@
 					end
 				end
 
-				if msg ~= "" then msg = tipPrefix .. "|n|n" .. msg else msg = tipPrefix end
-				eb.tiptext = msg
-				eb.Text.tiptext = msg
+				if keepMsg ~= "" then keepMsg = "|n" .. L["Keep"] .. "|n" .. keepMsg end
+				if sellMsg ~= "" then sellMsg = "|n" .. L["Sell"] .. "|n" .. sellMsg end
+				if dupMsg ~= "" then dupMsg = "|n" .. L["Duplicates"] .. "|n" .. dupMsg end
+				if novalueMsg ~= "" then novalueMsg = "|n" .. L["Cannot be sold"] .. "|n" .. novalueMsg end
+				if incompatMsg ~= "" then incompatMsg = "|n" .. L["Incompatible"] .. "|n" .. incompatMsg end
+
+				eb.tiptext = L["Exclusions"] .. "|n" .. keepMsg .. sellMsg .. dupMsg .. novalueMsg .. incompatMsg
+				eb.Text.tiptext = L["Exclusions"] .. "|n" .. keepMsg .. sellMsg .. dupMsg .. novalueMsg .. incompatMsg
+				if eb.tiptext == L["Exclusions"] .. "|n" then eb.tiptext = eb.tiptext .. "|n" .. L["Nothing to see here."] end
+				if eb.Text.tiptext == L["Exclusions"] .. "|n" then eb.Text.tiptext = "-" end
 
 				if GameTooltip:IsShown() then
 					if MouseIsOver(eb) or MouseIsOver(eb.Text) then
@@ -2308,8 +2437,14 @@
 							-- Don't sell whitelisted items
 							local itemID = GetItemInfoFromHyperlink(CurrentItemLink)
 							if itemID and whiteList[itemID] then
-								Rarity = 3
-								ItemPrice = 0
+								if Rarity == 0 then
+									-- Junk item to keep
+									Rarity = 3
+									ItemPrice = 0
+								elseif Rarity == 1 then
+									-- White item to sell
+									Rarity = 0
+								end
 							end
 							-- Continue
 							local void, itemCount = GetContainerItemInfo(BagID, BagSlot)
@@ -5637,7 +5772,7 @@
 			local ChatFilterPanel = LeaPlusLC:CreatePanel("Filter chat messages", "ChatFilterPanel")
 
 			LeaPlusLC:MakeTx(ChatFilterPanel, "Settings", 16, -72)
-			LeaPlusLC:MakeCB(ChatFilterPanel, "BlockSpellLinks", "Block spell links during combat", 16, -92, false, "If checked, messages containing spell links will be blocked while you are in combat.|n|nThis is useful for blocking spell interrupt spam.|n|nThis applies to the say, party, raid, instance and emote channels.")
+			LeaPlusLC:MakeCB(ChatFilterPanel, "BlockSpellLinks", "Block spell links during combat", 16, -92, false, "If checked, messages containing spell links will be blocked while you are in combat.|n|nThis is useful for blocking spell interrupt spam.|n|nThis applies to the say, party, raid and emote channels.")
 			LeaPlusLC:MakeCB(ChatFilterPanel, "BlockDrunkenSpam", "Block drunken spam", 16, -112, false, "If checked, drunken messages will be blocked unless they apply to your character.|n|nThis applies to the system channel.")
 			LeaPlusLC:MakeCB(ChatFilterPanel, "BlockDuelSpam", "Block duel spam", 16, -132, false, "If checked, duel victory and retreat messages will be blocked unless your character took part in the duel.|n|nThis applies to the system channel.")
 
@@ -5706,8 +5841,6 @@
 					ChatFrame_AddMessageEventFilter("CHAT_MSG_PARTY_LEADER", ChatFilterFunc)
 					ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID", ChatFilterFunc)
 					ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID_LEADER", ChatFilterFunc)
-					ChatFrame_AddMessageEventFilter("CHAT_MSG_INSTANCE_CHAT", ChatFilterFunc)
-					ChatFrame_AddMessageEventFilter("CHAT_MSG_INSTANCE_CHAT_LEADER", ChatFilterFunc)
 					ChatFrame_AddMessageEventFilter("CHAT_MSG_EMOTE", ChatFilterFunc)
 				else
 					ChatFrame_RemoveMessageEventFilter("CHAT_MSG_SAY", ChatFilterFunc)
@@ -5715,8 +5848,6 @@
 					ChatFrame_RemoveMessageEventFilter("CHAT_MSG_PARTY_LEADER", ChatFilterFunc)
 					ChatFrame_RemoveMessageEventFilter("CHAT_MSG_RAID", ChatFilterFunc)
 					ChatFrame_RemoveMessageEventFilter("CHAT_MSG_RAID_LEADER", ChatFilterFunc)
-					ChatFrame_RemoveMessageEventFilter("CHAT_MSG_INSTANCE_CHAT", ChatFilterFunc)
-					ChatFrame_RemoveMessageEventFilter("CHAT_MSG_INSTANCE_CHAT_LEADER", ChatFilterFunc)
 					ChatFrame_RemoveMessageEventFilter("CHAT_MSG_EMOTE", ChatFilterFunc)
 				end
 				if LeaPlusLC["BlockDrunkenSpam"] == "On" or LeaPlusLC["BlockDuelSpam"] == "On" then
@@ -7868,13 +7999,9 @@
 				if LeaPlusLC["UnivGroupColor"] == "On" then
 					ChangeChatColor("RAID", 0.67, 0.67, 1)
 					ChangeChatColor("RAID_LEADER", 0.46, 0.78, 1)
-					ChangeChatColor("INSTANCE_CHAT", 0.67, 0.67, 1)
-					ChangeChatColor("INSTANCE_CHAT_LEADER", 0.46, 0.78, 1)
 				else
 					ChangeChatColor("RAID", 1, 0.50, 0)
 					ChangeChatColor("RAID_LEADER", 1, 0.28, 0.04)
-					ChangeChatColor("INSTANCE_CHAT", 1, 0.50, 0)
-					ChangeChatColor("INSTANCE_CHAT_LEADER", 1, 0.28, 0.04)
 				end
 			end
 
@@ -7900,20 +8027,46 @@
 				-- Left button down
 				if arg1 == "LeftButton" then
 
-					-- Control key does nothing
-					if IsControlKeyDown() and not IsShiftKeyDown() then
-						return
-					end
-
 					-- Shift key toggles music
-					if IsShiftKeyDown() and not IsControlKeyDown() then
-						Sound_ToggleMusic();
+					if IsShiftKeyDown() and not IsControlKeyDown() and not IsAltKeyDown() then
+						Sound_ToggleMusic()
 						return
 					end
 
-					-- Shift key and control key toggles Zygor addon
-					if IsShiftKeyDown() and IsControlKeyDown() then
-						LeaPlusLC:ZygorToggle();
+					-- Control key does nothing (no minimap target tracking in Wrath)
+					if IsControlKeyDown() and not IsShiftKeyDown() and not IsAltKeyDown() then
+						return
+					end
+
+					-- Alt key toggles error messages
+					if IsAltKeyDown() and not IsControlKeyDown() and not IsShiftKeyDown() then
+						if LeaPlusDB["HideErrorMessages"] == "On" then -- Checks global
+							if LeaPlusLC["ShowErrorsFlag"] == 1 then
+								LeaPlusLC["ShowErrorsFlag"] = 0
+								ActionStatus_DisplayMessage(L["Error messages will be shown"], true);
+							else
+								LeaPlusLC["ShowErrorsFlag"] = 1
+								ActionStatus_DisplayMessage(L["Error messages will be hidden"], true);
+							end
+							return
+						end
+						return
+					end
+
+					-- Control key and shift key toggles Zygor addon
+					if IsControlKeyDown() and IsShiftKeyDown() and not IsAltKeyDown() then
+						LeaPlusLC:ZygorToggle()
+						return
+					end
+
+					-- Control key and alt key toggles maximised window mode
+					if IsControlKeyDown() and IsAltKeyDown() and not IsShiftKeyDown() then
+						if LeaPlusLC:PlayerInCombat() then
+							return
+						else
+							SetCVar("gxMaximize", tostring(1 - GetCVar("gxMaximize")));
+							UpdateWindow()
+						end
 						return
 					end
 
@@ -7930,37 +8083,6 @@
 
 				-- Right button down
 				if arg1 == "RightButton" then
-
-					-- Control key toggles error messages
-					if IsControlKeyDown() and not IsShiftKeyDown() then
-						if LeaPlusDB["HideErrorMessages"] == "On" then -- Checks global
-							if LeaPlusLC["ShowErrorsFlag"] == 1 then
-								LeaPlusLC["ShowErrorsFlag"] = 0
-								ActionStatus_DisplayMessage(L["Error messages will be shown"], true);
-							else
-								LeaPlusLC["ShowErrorsFlag"] = 1
-								ActionStatus_DisplayMessage(L["Error messages will be hidden"], true);
-							end
-							return
-						end
-						return
-					end
-
-					-- Shift key does nothing
-					if IsShiftKeyDown() and not IsControlKeyDown() then
-						return
-					end
-
-					-- Shift key and control key toggles maximised window mode
-					if IsShiftKeyDown() and IsControlKeyDown() then
-						if LeaPlusLC:PlayerInCombat() then
-							return
-						else
-							SetCVar("gxMaximize", tostring(1 - GetCVar("gxMaximize")));
-							RestartGx();
-						end
-						return
-					end
 
 					-- No modifier key toggles the options panel
 					if LeaPlusLC:IsPlusShowing() then
@@ -12751,8 +12873,6 @@
 			-- Universal group color (LeaPlusLC["UnivGroupColor"])
 			ChangeChatColor("RAID", 1, 0.50, 0)
 			ChangeChatColor("RAID_LEADER", 1, 0.28, 0.04)
-			ChangeChatColor("INSTANCE_CHAT", 1, 0.50, 0)
-			ChangeChatColor("INSTANCE_CHAT_LEADER", 1, 0.28, 0.04)
 
 			-- Use class colors in chat (LeaPlusLC["ClassColorsInChat"])
 			SetCVar("chatClassColorOverride", "1")
@@ -13184,7 +13304,7 @@
 		tinsert(LeaDropList, ddname)
 
 		-- Populate variable with item list
-		LeaPlusLC[ddname.."Table"] = items
+		LeaPlusLC[ddname .. "Table"] = items
 
 		-- Create outer frame
 		local frame = CreateFrame("FRAME", nil, parent); frame:SetWidth(width); frame:SetHeight(42); frame:SetPoint("BOTTOMLEFT", parent, anchor, x, y);
@@ -13217,7 +13337,7 @@
 		LeaPlusCB["ListFrame"..ddname] = ddlist
 		ddlist:SetPoint("TOP",0,-42)
 		ddlist:SetWidth(frame:GetWidth())
-		ddlist:SetHeight((#items * 17) + 17 + 17)
+		ddlist:SetHeight((#items * 16) + 16 + 16)
 		ddlist:SetFrameStrata("FULLSCREEN_DIALOG")
 		ddlist:SetFrameLevel(12)
 		ddlist:SetBackdrop({bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark", edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border", tile = false, tileSize = 0, edgeSize = 32, insets = { left = 4, right = 4, top = 4, bottom = 4 }});
@@ -13237,9 +13357,9 @@
 			local dditem = CreateFrame("Button", nil, LeaPlusCB["ListFrame"..ddname])
 			LeaPlusCB["Drop"..ddname..k] = dditem;
 			dditem:Show();
-			dditem:SetWidth(ddlist:GetWidth()-22)
-			dditem:SetHeight(20)
-			dditem:SetPoint("TOPLEFT", 12, -k*16)
+			dditem:SetWidth(ddlist:GetWidth() - 22)
+			dditem:SetHeight(16)
+			dditem:SetPoint("TOPLEFT", 12, -k * 16)
 
 			dditem.f = dditem:CreateFontString(nil, 'ARTWORK', 'GameFontHighlight')
 			dditem.f:SetPoint('LEFT', 16, 0)
@@ -14567,6 +14687,37 @@
 				end
 				LeaPlusLC["Page"..LeaPlusLC["LeaStartPage"]]:Show()
 				return
+			elseif str == "gossinfo" then
+				-- Print gossip frame information
+				if GossipFrame:IsShown() then
+					local npcName = UnitName("target")
+					local npcGuid = UnitGUID("target") or nil
+					if npcName and npcGuid then
+						local void, void, void, void, void, npcID = strsplit("-", npcGuid)
+						if npcID then
+							LeaPlusLC:Print(npcName .. ": |cffffffff" .. npcID)
+						end
+					end
+					LeaPlusLC:Print("Available quests: |cffffffff" .. GetNumGossipAvailableQuests())
+					LeaPlusLC:Print("Active quests: |cffffffff" .. GetNumGossipActiveQuests())
+					LeaPlusLC:Print("Gossip count: |cffffffff" .. GetNumGossipOptions())
+					if GetGossipOptions() then
+						local void, gossipType = GetGossipOptions()
+						LeaPlusLC:Print("Gossip type: |cffffffff" .. gossipType)
+					else
+						LeaPlusLC:Print("Gossip type: |cffffffff" .. "Nil")
+					end
+					if GossipTitleButton1 and GossipTitleButton1:GetText() then
+						LeaPlusLC:Print("First option: |cffffffff" .. GossipTitleButton1:GetText())
+					end
+					-- LeaPlusLC:Print("Gossip text: |cffffffff" .. GetGossipText())
+					if not IsShiftKeyDown() then
+						SelectGossipOption(1)
+					end
+				else
+					LeaPlusLC:Print("Gossip frame not open.")
+				end
+				return
 			elseif str == "admin" then
 				-- Preset profile (used for testing)
 				LpEvt:UnregisterAllEvents()						-- Prevent changes
@@ -15021,7 +15172,7 @@
 	LeaPlusLC:MakeCB(LeaPlusLC[pg], "NoStickyChat"				, 	"Disable sticky chat"			,	340, -92,	true,	"If checked, sticky chat will be disabled.|n|nNote that this does not apply to temporary chat windows.")
 	LeaPlusLC:MakeCB(LeaPlusLC[pg], "UseArrowKeysInChat"		, 	"Use arrow keys in chat"		, 	340, -112, 	true,	"If checked, you can press the arrow keys to move the insertion point left and right in the chat frame.|n|nIf unchecked, the arrow keys will use the default keybind setting.")
 	LeaPlusLC:MakeCB(LeaPlusLC[pg], "NoChatFade"				, 	"Disable chat fade"				, 	340, -132, 	true,	"If checked, chat text will not fade out after a time period.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "UnivGroupColor"			,	"Universal group color"			,	340, -152,	false,	"If checked, raid chat and instance chat will both be colored blue (to match the default party chat color).")
+	LeaPlusLC:MakeCB(LeaPlusLC[pg], "UnivGroupColor"			,	"Universal group color"			,	340, -152,	false,	"If checked, raid chat will be colored blue (to match the default party chat color).")
 	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ClassColorsInChat"			,	"Use class colors in chat"		,	340, -172,	false,	"If checked, class colors will be used in the chat frame.")
 	LeaPlusLC:MakeCB(LeaPlusLC[pg], "RecentChatWindow"			,	"Recent chat window"			, 	340, -192, 	true,	"If checked, you can hold down the control key and click a chat tab to view recent chat in a copy-friendly window.")
 	LeaPlusLC:MakeCB(LeaPlusLC[pg], "MaxChatHstory"				,	"Increase chat history"			, 	340, -212, 	true,	"If checked, your chat history will increase to 4096 lines.  If unchecked, the default will be used (128 lines).|n|nEnabling this option may prevent some chat text from showing during login.")
@@ -15037,7 +15188,7 @@
 	pg = "Page4";
 
 	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Visibility"				, 	146, -72);
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "HideErrorMessages"			, 	"Hide error messages"			,	146, -92, 	true,	"If checked, most error messages (such as 'Not enough rage') will not be shown.  Some important errors are excluded.|n|nIf you have the minimap button enabled, you can hold down the control key and right-click it to toggle error messages without affecting this setting.")
+	LeaPlusLC:MakeCB(LeaPlusLC[pg], "HideErrorMessages"			, 	"Hide error messages"			,	146, -92, 	true,	"If checked, most error messages (such as 'Not enough rage') will not be shown.  Some important errors are excluded.|n|nIf you have the minimap button enabled, you can hold down the alt key and click it to toggle error messages without affecting this setting.")
 	LeaPlusLC:MakeCB(LeaPlusLC[pg], "NoHitIndicators"			, 	"Hide portrait numbers"			,	146, -112, 	true,	"If checked, damage and healing numbers in the player and pet portrait frames will be hidden.")
 	LeaPlusLC:MakeCB(LeaPlusLC[pg], "HideZoneText"				,	"Hide zone text"				,	146, -132, 	true,	"If checked, zone text will not be shown (eg. 'Ironforge').")
 	LeaPlusLC:MakeCB(LeaPlusLC[pg], "HideKeybindText"			,	"Hide keybind text"				,	146, -152, 	true,	"If checked, keybind text will not be shown on action buttons.")
@@ -15157,7 +15308,7 @@
 	pg = "Page8";
 
 	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Addon"						, 146, -72);
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ShowMinimapIcon"			, "Show minimap button"				, 146, -92,		false,	"If checked, a minimap button will be available.|n|nClick - Toggle options panel.|n|nSHIFT/Left-click - Toggle music.|n|nCTRL/Right-click - Toggle errors (if enabled).|n|nCTRL/SHIFT/Left-click - Toggle Zygor (if installed).|n|nCTRL/SHIFT/Right-click - Toggle windowed mode.")
+	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ShowMinimapIcon"			, "Show minimap button"				, 146, -92,		false,	"If checked, a minimap button will be available.|n|nClick - Toggle options panel.|n|nSHIFT-click - Toggle music.|n|nALT-click - Toggle errors (if enabled).|n|nCTRL/SHIFT-click - Toggle Zygor (if installed).|n|nCTRL/ALT-click - Toggle windowed mode.")
 
 	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Scale", 340, -72);
 	LeaPlusLC:MakeSL(LeaPlusLC[pg], "PlusPanelScale", "Drag to set the scale of the Leatrix Plus panel.", 1, 2, 0.1, 340, -92, "%.1f")

@@ -4,8 +4,7 @@ This mod is distributed under Version 2 of the GPL.  A copy of the GPL is includ
 
 [Changelog history](https://github.com/Hoizame/AtlasLootClassic/blob/master/AtlasLootClassic/Documentation/Release_Notes.md)
 
-## v3.0.4 (Oct, 01, 2022)
+## v3.0.6 (Oct, 08, 2022)
 
-- fix lua error with ruRU clients
-- add Revered Helm Enchants from Factions #247
-- add missing red AP gems #249
+- fix classic Naxxramas opens when in Wotlk #260
+- add missing orange gems pr #259

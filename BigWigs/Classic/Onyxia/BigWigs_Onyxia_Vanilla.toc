@@ -22,7 +22,7 @@
 ## Notes-ptBR: BigWigs Onyxia Modules
 ## Notes-zhCN: 奥妮克希亚模块。
 ## Notes-zhTW: BigWigs Onyxia Modules
-## Version: v45.1-classic
+## Version: v45.2-classic
 
 ## LoadOnDemand: 1
 ## Dependencies: BigWigs

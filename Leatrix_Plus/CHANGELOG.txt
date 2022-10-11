@@ -1,3 +1,40 @@
+3.0.28 - 11th October 2022
+- For 'Mute game sounds' ('System'), you can now make Netherdrakes quieter.
+- Added flight times.
+- Removed references to instance chat.
+
+3.0.27 - 10th October 2022
+- Added flight times.
+
+3.0.26 - 9th October 2022
+- For 'Sell junk automatically' ('Automation'), white items entered in the exclusions editbox will be sold automatically.  Junk items entered in the editbox will not be sold automatically (as before).
+- Added flight times.
+
+3.0.25 - 8th October 2022
+- Added flight times.
+
+3.0.24 - 7th October 2022
+- Fixed 'Mute travelers' so that it applies to Gnimo too.  Gnimo sounds are shared with mechstrider wound sounds so now enabling either mute travelers or mute mechstriders will mute the mechstrider wound sounds.
+- Added flight times.
+
+3.0.23 - 6th October 2022
+- For 'Mute game sounds' ('System'), you can now mute travelers, bikes and mechanical guild vaults.
+- For 'Show minimap icon', some of the modified clicks have changed.  Read the option tooltip for more details.
+- The minimap button control-alt-click to toggle maximised windowed mode now runs much faster.
+- Added flight times.
+
+3.0.22 - 5th October 2022
+- Added flight times.
+
+3.0.21 - 4th October 2022
+- Added flight times.
+
+3.0.20 - 3rd October 2022
+- Added flight times.
+
+3.0.19 - 2nd October 2022
+- Added flight times.
+
 3.0.18 - 2nd October 2022
 - Added flight times.
 

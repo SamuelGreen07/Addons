@@ -1,9 +1,7 @@
 # Auctionator
 
-## [9.2.40](https://github.com/Auctionator/Auctionator/tree/9.2.40) (2022-09-27)
-[Full Changelog](https://github.com/Auctionator/Auctionator/compare/9.2.39...9.2.40) 
+## [9.2.44](https://github.com/Auctionator/Auctionator/tree/9.2.44) (2022-10-11)
+[Full Changelog](https://github.com/Auctionator/Auctionator/compare/9.2.43...9.2.44) 
 
-- Classic: Add prospecting values for Cobalt, Saronite and Titanium  
-- Update TaintLess patch (version 22-09-15)  
-- Classic: Buying: Code cleanup  
-- Classic: Consistent folder names for ShoppingLists/Shopping  
+- Initialize dropdowns at the last possible moment  
+- Fix remaining HideDropDownMenu to use LibDD  

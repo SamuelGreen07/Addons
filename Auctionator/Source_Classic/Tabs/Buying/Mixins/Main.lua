@@ -97,7 +97,7 @@ function AuctionatorBuyFrameMixin:UpdateButtons()
   self.CancelButton:SetEnabled(self.selectedAuctionData ~= nil and self.selectedAuctionData.isOwned and self.selectedAuctionData.numStacks > 0 and Auctionator.AH.IsNotThrottled())
   self.BuyButton:Disable()
 
-  self.BuyButton:SetEnabled(self.selectedAuctionData ~= nil and not self.selectedAuctionData.isOwned and GetMoney() >= self.selectedAuctionData.stackPrice)
+  self.BuyButton:SetEnabled(self.selectedAuctionData ~= nil and not self.selectedAuctionData.isOwned and self.selectedAuctionData.stackPrice ~= nil and GetMoney() >= self.selectedAuctionData.stackPrice)
 
   self.LoadAllPagesButton:SetShown(not self.SearchDataProvider:GetRequestAllResults() and not self.gotCompleteResults and self.SearchResultsListing:IsShown())
 end
@@ -177,7 +177,7 @@ function AuctionatorBuyFrameMixinForShopping:Init()
   AuctionatorBuyFrameMixin.Init(self)
   Auctionator.EventBus:Register(self, {
     Auctionator.Buying.Events.ShowForShopping,
-    Auctionator.ShoppingLists.Events.ListSearchStarted,
+    Auctionator.Shopping.Events.ListSearchStarted,
   })
 end
 
@@ -224,7 +224,7 @@ function AuctionatorBuyFrameMixinForShopping:ReceiveEvent(eventName, eventData, 
       self.gotCompleteResults = eventData.complete
       self:UpdateButtons()
     end
-  elseif eventName == Auctionator.ShoppingLists.Events.ListSearchStarted then
+  elseif eventName == Auctionator.Shopping.Events.ListSearchStarted then
     self:Hide()
   else
     AuctionatorBuyFrameMixin.ReceiveEvent(self, eventName, eventData, ...)
