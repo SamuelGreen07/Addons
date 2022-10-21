@@ -686,6 +686,7 @@ end
 -- Manage the appearing and disappearing effects on the warlock || Permet de gérer les effets apparaissants et disparaissants sur le démoniste
 -- Based on CombatLog || Basé sur le CombatLog
 function SelfEffect(action, nom)
+--print (action, nom)
 	if NecrosisConfig.LeftMount then
 		local NomCheval1 = GetSpellInfo(NecrosisConfig.LeftMount)
 	else
@@ -699,6 +700,7 @@ function SelfEffect(action, nom)
 
 	local f = _G[Necrosis.Warlock_Buttons.mounts.f]
 	if action == "BUFF" then
+	--print (nom)
 		local fs = _G[Necrosis.Warlock_Buttons.trance.f]
 		local fb = _G[Necrosis.Warlock_Buttons.backlash.f]
 		-- Changing the mount button when the Warlock is disassembled || Changement du bouton de monture quand le Démoniste est démonté
@@ -728,12 +730,25 @@ function SelfEffect(action, nom)
 				f:SetNormalTexture(Necrosis.Warlock_Buttons.link.high)
 				f:GetNormalTexture():SetDesaturated(nil)
 			end
-		-- If Backlash, to display the icon and we proc the sound || si Contrecoup, pouf on affiche l'icone et on proc le son
+		-- If Backlash or MoltenCore, to display the icon and we proc the sound || si Contrecoup, pouf on affiche l'icone et on proc le son
 		-- If By-effect, one-on-one icon and one proc the sound || if By-effect, pouf one posts the icon and one proc the sound
-		elseif nom == Necrosis.Translation.Proc.Backlash and NecrosisConfig.ShadowTranceAlert then
-			Necrosis:Msg(Necrosis.ProcText.Backlash, "USER")
-			if NecrosisConfig.Sound then PlaySoundFile(Necrosis.Sound.Backlash) end
-			---print(Necrosis.Sound.Backlash)
+		
+		elseif nom == Necrosis.Translation.Proc.Backlash  or nom == select(1, GetSpellInfo(47247)) and NecrosisConfig.ShadowTranceAlert then
+			
+			
+			
+			if nom == select(1, GetSpellInfo(47247)) then -- Motencore
+				--print (select(1, GetSpellInfo(47247)))
+				Necrosis:Msg(Necrosis.ProcText.MoltenCore, "USER")
+				if NecrosisConfig.Sound then PlaySound(12977) end	
+
+			else
+				Necrosis:Msg(Necrosis.ProcText.Backlash, "USER")
+				if NecrosisConfig.Sound then PlaySoundFile(Necrosis.Sound.Backlash) end	
+			
+			end
+			
+			
 			fb:Show()
 			
 		-- If Twilight, to display the icon and sound || si Crépuscule, pouf on affiche l'icone et on proc le son
@@ -769,7 +784,7 @@ function SelfEffect(action, nom)
 				f:SetNormalTexture(Necrosis.Warlock_Buttons.link.norm)
 			end
 		-- Hide the shadowtrance (nightfall) or backlash buttons when the state is ended
-		elseif nom == Necrosis.Translation.Proc.ShadowTrance or nom == Necrosis.Translation.Proc.Backlash then
+		elseif nom == Necrosis.Translation.Proc.ShadowTrance or nom == select(1, GetSpellInfo(47247)) or nom == Necrosis.Translation.Proc.Backlash then
 			local fs = _G[Necrosis.Warlock_Buttons.trance.f]
 			local fb = _G[Necrosis.Warlock_Buttons.backlash.f]
 			fs:Hide()
@@ -2901,7 +2916,7 @@ function Necrosis:CreateMenu()
 
 		for index = 1, #Necrosis.Warlock_Lists.curses, 1 do
 			
-			if NecrosisConfig.CurseShow[index] == true 		then
+			if NecrosisConfig.CurseShow[index] and NecrosisConfig.CurseShow[index] == true 		then
 				show = NecrosisConfig.CurseShow[index]
 			elseif NecrosisConfig.CurseShow[index] == false 	then
 				show = NecrosisConfig.CurseShow[index]
@@ -2992,6 +3007,19 @@ function Necrosis:Recall()
 		Necrosis:OnDragStop(f)
 	end
 end
+function Necrosis:Redraw()
+	for i,v in pairs(Necrosis.Warlock_Lists.recall) do
+		local f = _G[Necrosis.Warlock_Buttons[v.f_ptr].f]
+		
+		if v.show then
+			f:Show()
+		else
+			f:Hide()
+		end
+		Necrosis:OnDragStop(f)
+	end
+end
+
 
 function Necrosis:SetOfxy(menu)
 	local fb = _G[Necrosis.Warlock_Buttons.buffs.f]

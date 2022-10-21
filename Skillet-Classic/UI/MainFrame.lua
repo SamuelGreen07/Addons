@@ -2,7 +2,7 @@ local addonName,addonTable = ...
 local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 local isBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
-local isWrath = Skillet.build == "Wrath"
+local isWrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
 local DA = LibStub("AceAddon-3.0"):GetAddon("Skillet") -- for DebugAids.lua
 --[[
 Skillet: A tradeskill window replacement.
@@ -1610,10 +1610,10 @@ function Skillet:SetTradeSkillToolTip(skillIndex, buttonID)
 		if Skillet.db.profile.enchant_scrolls and recipe.scrollID then
 			GameTooltip:SetItemByID(recipe.scrollID)
 		else
-			GameTooltip:AddLine(GetTradeSkillDescription(skillIndex))
+			GameTooltip:AddLine(GetTradeSkillDescription(skillIndex),NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
 		end
 	elseif recipe.itemID == 0 then
-		GameTooltip:AddLine(GetTradeSkillDescription(skillIndex))
+		GameTooltip:AddLine(GetTradeSkillDescription(skillIndex),NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
 	else
 		if recipe then
 			if recipe.itemID ~= 0 then

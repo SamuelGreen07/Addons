@@ -1,12 +1,12 @@
-lightweight tag afba0baf798782f3bacaf7bac27549a5fc58a9aa 8.0.6
+lightweight tag ecfadc0f70e1c7780923681d183c5e06301d6c04 8.0.8
 Author:	LANCESTRE <lancetre@intenebris.org>
-Date:	Thu Oct 6 04:39:21 2022 +0200
+Date:	Mon Oct 17 23:10:01 2022 +0200
 
-commit afba0baf798782f3bacaf7bac27549a5fc58a9aa
+commit ecfadc0f70e1c7780923681d183c5e06301d6c04
 Author: LANCESTRE <lancetre@intenebris.org>
-Date:   Thu Oct 6 04:39:21 2022 +0200
+Date:   Mon Oct 17 23:10:01 2022 +0200
 
-    Update Spells.lua
+    Motencore
     
-     Ritual of Souls R2
+    proc
 

@@ -1,15 +1,5 @@
+
 -- CLASSIC Specific functions
-
-
--- ClubID create my own algorithm
-GRM.CreateCustomGUIDValue = function( guildName )
-    local result = 0;
-    local nameByteArray = { string.byte ( guildName , 1 , -1 ) };
-    for i = 1 , #nameByteArray do
-        result = result + nameByteArray[i];
-    end
-    return result;
-end
 
 -- Method:          GRM.ClassicCheckForNewMember ( name )
 -- What it Does:    Live checks when a player joins the guild and reports on it
@@ -74,7 +64,7 @@ GRM.ClassicCheckForNewMember = function ( name )
         -- -- Delay for time to check "Unique Accounts" change...
         C_Timer.After ( 10 , function()               
             if GRM_G.DesignateMain then
-                GRM.SetMain ( name , name , false , 0 );
+                GRM.SetMain ( name , 1 );
                 GRM.Report ( GRM.L ( "GRM Auto-Detect! {name} has joined the guild and will be set as Main" , GRM.GetClassifiedName ( name , true ) ) );
                 if GRM_UI.GRM_RosterChangeLogFrame.GRM_AuditFrame:IsVisible() then
                     GRM.RefreshAuditFrames ( true , true );
@@ -117,15 +107,7 @@ end
 -- Purpose:         Porting GRM to Classic needs to have this consideration for non-existent features, like the calendar, in the original Warcraft release.
 GRM_UI.DisableFramesForClassic = function()
 
-    if GRM_G.BuildVersion <= 40000 then  -- Not introduced until WOTLK
-
-        -- Event stuff
-        GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_ScanningOptionsFrame.GRM_RosterReportUpcomingEventsCheckButton:Disable();
-        GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_ScanningOptionsFrame.GRM_RosterReportUpcomingEventsCheckButtonText:SetTextColor ( 0.5 , 0.5 , 0.5 );
-        GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_ScanningOptionsFrame.GRM_RosterReportUpcomingEventsCheckButtonText2:SetTextColor ( 0.5 , 0.5 , 0.5 );
-
-        GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_ScanningOptionsFrame.GRM_RosterMainOnlyCheckButton:Disable();
-        GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_ScanningOptionsFrame.GRM_RosterMainOnlyCheckButtonText:SetTextColor ( 0.5 , 0.5 , 0.5 );
+    if GRM_G.BuildVersion < 40000 then  -- Not introduced until WOTLK
 
         GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_OfficerOptionsFrame.GRM_RosterReportAddEventsToCalendarButton:Disable();
         GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_OfficerOptionsFrame.GRM_RosterReportAddEventsToCalendarButtonText:SetTextColor ( 0.5 , 0.5 , 0.5 );
@@ -138,7 +120,7 @@ end
 -- Purpose:         Needed to unlock the highlights properly so it is not confusing who is selected.
 GRM.ClearRosterHighlights = function()
     SetGuildRosterSelection ( 0 );      -- If you do not clear the selection, it will just re-highlight the bar when it updates.
-    for i = 1 , 13 do
+    for i = 1 , GRM_UI.ContainerButtonCount do
         _G[ "GuildFrameButton" .. i ]:UnlockHighlight();
     end
 end

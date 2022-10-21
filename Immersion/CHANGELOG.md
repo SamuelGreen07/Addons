@@ -1,8 +1,9 @@
 # Immersion
 
-## [1.4.5](https://github.com/seblindfors/Immersion/tree/1.4.5) (2022-09-03)
-[Full Changelog](https://github.com/seblindfors/Immersion/compare/1.4.4...1.4.5) [Previous Releases](https://github.com/seblindfors/Immersion/releases)
+## [1.4.6](https://github.com/seblindfors/Immersion/tree/1.4.6) (2022-10-16)
+[Full Changelog](https://github.com/seblindfors/Immersion/compare/1.4.5...1.4.6) [Previous Releases](https://github.com/seblindfors/Immersion/releases)
 
-- Fix classic check on internal API  
-- Revert "Fix classic check on internal API"  
-- Fix classic check on internal API  
+- Update API wrapper  
+- Fix title buttons not working on retail 9+  
+- Update Controller.lua  
+- Update to work on Dragonflight  
