@@ -1,6 +1,8 @@
 -- Russian localization file for ruRU.
 local L = ElvUI[1].Libs.ACL:NewLocale("ElvUI", "ruRU")
 
+L["Abbreviate Name"] = true
+L["Max Allowed Groups"] = true
 L["Display Mana"] = true
 L["Will display mana when main power is:"] = true
 L["%s and then %s"] = "%s, а затем %s"
@@ -154,12 +156,10 @@ L["Bag 2"] = "Сумка 2"
 L["Bag 3"] = "Сумка 3"
 L["Bag 4"] ="Сумка 4"
 L["Bag Assignment"] = "Назначение сумок"
-L["Bag Bar"] = true
 L["Bag Spacing"] = "Отступ сумок"
 L["BAG_FILTER_CONSUMABLES"] = "расходуемые"
 L["BAG_FILTER_EQUIPMENT"] = "снаряжение"
 L["BAG_FILTER_TRADE_GOODS"] = "хозяйственные товары"
-L["Bag-Bar"] = "Панель сумок"
 L["Bags Only"] = "Только в сумках"
 L["Bags/Bank"] = "Сумки/Банк"
 L["Bank 1"] = "Банк 1"
@@ -238,7 +238,6 @@ L["Can Not Attack"] = "Нельзя атаковать"
 L["Cart / Flag / Orb / Assassin Bounty"] = "Тележка / Флаг / Сфера / Убить этого гада"
 L["Cast Bar"] = "Полоса заклинаний"
 L["Cast Time Format"] = "Формат времени заклинания"
-L["Castbar"] = "Полоса заклинаний"
 L["Casted by Player Only"] = "Принадлежащее вам."
 L["Casting"] = "Заклинания"
 L["Center"] = "Центр"
@@ -945,7 +944,7 @@ L["Lines"] = "Линии"
 L["Particles"] = "Частицы"
 L["Link to the latest development version."] = "Ссылка на последнюю девелоперскую версию."
 L["Link to the latest PTR version."] = "Ссылка на последнюю PTR версию"
-L["List of words to color in chat if found in a message. If you wish to add multiple words you must seperate the word with a comma. To search for your current name you can use %MYNAME%.\n\nExample:\n%MYNAME%, ElvUI, RBGs, Tank"] = "Список слов для окрашивания, если они обнаружены в чате. Если Вы хотите добавить несколько слов, то разделяйте их запятыми. Для поиска имени Вашего текущего персонажа используйте %MYNAME%.\n\nПример:\n%MYNAME%, ElvUI, РБГ, Танк"
+L["List of words to color in chat if found in a message. If you wish to add multiple words you must separate the word with a comma. To search for your current name you can use %MYNAME%.\n\nExample:\n%MYNAME%, ElvUI, RBGs, Tank"] = "Список слов для окрашивания, если они обнаружены в чате. Если Вы хотите добавить несколько слов, то разделяйте их запятыми. Для поиска имени Вашего текущего персонажа используйте %MYNAME%.\n\nПример:\n%MYNAME%, ElvUI, РБГ, Танк"
 L["Local Time"] = "Местное время"
 L["Location Text"] = "Текст локации"
 L["Lock Distance Max"] = true
@@ -1366,13 +1365,13 @@ L["Send ADDON_ACTION_BLOCKED errors to the Lua Error frame. These errors are les
 L["Sends your current profile to your target."] = "Отправить текущий профиль цели."
 L["Sends your filter settings to your target."] = "Отправить Ваши фильтры цели."
 L["Separate Panel Sizes"] = "Разные размеры панелей"
-L["Seperate"] = "Разделение"
+L["Separate"] = "Разделение"
 L["Set auras that are not from you to desaturated."] = "Иконки чужих аур будут обесцвечены."
 L["Set Settings to Default"] = "Сбросить настройки на умолчания"
 L["Set the alpha level of portrait when frame is overlayed."] = "Установить уровень прозрачности портрета, когда включен режим наложения"
 L["Set the filter type. Blacklist will hide any auras in the list and show all others. Whitelist will show any auras in the filter and hide all others."] = "Выберите тип фильтра. Черный список будет скрывать содержащиеся заклинания и отображать остальные. Белый список будет показывать включенные заклинания и скрывать все остальные."
 L["Set the font outline."] = "Устанавливает границу шрифта."
-L["Set the font size for everything in UI. Note: This doesn't effect somethings that have their own seperate options (UnitFrame Font, Datatext Font, ect..)"] = "Установите размер шрифта для всего интерфейса. Это не действует на элементы с собственными настройками шрифтов (например, рамки юнитов)."
+L["Set the font size for everything in UI. Note: This doesn't effect somethings that have their own separate options (UnitFrame Font, Datatext Font, ect..)"] = "Установите размер шрифта для всего интерфейса. Это не действует на элементы с собственными настройками шрифтов (например, рамки юнитов)."
 L["Set the font size for unitframes."] = "Устанавливает шрифт для рамок юнитов."
 L["Set the order that the group will sort."] = "Устанавливает метод сортировки в группе."
 L["Set the orientation of the UnitFrame."] = "Устанавливает ориентацию рамки."
@@ -1783,6 +1782,8 @@ L["blockDispellable"] = "[Блокировать] Развеиваемые"
 L["blockNoDuration"] = "[Блокировать] Без длительности"
 L["blockNonPersonal"] = "[Блокировать] Чужие"
 L["blockNotDispellable"] = "[Блокировать] Не развеиваемые"
+L["blockMount"] = "[Блокировать] Mount"
+L["Mount"] = true
 L["CastByNPC"] = "Принадлежит НИП"
 L["CastByPlayers"] = "Принадлежат игрокам"
 L["CastByUnit"] = "Принадлежит юниту"
@@ -1808,13 +1809,7 @@ L["SKINS_DESC"] = "Установки скинов"
 L["TOGGLESKIN_DESC"] = "Включить/выключить этот скин."
 L["TOOLTIP_DESC"] = "Опций подсказки"
 L["UNITFRAME_DESC"] = "Изменение настроек рамок юнитов."
-L["VISIBILITY_DESC"] = [=[Следующий фильтр должен быть верен для отображения группы в дополнение к любому другому уже установленному фильтру.
-
-|cffff8000Defaults:|r
-    Party: [@raid6,exists][nogroup] hide;show
-    Raid: [@raid6,noexists][@raid26,exists] hide;show
-    Raid40: [@raid26,noexists] hide;show]
-    Raid Pet: [group:raid] show; hide]=]
+L["VISIBILITY_DESC"] = "Следующий фильтр должен быть верен для отображения группы в дополнение к любому другому уже установленному фильтру."
 L["SEARCH_SYNTAX_DESC"] = [=[С добавлением библиотеки LibItemSearch, у Вас появился доступ к большему количеству поисковых запросов. Здесь представлена документация по синтаксису поисковых запросов. Полная инструкция доступна по адресу: https://github.com/Jaliborc/LibItemSearch-1.2/wiki/Search-Syntax.
 
 Специфический поиск:

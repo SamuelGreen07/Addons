@@ -9,6 +9,8 @@ local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 
 local LE_ITEM_CLASS_KEY = LE_ITEM_CLASS_KEY or Enum.ItemClass.Key
 
+local UseContainerItem = C_Container and C_Container.UseContainerItem or UseContainerItem
+
 local BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate" or nil
 
 local mediaPath = [[Interface\AddOns\cargBags_Nivaya\media\]]
@@ -119,7 +121,8 @@ function MyContainer:OnContentsChanged(forced)
 
 	local buttonIDs = {}
   	for i, button in pairs(self.buttons) do
-		local item = cbNivaya:GetCustomItemInfo(button.bagID, button.slotID)
+		local slotID, bagID = button:GetSlotAndBagID()
+		local item = cbNivaya:GetCustomItemInfo(bagID, slotID)
 		if item.link then
 			buttonIDs[i] = { item.id, item.rarity, button, item.count }
 		else
@@ -453,7 +456,7 @@ end
 local SetFrameMovable = function(f, v)
 	f:SetMovable(true)
 	f:SetUserPlaced(true)
-	f:RegisterForClicks("LeftButton", "RightButton")
+	f:RegisterForClicks("LeftButtonDown", "LeftButtonUp", "RightButtonDown", "RightButtonUp")
 	if v then 
 		f:SetScript("OnMouseDown", function() 
 			f:ClearAllPoints() 
@@ -668,7 +671,7 @@ function MyContainer:OnCreate(name, settings)
 	-- Stripes
 
 	-- Caption, close button
-	local caption = background:CreateFontString(background, "OVERLAY", nil)
+	local caption = background:CreateFontString(nil, "OVERLAY", nil)
 	caption:SetFont(unpack(ns.options.fonts.standard))
 	if(caption) then
 		local t = L.bagCaptions[self.name] or (tBankBags and strsub(self.name, 5))
@@ -1015,7 +1018,8 @@ MyButton:Scaffold("Default")
 function MyButton:OnAdd()
 	self:SetScript('OnMouseUp', function(self, mouseButton)
 		if (mouseButton == 'RightButton') then
-			local tID = GetContainerItemID(self.bagID, self.slotID)
+			local slotID, bagID = self:GetSlotAndBagID()
+			local tID = GetContainerItemID(bagID, slotID)
 			
 			if not tID then return end
 			
@@ -1030,7 +1034,7 @@ function MyButton:OnAdd()
 				cbNivCatDropDown:Toggle(self, nil, nil, 0, 0)
 			elseif ctrl then
 				if isRetail and cbNivaya:AtBank() then
-					UseContainerItem(self.bagID, self.slotID, nil, true);
+					UseContainerItem(bagID, slotID, nil, true);
 				end
 			end
 		end

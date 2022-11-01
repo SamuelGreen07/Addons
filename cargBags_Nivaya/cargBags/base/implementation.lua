@@ -536,7 +536,8 @@ function Implementation:BAG_UPDATE_COOLDOWN(event, bagID)
 	else
 		for id, container in pairs(self.contByID) do
 			for i, button in pairs(container.buttons) do
-				local item = self:GetCustomItemInfo(button.bagID, button.slotID)
+				local slotID, bagID = button:GetSlotAndBagID()
+				local item = self:GetCustomItemInfo(bagID, slotID)
 				button:UpdateCooldown(item)
 			end
 		end
@@ -593,7 +594,8 @@ end
 function Implementation:UNIT_QUEST_LOG_CHANGED(event)
 	for id, container in pairs(self.contByID) do
 		for i, button in pairs(container.buttons) do
-			local item = self:GetCustomItemInfo(button.bagID, button.slotID)
+			local slotID, bagID = button:GetSlotAndBagID()
+			local item = self:GetCustomItemInfo(bagID, slotID)
 			button:UpdateQuest(item)
 		end
 	end

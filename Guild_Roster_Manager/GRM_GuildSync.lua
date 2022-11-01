@@ -132,6 +132,7 @@ GRMsyncGlobals.ThrottleDelay = 1.25;           -- 1.25 seconds between bursts.
 -- Throttle compatibility with ChatThrottleLib
 GRMsyncGlobals.CTLEnabled = false;
 GRMsync.ChatThrottleDelay = 0;
+GRMsyncGlobals.altSyncCompleted = false;
 
 -- Version check
 GRMsyncGlobals.CompatibleAddonUsers = {};
@@ -155,6 +156,7 @@ GRMsyncGlobals.formerGuildData = {};
 GRMsyncGlobals.guildAltData = {};
 
 GRMsyncGlobals.firstSyncOccurred = false;
+GRMsyncGlobals.offline = false;
 
 -- For sync control measures on player details, so leader can be determined on who has been online the longest. In other words, for the leadership selecting algorithm
 -- when determining the tiers for syncing, it is ideal to select the leader who has been online the longest, as they most-likely have encountered the most current amount of information.
@@ -2621,6 +2623,7 @@ GRMsync.SendAddAltPackets = function()
         local i = GRMsyncGlobals.SyncCountAltAdd;
         local hasAtLeastOne = false;
         local alts = {};
+        local endCheck = false;
 
         -- Set the tables to new memory index to prevent stutter...
         if GRMsyncGlobals.AltSendIsFinished then
@@ -2639,6 +2642,7 @@ GRMsync.SendAddAltPackets = function()
             while i <= #exactIndexes[3] do
                 messageReady = false;
                 hasAtLeastOne = true
+                endCheck = false;
 
                 if GRMsyncGlobals.SyncOK then
 
@@ -2651,7 +2655,7 @@ GRMsync.SendAddAltPackets = function()
                         if #tempMessage + GRMsyncGlobals.sizeModifier < 255 then
 
                             for j = GRMsyncGlobals.SyncCountAltAdd2 , #alts do
-
+                                endCheck = false;
                                 -- Temp store current build of message
                                 tempMessage3 = tempMessage;
 
@@ -2661,6 +2665,8 @@ GRMsync.SendAddAltPackets = function()
                                 if #tempMessage4 + GRMsyncGlobals.sizeModifier >= 255 then
                                     -- Loop back around
                                     syncMessage = tempMessage3;
+                                    endCheck = true;
+
                                     GRMsyncGlobals.SyncCount = GRMsyncGlobals.SyncCount + #syncMessage + GRMsyncGlobals.sizeModifier;
 
                                     GRMsync.SendMessage ( "GRM_SYNC" , syncMessage , GRMsyncGlobals.DesignatedLeader );
@@ -2684,8 +2690,12 @@ GRMsync.SendAddAltPackets = function()
 
                                 if j == #alts then
 
-                                    tempMessage = tempMessage4;     -- Adding the extra step for my brain only
-                                    syncMessage = tempMessage;
+                                    if endCheck then
+                                        syncMessage = tempMessage;
+                                    else
+                                        syncMessage = tempMessage4;
+                                    end                                  
+                                    
                                     messageReady = true;
 
                                 end
@@ -3275,18 +3285,20 @@ GRMsyncGlobals.TimeSinceLastSyncAction = time();
 ----- AND ANALYSIS ------------ 
 -------------------------------
 
--- Method:          GRMsync.ErrorCheck()
+-- Method:          GRMsync.ErrorCheck( boolean )
 -- What it Does:    On the giver ErrorCD interval, determines if sync has failed by time since last sync action has occcurred. 
 -- Purpose:         To exit out the sync attempt and retry in an efficiennt non, time-wasting way.
-GRMsync.ErrorCheck = function()
+GRMsync.ErrorCheck = function ( forceStop )
     if not GRM.IsCalendarEventEditOpen() then
         GRM.GuildRoster();
     end
     if GRMsyncGlobals.DesignatedLeader == GRM_G.addonUser then
-        if GRMsyncGlobals.currentlySyncing and ( time() - GRMsyncGlobals.TimeSinceLastSyncAction ) >= GRMsyncGlobals.ErrorCD then
+        if forceStop or ( GRMsyncGlobals.currentlySyncing and ( time() - GRMsyncGlobals.TimeSinceLastSyncAction ) >= GRMsyncGlobals.ErrorCD ) then
 
             -- Check if player is offline...
             local playerIsOnline = GRM.IsGuildieOnline ( GRMsyncGlobals.CurrentSyncPlayer );
+            GRMsyncGlobals.offline = false;
+            GRMsyncGlobals.TimeSinceLastSyncAction = time();
             local msg = GRM.L ( "GRM:" ) .. " " .. GRM.L ( "Sync Failed with {name}..." , GRM.GetClassifiedName ( GRMsyncGlobals.CurrentSyncPlayer , true ) );
             -- We already tried to sync, now aboard to 2nd.
             if playerIsOnline then
@@ -3346,9 +3358,11 @@ GRMsync.ErrorCheck = function()
         elseif GRMsyncGlobals.currentlySyncing and #GRMsyncGlobals.SyncQue > 0 then
             C_Timer.After ( GRMsyncGlobals.ErrorCD , GRMsync.ErrorCheck );
         end
-    elseif not GRMsyncGlobals.dateSentComplete then
-        if GRMsyncGlobals.currentlySyncing and ( time() - GRMsyncGlobals.TimeSinceLastSyncAction ) >= GRMsyncGlobals.ErrorCD then
+    elseif forceStop or not GRMsyncGlobals.dateSentComplete then
+        if forceStop or ( GRMsyncGlobals.currentlySyncing and ( time() - GRMsyncGlobals.TimeSinceLastSyncAction ) >= GRMsyncGlobals.ErrorCD ) then
             local playerIsOnline = GRM.IsGuildieOnline ( GRMsyncGlobals.DesignatedLeader );
+            GRMsyncGlobals.offline = false;
+            GRMsyncGlobals.TimeSinceLastSyncAction = time();
             local msg = GRM.L ( "GRM:" ) .. " " .. GRM.L ( "Sync Failed with {name}..." , GRM.GetClassifiedName ( GRMsyncGlobals.DesignatedLeader , true ) );
             if GRMsyncGlobals.numSyncAttempts == 0 then
                 if not playerIsOnline then
@@ -3602,11 +3616,18 @@ GRMsync.SubmitFinalSyncData = function ()
                     C_Timer.After ( GRMsyncGlobals.ThrottleDelay , GRMsync.SubmitFinalSyncData );
                     return;
                 end
+            else
+                break;
             end
         end
         GRMsyncGlobals.finalSyncDataCount = 1;
         GRMsyncGlobals.finalSyncProgress[1] = true;
     end
+
+    if not GRMsyncGlobals.SyncOK then
+        return;
+    end
+
     -- Promo date sync!
     if not GRMsyncGlobals.finalSyncProgress[2] and #GRMsyncGlobals.PDChanges > 0 then
         for i = GRMsyncGlobals.finalSyncDataCount , #GRMsyncGlobals.PDChanges do
@@ -3629,12 +3650,20 @@ GRMsync.SubmitFinalSyncData = function ()
                     C_Timer.After ( GRMsyncGlobals.ThrottleDelay , GRMsync.SubmitFinalSyncData );
                     return;
                 end
+            else
+                break;
             end
         end
         GRMsyncGlobals.finalSyncDataCount = 1;
         GRMsyncGlobals.finalSyncProgress[2] = true;
     end
-    
+
+    if not GRMsyncGlobals.SyncOK then
+        return;
+    end
+
+    -- GRM.TableLength ( GRMsyncGlobals.FinalCorrectAltList )
+    -- GRM.TableLength ( GRMsyncGlobals.FinalAltListReeceived )
     -- ALT changes sync for adding alts!
     if not GRMsyncGlobals.finalSyncProgress[3] and GRM.TableLength ( GRMsyncGlobals.FinalCorrectAltList ) > 0 then
 
@@ -3666,19 +3695,25 @@ GRMsync.SubmitFinalSyncData = function ()
 
                         for j = GRMsyncGlobals.SyncCountAdd2 , #toon do
 
-                            msg = tempMsg1 .. finalList[i] .. "?" .. toon[j] .. "?" .. tostring ( altGroupModified );
+                            if GRMsyncGlobals.SyncOK then
 
-                            GRMsync.SendMessage ( "GRM_SYNC" , msg , GRMsyncGlobals.CurrentSyncPlayer );
+                                msg = tempMsg1 .. finalList[i] .. "?" .. toon[j] .. "?" .. tostring ( altGroupModified );
 
-                            GRMsyncGlobals.SyncCount = GRMsyncGlobals.SyncCount + #msg + GRMsyncGlobals.sizeModifier;
-                            -- Do my own changes too!
-                            
-                            if GRMsyncGlobals.SyncCount + 254 > GRMsyncGlobals.ThrottleCap then
-                                GRMsyncGlobals.SyncCount = 0;
-                                GRMsyncGlobals.SyncCountAdd2 = j + 1;
-                                GRMsyncGlobals.SyncCountAdd1 = i;
-                                C_Timer.After ( GRMsyncGlobals.ThrottleDelay , GRMsync.SubmitFinalSyncData );
-                                return;
+                                GRMsync.SendMessage ( "GRM_SYNC" , msg , GRMsyncGlobals.CurrentSyncPlayer );
+
+                                GRMsyncGlobals.SyncCount = GRMsyncGlobals.SyncCount + #msg + GRMsyncGlobals.sizeModifier;
+                                -- Do my own changes too!
+                                
+                                if GRMsyncGlobals.SyncCount + 254 > GRMsyncGlobals.ThrottleCap then
+                                    GRMsyncGlobals.SyncCount = 0;
+                                    GRMsyncGlobals.SyncCountAdd2 = j + 1;
+                                    GRMsyncGlobals.SyncCountAdd1 = i;
+                                    C_Timer.After ( GRMsyncGlobals.ThrottleDelay , GRMsync.SubmitFinalSyncData );
+                                    return;
+                                end
+
+                            else
+                                break;
                             end
 
                         end
@@ -3698,7 +3733,8 @@ GRMsync.SubmitFinalSyncData = function ()
                         end
 
                     end
-
+                else
+                    break;
                 end
             end
 
@@ -3726,6 +3762,10 @@ GRMsync.SubmitFinalSyncData = function ()
         GRMsyncGlobals.SyncCountAdd1 = 1;
         GRMsyncGlobals.SyncCountAdd2 = 1;
         GRMsyncGlobals.finalSyncProgress[3] = true;
+    end
+
+    if not GRMsyncGlobals.SyncOK then
+        return;
     end
 
     -- CUSTOM NOTE CHECK!
@@ -3759,6 +3799,8 @@ GRMsync.SubmitFinalSyncData = function ()
                     C_Timer.After ( GRMsyncGlobals.ThrottleDelay , GRMsync.SubmitFinalSyncData );
                     return;
                 end
+            else
+                break;
             end
         end
         GRMsyncGlobals.finalSyncDataCount = 1;
@@ -3766,6 +3808,10 @@ GRMsync.SubmitFinalSyncData = function ()
             GRMsyncGlobals.ThrottleCap = GRMsyncGlobals.normalMessage;
         end
         GRMsyncGlobals.finalSyncProgress[4] = true;
+    end
+
+    if not GRMsyncGlobals.SyncOK then
+        return;
     end
 
     -- BAN changes sync!
@@ -3793,6 +3839,8 @@ GRMsync.SubmitFinalSyncData = function ()
                     C_Timer.After ( GRMsyncGlobals.ThrottleDelay , GRMsync.SubmitFinalSyncData );
                     return;
                 end
+            else
+                break;
             end
         end
         GRMsyncGlobals.finalSyncDataBanCount = 1;
@@ -3845,6 +3893,8 @@ GRMsync.SubmitFinalMainData = function()
                     C_Timer.After ( GRMsyncGlobals.ThrottleDelay , GRMsync.SubmitFinalMainData );
                     return;
                 end
+            else
+                break;
             end
         end
         GRMsyncGlobals.finalSyncDataCount = 1;
@@ -3886,6 +3936,8 @@ GRMsync.SubmitFinalBdayData = function()
                     C_Timer.After ( GRMsyncGlobals.ThrottleDelay , GRMsync.SubmitFinalBdayData );
                     return;
                 end
+            else
+                break;
 
             end
         end
@@ -5046,91 +5098,145 @@ GRMsync.CompareAltLists = function()
     local onList = false;
     local epochTimestamp = 0;
     local ind = 0;
+    GRMsyncGlobals.altSyncCompleted = false;
+
+    if exactIndexes[3] == nil then
+        GRMsync.BuildFullCheckArray();
+        exactIndexes = GRMsyncGlobals.DatabaseExactIndexes;
+    end
 
     -- Let's first get the leader's alt data to compare.
+    if exactIndexes[3] ~= nil then
 
-    for j = 1 , #exactIndexes[3] do
+        for j = 1 , #exactIndexes[3] do
 
-        -- Add a position for each mismatched name
-        GRMsyncGlobals.FinalCorrectAltList[guildData[exactIndexes[3][j]].name] = {};
+            -- Add a position for each mismatched name
+            GRMsyncGlobals.FinalCorrectAltList[guildData[exactIndexes[3][j]].name] = {};
 
-        -- initializing empty tables for each of the leader's players
-        leaderListOfAlts[guildData[exactIndexes[3][j]].name] = {};
+            -- initializing empty tables for each of the leader's players
+            leaderListOfAlts[guildData[exactIndexes[3][j]].name] = {};
 
-        alts = GRM.GetListOfAlts ( guildData[exactIndexes[3][j]] , false , altData );
+            alts = GRM.GetListOfAlts ( guildData[exactIndexes[3][j]] , false , altData );
 
-        -- Build leader alt Tables for easier coding
-        if #alts > 0 then
-            for i = 1 , #alts do
+            -- Build leader alt Tables for easier coding
+            if #alts > 0 then
+                for i = 1 , #alts do
 
-                if i == 1 then
-                    leaderListOfAlts[guildData[exactIndexes[3][j]].name].altGroupModified = alts[i][3];
+                    if i == 1 then
+                        leaderListOfAlts[guildData[exactIndexes[3][j]].name].altGroupModified = alts[i][3];
+                    end
+
+                    table.insert ( leaderListOfAlts[guildData[exactIndexes[3][j]].name] , alts[i][1] ); -- AN extra step, but easier to follow in the code.
                 end
+                sort ( leaderListOfAlts[guildData[exactIndexes[3][j]].name] );
 
-                table.insert ( leaderListOfAlts[guildData[exactIndexes[3][j]].name] , alts[i][1] ); -- AN extra step, but easier to follow in the code.
+            else
+                leaderListOfAlts[guildData[exactIndexes[3][j]].name].altGroupModified = guildData[exactIndexes[3][j]].altGroupModified;
             end
-            sort ( leaderListOfAlts[guildData[exactIndexes[3][j]].name] );
 
-        else
-            leaderListOfAlts[guildData[exactIndexes[3][j]].name].altGroupModified = guildData[exactIndexes[3][j]].altGroupModified;
         end
 
-    end
+        local InsertName = function ( listAlreadyAdded , name )
 
-    local InsertName = function ( listAlreadyAdded , name )
+            local isFound = false;
 
-        local isFound = false;
-
-        for i = 1 , #listAlreadyAdded do
-            if listAlreadyAdded[i] == name then
-                isFound = true;
-                break;
+            for i = 1 , #listAlreadyAdded do
+                if listAlreadyAdded[i] == name then
+                    isFound = true;
+                    break;
+                end
             end
+
+            if not isFound then
+                table.insert ( listAlreadyAdded , name );
+            end
+
+            return listAlreadyAdded;
         end
+        -- Now we can compare!!!
 
-        if not isFound then
-            table.insert ( listAlreadyAdded , name );
-        end
+        ----------------------------------------------
+        ----- CHECKING AGAINST LEADER'S DATA  --------
+        ----------------------------------------------0
 
-        return listAlreadyAdded;
-    end
-    -- Now we can compare!!!
+        -- Scan through leaders alts - This should be sufficient as the leader's indexes of differences has already been compared.
+        for name , leaderAlts in pairs ( leaderListOfAlts ) do
 
-    ----------------------------------------------
-    ----- CHECKING AGAINST LEADER'S DATA  --------
-    ----------------------------------------------0
+            -- Scan through received alts
+            if GRMsyncGlobals.AltReceivedTemp[name] ~= nil then  -- If it did == nil, it would indicate a failure in the sync process
 
-    -- Scan through leaders alts - This should be sufficient as the leader's indexes of differences has already been compared.
-    for name , leaderAlts in pairs ( leaderListOfAlts ) do
+                -- Compare received list to master list - master list is held by "leader"
+                if #GRMsyncGlobals.AltReceivedTemp[name] > 0 then
+                    -- Let's determine who has the more current information.
+                    
+                    if  #leaderAlts > 0 then
+                        -- Master list also has alts, so let's see which was added more recently
 
-        -- Scan through received alts
-        if GRMsyncGlobals.AltReceivedTemp[name] ~= nil then  -- If it did == nil, it would indicate a failure in the sync process
+                        if GRMsyncGlobals.AltReceivedTemp[name].altGroupModified > leaderListOfAlts[name].altGroupModified then
+                            -- Received alts grouping is MORE current than master list
 
-            -- Compare received list to master list - master list is held by "leader"
-            if #GRMsyncGlobals.AltReceivedTemp[name] > 0 then
-                -- Let's determine who has the more current information.
-                
-                if  #leaderAlts > 0 then
-                    -- Master list also has alts, so let's see which was added more recently
+                            -- Add all received alts
+                            for i = 1 , #GRMsyncGlobals.AltReceivedTemp[name] do
 
-                    if GRMsyncGlobals.AltReceivedTemp[name].altGroupModified > leaderListOfAlts[name].altGroupModified then
-                        -- Received alts grouping is MORE current than master list
+                                if i == 1 then
+                                    GRMsyncGlobals.FinalCorrectAltList[name].altGroupModified = GRMsyncGlobals.AltReceivedTemp[name].altGroupModified;
+                                    GRMsyncGlobals.FinalCorrectAltList[name].syncControl = { GRMsyncGlobals.CurrentSyncPlayer , GRMsyncGlobals.CurrentSyncPlayerRankRequirement };
+                                end
 
-                        -- Add all received alts
-                        for i = 1 , #GRMsyncGlobals.AltReceivedTemp[name] do
+                                GRMsyncGlobals.FinalCorrectAltList[name] = InsertName ( GRMsyncGlobals.FinalCorrectAltList[name] , GRMsyncGlobals.AltReceivedTemp[name][i] );
 
-                            if i == 1 then
-                                GRMsyncGlobals.FinalCorrectAltList[name].altGroupModified = GRMsyncGlobals.AltReceivedTemp[name].altGroupModified;
-                                GRMsyncGlobals.FinalCorrectAltList[name].syncControl = { GRMsyncGlobals.CurrentSyncPlayer , GRMsyncGlobals.CurrentSyncPlayerRankRequirement };
                             end
 
-                            GRMsyncGlobals.FinalCorrectAltList[name] = InsertName ( GRMsyncGlobals.FinalCorrectAltList[name] , GRMsyncGlobals.AltReceivedTemp[name][i] );
+                        else
+                            -- Master list alt grouping is MORE current that the received list
+                            -- Add all master alts
+                            for i = 1 , #leaderAlts do
+
+                                if i == 1 then
+                                    GRMsyncGlobals.FinalCorrectAltList[name].altGroupModified = leaderListOfAlts[name].altGroupModified;
+                                    GRMsyncGlobals.FinalCorrectAltList[name].syncControl = { GRMsyncGlobals.DesignatedLeader , syncRankFilter };
+                                end
+
+                                GRMsyncGlobals.FinalCorrectAltList[name] = InsertName ( GRMsyncGlobals.FinalCorrectAltList[name] , leaderAlts[i] );
+
+                            end
 
                         end
 
                     else
-                        -- Master list alt grouping is MORE current that the received list
-                        -- Add all master alts
+                        -- Master list has no alts, so we need to determine if the received is more current
+
+                        if GRMsyncGlobals.AltReceivedTemp[name].altGroupModified > leaderListOfAlts[name].altGroupModified then
+
+                            -- Received is more current
+                            -- Add all received alts
+                            for i = 1 , #GRMsyncGlobals.AltReceivedTemp[name] do
+
+                                if i == 1 then
+                                    GRMsyncGlobals.FinalCorrectAltList[name].altGroupModified = GRMsyncGlobals.AltReceivedTemp[name].altGroupModified;
+                                    GRMsyncGlobals.FinalCorrectAltList[name].syncControl = { GRMsyncGlobals.CurrentSyncPlayer , GRMsyncGlobals.CurrentSyncPlayerRankRequirement };
+                                end
+
+                                GRMsyncGlobals.FinalCorrectAltList[name] = InsertName ( GRMsyncGlobals.FinalCorrectAltList[name] , GRMsyncGlobals.AltReceivedTemp[name][i] );
+
+                            end
+                            
+                        else
+
+                            -- Update the timestamp
+                            GRMsyncGlobals.FinalCorrectAltList[name].altGroupModified = leaderListOfAlts[name].altGroupModified;
+                            GRMsyncGlobals.FinalCorrectAltList[name].syncControl = { GRMsyncGlobals.DesignatedLeader , syncRankFilter };
+
+                        end
+
+                    end
+
+                elseif #leaderAlts > 0 then
+                    -- Received has no alts, but leader does, on the master list
+
+                    if leaderListOfAlts[name].altGroupModified > GRMsyncGlobals.AltReceivedTemp[name].altGroupModified then
+
+                        -- - Add all leader alts from master list
                         for i = 1 , #leaderAlts do
 
                             if i == 1 then
@@ -5141,30 +5247,24 @@ GRMsync.CompareAltLists = function()
                             GRMsyncGlobals.FinalCorrectAltList[name] = InsertName ( GRMsyncGlobals.FinalCorrectAltList[name] , leaderAlts[i] );
 
                         end
-
-                    end
-
-                else
-                    -- Master list has no alts, so we need to determine if the received is more current
-
-                    if GRMsyncGlobals.AltReceivedTemp[name].altGroupModified > leaderListOfAlts[name].altGroupModified then
-
-                        -- Received is more current
-                        -- Add all received alts
-                        for i = 1 , #GRMsyncGlobals.AltReceivedTemp[name] do
-
-                            if i == 1 then
-                                GRMsyncGlobals.FinalCorrectAltList[name].altGroupModified = GRMsyncGlobals.AltReceivedTemp[name].altGroupModified;
-                                GRMsyncGlobals.FinalCorrectAltList[name].syncControl = { GRMsyncGlobals.CurrentSyncPlayer , GRMsyncGlobals.CurrentSyncPlayerRankRequirement };
-                            end
-
-                            GRMsyncGlobals.FinalCorrectAltList[name] = InsertName ( GRMsyncGlobals.FinalCorrectAltList[name] , GRMsyncGlobals.AltReceivedTemp[name][i] );
-
-                        end
                         
                     else
 
                         -- Update the timestamp
+                        GRMsyncGlobals.FinalCorrectAltList[name].altGroupModified = GRMsyncGlobals.AltReceivedTemp[name].altGroupModified;
+                        GRMsyncGlobals.FinalCorrectAltList[name].syncControl = { GRMsyncGlobals.CurrentSyncPlayer , GRMsyncGlobals.CurrentSyncPlayerRankRequirement };
+
+                    end
+
+                else
+                    -- Neither has alts   GRMsyncGlobals.AltReceivedTemp[name]
+                    if GRMsyncGlobals.AltReceivedTemp[name].altGroupModified >= leaderListOfAlts[name].altGroupModified then
+
+                        GRMsyncGlobals.FinalCorrectAltList[name].altGroupModified = GRMsyncGlobals.AltReceivedTemp[name].altGroupModified;
+                        GRMsyncGlobals.FinalCorrectAltList[name].syncControl = { GRMsyncGlobals.CurrentSyncPlayer , GRMsyncGlobals.CurrentSyncPlayerRankRequirement };
+
+                    else
+
                         GRMsyncGlobals.FinalCorrectAltList[name].altGroupModified = leaderListOfAlts[name].altGroupModified;
                         GRMsyncGlobals.FinalCorrectAltList[name].syncControl = { GRMsyncGlobals.DesignatedLeader , syncRankFilter };
 
@@ -5172,65 +5272,29 @@ GRMsync.CompareAltLists = function()
 
                 end
 
-            elseif #leaderAlts > 0 then
-                -- Received has no alts, but leader does, on the master list
-
-                if leaderListOfAlts[name].altGroupModified > GRMsyncGlobals.AltReceivedTemp[name].altGroupModified then
-
-                    -- - Add all leader alts from master list
-                    for i = 1 , #leaderAlts do
-
-                        if i == 1 then
-                            GRMsyncGlobals.FinalCorrectAltList[name].altGroupModified = leaderListOfAlts[name].altGroupModified;
-                            GRMsyncGlobals.FinalCorrectAltList[name].syncControl = { GRMsyncGlobals.DesignatedLeader , syncRankFilter };
-                        end
-
-                        GRMsyncGlobals.FinalCorrectAltList[name] = InsertName ( GRMsyncGlobals.FinalCorrectAltList[name] , leaderAlts[i] );
-
-                    end
-                    
-                else
-
-                    -- Update the timestamp
-                    GRMsyncGlobals.FinalCorrectAltList[name].altGroupModified = GRMsyncGlobals.AltReceivedTemp[name].altGroupModified;
-                    GRMsyncGlobals.FinalCorrectAltList[name].syncControl = { GRMsyncGlobals.CurrentSyncPlayer , GRMsyncGlobals.CurrentSyncPlayerRankRequirement };
-
-                end
-
             else
-                -- Neither has alts   GRMsyncGlobals.AltReceivedTemp[name]
-                if GRMsyncGlobals.AltReceivedTemp[name].altGroupModified >= leaderListOfAlts[name].altGroupModified then
+                GRMsyncGlobals.FinalCorrectAltList[name].syncControl = { GRMsyncGlobals.DesignatedLeader , syncRankFilter };
+            end
 
-                    GRMsyncGlobals.FinalCorrectAltList[name].altGroupModified = GRMsyncGlobals.AltReceivedTemp[name].altGroupModified;
-                    GRMsyncGlobals.FinalCorrectAltList[name].syncControl = { GRMsyncGlobals.CurrentSyncPlayer , GRMsyncGlobals.CurrentSyncPlayerRankRequirement };
+        end
 
-                else
-
-                    GRMsyncGlobals.FinalCorrectAltList[name].altGroupModified = leaderListOfAlts[name].altGroupModified;
-                    GRMsyncGlobals.FinalCorrectAltList[name].syncControl = { GRMsyncGlobals.DesignatedLeader , syncRankFilter };
-
+        -- Leader Count
+        local listOfAlts = {};
+        for name , alts in pairs ( GRMsyncGlobals.FinalCorrectAltList ) do
+            
+            if GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ][name] then
+                -- Ok, collect the alts so we can compare.
+                listOfAlts = GRM.GetListOfAlts ( GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ][name] , false , GRM_Alts[GRM_G.guildName] )
+                if not GRMsync.IsListTheSame ( alts , listOfAlts ) then
+                    GRMsyncGlobals.updateCount = GRMsyncGlobals.updateCount + 1;
+                    GRMsyncGlobals.upatesEach[3] = GRMsyncGlobals.upatesEach[3] + 1;
                 end
-
-            end
-
-        else
-            GRMsyncGlobals.FinalCorrectAltList[name].syncControl = { GRMsyncGlobals.DesignatedLeader , syncRankFilter };
-        end
-
-    end
-
-    -- Leader Count
-    local listOfAlts = {};
-    for name , alts in pairs ( GRMsyncGlobals.FinalCorrectAltList ) do
-        
-        if GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ][name] then
-            -- Ok, collect the alts so we can compare.
-            listOfAlts = GRM.GetListOfAlts ( GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ][name] , false , GRM_Alts[GRM_G.guildName] )
-            if not GRMsync.IsListTheSame ( alts , listOfAlts ) then
-                GRMsyncGlobals.updateCount = GRMsyncGlobals.updateCount + 1;
-                GRMsyncGlobals.upatesEach[3] = GRMsyncGlobals.upatesEach[3] + 1;
             end
         end
+
+        GRMsyncGlobals.altSyncCompleted = true;
+    else
+        GRMsyncGlobals.altSyncCompleted = false;
     end
 
 end
@@ -5248,6 +5312,11 @@ GRMsync.PreCheckChanges = function ( msg , banSyncCheck )
                     GRMsync.CheckChanges ( lists[i] );
                 else
                     GRMsync.CompareAltLists();
+
+                    if not GRMsyncGlobals.altSyncCompleted then
+                        -- HUGE ISSUE HERE - THIS IS PROTECTION
+                        return
+                    end
                 end
 
             elseif i == 5 then

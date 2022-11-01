@@ -1,4 +1,105 @@
-## **VERSION R1.933 RELEASE - 21st Oct, 2022**
+## **VERSION R1.942 RELEASE - 27th Oct, 2022**
+
+* Fixed a Lua error that could occur when changing fonts or on load in Classic  
+
+* Fixed an issue where the mouseover could get locked even after closing the window. This seemed to only happen on the "Old" roster window.
+
+* Fixed the new minimap compatibility issue error that was causing GRM to crash for people hiding the minimap button.
+
+* Fixed an issue so export won't throw an error when looking at Race data for export in Classic, but trying to determine the source.
+
+
+## **VERSION R1.941 RELEASE - 27th Oct, 2022**
+
+***QUALITY OF LIFE***
+
+* Added compatibility to the LibDBIcon data broker, which is commonly used for MINIMAP Icons. The broker is not natively included within GRM, and the default GRM icon will work regardless. However, if GRM finds it installed, which is likely given the prevelance of other addons, it will take advantage of it and create a broker compatible icon. You may notice your minimap position has been reset. 
+
+***BUG FIXES***
+
+* Issue with the roster refreshing back to the top. Blizz must have made a change when doing a call to the roster to scan for changes, it will refresh the frames too. This is handled slightly differently now and should not annoyingly refresh your guild roster back to the top.
+
+
+## **VERSION R1.94 RELEASE - 26th Oct, 2022**
+
+***RELEASE FOR 10.0 COMPATIBILITY FOR DRAGONFLIGHT EXPANSION***
+
+***QUALITY OF LIFE***
+
+* There was some chance of spam when syncing if a player logged off in the middle of a sync, getting a message they are currently offline. GRM will now use that message to instantly know synce will fail and end the sync with the current player, silencing the spam messages.
+
+***BUG FIXES***
+
+* Compatibility issues with GRM and DF pre-patch 10.0 have been resolved.
+
+* The check for dead accounts was not allowing you to ignore them on the scan - you would hit ignore, then next session you would see them again.
+
+* The ban list search was not showing all names, just the ones currently in guild but banned, but not yet removed. Oops! Fixed
+
+* There was an error where a Rejoining member was not processing in the scan properly. This has now been fixed. It broke the scan report so GRM will have reported no changes until this was resolved so if it has been broken for a few days for you, this will now resolve it. I tested it in all scenarios... Rejoining player, banned rejoining player, rejoining player with a namechange, and namechanged player who is rejoining but was previously banned. All scenarios working and reporting properly now.
+
+* Found an issue with the patching process because there was a bug found where a player, in Classic, can have guild database on one faction, deleted the guild, or abandoned it in a previous expansion, then the saved data is carried over to the next Classic expansion, Like Vanilla to TBC, but they now have changed factions and recreated the same guild on same server with same name... Typically you cannot do this, as you can only have 1 guild with a name on the server, well... this is how it can happen. In retail this is not an issue because the guild Check relies on the unique guild GUID or "ClubID" post 8.0 communities patch, but in Classic, you have to check against the guild name string only... Thank you @kreun for this report. This is the first I have ever heard of this happening.
+
+* When using the "Ignore List" - if you propagated all of the ignore rules to all alts of the player, and the macro tool was currently open, the queued window would need to be closed and opened to refresh. It will now refresh appropriately, automatically, when any ignore rules are set.
+
+* "Fade on Tab Change (GRM UI setting option) was throwing a lua error I just realized. I guess no one uses this feature, including me, as I only discovered it when testing if everything was working. lol
+
+* Classic had a potential taint issue that could occur if you CTRL-Clicked to bring up player window, like from audit window, prior to actually opening the guild frame yourself that session
+
+
+## **VERSION R1.936 RELEASE - 23rd Oct, 2022**
+
+***QUALITY OF LIFE***
+
+* Added the ability to control-click a player's name in the chat window and open the guild roster directly. This only works, obviously, with current guild members. I also added a tooltip indicating this possibility on the current roster.
+
+* Using the "search" in the Log will be a little bit smoother for people with large number of entries and it will only do the search once you've finished typing, not try to reprocess the whole log each char, instantly.
+
+* The Ban List window now has a "Search" feature to find names - I did notice something I need to also update with the ban feature - This is the last window that is NOT a hybrid scrollframe, so it is a bit inefficient of a window. I completely forgot that I never implemented the code on this scrolling window. I made a note to do it on my to-do list. Regardless, enjoy the search feature! :)
+
+![Search names on the ban list](https://i.imgur.com/Ogyle02.jpg)
+
+* Dates should not be properly 2 index formatting. For example, 5th of January, 2022 was showing 2022-1-5 for date formatting, and now it should properly show 2022-01-05, which just is the proper way to show the dates.
+
+* It might not be obvious, but you can actually shift click player's names in the GRM window to copy them. As such, I added a tooltip to make this information more known:
+
+![Copy someone's name to chat](https://i.imgur.com/lpznWKa.jpg)
+
+
+***BUG FIXES***
+
+* Fixed a Lua error that could trigger when reviewing guild calendar.
+
+* /grm guid was not posting to chat for some people - a delay has been added to ensure the proper clearing of the chat in the UI has enough time to occur and the player GUID pastes there to be copied.
+
+* (Classic Only) - When using the `/grm search playerName` - you will no longer get spammed about a missing key. 
+
+
+
+**VERSION R1.935 RELEASE - 21st Oct, 2022**
+
+***QUALITY OF LIFE***
+
+* You can now type `/grm search playerName` into the guild chat and it will bring up the audit window searching their name. It does not have to be exact spelling - this will also do partial matches, as well as disregard special alt code characters so complicated name spellings can be easily simplified.
+
+***BUG FIXES***
+
+* Fixed a bug that was missed that would cause GRM to fail to load or complete the patch process - this was missed because it ONLY affected people who had toons in their guild with join or rank dates on Feb 28th or Mar 1st -- Had a typo on my LeapYear API and the Lua error filters never caught it in any of the databases I tried due to this semi-edge case situation!
+
+**VERSION R1.934 RELEASE - 21st Oct, 2022**
+
+***BUG FIXES***
+
+* Fixed an issue that would cause an "error" message about alt sync data message - this could ultimately cause alt data to not sync completely accuractely either for a few names at the end of the roster. Minor oversight from when I rewrote the alt sync protocol.
+
+* Fixed a bug where GRM would not finish the "patching" process.
+
+* Added a fix where if you used a custom channel for GRM messaging, in some cases it would get reset. This shouldn't happen anymore as there is some redundance to recheck that a channel exists before just purging it immediately.
+
+* (Classic Only) - Class coloring was erroneously getting disabled in the default channels by mistake in latest update. This has been resolved. Also, you can control this much easier in the /grm > Options > UI settings tab with just a single checkbox.
+
+
+**VERSION R1.933 RELEASE - 21st Oct, 2022**
 
 ***QUALITY OF LIFE***
 
@@ -34,6 +135,8 @@
 * The same applies to the alt group extra details window that would popout before when holding shift over Alts title - now, there is a button that appears and on mouseover the side window pops up, which you can click to lock in place.
 
 ![Alt Groups Button](https://imgur.com/jIpKFwa.jpg)
+
+* (Classic Only) - Achievement announce. Thanks to @DinnerBone on discord, the code pull request has been merged and Classic Wrath will now announce achievements to other GRM users. For some reason this feature is missing from Classic Wrath even though it existed in the original WOTLK expansion - Blizz has acknowledged this bug, but who knows when they will fix it.
 
 * Birthdays will now just say "Happy Birthday, [Guild Member]" instead of the weird "It's almost time to celebrate" message.
 
@@ -143,8 +246,6 @@
 * (Classic Only) - Level filtering option in the GRM > Options > Scan tab should now properly include max level 70 checkbox if in BCC and 80 if in WOTLK (once fully released).
 
 * (Classic Only) - Export, when you selected to "Check all" was erroneously checking the "Guild Rep
-
-* (Classic Only) - Achievement announce. Thanks to @DinnerBone on discord, the code pull request has been merged and Classic Wrath will now announce achievements to other GRM users. For some reason this feature is missing from Classic Wrath even though it existed in the original WOTLK expansion - Blizz has acknowledged this bug, but who knows when they will fix it.
 
 **CODE OPTIMIAZATION**
 

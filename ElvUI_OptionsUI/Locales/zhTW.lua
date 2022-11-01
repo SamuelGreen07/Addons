@@ -1,6 +1,8 @@
 -- Traditional Chinese localization file for zhTW.
 local L = ElvUI[1].Libs.ACL:NewLocale("ElvUI", "zhTW")
 
+L["Abbreviate Name"] = true
+L["Max Allowed Groups"] = true
 L["Display Mana"] = true
 L["Will display mana when main power is:"] = true
 L["%s and then %s"] = "%s 與 %s"
@@ -140,7 +142,6 @@ L["Backdrop color of transparent frames"] = "透明框架的背景顏色"
 L["Backdrop Color"] = "背景顏色"
 L["Backdrop Faded"] = "背景透明"
 L["Backdrop Settings"] = "背景設定"
-L["Bag Bar"] = "背包條"
 L["Backdrop Spacing"] = "背景間距"
 L["Backdrop Transparency"] = "背景透明度"
 L["Backdrop"] = "背景"
@@ -159,7 +160,6 @@ L["Bag Spacing"] = "背包間隔"
 L["BAG_FILTER_CONSUMABLES"] = "消耗品"
 L["BAG_FILTER_EQUIPMENT"] = "裝備"
 L["BAG_FILTER_TRADE_GOODS"] = "商品"
-L["Bag-Bar"] = "背包條"
 L["Bags Only"] = "僅背包"
 L["Bags/Bank"] = "背包/銀行"
 L["Bank 1"] = "銀行 1"
@@ -238,7 +238,6 @@ L["Can Not Attack"] = "不可攻擊"
 L["Cart / Flag / Orb / Assassin Bounty"] = "推車/旗/球/刺客賞金"
 L["Cast Bar"] = "施法條"
 L["Cast Time Format"] = "施法時間格式"
-L["Castbar"] = "施法條"
 L["Casted by Player Only"] = "僅玩家施放"
 L["Casting"] = "施法"
 L["Center"] = "置中"
@@ -945,7 +944,7 @@ L["Lines"] = "行數"
 L["Particles"] = "粒子"
 L["Link to the latest development version."] = "最新開發版連結"
 L["Link to the latest PTR version."] = "最新 PTR 版本連結"
-L["List of words to color in chat if found in a message. If you wish to add multiple words you must seperate the word with a comma. To search for your current name you can use %MYNAME%.\n\nExample:\n%MYNAME%, ElvUI, RBGs, Tank"] = "如果在對話信息中發現如下文字會自動上色該文字. 如果你需要添加多個詞必須用逗號分開. 如要搜尋角色名稱可使用%MYNAME %.\n\n例如:\n%MYNAME%, ElvUI, RBGs, Tank"
+L["List of words to color in chat if found in a message. If you wish to add multiple words you must separate the word with a comma. To search for your current name you can use %MYNAME%.\n\nExample:\n%MYNAME%, ElvUI, RBGs, Tank"] = "如果在對話信息中發現如下文字會自動上色該文字. 如果你需要添加多個詞必須用逗號分開. 如要搜尋角色名稱可使用%MYNAME %.\n\n例如:\n%MYNAME%, ElvUI, RBGs, Tank"
 L["Local Time"] = "本地時間"
 L["Location Text"] = "所在位置文字"
 L["Lock Distance Max"] = "最大鎖定距離"
@@ -1366,13 +1365,13 @@ L["Send ADDON_ACTION_BLOCKED errors to the Lua Error frame. These errors are les
 L["Sends your current profile to your target."] = "發送你的配置文件到當前目標."
 L["Sends your filter settings to your target."] = "發送你的過濾器配置到當前目標."
 L["Separate Panel Sizes"] = "分離框架大小"
-L["Seperate"] = "光環分離"
+L["Separate"] = "光環分離"
 L["Set auras that are not from you to desaturated."] = "將非您施放的光環去色顯示."
 L["Set Settings to Default"] = "恢復默認設置"
 L["Set the alpha level of portrait when frame is overlayed."] = "當框體被遮擋時頭像的不透明度."
 L["Set the filter type. Blacklist will hide any auras in the list and show all others. Whitelist will show any auras in the filter and hide all others."] = "設置過濾器類型. 黑名單將隱藏列表內的任何光環而顯示其他. 白名單將顯示過濾器內的任何光環而隱藏其他所有光環."
 L["Set the font outline."] = "字體描邊設定."
-L["Set the font size for everything in UI. Note: This doesn't effect somethings that have their own seperate options (UnitFrame Font, Datatext Font, ect..)"] = "設定介面上所有字體的尺寸, 但不包含本身有獨立設定的字體(如單位框架字體、資訊文字字體等...)"
+L["Set the font size for everything in UI. Note: This doesn't effect somethings that have their own separate options (UnitFrame Font, Datatext Font, ect..)"] = "設定介面上所有字體的尺寸, 但不包含本身有獨立設定的字體(如單位框架字體、資訊文字字體等...)"
 L["Set the font size for unitframes."] = "設定單位框架字體尺寸."
 L["Set the order that the group will sort."] = "設定組排序的順序."
 L["Set the orientation of the UnitFrame."] = "設置框架的方向"
@@ -1783,6 +1782,8 @@ L["blockDispellable"] = "[屏蔽] 可驅散的"
 L["blockNoDuration"] = "[屏蔽] 永久的"
 L["blockNonPersonal"] = "[屏蔽] 他人的"
 L["blockNotDispellable"] = "[屏蔽] 不可驅散的"
+L["blockMount"] = "[屏蔽] Mount"
+L["Mount"] = true
 L["CastByNPC"] = "NPC施放的"
 L["CastByPlayers"] = "玩家施放的"
 L["CastByUnit"] = "單位施放的"
@@ -1808,13 +1809,7 @@ L["SKINS_DESC"] = "調整外觀設定."
 L["TOGGLESKIN_DESC"] = "啟用/停用此外觀."
 L["TOOLTIP_DESC"] = "浮動提示資訊設定選項."
 L["UNITFRAME_DESC"] = "修改單位框架設定."
-L["VISIBILITY_DESC"] = [=[為了顯示設定過的過濾器下面的巨集必須啟用.
-
-|cffff8000預設:|r
-    隊伍: [@raid6,exists][nogroup] hide;show
-    團隊: [@raid6,noexists][@raid26,exists] hide;show
-    40人團隊: [@raid26,noexists] hide;show]
-    團隊寵物: [group:raid] show; hide]=]
+L["VISIBILITY_DESC"] = "為了顯示設定過的過濾器下面的巨集必須啟用."
 L["SEARCH_SYNTAX_DESC"] = [=[由於新增了 LibItemSearch, 你現在可以使用更進階的物品搜尋. 下面是一份搜尋語法的文件. 想要看更完整的解釋請到: https://github.com/Jaliborc/LibItemSearch-1.2/wiki/Search-Syntax.
 
 條件搜尋:

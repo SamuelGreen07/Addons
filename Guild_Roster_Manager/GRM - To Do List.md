@@ -2,11 +2,6 @@
 
 *These are either my own notes, or mostly suggestions and reports from all of you. This does not yet include all reported or suggestions on Discord. There is no guarantee I am going to do all of these eventually, just notes of all things suggested that I am either moderately interested in, or extremely interested in implemented. Some items I have already largely built but are not yet ready for release. Most I have not even begun to brainstorm implementation on. If you would like to add to any of these suggestions or expand on things further, please look at Suggestions in Discord*
 
-*PRIOR TO DRAGONFLIGHT LAUNCH*
-
-* Make sure in new expansion this is updated - GRM.BuildGuildRosterHotkeyAndMacro - the "KeyNum" binding must match - CRITICAL for me to not forget this, so I placed it at the top.
-
-
 # **BUG FIXES**
 
 * -- Promote live recording to chat on macro tool often not recording WHO "https://cdn.discordapp.com/attachments/418471113023029248/791368969561833512/unknown.png" - Still need to debug this as it was reported and I have not yet fixed it...
@@ -14,8 +9,6 @@
 * StaticPopup is closing on Escape, which is bad if you die and hit escape. It should only on the GRM one. This seems to be affecting Classic.
 
 * Birthday column on Audit window is not sorting when clicked. Note, when selecting "Include bdays as incomplete," the sorting works fine, interestingly enough.
-
-* Sync join date on all alts is not overwriting or replacing the old date
 
 * Macro rule showing doubling results - seen it once but was unable to rereate
 
@@ -60,11 +53,11 @@
 
 # **CODE IMPROVEMENTS**
 
+* BanList is outdated scrollframe format - just realized it is NOT a hybridscrollframe and needs to be updated. Completely forgot about this.
+
 * Adjust sync leadership structure and restrict sync leadership to the highest rank - if someone inquires who Is Leader and you determine they are a higher rank than you, then do not respond and let them reassess leadership.
 
 * Replace GRM.SlimName everywhere with GRM.FormatName -- this is to give player the option choose the full name or the slimname, and only force the full name as needed on the backend database.
-
-* isAltAlreadyAdded function needs to be removed as it is redundant
 
 * Leverage and/or support the LibAlts library so that the information could be shared with other addons - LibSharedMedia compatibility
 

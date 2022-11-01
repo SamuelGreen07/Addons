@@ -32,7 +32,7 @@ do
 	local RELEASE = "RELEASE"
 
 	local releaseType = RELEASE
-	local myGitHash = "d66232e" -- The ZIP packager will replace this with the Git hash.
+	local myGitHash = "c159273" -- The ZIP packager will replace this with the Git hash.
 	local releaseString = ""
 	--[=[@alpha@
 	-- The following code will only be present in alpha ZIPs.
@@ -869,6 +869,7 @@ do
 
 	-- XXX Temporary print
 	if printTempWarn then
+		Popup(L.missingAddOn:format("BigWigs_WrathOfTheLichKing"))
 		delayedMessages[#delayedMessages+1] = L.missingAddOn:format("BigWigs_WrathOfTheLichKing")
 	end
 
@@ -895,7 +896,9 @@ do
 					for i = 1, #delayedMessages do
 						sysprint(delayedMessages[i])
 					end
-					if printTempWarn then RaidNotice_AddMessage(RaidWarningFrame, L.missingAddOn:format("BigWigs_WrathOfTheLichKing"), {r=1,g=1,b=1}, 5) end
+					if printTempWarn then
+						RaidNotice_AddMessage(RaidWarningFrame, L.missingAddOn:format("BigWigs_WrathOfTheLichKing"), {r=1,g=1,b=1}, 10)
+					end
 					delayedMessages = nil
 				end)
 			end)
@@ -992,9 +995,9 @@ do
 		DBMdotReleaseRevision = "20220801000000"
 		public.dbmPrefix = "D4C"
 	else
-		DBMdotRevision = "20220930021857"
-		DBMdotDisplayVersion = "3.4.14"
-		DBMdotReleaseRevision = "20220929000000"
+		DBMdotRevision = "20221018190433"
+		DBMdotDisplayVersion = "3.4.17"
+		DBMdotReleaseRevision = "20221018000000"
 		public.dbmPrefix = "D4WC"
 	end
 

@@ -25,6 +25,8 @@ GRM_Misc = GRM_Misc or {};                                                      
 GRM_DailyAnnounce = GRM_DailyAnnounce or {};
 -- Backups...
 GRM_GuildDataBackup_Save = GRM_GuildDataBackup_Save or {};
+-- Minimap position for databroker
+GRM_MinimapPosition = GRM_MinimapPosition or {};
 
 -- slash commands (You can create custom one localized to your language in the localization folder)
 SLASH_GRM1 = '/roster';
@@ -32,9 +34,9 @@ SLASH_GRM2 = '/grm';
 
 
 -- Addon Details:
-GRM_G.Version = "R1.933";
-GRM_G.PatchDay = 1666329697;             -- In Epoch Time
-GRM_G.PatchDayString = "1666329697";     -- 2 Versions saves on conversion computational costs... just keep one stored in memory. Extremely minor gains, but very useful if syncing thousands of pieces of data in large guilds as Blizzard only allows data in string format to be sent
+GRM_G.Version = "R1.942";
+GRM_G.PatchDay = 1666911833;             -- In Epoch Time
+GRM_G.PatchDayString = "1666911833";     -- 2 Versions saves on conversion computational costs... just keep one stored in memory. Extremely minor gains, but very useful if syncing thousands of pieces of data in large guilds as Blizzard only allows data in string format to be sent
 GRM_G.LvlCap = GetMaxPlayerLevel();
 GRM_G.BuildVersion = select ( 4 , GetBuildInfo() ); -- Technically the build level or the patch version as an integer.
 
@@ -248,6 +250,7 @@ GRM_G.OldLogHeaderIsOn = false;
 GRM_G.IndexOfLastLogEntry = 0;
 GRM_G.fullLogMatch = {};
 GRM_G.CurrentTotalCount = 0;
+GRM_G.logSearch = false;
 
 -- Version Control
 GRM_G.VersionChecked = false;
@@ -356,7 +359,7 @@ local daysBeforeMonthEnum = { ['1']=0 , ['2']=31 , ['3']=59 , ['4']=90 , ['5']=1
 local daysInMonth = { ['1']=31 , ['2']=28 , ['3']=31 , ['4']=30 , ['5']=31 , ['6']=30 , ['7']=31 , ['8']=31 , ['9']=30 , ['10']=31 , ['11']=30 , ['12']=31 };
 local AllClasses = { "Deathknight" , "Demonhunter" , "Druid" , "Hunter" , "Mage" , "Monk" , "Paladin" , "Priest" , "Rogue" , "Shaman" , "Warlock" , "Warrior" };
 local classFileIDEnum = { ["WARRIOR"]=1 , ["PALADIN"]=2 , ["HUNTER"]=3 , ["ROGUE"]=4 , ["PRIEST"]=5 , ["DEATHKNIGHT"]=6 , ["SHAMAN"]=7 , ["MAGE"]=8 , ["WARLOCK"]=9 , ["MONK"]=10 , ["DRUID"]=11 , ["DEMONHUNTER"]=12 };
-local raceIDEnum = { ["Human"]=1 , ["Orc"]=2 , ["Dwarf"]=3 , ["NightElf"]=4 , ["Scourge"]=5 , ["Tauren"]=6 , ["Gnome"]=7 , ["Troll"]=8 , ["Goblin"]=9 , ["BloodElf"]=10 , ["Draenei"]=11 , ["Worgen"]=22 , ["Pandaren"]=24 , ["Nightborne"]=27 , ["HighmountainTauren"]=28 , ["VoidElf"]=29 , ["LightforgedDraenei"]=30 , ["ZandalariTroll"]=31 , ["KulTiran"]=32 , ["DarkIronDwarf"]=34 , ["Vulpera"]=35 , ["MagharOrc"]=36 , ["Mechagnome"]=37 };
+local raceIDEnum = { ["Human"]=1 , ["Orc"]=2 , ["Dwarf"]=3 , ["NightElf"]=4 , ["Scourge"]=5 , ["Tauren"]=6 , ["Gnome"]=7 , ["Troll"]=8 , ["Goblin"]=9 , ["BloodElf"]=10 , ["    Draenei"]=11 , ["Worgen"]=22 , ["Pandaren"]=24 , ["Nightborne"]=27 , ["HighmountainTauren"]=28 , ["VoidElf"]=29 , ["LightforgedDraenei"]=30 , ["ZandalariTroll"]=31 , ["KulTiran"]=32 , ["DarkIronDwarf"]=34 , ["Vulpera"]=35 , ["MagharOrc"]=36 , ["Mechagnome"]=37 };
 
 -- Let's global some of these useful frames into a table.
 local GuildRanks = {};
@@ -370,10 +373,59 @@ local Initialization = CreateFrame ( "Frame" );
 local GeneralEventTracking = CreateFrame ( "Frame" );
 local UI_Events = CreateFrame ( "Frame" );
 local VersionCheck = CreateFrame ( "Frame" );
-local KickAndRankChecking = CreateFrame ( "Frame" );
+local SystemMessageChecking = CreateFrame ( "Frame" );
 local AddonUsersCheck = CreateFrame ( "Frame" );
 local AchievementsChecking = CreateFrame ( "Frame" );
 local StatusChecking = CreateFrame ( "Frame" );
+
+
+--------------------------------------------
+----- COMPATIBILITY WITH CLASSIC BUILDS ----
+-------- NEEDED DUE TO 10.0 DF CHANGES -----
+--------------------------------------------
+
+-- Method           GRM.CreateTexture ( frame , string , string )
+-- What it Does:    Wraps 2 ways to implement the texture, for version compatibility
+-- Purpose:         Version Compatibility
+GRM.CreateTexture = function ( frame , name , layer , useFrame )
+    local heritableFrame = nil;
+
+    if GRM_G.BuildVersion >= 100000 then
+        frame[name] = frame:CreateTexture ( nil , layer , nil , 0 );
+    else
+
+        if useFrame then
+            heritableFrame = frame;
+        end
+        frame[name] = frame:CreateTexture ( name , layer , heritableFrame , nil );
+
+    end
+end
+
+-- Method:          GRM.TabResize ( frameObject, int , int )
+-- What it Does:    Reframes a tab for all classic builds prior 10.0
+-- Purpose:         The UI changes in 10.0 negate the need of this.
+GRM.TabResize = function ( tabFrame , Width , Height )
+    if GRM_G.BuildVersion < 100000 then
+        PanelTemplates_TabResize ( tabFrame , nil , 76 , 25 );
+    else
+        tabFrame:SetHighlightTexture ( "Interface\\Buttons\\ButtonHilight-Square" );
+    end
+end
+
+-- Due to deprecated templates, these need to be used for duel compatibility
+if GRM_G.BuildVersion >= 100000 then
+    GRM_G.CheckButtonTemplate = "InterfaceOptionsCheckButtonTemplate";
+    GRM_G.TabTemplate = "MinimalTabTemplate";
+
+else
+    GRM_G.CheckButtonTemplate = "OptionsSmallCheckButtonTemplate";
+    GRM_G.TabTemplate = "TabButtonTemplate";
+end
+-------------------------------
+--- END COMPATIBILITY CHECK ---
+-------------------------------
+
 
 --------------------------
 --- STATUS FUNCTIONS -----
@@ -959,6 +1011,80 @@ GRM.LoadSettings = function()
 
 end
 
+-- Method:          GRM.GuildDataIntegrityCheck()
+-- What it Does:    Performs a check to see if the same guild name is on Horde and Alliance. If so, it purges the guild data from the database that is the most outdated.
+-- Purpose:         An unexpected error occurred when transferring from one classic expansion to the next, like Vanilla to TBC. The SavedVariables would be transferred by the client, but then a person could go and create a new guild on opposite faction with the same name, and GRM would then detect it as a new guild. As of Oct 24, 2022, I have only ever gotten 1 report of this ever happening, but it is possible others just never report it. This is just some logic to check against this, clean it up, and future proof against this happening in the future. Thanks @Kreun on Discord for the report!
+GRM.GuildDataIntegrityCheck = function()
+
+    local guildName = "";
+    local F2 = "A";
+    local indexTable = {
+        [1] = 8 , [2] = 8 , [3] = 7 , [4] = 6 , [5] = 6 , [7] = 6 , [8] = 6 , [9] = 6 , [10] = 11 , [11] = 5 , [14] = 5 , [15] = 5 , [16] = 5 , [17] = 7 , [19] = 7
+    }
+    local log1Date , log2Date = {} , {};
+
+    for F in pairs ( GRM_GuildMemberHistory_Save ) do                         -- Horde and Alliance
+        for name in pairs ( GRM_GuildMemberHistory_Save[F] ) do                  -- The guilds in each faction
+
+            if F == "H" then
+                F2 = "A";
+            else
+                F2 = "H";
+            end
+
+            for n in pairs ( GRM_GuildMemberHistory_Save[F2] ) do
+
+                if n == name then
+
+                    -- There is a match. Let's look at the log
+                    if #GRM_LogReport_Save[F][name] > 0 and #GRM_LogReport_Save[F2][name] > 0 then
+                        -- Both have logs
+
+                        local found = false;
+                        local found2 = false;
+
+                        for i = #GRM_LogReport_Save[F][name] , 1 , -1 do
+                            if indexTable[GRM_LogReport_Save[F][name][i][1]] then
+                                found = true;
+                                log1Date = GRM_LogReport_Save[F][name][i][indexTable[GRM_LogReport_Save[F][name][i][1]]];
+                                break;
+                            end
+                        end
+
+                        for i = #GRM_LogReport_Save[F2][name] , 1 , -1 do
+                            if indexTable[GRM_LogReport_Save[F2][name][i][1]] then
+                                found2 = true;
+                                log2Date = GRM_LogReport_Save[F2][name][i][indexTable[GRM_LogReport_Save[F2][name][i][1]]];
+                                break;
+                            end
+                        end
+
+                        if found and found2 then
+                            
+                            if GRM.TimeStampToEpoch ( log1Date ) < GRM.TimeStampToEpoch ( log2Date ) then
+                                -- The F1 one is most recent, delete the other
+                                GRM.PurgeGuildFromDatabase ( name , F , true );
+                            else
+                                GRM.PurgeGuildFromDatabase ( name , F2 , true );
+                            end
+
+                        else
+                            print("GRM: Possible database issue - same guild found on both factions. Please report this to GRM Dev" ); -- Somehow it failed in the check. This should NEVER report, but just in case, I am adding this message.
+                        end
+
+                    elseif #GRM_LogReport_Save[F][name] > 0 then
+                        GRM.PurgeGuildFromDatabase ( name , F2 , true );    -- purging the guild with no log
+                    else
+                        GRM.PurgeGuildFromDatabase ( name , F , true );
+                    end
+
+                    break;
+                end
+            end
+        end
+    end
+end
+
 -- Method:          GRM.FinalSettingsConfigurations()
 -- What it Does:    Calculates the final settings configurations
 -- Purpose:         Compartmentalizes this so it can only be on call as needed.
@@ -1038,7 +1164,9 @@ end
 
 GRM.GuildRoster = function()
     if C_GuildInfo.GuildRoster then
-        C_GuildInfo.GuildRoster();
+        if CommunitiesFrame and CommunitiesFrame.MemberList and not CommunitiesFrame.MemberList:IsVisible() then
+            C_GuildInfo.GuildRoster();
+        end
     else
         GuildRoster();
     end
@@ -1107,6 +1235,18 @@ GRM.SetClassChatColoring = function()
         end);
 
     end
+end
+
+-- Method:          GRM.SetChatClassColoringInWrath ( bool )
+-- What it Does:    Enables or Disables chat class coloring
+-- Purpose:         Enable chat coloring controls in wrath
+GRM.SetChatClassColoringInWrath = function ( enable )
+    local list = { "SAY" , "EMOTE" , "YELL" , "GUILD" , "GUILD_OFFICER" , "OFFICER" , "GUILD_ACHIEVEMENT" , "ACHIEVEMENT" , "WHISPER" , "PARTY" , "PARTY_LEADER" , "RAID" , "RAID_LEADER" , "RAID_WARNING" , "INSTANCE_CHAT" , "INSTANCE_CHAT_LEADER" , "CHANNEL1" , "CHANNEL2" , "CHANNEL3" , "CHANNEL4" , "CHANNEL5"};
+
+    for i = 1 , #list do
+        ToggleChatColorNamesByClassGroup ( enable, list[i] );
+    end
+
 end
 
 -- method:          GRM.RefreshNumberOfHoursTilRecommend()
@@ -1454,6 +1594,7 @@ GRM.IsMouseOverAnyChatWindowIncludingCommunities = function()
                 result = true;
             end
         end
+        
 
     end
     
@@ -1463,21 +1604,23 @@ end
 -- Method:          GRM.SetReportWindow ()
 -- What it Does:    Sets the addon reporting to a specified custom channel
 -- Purpose:         Allow flexibility to send GRM reports to a custom channel so you don't miss anything.
-GRM.SetReportWindow = function()
+GRM.SetReportWindow = function( count )
     local isEstablished = false;
     local chatFrame;
+    count = count or 1;
 
     for i = #GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].reportChannel , 1 , -1 do
         isEstablished = false;
 
         for j = 1 , #CHAT_FRAMES do
-            chatFrame = GetClickFrame ( CHAT_FRAMES[j] );
+            chatFrame = _G[ CHAT_FRAMES[j] ];
 
             if chatFrame ~= nil and chatFrame.name == GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].reportChannel[i] then
                 -- Custom frame writte, custom frame found! Now, let's see if there is a tab
 
-                if GetClickFrame ( chatFrame:GetName() .. "Tab" ):IsVisible() then
+                if _G[ CHAT_FRAMES[j] .."Tab" ]:IsVisible() then
                     isEstablished = true;
+                    
                     GRM.AddReportChannel ( nil , chatFrame , true );        -- Just adds it to the GRM_G.Chat
                     break;
                 end
@@ -1486,7 +1629,15 @@ GRM.SetReportWindow = function()
         end
 
         if not isEstablished then
-            table.remove ( GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].reportChannel , i );
+            if count < 5 then
+                C_Timer.After ( 2 , function()
+                    count = count + 1;
+                    GRM.SetReportWindow ( count );      -- Some redundancy before I go and start removing channels.
+                    return;
+                end);
+            else
+                table.remove ( GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].reportChannel , i );
+            end
         end
     end
 
@@ -2251,13 +2402,15 @@ GRM.GetAllConnectedRealms = function()
     return realms;
 end
 
--- Method:          GRM.PurgeGuildFromDatabase( string , string)
+-- Method:          GRM.PurgeGuildFromDatabase( string , string , bool )
 -- What it Does:    Completely purges a guild from the player database... that it is not currently logged into
 -- Purpose:         Cleanup old guild data from a guild the player is no longer a part of.
-GRM.PurgeGuildFromDatabase = function ( guildName , faction )
+GRM.PurgeGuildFromDatabase = function ( guildName , faction , special )
 
     if guildName == GRM_G.guildName or guildName == GRM.SlimName ( GRM_G.guildName ) then
-        GRM.Report ( "\n" .. GRM.L ( "Player Cannot Purge the Guild Data they are Currently In!!!" ) .. "\n" .. GRM.L( "To reset your current guild data type '/grm clearguild'" ) );
+        if not special then
+            GRM.Report ( "\n" .. GRM.L ( "Player Cannot Purge the Guild Data they are Currently In!!!" ) .. "\n" .. GRM.L( "To reset your current guild data type '/grm clearguild'" ) );
+        end
     else
 
         if GRM_GuildMemberHistory_Save[faction][guildName] ~= nil then
@@ -2270,17 +2423,24 @@ GRM.PurgeGuildFromDatabase = function ( guildName , faction )
             GRM_PlayerListOfAlts_Save[faction][guildName] = nil;
             GRM_Alts[guildName] = nil;
 
-            GRM.Report ( GRM.L ( "{name} has been removed from the database." , guildName ) );
+            if not special then
+                GRM.Report ( GRM.L ( "{name} has been removed from the database." , guildName ) );
+            end
 
         else
             -- remove the saved data if any exists as well
             -- Do a purge of the guild regardless, if it's showing up here, it means it's get lingering bad data.
             if GRM_GuildDataBackup_Save[faction][guildName] ~= nil then
                 GRM_GuildDataBackup_Save[faction][guildName] = nil;
-                GRM.Report ( GRM.L ( "Error: Guild Not Found..." ) );
+                if not special then
+                    GRM.Report ( GRM.L ( "Error: Guild Not Found..." ) );
+                end
             else
-                GRM.Report ( GRM.L ( "{name} has been removed from the database." , guildName ) );
+                if not special then
+                    GRM.Report ( GRM.L ( "{name} has been removed from the database." , guildName ) );
+                end
             end
+
         end
     end
 end
@@ -2517,8 +2677,6 @@ GRM.CreateGuildCreationDatePattern = function()
 
     return pattern;
 end
--- /dump string.sub ( GUILD_INFO_TEMPLATE , 1 , string.find ( GUILD_INFO_TEMPLATE , "%%" ) - 1 )
-
 
 -- Method:          GRM.SetSystemMessageFilter ( self , string , string )
 -- What it Does:    Starts tracking the system messages for filtering. This is only triggered on the audit frame initialization or if a player has left the guild
@@ -2529,7 +2687,6 @@ GRM.SetSystemMessageFilter = function ( _ , _ , msg , ... )
 
     if time() - GRMsyncGlobals.timeAtLogin > 1 and not GRM_G.TempBanSystemMessage then
         GRM_G.guildInfoSystemMessage = GRM_G.guildInfoSystemMessage or string.sub ( GUILD_INFO_TEMPLATE , 1 , string.find ( GUILD_INFO_TEMPLATE , "%%" ) - 1 );
-
         -- GUILD INFO FILTER (GuildInfo())
         if GRM_G.MsgFilterDelay and ( string.find ( msg , GRM_G.guildInfoSystemMessage ) ~= nil or string.find ( msg , GRM.Trim ( CHAT_GUILD_SEND ) ) ~= nil ) then       -- These may need to be localized. I have not yet tested if other regions return same info. It IS system info.
             if string.find ( msg , GRM_G.guildInfoSystemMessage ) ~= nil and ( ( time() - GRM_G.SystemMsgThrottle ) > 1 ) then
@@ -2587,6 +2744,21 @@ GRM.SetSystemMessageFilter = function ( _ , _ , msg , ... )
         elseif ( GRM_G.MsgFilterDelay or GRM_G.MsgFilterDelay2 ) and ( msg == GRM.L ( "Player not found." ) or string.find ( msg , GRM.L ( "added to friends" ) ) ~= nil or string.find ( msg , GRM.L ( "is already your friend" ) ) ~= nil ) then
             result = true;
 
+        elseif GRM.SystemMessagePatternMatchCheck ( 1 , msg ) then
+            if GRMsyncGlobals.currentlySyncing then
+
+                -- Logic to exit a sync faster if someone goes offline
+                if GRMsyncGlobals.SyncOK then
+                    GRMsyncGlobals.offline = true;
+                    GRMsyncGlobals.SyncOK = false;
+                    GRMsync.ErrorCheck ( true );
+                    C_Timer.After ( 1 , function()
+                        GRMsyncGlobals.SyncOK = true;
+                    end);
+                end
+            end
+            result = true;
+
         -- Normal System message... Let's add the main tags...
         elseif not GRM_G.MainNameSystemMsgControl and string.find ( msg , GRM.L ( "joined the guild." ) ) == nil and string.find ( msg , GRM.L ( "has Left the guild" ) ) == nil then  -- No need to add a tag if they just joined... as they have no tag, and their profile is not yet generated. Addon will see them as a non-guildie the first instant.
             if ( time() - GRMsyncGlobals.timeAtLogin ) > 5 and ( ( GRM_G.MainTagHexCode ~= "" and GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].showMainName ) or GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].colorizeNames ) then
@@ -2608,6 +2780,47 @@ GRM.SetSystemMessageFilter = function ( _ , _ , msg , ... )
     GRM.SystemMessageHookControl()
 
     return result , msg , ... ;
+end
+
+-- /run GRMsync.SendMessage("GRM_SYNC","TEST", "Neutron-Zul'jin")
+GRM.SystemMessagePatternMatchCheck = function( pattern , msg )
+
+    local result = false;
+    local toMatch = "";
+
+    if pattern == 1 then
+
+        if not GRM_G.NotOnlineSystemMessage then
+            if GRM_G.Region == "esES" or GRM_G.Region == "esMX" or GRM_G.Region == "koKR" or GRM_G.Region == "zhTW" then
+                toMatch = "%%s";
+
+            elseif GRM_G.Region == "zhCN" then
+                if GRM_G.BuildVersion < 40000 then  -- Not known exact expansion it changed
+                    toMatch = "\"%%s\""
+                else
+                    toMatch = "“%%s”";
+                end
+
+            elseif GRM_G.Region == "itIT" or GRM_G.Region == "ruRU" then
+                toMatch = "\"%%s\""
+
+            elseif GRM_G.Region == "koKR" then
+                toMatch = "“%%s";
+
+            else
+                toMatch = "\'%%s\'";
+            end
+
+            GRM_G.NotOnlineSystemMessage = string.gsub ( ERR_CHAT_PLAYER_NOT_FOUND_S , toMatch , "(.+)" );
+        end
+        
+        if string.match ( msg , GRM_G.NotOnlineSystemMessage ) ~= nil then
+            result = true;
+        end
+
+    end
+
+    return result;
 end
 
 -- Method:          GRM.AnnounceIfBirthday ( string )
@@ -3547,13 +3760,19 @@ GRM.IsGuildieOnline = function ( name )
         GRM.GuildRoster();
     end
     local result = false;
-    for i = 1 , GRM.GetNumGuildies() do
-        local fullName , _, _, _, _, _, _, _, online = GetGuildRosterInfo ( i );
-        if name == fullName then
-            result = online;
-            break;
+
+    if GRMsyncGlobals.offline then
+        result = false;
+    else
+        for i = 1 , GRM.GetNumGuildies() do
+            local fullName , _, _, _, _, _, _, _, online = GetGuildRosterInfo ( i );
+            if name == fullName then
+                result = online;
+                break;
+            end
         end
     end
+    
     return result;
 end
 
@@ -3623,11 +3842,11 @@ GRM.IsPlayerStillOnServerByGUID = function ( name , guid , isBanCheck )
 
  end
 
- -- Method:         GRM.ValidateBanGUIDs()
+ -- Method:         GRM.ValidateBanGUIDs( string )
  -- What it Does:   Checks against the given result from a Ban list GUID check and returns a list of the players whose info went missing.
  -- Purpose:        To be able to update the Ban Frames with relevant info on if player is still on the server or not on the fly.
- GRM.ValidateBanGUIDs = function()
-    local currentBanList = GRM.GetSortedBanListNamesWithDetails();
+ GRM.ValidateBanGUIDs = function ( textSearch )
+    local currentBanList = GRM.GetSortedBanListNamesWithDetails ( textSearch );
     local result = {};
     local isFound = false;
 
@@ -4870,6 +5089,10 @@ GRM.GetTimestampFromTable = function ( timeArray )
         if timeArray[3] > 2000 then
             timeArray[3] = timeArray[3] - 2000;
         end
+
+        if timeArray[3] < 10 then
+            timeArray[3] = "0" .. tostring ( timeArray[3] );
+        end
         result = ( timeArray[1] .. " " .. monthEnum2[tostring(timeArray[2])] .. " '" .. timeArray[3] );
     else
         result = ( timeArray[1] .. " " .. monthEnum2[tostring(timeArray[2])] );
@@ -5032,7 +5255,7 @@ GRM.ConvertTimetableToServer = function ( timeTable , offset )
                 else
                     timeTable.month = timeTable.month - 1;
                     timeTable.day = daysInMonth [ tostring ( timeTable.month ) ];
-                    if timeTable.month == 2 and IsLeapYear ( timeTable.year ) then
+                    if timeTable.month == 2 and GRM.IsLeapYear ( timeTable.year ) then
                         timeTable.day = timeTable.day + 1;
                     end
                     
@@ -5583,6 +5806,7 @@ GRM.FormatTimeStamp = function ( timestamp , includeHour , removeYear , forcedFo
         typeStamp = 1;
         timestamp = GRM.GetCleanTimestamp ( timestamp ); -- ensure proper formatting
         -- Default format = 12 Mar '18
+
         day = string.match ( timestamp , "%d+" );
         if #day == 1 then
             day = "0" .. day;
@@ -5600,6 +5824,10 @@ GRM.FormatTimeStamp = function ( timestamp , includeHour , removeYear , forcedFo
         day = timestamp[1];
         monthNum = tostring ( timestamp[2] );
         year = timestamp[3];
+
+        if day < 10 then
+            day = "0" .. tostring ( day );
+        end
         
         if year > 2000 then
             year = year - 2000;
@@ -5608,6 +5836,10 @@ GRM.FormatTimeStamp = function ( timestamp , includeHour , removeYear , forcedFo
             year = "0" .. tostring ( year );
         end
         month = tostring ( monthEnum2[ monthNum ] );
+
+        if #monthNum == 1 then
+            monthNum = "0" .. monthNum;
+        end
     end
     local result = "";  
 
@@ -5918,6 +6150,7 @@ end
 -- Method:          GRM.InitializeRosterButtons()
 -- What it Does:    Initializes, one time, the script handlers for the roster frames
 -- Purpose:         So main player popup window appears properly 
+-- Note:            THIS ONLY WORKS WITH BFA and SL expansions 8.0 and 9.0 -- not Dragonflight
 GRM.InitializeRosterButtons = function()
     local cFrame = CommunitiesFrame;
     local memberFrame = cFrame.MemberList;
@@ -6000,6 +6233,92 @@ GRM.InitializeRosterButtons = function()
 
         buttons[i]:HookScript ( "OnUpdate" , GRM.RosterButton_OnUpdate );
     end
+end
+
+-- Method:          GRM.InitializeDragonFlightRosterButtons()
+-- What it Does:    Initializes, one time, the script handlers for the roster frames
+-- Purpose:         So main player popup window appears properly 
+GRM.InitializeDragonFlightRosterButtons = function()
+    local cFrame = CommunitiesFrame;
+
+    cFrame.MemberList.ScrollBox:ForEachFrame ( function ( scrollButton )
+
+        scrollButton:HookScript ( "OnEnter" , function ()
+            if cFrame:GetSelectedClubId() == GRM_G.gClubID and GetMouseFocus() == self then
+                local name = GRM.GetRosterName ( scrollButton , false  );
+                if name ~= "" and name ~= nil then
+
+                    local memberInfo = self.memberInfo
+                    GRM.MemberListBlizTooltip_Update ( scrollButton , false , memberInfo.classID , memberInfo.name , memberInfo.guildRank , memberInfo.race , memberInfo.level , memberInfo.presence , memberInfo.zone , memberInfo.memberNote , memberInfo.officerNote );
+                    GRM_G.currentName = name;
+                    GRM.SubFrameCheck();
+
+                    if cFrame:GetSelectedClubId() == GRM_G.gClubID then
+                        GRM.PopulateMemberDetails ( name , memberInfo );
+                        if not GRM_UI.GRM_MemberDetailMetaData:IsVisible() then
+                            if not GRM_G.CurrentPinCommunity then
+                                if GRM_UI.MemberDetailFrame:IsVisible() then
+                                    GRM_UI.GRM_MemberDetailMetaData:SetPoint ( "TOPLEFT" , GRM_UI.MemberDetailFrame , "TOPRIGHT" , -4 , 5 );
+                                else
+                                    GRM_UI.GRM_MemberDetailMetaData:SetPoint ( "TOPLEFT" , CommunitiesFrame , "TOPRIGHT" , 22.5 , 5 );
+                                end
+                                GRM_G.CurrentPinCommunity = true;
+                            end
+                            if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].showMouseoverRetail then
+                                if GRM_G.guildName ~= "" then
+                                    GRM_UI.GRM_MemberDetailMetaData:Show();
+                                end
+                            end
+                        end
+                    end
+
+                end
+            end
+        end);
+        
+        scrollButton:HookScript ( "OnClick" , function ( self , button )
+            if button == "LeftButton" then
+                local nameCopy = false;
+                if IsShiftKeyDown() then
+                    nameCopy = true;
+                end
+
+                local name = GRM.GetRosterName ( self , true );
+                if name ~= "" and name ~= nil then
+                    if not nameCopy then
+                        if name ~= GRM_G.currentName and StaticPopup1:IsVisible() and GRM_UI.GRM_PopupWindow:IsVisible() then
+                            StaticPopup1:Hide();
+                        end
+                        GRM_G.currentName = name;
+                        GRM.SubFrameCheck();
+                        if cFrame:GetSelectedClubId() == GRM_G.gClubID then
+                            GRM.PopulateMemberDetails ( name , self.memberInfo );
+                            GRM_G.pause = true;
+                            if not GRM_UI.GRM_MemberDetailMetaData:IsVisible() then
+                                if not GRM_G.CurrentPinCommunity then
+                                    if GRM_UI.MemberDetailFrame:IsVisible() then
+                                        GRM_UI.GRM_MemberDetailMetaData:SetPoint ( "TOPLEFT" , GRM_UI.MemberDetailFrame , "TOPRIGHT" , -4 , 5 );
+                                    else
+                                        GRM_UI.GRM_MemberDetailMetaData:SetPoint ( "TOPLEFT" , CommunitiesFrame , "TOPRIGHT" , 22.5 , 5 );
+                                    end
+                                    GRM_G.CurrentPinCommunity = true;
+                                end
+                                if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].showMouseoverRetail then
+                                    if GRM_G.guildName ~= "" then
+                                        GRM_UI.GRM_MemberDetailMetaData:Show();
+                                    end
+                                end
+                            end
+                        end
+                    else
+                        GRM.GR_Roster_Click ( name );
+                    end
+                end
+            end
+        end);
+
+        scrollButton:HookScript ( "OnUpdate" , GRM.RosterButton_OnUpdate );
+    end);
 end
 
 
@@ -6454,8 +6773,19 @@ GRM.BuildGuildRosterHotkeyAndMacro = function ( count , noPTT )
     count = count or 1;
     noPTT = noPTT or false;
 
-    local keyNum = 197;
-    local hotkeyTemp = select ( 3 , GetBinding(keyNum) );
+    local hotkeyTemp = "";
+    local keyNum = 0;
+
+    for i = 1 , 500 do
+        local name , _ , b = GetBinding(i);
+
+        if name == "TOGGLEGUILDTAB" then
+            hotkeyTemp = b;
+            keyNum = i;
+            break;
+        end
+    end
+
     local listOfKeybinds = { "J" , ";" };
     local keybinds = "";
 
@@ -6488,8 +6818,10 @@ GRM.BuildGuildRosterHotkeyAndMacro = function ( count , noPTT )
                     FriendsFrame:Show();
                 else
                     CommunitiesFrame:Hide();
-                    GuildFrame_Toggle();
-                    GuildFrame_TabClicked ( GuildFrameTab2 );
+                    if GuildFrame_Toggle ~= nil then
+                        GuildFrame_Toggle();
+                        GuildFrame_TabClicked ( GuildFrameTab2 );
+                    end
                 end
             else
                 GRM_G.CurrentPinCommunity = true;
@@ -6558,12 +6890,20 @@ end
 GRM.BuildGuildRosterHotkeyAndMacroCLASSIC = function( count , noPTT )
     count = count or 1;
     noPTT = noPTT or false;
-    
-    local keyNum = 184;
-    if GRM_G.BuildVersion >= 30000 then
-        keyNum = 209;
+
+    local keyBindGuild = "";
+    local keyNum = 0;
+
+    for i = 1 , 500 do
+        local name , _ , b = GetBinding(i);
+
+        if name == "TOGGLEGUILDTAB" then
+            keyBindGuild = b;
+            keyNum = i;
+            break;
+        end
     end
-    local keyBindGuild = select ( 3 , GetBinding(keyNum) );
+    
     local listOfKeybinds = { "J" , ";" };
 
     if not noPTT and C_VoiceChat.GetPushToTalkBinding() == nil then
@@ -6592,26 +6932,27 @@ GRM.BuildGuildRosterHotkeyAndMacroCLASSIC = function( count , noPTT )
                 end
             end
         end
-        
+
         SocialsMicroButton:SetScript ( "OnEnter" , function( self )
             local hotkeySocial = select ( 3 , GetBinding ( keyNum - 3 ) );                  -- This is the hotkey to open guild and community interface.
             local hotkeyRoster = select ( 3 , GetBinding ( keyNum ) ); 
             local tooltipTopLine = GRM.L ( "Social" );
-
+    
             if hotkeySocial ~= nil then
                 tooltipTopLine = tooltipTopLine .. " |CFFFFD100(" .. hotkeySocial .. ")|r"
             end
-
+    
             if IsInGuild() and hotkeyRoster ~= nil then
                 tooltipTopLine = tooltipTopLine .. " " .. GRM.L ( "Roster" ) .. " |CFFFFD100(" .. hotkeyRoster .. ")|r";
             end
-
+    
             GameTooltip:SetOwner ( self , "ANCHOR_NONE" );
             GameTooltip:SetPoint( "BOTTOMLEFT" , SocialsMicroButton , "TOPRIGHT" , 0 , 0 );   
             GameTooltip:AddLine( tooltipTopLine , 1 , 1 , 1 );
             GameTooltip:AddLine ( NEWBIE_TOOLTIP_SOCIAL , 1 , 0.82 , 0 , 1 , true );
             GameTooltip:Show();
         end);
+
     end
 end
 
@@ -6643,8 +6984,8 @@ GRM.RosterFrame = function()
         end
 
         -- Ensure pinned to correct window.
-        if ( ( GRM_G.CurrentPinCommunity and not CommunitiesFrame.MemberList.ListScrollFrame:IsMouseOver ( 4 , -20 , -4 , 30 ) ) or ( GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].showMouseoverOld and not GRM_G.CurrentPinCommunity and not GRM_UI.GuildRosterContainer:IsMouseOver ( 4 , -20 , -4 , 30 ) ) ) and not GRM_G.pause then
-            if ( ( ( GRM_G.CurrentPinCommunity and not CommunitiesFrame.MemberList.ListScrollFrame:IsMouseOver ( 4 , -20 , -4 , 30 ) ) or ( GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].showMouseoverOld and not GRM_G.CurrentPinCommunity and not GRM_UI.GuildRosterContainer:IsMouseOver ( 4 , -20 , -4 , 30 ) ) ) and not DropDownList1MenuBackdrop:IsMouseOver ( 2 , -2 , -2 , 2 ) and not StaticPopup1:IsMouseOver ( 2 , -2 , -2 , 2 ) and not GRM_UI.GRM_MemberDetailMetaData:IsMouseOver ( 1 , -1 , -30 , 1 ) and not GRM_UI.GRM_CoreAltFrame:IsMouseOver( 5 , 5 , 5 , 35 ) and not GRM_UI.GRM_CoreAltFrame.GRM_CoreAltScrollFrameSlider:IsMouseOver ( 1 , 1 , 1 , 3 ) ) or 
+        if ( ( GRM_G.CurrentPinCommunity and not CommunitiesFrame.MemberList.ScrollBox:IsMouseOver ( 4 , -20 , -4 , 30 ) ) or ( GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].showMouseoverOld and not GRM_G.CurrentPinCommunity and not GRM_UI.GuildRosterContainer:IsMouseOver ( 4 , -20 , -4 , 30 ) ) ) and not GRM_G.pause then
+            if ( ( ( GRM_G.CurrentPinCommunity and not CommunitiesFrame.MemberList.ScrollBox:IsMouseOver ( 4 , -20 , -4 , 30 ) ) or ( GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].showMouseoverOld and not GRM_G.CurrentPinCommunity and not GRM_UI.GuildRosterContainer:IsMouseOver ( 4 , -20 , -4 , 30 ) ) ) and not DropDownList1MenuBackdrop:IsMouseOver ( 2 , -2 , -2 , 2 ) and not StaticPopup1:IsMouseOver ( 2 , -2 , -2 , 2 ) and not GRM_UI.GRM_MemberDetailMetaData:IsMouseOver ( 1 , -1 , -30 , 1 ) and not GRM_UI.GRM_CoreAltFrame:IsMouseOver( 5 , 5 , 5 , 35 ) and not GRM_UI.GRM_CoreAltFrame.GRM_CoreAltScrollFrameSlider:IsMouseOver ( 1 , 1 , 1 , 3 ) ) or 
                 ( not GRM_UI.GRM_MemberDetailMetaData:IsVisible() ) then  -- If player is moused over side window, it will not hide it!
                 if GRM_UI.GRM_MemberDetailMetaData:IsVisible() then
                     GRM.ClearAllFrames( true );
@@ -6792,7 +7133,7 @@ GRM.GetLevelRange = function()
     if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].recordLevelUp then
         result = "|cffffd100" .. GRM.L ( "Reporting:" ) .. "|r|cff00ccff";
         local initialNumber = "";
-        local caps = { 10 , 20 , 30 , 40 , 50 , 60 };
+        local caps = { 10 , 20 , 30 , 40 , 50 , 60 , 70 , 80 };
         local addon = "";
 
         local atLeastOne = false;
@@ -7955,7 +8296,7 @@ GRM.BuildEventCalendarManagerScrollFrame = function()
         -- if font string is not created, do so.
         if not GRM_UI.GRM_RosterChangeLogFrame.GRM_EventsFrame.GRM_AddEventScrollChildFrame.allFrameButtons[i] then
             local tempButton = CreateFrame ( "Button" , "PlayerToAdd" .. i , GRM_UI.GRM_RosterChangeLogFrame.GRM_EventsFrame.GRM_AddEventScrollChildFrame ); -- Names each Button 1 increment up
-            GRM_UI.GRM_RosterChangeLogFrame.GRM_EventsFrame.GRM_AddEventScrollChildFrame.allFrameButtons[i] = { tempButton , tempButton:CreateFontString ( "PlayerToAddText" .. i , "OVERLAY" , "GameFontWhiteTiny" ) , tempButton:CreateFontString ( "PlayerToAddDateText .. i" .. i , "OVERLAY" , "GameFontWhiteTiny" ) , tempButton:CreateFontString ( "PlayerToAddTitleText" .. i , "OVERLAY" , "GameFontWhiteTiny" ) , tempButton:CreateFontString ( "PlayerToAddDescriptionText" .. i , "OVERLAY" , "GameFontWhiteTiny" ) };
+            GRM_UI.GRM_RosterChangeLogFrame.GRM_EventsFrame.GRM_AddEventScrollChildFrame.allFrameButtons[i] = { tempButton , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) };
         end
 
         GRM_UI.GRM_RosterChangeLogFrame.GRM_EventsFrame.GRM_AddEventScrollChildFrame.allFrameButtons[i][1].timer = 0;
@@ -8171,7 +8512,7 @@ GRM.BuildAddonUserScrollFrame = function()
         GRM_UI.GRM_RosterChangeLogFrame.GRM_AddonUsersFrame.GRM_AddonUsersScrollChildFrame.GRM_AddonUsersCoreFrameTitleText2:Hide();
         -- if font string is not created, do so.
         if not GRM_UI.GRM_RosterChangeLogFrame.GRM_AddonUsersFrame.GRM_AddonUsersScrollChildFrame.AllFrameFontstrings[i] then
-            GRM_UI.GRM_RosterChangeLogFrame.GRM_AddonUsersFrame.GRM_AddonUsersScrollChildFrame.AllFrameFontstrings[i] = { GRM_UI.GRM_RosterChangeLogFrame.GRM_AddonUsersFrame.GRM_AddonUsersScrollChildFrame:CreateFontString ( "GRM_AddonUserNameText" .. i , "OVERLAY" , "GameFontWhiteTiny" ) , GRM_UI.GRM_RosterChangeLogFrame.GRM_AddonUsersFrame.GRM_AddonUsersScrollChildFrame:CreateFontString ( "GRM_AddonUserSyncText" .. i , "OVERLAY" , "GameFontWhiteTiny" ) , GRM_UI.GRM_RosterChangeLogFrame.GRM_AddonUsersFrame.GRM_AddonUsersScrollChildFrame:CreateFontString ( "GRM_AddonUserVersionText" .. i , "OVERLAY" , "GameFontWhiteTiny" ) };
+            GRM_UI.GRM_RosterChangeLogFrame.GRM_AddonUsersFrame.GRM_AddonUsersScrollChildFrame.AllFrameFontstrings[i] = { GRM_UI.GRM_RosterChangeLogFrame.GRM_AddonUsersFrame.GRM_AddonUsersScrollChildFrame:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) , GRM_UI.GRM_RosterChangeLogFrame.GRM_AddonUsersFrame.GRM_AddonUsersScrollChildFrame:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) , GRM_UI.GRM_RosterChangeLogFrame.GRM_AddonUsersFrame.GRM_AddonUsersScrollChildFrame:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) };
         end
 
         local AddonUserText1 = GRM_UI.GRM_RosterChangeLogFrame.GRM_AddonUsersFrame.GRM_AddonUsersScrollChildFrame.AllFrameFontstrings[i][1];
@@ -8302,7 +8643,7 @@ GRM.BuildAltGroupingScrollFrame = function( currentName )
         for i = 1 , #listOfAlts do  -- The +1 is for the player so they can count themselves too...
             -- if font string is not created, do so.
             if not GRM_UI.GRM_MemberDetailMetaData.GRM_AltGroupingScrollBorderFrame.GRM_AltGroupingScrollChildFrame.AllFrameFontstrings[i] then
-                GRM_UI.GRM_MemberDetailMetaData.GRM_AltGroupingScrollBorderFrame.GRM_AltGroupingScrollChildFrame.AllFrameFontstrings[i] = { GRM_UI.GRM_MemberDetailMetaData.GRM_AltGroupingScrollBorderFrame.GRM_AltGroupingScrollChildFrame:CreateFontString ( "GRM_AltName" .. i , "OVERLAY" , "GameFontWhiteTiny" ) , GRM_UI.GRM_MemberDetailMetaData.GRM_AltGroupingScrollBorderFrame.GRM_AltGroupingScrollChildFrame:CreateFontString ( "GRM_AltLevel" .. i , "OVERLAY" , "GameFontWhiteTiny" ) , GRM_UI.GRM_MemberDetailMetaData.GRM_AltGroupingScrollBorderFrame.GRM_AltGroupingScrollChildFrame:CreateFontString ( "GRM_AltRank" .. i , "OVERLAY" , "GameFontWhiteTiny" ) , GRM_UI.GRM_MemberDetailMetaData.GRM_AltGroupingScrollBorderFrame.GRM_AltGroupingScrollChildFrame:CreateFontString ( "GRM_AltLastOnline" .. i , "OVERLAY" , "GameFontWhiteTiny" ) };
+                GRM_UI.GRM_MemberDetailMetaData.GRM_AltGroupingScrollBorderFrame.GRM_AltGroupingScrollChildFrame.AllFrameFontstrings[i] = { GRM_UI.GRM_MemberDetailMetaData.GRM_AltGroupingScrollBorderFrame.GRM_AltGroupingScrollChildFrame:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) , GRM_UI.GRM_MemberDetailMetaData.GRM_AltGroupingScrollBorderFrame.GRM_AltGroupingScrollChildFrame:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) , GRM_UI.GRM_MemberDetailMetaData.GRM_AltGroupingScrollBorderFrame.GRM_AltGroupingScrollChildFrame:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) , GRM_UI.GRM_MemberDetailMetaData.GRM_AltGroupingScrollBorderFrame.GRM_AltGroupingScrollChildFrame:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) };
             end
     
             local AltName = GRM_UI.GRM_MemberDetailMetaData.GRM_AltGroupingScrollBorderFrame.GRM_AltGroupingScrollChildFrame.AllFrameFontstrings[i][1];
@@ -8438,7 +8779,7 @@ GRM.BuildAutoCompleteAltSelectionScrollFrame = function ( listOfAlts )
         -- if font string is not created, do so.
         if not GRM_UI.GRM_CoreAltFrame.GRM_AddAltEditFrame.GRM_AddAltScrollChildFrame.AllButtons[i] then
             local tempButton = CreateFrame ( "Button" , "AltSelection" .. i , GRM_UI.GRM_CoreAltFrame.GRM_AddAltEditFrame.GRM_AddAltScrollChildFrame ); -- Names each Button 1 increment up
-            GRM_UI.GRM_CoreAltFrame.GRM_AddAltEditFrame.GRM_AddAltScrollChildFrame.AllButtons[i] = { tempButton , tempButton:CreateFontString ( "AltButtonText" .. i , "OVERLAY" , "GameFontWhiteTiny" )  };
+            GRM_UI.GRM_CoreAltFrame.GRM_AddAltEditFrame.GRM_AddAltScrollChildFrame.AllButtons[i] = { tempButton , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" )  };
         end
 
         local button = GRM_UI.GRM_CoreAltFrame.GRM_AddAltEditFrame.GRM_AddAltScrollChildFrame.AllButtons[i][1];
@@ -8513,7 +8854,7 @@ GRM.BuildAutoCompleteBanNames = function ( listOfAlts )
         -- if font string is not created, do so.
         if not GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_AddBanFrame.GRM_AddBanScrollChildFrame.AllButtons[i] then
             local tempButton = CreateFrame ( "Button" , "BanButton" .. i , GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_AddBanFrame.GRM_AddBanScrollChildFrame ); -- Names each Button 1 increment up
-            GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_AddBanFrame.GRM_AddBanScrollChildFrame.AllButtons[i] = { tempButton , tempButton:CreateFontString ( "BanButtonText" .. i , "OVERLAY" , "GameFontWhiteTiny" )  };
+            GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_AddBanFrame.GRM_AddBanScrollChildFrame.AllButtons[i] = { tempButton , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" )  };
         end
 
         local button = GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_AddBanFrame.GRM_AddBanScrollChildFrame.AllButtons[i][1];
@@ -8971,11 +9312,11 @@ GRM.BuildBackupScrollFrame = function ( showAll , fullRefresh )
                 local button = CreateFrame ( "Button" , "GRMBackupCoreButton_" .. i , GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_UIOptionsFrame.GRM_CoreBackupScrollChildFrame );
                 GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_UIOptionsFrame.GRM_CoreBackupScrollChildFrame.AllBackupButtons[i] = {
                     button ,
-                    button:CreateFontString ( "GuildBString1_" .. i , "OVERLAY" , "GameFontWhiteTiny" ) ,
-                    button:CreateFontString ( "GuildBString2_" .. i , "OVERLAY" , "GameFontWhiteTiny" ) ,
-                    button:CreateFontString ( "GuildBString3_" .. i , "OVERLAY" , "GameFontWhiteTiny" ) ,
-                    button:CreateFontString ( "GuildBString4_" .. i , "OVERLAY" , "GameFontWhiteTiny" ) ,
-                    button:CreateFontString ( "GuildBString5_" .. i , "OVERLAY" , "GameFontWhiteTiny" ) ,
+                    button:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) ,
+                    button:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) ,
+                    button:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) ,
+                    button:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) ,
+                    button:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) ,
                     CreateFrame ( "Button" , "GuildBackup1_" .. i , button , "UIPanelButtonTemplate" ) ,
                     CreateFrame ( "Button" , "GuildBackup2_" .. i , button , "UIPanelButtonTemplate" ) ,
                 };
@@ -9220,7 +9561,6 @@ end
 -- What it Does:    Updates the audit list to be shown as those to match the search box
 -- Purpose:         Search for guildies
 GRM.GetAutoCompleteNamesForAudit = function ( searchString )
-
     local matches = GRM.GetAutoCompleteMatches ( GRM.GetAllCurrentAndFormerGuildies ( true , false ) , searchString )
     local listOfGuildies = {};
     local isComplete = true;
@@ -9456,11 +9796,11 @@ GRM.RefreshAuditFrames = function ( showAll , fullRefresh , searchString )
                 local button = CreateFrame ( "Button" , "GRMAuditCoreButton_" .. i , GRM_UI.GRM_RosterChangeLogFrame.GRM_AuditFrame.GRM_AuditScrollChildFrame );
                 GRM_UI.GRM_RosterChangeLogFrame.GRM_AuditFrame.GRM_AuditScrollChildFrame.AllAuditButtons[i] = {
                     button ,
-                    button:CreateFontString ( "AudtString1_" .. i , "OVERLAY" , "GameFontWhiteTiny" ) ,
-                    button:CreateFontString ( "AudtString2_" .. i , "OVERLAY" , "GameFontWhiteTiny" ) ,
-                    button:CreateFontString ( "AudtString3_" .. i , "OVERLAY" , "GameFontWhiteTiny" ) ,
-                    button:CreateFontString ( "AudtString4_" .. i , "OVERLAY" , "GameFontWhiteTiny" ) ,
-                    button:CreateFontString ( "AudtString5_" .. i , "OVERLAY" , "GameFontWhiteTiny" ) ,
+                    button:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) ,
+                    button:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) ,
+                    button:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) ,
+                    button:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) ,
+                    button:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) ,
                 };
 
                 button = GRM_UI.GRM_RosterChangeLogFrame.GRM_AuditFrame.GRM_AuditScrollChildFrame.AllAuditButtons[i][1];
@@ -11204,6 +11544,8 @@ GRM.ScanRecommendationsList = function()
     local tempListOfNames = {};
     local ruleNames = "";
 
+    GRM.RefreshNumberOfHoursTilRecommend();
+
     -- Kick Recommendations
     if CanGuildRemove() then        -- No need to do the work and report if you cannot remove players
         playerRecommendation = GRM.GetKickNamesByFilterRules();
@@ -11817,13 +12159,7 @@ GRM.IsRejoinAndSetDetails = function( member , simpleName , tempTimeStamp , scan
                     local index;
 
                     if member.rosterSelection == 0 then
-                        for i = 1 , GRM.GetNumGuildies() do
-                            local name = GetGuildRosterInfo ( i );
-                            if name == member.name then
-                                index = i;
-                                break;
-                            end
-                        end
+                        
                     else
                         index = member.rosterSelection;
                     end
@@ -12664,13 +13000,13 @@ end
 -- Purpose:         Quality of life feature for maintenance reasons of a roster.
 GRM.CheckForDeadAccounts = function ()
     GRM_G.customKickList = {};
-    local hours = 1440; -- Equals 60 days - presumably someone with account deleted. This is just a buffer because sometimes names get flagged for rename for TOS violation but are still active.
+    local hours = 4320; -- Equals 180 days - presumably someone with account deleted. This is just a buffer because sometimes names get flagged for rename for TOS violation but are still active.
     local ind = 0;
     local guildData = GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ];
 
     for _ , player in pairs ( guildData ) do
         if type ( player ) == "table" then
-            if player.lastOnline >= hours and string.match ( GRM.SlimName ( player.name ) , "%d" ) ~= nil then  -- Needs to just be first name because servers may have numbers in them, like Area52, but the player name cannot.
+            if not player.deadNameIgnore and player.lastOnline >= hours and string.match ( GRM.SlimName ( player.name ) , "%d" ) ~= nil then  -- Needs to just be first name because servers may have numbers in them, like Area52, but the player name cannot.
 
                 table.insert ( GRM_G.customKickList , { player.name } );
                 ind = #GRM_G.customKickList;
@@ -12703,7 +13039,13 @@ GRM.CheckForDeadAccounts = function ()
         end
 
         local ignoreDeadNames = function()
-            GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].ignoreDeadNames = true;
+
+            for i = 1 , #GRM_G.customKickList do
+                if GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ][GRM_G.customKickList[i].name] then
+                    GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ][GRM_G.customKickList[i].name].deadNameIgnore = true;
+                end
+            end
+            
             GRM.Report ( GRM.L ( "You can re-check in the future by typing '/grm dead'" ) );
         end
 
@@ -14659,8 +15001,8 @@ GRM.BuildLog = function ( searchString , fullRefresh )
                 local button = CreateFrame ( "Button" , "LogButton" .. i , GRM_UI.GRM_RosterChangeLogFrame.GRM_LogFrame.GRM_RosterChangeLogScrollChildFrame );
                 GRM_UI.GRM_RosterChangeLogFrame.GRM_LogFrame.GRM_RosterChangeLogScrollChildFrame.AllButtons[i] = {
                     button ,
-                    button:CreateFontString ( "GRM_LogEntry_" .. i ) ,
-                    button:CreateFontString ( "GRM_LogCount_" .. i , "OVERLAY" , "GameFontWhiteTiny" ),
+                    button:CreateFontString ( nil ) ,
+                    button:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ),
                     0   -- index of the log
                 };
 
@@ -15020,7 +15362,7 @@ GRM.BuildExportMemberDetails = function( currentMembers , specificGuild , guildF
                     playerDetails = playerDetails .. C_CreatureInfo.GetClassInfo ( classFileIDEnum[roster[i].class] ).className .. delimiter;   -- class
                 end
                 if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].exportFilters[15] then
-                    if roster[i].race ~= "" then 
+                    if roster[i].race and roster[i].race ~= "" and raceIDEnum[roster[i].race] ~= nil then 
                         playerDetails = playerDetails .. C_CreatureInfo.GetRaceInfo ( raceIDEnum[roster[i].race] ).raceName .. delimiter;   -- Race
                     else
                         playerDetails = playerDetails .. GRM.L ( "Unknown" ) .. delimiter;
@@ -15360,7 +15702,7 @@ GRM.BuildExportDelimiterDropdownMenu = function()
     for i = 1 , #delimiters do
         if not GRM_UI.GRM_RosterChangeLogFrame.GRM_ExportLogBorderFrame.GRM_DelimiterDropdownMenu.Buttons[i] then
             local tempButton = CreateFrame ( "Button" , "GRM_DelimiterButton" .. i , GRM_UI.GRM_RosterChangeLogFrame.GRM_ExportLogBorderFrame.GRM_DelimiterDropdownMenu );
-            GRM_UI.GRM_RosterChangeLogFrame.GRM_ExportLogBorderFrame.GRM_DelimiterDropdownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( "GRM_DelimiterText" .. i , "OVERLAY" , "GameFontWhiteTiny" ) }
+            GRM_UI.GRM_RosterChangeLogFrame.GRM_ExportLogBorderFrame.GRM_DelimiterDropdownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) }
         end
 
         local DelimiterButton = GRM_UI.GRM_RosterChangeLogFrame.GRM_ExportLogBorderFrame.GRM_DelimiterDropdownMenu.Buttons[i][1];
@@ -15568,7 +15910,7 @@ GRM.InitializeDropDownDay = function ()
     for i = 1 , numDays do
         if not GRM_UI.GRM_MemberDetailMetaData.GRM_DayDropDownMenu.Buttons[i] then
             local tempButton = CreateFrame ( "Button" , "DayOfTheMonth" .. i , GRM_UI.GRM_MemberDetailMetaData.GRM_DayDropDownMenu );
-            GRM_UI.GRM_MemberDetailMetaData.GRM_DayDropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( "DayOfTheGRM_MonthText" .. i , "OVERLAY" , "GameFontWhiteTiny" ) }
+            GRM_UI.GRM_MemberDetailMetaData.GRM_DayDropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) }
         end
 
         local DayButtons = GRM_UI.GRM_MemberDetailMetaData.GRM_DayDropDownMenu.Buttons[i][1];
@@ -15627,7 +15969,7 @@ GRM.InitializeDropDownYear = function ()
     for i = 1 , currentYear - 2003 do
         if not GRM_UI.GRM_MemberDetailMetaData.GRM_YearDropDownMenu.Buttons[i] then
             local tempButton = CreateFrame ( "Button" , "YearIndexButton" .. i , GRM_UI.GRM_MemberDetailMetaData.GRM_YearDropDownMenu );
-            GRM_UI.GRM_MemberDetailMetaData.GRM_YearDropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( "YearIndexButtonText" .. i , "OVERLAY" , "GameFontWhiteTiny" ) }
+            GRM_UI.GRM_MemberDetailMetaData.GRM_YearDropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) }
         end
 
         local YearButtons = GRM_UI.GRM_MemberDetailMetaData.GRM_YearDropDownMenu.Buttons[i][1];
@@ -15685,7 +16027,7 @@ GRM.InitializeDropDownMonth = function ()
     for i = 1 , #months do
         if not GRM_UI.GRM_MemberDetailMetaData.GRM_MonthDropDownMenu.Buttons[i] then
             local tempButton = CreateFrame ( "Button" , "monthIndex" .. i , GRM_UI.GRM_MemberDetailMetaData.GRM_MonthDropDownMenu );
-            GRM_UI.GRM_MemberDetailMetaData.GRM_MonthDropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( "monthIndexText" .. i , "OVERLAY" , "GameFontWhiteTiny" ) }
+            GRM_UI.GRM_MemberDetailMetaData.GRM_MonthDropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) }
         end
 
         local MonthButtons = GRM_UI.GRM_MemberDetailMetaData.GRM_MonthDropDownMenu.Buttons[i][1];
@@ -16595,7 +16937,7 @@ GRM.PopulateOptionsRankDropDown = function ()
     for count = 1 , GuildControlGetNumRanks() do
         if not GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_SyncOptionsFrame.GRM_RosterSyncRankDropDownMenu.Buttons[i] then
             local tempButton = CreateFrame ( "Button" , "rankIndex" .. i , GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_SyncOptionsFrame.GRM_RosterSyncRankDropDownMenu );
-            GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_SyncOptionsFrame.GRM_RosterSyncRankDropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( "rankIndexText" .. i , "OVERLAY" , "GameFontWhiteTiny" ) }
+            GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_SyncOptionsFrame.GRM_RosterSyncRankDropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) }
         end
 
         local RankButtons = GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_SyncOptionsFrame.GRM_RosterSyncRankDropDownMenu.Buttons[i][1];
@@ -16694,7 +17036,7 @@ GRM.PopulateBanListOptionsDropDown = function ()
     for count = 1 , GuildControlGetNumRanks() do
         if not GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_SyncOptionsFrame.GRM_RosterBanListDropDownMenu.Buttons[i] then
             local tempButton = CreateFrame ( "Button" , "rankIndex" .. i , GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_SyncOptionsFrame.GRM_RosterBanListDropDownMenu );
-            GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_SyncOptionsFrame.GRM_RosterBanListDropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( "rankIndexText" .. i , "OVERLAY" , "GameFontWhiteTiny" ) }
+            GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_SyncOptionsFrame.GRM_RosterBanListDropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) }
         end
 
         local RankButtons = GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_SyncOptionsFrame.GRM_RosterBanListDropDownMenu.Buttons[i][1];
@@ -16790,7 +17132,7 @@ GRM.PopulateDefaultDropDownRankMenu = function ()
     for count = 1 , GuildControlGetNumRanks() do
         if not GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_SyncOptionsFrame.GRM_DefaultCustomRankDropDownMenu.Buttons[i] then
             local tempButton = CreateFrame ( "Button" , "rankIndex" .. i , GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_SyncOptionsFrame.GRM_DefaultCustomRankDropDownMenu );
-            GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_SyncOptionsFrame.GRM_DefaultCustomRankDropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( "rankIndexText" .. i , "OVERLAY" , "GameFontWhiteTiny" ) }
+            GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_SyncOptionsFrame.GRM_DefaultCustomRankDropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) }
         end
 
         local RankButtons = GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_SyncOptionsFrame.GRM_DefaultCustomRankDropDownMenu.Buttons[i][1];
@@ -16874,7 +17216,7 @@ GRM.CreateRankDropDownMenu = function ( SelectedFrame , Menu , fontSize , button
     for count = 1 , GuildControlGetNumRanks() do
         if not Menu.Buttons[i] then
             local tempButton = CreateFrame ( "Button" , Menu:GetName() .. "RankIndex_" .. i , Menu );
-            Menu.Buttons[i] = { tempButton , tempButton:CreateFontString ( Menu:GetName() .. "RankIndexText_" .. i , "OVERLAY" , "GameFontWhiteTiny" ) }
+            Menu.Buttons[i] = { tempButton , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) }
         end
 
         local RankButtons = Menu.Buttons[i][1];
@@ -16925,7 +17267,7 @@ GRM.CreateDropDownMenu = function ( SelectedFrame , Menu , fontSize , buttonHeig
     for i = 1 , #textList do
         if not Menu.Buttons[i] then
             local tempButton = CreateFrame ( "Button" , Menu:GetName() .. "_" .. i , Menu );
-            Menu.Buttons[i] = { tempButton , tempButton:CreateFontString ( Menu:GetName() .. "Text_" .. i , "OVERLAY" , "GameFontWhiteTiny" ) }
+            Menu.Buttons[i] = { tempButton , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) }
         end
 
         local RankButtons = Menu.Buttons[i][1];
@@ -16975,7 +17317,7 @@ GRM.PopulateClassDropDownMenu = function()
     for i = 1 , #AllClasses do
         if not GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_AddBanFrame.GRM_AddBanDropDownMenu.Buttons[i] then
             local tempButton = CreateFrame ( "Button" , "ClassButton" .. i , GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_AddBanFrame.GRM_AddBanDropDownMenu );
-            GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_AddBanFrame.GRM_AddBanDropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( "ClassButtonText" .. i , "OVERLAY" , "GameFontWhiteTiny" ) }
+            GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_AddBanFrame.GRM_AddBanDropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) }
             if i == 1 then
                 GRM_G.DropDownHighlightLockIndex = 1;
                 GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_AddBanFrame.GRM_AddBanDropDownMenu.Buttons[i][1]:LockHighlight();
@@ -17039,7 +17381,7 @@ GRM.PopulateMainTagDropdown = function()
     for i = 1 , #tagChoices do
         if not GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_MainTagFormatMenu.Buttons[i] then
             local tempButton = CreateFrame ( "Button" , "MainTagOption" .. i , GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_MainTagFormatMenu );
-            GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_MainTagFormatMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( "MainTagText" .. i , "OVERLAY" , "GameFontWhiteTiny" ) }
+            GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_MainTagFormatMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) }
         end
 
         local TagButton = GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_MainTagFormatMenu.Buttons[i][1];
@@ -17102,7 +17444,7 @@ GRM.PopulateDefaultTabDropdown = function()
     for i = 1 , #tabChoices do
         if not GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_DefaultTabMenu.Buttons[i] then
             local tempButton = CreateFrame ( "Button" , "DefaultTabButton" .. i , GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_DefaultTabMenu );
-            GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_DefaultTabMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( "DefaultTabButtonText" .. i , "OVERLAY" , "GameFontWhiteTiny" ) }
+            GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_DefaultTabMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) }
         end
 
         local TabButton = GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_DefaultTabMenu.Buttons[i][1];
@@ -17154,7 +17496,7 @@ GRM.PopulateLanguageDropdown = function()
     for i = 1 , #GRML.Languages do
         if not GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_LanguageDropDownMenu.Buttons[i] then
             local tempButton = CreateFrame ( "Button" , "GRM_Language_" .. i , GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_LanguageDropDownMenu );
-            GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_LanguageDropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( "GRM_LanguageButtonText_" .. i , "OVERLAY" , "GameFontWhiteTiny" ) }
+            GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_LanguageDropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) }
         end
 
         local LangButton = GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_LanguageDropDownMenu.Buttons[i][1];
@@ -17296,7 +17638,7 @@ GRM.PopulateFontDropdown = function()
     for i = 1 , #GRML.FontNames do
         if not GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_FontDropDownMenu.Buttons[i] then
             local tempButton = CreateFrame ( "Button" , "GRM_Font" .. i , GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_FontDropDownMenu );
-            GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_FontDropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( "GRM_FontButtonText_" .. i , "OVERLAY" , "GameFontWhiteTiny" ) }
+            GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_FontDropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) }
         end
 
         local FontButton = GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_FontDropDownMenu.Buttons[i][1];
@@ -17388,7 +17730,7 @@ GRM.PopulateTimestampFormatDropDown = function()
     for i = 1 , 16 do
         if not GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_TimestampSelectedDropDownMenu.Buttons[i] then
             local tempButton = CreateFrame ( "Button" , "GRM_timeStampButton" .. i , GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_TimestampSelectedDropDownMenu );
-            GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_TimestampSelectedDropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( "GRM_GRM_timeStampButton_Text" .. i , "OVERLAY" , "GameFontWhiteTiny" ) }
+            GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_TimestampSelectedDropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) }
         end
         GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].dateFormat = i;
         local timeStampButton = GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_TimestampSelectedDropDownMenu.Buttons[i][1];
@@ -17445,7 +17787,7 @@ GRM.CreateServerSelectionDropdown = function ( theList )
     for i = 1 , #theList do
         if not GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_AddBanFrame.GRM_BanServerDropDownMenu.Buttons[i] then
             local tempButton = CreateFrame ( "Button" , name .. "_Button" .. i , GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_AddBanFrame.GRM_BanServerDropDownMenu );
-            GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_AddBanFrame.GRM_BanServerDropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( name .. "_Button_Text" .. i , "OVERLAY" , "GameFontWhiteTiny" ) }
+            GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_AddBanFrame.GRM_BanServerDropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) }
             if i == 1 then
                 GRM_G.DropDownHighlightLockIndex = 1;
                 GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_AddBanFrame.GRM_BanServerDropDownMenu.Buttons[i][1]:LockHighlight();
@@ -17503,7 +17845,7 @@ GRM.Populate24HrDropDown = function()
     for i = 1 , 2 do
         if not GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_24HrSelectedDropDownMenu.Buttons[i] then
             local tempButton = CreateFrame ( "Button" , "GRM_HrButton" .. i , GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_24HrSelectedDropDownMenu );
-            GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_24HrSelectedDropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( "GRM_HrButton_Txt" .. i , "OVERLAY" , "GameFontWhiteTiny" ) }
+            GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_24HrSelectedDropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) }
         end
         local HrButton = GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_24HrSelectedDropDownMenu.Buttons[i][1];
         local HrButtonText = GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_GeneralOptionsFrame.GRM_24HrSelectedDropDownMenu.Buttons[i][2];
@@ -18651,8 +18993,6 @@ GRM.RemoveBan = function ( name , onPopulate , personWhoRemovedIt )
         -- On populate is referring to the check for when it is on mouseover... no need to check this if not.
         if onPopulate and GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame:IsVisible() then
             -- Refresh the frames:
-            GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListFrameSelectedNameText:Hide();
-            GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListFrameText:SetText ( GRM.L ( "Select a Player" ) );
             if GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons ~= nil then
                 for i = 1 , #GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons do
                     GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons[i][1]:UnlockHighlight();
@@ -18690,8 +19030,6 @@ GRM.BanListUnban = function ( name , personWhoRemovedIt )
     end
 
     -- Refresh the frames:
-    GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListFrameSelectedNameText:Hide();
-    GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListFrameText:SetText ( GRM.L ( "Select a Player" ) );
     if GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons ~= nil then
         for i = 1 , #GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons do
             GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons[i][1]:UnlockHighlight();
@@ -19259,11 +19597,10 @@ GRM.GetNumberOfPlayerSBannedCurrentlyInGuild = function()
         
     return result , names;
 end
-
--- Method:          GRM.GetSortedBanListNamesWithDetails ()
+-- Method:          GRM.GetSortedBanListNamesWithDetails ( string )
 -- What it Does:    Returns the list of all banned players based on the given sorting settings
 -- Purpose:         Give the player to sort the ban list by the headers.
-GRM.GetSortedBanListNamesWithDetails = function ()
+GRM.GetSortedBanListNamesWithDetails = function ( textSearch )
     local guildData = GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ];
     local finalList = {};
     local format = GRM_G.banDetailsControl[1];
@@ -19272,13 +19609,14 @@ GRM.GetSortedBanListNamesWithDetails = function ()
     local isAdded = false
     local count = 0;
 
-    -- Add bans of people still in the guild
+-- Add bans of people still in the guild
     for _ , player in pairs ( guildData ) do
         if type ( player ) == "table" then
             if player.bannedInfo[1] then
-                
-                table.insert ( playerDetails  , { player.name , player.class , player.bannedInfo[2] , player.rankName , player.rankIndex , player.reasonBanned , true , player.isUnknown , player.GUID } );
-                count = count + 1;
+                if not textSearch or string.find ( string.lower ( GRM.RemoveSpecialCharacters ( player.name ) ) , textSearch , 1 , true ) then
+                    table.insert ( playerDetails  , { player.name , player.class , player.bannedInfo[2] , player.rankName , player.rankIndex , player.reasonBanned , true , player.isUnknown , player.GUID } );
+                    count = count + 1;
+                end
             end
         end
     end
@@ -19293,30 +19631,32 @@ GRM.GetSortedBanListNamesWithDetails = function ()
         if type ( player ) == "table" then
 
             if player.bannedInfo[1] then
-                insertIndex = 1;
-
-                local isUnknown = false;
-                if player.GUID == "" then
-                    isUnknown = true;
-                end
-
-                if #playerDetails == 0 then
+                if not textSearch or string.find ( string.lower ( GRM.RemoveSpecialCharacters ( player.name ) ) , textSearch , 1 , true ) then
                     insertIndex = 1;
-                else
-                    for i = start , #playerDetails do
-                        if player.bannedInfo[2] >= playerDetails[i][3] then
-                            insertIndex = i;
-                            break;
-                        end
 
-                        if i == #playerDetails and insertIndex == 1 then
-                            insertIndex = i + 1;
+                    local isUnknown = false;
+                    if player.GUID == "" then
+                        isUnknown = true;
+                    end
+
+                    if #playerDetails == 0 then
+                        insertIndex = 1;
+                    else
+                        for i = start , #playerDetails do
+                            if player.bannedInfo[2] >= playerDetails[i][3] then
+                                insertIndex = i;
+                                break;
+                            end
+
+                            if i == #playerDetails and insertIndex == 1 then
+                                insertIndex = i + 1;
+                            end
                         end
                     end
-                end
 
-                table.insert ( playerDetails  , insertIndex , { player.name , player.class , player.bannedInfo[2] , player.rankName , player.rankIndex , player.reasonBanned , false , isUnknown , player.GUID } );
-                count = count + 1;
+                    table.insert ( playerDetails  , insertIndex , { player.name , player.class , player.bannedInfo[2] , player.rankName , player.rankIndex , player.reasonBanned , false , isUnknown , player.GUID } );
+                    count = count + 1;
+                end
             end
         end
     end
@@ -19397,6 +19737,33 @@ GRM.GetSortedBanListNamesWithDetails = function ()
     return finalList , count;
 end
 
+-- Method:          GRM.IsAnyBanHighlighted()
+-- What it Does:    Checks if any of the buttons in the ban list are highlighted
+-- Purpose:         UX
+GRM.IsAnyBanHighlighted = function()
+    local result = false;
+
+    for i = 1 , #GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons do
+        if GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons[i][6] then
+            result = true;
+            break;
+        end
+
+    end
+
+    return result;
+end
+
+-- Method:          GRM.ClearAllBanHighlights()
+-- What it Does:    Clears all the highlights of any selected name in the ban window
+-- Purpose:         UX
+GRM.ClearAllBanHighlights = function()
+    for i = 1 , #GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons do
+        GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons[i][1]:UnlockHighlight();
+        GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons[i][6] = false
+    end
+end
+
 -- Method:          GRM.IsBanNameOnList ( name , array )
 -- What it Does:    Returns true if the given name is on the list
 -- Purpose:         To identify a quick lookup if the name is on the list for purposes of updating the ban list to show player has left the server
@@ -19413,29 +19780,37 @@ GRM.IsBanNameOnList = function ( name , list )
     return result;
 end
 
--- Method:          GRM.RefreshBanListFrames()
+-- Method:          GRM.RefreshBanListFrames( bool , string )
 -- What it Does:    On loading the Ban List frames, it populates and prepares them for a scrollable window if necessary
 -- purpose:         Quality of Life. Whilst the ban list is managed automatically behind the scenes, it is useful to have common information that syncs between users
 --                  with the guild.
-GRM.RefreshBanListFrames = function( listNeedingUpdate )
+GRM.RefreshBanListFrames = function( listNeedingUpdate , textSearch , banList , count )
     -- SCRIPT LOGIC ON ADD EVENT SCROLLING FRAME
     local scrollHeight = 0;
     local scrollWidth = 561;
     local buffer = 20;
+    textSearch = textSearch or "";
 
     GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons = GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons or {};  -- Create a table for the Buttons.
 
     -- populating the window correctly.
     local tempHeight = 0;
-    -- { tempGuild[i][1] , tempGuild[i][9] , tempGuild[i][17][2] , tempGuild[i][4] , tempGuild[i][5] , tempGuild[i][18] , isInGuild } );
-    local banList , count = GRM.GetSortedBanListNamesWithDetails();
+
+    if not banList then
+    
+        if textSearch == "" and GRM.Trim( GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_PlayerSearchBanEditBox:GetText() ) ~= "" then
+            textSearch = GRM.Trim( GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_PlayerSearchBanEditBox:GetText() );
+        end
+
+        banList , count = GRM.GetSortedBanListNamesWithDetails ( textSearch );
+    end
 
     -- Populating the window based on the Current Players PLayers
     for i = 1 , #banList do
         -- if font string is not created, do so.
         if not GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons[i] then
             local tempButton = CreateFrame ( "Button" , "BannedPlayer" .. i , GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame ); -- Names each Button 1 increment up
-            table.insert ( GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons , { tempButton , tempButton:CreateFontString ( "BannedPlayerNameText" .. i , "OVERLAY" , "GameFontWhiteTiny" ) , tempButton:CreateFontString ( "BannedPlayerRankText" .. i , "OVERLAY" , "GameFontWhiteTiny" ) , tempButton:CreateFontString ( "BannedPlayerDateText" .. i , "OVERLAY" , "GameFontWhiteTiny" ) , tempButton:CreateFontString ( "BannedPlayerReasonText" .. i , "OVERLAY" , "GameFontWhiteTiny" ) } );
+            table.insert ( GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons , { tempButton , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ) , false } );
         end
 
         local BanButtons = GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons[i][1];
@@ -19443,6 +19818,8 @@ GRM.RefreshBanListFrames = function( listNeedingUpdate )
         local BanRankText = GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons[i][3];
         local BanDateText = GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons[i][4];
         local BanReasonText = GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons[i][5];
+        GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons[i][6] = false;  -- Reset the highlights.
+
         local classColor = GRM.GetClassColorRGB ( banList[i][2] );
         local nameDetails = banList[i][1];
         if banList[i][8] then
@@ -19524,16 +19901,18 @@ GRM.RefreshBanListFrames = function( listNeedingUpdate )
                     -- For highlighting purposes
                     for j = 1 , #GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons do
                         if self ~= GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons[j][1] then
+
+                            -- Selected button differs from this, so we can 
                             GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons[j][1]:UnlockHighlight();
+                            GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons[j][6] = false;
                         else
                             GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons[j][1]:LockHighlight();
+                            GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListScrollChildFrame.allFrameButtons[j][6] = true;
                         end
+
                     end
                     
                     GRM_G.TempBanTarget = { fullName , { GRM.ConvertRGBScale ( R , true ) , GRM.ConvertRGBScale ( G , true ) , GRM.ConvertRGBScale ( B , true ) } }; -- Need to parse out the "(Still in Guild)"
-                    GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListFrameSelectedNameText:SetText ( GRM.SlimName ( fullName ) );
-                    GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListFrameText:SetText ( GRM.L ( "Player Selected" ) );
-                    GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListFrameSelectedNameText:Show();
                 end
             end
         end);
@@ -19561,11 +19940,9 @@ GRM.RefreshBanListFrames = function( listNeedingUpdate )
     if count > 0 then
         GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListFrameNumBannedText:SetText( "(" .. GRM.L ( "Total Banned:" ) .. " " .. count .. ")" );
         GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListFrameNumBannedText:Show();
-        GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListFrameText:Show();
         GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListFrameAllOfflineText:Hide();
     else
         GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListFrameNumBannedText:Hide();
-        GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListFrameText:Hide();
         GRM_UI.GRM_RosterChangeLogFrame.GRM_CoreBanListFrame.GRM_CoreBanListFrameAllOfflineText:Show();
     end
 
@@ -19609,6 +19986,7 @@ GRM.RefreshBanListFrames = function( listNeedingUpdate )
             GRM_UI.SetTooltipScale();
             GameTooltip:SetOwner ( self , "ANCHOR_CURSOR" );
             GameTooltip:AddLine ( GRM.L ( "Player Was Banned By: {name}" , playerWhoBanned ) );
+            GameTooltip:AddLine ( " " );
             if stillInGuild then
                 GameTooltip:AddLine ( GRM.L ( "{custom1} to open Player Window" , nil , nil , nil , "|CFFE6CC7F" .. GRM.L ( "Ctrl-Click" ) .. "|r" ) );
             end
@@ -19663,10 +20041,10 @@ GRM.RefreshBanListFrames = function( listNeedingUpdate )
         GRM.SetplayersStillOnServer ( names , true );
 
         C_Timer.After ( 1.5 , function()
-            local listNeedingUpdate = GRM.ValidateBanGUIDs();
+            local listNeedingUpdate = GRM.ValidateBanGUIDs ( textSearch );
 
             if #listNeedingUpdate > 0 then
-                GRM.RefreshBanListFrames( listNeedingUpdate );
+                GRM.RefreshBanListFrames( listNeedingUpdate , textSearch , banList , count );
             end
         end);
     end
@@ -19908,6 +20286,8 @@ GRM.PlayerNameTooltip = function( self )
             self.GRM_MemberDetailServerNameToolTip:AddLine ( GRM.L ( "{name} {name2}" , C_CreatureInfo.GetRaceInfo ( raceIDEnum[player.race] ).raceName , GRM.GetSex ( player.sex ) ) , 1 , 1 , 1 );
         end
 
+        self.GRM_MemberDetailServerNameToolTip:AddLine ( " " );
+        self.GRM_MemberDetailServerNameToolTip:AddLine ( GRM.L ( "{custom1} to Copy Name to Chat" , nil , nil , nil , "|CFFE6CC7F" .. GRM.L ( "Shift-Click" ) .. "|r" ) );
         self.GRM_MemberDetailServerNameToolTip:AddLine ( GRM.L ( "{custom1} for Additional Options" , nil , nil , nil , "|CFFE6CC7F" .. GRM.L ( "Right-Click" ) .. "|r" ) );
         self.GRM_MemberDetailServerNameToolTip:Show();
     else
@@ -19954,6 +20334,8 @@ GRM.AltNameTooltip = function ( self , guildData )
                             color = GRM.GetClassColorRGB ( listOfAlts[i][2] , false )
                             AltTT:SetOwner ( GRM_UI.GRM_CoreAltFrame.GRM_CoreAltScrollFrame.GRM_CoreAltScrollChildFrame.allFrameButtons[i][1] , "ANCHOR_CURSOR" );
                             AltTT:AddLine ( listOfAlts[i][1] , color[1] , color[2] , color[3] );
+                            AltTT:AddLine ( " " );
+                            AltTT:AddLine ( GRM.L ( "{custom1} to Copy Name to Chat" , nil , nil , nil , "|CFFE6CC7F" .. GRM.L ( "Shift-Click" ) .. "|r" ) );
                             AltTT:AddLine ( GRM.L ( "{custom1} for Additional Options" , nil , nil , nil , "|CFFE6CC7F" .. GRM.L ( "Right-Click" ) .. "|r" ) );
                             AltTT:AddLine ( GRM.L ( "{custom1} to open Player Window" , nil , nil , nil , "|CFFE6CC7F" .. GRM.L ( "Ctrl-Click" ) .. "|r" ) )
                             isOver = true;
@@ -21646,13 +22028,10 @@ GRM.RefreshJDAuditToolFrames = function ( showAll , fullRefresh )
         -- Build HybridScrollFrame Buttons
         if i <= hybridScrollFrameButtonCount then
             if not GRM_UI.GRM_AuditJDTool.GRM_JDToolScrollChildFrame.AllButtons[i] then
-                local button = CreateFrame ( "Button" , "JDAuditButton" .. i .. "_" .. 1, GRM_UI.GRM_AuditJDTool.GRM_JDToolScrollChildFrame );
-                GRM_UI.GRM_AuditJDTool.GRM_JDToolScrollChildFrame.AllButtons[i] = { button , button:CreateFontString ( "JDAuditButtonText" .. i .. "_" .. 1 , "OVERLAY" , "GameFontWhiteTiny" ),
-                                                                                                    button:CreateFontString ( "JDAuditButtonText" .. i .. "_" .. 2 , "OVERLAY" , "GameFontWhiteTiny" ),
-                                                                                                    button:CreateFontString ( "JDAuditButtonText" .. i .. "_" .. 3 , "OVERLAY" , "GameFontWhiteTiny" ),
-                                                                                                    button:CreateFontString ( "JDAuditButtonText" .. i .. "_" .. 4 , "OVERLAY" , "GameFontWhiteTiny" ),
-                                                                                                    button:CreateFontString ( "JDAuditButtonText" .. i .. "_" .. 5 , "OVERLAY" , "GameFontWhiteTiny" )
+                local button = CreateFrame ( "Button" , "JDAuditButton" .. i .. "_" .. 1 , GRM_UI.GRM_AuditJDTool.GRM_JDToolScrollChildFrame );
+                GRM_UI.GRM_AuditJDTool.GRM_JDToolScrollChildFrame.AllButtons[i] = { button , button:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ), button:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ), button:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ), button:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" ), button:CreateFontString ( nil , "OVERLAY" , "GameFontWhiteTiny" )
                 };
+
                 button = GRM_UI.GRM_AuditJDTool.GRM_JDToolScrollChildFrame.AllButtons[i][1];
                 if i == 1 then
                     button:SetPoint ( "TOP" , GRM_UI.GRM_AuditJDTool.GRM_JDToolScrollChildFrame , "TOP" , -1 , 0 );
@@ -22913,25 +23292,38 @@ GRM.DisplayRosterMember = function ( playerName , index )
     end
 end
 
+GRM_G.ClassicTaintProtection = false;
+
 -- Method:          GRM.OpenPlayerWindow ( string )
 -- What it Does:    Opens the community frame and brings up the player window for editing
 -- Purpose:         Easy access to find the player from various frames
 GRM.OpenPlayerWindow = function ( playerName )
+    local frameProtection = false;
+
     if GuildFrame and not GuildFrame:IsVisible() then
         if GRM_G.BuildVersion < 80000 then
-            SocialsMicroButton:Click();
-            C_Timer.After ( 0.1 , function()
-                if not GuildFrame:IsVisible() then
-                    if not GRM_G.ClassicTaintWarning then
-                        GRM_G.ClassicTaintWarning = true;
-                        GRM.Report ( GRM.L ( "GRM:" ) .. " " .. GRM.L ( "To avoid addon taint/blocking errors in Classic, the player must manually open the Guild Roster tab the first time." ) );
-                    end
+
+            if not GRM_G.ClassicTaintProtection then
+                if not FriendsFrame:IsVisible() then
+                    SocialsMicroButton:Click();
                 end
-            end);
+
+                C_Timer.After ( 0.1 , function()
+                    if not GuildFrame:IsVisible() then
+                        frameProtection = true;
+                        if not GRM_G.ClassicTaintWarning then
+                            GRM_G.ClassicTaintWarning = true;
+                            GRM.Report ( GRM.L ( "GRM:" ) .. " " .. GRM.L ( "To avoid addon taint/blocking errors in Classic, the player must manually open the Guild Roster tab the first time." ) );
+                        end
+                    end
+                end);
+            end
         else
             -- Force community Frame open
-            GuildFrame_Toggle();
-            GuildFrame_TabClicked ( GuildFrameTab2 );
+            if GuildFrame_Toggle ~= nil then
+                GuildFrame_Toggle();
+                GuildFrame_TabClicked ( GuildFrameTab2 );
+            end
         end
     end
     
@@ -22939,7 +23331,7 @@ GRM.OpenPlayerWindow = function ( playerName )
         GRM_UI.MemberDetailFrame:Hide();
     end
 
-    local timer = 0;
+    local timer = 0.2;
 
     if not GRM_G.BlizzFramePinsInitialized then
         timer = 0.5;
@@ -22955,8 +23347,11 @@ GRM.OpenPlayerWindow = function ( playerName )
         GRM.ClearAllFrames( true );
         GRM.PopulateMemberDetails ( GRM_G.currentName );
         GRM_UI.GRM_MemberDetailMetaData:Show();
-        GRM.DisplayRosterMember ( playerName , GRM_G.RosterSelection );
-        GRM.UpdateMemberDetailNameClassColor();
+
+        if not frameProtection then
+            GRM.DisplayRosterMember ( playerName , GRM_G.RosterSelection );
+            GRM.UpdateMemberDetailNameClassColor();
+        end
         GRM_G.pause = true;
 
     end);
@@ -23268,12 +23663,18 @@ GRM.FrameTransition = function( fadeInName , fadeOutName , isOptionsTab , isOpti
         if fadeInName ~= nil then
             fadeInName:Show();
             fadeInName:SetAlpha( fadeInName:GetAlpha() + 0.04 );
+            if fadeInName:GetAlpha() + 0.04 >= 1 then
+                fadeInName:SetAlpha(1);
+            end
         end
         if fadeOutName ~= nil then
             fadeOutName:SetAlpha( fadeOutName:GetAlpha() - 0.04 );
+            if fadeOutName:GetAlpha() - 0.04 <= 0 then
+                fadeOutName:SetAlpha(0);
+            end
         end
 
-        if ( fadeInName ~= nil and fadeInName:GetAlpha() < 1 ) or ( fadeInName == nil and fadeOutName:GetAlpha() > 0 ) then
+        if ( fadeInName ~= nil and fadeInName:GetAlpha() < 1 ) or ( fadeInName == nil and fadeOutName:GetAlpha() > 0 )  then
             C_Timer.After ( 0.01 , function()
                 GRM.FrameTransition ( fadeInName , fadeOutName , isOptionsTab , isOptionsSubTab );
             end);
@@ -23865,12 +24266,38 @@ end
 GRM.SlashCommandGUID = function()
 
     if GRM.GetPlayer ( GRM_G.addonUser ) then
-        C_Timer.After ( 0.1 , function()
+        C_Timer.After ( 1 , function()
             ChatFrame1EditBox:ClearFocus();
             ChatFrame1EditBox:SetFocus();
             ChatFrame1EditBox:Insert ( GRM.GetPlayer ( GRM_G.addonUser ).GUID );
             ChatFrame1EditBox:HighlightText ( 0 , #ChatFrame1EditBox:GetText() );
         end);
+    else
+        GRM.Report ( GRM.L ( "One moment, GRM is still being configured." ) );
+    end
+end
+
+GRM.SlashCommandSearch = function ( text )
+    local searchName;
+
+    if GRM.GetPlayer ( GRM_G.addonUser ) then
+        GRM.SlashCommandAudit(); 
+
+        -- if text == string.lower ( GRM.L ( "Search" ) ) or text == "Search" then
+            -- Open search window, but nothing to search
+
+        if string.match ( text , "(" ..string.lower ( GRM.L ( "Search" ) ) .. ").+" ) ~= nil then
+            searchName = string.match ( text , string.lower ( GRM.L ( "Search" ) ) .. "(.+)" );
+
+        elseif string.match ( text , "(Search).+" ) ~= nil then
+            searchName = string.match ( text , "(Search).+" );
+
+        end
+
+        if searchName then
+            GRM_UI.GRM_RosterChangeLogFrame.GRM_AuditFrame.GRM_PlayerSearchAuditEditBox:SetText ( GRM.Trim ( searchName ) );
+            GRM.RefreshAuditFrames ( false , false , GRM.Trim ( searchName ) );
+        end
     else
         GRM.Report ( GRM.L ( "One moment, GRM is still being configured." ) );
     end
@@ -24084,7 +24511,10 @@ SlashCmdList["GRM"] = function ( input )
     elseif command == "guid" then
         GRM.SlashCommandGUID();
 
-    -- Invalid slash command.
+    -- /grm search
+    elseif string.match ( command , "(" ..string.lower ( GRM.L ( "Search" ) ) .. ").+" ) ~= nil or string.match ( command , "(Search).+" ) ~= nil or command == string.lower ( GRM.L ( "Search" ) ) or command == "Search" then
+        GRM.SlashCommandSearch ( command )
+
     elseif string.find ( command , "debug" ) ~= nil then
         GRM.DebugConfig( command );
     else
@@ -24494,11 +24924,11 @@ GRM.GR_LoadAddon = function()
     GeneralEventTracking:RegisterEvent ( "PLAYER_GUILD_UPDATE" ); -- If player leaves or joins a guild, this should fire.
     GeneralEventTracking:SetScript ( "OnEvent" , GRM.ManageGuildStatus );
 
-    KickAndRankChecking:RegisterEvent ( "CHAT_MSG_SYSTEM" );
+    SystemMessageChecking:RegisterEvent ( "CHAT_MSG_SYSTEM" );
     if GRM_G.BuildVersion >= 80000 then
-        KickAndRankChecking:RegisterEvent ( "CLUB_MEMBER_ADDED" );
+        SystemMessageChecking:RegisterEvent ( "CLUB_MEMBER_ADDED" );
     end
-    KickAndRankChecking:SetScript ( "OnEvent" , GRM.KickPromoteOrJoinPlayer );
+    SystemMessageChecking:SetScript ( "OnEvent" , GRM.KickPromoteOrJoinPlayer );
 
 	if GRM_G.BuildVersion < 80000 and GRM_G.BuildVersion >= 30000 then
 		-- Achievements are broken in WotLK classic - so don't announce for modern versions or it'll duplicate
@@ -24514,6 +24944,7 @@ GRM.GR_LoadAddon = function()
                 end
             end
 	    end);
+
 	end
     
     -- Initialize chat tagging

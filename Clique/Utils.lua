@@ -23,7 +23,7 @@ function addon:GetPrefixString(extended)
     local alt, lalt, ralt = IsAltKeyDown(), IsLeftAltKeyDown() IsRightAltKeyDown()
     local meta, lmeta, rmeta = false, false, false
 
-    if addon.versionIsRelease then
+    if addon:ProjectIsRetail() then
         meta, lmeta, rmeta = IsMetaKeyDown(), IsLeftMetaKeyDown(), IsRightMetaKeyDown()
     end
 

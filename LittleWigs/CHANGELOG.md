@@ -1,14 +1,8 @@
 # LittleWigs
 
-## [v9.2.26](https://github.com/BigWigsMods/LittleWigs/tree/v9.2.26) (2022-10-05)
-[Full Changelog](https://github.com/BigWigsMods/LittleWigs/compare/v9.2.25...v9.2.26) [Previous Releases](https://github.com/BigWigsMods/LittleWigs/releases)
+## [v10.0.0](https://github.com/BigWigsMods/LittleWigs/tree/v10.0.0) (2022-10-26)
+[Full Changelog](https://github.com/BigWigsMods/LittleWigs/compare/v9.2.27...v10.0.0) [Previous Releases](https://github.com/BigWigsMods/LittleWigs/releases)
 
-- Update option files  
-- WotLK/TheVioletHold: Minor tweaks  
-- TBC/TheBotanica/Sarannis: Convert Arcane Resonance warning to a StackMessage  
-- WotLK/TheVioletHold/Trash: Fix waves on Wrath classic  
-- WotLK/TheVioletHold/Trash: Fix a missing spell error on Wrath classic  
-- Dragonflight/TheNokhudOffensive/TheRagingTempest: Add boss module (#786)  
-- Dragonflight/TheNokhudOffensive/BalakarKhan: Add boss module (#789)  
-- Dragonflight/TheNokhudOffensive/TeeraAndMaruuk: Add boss module (#788)  
-- Dragonflight/TheNokhudOffensive/Granyth: Add boss module (#787)  
+- bump toc  
+- Legion/Karazhan/Trash: Use new gossip API (#808)  
+- Dragonflight/RubyLifePools/KyrakkaAndErkhartStormvein: Fix Infernocore target bar  

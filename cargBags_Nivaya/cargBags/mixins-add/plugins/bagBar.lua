@@ -65,13 +65,13 @@ function BagButton:Create(bagID)
 
     local invID = ContainerIDToInventoryID(bagID)
     button.invID = invID
-    button.bagID = bagID
+    button.bagID_ = bagID
     button.isBag = 1
-    if button.bagID <= 4 then
+    if button.bagID_ <= 4 then
         -- Inventory
         button:SetID(invID)
         button.UpdateTooltip = BagSlotButton_OnEnter
-    elseif button.bagID >= 5 then
+    elseif button.bagID_ >= 5 then
         -- Bank
         button:SetID(buttonNum) -- bank IDs don't use the actual invID
         button.GetInventorySlot = ButtonInventorySlot
@@ -117,7 +117,7 @@ function BagButton:Create(bagID)
 end
 
 function BagButton:GetBagID()
-    return self.bagID
+    return self.bagID_
 end
 
 function BagButton:Update()
@@ -125,8 +125,8 @@ function BagButton:Update()
 	self.Icon:SetTexture(icon or self.bgTex)
 	self.Icon:SetDesaturated(IsInventoryItemLocked(self.invID))
 
-	if(self.bagID > NUM_BAG_SLOTS) then
-		if(self.bagID-NUM_BAG_SLOTS <= GetNumBankSlots()) then
+	if(self.bagID_ > NUM_BAG_SLOTS) then
+		if(self.bagID_-NUM_BAG_SLOTS <= GetNumBankSlots()) then
 			self.Icon:SetVertexColor(1, 1, 1)
 			self.notBought = false
 			self.tooltipText = BANK_BAG
@@ -143,7 +143,19 @@ function BagButton:Update()
 end
 
 local function highlight(button, func, bagID)
-	func(button, not bagID or button.bagID == bagID)
+	func(button, not bagID or button.bagID_ == bagID)
+end
+
+local function CalculateItemTooltipAnchors(self, mainTooltip)
+	local x = self:GetRight();
+	local anchorFromLeft = x < GetScreenWidth() / 2;
+	if ( anchorFromLeft ) then
+		mainTooltip:SetAnchorType("ANCHOR_BOTTOMRIGHT", 0, 0);
+		mainTooltip:SetPoint("TOPLEFT", self, "BOTTOMRIGHT");
+	else
+		mainTooltip:SetAnchorType("ANCHOR_BOTTOMLEFT", 0, 0);
+		mainTooltip:SetPoint("TOPRIGHT", self, "BOTTOMLEFT");
+	end
 end
 
 function BagButton:OnEnter()
@@ -152,14 +164,21 @@ function BagButton:OnEnter()
 	if(hlFunction) then
 		if(self.bar.isGlobal) then
 			for i, container in pairs(self.implementation.contByID) do
-				container:ApplyToButtons(highlight, hlFunction, self.bagID)
+				container:ApplyToButtons(highlight, hlFunction, self.bagID_)
 			end
 		else
-			self.bar.container:ApplyToButtons(highlight, hlFunction, self.bagID)
+			self.bar.container:ApplyToButtons(highlight, hlFunction, self.bagID_)
 		end
 	end
 
-	self:UpdateTooltip()
+	if self.UpdateTooltip then 
+		self:UpdateTooltip()
+	else
+		GameTooltip:SetOwner(self, "ANCHOR_NONE")
+		CalculateItemTooltipAnchors(self, GameTooltip)
+		GameTooltip:SetInventoryItem("player", self.invID)
+		GameTooltip:Show()
+	end
 end
 
 function BagButton:OnLeave()
@@ -191,19 +210,19 @@ function BagButton:OnClick()
 	local container = self.bar.container
 	if(container and container.SetFilter) then
 		if(not self.filter) then
-			local bagID = self.bagID
-			self.filter = function(i) return i.bagID ~= bagID end
+			local bagID = self.bagID_
+			self.filter = function(i) return i.bagID_ ~= bagID end
 		end
 		self.hidden = not self.hidden
 
 		if(self.bar.isGlobal) then
 			for i, container in pairs(container.implementation.contByID) do
 				container:SetFilter(self.filter, self.hidden)
-				container.implementation:OnEvent("BAG_UPDATE", self.bagID)
+				container.implementation:OnEvent("BAG_UPDATE", self.bagID_)
 			end
 		else
 			container:SetFilter(self.filter, self.hidden)
-			container.implementation:OnEvent("BAG_UPDATE", self.bagID)
+			container.implementation:OnEvent("BAG_UPDATE", self.bagID_)
 		end
 	end
 end

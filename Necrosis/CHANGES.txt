@@ -1,12 +1,12 @@
-lightweight tag ecfadc0f70e1c7780923681d183c5e06301d6c04 8.0.8
+lightweight tag 028646838372fbbb5f350cf0772c61e3c35b95e4 8.0.9
 Author:	LANCESTRE <lancetre@intenebris.org>
-Date:	Mon Oct 17 23:10:01 2022 +0200
+Date:	Thu Oct 20 14:40:40 2022 +0200
 
-commit ecfadc0f70e1c7780923681d183c5e06301d6c04
+commit 028646838372fbbb5f350cf0772c61e3c35b95e4
 Author: LANCESTRE <lancetre@intenebris.org>
-Date:   Mon Oct 17 23:10:01 2022 +0200
+Date:   Thu Oct 20 14:40:40 2022 +0200
 
-    Motencore
+    Update Necrosis.lua
     
-    proc
+    Count Charges in Spell StoneToolTip
 

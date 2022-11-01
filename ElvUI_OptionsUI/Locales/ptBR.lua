@@ -1,6 +1,8 @@
 -- Portuguese localization file for ptBR.
 local L = ElvUI[1].Libs.ACL:NewLocale("ElvUI", "ptBR")
 
+L["Abbreviate Name"] = true
+L["Max Allowed Groups"] = true
 L["Display Mana"] = true
 L["Will display mana when main power is:"] = true
 L["%s and then %s"] = "%s e depois %s"
@@ -154,12 +156,10 @@ L["Bag 2"] = "Bolsa 2"
 L["Bag 3"] = "Bolsa 3"
 L["Bag 4"] = "Bolsa 4"
 L["Bag Assignment"] = "Atribuição da Bolsa"
-L["Bag Bar"] = true
 L["Bag Spacing"] = "Espaçamentos da Bolsas"
 L["BAG_FILTER_CONSUMABLES"] = "Consumíveis"
 L["BAG_FILTER_EQUIPMENT"] = "Equipamento"
 L["BAG_FILTER_TRADE_GOODS"] = "Mercadorias"
-L["Bag-Bar"] = "Barra das Bolsas"
 L["Bags Only"] = "Apenas Bolsas"
 L["Bags/Bank"] = "Bolsas/Banco"
 L["Bank 1"] = "Banco 1"
@@ -238,7 +238,6 @@ L["Can Not Attack"] = true
 L["Cart / Flag / Orb / Assassin Bounty"] = "Cart / Bandeira / Orbe / Recompensa de Assassino"
 L["Cast Bar"] = "Barra de Lançamento"
 L["Cast Time Format"] = "Formato do Tempo de Lançamento"
-L["Castbar"] = "Barra de cast"
 L["Casted by Player Only"] = true
 L["Casting"] = "Lançando"
 L["Center"] = "Centro"
@@ -945,7 +944,7 @@ L["Lines"] = true
 L["Particles"] = true
 L["Link to the latest development version."] = "Link para a última versão de desenvolvimento."
 L["Link to the latest PTR version."] = true
-L["List of words to color in chat if found in a message. If you wish to add multiple words you must seperate the word with a comma. To search for your current name you can use %MYNAME%.\n\nExample:\n%MYNAME%, ElvUI, RBGs, Tank"] = "Lista de palavras a colorir se encontrada numa mensagem. Se desejar adicionar multiplas palavras deverá separa-las com uma vírgula. Para procurar pelo seu nome actual pode usar %MYNAME%.\n\nExemplo:\n%MYNAME%, ElvUI, RBGs, Tank"
+L["List of words to color in chat if found in a message. If you wish to add multiple words you must separate the word with a comma. To search for your current name you can use %MYNAME%.\n\nExample:\n%MYNAME%, ElvUI, RBGs, Tank"] = "Lista de palavras a colorir se encontrada numa mensagem. Se desejar adicionar multiplas palavras deverá separa-las com uma vírgula. Para procurar pelo seu nome actual pode usar %MYNAME%.\n\nExemplo:\n%MYNAME%, ElvUI, RBGs, Tank"
 L["Local Time"] = "Hora Local"
 L["Location Text"] = "Texto de Localização"
 L["Lock Distance Max"] = true
@@ -1366,13 +1365,13 @@ L["Send ADDON_ACTION_BLOCKED errors to the Lua Error frame. These errors are les
 L["Sends your current profile to your target."] = "Envia seu perfil atual para seu alvo."
 L["Sends your filter settings to your target."] = "Envia as configurações de filtro para seu alvo."
 L["Separate Panel Sizes"] = "Tamanhos de Paineis Separados"
-L["Seperate"] = "Separar"
+L["Separate"] = "Separar"
 L["Set auras that are not from you to desaturated."] = "Define auras que não são suas para desaturar."
 L["Set Settings to Default"] = "Define as configurações para o padrão"
 L["Set the alpha level of portrait when frame is overlayed."] = true
 L["Set the filter type. Blacklist will hide any auras in the list and show all others. Whitelist will show any auras in the filter and hide all others."] = "Define o tipo de filtro. Lista-negra irá esconder qualquer aura nesta lista e mostrar todas as outras. Lista-branca irá apenas mostrar as auras neste filtro e esconder as outras."
 L["Set the font outline."] = "Definir o contorno de fonte."
-L["Set the font size for everything in UI. Note: This doesn't effect somethings that have their own seperate options (UnitFrame Font, Datatext Font, ect..)"] = "Define o tamanho da fonte para toda a Interface. Nota: Isto nao afeta coisas que tenham suas prórpias opções de fonte (Quadros de Unidade, Textos Informativos, etc..)"
+L["Set the font size for everything in UI. Note: This doesn't effect somethings that have their own separate options (UnitFrame Font, Datatext Font, ect..)"] = "Define o tamanho da fonte para toda a Interface. Nota: Isto nao afeta coisas que tenham suas prórpias opções de fonte (Quadros de Unidade, Textos Informativos, etc..)"
 L["Set the font size for unitframes."] = "Define o tamanho da fonte para o quadro de unidades."
 L["Set the order that the group will sort."] = "Define a ordem em que o grupo vai se organizar."
 L["Set the orientation of the UnitFrame."] = "Define a orientação da Placa de identificação."
@@ -1783,6 +1782,8 @@ L["blockDispellable"] = "[Bloquear] Dissipável"
 L["blockNoDuration"] = "[Bloquear] Sem Duração"
 L["blockNonPersonal"] = "[Bloquear] Não Pessoal"
 L["blockNotDispellable"] = "[Bloquear] Não Dissipável"
+L["blockMount"] = "[Bloquear] Mount"
+L["Mount"] = true
 L["CastByNPC"] = "Castado por NPC"
 L["CastByPlayers"] = "Castado por Jogador"
 L["CastByUnit"] = "Castado por Unidade"
@@ -1808,13 +1809,7 @@ L["SKINS_DESC"] = "Ajustar definições de Aparências."
 L["TOGGLESKIN_DESC"] = "Ativa/Desativa a aparência deste quadro."
 L["TOOLTIP_DESC"] = "Opções de configuração para a Tooltip."
 L["UNITFRAME_DESC"] = "Modificar as configurações de Quadros de Unidade."
-L["VISIBILITY_DESC"] = [=[O macro seguinte tem de ser verdadeira para que o grupo seja mostrado, em adição a qualquer outro filtro que possa já estar definido.
-
-|cffff8000Defaults:|r
-    Party: [@raid6,exists][nogroup] hide;show
-    Raid: [@raid6,noexists][@raid26,exists] hide;show
-    Raid40: [@raid26,noexists] hide;show]
-    Raid Pet: [group:raid] show; hide]=]
+L["VISIBILITY_DESC"] = "O macro seguinte tem de ser verdadeira para que o grupo seja mostrado, em adição a qualquer outro filtro que possa já estar definido."
 L["SEARCH_SYNTAX_DESC"] = [=[With the new addition of LibItemSearch, you now have access to much more advanced item searches. The following is a documentation of the search syntax. See the full explanation at: https://github.com/Jaliborc/LibItemSearch-1.2/wiki/Search-Syntax.
 
 Specific Searching:

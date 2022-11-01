@@ -1,6 +1,8 @@
 -- French localization file for frFR.
 local L = ElvUI[1].Libs.ACL:NewLocale("ElvUI", "frFR")
 
+L["Abbreviate Name"] = true
+L["Max Allowed Groups"] = true
 L["Display Mana"] = true
 L["Will display mana when main power is:"] = true
 L["%s and then %s"] = "%s et alors %s"
@@ -154,12 +156,10 @@ L["Bag 2"] = "Sac 2"
 L["Bag 3"] = "Sac 3"
 L["Bag 4"] = "Sac 4"
 L["Bag Assignment"] = "Affectation de sac"
-L["Bag Bar"] = true
 L["Bag Spacing"] = "Mauvais espacement"
 L["BAG_FILTER_CONSUMABLES"] = "Consommables"
 L["BAG_FILTER_EQUIPMENT"] = "Équipement"
 L["BAG_FILTER_TRADE_GOODS"] = "Fournitures d’artisanat"
-L["Bag-Bar"] = "Barre des sacs"
 L["Bags Only"] = "Sacs seulement"
 L["Bags/Bank"] = "Sacs / banque"
 L["Bank 1"] = "Banque 1"
@@ -238,7 +238,6 @@ L["Can Not Attack"] = "Ne peut pas attaquer"
 L["Cart / Flag / Orb / Assassin Bounty"] = true
 L["Cast Bar"] = "Barre d'incantation"
 L["Cast Time Format"] = true
-L["Castbar"] = "Barre d'incantation"
 L["Casted by Player Only"] = "Seulement lancé par le joueur"
 L["Casting"] = "Incantation"
 L["Center"] = "Centrer"
@@ -945,7 +944,7 @@ L["Lines"] = true
 L["Particles"] = true
 L["Link to the latest development version."] = "Lien vers la dernière version de développement."
 L["Link to the latest PTR version."] = true
-L["List of words to color in chat if found in a message. If you wish to add multiple words you must seperate the word with a comma. To search for your current name you can use %MYNAME%.\n\nExample:\n%MYNAME%, ElvUI, RBGs, Tank"] = "Liste des mots à colorer dans la fenêtre de discussion s'ils y sont trouvés. Si vous souhaitez ajouter plusieurs mots, vous devez séparer le mot avec une virgule. Pour rechercher votre nom actuel, vous pouvez utiliser %MYNAME%.\n\nExemple:\n%MYNAME%, ElvUI, RBG, Tank"
+L["List of words to color in chat if found in a message. If you wish to add multiple words you must separate the word with a comma. To search for your current name you can use %MYNAME%.\n\nExample:\n%MYNAME%, ElvUI, RBGs, Tank"] = "Liste des mots à colorer dans la fenêtre de discussion s'ils y sont trouvés. Si vous souhaitez ajouter plusieurs mots, vous devez séparer le mot avec une virgule. Pour rechercher votre nom actuel, vous pouvez utiliser %MYNAME%.\n\nExemple:\n%MYNAME%, ElvUI, RBG, Tank"
 L["Local Time"] = "Heure Locale"
 L["Location Text"] = "Texte de localisation"
 L["Lock Distance Max"] = true
@@ -1366,13 +1365,13 @@ L["Send ADDON_ACTION_BLOCKED errors to the Lua Error frame. These errors are les
 L["Sends your current profile to your target."] = "Envoi votre profil actuel à votre cible."
 L["Sends your filter settings to your target."] = "Envoi vos paramètres de filtre à votre cible."
 L["Separate Panel Sizes"] = "Séparer la taille des fenêtres de discussion."
-L["Seperate"] = "Séparer"
+L["Separate"] = "Séparer"
 L["Set auras that are not from you to desaturated."] = true
 L["Set Settings to Default"] = true
 L["Set the alpha level of portrait when frame is overlayed."] = true
 L["Set the filter type. Blacklist will hide any auras in the list and show all others. Whitelist will show any auras in the filter and hide all others."] = "Définir le type de filtre. La liste noire masquera toutes les auras dans la liste et rendra visible les autres. La liste blanche montrera les auras dans la liste et masquera tous les autres."
 L["Set the font outline."] = "Configure le contour extérieur de la police."
-L["Set the font size for everything in UI. Note: This doesn't effect somethings that have their own seperate options (UnitFrame Font, Datatext Font, ect..)"] = "Définie la taille de la police d'écriture pour toute l'interface utilisateur. Note: Ceci n'affecte pas les modules qui ont leurs propres paramètres (Portait d'unité, Textes d'Informations, etc)"
+L["Set the font size for everything in UI. Note: This doesn't effect somethings that have their own separate options (UnitFrame Font, Datatext Font, ect..)"] = "Définie la taille de la police d'écriture pour toute l'interface utilisateur. Note: Ceci n'affecte pas les modules qui ont leurs propres paramètres (Portait d'unité, Textes d'Informations, etc)"
 L["Set the font size for unitframes."] = "Configure la taille de la police d'écriture pour les cadres d'unités."
 L["Set the order that the group will sort."] = "Définir l'ordre de tri d'affichage du groupe"
 L["Set the orientation of the UnitFrame."] = "Définir l'orientation des cadres d'unités"
@@ -1783,6 +1782,8 @@ L["blockDispellable"] = "[Block] Dispellable"
 L["blockNoDuration"] = "[Block] No Duration"
 L["blockNonPersonal"] = "[Block] Non Personal"
 L["blockNotDispellable"] = "[Block] Not Dispellable"
+L["blockMount"] = "[Block] Mount"
+L["Mount"] = true
 L["CastByNPC"] = "Cast By NPC"
 L["CastByPlayers"] = "Cast By Players"
 L["CastByUnit"] = "Cast By Unit"
@@ -1808,13 +1809,7 @@ L["SKINS_DESC"] = "Ajuste les paramètres d'habillage."
 L["TOGGLESKIN_DESC"] = "Active ou désactive l'habillage ElvUI des éléments ci-dessous."
 L["TOOLTIP_DESC"] = "Configuration des infobulles."
 L["UNITFRAME_DESC"] = "Modifier les options des cadres d'unités."
-L["VISIBILITY_DESC"] = [=[La macro suivante doit être cochée pour que le groupe soit affiché, en plus de la configuration des filtres.
-
-|cffff8000Defaults:|r
-    Party: [@raid6,exists][nogroup] hide;show
-    Raid: [@raid6,noexists][@raid26,exists] hide;show
-    Raid40: [@raid26,noexists] hide;show]
-    Raid Pet: [group:raid] show; hide]=]
+L["VISIBILITY_DESC"] = "La macro suivante doit être cochée pour que le groupe soit affiché, en plus de la configuration des filtres."
 L["SEARCH_SYNTAX_DESC"] = [=[With the new addition of LibItemSearch, you now have access to much more advanced item searches. The following is a documentation of the search syntax. See the full explanation at: https://github.com/Jaliborc/LibItemSearch-1.2/wiki/Search-Syntax.
 
 Specific Searching:

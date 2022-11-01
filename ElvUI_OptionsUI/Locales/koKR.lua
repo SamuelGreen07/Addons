@@ -1,6 +1,8 @@
 -- Korean localization file for koKR.
 local L = ElvUI[1].Libs.ACL:NewLocale("ElvUI", "koKR")
 
+L["Abbreviate Name"] = true
+L["Max Allowed Groups"] = true
 L["Display Mana"] = true
 L["Will display mana when main power is:"] = true
 L["%s and then %s"] = "%s 이후 %s"
@@ -154,12 +156,10 @@ L["Bag 2"] = true
 L["Bag 3"] = true
 L["Bag 4"] = true
 L["Bag Assignment"] = true
-L["Bag Bar"] = true
 L["Bag Spacing"] = true
 L["BAG_FILTER_CONSUMABLES"] = "소비용품"
 L["BAG_FILTER_EQUIPMENT"] = "장비"
 L["BAG_FILTER_TRADE_GOODS"] = "직업용품"
-L["Bag-Bar"] = "가방바"
 L["Bags Only"] = "가방 안에만"
 L["Bags/Bank"] = "가방/은행"
 L["Bank 1"] = true
@@ -238,7 +238,6 @@ L["Can Not Attack"] = true
 L["Cart / Flag / Orb / Assassin Bounty"] = true
 L["Cast Bar"] = "시전바"
 L["Cast Time Format"] = "시전 시간 형식"
-L["Castbar"] = "시전바"
 L["Casted by Player Only"] = true
 L["Casting"] = "시전중"
 L["Center"] = "정 중앙"
@@ -945,7 +944,7 @@ L["Lines"] = true
 L["Particles"] = true
 L["Link to the latest development version."] = true
 L["Link to the latest PTR version."] = true
-L["List of words to color in chat if found in a message. If you wish to add multiple words you must seperate the word with a comma. To search for your current name you can use %MYNAME%.\n\nExample:\n%MYNAME%, ElvUI, RBGs, Tank"] = "이 곳에 키워드를 적으면 모든 대화내용에서 해당 키워드를 발견 시 색깔을 입혀 강조합니다. 쉼표(,) 로 구분해서 작성하세요.\n\n내 이름을 강조하고 싶으면 |cff2eb7e4%MYNAME%|r 을 사용하면 됩니다."
+L["List of words to color in chat if found in a message. If you wish to add multiple words you must separate the word with a comma. To search for your current name you can use %MYNAME%.\n\nExample:\n%MYNAME%, ElvUI, RBGs, Tank"] = "이 곳에 키워드를 적으면 모든 대화내용에서 해당 키워드를 발견 시 색깔을 입혀 강조합니다. 쉼표(,) 로 구분해서 작성하세요.\n\n내 이름을 강조하고 싶으면 |cff2eb7e4%MYNAME%|r 을 사용하면 됩니다."
 L["Local Time"] = "컴퓨터 시계 기준"
 L["Location Text"] = "지역이름 표시 방법"
 L["Lock Distance Max"] = true
@@ -1367,13 +1366,13 @@ L["Send ADDON_ACTION_BLOCKED errors to the Lua Error frame. These errors are les
 L["Sends your current profile to your target."] = "대상에게 지금 활성화되어 있는 프로필 설정을 전송합니다."
 L["Sends your filter settings to your target."] = "대셍에게 지금 사용하고 있는 필터 설정을 전송합니다."
 L["Separate Panel Sizes"] = "좌우패널 크기 따로설정"
-L["Seperate"] = "시전자 구분 정렬"
+L["Separate"] = "시전자 구분 정렬"
 L["Set auras that are not from you to desaturated."] = true
 L["Set Settings to Default"] = "설정을 기본값으로 지정"
 L["Set the alpha level of portrait when frame is overlayed."] = true
 L["Set the filter type. Blacklist will hide any auras in the list and show all others. Whitelist will show any auras in the filter and hide all others."] = "필터 종류를 지정합니다. 블랙리스트는 목록에 있는 오라는 싸그리 숨기고 나머지는 전부 표시합니다. 화이트리스트는 목록에 있는 오라는 모조리 표시하고 나머지는 전부 숨깁니다."
 L["Set the font outline."] = "글꼴의 외곽선을 결정합니다."
-L["Set the font size for everything in UI. Note: This doesn't effect somethings that have their own seperate options (UnitFrame Font, Datatext Font, ect..)"] = "ElvUI에서 쓰이는 모든 글꼴 크기를 결정합니다.\n\n개인적으로 글꼴 크기를 지정할 수 있는 곳은 적용되지 않습니다."
+L["Set the font size for everything in UI. Note: This doesn't effect somethings that have their own separate options (UnitFrame Font, Datatext Font, ect..)"] = "ElvUI에서 쓰이는 모든 글꼴 크기를 결정합니다.\n\n개인적으로 글꼴 크기를 지정할 수 있는 곳은 적용되지 않습니다."
 L["Set the font size for unitframes."] = "유닛프레임 내에서 쓰이는 모든 글자의 크기를 결정합니다."
 L["Set the order that the group will sort."] = "이 유닛프레임에서 그룹을 어떤 기준으로 묶을지를 결정합니다.\n\n|cffceff00해석불완전|r : 기능을 제가 아직 확인해보지 못했습니다."
 L["Set the orientation of the UnitFrame."] = "유닛프레임의 방향을 지정합니다."
@@ -1784,6 +1783,8 @@ L["blockDispellable"] = "[차단] Dispellable"
 L["blockNoDuration"] = "[차단] No Duration"
 L["blockNonPersonal"] = "[차단] Non Personal"
 L["blockNotDispellable"] = "[차단] Not Dispellable"
+L["blockMount"] = "[차단] Mount"
+L["Mount"] = true
 L["CastByNPC"] = "Cast By NPC"
 L["CastByPlayers"] = "Cast By Players"
 L["CastByUnit"] = "Cast By Unit"
@@ -1809,13 +1810,7 @@ L["SKINS_DESC"] = "다른 애드온이나 게임 내 여러 프레임에 체크 
 L["TOGGLESKIN_DESC"] = "체크 시 해당 프레임에 스킨을 사용합니다."
 L["TOOLTIP_DESC"] = "툴팁에 관련된 옵션들입니다."
 L["UNITFRAME_DESC"] = "유닛프레임 설정을 변경합니다."
-L["VISIBILITY_DESC"] = [=[체크시 그룹의 표시 설정이 설정됩니다. 필터를 추가해서 수정이 가능합니다.
-
-|cffff8000Defaults:|r
-    Party: [@raid6,exists][nogroup] hide;show
-    Raid: [@raid6,noexists][@raid26,exists] hide;show
-    Raid40: [@raid26,noexists] hide;show]
-    Raid Pet: [group:raid] show; hide]=]
+L["VISIBILITY_DESC"] = "체크시 그룹의 표시 설정이 설정됩니다. 필터를 추가해서 수정이 가능합니다."
 L["SEARCH_SYNTAX_DESC"] = [=[
 
   각종 가방에서 검색기능을 사용할 때, 다음의 명령어들을 활용하면

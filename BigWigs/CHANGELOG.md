@@ -1,6 +1,7 @@
 # BigWigs
 
-## [v45.2-classic](https://github.com/BigWigsMods/BigWigs/tree/v45.2-classic) (2022-10-04)
-[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v45.1-classic...v45.2-classic) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
+## [v45.3-classic](https://github.com/BigWigsMods/BigWigs/tree/v45.3-classic) (2022-10-22)
+[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v45.2-classic...v45.3-classic) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
 
-- Core/BossPrototype: Fix widget event processing  
+- bump version  
+- Loader: another tweak for missing addon  

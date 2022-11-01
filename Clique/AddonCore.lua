@@ -66,6 +66,36 @@ function addon:APIIsTrue(val, ...)
 	end
 end
 
+local projects = {
+    retail = "WOW_PROJECT_MAINLINE",
+    classic = "WOW_PROJECT_CLASSIC",
+    bcc = "WOW_PROJECT_BURNING_CRUSADE_CLASSIC",
+    wrath = "WOW_PROJECT_WRATH_CLASSIC",
+}
+
+local project_id = _G["WOW_PROJECT_ID"]
+
+function addon:ProjectIsRetail()
+    return project_id == _G[projects.retail]
+end
+
+function addon:ProjectIsClassic()
+    return project_id == _G[projects.classic]
+end
+
+function addon:ProjectIsBCC()
+    return project_id == _G[projects.bcc]
+end
+
+function addon:ProjectIsWrath()
+    return project_id ==  _G[projects.wrath]
+end
+
+function addon:IsDragonflight()
+    local toc = select(4, GetBuildInfo())
+    return toc >= 100000
+end
+
 --[[-------------------------------------------------------------------------
 --  Print/Printf support
 -------------------------------------------------------------------------]]--
@@ -231,62 +261,3 @@ function addon:RegisterLocale(locale, tbl)
         end
     end
 end
-
---[[-------------------------------------------------------------------------
---  Addon 'About' Dialog for Interface Options
---
---  Some of this code was taken from/inspired by tekKonfigAboutPanel
--------------------------------------------------------------------------]]--
-
-local about = CreateFrame("Frame", addonName .. "AboutPanel", InterfaceOptionsFramePanelContainer)
-about.name = addonName
-about:Hide()
-
-function about.OnShow(frame)
-    local fields = {"Version", "Author", "X-Category", "X-License", "X-Email", "X-Website", "X-Credits"}
-	local notes = GetAddOnMetadata(addonName, "Notes")
-
-    local title = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
-
-	title:SetPoint("TOPLEFT", 16, -16)
-	title:SetText(addonName)
-
-	local subtitle = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-	subtitle:SetHeight(32)
-	subtitle:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -8)
-	subtitle:SetPoint("RIGHT", about, -32, 0)
-	subtitle:SetNonSpaceWrap(true)
-	subtitle:SetJustifyH("LEFT")
-	subtitle:SetJustifyV("TOP")
-	subtitle:SetText(notes)
-
-	local anchor
-	for _,field in pairs(fields) do
-		local val = GetAddOnMetadata(addonName, field)
-		if val then
-			local title = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
-			title:SetWidth(75)
-			if not anchor then title:SetPoint("TOPLEFT", subtitle, "BOTTOMLEFT", -2, -8)
-			else title:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -6) end
-			title:SetJustifyH("RIGHT")
-			title:SetText(field:gsub("X%-", ""))
-
-			local detail = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-			detail:SetPoint("LEFT", title, "RIGHT", 4, 0)
-			detail:SetPoint("RIGHT", -16, 0)
-			detail:SetJustifyH("LEFT")
-			detail:SetText(val)
-
-			anchor = title
-		end
-	end
-
-    -- Clear the OnShow so it only happens once
-	frame:SetScript("OnShow", nil)
-end
-
-addon.optpanels = addon.optpanels or {}
-addon.optpanels.ABOUT = about
-
-about:SetScript("OnShow", about.OnShow)
-InterfaceOptions_AddCategory(about)
