@@ -30,7 +30,7 @@ local _, pclass = UnitClass("Player")
 
 local Type = TMW.Classes.IconType:New("totem")
 local totemData = TMW.COMMON.CurrentClassTotems
-local totemRanks = TMW.COMMON.TotemRanks
+local totemRanks = TMW.COMMON.TotemRanks or {}
 
 Type.name = totemData.name
 Type.desc = totemData.desc
@@ -77,7 +77,7 @@ end
 if hasNameConfig then
 	Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 		title = L["ICONMENU_CHOOSENAME3"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
-		SUGType = "totem",
+		SUGType = TMW.isWrath and "totem" or "spell",
 	})
 end
 
@@ -118,9 +118,7 @@ TMW:RegisterUpgrade(48017, {
 	end,
 })
 
-
 local function Totem_OnUpdate(icon, time)
-
 	-- Upvalue things that will be referenced in our loops.
 	local Slots, NameHash, NameFirst = icon.Slots, icon.Spells.Hash, icon.Spells.First
 	
@@ -131,10 +129,13 @@ local function Totem_OnUpdate(icon, time)
 			local _, totemName, start, duration, totemIcon = GetTotemInfo(iSlot)
 			local totemNameLower = strlowerCache[totemName]
 			local totemInfo = totemRanks[totemNameLower]
+			local remaining = duration - (time - start)
 			
 			if
 				start ~= 0 and
 				totemName and
+				-- Remaining check fixes #2019
+				remaining > 0 and
 				(
 					NameFirst == "" or
 					NameHash[totemNameLower] or
@@ -215,7 +216,7 @@ function Type:Setup(icon)
 	if not icon.FirstTexture and onlySlot then
 		icon.FirstTexture = onlySlot.texture and TMW.get(onlySlot.texture)
 	end
-	if not icon.FirstTexture and totemRanks[icon.Spells.FirstString] then
+	if not icon.FirstTexture and totemRanks and totemRanks[icon.Spells.FirstString] then
 		icon.FirstTexture = GetSpellTexture(totemRanks[icon.Spells.FirstString].spellID)
 	end
 	if not icon.FirstTexture then

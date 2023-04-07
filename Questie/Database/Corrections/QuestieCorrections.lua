@@ -45,6 +45,9 @@ local QuestieWotlkItemFixes = QuestieLoader:ImportModule("QuestieWotlkItemFixes"
 ---@type QuestieWotlkObjectFixes
 local QuestieWotlkObjectFixes = QuestieLoader:ImportModule("QuestieWotlkObjectFixes")
 
+---@type IsleOfQuelDanas
+local IsleOfQuelDanas = QuestieLoader:ImportModule("IsleOfQuelDanas")
+
 --- Automatic corrections
 local QuestieItemStartFixes = QuestieLoader:ImportModule("QuestieItemStartFixes")
 
@@ -66,6 +69,7 @@ local QuestieItemStartFixes = QuestieLoader:ImportModule("QuestieItemStartFixes"
 QuestieCorrections.TBC_ONLY = 1
 QuestieCorrections.CLASSIC_ONLY = 2
 QuestieCorrections.WOTLK_ONLY = 3
+QuestieCorrections.TBC_AND_WOTLK = 4
 
 QuestieCorrections.killCreditObjectiveFirst = {} -- Only used for TBC quests
 
@@ -98,6 +102,12 @@ local function filterExpansion(values)
                 values[k] = nil
             else
                 values[k] = true
+            end
+        elseif v == QuestieCorrections.TBC_AND_WOTLK then
+            if isTBC or isWotlk then
+                values[k] = true
+            else
+                values[k] = nil
             end
         end
     end
@@ -144,6 +154,15 @@ function QuestieCorrections:MinimalInit() -- db already compiled
     QuestieCorrections.questItemBlacklist = filterExpansion(QuestieItemBlacklist:Load())
     QuestieCorrections.questNPCBlacklist = filterExpansion(QuestieNPCBlacklist:Load())
     QuestieCorrections.hiddenQuests = filterExpansion(QuestieQuestBlacklist:Load())
+
+    if Questie.db.global.isleOfQuelDanasPhase == IsleOfQuelDanas.MAX_ISLE_OF_QUEL_DANAS_PHASES then
+        for id, hide in pairs(IsleOfQuelDanas.quests[Questie.db.global.isleOfQuelDanasPhase]) do
+            -- This has to be a nil-check, because the value could be false
+            if (QuestieCorrections.hiddenQuests[id] == nil) then
+                QuestieCorrections.hiddenQuests[id] = hide
+            end
+        end
+    end
 
     if (Questie.IsWotlk) then
         -- We only add blacklist if no blacklist entry for the quest already exists
@@ -196,8 +215,7 @@ local _LoadCorrections = function(databaseTableName, corrections, reversedKeys, 
     end
 end
 
-
----@param validationTables table Only used by the cli.lua script to validate the corrections against the original database values and find irrelevant corrections
+---@param validationTables table? Only used by the cli.lua script to validate the corrections against the original database values and find irrelevant corrections
 function QuestieCorrections:Initialize(validationTables)
     -- Classic Corrections
     _LoadCorrections("questData", QuestieQuestFixes:Load(), QuestieDB.questKeysReversed, validationTables)
@@ -278,10 +296,12 @@ local ZONE_SCALES = {
     [ZoneDB.zoneIDs.UNDERCITY] = 0.5,
 }
 
+
+local abs, sqrt = math.abs, math.sqrt
 local function euclid(x, y, i, e)
-    local xd = math.abs(x - i)
-    local yd = math.abs(y - e)
-    return math.sqrt(xd * xd + yd * yd)
+    local xd = abs(x - i)
+    local yd = abs(y - e)
+    return sqrt(xd * xd + yd * yd)
 end
 
 function QuestieCorrections:OptimizeWaypoints(waypointData)
@@ -310,56 +330,38 @@ function QuestieCorrections:OptimizeWaypoints(waypointData)
                         for i=1,divs do
                             local mul0 = i/divs
                             local mul1 = 1-mul0
-                            tinsert(newWaypoints, {way[1] * mul0 + lastWay[1] * mul1, way[2] * mul0 + lastWay[2] * mul1})
+                            newWaypoints[#newWaypoints+1] = {way[1] * mul0 + lastWay[1] * mul1, way[2] * mul0 + lastWay[2] * mul1}
                         end
                     else
-                        tinsert(newWaypoints, way)
+                        newWaypoints[#newWaypoints+1] = way
                     end
                 else
-                    tinsert(newWaypoints, way)
+                    newWaypoints[#newWaypoints+1] = way
                 end
-
                 lastWay = way
             end
-            tinsert(newWaypointList, newWaypoints)
+            newWaypointList[#newWaypointList+1] = newWaypoints
         end
         newWaypointZones[zone] = newWaypointList
-
     end
     return newWaypointZones
 end
 
 function QuestieCorrections:PreCompile() -- this happens only if we are about to compile the database. Run intensive preprocessing tasks here (like ramer-douglas-peucker)
-    local ops = {}
+    local waypointKey = QuestieDB.npcKeys["waypoints"]
+    local npcData = QuestieDB.npcData
 
-    for id, data in pairs(QuestieDB.npcData) do
-        local way = data[QuestieDB.npcKeys["waypoints"]]
+    local count = 0
+    for id, data in pairs(npcData) do
+        local way = data[waypointKey]
         if way then
-            tinsert(ops, {way, id})
+            npcData[id][waypointKey] = QuestieCorrections:OptimizeWaypoints(way)
         end
-    end
 
-    while true do
-        coroutine.yield()
-        for _ = 0, Questie.db.global.debugEnabled and TICKS_PER_YIELD_DEBUG or TICKS_PER_YIELD do
-            local op = tremove(ops, 1)
-            if op then
-                QuestieDB.npcData[op[2]][QuestieDB.npcKeys["waypoints"]] = QuestieCorrections:OptimizeWaypoints(op[1])
-            else
-                --local totalPoints2 = 0
-                --for id, data in pairs(QuestieDB.npcData) do
-                --    local way = data[QuestieDB.npcKeys["waypoints"]]
-                --    if way then
-                --        for _,waypoints in pairs(way) do
-                --            totalPoints2 = totalPoints2 + #waypoints
-                --        end
-                --    end
-                --end
-                --print("Before RDP: " .. tostring(totalPoints))
-                --print("After RDP:" .. tostring(totalPoints2))
-
-                return
-            end
+        if count > 500 then -- 500 seems like a good number
+            count = 0
+            coroutine.yield()
         end
+        count = count + 1
     end
 end

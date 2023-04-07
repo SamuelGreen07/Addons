@@ -11,7 +11,6 @@ local pairs, tinsert, tContains = pairs, tinsert, tContains
 local hooksecurefunc = hooksecurefunc
 local EnableAddOn = EnableAddOn
 local LoadAddOn = LoadAddOn
-local GetAddOnMetadata = GetAddOnMetadata
 local GetAddOnInfo = GetAddOnInfo
 local CreateFrame = CreateFrame
 local IsAddOnLoaded = IsAddOnLoaded
@@ -78,7 +77,7 @@ function E:ToggleMoveMode(which)
 		mode = true
 	end
 
-	self:ToggleMovers(mode, which)
+	E:ToggleMovers(mode, which)
 
 	if mode then
 		E:Grid_Show()
@@ -91,7 +90,7 @@ function E:ToggleMoveMode(which)
 		ElvUIMoverPopupWindow:Show()
 		_G.UIDropDownMenu_SetSelectedValue(ElvUIMoverPopupWindowDropDown, strupper(which))
 
-		if IsAddOnLoaded('ElvUI_OptionsUI') then
+		if IsAddOnLoaded('ElvUI_Options') then
 			E:Config_CloseWindow()
 		end
 	else
@@ -302,7 +301,7 @@ function E:CreateMoverPopup()
 		if E.ConfigurationToggled then
 			E.ConfigurationToggled = nil
 
-			if IsAddOnLoaded('ElvUI_OptionsUI') then
+			if IsAddOnLoaded('ElvUI_Options') then
 				E:Config_OpenWindow()
 			end
 		end
@@ -631,21 +630,21 @@ local function Config_SortButtons(a,b)
 	end
 end
 
-local function ConfigSliderOnMouseWheel(self, offset)
-	local _, maxValue = self:GetMinMaxValues()
+local function ConfigSliderOnMouseWheel(frame, offset)
+	local _, maxValue = frame:GetMinMaxValues()
 	if maxValue == 0 then return end
 
-	local newValue = self:GetValue() - offset
+	local newValue = frame:GetValue() - offset
 	if newValue < 0 then newValue = 0 end
 	if newValue > maxValue then return end
 
-	self:SetValue(newValue)
-	self.buttons:Point('TOPLEFT', 0, newValue * 36)
+	frame:SetValue(newValue)
+	frame.buttons:Point('TOPLEFT', 0, newValue * 36)
 end
 
-local function ConfigSliderOnValueChanged(self, value)
-	self:SetValue(value)
-	self.buttons:Point('TOPLEFT', 0, value * 36)
+local function ConfigSliderOnValueChanged(frame, value)
+	frame:SetValue(value)
+	frame.buttons:Point('TOPLEFT', 0, value * 36)
 end
 
 function E:Config_SetButtonText(btn, noColor)
@@ -670,8 +669,9 @@ function E:Config_CreateSeparatorLine(frame, lastButton)
 end
 
 function E:Config_SetButtonColor(btn, disabled)
+	btn:SetEnabled(not disabled)
+
 	if disabled then
-		btn:Disable()
 		btn.Text:SetTextColor(1, 1, 1)
 		E:Config_SetButtonText(btn, true)
 
@@ -680,7 +680,6 @@ function E:Config_SetButtonColor(btn, disabled)
 			btn:SetBackdropBorderColor(1, .82, 0, 1)
 		end
 	else
-		btn:Enable()
 		btn.Text:SetTextColor(1, .82, 0)
 		E:Config_SetButtonText(btn)
 
@@ -879,7 +878,7 @@ function E:Config_GetWindow()
 end
 
 local ConfigLogoTop
-E.valueColorUpdateFuncs[function(_, r, g, b)
+E.valueColorUpdateFuncs.ConfigLogo = function(_, _, r, g, b)
 	if ConfigLogoTop then
 		ConfigLogoTop:SetVertexColor(r, g, b)
 	end
@@ -887,7 +886,7 @@ E.valueColorUpdateFuncs[function(_, r, g, b)
 	if ElvUIMoverNudgeWindow and ElvUIMoverNudgeWindow.shadow then
 		ElvUIMoverNudgeWindow.shadow:SetBackdropBorderColor(r, g, b, 0.9)
 	end
-end] = true
+end
 
 function E:Config_WindowClosed()
 	if not self.bottomHolder then return end
@@ -986,7 +985,7 @@ function E:Config_CreateBottomButtons(frame, unskinned)
 			desc = L["Run the installation process."],
 			func = function()
 				E:Install()
-				E:ToggleOptionsUI()
+				E:ToggleOptions()
 			end
 		},
 		{
@@ -994,7 +993,7 @@ function E:Config_CreateBottomButtons(frame, unskinned)
 			name = L["Toggle Tutorials"],
 			func = function()
 				E:Tutorials(true)
-				E:ToggleOptionsUI()
+				E:ToggleOptions()
 			end
 		},
 		{
@@ -1003,7 +1002,7 @@ function E:Config_CreateBottomButtons(frame, unskinned)
 			desc = L["Shows a frame with needed info for support."],
 			func = function()
 				E:ShowStatusReport()
-				E:ToggleOptionsUI()
+				E:ToggleOptions()
 				E.StatusReportToggled = true
 			end
 		}
@@ -1074,32 +1073,30 @@ function E:Config_GetToggleMode(frame, msg)
 	end
 end
 
-function E:ToggleOptionsUI(msg)
+function E:ToggleOptions(msg)
 	if InCombatLockdown() then
-		self:Print(ERR_NOT_IN_COMBAT)
-		self.ShowOptionsUI = true
+		E:Print(ERR_NOT_IN_COMBAT)
+		self.ShowOptions = true
 		return
 	end
 
-	if not IsAddOnLoaded('ElvUI_OptionsUI') then
-		local noConfig
-		local _, _, _, _, reason = GetAddOnInfo('ElvUI_OptionsUI')
+	if not IsAddOnLoaded('ElvUI_Options') then
+		local _, _, _, _, reason = GetAddOnInfo('ElvUI_Options')
 
-		if reason ~= 'MISSING' then
-			EnableAddOn('ElvUI_OptionsUI')
-			LoadAddOn('ElvUI_OptionsUI')
-
-			-- version check elvui options if it's actually enabled
-			if GetAddOnMetadata('ElvUI_OptionsUI', 'Version') ~= '1.08' then
-				self:StaticPopup_Show('CLIENT_UPDATE_REQUEST')
-			end
-		else
-			noConfig = true
-		end
-
-		if noConfig then
-			self:Print('|cffff0000Error -- Addon "ElvUI_OptionsUI" not found.|r')
+		if reason == 'MISSING' then
+			E:Print('|cffff0000Error|r -- Addon "ElvUI_Options" not found.')
 			return
+		else
+			EnableAddOn('ElvUI_Options')
+			LoadAddOn('ElvUI_Options')
+
+			-- version check if it's actually enabled
+			local config = E.Config and E.Config[1]
+			if not config or (E.version ~= config.version) then
+				E.updateRequestTriggered = true
+				E:StaticPopup_Show('UPDATE_REQUEST')
+				return
+			end
 		end
 	end
 

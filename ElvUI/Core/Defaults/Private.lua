@@ -68,6 +68,7 @@ V.chat = {
 
 V.skins = {
 	ace3Enable = true,
+	libDropdown = true,
 	checkBoxSkin = true,
 	parchmentRemoverEnable = false,
 	blizzard = {
@@ -141,6 +142,7 @@ V.skins = {
 		objectiveTracker = true,
 		obliterum = true,
 		orderhall = true,
+		perks = true,
 		petbattleui = true,
 		petition = true,
 		playerChoice = true,

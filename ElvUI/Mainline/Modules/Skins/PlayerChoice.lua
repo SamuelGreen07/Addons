@@ -3,6 +3,7 @@ local S = E:GetModule('Skins')
 local B = E:GetModule('Blizzard')
 
 local _G = _G
+local pairs = pairs
 local hooksecurefunc = hooksecurefunc
 
 function S:PlayerChoice_SetupButtons(buttons)
@@ -32,9 +33,28 @@ function S:PlayerChoice_SetupRewards(rewards)
 	end
 end
 
+local function ReskinSpellWidget(spell)
+	if spell.Icon and not spell.Icon.backdrop then
+		S:HandleIcon(spell.Icon, true)
+	end
+
+	if spell.IconMask then
+		spell.IconMask:Hide()
+	end
+
+	if spell.Border then
+		spell.Border:SetAlpha(0)
+	end
+
+	if spell.Text then
+		spell.Text:SetTextColor(1, .8, 0)
+	end
+end
+
 S.PlayerChoice_TextureKits = {
 	jailerstower = true,
-	cypherchoice = true
+	cypherchoice = true,
+	genericplayerchoice = true,
 }
 
 function S:PlayerChoice_SetupOptions()
@@ -81,6 +101,19 @@ function S:PlayerChoice_SetupOptions()
 
 			S:PlayerChoice_SetupRewards(option.rewards)
 			S:PlayerChoice_SetupButtons(option.buttons)
+
+			local container = option.WidgetContainer
+			if container and container.widgetFrames then
+				for _, frame in pairs(container.widgetFrames) do
+					if frame.Text then
+						frame.Text:SetTextColor(1, 1, 1)
+					end
+
+					if frame.Spell then
+						ReskinSpellWidget(frame.Spell)
+					end
+				end
+			end
 		end
 	end
 end
@@ -108,6 +141,10 @@ function S:Blizzard_PlayerChoice()
 	if not (E.private.skins.blizzard.enable and E.private.skins.blizzard.playerChoice) then return end
 
 	SetupTorghastMover()
+
+	if _G.GenericPlayerChoiceToggleButton then
+		S:HandleButton(_G.GenericPlayerChoiceToggleButton)
+	end
 
 	hooksecurefunc(_G.PlayerChoiceFrame, 'SetupOptions', S.PlayerChoice_SetupOptions)
 end

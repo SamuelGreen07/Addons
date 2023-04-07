@@ -1,10 +1,10 @@
--- $Id: Atlas-zhCN.lua 374 2022-01-26 14:33:01Z arithmandar $
+-- $Id: Atlas-zhCN.lua 431 2023-03-20 14:46:49Z arithmandar $
 --[[
 
 	Atlas, a World of Warcraft instance map browser
 	Copyright 2005 ~ 2010 - Dan Gilbert <dan.b.gilbert at gmail dot com>
 	Copyright 2010 - Lothaer <lothayer at gmail dot com>, Atlas Team
-	Copyright 2011 ~ 2022 - Arith Hsu, Atlas Team <atlas.addon at gmail dot com>
+	Copyright 2011 ~ 2023 - Arith Hsu, Atlas Team <atlas.addon at gmail dot com>
 
 	This file is part of Atlas.
 
@@ -91,15 +91,18 @@ L["ATLAS_DDL_EXPANSION_WOTLK"] = "《巫妖王之怒》副本"
 L["ATLAS_DDL_LEVEL"] = "等级"
 L["ATLAS_DDL_LEVEL_100PLUS"] = "100 级以上副本"
 L["ATLAS_DDL_LEVEL_100TO110"] = "100-110 级副本"
+L["ATLAS_DDL_LEVEL_10TO20"] = "10-20 级副本"
 L["ATLAS_DDL_LEVEL_10TO30"] = "副本等级 10-30"
 L["ATLAS_DDL_LEVEL_110PLUS"] = "110 级以上副本"
 L["ATLAS_DDL_LEVEL_110TO120"] = "110-120 级副本"
 L["ATLAS_DDL_LEVEL_120PLUS"] = "120 级以上副本"
 L["ATLAS_DDL_LEVEL_120TO130"] = "120-130 级副本"
 L["ATLAS_DDL_LEVEL_130PLUS"] = "130 级以上副本"
+L["ATLAS_DDL_LEVEL_20TO40"] = "20-40 级副本"
 L["ATLAS_DDL_LEVEL_30TO35"] = "副本等级 30-35"
 L["ATLAS_DDL_LEVEL_35TO40"] = "副本等级 35-40"
 L["ATLAS_DDL_LEVEL_40TO45"] = "副本等级 40-45"
+L["ATLAS_DDL_LEVEL_40TO60"] = "40-60 级副本"
 L["ATLAS_DDL_LEVEL_45TO50"] = "副本等级 45-50"
 L["ATLAS_DDL_LEVEL_45TO60"] = "45-60 级副本"
 L["ATLAS_DDL_LEVEL_50TO60"] = "副本等级 50-60"

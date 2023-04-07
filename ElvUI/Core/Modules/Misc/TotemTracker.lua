@@ -2,7 +2,7 @@ local E, L, V, P, G = unpack(ElvUI)
 local T = E:GetModule('TotemTracker')
 
 local _G = _G
-local next = next
+local ipairs = ipairs
 local unpack = unpack
 
 local CreateFrame = CreateFrame
@@ -12,33 +12,38 @@ local MAX_TOTEMS = MAX_TOTEMS
 -- SHAMAN_TOTEM_PRIORITIES does not work here because we need to swap 3/4 instead of 1/2
 local priority = E.myclass == 'SHAMAN' and { [1]=1, [2]=2, [3]=4, [4]=3 } or STANDARD_TOTEM_PRIORITIES
 
-function T:UpdateButton(button, totem, show)
-	if show and totem then
-		local _, _, startTime, duration, icon = GetTotemInfo(totem.slot)
+function T:UpdateButton(button, totem)
+	if not (button and totem) then return end
 
+	local haveTotem, _, startTime, duration, icon = GetTotemInfo(totem.slot)
+
+	button:SetShown(haveTotem and duration > 0)
+
+	if haveTotem then
 		button.iconTexture:SetTexture(icon)
 		button.cooldown:SetCooldown(startTime, duration)
 
-		totem:ClearAllPoints()
-		totem:SetParent(button.holder)
-		totem:SetAllPoints(button.holder)
+		if totem:GetParent() ~= button.holder then
+			totem:ClearAllPoints()
+			totem:SetParent(button.holder)
+			totem:SetAllPoints(button.holder)
+		end
 	end
-
-	button:SetShown(show)
 end
 
 function T:Update()
 	if E.Retail then
-		for totem in next, _G.TotemFrame.totemPool.activeObjects do
-			T:UpdateButton(T.bar[priority[totem.layoutIndex]], totem, true)
+		for _, button in ipairs(T.bar) do
+			if button:IsShown() then
+				button:SetShown(false)
+			end
 		end
-		for _, totem in next, _G.TotemFrame.totemPool.inactiveObjects do
-			T:UpdateButton(T.bar[priority[totem.layoutIndex]], totem, false)
+		for totem in _G.TotemFrame.totemPool:EnumerateActive() do
+			T:UpdateButton(T.bar[priority[totem.layoutIndex]], totem)
 		end
 	else
 		for i = 1, MAX_TOTEMS do
-			local totem = _G['TotemFrameTotem'..i]
-			T:UpdateButton(T.bar[priority[i]], totem, totem and totem:IsShown())
+			T:UpdateButton(T.bar[priority[i]], _G['TotemFrameTotem'..i])
 		end
 	end
 end
@@ -129,6 +134,12 @@ function T:Initialize()
 
 	T:RegisterEvent('PLAYER_TOTEM_UPDATE', 'Update')
 	T:RegisterEvent('PLAYER_ENTERING_WORLD', 'Update')
+
+	if E.Retail then
+		T:RegisterEvent('PLAYER_SPECIALIZATION_CHANGED', 'Update')
+	else
+		T:RegisterEvent('ACTIVE_TALENT_GROUP_CHANGED', 'Update')
+	end
 
 	E:CreateMover(bar, 'TotemTrackerMover', L["Totem Tracker"], nil, nil, nil, nil, nil, 'general,totems')
 end

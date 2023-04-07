@@ -26,7 +26,7 @@ function Necrosis:CreateTimerAnchor()
 			f:SetWidth(150)
 			f:SetHeight(150)
 			f:SetMovable(true)
-			f:EnableMouse(true)
+			--f:EnableMouse(true)
 			
 			f:Show()
 			f:ClearAllPoints()
@@ -70,7 +70,7 @@ function Necrosis:CreateWarlockUI()
 	-- Define its attributes || Définition de ses attributs
 	frame:SetFrameStrata("MEDIUM")
 	frame:SetMovable(true)
-	frame:EnableMouse(true)
+	--frame:EnableMouse(true)
 	frame:SetWidth(34)
 	frame:SetHeight(34)
 	frame:SetNormalTexture("Interface\\AddOns\\Necrosis\\UI\\SpellTimerButton-Normal")
@@ -137,7 +137,7 @@ function Necrosis:CreateWarlockUI()
 		NecrosisConfig.FramePosition["NecrosisButton"][5]
 	)
 
-	frame:SetScale(NecrosisConfig.NecrosisButtonScale / 100)
+	frame:SetScale((NecrosisConfig.NecrosisButtonScale / 100))
 	
 	-- Create the soulshard counter || Création du compteur de fragments d'âme
 	local FontString = _G["NecrosisShardCount"]
@@ -327,7 +327,7 @@ function Necrosis:CreateMenuItem(i)
 		frame:SetWidth(40)
 		frame:SetHeight(40)
 		frame:SetHighlightTexture(b.high) --("Interface\\AddOns\\Necrosis\\UI\\"...)
-		frame:RegisterForClicks("LeftButtonUp", "MiddleButton" , "RightButtonUp")
+		frame:RegisterForClicks("LeftButtonUp", "MiddleButtonUp" , "RightButtonUp")
 --
 -- essai bt movable
 		frame:RegisterForDrag("MiddleButton")
@@ -502,7 +502,7 @@ function Necrosis:CreateWarlockPopup()
 		if frame:GetAlpha() == 0 then
 	
 		GameTooltip:Hide()
-		frame:EnableMouse(false)
+		--frame:EnableMouse(false)
 		else
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
 		GameTooltip:SetText(White(Necrosis.GetSpellName("enslave")))
@@ -542,7 +542,7 @@ function Necrosis:CreateWarlockPopup()
 
 	-- Define its attributes || Définition de ses attributs
 	frame:SetMovable(true)
-	frame:EnableMouse(true)
+	--frame:EnableMouse(true)
 	frame:SetFrameStrata("HIGH")
 	frame:SetWidth(40)
 	frame:SetHeight(40)
@@ -576,18 +576,14 @@ function Necrosis:CreateWarlockPopup()
 	frame:SetScript("OnEnter", function(self) 
 		--Necrosis:BuildButtonTooltip("ElementalToolTip")
 		
-		if frame:GetAlpha() == 0 then
-		-- NOTHING TO SHOW			
-		frame:EnableMouse(true)
-		frame:SetMovable(true)
-		else
+
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
 		GameTooltip:SetText(White(Necrosis.GetSpellName("banish")))
 		GameTooltip:AddDoubleLine(L["BUTTONS_L"], hight_rank)
 		GameTooltip:AddDoubleLine(L["BUTTONS_R"], derank)			
 		GameTooltip:Show()
 
-		end
+
 	end)
 	frame:SetScript("OnLeave", function() GameTooltip:Hide() end)
 
@@ -621,7 +617,7 @@ function Necrosis:CreateWarlockPopup()
 
 	-- Define its attributes || Définition de ses attributs
 	frame:SetMovable(true)
-	frame:EnableMouse(true)
+	--frame:EnableMouse(true)
 	frame:SetFrameStrata("HIGH")
 	frame:SetWidth(40)
 	frame:SetHeight(40)

@@ -1,13 +1,13 @@
 ﻿-- Pawn by Vger-Azjol-Nerub
 -- www.vgermods.com
--- © 2006-2022 Travis Spomer.  This mod is released under the Creative Commons Attribution-NonCommercial-NoDerivs 3.0 license.
+-- © 2006-2023 Travis Spomer.  This mod is released under the Creative Commons Attribution-NonCommercial-NoDerivs 3.0 license.
 -- See Readme.htm for more information.
 
 --
 -- Main non-UI code
 ------------------------------------------------------------
 
-PawnVersion = 2.0706
+PawnVersion = 2.0718
 
 -- Pawn requires this version of VgerCore:
 local PawnVgerCoreVersionRequired = 1.17
@@ -203,6 +203,7 @@ function PawnInitialize()
 		end)
 
 	-- Main game tooltip
+	-- Note that in Dragonflight, most or all of this could be replaced by hooking GameTooltip.ProcessInfo, but that won't work in older versions.
 	if not VgerCore.IsMainline then
 		-- SetAuctionItem was removed in 8.3.0 but is still there on Classic.  The (incorrect) way that BankItems hooks this function
 		-- causes the detection to fail, so just directly check the version.
@@ -262,8 +263,8 @@ function PawnInitialize()
 	if GameTooltip.SetWeeklyReward then
 		hooksecurefunc(GameTooltip, "SetWeeklyReward", function(self, ...) PawnUpdateTooltip("GameTooltip", "SetWeeklyReward", ...) end)
 	end
-	if C_ItemInteraction and C_ItemInteraction.SetItemConversionOutputTooltip then
-		hooksecurefunc(C_ItemInteraction, "SetItemConversionOutputTooltip", function(self, ...) PawnUpdateTooltip("GameTooltip", "__ItemInteraction_SetItemConversionOutputTooltip_ignored", ...) end)
+	if GameTooltip.SetItemInteractionItem then
+		hooksecurefunc(GameTooltip, "SetItemInteractionItem", function(self, ...) PawnUpdateTooltip("GameTooltip", "SetItemInteractionItem", ...) end)
 	end
 	hooksecurefunc(GameTooltip, "Hide",
 		function(self, ...)
@@ -327,28 +328,43 @@ function PawnInitialize()
 	hooksecurefunc("LootWonAlertFrame_SetUp", PawnUI_LootWonAlertFrame_SetUp)
 
 	-- The "currently equipped" tooltips (two, in case of rings, trinkets, and dual wielding)
-	hooksecurefunc(ShoppingTooltip1, "SetCompareItem",
-		function(self, ...)
-			local _, ItemLink1 = ShoppingTooltip1:GetItem()
-			PawnUpdateTooltip("ShoppingTooltip1", "SetCompareItem", ItemLink1, ...)
-			PawnAttachIconToTooltip(ShoppingTooltip1, true)
-			local _, ItemLink2 = ShoppingTooltip2:GetItem()
-			if ItemLink2 and ShoppingTooltip2:IsShown() then
-				PawnUpdateTooltip("ShoppingTooltip2", "SetHyperlink", ItemLink2, ...)
-				PawnAttachIconToTooltip(ShoppingTooltip2, true)
-			end
+	if ShoppingTooltip1.SetCompareItem then
+		hooksecurefunc(ShoppingTooltip1, "SetCompareItem",
+			function(self, ...)
+				local _, ItemLink1 = ShoppingTooltip1:GetItem()
+				PawnUpdateTooltip("ShoppingTooltip1", "SetCompareItem", ItemLink1, ...)
+				PawnAttachIconToTooltip(ShoppingTooltip1, true)
+				local _, ItemLink2 = ShoppingTooltip2:GetItem()
+				if ItemLink2 and ShoppingTooltip2:IsShown() then
+					PawnUpdateTooltip("ShoppingTooltip2", "SetHyperlink", ItemLink2, ...)
+					PawnAttachIconToTooltip(ShoppingTooltip2, true)
+				end
+			end)
+		hooksecurefunc(ItemRefShoppingTooltip1, "SetCompareItem",
+			function(self, ...)
+				local _, ItemLink1 = ItemRefShoppingTooltip1:GetItem()
+				PawnUpdateTooltip("ItemRefShoppingTooltip1", "SetCompareItem", ItemLink1, ...)
+				PawnAttachIconToTooltip(ItemRefShoppingTooltip1, true)
+				local _, ItemLink2 = ItemRefShoppingTooltip2:GetItem()
+				if ItemLink2 and ItemRefShoppingTooltip2:IsShown() then
+					PawnUpdateTooltip("ItemRefShoppingTooltip2", "SetHyperlink", ItemLink2, ...)
+					PawnAttachIconToTooltip(ItemRefShoppingTooltip2, true)
+				end
+			end)
+	end
+
+	-- Dragonflight replaces SetCompareItem with ProcessInfo. (ProcessInfo is now used internally by lots of
+	-- methods, but only in Dragonflight.)
+	if ShoppingTooltip1.ProcessInfo then
+		hooksecurefunc(ShoppingTooltip1, "ProcessInfo", function(self)
+			local _, ItemLink = TooltipUtil.GetDisplayedItem(ShoppingTooltip1)
+			if ItemLink then PawnUpdateTooltip("ShoppingTooltip1", "SetHyperlink", ItemLink) end
 		end)
-	hooksecurefunc(ItemRefShoppingTooltip1, "SetCompareItem",
-		function(self, ...)
-			local _, ItemLink1 = ItemRefShoppingTooltip1:GetItem()
-			PawnUpdateTooltip("ItemRefShoppingTooltip1", "SetCompareItem", ItemLink1, ...)
-			PawnAttachIconToTooltip(ItemRefShoppingTooltip1, true)
-			local _, ItemLink2 = ItemRefShoppingTooltip2:GetItem()
-			if ItemLink2 and ItemRefShoppingTooltip2:IsShown() then
-				PawnUpdateTooltip("ItemRefShoppingTooltip2", "SetHyperlink", ItemLink2, ...)
-				PawnAttachIconToTooltip(ItemRefShoppingTooltip2, true)
-			end
+		hooksecurefunc(ShoppingTooltip2, "ProcessInfo", function(self)
+			local _, ItemLink = TooltipUtil.GetDisplayedItem(ShoppingTooltip2)
+			if ItemLink then PawnUpdateTooltip("ShoppingTooltip2", "SetHyperlink", ItemLink) end
 		end)
+	end
 
 	-- MultiTips compatibility
 	if MultiTips then
@@ -394,18 +410,28 @@ function PawnInitialize()
 		ArkInventoryRules.Register(arkInventoryModule, "PAWNNOTUPGRADE", ArkInventoryRulePawnNotUpgrade)
 	end
 
+	-- AceConfigDialog compatibility
+	if AceConfigDialogTooltip then
+		VgerCore.HookInsecureFunction(AceConfigDialogTooltip, "SetHyperlink", function(self, ItemLink, ...) PawnUpdateTooltip("AceConfigDialogTooltip", "SetHyperlink", ItemLink, ...) end)
+	end
+
 	-- In-bag upgrade icons
 	if VgerCore.IsMainline then
 		PawnOriginalIsContainerItemAnUpgrade = IsContainerItemAnUpgrade
 		PawnIsContainerItemAnUpgrade = function(bagID, slot, ...)
 			if PawnCommon.ShowBagUpgradeAdvisor then
-				local _, Count, _, _, _, _, ItemLink = GetContainerItemInfo(bagID, slot)
-				if not Count then return false end -- If the stack count is 0, it's clearly not an upgrade
-				if not ItemLink then return nil end -- If we didn't get an item link, but there's an item there, try again later
-				return PawnShouldItemLinkHaveUpgradeArrow(ItemLink, true) -- true means to check player level
+				local ItemInfo = C_Container.GetContainerItemInfo(bagID, slot)
+				if not ItemInfo or not ItemInfo.stackCount then return false end -- If the stack count is 0, it's clearly not an upgrade
+				if not ItemInfo.hyperlink then return nil end -- If we didn't get an item link, but there's an item there, try again later
+				return PawnShouldItemLinkHaveUpgradeArrow(ItemInfo.hyperlink, true) -- true means to check player level
 			else
-				---@diagnostic disable-next-line: redundant-parameter
-				return PawnOriginalIsContainerItemAnUpgrade(bagID, slot, ...)
+				if PawnOriginalIsContainerItemAnUpgrade then
+					---@diagnostic disable-next-line: redundant-parameter
+					return PawnOriginalIsContainerItemAnUpgrade(bagID, slot, ...)
+				else
+					-- If Pawn's bag advisor is off, AND the game's IsContainerItemAnUpgrade is missing, nothing's an upgrade.
+					return false
+				end
 			end
 		end
 		PawnUpdateItemUpgradeIcon = function(self)
@@ -423,7 +449,7 @@ function PawnInitialize()
 	end
 
 	if ContainerFrameItemButtonMixin and ContainerFrameItemButtonMixin.UpdateItemUpgradeIcon then
-		-- Dragonflight onward
+		-- 10.0.0 only - this code was removed from the game in 10.0.2
 
 		-- First, hook ContainerFrameItemButtonMixin to affect all future bag frames.
 		hooksecurefunc(ContainerFrameItemButtonMixin, "UpdateItemUpgradeIcon", PawnUpdateItemUpgradeIcon)
@@ -455,9 +481,10 @@ function PawnInitialize()
 	PawnIsInitialized = true
 
 	-- If any of our dependencies have already loaded, pretend that they just loaded now.
+	if IsAddOnLoaded("Blizzard_ArtifactUI") then PawnOnAddonLoaded("Blizzard_ArtifactUI") end
+	if IsAddOnLoaded("Blizzard_EncounterJournal") then PawnOnAddonLoaded("Blizzard_EncounterJournal") end
 	if IsAddOnLoaded("Blizzard_InspectUI") then PawnOnAddonLoaded("Blizzard_InspectUI") end
 	if IsAddOnLoaded("Blizzard_ItemSocketingUI") then PawnOnAddonLoaded("Blizzard_ItemSocketingUI") end
-	if IsAddOnLoaded("Blizzard_ArtifactUI") then PawnOnAddonLoaded("Blizzard_ArtifactUI") end
 
 	-- Now, load any plugins that are ready to be loaded.
 	PawnInitializePlugins()
@@ -523,6 +550,9 @@ function PawnOnAddonLoaded(AddonName)
 	elseif AddonName == "Blizzard_ArtifactUI" then
 		-- After the artifact UI is loaded, watch the relic sockets.
 		PawnUI_HookArtifactUI()
+	elseif AddonName == "Blizzard_EncounterJournal" then
+		-- After the encounter journal is loaded, watch the loot buttons.
+		PawnUI_HookEncounterJournal()
 	end
 end
 
@@ -2427,7 +2457,12 @@ function PawnGetStatsFromTooltip(TooltipName, DebugMessages)
 	end
 
 	-- Done!
-	local _, PrettyLink = Tooltip:GetItem()
+	local _, PrettyLink
+	if Tooltip.GetItem then
+		_, PrettyLink = Tooltip:GetItem()
+	elseif TooltipUtil then
+		_, PrettyLink = TooltipUtil.GetDisplayedItem(Tooltip)
+	end
 	if not HadUnknown then UnknownLines = nil end
 	return Stats, SocketBonusStats, UnknownLines, PrettyLink
 end
@@ -2851,7 +2886,7 @@ function PawnGetGemListString(ScaleName, ListAll, ItemLevel, Color)
 			end
 		elseif Color == "Red" or Color == "Yellow" or Color == "Blue" then
 			-- If there are three or more best gems AND it's a specific color, we can at least return the socket color.
-			return _G[toupper(Color) .. "_GEM"], true
+			return _G[strupper(Color) .. "_GEM"], true
 		end
 	end
 
@@ -2859,101 +2894,62 @@ function PawnGetGemListString(ScaleName, ListAll, ItemLevel, Color)
 	return "?", true
 end
 
--- Returns the type of hyperlink passed in, or nil if it's not a hyperlink.
--- Possible values include: item, enchant, quest, spell
-function PawnGetHyperlinkType(Hyperlink)
+-- If the string is a clickable hyperlink, return the actual item: or other link target from it.
+function PawnGetHyperlinkTarget(Hyperlink)
 	-- First, try colored links.
-	local _, _, LinkType = strfind(Hyperlink, "^|c%x%x%x%x%x%x%x%x|H(.-):")
-	if not LinkType then
-		-- Then, try links prepended with |H.  (Outfitter does this.)
-		_, _, LinkType = strfind(Hyperlink, "^|H(.-):")
+	local _, _, Target = strfind(Hyperlink, "^|c%x%x%x%x%x%x%x%x|H(.-)|")
+	if not Target then
+		-- Then, try links prepended with |H but no color.  (Outfitter does this.)
+		_, _, Target = strfind(Hyperlink, "^|H(.-)|")
 	end
-	if not LinkType then
-		-- Then, try raw links.
-		_, _, LinkType = strfind(Hyperlink, "^(.-):")
-	end
-	return LinkType
+	-- If it's a raw link, or not a link at all, just return the same string.
+	if not Target then Target = Hyperlink end
+	return Target
 end
 
--- If the item link is of the clickable form, strip off the initial hyperlink portion.
-function PawnStripLeftOfItemLink(ItemLink)
-	local _, _, InnerLink = strfind(ItemLink, "^|%x+|H(.+)")
-	if InnerLink then return InnerLink else return ItemLink end
+-- Returns the type of hyperlink passed in, or nil if it's not a hyperlink.
+-- Possible values include: "item", "enchant", "quest", "spell", and many more.
+function PawnGetHyperlinkType(Hyperlink)
+	local _, _, LinkType = strfind(PawnGetHyperlinkTarget(Hyperlink), "^(.-):")
+	return LinkType
 end
 
 -- Extracts the item ID from an ItemLink string and returns it, or nil if unsuccessful.
 function PawnGetItemIDFromLink(ItemLink)
-	local Pos, _, ItemID = strfind(PawnStripLeftOfItemLink(ItemLink), "^item:(%-?%d+):?")
+	local Pos, _, ItemID = strfind(PawnGetHyperlinkTarget(ItemLink), "^item:(%-?%d+):?")
 	if Pos then return tonumber(ItemID) else return nil end
-end
-
--- If the upgrade level passed in is upgradeable with valor, return the new upgrade level, otherwise return nil.
-local function PawnDoValorUpgrade(UpgradeLevel)
-	if UpgradeLevel1 == "529" or UpgradeLevel1 == "530" then
-		-- Note: This only covers Warlords of Draenor upgradeable items, not legacy items, but realistically you're probably
-		-- not ever going to want to upgrade those.  (If it ever becomes useful, it sounds like LibItemUpgradeInfo handles all of the edge cases.)
-		return "531"
-	else
-		return nil
-	end
 end
 
 -- Returns a new item link that represents an unenchanted version of the original item link.
 -- Return values:
---		ItemLink - The unenchanted item link, or nil if unsuccessful or the item is not unenchanted.
---		WasUpgraded - True if the item was upgraded while being "unenchanted."  (Always false if "ignore valor and baleful upgrades" is off.)
--- (But if EvenIfNotEnchanted is true, the item link will be processed even if the item wasn't enchanted.)
+--		ItemLink - The unenchanted item link, or nil if unsuccessful or the item is not unenchanted and not EvenIfNotEnchanted.
 function PawnUnenchantItemLink(ItemLink, EvenIfNotEnchanted)
-	local TrimmedItemLink = PawnStripLeftOfItemLink(ItemLink)
-	local Pos, _, ItemID, EnchantID, GemID1, GemID2, GemID3, GemID4, SuffixID, MoreInfo, ViewAtLevel, SpecializationID, UpgradeLevel1, Difficulty, NumBonusIDs, BonusID1, BonusID2, BonusID3, BonusID4, BonusID5, BonusID6, BonusID7, BonusID8, BonusID9, BonusID10, BonusID11, BonusID12 = strfind(TrimmedItemLink, "^item:(%-?%d+):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%-?%d*):?(%-?%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*)")
-	-- Note: After the specified number of bonus IDs would be UpgradeLevel2, which could be the level at which the item was acquired for timewarped items, or
-	-- the Valor upgrade level.
-	-- Note: This code is gross and you should be ashamed.
+	-- Item link format
+	-- item:ItemID:EnchantID:GemID1:GemID2:GemID3:GemID4:SuffixID:MoreInfo:ViewAtLevel:SpecializationID:UpgradeLevel1:Difficulty:NumBonusIDs:BonusID1:BonusID2:[...]:BonusIDn:UpgradeLevel2:[...]
+	-- All portions after the initial item ID are optional, and all trailing colons are optional.
+	-- "Unenchanting" an item link involves removing the enchantment and gem IDs and leaving everything else intact.
+	local Target = PawnGetHyperlinkTarget(ItemLink)
+	local Pos, _, ItemID, EnchantID, GemID1, GemID2, GemID3, GemID4, EverythingElse = strfind(Target, "^item:(%-?%d+):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(.*)")
 
-	if Pos then
-		-- If this is a valor-upgradeable item that isn't fully upgraded, for purposes of calculation we always assume a fully-upgraded item is the "base."
-		-- The upgrade value will always come after the list of bonus IDs, as UpgradeLevel2.
-		NumBonusIDs = tonumber(NumBonusIDs) or 0
-		VgerCore.Assert(NumBonusIDs <= 12, "Pawn didn't expect to find " .. tostring(NumBonusIDs) .. " bonus IDs on that complicated-ass item. Item stats may not be correct.")
-		local WasUpgraded = false -- This feature was removed in Pawn 2.1.4.
+	-- If this isn't in the correct item link format, we can exit now. This is a normal case: for example, caged battle pets appear in inventory but aren't items.
+	if not Pos then return nil end
 
-		if
-			EvenIfNotEnchanted or
-			EnchantID ~= "0" or EnchantID == "" or EnchantID == nil or
-			GemID1 ~= "0" or GemID1 == "" or GemID1 == nil or
-			GemID2 ~= "0" or GemID2 == "" or GemID2 == nil or
-			GemID3 ~= "0" or GemID3 == "" or GemID3 == nil or
-			GemID4 ~= "0" or GemID4 == "" or GemID4 == nil or
-			WasUpgraded
-		then
-			-- This item is enchanted.  Return a new link.
-			if SuffixID == nil or SuffixID == "" then SuffixID = "0" end
-			if MoreInfo == nil or MoreInfo == "" then MoreInfo = "0" end
-			if SpecializationID == nil or SpecializationID == "" then SpecializationID = "0" end
-			if UpgradeLevel1 == nil or UpgradeLevel1 == "" then UpgradeLevel1 = "0" end
-			if Difficulty == nil or Difficulty == "" then Difficulty = "0" end
-			if NumBonusIDs == nil or NumBonusIDs == "" then NumBonusIDs = "0" end
-			if BonusID1 == nil or BonusID1 == "" then BonusID1 = "0" end
-			if BonusID2 == nil or BonusID2 == "" then BonusID2 = "0" end
-			if BonusID3 == nil or BonusID3 == "" then BonusID3 = "0" end
-			if BonusID4 == nil or BonusID4 == "" then BonusID4 = "0" end
-			if BonusID5 == nil or BonusID5 == "" then BonusID5 = "0" end
-			if BonusID6 == nil or BonusID6 == "" then BonusID6 = "0" end
-			if BonusID7 == nil or BonusID7 == "" then BonusID7 = "0" end
-			if BonusID8 == nil or BonusID8 == "" then BonusID8 = "0" end
-			if BonusID9 == nil or BonusID9 == "" then BonusID9 = "0" end
-			if BonusID10 == nil or BonusID10 == "" then BonusID10 = "0" end
-			if BonusID11 == nil or BonusID11 == "" then BonusID11 = "0" end
-			if BonusID12 == nil or BonusID12 == "" then BonusID12 = "0" end
-			return "item:" .. ItemID .. ":0:0:0:0:0:" .. SuffixID .. ":" .. MoreInfo .. ":" .. 0 .. ":" .. SpecializationID .. ":" .. UpgradeLevel1 .. ":" .. Difficulty .. ":" .. NumBonusIDs .. ":" .. BonusID1 .. ":" .. BonusID2 .. ":" .. BonusID3 .. ":" .. BonusID4 .. ":" .. BonusID5 .. ":" .. BonusID6 .. ":" .. BonusID7 .. ":" .. BonusID8 .. ":" .. BonusID9 .. ":" .. BonusID10 .. ":" .. BonusID11 .. ":" .. BonusID12, WasUpgraded
+	if
+		EvenIfNotEnchanted or
+		(EnchantID ~= "0" and EnchantID ~= "" and EnchantID ~= nil) or
+		(GemID1 ~= "0" and GemID1 ~= "" and GemID1 ~= nil) or
+		(GemID2 ~= "0" and GemID2 ~= "" and GemID2 ~= nil) or
+		(GemID3 ~= "0" and GemID3 ~= "" and GemID3 ~= nil) or
+		(GemID4 ~= "0" and GemID4 ~= "" and GemID4 ~= nil)
+	then
+		-- This item is enchanted or gemmed, so return a new link.
+		if EverythingElse then
+			return "item:" .. ItemID .. "::::::" .. EverythingElse
 		else
-			-- This item is not enchanted.  Return nil.
-			return nil
+			return "item:" .. ItemID
 		end
 	else
-		-- We couldn't parse this item link.  Return nil.
-		-- This is a normal case—for example, battle pet item links.
-		--VgerCore.Fail("Could not parse the item link: " .. PawnEscapeString(ItemLink))
+		-- This item is already unenchanted, so just return nil.
 		return nil
 	end
 end
@@ -3589,8 +3585,20 @@ function PawnIsItemAnUpgrade(Item, DoNotRescan)
 							if Item1 then Value1 = Item1.Level end
 							if Item2 then Value2 = Item2.Level end
 						else
-							if Item1 then _, Value1 = PawnGetSingleValueFromItem(Item1, ScaleName) end
-							if Item2 then _, Value2 = PawnGetSingleValueFromItem(Item2, ScaleName) end
+							if Item1 then
+								if PawnNeverShowUpgradesFor[Item1.ID] then
+									Value1 = 1/0
+								else
+									_, Value1 = PawnGetSingleValueFromItem(Item1, ScaleName)
+								end
+							end
+							if Item2 then
+								if PawnNeverShowUpgradesFor[Item2.ID] then
+									Value2 = 1/0
+								else
+									_, Value2 = PawnGetSingleValueFromItem(Item2, ScaleName)
+								end
+							end
 						end
 
 						if Value1 and Value2 then
@@ -3811,6 +3819,7 @@ function PawnFindBestItems(ScaleName, InventoryOnly)
 		if not InvType or InvType == "" or InvType == "INVTYPE_TRINKET" or InvType == "INVTYPE_BAG" or InvType == "INVTYPE_QUIVER" or InvType == "INVTYPE_TABARD" or InvType == "INVTYPE_BODY" then return end
 		local _, Value = PawnGetSingleValueFromItem(Item, ScaleName)
 		if Value <= 0 then return end
+		if PawnNeverShowUpgradesFor[Item.ID] then return end
 		local UnenchantedItemLink = PawnUnenchantItemLink(Item.Link, true)
 		VgerCore.Assert(UnenchantedItemLink ~= nil, "PawnFindBestItems's CheckItem lambda failed to get an item link for item " .. tostring(Item.ID))
 

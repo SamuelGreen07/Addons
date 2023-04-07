@@ -151,7 +151,7 @@ Skillet.options =
 					set = function(self,value)
 						Skillet.db.profile.link_craftable_reagents = value
 					end,
-					width = "full",
+					width = 1.5,
 					order = 19
 				},
 				queue_craftable_reagents = {
@@ -167,6 +167,19 @@ Skillet.options =
 					width = 1.5,
 					order = 20
 				},
+				queue_tools = {
+					type = "toggle",
+					name = L["QUEUETOOLSNAME"],
+					desc = L["QUEUETOOLSDESC"],
+					get = function()
+						return Skillet.db.profile.queue_tools
+					end,
+					set = function(self,value)
+						Skillet.db.profile.queue_tools = value
+					end,
+					width = 1.5,
+					order = 21
+				},
 				ignore_banked_reagents = {
 					type = "toggle",
 					name = L["IGNOREBANKEDREAGENTSNAME"],
@@ -178,7 +191,7 @@ Skillet.options =
 						Skillet.db.profile.ignore_banked_reagents = value
 					end,
 					width = 1.5,
-					order = 21
+					order = 22
 				},
 --[[
 				queue_glyph_reagents = {
@@ -1005,6 +1018,20 @@ Skillet.options =
 			end,
 			order = 78
 		},
+		news = {
+			type = 'execute',
+			name = "Display news",
+			desc = "Display the news frame",
+			func = function()
+				if not (UnitAffectingCombat("player")) then
+					Skillet.NewsGUI:Toggle()
+				else
+					DA.DEBUG(0,"|cff8888ffSkillet|r: Combat lockdown restriction." ..
+												  " Leave combat and try again.")
+				end
+			end,
+			order = 80
+		},
 
 --
 -- Commands to manipulate the state of debugging code flags
@@ -1127,6 +1154,19 @@ Skillet.options =
 			set = function(self,value)
 				Skillet.db.profile.TraceLog = value
 				Skillet.TraceLog = value
+			end,
+			order = 88
+		},
+		TraceLog2 = {
+			type = "toggle",
+			name = "TraceLog2",
+			desc = "Option for debugging",
+			get = function()
+				return Skillet.db.profile.TraceLog2
+			end,
+			set = function(self,value)
+				Skillet.db.profile.TraceLog2 = value
+				Skillet.TraceLog2 = value
 			end,
 			order = 88
 		},

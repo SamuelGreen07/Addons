@@ -2,26 +2,25 @@
 
 *These are either my own notes, or mostly suggestions and reports from all of you. This does not yet include all reported or suggestions on Discord. There is no guarantee I am going to do all of these eventually, just notes of all things suggested that I am either moderately interested in, or extremely interested in implemented. Some items I have already largely built but are not yet ready for release. Most I have not even begun to brainstorm implementation on. If you would like to add to any of these suggestions or expand on things further, please look at Suggestions in Discord*
 
-# **BUG FIXES**
 
-* -- Promote live recording to chat on macro tool often not recording WHO "https://cdn.discordapp.com/attachments/418471113023029248/791368969561833512/unknown.png" - Still need to debug this as it was reported and I have not yet fixed it...
+** SCAN FOR CHANGES ** Trigger on GUILD_ROSTER_UPDATE - this will only check for changes to notes, leveling, etc...
+    --Event_Log_Update - check for promotion/demotion/kick/join/etc...
+
+
+# **BUG FIXES**
 
 * StaticPopup is closing on Escape, which is bad if you die and hit escape. It should only on the GRM one. This seems to be affecting Classic.
 
 * Birthday column on Audit window is not sorting when clicked. Note, when selecting "Include bdays as incomplete," the sorting works fine, interestingly enough.
-
-* Macro rule showing doubling results - seen it once but was unable to rereate
 
 
 # **QUALITY OF LIFE**
 
 * UI 2.0 - See Discord for details
 
-* Resizable frames by dragging corner
+* Re-scalable frames by dragging corner - NOT RESIZABLE, just scaling by dragging.
 
 * Online indicator on the alt popout mouseover toons beyond just alphabetically, but also tagged as main/alt group, etc...
-
-* Block log reporting unless the players reaches the "Destination" rank when promoting/demoting with macro tool
 
 * Occasionally GRM's window is appearing when a player is logging out, the ban attachment. That should not happen. This seems to be happening in Classic, mainly.
 
@@ -273,9 +272,6 @@ end
 
 * Restore public note from backup
 
-```Lua
-/run local g,n,p=GRM_GuildDataBackup_Save["A"][GRM_G.guildName].Auto.members;for i=1,GRM.GetNumGuildies() do n,_,_,_,_,_,p=GetGuildRosterInfo(i);for x,y in pairs (g) do if type(y)=="table" and x==n then GuildRosterSetPublicNote(i,y.note);end;end;end
-```
 
 **MACRO TOOL ENHANCEMENT**
 

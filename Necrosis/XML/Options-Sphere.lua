@@ -27,29 +27,81 @@ function Necrosis:SetSphereConfig()
 		frame:ClearAllPoints()
 		frame:SetPoint("BOTTOMLEFT")
 
-		-- Création du slider de scale de Necrosis
+		---------------------------------------
+		-- Option  Verrouillage de Necrosis ---
+		---------------------------------------
+		
+		frame = CreateFrame("CheckButton", "NecrosisLock", NecrosisSphereConfig, "UICheckButtonTemplate")
+		frame:EnableMouse(true)
+		frame:SetWidth(24)
+		frame:SetHeight(24)
+		frame:Show()
+		frame:ClearAllPoints()
+		frame:SetPoint("LEFT", NecrosisSphereConfig, "BOTTOMLEFT", 35, 160)
+
+		frame:SetScript("OnClick", function(self)
+			local ft = _G[Necrosis.Warlock_Buttons.trance.f]
+			local fb = _G[Necrosis.Warlock_Buttons.backlash.f]
+			local fa = _G[Necrosis.Warlock_Buttons.anti_fear.f]
+			local fe = _G[Necrosis.Warlock_Buttons.elemental.f]
+			local fd = _G[Necrosis.Warlock_Buttons.demon.f]	
+			
+			if (self:GetChecked()) then
+				Necrosis:NoDrag()
+				NecrosisButton:RegisterForDrag("")
+				NecrosisSpellTimerButton:RegisterForDrag("")
+				ft:RegisterForDrag("")
+				fb:RegisterForDrag("")
+				fa:RegisterForDrag("")
+				fe:RegisterForDrag("")
+				fd:RegisterForDrag("")			
+				NecrosisConfig.NoDragAll = true
+			else
+				if not NecrosisConfig.NecrosisLockServ then
+					Necrosis:Drag()
+				end
+				NecrosisButton:RegisterForDrag("LeftButton")
+				NecrosisSpellTimerButton:RegisterForDrag("LeftButton")
+				ft:RegisterForDrag("LeftButton")
+				fb:RegisterForDrag("LeftButton")
+				fa:RegisterForDrag("LeftButton")
+				fe:RegisterForDrag("LeftButton")
+				fd:RegisterForDrag("LeftButton")				
+				NecrosisConfig.NoDragAll = false
+			end
+		end)
+
+		FontString = frame:CreateFontString(nil, nil, "GameFontNormalSmall")
+		FontString:Show()
+		FontString:ClearAllPoints()
+		FontString:SetPoint("LEFT", frame, "RIGHT", 5, 1)
+		FontString:SetTextColor(1, 1, 1)
+		frame:SetFontString(FontString)
+
+
+
+
+		
+-----------------------------------------------------------
+		-- Création du slider de scale de Necrosis---------
+-----------------------------------------------------------
+
 		frame = CreateFrame("Slider", "NecrosisSphereSize", NecrosisSphereConfig, "OptionsSliderTemplate")
 		frame:SetMinMaxValues(50, 200)
-		frame:SetValueStep(5)
+		frame:SetValueStep(1)
 		frame:SetObeyStepOnDrag(true)
 		frame:SetWidth(150)
 		frame:SetHeight(15)
 		frame:Show()
 		frame:ClearAllPoints()
-		frame:SetPoint("CENTER", NecrosisSphereConfig, "BOTTOMLEFT", 225, 400)
+		frame:SetPoint("CENTER", NecrosisSphereConfig, "BOTTOMLEFT", 133, 120)
 
 		local f = _G[Necrosis.Warlock_Buttons.main.f]
 --		local NBx, NBy = f:GetCenter()
 		local point, relativeTo, relativePoint, NBx, NBy = f:GetPoint()
---[[
-_G["DEFAULT_CHAT_FRAME"]:AddMessage("SetSphereConfig scale"
-.." p'"..(tostring(point))..'"'
-.." rt'"..(tostring(relativeTo:GetName()))..'"'
-.." rp'"..(tostring(relativePoint))..'"'
-.." x'"..(tostring(NBx))..'"'
-.." y'"..(tostring(NBy))..'"'
-)
---]]
+
+
+
 		NBx = NBx * (NecrosisConfig.NecrosisButtonScale / 100) -- undo the scaling
 		NBy = NBy * (NecrosisConfig.NecrosisButtonScale / 100)
 
@@ -71,35 +123,71 @@ _G["DEFAULT_CHAT_FRAME"]:AddMessage("SetSphereConfig scale"
 				
 				f:ClearAllPoints()
 				f:SetPoint(NecrosisConfig.FramePosition["NecrosisButton"][1],
-					NecrosisConfig.FramePosition["NecrosisButton"][2],
-					NecrosisConfig.FramePosition["NecrosisButton"][3], 
-					NBx / (NecrosisConfig.NecrosisButtonScale / 100), 
-					NBy / (NecrosisConfig.NecrosisButtonScale / 100)
+					NecrosisConfig.FramePosition["NecrosisButton"][2], --X Position
+					NecrosisConfig.FramePosition["NecrosisButton"][3], --Y Position
+					NBx / (NecrosisConfig.NecrosisButtonScale / 100), --X offset
+					NBy / (NecrosisConfig.NecrosisButtonScale / 100) -- Y Offset
 					)
 
-				f:SetScale(NecrosisConfig.NecrosisButtonScale / 100)
+				--f:SetScale(NecrosisConfig.NecrosisButtonScale / 100) 
+				--local Ratio = 1.25
+				f:SetScale(NecrosisConfig.NecrosisButtonScale / 100 ) ---- Scaling de la sphere 
 				
-				if self:GetValue() > 100 then
+				
+				--if self:GetValue() > 100 then
 				Necrosis:ButtonSetup()
-				end
-				
+				--end
+			else
+			Necrosis:ButtonSetup()
 			end
 		end)
 
 		NecrosisSphereSizeLow:SetText("50 %")
 		NecrosisSphereSizeHigh:SetText("200 %")
+		
+--------------------------------------------------------------------------------------------------------------------------------
+------- Create a slider control for rotating the buttons around the sphere || Création du slider de rotation de Necrosis  ------
+--------------------------------------------------------------------------------------------------------------------------------
 
-		-------------------------------------------------
+		frame = CreateFrame("Slider", "NecrosisRotation", NecrosisSphereConfig, "OptionsSliderTemplate")
+		frame:SetMinMaxValues(0, 360)
+		frame:SetValueStep(9)
+		frame:SetWidth(150)
+		frame:SetHeight(15)
+		frame:Show()
+		frame:ClearAllPoints()
+
+		frame:SetPoint("CENTER", NecrosisSphereConfig, "BOTTOMRIGHT", 18, 120)
+
+		frame:SetScript("OnEnter", function(self)
+			GameTooltip:SetOwner(frame, "ANCHOR_RIGHT")
+			GameTooltip:SetText(self:GetValue())
+		end)
+		frame:SetScript("OnLeave", function() GameTooltip:Hide() end)
+		frame:SetScript("OnValueChanged", function(self)
+			NecrosisConfig.NecrosisAngle = self:GetValue()
+			GameTooltip:SetText(self:GetValue())
+			Necrosis:ButtonSetup()
+		end)
+
+		NecrosisRotationLow:SetText("0")
+		NecrosisRotationHigh:SetText("360")
+
+		NecrosisRotation:SetValue(NecrosisConfig.NecrosisAngle)
+
+		---------------------------------------------
 		-- Skin de la sphère
+		---------------------------------------------
+
 		frame = CreateFrame("Frame", "NecrosisSkinSelection", NecrosisSphereConfig, "UIDropDownMenuTemplate")
 		frame:Show()
 		frame:ClearAllPoints()
-		frame:SetPoint("RIGHT", NecrosisSphereConfig, "BOTTOMRIGHT", 40, 345)
+		frame:SetPoint("RIGHT", NecrosisSphereConfig, "BOTTOMRIGHT", 120, 385)
 
 		local FontString = frame:CreateFontString("NecrosisSkinSelectionT", "OVERLAY", "GameFontNormalSmall")
 		FontString:Show()
 		FontString:ClearAllPoints()
-		FontString:SetPoint("LEFT", NecrosisSphereConfig, "BOTTOMLEFT", 35, 348)
+		FontString:SetPoint("LEFT", NecrosisSphereConfig, "BOTTOMLEFT", 35, 388)
 		FontString:SetTextColor(1, 1, 1)
 
 		UIDropDownMenu_SetWidth(frame, 125)
@@ -109,12 +197,12 @@ _G["DEFAULT_CHAT_FRAME"]:AddMessage("SetSphereConfig scale"
 		frame = CreateFrame("Frame", "NecrosisEventSelection", NecrosisSphereConfig, "UIDropDownMenuTemplate")
 		frame:Show()
 		frame:ClearAllPoints()
-		frame:SetPoint("RIGHT", NecrosisSphereConfig, "BOTTOMRIGHT", 40, 315)
+		frame:SetPoint("RIGHT", NecrosisSphereConfig, "BOTTOMRIGHT", 120, 355)
 
 		FontString = frame:CreateFontString("NecrosisEventSelectionT", "OVERLAY", "GameFontNormalSmall")
 		FontString:Show()
 		FontString:ClearAllPoints()
-		FontString:SetPoint("LEFT", NecrosisSphereConfig, "BOTTOMLEFT", 35, 318)
+		FontString:SetPoint("LEFT", NecrosisSphereConfig, "BOTTOMLEFT", 35, 358)
 		FontString:SetTextColor(1, 1, 1)
 
 		UIDropDownMenu_SetWidth(frame, 125)
@@ -125,12 +213,12 @@ _G["DEFAULT_CHAT_FRAME"]:AddMessage("SetSphereConfig scale"
 		UIDropDownMenu_SetText(NecrosisSpellSelection, Necrosis.GetSpellName(NecrosisConfig.MainSpell))
 		frame:Show()
 		frame:ClearAllPoints()
-		frame:SetPoint("RIGHT", NecrosisSphereConfig, "BOTTOMRIGHT", 40, 285)
+		frame:SetPoint("RIGHT", NecrosisSphereConfig, "BOTTOMRIGHT", 120, 325)
 
 		FontString = frame:CreateFontString("NecrosisSpellSelectionT", "OVERLAY", "GameFontNormalSmall")
 		FontString:Show()
 		FontString:ClearAllPoints()
-		FontString:SetPoint("LEFT", NecrosisSphereConfig, "BOTTOMLEFT", 35, 288)
+		FontString:SetPoint("LEFT", NecrosisSphereConfig, "BOTTOMLEFT", 35, 328)
 		FontString:SetTextColor(1, 1, 1)
 
 		UIDropDownMenu_SetWidth(frame, 125)
@@ -139,12 +227,12 @@ _G["DEFAULT_CHAT_FRAME"]:AddMessage("SetSphereConfig scale"
 		UIDropDownMenu_SetText(NecrosisSpellSelection2, Necrosis.GetSpellName(NecrosisConfig.MainSpell2))
 		frame:Show()
 		frame:ClearAllPoints()
-		frame:SetPoint("RIGHT", NecrosisSphereConfig, "BOTTOMRIGHT", 40, 255)
+		frame:SetPoint("RIGHT", NecrosisSphereConfig, "BOTTOMRIGHT", 120, 295)
 
 		FontString = frame:CreateFontString("NecrosisSpellSelectionT2", "OVERLAY", "GameFontNormalSmall")
 		FontString:Show()
 		FontString:ClearAllPoints()
-		FontString:SetPoint("LEFT", NecrosisSphereConfig, "BOTTOMLEFT", 35, 258)
+		FontString:SetPoint("LEFT", NecrosisSphereConfig, "BOTTOMLEFT", 35, 298)
 		FontString:SetTextColor(1, 1, 1)
 
 		UIDropDownMenu_SetWidth(frame, 125)
@@ -157,7 +245,7 @@ _G["DEFAULT_CHAT_FRAME"]:AddMessage("SetSphereConfig scale"
 		frame:SetHeight(24)
 		frame:Show()
 		frame:ClearAllPoints()
-		frame:SetPoint("LEFT", NecrosisSphereConfig, "BOTTOMLEFT", 25, 200)
+		frame:SetPoint("LEFT", NecrosisSphereConfig, "BOTTOMLEFT", 35, 240)
 		frame:SetChecked(NecrosisConfig.deleteshards)
 		frame:SetScript("OnClick", function(self)
 			NecrosisConfig.deleteshards = self:GetChecked()
@@ -179,7 +267,7 @@ _G["DEFAULT_CHAT_FRAME"]:AddMessage("SetSphereConfig scale"
 		frame:SetHeight(24)
 		frame:Show()
 		frame:ClearAllPoints()
-		frame:SetPoint("LEFT", NecrosisSphereConfig, "BOTTOMLEFT", 25, 225)
+		frame:SetPoint("LEFT", NecrosisSphereConfig, "BOTTOMLEFT", 35, 265)
 		frame:SetChecked(NecrosisConfig.DestroyShardwithsphere)
 		frame:SetScript("OnClick", function(self)
 			
@@ -199,12 +287,12 @@ _G["DEFAULT_CHAT_FRAME"]:AddMessage("SetSphereConfig scale"
 		frame = CreateFrame("Frame", "NecrosisCountSelection", NecrosisSphereConfig, "UIDropDownMenuTemplate")
 		frame:Show()
 		frame:ClearAllPoints()
-		frame:SetPoint("RIGHT", NecrosisSphereConfig, "BOTTOMRIGHT", 40, 175)
+		frame:SetPoint("RIGHT", NecrosisSphereConfig, "BOTTOMRIGHT", 120, 215)
 
 		FontString = frame:CreateFontString("NecrosisCountSelectionT", "OVERLAY", "GameFontNormalSmall")
 		FontString:Show()
 		FontString:ClearAllPoints()
-		FontString:SetPoint("LEFT", NecrosisSphereConfig, "BOTTOMLEFT", 35, 178)
+		FontString:SetPoint("LEFT", NecrosisSphereConfig, "BOTTOMLEFT", 35, 218)
 		FontString:SetTextColor(1, 1, 1)
 
 		UIDropDownMenu_SetWidth(frame, 125)
@@ -217,7 +305,9 @@ _G["DEFAULT_CHAT_FRAME"]:AddMessage("SetSphereConfig scale"
 	UIDropDownMenu_Initialize(NecrosisSpellSelection2, Necrosis.Spell_Init2)
 	UIDropDownMenu_Initialize(NecrosisCountSelection, Necrosis.Count_Init)
 
+	NecrosisLock:SetText(self.Config.Misc["Verrouiller Necrosis sur l'interface"])
 	NecrosisSphereSizeText:SetText(self.Config.Sphere["Taille de la sphere"])
+	NecrosisRotationText:SetText(self.Config.Buttons["Rotation des boutons"])
 	NecrosisSkinSelectionT:SetText(self.Config.Sphere["Skin de la pierre Necrosis"])
 	NecrosisEventSelectionT:SetText(self.Config.Sphere["Evenement montre par la sphere"])
 	NecrosisSpellSelectionT:SetText(self.Config.Sphere["Sort caste par la sphere"])
@@ -225,6 +315,8 @@ _G["DEFAULT_CHAT_FRAME"]:AddMessage("SetSphereConfig scale"
 	NecrosisShowCount:SetText(self.Config.Sphere["Afficher le compteur numerique"])
 	NecrosisCountSelectionT:SetText(self.Config.Sphere["Type de compteur numerique"])
 	NecrosisDeleteShardsOutCount:SetText(self.Config.Sphere["Shift+Clic on Sphere to del. Shards"].."Shards > "..tostring(NecrosisConfig.DestroyCount))
+
+	NecrosisLock:SetChecked(NecrosisConfig.NoDragAll)
 
 	NecrosisSphereSize:SetValue(NecrosisConfig.NecrosisButtonScale)
 	NecrosisShowCount:SetChecked(NecrosisConfig.ShowCount)

@@ -88,6 +88,7 @@ function SUG:DoSuggest()
 	end
 
 	wipe(SUGpreTable)
+	suggestedForModule = SUG.CurrentModule
 
 	local tbl = SUG.CurrentModule:Table_Get() or {}
 
@@ -103,17 +104,8 @@ function SUG:DoSuggest()
 		Table_GetSpecialSuggestions(SUG.CurrentModule, SUGpreTable)
 	end
 
-	suggestedForModule = SUG.CurrentModule
 	SUG.tabIndex = 1
 	SUG:SuggestingComplete(1)
-end
-
-local function progressCallback(countdown)
-	-- This is called for each step of TMW.shellSortDeferred.
-	SUG:SuggestingComplete()
-
-	SUG.SuggestionList.blocker:Show()
-	SUG.SuggestionList.Header:SetText(L["SUGGESTIONS_SORTING"] .. " " .. countdown)
 end
 
 local buckets_meta = {__index = function(t, k)
@@ -123,10 +115,15 @@ end}
 local buckets = setmetatable({}, buckets_meta)
 
 function SUG:SuggestingComplete(doSort)
+	if suggestedForModule ~= SUG.CurrentModule then
+		TMW:Debug("SUG module changed mid-suggestion")
+		return
+	end
+
 	SUG.SuggestionList.blocker:Hide()
 	SUG.SuggestionList.Header:SetText(SUG.CurrentModule.headerText)
-	if doSort and not SUG.CurrentModule.dontSort then
 
+	if doSort and not SUG.CurrentModule.dontSort then
 		local sorter, sorterBucket = SUG.CurrentModule:Table_GetSorter()
 
 		if sorterBucket then
@@ -166,17 +163,8 @@ function SUG:SuggestingComplete(doSort)
 			buckets_meta.__mode = 'kv'
 
 		else
-			SUG.SuggestionList.blocker:Show()
-			SUG.SuggestionList.Header:SetText(L["SUGGESTIONS_SORTING"])
-
-			TMW.shellsortDeferred(SUGpreTable, sorter, nil, SUG.SuggestingComplete, SUG, progressCallback)
-			return
+			sort(SUGpreTable, sorter)
 		end
-	end
-
-	if suggestedForModule ~= SUG.CurrentModule then
-		TMW:Debug("SUG module changed mid-suggestion")
-		return
 	end
 
 	-- Each module should maintain a cached list of invalid entries
@@ -1229,15 +1217,12 @@ function Module:Sorter_Bucket(suggestions, buckets)
 		elseif ClassSpellLookup[id] then
 			tinsert(buckets[3], id)
 		else
-			-- Classic: the aura cache just isn't useful, since it can't cache by spellID.
-	
-			-- local spellName = GetSpellInfo(id)
-			-- local auraSoruce = spellName and AuraCache_Cache[strlowerCache[spellName]]
-			-- if auraSoruce == 2 then
-			-- 	tinsert(buckets[4], id)
-			-- elseif auraSoruce == 1 then
-			-- 	tinsert(buckets[5], id)
-			-- else
+			local auraSource = AuraCache_Cache[id]
+			if auraSource == 2 then
+				tinsert(buckets[4], id)
+			elseif auraSource == 1 then
+				tinsert(buckets[5], id)
+			else
 				if SUGIsNumberInput then
 					tinsert(buckets[6 + floor(id/1000)], id)
 				else
@@ -1249,7 +1234,7 @@ function Module:Sorter_Bucket(suggestions, buckets)
 					--bucket.__sorter = spellSort
 					tinsert(bucket, id)
 				end
-			--end
+			end
 		end
 	end
 end
@@ -1286,7 +1271,7 @@ function Module:Entry_AddToList_1(f, id)
 		f.Name:SetText(name)
 		f.ID:SetText(id)
 
-		f.tooltipmethod = "TMW_SetSpellByIDWithClassIcon"
+		f.tooltipmethod = TMW.GameTooltip_SetSpellByIDWithClassIcon
 		f.tooltiparg = id
 
 		if TMW.EquivFirstIDLookup[name] then
@@ -1311,19 +1296,15 @@ function Module:Entry_Colorize_1(f, id)
 		return
 	end
 
-	-- Classic: the aura cache just isn't useful, since it can't cache by spellID.
-
-	-- local spellName = GetSpellInfo(id)
-	-- local auraSoruce = spellName and AuraCache_Cache[strlowerCache[spellName]]
-	
-	-- if auraSoruce == AuraCache.CONST.AURA_TYPE_NONPLAYER then
-	-- 	-- Color known NPC auras warrior brown.
-	-- 	f.Background:SetVertexColor(.78, .61, .43, 1)
-	-- elseif auraSoruce == AuraCache.CONST.AURA_TYPE_PLAYER then
-	-- 	-- Color known PLAYER auras a bright pink-ish/pruple-ish color that is similar to paladin pink,
-	-- 	-- but has sufficient contrast for distinguishing.
-	-- 	f.Background:SetVertexColor(.79, .30, 1, 1)
-	-- end
+	local whoCasted = AuraCache_Cache[id]
+	if whoCasted == AuraCache.CONST.AURA_TYPE_NONPLAYER then
+		 -- Color known NPC auras warrior brown.
+		f.Background:SetVertexColor(.78, .61, .43, 1)
+	elseif whoCasted == AuraCache.CONST.AURA_TYPE_PLAYER then
+		-- Color known PLAYER auras a bright pink-ish/pruple-ish color that is similar to paladin pink,
+		-- but has sufficient contrast for distinguishing.
+		f.Background:SetVertexColor(.79, .30, 1, 1)
+	end
 end
 
 
@@ -1335,11 +1316,11 @@ function Module:Entry_AddToList_1(f, id)
 		f.Name:SetText(name)
 		f.ID:SetText(id)
 
-		f.tooltipmethod = "TMW_SetSpellByIDWithClassIcon"
+		f.tooltipmethod = TMW.GameTooltip_SetSpellByIDWithClassIcon
 		f.tooltiparg = id
 
 		f.insert = id
-		if ClassSpellCache:GetCache()[pclass][id] and name and GetSpellTexture(name) then
+		if ClassSpellCache:GetPlayerSpells()[id] and name and GetSpellTexture(name) then
 			f.insert2 = name
 		end
 
@@ -1461,7 +1442,7 @@ function Module:Entry_AddToList_2(f, id)
 		f.insert = equiv
 		f.overrideInsertName = L["SUG_INSERTEQUIV"]
 
-		f.tooltipmethod = "TMW_SetEquiv"
+		f.tooltipmethod = TMW.GameTooltip_SetEquiv
 		f.tooltiparg = equiv
 
 		f.Icon:SetTexture(GetSpellTexture(id))
@@ -1484,12 +1465,17 @@ function Module:Entry_IsValid(id)
 		return true
 	end
 
+	-- var lines = TooltipUtil.FindLinesFromGetter({0}, "GetSpellByID", 198013)
 	local Parser, LT1, LT2, LT3 = TMW:GetParser()
 
 	Parser:SetOwner(UIParent, "ANCHOR_NONE") -- must set the owner before text can be obtained.
 	Parser:SetSpellByID(id)
 
-	if LT2:GetText() == SPELL_CAST_CHANNELED or LT3:GetText() == SPELL_CAST_CHANNELED then
+	if 
+		LT1:GetText() == SPELL_CAST_CHANNELED or 
+		LT2:GetText() == SPELL_CAST_CHANNELED or 
+		LT3:GetText() == SPELL_CAST_CHANNELED 
+	then
 		return true
 	end
 end
@@ -1533,7 +1519,7 @@ function Module:Entry_AddToList_2(f, id)
 		f.insert = equiv
 		f.overrideInsertName = L["SUG_INSERTEQUIV"]
 
-		f.tooltipmethod = "TMW_SetEquiv"
+		f.tooltipmethod = TMW.GameTooltip_SetEquiv
 		f.tooltiparg = equiv
 
 		f.Icon:SetTexture(GetSpellTexture(firstid))

@@ -225,7 +225,7 @@ ConditionCategory:RegisterCondition(12,	 "TIMEOFDAY", {
 		--return CNDT.COMMON.formatSeconds(k*60)
 	end,
 	unit = false,
-	icon = "Interface\\Icons\\inv_misc_pocketwatch_02",
+	icon = TMW.isWrath and "Interface\\Icons\\inv_misc_pocketwatch_02" or "Interface\\Icons\\Ability_Racial_TimeIsMoney",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
 		GetDaysElapsedMinutes = function()
@@ -270,7 +270,7 @@ ConditionCategory:RegisterCondition(21,	 "QUESTCOMPLETE", {
 	},
 	funcstr = function(c)
 		if c.Name ~= "" then
-			return [[BOOLCHECK( IsQuestFlaggedCompleted(c.NameFirst) )]]
+			return [[BOOLCHECK( IsQuestFlaggedCompleted(c.Name) )]]
 		else
 			return [[false]]
 		end

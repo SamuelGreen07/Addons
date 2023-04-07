@@ -38,7 +38,7 @@ function NP:Health_UpdateColor(_, unit)
 	end
 
 	if t then
-		r, g, b = t[1] or t.r, t[2] or t.g, t[3] or t.b
+		r, g, b = t.r, t.g, t.b
 		element.r, element.g, element.b = r, g, b -- save these for the style filter to switch back
 	end
 
@@ -71,11 +71,13 @@ function NP:Construct_Health(nameplate)
 
 	NP.StatusBars[Health] = true
 
-	local statusBarTexture = Health:GetStatusBarTexture()
+	local healthBarTexture = Health:GetStatusBarTexture()
+	Health.barTexture = healthBarTexture
+
 	local healthFlashTexture = Health:CreateTexture(nameplate:GetName()..'FlashTexture', 'OVERLAY')
 	healthFlashTexture:SetTexture(LSM:Fetch('background', 'ElvUI Blank'))
-	healthFlashTexture:Point('BOTTOMLEFT', statusBarTexture, 'BOTTOMLEFT')
-	healthFlashTexture:Point('TOPRIGHT', statusBarTexture, 'TOPRIGHT')
+	healthFlashTexture:Point('BOTTOMLEFT', healthBarTexture, 'BOTTOMLEFT')
+	healthFlashTexture:Point('TOPRIGHT', healthBarTexture, 'TOPRIGHT')
 	healthFlashTexture:Hide()
 	nameplate.HealthFlashTexture = healthFlashTexture
 

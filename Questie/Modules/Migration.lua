@@ -113,7 +113,7 @@ local migrationFunctions = {
                 Questie.db.char.questAnnounceChannel = "disabled"
                 Questie.db.char.questAnnounceObjectives = false
             else
-                Questie.db.char.questAnnounceChannel = "group"
+                Questie.db.char.questAnnounceChannel = "party"
                 Questie.db.char.questAnnounceObjectives = true
             end
         end
@@ -155,6 +155,26 @@ local migrationFunctions = {
         if Questie.db.global.nameplateTargetFrameEnabled == false then -- old default value
             Questie.db.global.nameplateTargetFrameEnabled = true
         end
+    end,
+    [16] = function()
+        if Questie.db.char.questAnnounceChannel == "group" then
+            Questie.db.char.questAnnounceChannel = "party"
+        end
+    end,
+    [17] = function()
+        if Questie.IsWotlk then
+            Questie.db.global.isleOfQuelDanasPhase = 9 -- Last Isle Of Quel Danas Phase
+        end
+    end,
+    [18] = function()
+        if Questie.db.char.enableQuestFrameIcons == nil then
+            Questie.db.char.enableQuestFrameIcons = true
+        end
+    end,
+    [19] = function()
+        Questie.db.global.ICON_REPEATABLE_COMPLETE = Questie.icons["complete"]
+        Questie.db.global.ICON_EVENTQUEST_COMPLETE = Questie.icons["complete"]
+        Questie.db.global.ICON_PVPQUEST_COMPLETE = Questie.icons["complete"]
     end,
 }
 

@@ -519,11 +519,11 @@ function Skillet:ItemDataAddUsedInRecipe(itemID,recipeID)
 	self.db.global.itemRecipeUsedIn[itemID][recipeID] = true
 end
 
---[[
+
 --
 -- Inscription 
 --
-local topink = 113111				-- Warbinder's Ink
+local topink = 43126				-- Ink of the Sea
 local specialVendorItems = {
 	[37101] = {1, topink},			--Ivory Ink
 	[39469] = {1, topink},			--Moonglow Ink
@@ -533,19 +533,13 @@ local specialVendorItems = {
 	[43120] = {1, topink},			--Celestial Ink
 	[43122] = {1, topink},			--Shimmering Ink
 	[43124] = {1, topink},			--Ethereal Ink
-	[43126] = {1, topink},			--Ink of the Sea
-	[61978] = {1, topink},			--Blackfallow Ink
-	[79254] = {1, topink},			--Ink of Dreams
+--	[43126] = {1, topink},			--Ink of the Sea
+--	[61978] = {1, topink},			--Blackfallow Ink
+--	[79254] = {1, topink},			--Ink of Dreams
 
 	[43127] = {10, topink},			--Snowfall Ink
-	[61981] = {10, topink},			--Inferno Ink
-	[79255] = {10, topink},			--Starlight Ink
-}
-]]--
---
--- No special items in Classic (yet)
---
-local specialVendorItems = {
+--	[61981] = {10, topink},			--Inferno Ink
+--	[79255] = {10, topink},			--Starlight Ink
 }
 Skillet.SpecialVendorItems = specialVendorItems
 
@@ -993,24 +987,24 @@ local function ScanTrade()
 				skillData[i].color = skill_style_type[skillType]
 				skillData[i].category = lastHeader
 				local skillDBString = DifficultyChar[skillType]..recipeID
-				local tools
+				local cd, tools
 				if Skillet.isCraft then
+					cd = GetCraftCooldown(i)
 					tools = { GetCraftSpellFocus(i) }
 				else
+					cd = GetTradeSkillCooldown(i)
 					tools = { GetTradeSkillTools(i) }
 				end
+				if cd then
+					skillData[i].cooldown = cd + time()		-- this is when your cooldown will be up
+					skillDBString = skillDBString.."@cd="..cd + time()
+				end
+				--DA.DEBUG(1,"ScanTrade: #tools= "..tostring(#tools)..", tools= "..DA.DUMP1(tools))
 				skillData[i].tools = {}
 				local slot = 1
 				for t=2,#tools,2 do
 					skillData[i].tools[slot] = (tools[t] or 0)
 					slot = slot + 1
-				end
-				if not Skillet.isCraft then
-					local cd = GetTradeSkillCooldown(i)
-					if cd then
-						skillData[i].cooldown = cd + time()		-- this is when your cooldown will be up
-						skillDBString = skillDBString.."@cd="..cd + time()
-					end
 				end
 				local numTools = #tools+1
 				if numTools > 1 then

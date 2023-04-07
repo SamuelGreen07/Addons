@@ -1,10 +1,10 @@
--- $Id: Atlas.lua 412 2022-08-30 17:55:24Z arithmandar $
+-- $Id: Atlas.lua 434 2023-03-28 14:39:00Z arithmandar $
 --[[
 
 	Atlas, a World of Warcraft instance map browser
 	Copyright 2005 ~ 2010 - Dan Gilbert <dan.b.gilbert at gmail dot com>
 	Copyright 2010 - Lothaer <lothayer at gmail dot com>, Atlas Team
-	Copyright 2011 ~ 2022 - Arith Hsu, Atlas Team <atlas.addon at gmail dot com>
+	Copyright 2011 ~ 2023 - Arith Hsu, Atlas Team <atlas.addon at gmail dot com>
 
 	This file is part of Atlas.
 
@@ -643,7 +643,8 @@ function Atlas_OnEvent(self, event, ...)
 	if (event=="ADDON_LOADED" and (arg1=="Atlas" or arg1=="Blizzard_EncounterJournal")) then
 		--Blizzard_EncounterJournal
 		if (IsAddOnLoaded("Blizzard_EncounterJournal") and IsAddOnLoaded("Atlas")) then
-			addon:EncounterJournal_Binding()
+			-- Added Atlas button to Encounter Journal
+			--addon:EncounterJournal_Binding()
 		end
 	end
 
@@ -888,7 +889,7 @@ function addon:MapAddNPCButton()
 			-- Disable the set text unless one day we want the text to be added dynamatically
 			-- Or, enable it for debugging purpose
 --[[
-			local f_text = button:CreateFontString(button:GetName().."_Text", "MEDIUM", "NumberFont_Outline_Huge")
+			local f_text = button:CreateFontString(button:GetName().."_Text", "OVERLAY", "NumberFont_Outline_Huge")
 			f_text:SetPoint("CENTER", button, "CENTER", 0, 0)
 			f_text:SetText(info_mark)
 ]]
@@ -1018,7 +1019,7 @@ function addon:MapAddNPCButtonLarge()
 						info_colortag == "Purple" or
 						info_colortag == "Blue") then
 						if (not text) then
-							text = button:CreateFontString(button:GetName().."_Text", "MEDIUM", "AtlasSystemFont_Large_Outline_Thick")
+							text = button:CreateFontString(button:GetName().."_Text", "OVERLAY", "AtlasSystemFont_Large_Outline_Thick")
 						end
 						text:SetPoint("CENTER", button, "CENTER", 0, 0)
 						text:SetText(info_mark)
@@ -1038,7 +1039,7 @@ function addon:MapAddNPCButtonLarge()
 						info_colortag == "MONK" or
 						info_colortag == "DEMONHUNTER") then
 						if (not text) then
-							text = button:CreateFontString(button:GetName().."_Text", "MEDIUM", "AtlasSystemFont_Large_Outline_Thick")
+							text = button:CreateFontString(button:GetName().."_Text", "OVERLAY", "AtlasSystemFont_Large_Outline_Thick")
 						end
 						local color = RAID_CLASS_COLORS[info_colortag]
 						text:SetPoint("CENTER", button, "CENTER", 0, 0)
@@ -1994,10 +1995,18 @@ local function initialization()
 	end
 	
 	check_Modules()
-	if (profile.options.worldMapButton) then
-		AtlasToggleFromWorldMap:Show()
+	if (WoWClassicEra) then
+		if (profile.options.worldMapButton) then
+			AtlasToggleFromWorldMap:Show()
+		else
+			AtlasToggleFromWorldMap:Hide()
+		end
 	else
-		AtlasToggleFromWorldMap:Hide()
+		if (profile.options.worldMapButton) then
+			addon.WorldMap.Button:Show()
+		else
+			addon.WorldMap.Button:Hide()
+		end
 	end
 end
 
@@ -2039,9 +2048,17 @@ function addon:Refresh()
 	AtlasFrame:SetClampedToScreen(profile.options.frames.clamp)
 	AtlasFrameLarge:SetClampedToScreen(profile.options.frames.clamp)
 	AtlasFrameSmall:SetClampedToScreen(profile.options.frames.clamp)
-	if (profile.options.worldMapButton) then
-		AtlasToggleFromWorldMap:Show()
+	if (WoWClassicEra) then
+		if (profile.options.worldMapButton) then
+			AtlasToggleFromWorldMap:Show()
+		else
+			AtlasToggleFromWorldMap:Hide()
+		end
 	else
-		AtlasToggleFromWorldMap:Hide()
+		if (profile.options.worldMapButton) then
+			addon.WorldMap.Button:Show()
+		else
+			addon.WorldMap.Button:Hide()
+		end
 	end
 end

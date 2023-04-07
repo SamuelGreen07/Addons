@@ -36,14 +36,13 @@ local ItemButton = cargBags:NewClass("ItemButton", nil, "Button")
 	@return tpl <string>
 ]]
 function ItemButton:GetTemplate(bagID)
-	bagID = bagID or self:GetParent():GetID()
+	bagID = bagID or self._bagID or self:GetParent():GetID()
 	return (bagID == -3 and "ReagentBankItemButtonGenericTemplate") or (bagID == -1 and "BankItemButtonGenericTemplate") or (bagID and "ContainerFrameItemButtonTemplate") or (isClassic and "ItemButtonTemplate" or ""),
       (bagID == -3 and ReagentBankFrame) or (bagID == -1 and BankFrame) or (bagID and _G["ContainerFrame"..bagID + (isClassic and 2 or 1)]);
 end 
 
 local mt_gen_key = {__index = function(self,k) self[k] = {}; return self[k]; end}
 
-local parentFrames = {}
 --[[!
 	Fetches a new instance of the ItemButton, creating one if necessary
 	@param bagID <number>
@@ -54,17 +53,9 @@ function ItemButton:New(bagID, slotID)
 	self.recycled = self.recycled or setmetatable({}, mt_gen_key)
 
 	local tpl, parent = self:GetTemplate(bagID)
-	local pf = parentFrames[bagID]
-	if not pf then
-		pf = CreateFrame("Frame", nil, parent)
-		parentFrames[bagID] = pf
-		pf:SetID(bagID)
-		pf:Show()
-	end
-	local button = table.remove(self.recycled[tpl]) or self:Create(tpl, pf)
+	local button = table.remove(self.recycled[tpl]) or self:Create(tpl, parent)
 	button._bagID = bagID
 	button._slotID = slotID
-	button:SetParent(pf)
 	button:SetID(slotID)
 	
 	if not button.GetSlotAndBagID then

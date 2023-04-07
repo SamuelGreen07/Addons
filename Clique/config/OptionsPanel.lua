@@ -12,6 +12,7 @@ local addonName, addon = ...
 local L = addon.L
 
 local LibDropDown = LibStub("LibDropDown")
+local GetAddOnMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
 
 --[[-------------------------------------------------------------------------
 --  Addon 'About' Dialog for Interface Options
@@ -369,56 +370,6 @@ local function getsorttbl()
     end
     table.sort(sort)
     return sort
-end
-
-local function spec_initialize(dropdown, level)
-    local sort = getsorttbl()
-    local paged = (#sort >= 15)
-
-    if not level or level == 1 then
-        if not paged then
-            -- Display the profiles un-paged
-            for idx, entry in ipairs(sort) do
-                local info = UIDropDownMenu_CreateInfo()
-                info.text = entry
-                info.value = entry
-                info.func = function(frame, ...)
-                    UIDropDownMenu_SetSelectedValue(dropdown, entry)
-                end
-                UIDropDownMenu_AddButton(info, level)
-            end
-        else
-            -- Page the results into sub-menus
-            for idx = 1, #sort, 10 do
-                -- Make the submenus for each group
-                local lastidx = (idx + 9 > #sort) and #sort or (idx + 9)
-                local info = UIDropDownMenu_CreateInfo()
-                local first = sort[idx]
-                local last = sort[lastidx]
-                info.text = first:sub(1, 5):trim() .. ".." .. last:sub(1, 5):trim()
-                info.value = idx
-                info.hasArrow = true
-                info.notCheckable = true
-                UIDropDownMenu_AddButton(info, level)
-            end
-        end
-    elseif level == 2 then
-        -- Generate the appropriate submenus depending on need
-        if paged then
-            -- Generate the frame submenu
-            local startIdx = UIDROPDOWNMENU_MENU_VALUE
-            local lastIdx = (startIdx + 9 > #sort) and #sort or (startIdx + 9)
-            for idx = startIdx, lastIdx do
-                local info = UIDropDownMenu_CreateInfo()
-                info.text = sort[idx]
-                info.value = sort[idx]
-                info.func = function(frame, ...)
-                    UIDropDownMenu_SetSelectedValue(dropdown, sort[idx])
-                end
-                UIDropDownMenu_AddButton(info, level)
-            end
-        end
-    end
 end
 
 local function getProfileSubmenu(profileName, isCurrentProfile)

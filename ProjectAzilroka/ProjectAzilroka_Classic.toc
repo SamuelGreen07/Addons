@@ -1,8 +1,8 @@
 ## Interface: 11403
 ## Title: |cFF16C3F2Project|r|cFFFFFFFFAzilroka|r
-## Author: Azilroka
-## Version: 1.83
-## OptionalDeps: Masque, Tukui, ElvUI
+## Author: Azilroka, Nihilistzsche
+## Version: 1.87
+## OptionalDeps: Masque, Tukui, ElvUI, SpartanUI
 ## SavedVariables: ProjectAzilrokaDB, stAddonManagerProfilesDB, stAddonManagerServerDB
 ## X-Curse-Project-ID: 311661
 ## X-Wago-ID: baNDy46o
@@ -17,19 +17,4 @@ Cooldowns.lua
 Media\Media.lua
 
 # Modules
-Modules\BrokerLDB.lua
-Modules\DragonOverlay.lua
-Modules\EnhancedFriendsList.lua
-Modules\EnhancedShadows.lua
-Modules\FasterLoot.lua
-Modules\iFilger.lua
-Modules\LootConfirm.lua
-Modules\MasterExperience.lua
-Modules\MouseoverAuras.lua
-Modules\MovableFrames.lua
-Modules\OzCooldowns.lua
-Modules\QuestSounds.lua
-Modules\Reminder.lua
-Modules\SquareMinimapButtons.lua
-Modules\stAddonManager.lua
-Modules\TargetSounds.lua
+Modules\Load_Classic.xml

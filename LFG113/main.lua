@@ -462,7 +462,8 @@
 					if value[9] then
 						if submenu[value[9]] == nil and (value[9] == L.Locals.CurrentLocal ["Clients"]["1"] or
 								(version >= 2 and (value[9] == L.Locals.CurrentLocal ["Clients"]["2"].." Normal" or value[9] == L.Locals.CurrentLocal ["Clients"]["2"].." Heroic" or value[9] == L.Locals.CurrentLocal ["Clients"]["2"])) or
-								(version >= 3 and (value[9] == L.Locals.CurrentLocal ["Clients"]["3"].." Normal" or value[9] == L.Locals.CurrentLocal ["Clients"]["3"].." Heroic" or value[9] == L.Locals.CurrentLocal ["Clients"]["3"]))) then
+								(version >= 3 and (value[9] == L.Locals.CurrentLocal ["Clients"]["3"].." Normal" or value[9] == L.Locals.CurrentLocal ["Clients"]["3"].." Heroic" or value[9] == L.Locals.CurrentLocal ["Clients"]["3"])) or
+								(version >= 3 and (value[9] == L.Locals.CurrentLocal ["Clients"]["3"].." 10" or value[9] == L.Locals.CurrentLocal ["Clients"]["3"].." 25" or value[9] == L.Locals.CurrentLocal ["Clients"]["3"]))) then
 							submenu[value[9]] = 1;
 							info.hasArrow = true; -- creates submenus
 							info.notCheckable = true;
@@ -3026,6 +3027,7 @@
 					end
 					LFG113InstanceKeys [myKeyword][2] = text
 					if LFG113InstanceKeys ["h" .. myKeyword] then LFG113InstanceKeys ["h" .. myKeyword][2] = "Heroic " .. text end
+					if LFG113InstanceKeys ["h" .. myKeyword] then LFG113InstanceKeys ["h" .. myKeyword][2] = "Heroic " .. text end
 					DisplayKeys (true)
 					DisplayKeys (false)
 				else return " "
@@ -3467,7 +3469,7 @@
 						for key, value in pairs (L.Locals.CurrentLocal ["PulldownInstance"]) do
 							for innerKey, innerValue in pairs (value [7]) do
 								if msg:find (innerKey) then
-									local Heroic = (msg:find(" heroic ") or msg:find(" hero ") or msg:find(" hc ") or msg:find (" h ")) and (L.Locals.CurrentLocal ["PulldownInstance"]["h" .. key] ~= nil)
+									local Heroic = (msg:find(" daily ") or msg:find(" heroic ") or msg:find(" hero ") or msg:find(" hc ") or msg:find (" h ")) and (L.Locals.CurrentLocal ["PulldownInstance"]["h" .. key] ~= nil)
 									if value [8] and value [8] ~= "" then ValidInstance, fullTmpStr = true, fullTmpStr .. (fullTmpStr ~= "" and "!" or "") .. value [8] break
 									else ValidInstance, fullTmpStr = true, fullTmpStr .. (fullTmpStr ~= "" and "!" or "") .. "1:" .. (Heroic and "h" or "") .. key break
 									end
@@ -3481,7 +3483,11 @@
 						end
 						for key, value in pairs (L.Locals.CurrentLocal ["PulldownRaids"]) do
 							for innerKey, innerValue in pairs (value [7]) do
-								if msg:find (innerKey) then ValidInstance, fullTmpStr = true, fullTmpStr .. (fullTmpStr ~= "" and "!" or "") .. "2:" .. key break end
+								if msg:find (innerKey) then
+									local M10 = (msg:find("10 ") or msg:find(" 10m")) and (L.Locals.CurrentLocal ["PulldownRaids"]["10" .. key] ~= nil)
+									local M25 = (msg:find("25 ") or msg:find(" 25m")) and (L.Locals.CurrentLocal ["PulldownRaids"]["25" .. key] ~= nil)
+									ValidInstance, fullTmpStr = true, fullTmpStr .. (fullTmpStr ~= "" and "!" or "") .. "2:" .. key break
+								end
 							end
 						end
 						if originalStr:find ("%(") and originalStr:find ("%[") then --local msg = "LFM [[70]] Deathblow to the Legion (10409)]"

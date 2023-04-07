@@ -13,34 +13,61 @@ function Auctionator.CraftingInfo.Initialize()
   end
 end
 
-function Auctionator.CraftingInfo.DoTradeSkillReagentsSearch()
+-- Get the associated item, spell level and spell equipped item class for an
+-- enchant
+local function EnchantLinkToData(enchantLink)
+  return Auctionator.CraftingInfo.EnchantSpellsToItemData[tonumber(enchantLink:match("enchant:(%d+)"))]
+end
+
+local function GetOutputName(callback)
   local recipeIndex = GetTradeSkillSelectionIndex()
-  local recipeInfo =  { GetTradeSkillInfo(recipeIndex) }
+  local outputLink = GetTradeSkillItemLink(recipeIndex)
+  local itemID
 
-  local items = {}
-
-  local linkName = Auctionator.Utilities.GetNameFromLink(GetTradeSkillItemLink(recipeIndex) or "")
-
-  if linkName and linkName ~= "" then
-    table.insert(items, linkName)
-  else
-    table.insert(items, recipeInfo[1])
+  if outputLink then
+    itemID = GetItemInfoInstant(outputLink)
+  else -- Probably an enchant
+    local data = EnchantLinkToData(GetTradeSkillRecipeLink(recipeIndex))
+    if data == nil then
+      callback(nil)
+      return
+    end
+    itemID = data.itemID
   end
 
-  for reagentIndex = 1, GetTradeSkillNumReagents(recipeIndex) do
-    local reagentName = GetTradeSkillReagentInfo(recipeIndex, reagentIndex)
-    table.insert(items, reagentName)
+  if itemID == nil then
+    callback(nil)
+    return
   end
 
-  if recipeInfo[5] == ENSCRIBE then
-    Auctionator.API.v1.MultiSearch(AUCTIONATOR_L_REAGENT_SEARCH, items)
+  local item = Item:CreateFromItemID(itemID)
+  if item:IsItemEmpty() then
+    callback(nil)
   else
-    -- Exact search to avoid spurious results, say with "Runecloth"
-    Auctionator.API.v1.MultiSearchExact(AUCTIONATOR_L_REAGENT_SEARCH, items)
+    item:ContinueOnItemLoad(function()
+      callback(item:GetItemName())
+    end)
   end
 end
 
-function Auctionator.CraftingInfo.GetSkillReagentsTotal()
+function Auctionator.CraftingInfo.DoTradeSkillReagentsSearch()
+  GetOutputName(function(outputName)
+    local items = {}
+    if outputName then
+      table.insert(items, outputName)
+    end
+    local recipeIndex = GetTradeSkillSelectionIndex()
+
+    for reagentIndex = 1, GetTradeSkillNumReagents(recipeIndex) do
+      local reagentName = GetTradeSkillReagentInfo(recipeIndex, reagentIndex)
+      table.insert(items, reagentName)
+    end
+
+    Auctionator.API.v1.MultiSearchExact(AUCTIONATOR_L_REAGENT_SEARCH, items)
+  end)
+end
+
+local function GetSkillReagentsTotal()
   local recipeIndex = GetTradeSkillSelectionIndex()
 
   local total = 0
@@ -49,14 +76,10 @@ function Auctionator.CraftingInfo.GetSkillReagentsTotal()
     local multiplier = select(3, GetTradeSkillReagentInfo(recipeIndex, reagentIndex))
     local link = GetTradeSkillReagentItemLink(recipeIndex, reagentIndex)
     if link ~= nil then
-      local unitPrice
-
       local vendorPrice = Auctionator.API.v1.GetVendorPriceByItemLink(AUCTIONATOR_L_REAGENT_SEARCH, link)
-      if vendorPrice ~= nil then
-        unitPrice = vendorPrice
-      else
-        unitPrice = Auctionator.API.v1.GetAuctionPriceByItemLink(AUCTIONATOR_L_REAGENT_SEARCH, link)
-      end
+      local auctionPrice = Auctionator.API.v1.GetAuctionPriceByItemLink(AUCTIONATOR_L_REAGENT_SEARCH, link)
+
+      local unitPrice = vendorPrice or auctionPrice
 
       if unitPrice ~= nil then
         total = total + multiplier * unitPrice
@@ -67,8 +90,57 @@ function Auctionator.CraftingInfo.GetSkillReagentsTotal()
   return total
 end
 
-function Auctionator.CraftingInfo.GetAHProfit()
+local function GetEnchantProfit()
+  local toCraft = GetSkillReagentsTotal()
+
   local recipeIndex = GetTradeSkillSelectionIndex()
+  local data = EnchantLinkToData(GetTradeSkillRecipeLink(recipeIndex))
+  if data == nil then
+    return nil
+  end
+
+  -- Determine which vellum for the item class of the enchanted item
+  local vellumForClass = Auctionator.CraftingInfo.EnchantVellums[data.itemClass]
+  if vellumForClass == nil then
+    return nil
+  end
+
+  -- Find the cheapest vellum that will work
+  local vellumCost
+  local anyMatch = false
+  for vellumItemID, vellumLevel in pairs(vellumForClass) do
+    if data.level <= vellumLevel then
+      anyMatch = true
+      local optionOnAH = Auctionator.API.v1.GetAuctionPriceByItemID(AUCTIONATOR_L_REAGENT_SEARCH, vellumItemID)
+      if vellumCost == nil or (optionOnAH ~= nil and optionOnAH <= vellumCost) then
+        Auctionator.Debug.Message("CraftingInfo: Selecting vellum for enchant", vellumItemID)
+        vellumCost = optionOnAH
+      end
+    end
+  end
+
+  -- Couldn't find a vellum for the level (so presumably not in the enchant data)
+  if not anyMatch then
+    return nil
+  end
+
+  vellumCost = vellumCost or 0
+
+  local currentAH = Auctionator.API.v1.GetAuctionPriceByItemID(AUCTIONATOR_L_REAGENT_SEARCH, data.itemID)
+  if currentAH == nil then
+    currentAH = 0
+  end
+
+  return math.floor(currentAH * Auctionator.Constants.AfterAHCut - vellumCost - toCraft)
+end
+
+local function GetAHProfit()
+  local recipeIndex = GetTradeSkillSelectionIndex()
+
+  if select(5, GetTradeSkillInfo(recipeIndex)) == ENSCRIBE then
+    return GetEnchantProfit()
+  end
+
   local recipeLink =  GetTradeSkillItemLink(recipeIndex)
   local count = GetTradeSkillNumMade(recipeIndex)
 
@@ -80,7 +152,50 @@ function Auctionator.CraftingInfo.GetAHProfit()
   if currentAH == nil then
     currentAH = 0
   end
-  local toCraft = Auctionator.CraftingInfo.GetSkillReagentsTotal()
+  local toCraft = GetSkillReagentsTotal()
 
   return math.floor(currentAH * count * Auctionator.Constants.AfterAHCut - toCraft)
+end
+
+local function CraftCostString()
+  local price = WHITE_FONT_COLOR:WrapTextInColorCode(GetMoneyString(GetSkillReagentsTotal(), true))
+
+  return AUCTIONATOR_L_TO_CRAFT_COLON .. " " .. price
+end
+
+local function ProfitString(profit)
+  local price
+  if profit >= 0 then
+    price = WHITE_FONT_COLOR:WrapTextInColorCode(GetMoneyString(profit, true))
+  else
+    price = RED_FONT_COLOR:WrapTextInColorCode("-" .. GetMoneyString(-profit, true))
+  end
+
+  return AUCTIONATOR_L_PROFIT_COLON .. " " .. price
+
+end
+
+function Auctionator.CraftingInfo.GetInfoText()
+  local result = ""
+  local lines = 0
+  if Auctionator.Config.Get(Auctionator.Config.Options.CRAFTING_INFO_SHOW_COST) then
+    if lines > 0 then
+      result = result .. "\n"
+    end
+    result = result .. CraftCostString()
+    lines = lines + 1
+  end
+
+  if Auctionator.Config.Get(Auctionator.Config.Options.CRAFTING_INFO_SHOW_PROFIT) then
+    local profit = GetAHProfit()
+
+    if profit ~= nil then
+      if lines > 0 then
+        result = result .. "\n"
+      end
+      result = result .. ProfitString(profit)
+      lines = lines + 1
+    end
+  end
+  return result, lines
 end

@@ -6,6 +6,15 @@
 ***     Benefits will be a fast and customizable interface
 ***     Addons can be made to use the current data via interface
 
+Version 3.03 01/19/23
+- Changed for version 3.4.1
+
+Version 3.02 10/23/22
+- Added Heroics
+- Added Keywords
+- Added "Daily" to imply heroic
+- Split raids into 10/25/40
+
 Version 3.01 08/30/22
 - Changed keybind from "I" to "ALT-I".
 - Added Instances and raids for Wrath

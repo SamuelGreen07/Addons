@@ -1,5 +1,43 @@
-3.0.43 - 26th October 2022
-- Maintenance update.
+3.0.110 - 25th February 2023
+- Fix for Krowi Map Buttons library 1.4.4.
+
+3.0.106 - 22nd February 2023
+- Fix for Krowi Map Buttons library 1.5.
+
+3.0.100 - 30th January 2023
+- Updated LibDBIcon.
+
+3.0.84 - 19th January 2023
+- For 'Show points of interest', clicking a travel icon or a portal icon will now show the destination map.  Clicking a dungeon or raid icon on a Northrend map will now show the dungeon map (as long as there is only one dungeon or raid assigned to the icon).  Added zeppelin and boat icons to the Borean Tundra and Howling Fjord maps.  Added a Dalaran teleport crystal icon and a zone crossing icon to the Dalaran and Crystalsong Forest maps.
+
+3.0.83 - 18th January 2023
+- Updated for game version 3.4.1.
+- Due to problems with Blizzard's slash command system in 3.4.1, the /ltm command has been replaced with /run leamaps().  If you wish to pass a parameter, enter it in quotes between the brackets.
+
+3.0.78 - 8th January 2023
+- PTR (3.4.1): The interface options panel now shows /run leamaps() instead of /ltm.
+
+3.0.65 - 5th December 2022
+- Fixed frame border issue with 'Use default map'.
+
+3.0.64 - 5th December 2022
+- Adjusted world map frame strata.
+
+3.0.62 - 30th November 2022
+- Reformatted the texture file.
+
+3.0.60 - 23rd November 2022
+- In 3.4.1 (currently on the PTR), Blizzard's slash command system causes errors (just like retail) so /ltm has been replaced with /run leamaps() (just like retail).  When Blizzard fixes their slash command system, the /ltm slash command will return.
+
+3.0.56 - 22nd November 2022
+- For Krowi's Map Buttons users, fixed an issue which caused the borderless map close button to be hidden.
+- Fixed the levelling range for Borean Tundra and The Storm Peaks.
+
+3.0.53 - 15th November 2022
+- Updated LibDBIcon.
+
+3.0.52 - 9th November 2022
+- Fixed an issue which may have caused other map addon buttons to not show on the world map.
 
 3.0.29 - 12th October 2022
 - Updated summon levels for all dungeons and raids.

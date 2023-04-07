@@ -13,12 +13,17 @@ QuestieLib.AddonPath = "Interface\\Addons\\Questie\\"
 local math_abs = math.abs
 local math_sqrt = math.sqrt
 local math_max = math.max
+local math_random = math.random
 local tinsert = table.insert
 local stringSub = string.sub
 local stringGsub = string.gsub
 local strim = string.trim
 local smatch = string.match
 local tonumber = tonumber
+
+-- The original frame which we use to fetch the data required
+--                           Classic                          Wotlk Classic
+local textWrapFrameObject =  _G["QuestLogObjectivesText"] or _G["QuestInfoObjectivesText"]
 
 --[[
     Red: 5+ level above player
@@ -27,8 +32,14 @@ local tonumber = tonumber
     Green: 3 - GetQuestGreenRange() level below player (GetQuestGreenRange() changes on specific player levels)
     Gray: More than GetQuestGreenRange() below player
 --]]
-function QuestieLib:PrintDifficultyColor(level, text, isDailyQuest)
-    if isDailyQuest then
+function QuestieLib:PrintDifficultyColor(level, text, isDailyQuest, isEventQuest, isPvPQuest)
+    if isEventQuest == true then
+        return "|cFF6ce314" .. text .. "|r" -- Lime
+    end
+    if isPvPQuest == true then
+        return "|cFFE35639" .. text .. "|r" -- Maroon
+    end
+    if isDailyQuest == true then
         return "|cFF21CCE7" .. text .. "|r" -- Blue
     end
 
@@ -135,18 +146,53 @@ function QuestieLib:GetColoredQuestName(questId, showLevel, showState, blizzLike
         end
     end
 
-    return QuestieLib:PrintDifficultyColor(level, name, QuestieDB.IsRepeatable(questId))
+    return QuestieLib:PrintDifficultyColor(level, name, QuestieDB.IsRepeatable(questId), QuestieDB.IsActiveEventQuest(questId), QuestieDB.IsPvPQuest(questId))
 end
 
----@param randomSeed number
+local colors = {
+    {0.3125, 0.44140625, 1},  --Blizzard Polygon-blue --Alpha of 128
+    --{123,  146, 255},  --Blizzard Polygon-blue-2 --Alpha of 61
+    {0.5, 0.46875, 0.84765625},  --Medium Purple
+    {0.58203125, 0.89453125, 0.0546875},   --Inch Worm
+    {0.45703125, 0.8515625, 0.78125},  --Downy
+    {1, 0.5625, 0.625},  --Salmon Pink
+    --{149, 159, 112},  --Avocado, Bad? Fix it
+    {0, 0.6484375, 0.59375},  --Persian Green
+    {0.70703125, 0.109375, 0.4765625},  --Medium Violet Red     --ORG Dark Purple {119, 18,  79}
+    {0.58203125, 0.2148375, 1},  --Light Slate Blue
+    {0.72265625, 0.3671875, 0},    --Alloy Orange
+    {0, 0.9765625, 0.546875},  --Spring Green
+    {0.8515625, 0.2148375,  0.57421875},  --Deep Cerise
+    {1, 0.65234375, 0},    --Orange
+    {0.8125, 0.7109375, 1},  --Mauve
+    {0, 0.25390625,  0.58984375},  --Smalt
+    {1, 0.25, 1},  --Pink Flamingo
+    {1, 1, 0},    --Yellow
+    {0.16015625,  0.65234375, 0},    --Slimy Green
+    {0, 0.66015625, 1},  --Deep Sky Blue
+    {0.87109375, 0.87109375, 0.56640625},  --Primrose
+    {0, 0.5859375,  0},    --Vine Green --G67 default
+    {0, 0.3,  1},  --Navy Blue
+    {0, 0.97265625, 0},    --Lime
+    {0, 1, 1},  --Aqua
+    {1, 0.1484375,  0},    --Scarlet
+}
+
+local numColors = #colors
+local lastColor = math_random(numColors)
+
 ---@return Color
-function QuestieLib:GetRandomColor(randomSeed)
-    QuestieLib:MathRandomSeed(randomSeed)
-    return {
-        0.45 + QuestieLib:MathRandom() / 2,
-        0.45 + QuestieLib:MathRandom() / 2,
-        0.45 + QuestieLib:MathRandom() / 2
-    }
+function QuestieLib:ColorWheel()
+    lastColor = lastColor + 1
+    if lastColor > numColors then
+        lastColor = 1
+    end
+    return colors[lastColor]
+end
+
+---@return Color
+function QuestieLib:GetRandomColor()
+    return colors[math_random(numColors)]
 end
 
 ---@param questId number
@@ -555,7 +601,7 @@ end
 function QuestieLib:TableMemoizeFunction(func, __mode)
     return setmetatable({}, {
         __index = function(self, k)
-            local v = func(self, k);
+            local v = func(k);
             self[k] = v
             return v;
         end,
@@ -563,27 +609,8 @@ function QuestieLib:TableMemoizeFunction(func, __mode)
     });
 end
 
-
-local frameObject = nil
-if _G["QuestLogObjectivesText"] then -- classic
-    frameObject = _G["QuestLogObjectivesText"]
-elseif _G["QuestInfoObjectivesText"] then -- Wotlk Classic
-    frameObject = _G["QuestInfoObjectivesText"]
-end
 --Part of the GameTooltipWrapDescription function
-local objectiveFontString = UIParent:CreateFontString("questieObjectiveTextString", "ARTWORK", "QuestFont")
-objectiveFontString:SetWidth(frameObject:GetWidth() or 275) --QuestLogObjectivesText default width = 275
-objectiveFontString:SetHeight(0);
-objectiveFontString:SetPoint("LEFT");
-objectiveFontString:SetJustifyH("LEFT");
----@diagnostic disable-next-line: redundant-parameter
-objectiveFontString:SetWordWrap(true)
-objectiveFontString:SetVertexColor(1,1,1, 1)--Set opacity to 0, even if it is shown it should be invisible
-local font, size = frameObject:GetFont()
---Chinese? "Fonts\\ARKai_T.ttf"
-objectiveFontString:SetFont(font, size);
-objectiveFontString:Hide()
-
+local textWrapObjectiveFontString
 ---Emulates the wrapping of a quest description
 ---@param line string @The line to wrap
 ---@param prefix string @The prefix to add to the line
@@ -591,35 +618,50 @@ objectiveFontString:Hide()
 ---@param splitOnDot boolean @Should we add a linebreak if a dot appears thats not at the end of a line TRUE=NEW ROW, FALSE=NO NEW ROW, default: true
 ---@param desiredWidth number @Set the desired width to wrap, default: 275
 ---@return table[] @A table of wrapped lines
-function QuestieLib:TextWrap(line, prefix, combineTrailing, splitOnDot, desiredWidth, questid)
-    if(objectiveFontString:IsVisible()) then Questie:Error("TextWrap already running... Please report this on GitHub or Discord.") end
+function QuestieLib:TextWrap(line, prefix, combineTrailing, splitOnDot, desiredWidth)
+    if not textWrapObjectiveFontString then
+        textWrapObjectiveFontString = UIParent:CreateFontString("questieObjectiveTextString", "ARTWORK", "QuestFont")
+        textWrapObjectiveFontString:SetWidth(textWrapFrameObject:GetWidth() or 275) --QuestLogObjectivesText default width = 275
+        textWrapObjectiveFontString:SetHeight(0);
+        textWrapObjectiveFontString:SetPoint("LEFT");
+        textWrapObjectiveFontString:SetJustifyH("LEFT");
+        ---@diagnostic disable-next-line: redundant-parameter
+        textWrapObjectiveFontString:SetWordWrap(true)
+        textWrapObjectiveFontString:SetVertexColor(1,1,1, 1)--Set opacity to 0, even if it is shown it should be invisible
+        local font, size = textWrapFrameObject:GetFont()
+        --Chinese? "Fonts\\ARKai_T.ttf"
+        textWrapObjectiveFontString:SetFont(font, size);
+        textWrapObjectiveFontString:Hide()
+    end
+
+    if(textWrapObjectiveFontString:IsVisible()) then Questie:Error("TextWrap already running... Please report this on GitHub or Discord.") end
 
     --Set Defaults
     combineTrailing = combineTrailing or true
     splitOnDot = splitOnDot or true
     --We show the fontstring and set the text to start the process
     --We have to show it or else the functions won't work... But we set the opacity to 0 on creation
-    objectiveFontString:SetWidth(desiredWidth or frameObject:GetWidth() or 275) --QuestLogObjectivesText default width = 275
-    objectiveFontString:Show()
+    textWrapObjectiveFontString:SetWidth(desiredWidth or textWrapFrameObject:GetWidth() or 275) --QuestLogObjectivesText default width = 275
+    textWrapObjectiveFontString:Show()
 
     --Make a linebreak on each "dot" character if there is a space after (don't want it on end of line)
     local useLine = string.gsub(line, "%. ", "%.%\n")
 
-    objectiveFontString:SetText(useLine)
+    textWrapObjectiveFontString:SetText(useLine)
     --Is the line wrapped?
-    if(objectiveFontString:GetUnboundedStringWidth() > objectiveFontString:GetWrappedWidth()) then
+    if(textWrapObjectiveFontString:GetUnboundedStringWidth() > textWrapObjectiveFontString:GetWrappedWidth()) then
         local lines = {}
         local startIndex = 1
         local endIndex = 2 --We should be able to start at a later index...
         --This function returns a list of size information per row, so we use this to calculate number of rows
-        local numberOfRows = #objectiveFontString:CalculateScreenAreaFromCharacterSpan(startIndex, strlen(useLine))
+        local numberOfRows = #textWrapObjectiveFontString:CalculateScreenAreaFromCharacterSpan(startIndex, strlen(useLine))
         for row = 1, numberOfRows do
             local lastSpaceIndex
             local dotIndex
             local indexes
             --We use the previous way to get number of rows to loop through characterindex until we get 2 rows
             repeat
-                indexes = objectiveFontString:CalculateScreenAreaFromCharacterSpan(startIndex, endIndex)
+                indexes = textWrapObjectiveFontString:CalculateScreenAreaFromCharacterSpan(startIndex, endIndex)
                 --Last space of the line to be used to break a new row
                 if(string.sub(useLine, endIndex, endIndex) == " ") then
                     lastSpaceIndex = endIndex
@@ -661,11 +703,11 @@ function QuestieLib:TextWrap(line, prefix, combineTrailing, splitOnDot, desiredW
 
             table.insert(lines, prefix..newLine)
         end
-        objectiveFontString:Hide()
+        textWrapObjectiveFontString:Hide()
         return lines
     else
         --Line was not wrapped, return the string as is.
-        objectiveFontString:Hide()
+        textWrapObjectiveFontString:Hide()
         useLine = prefix..string.gsub(line, "%. ", "%.%\n"..prefix)
         return {useLine}
     end

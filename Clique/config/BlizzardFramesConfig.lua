@@ -93,6 +93,7 @@ function panel:CreateOptions()
 
     local last = bits[#bits]
 
+---@diagnostic disable-next-line: undefined-field
     table.wipe(bits)
     table.insert(bits, self.party)
     table.insert(bits, self.compactraid)

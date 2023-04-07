@@ -1,6 +1,8 @@
 local _detalhes = 		_G._detalhes
 local gump = 			_detalhes.gump
 local container_pets =		_detalhes.container_pets
+local _
+local addonName, Details222 = ...
 
 -- api locals
 local UnitGUID = _G.UnitGUID
@@ -14,7 +16,6 @@ local GetNumGroupMembers = _G.GetNumGroupMembers
 local setmetatable = setmetatable
 local _bit_band = bit.band --lua local
 local pairs = pairs
-local ipairs = ipairs
 local wipe = table.wipe
 
 --details locals
@@ -226,7 +227,7 @@ function _detalhes:WipePets()
 	return wipe(_detalhes.tabela_pets.pets)
 end
 
-function _detalhes:LimparPets()
+function _detalhes:PetContainerCleanup()
 	--erase old pet table by creating a new one
 	local newPetTable = {}
 	--minimum of 90 minutes to clean a pet from the pet table data

@@ -150,7 +150,12 @@ function TomTom:Initialize(event, addon)
     self.tooltip:SetFrameStrata("DIALOG")
 
     self.dropdown = ldd:NewMenu(UIParent, "TomTomDropdown")
+    self.dropdown:SetFrameStrata("HIGH")
     self:InitializeDropdown(self.dropdown)
+
+    self.worlddropdown = ldd:NewMenu(WorldMapFrame, "TomTomWorldMapDropdown")
+    self.worlddropdown:SetFrameStrata("HIGH")
+    self:InitializeDropdown(self.worlddropdown)
 
     -- Both the waypoints and waypointprofile tables are going to contain subtables for each
     -- of the mapids that might exist. Under these will be a hash of key/waypoint pairs consisting
@@ -209,6 +214,8 @@ function TomTom:Enable(addon)
 
     self:ReloadWaypoints()
     self:CreateConfigPanels()
+
+    self:CreateWorldMapClickHandler()
 end
 
 -- Some utility functions that can pack/unpack data from a waypoint
@@ -334,6 +341,9 @@ function TomTom:ShowHideWorldCoords()
         -- Create the frame if it doesn't exist
         if not TomTomWorldFrame then
             TomTomWorldFrame = CreateFrame("Frame", "TomTomWorldFrame", WorldMapFrame.BorderFrame)
+            TomTomWorldFrame:SetFrameStrata("HIGH")
+            TomTomWorldFrame:SetFrameLevel(9000)
+            TomTomWorldFrame:SetAllPoints(true)
             TomTomWorldFrame.Player = TomTomWorldFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
             TomTomWorldFrame.Cursor = TomTomWorldFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
             TomTomWorldFrame:SetScript("OnUpdate", WorldMap_OnUpdate)
@@ -464,42 +474,105 @@ function TomTom:ShowHideCoordBlock()
     end
 end
 
--- Hook the WorldMap OnClick
-local world_click_verify = {
-    ["A"] = function() return IsAltKeyDown() end,
-    ["C"] = function() return IsControlKeyDown() end,
-    ["S"] = function() return IsShiftKeyDown() end,
+-- -- Hook the WorldMap OnClick
+-- local world_click_verify = {
+--     ["A"] = function() return IsAltKeyDown() end,
+--     ["C"] = function() return IsControlKeyDown() end,
+--     ["S"] = function() return IsShiftKeyDown() end,
+-- }
+
+local verifyFuncs = {
+    ["A"] = function(alt, ctrl, shift) return alt and not (ctrl or shift) end,
+    ["C"] = function(alt, ctrl, shift) return ctrl and not (alt or shift) end,
+    ["S"] = function(alt, ctrl, shift) return shift and not (alt or ctrl) end,
+    ["AC"] = function(alt, ctrl, shift) return (alt and ctrl) and not (shift) end,
+    ["AS"] = function(alt, ctrl, shift) return (alt and shift) and not (ctrl) end,
+    ["CS"] = function(alt, ctrl, shift) return (ctrl and shift) and not (alt) end,
+    ["ACS"] = function(alt, ctrl, shift) return alt and ctrl and shift end,
 }
 
--- This is now a registered click handler.
--- If we return false, it gets passed on to the next handler.
--- We need to return true when we handle the click.
-local function WorldMap_OnClick (self, ...)
-    local mouseButton, button = ...
-    if mouseButton == "RightButton" then
-        -- Check for all the modifiers that are currently set
-        for mod in TomTom.db.profile.worldmap.create_modifier:gmatch("[ACS]") do
-            if not world_click_verify[mod] or not world_click_verify[mod]() then
-                return false
-            end
-        end
-
-        local m = WorldMapFrame.mapID
-        local x,y = WorldMapFrame:GetNormalizedCursorPosition()
-
-        if not m or m == 0 then
-            return false
-        end
-
-        local uid = TomTom:AddWaypoint(m, x, y, { title = L["TomTom waypoint"], from="TomTom/wm"})
-        return true
-    else
-        return false
+-- Thanks to Nevcariel for the help with this one!
+function addon:CreateWorldMapClickHandler()
+    if not self.worldMapClickHandler then
+        self.worldMapClickHandler = CreateFrame("Frame", addonName .. "WorldMapClickHandler", WorldMapFrame.ScrollContainer)
     end
+
+    local handler = self.worldMapClickHandler
+    handler:SetAllPoints()
+
+    handler.UpdatePassThrough = function(self)
+        local alt, ctrl, shift = IsAltKeyDown(), IsControlKeyDown(), IsShiftKeyDown()
+
+        local modKey = TomTom.db.profile.worldmap.create_modifier
+        if modKey and verifyFuncs[modKey] and verifyFuncs[modKey](alt, ctrl, shift) then
+            if self.SetPassThroughButtons then
+                self:SetPassThroughButtons("LeftButton", "MiddleButton", "Button4", "Button5")
+            end
+
+            self:Show()
+        else
+            if self.SetPassThroughButtons then
+                self:SetPassThroughButtons("LeftButton", "RightButton", "MiddleButton", "Button4", "Button5")
+            end
+
+            self:Hide()
+        end
+    end
+
+    handler:RegisterEvent("MODIFIER_STATE_CHANGED")
+    handler:SetScript("OnEvent", handler.UpdatePassThrough)
+    handler:SetScript("OnMouseUp", function(frame, button)
+        addon:AddWaypointFromMapClick()
+    end)
+
+    handler:SetScript("OnUpdate", function(self, elapsed)
+            handler:UpdatePassThrough()
+    end)
+
+    handler:UpdatePassThrough()
 end
 
--- Add WorldMap_OnClick as a Click Handler on the WorldMapFrame Canvas
-WorldMapFrame:AddCanvasClickHandler(WorldMap_OnClick,10)
+function addon:AddWaypointFromMapClick()
+    local m = WorldMapFrame.mapID
+    local x,y = WorldMapFrame:GetNormalizedCursorPosition()
+
+    if not m or m == 0 then
+        return
+    end
+
+    TomTom:AddWaypoint(m, x, y, { title = L["TomTom waypoint"], from="TomTom/wm"})
+end
+
+-- This is a taint factory, removed in favour of the above
+-- -- This is now a registered click handler.
+-- -- If we return false, it gets passed on to the next handler.
+-- -- We need to return true when we handle the click.
+-- local function WorldMap_OnClick (self, ...)
+--     local mouseButton, button = ...
+--     if mouseButton == "RightButton" then
+--         -- Check for all the modifiers that are currently set
+--         for mod in TomTom.db.profile.worldmap.create_modifier:gmatch("[ACS]") do
+--             if not world_click_verify[mod] or not world_click_verify[mod]() then
+--                 return false
+--             end
+--         end
+
+--         local m = WorldMapFrame.mapID
+--         local x,y = WorldMapFrame:GetNormalizedCursorPosition()
+
+--         if not m or m == 0 then
+--             return false
+--         end
+
+--         local uid = TomTom:AddWaypoint(m, x, y, { title = L["TomTom waypoint"], from="TomTom/wm"})
+--         return true
+--     else
+--         return false
+--     end
+-- end
+
+-- -- Add WorldMap_OnClick as a Click Handler on the WorldMapFrame Canvas
+-- WorldMapFrame:AddCanvasClickHandler(WorldMap_OnClick,10)
 
 local function WaypointCallback(event, arg1, arg2, arg3)
     if event == "OnDistanceArrive" then
@@ -702,8 +775,8 @@ end
 local function _world_onclick(event, uid, self, button)
     if TomTom.db.profile.worldmap.menu then
         TomTom.dropdown_uid = uid
-        TomTom.dropdown:SetAnchor("TOPRIGHT", self, "BOTTOMLEFT", -25, -25)
-        TomTom.dropdown:Toggle()
+        TomTom.worlddropdown:SetAnchor("TOPRIGHT", self, "BOTTOMLEFT", -25, -25)
+        TomTom.worlddropdown:Toggle()
     end
 end
 

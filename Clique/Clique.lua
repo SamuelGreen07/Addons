@@ -36,6 +36,9 @@
 local addonName, addon = ...
 local L = addon.L
 
+---@diagnostic disable-next-line: undefined-field
+local twipe = table.wipe
+
 function addon:Initialize()
     -- Create an AceDB, but it needs to be cleared first
     self.db = LibStub("AceDB-3.0"):New("CliqueDB3", self.defaults)
@@ -78,11 +81,10 @@ function addon:Initialize()
 
     -- Create a secure action button that can be used for 'hovercast' and 'global'
     self.globutton = CreateFrame("Button", addonName .. "SABButton", UIParent, "SecureActionButtonTemplate, SecureHandlerBaseTemplate")
-    self.globutton:RegisterForClicks("AnyUp", "AnyDown")
+    self:UpdateGlobalButtonClicks()
 
     -- Create a named frame that can be used as a side-car for unnamed frames
-    self.namedbutton = CreateFrame("Button", addonName .. "NamedSidecar", UIParent, "SecureActionButtonTemplate")
-    self.namedbutton:RegisterForClicks("AnyUp", "AnyDown")
+    self.namedbutton = CreateFrame("Button", addonName .. "NamedSidecar", UIParent, "SecureUnitButtonTemplate")
 
     -- Create a table within the addon header to store the frames
     -- that are registered for click-casting
@@ -187,14 +189,14 @@ function addon:Initialize()
         if v == nil or v == false then
             self:UnregisterFrame(k)
         else
-            self:RegisterFrame(k, v)
+            self:RegisterFrame(k)
         end
     end})
 
     -- Iterate over the frames that were set before we arrived
     if oldClickCastFrames then
         for frame, options in pairs(oldClickCastFrames) do
-            self:RegisterFrame(frame, options)
+            self:RegisterFrame(frame)
         end
     end
 
@@ -256,6 +258,11 @@ function addon:RegisterFrame(button)
         -- addon:Printf("  - protected: %s", tostring(protected))
         -- addon:Printf("  - nameplateish: %s", tostring(nameplateish))
         -- addon:Printf("  - forbidden: %s", tostring(forbidden))
+        return
+    end
+
+    -- Make sure we don't re-register button
+    if self.ccframes[button] then
         return
     end
 
@@ -626,8 +633,13 @@ function addon:GetBindingAttributes(global)
         set = {
             "local button = self",
             "local name = button:GetName()",
+            --"print('onenter: ' .. tostring(name and name or button))",
             "if blacklist[name] then return end",
-            "if danglingButton then control:RunFor(danglingButton, control:GetAttribute('setup_onleave')) end",
+            "if danglingButton then ",
+            --"  local dangleName = danglingButton:GetName()",
+            --"  print('clearing dangles for: ' .. tostring(dangleName and dangleName or danglingButton))",
+            "  control:RunFor(danglingButton, control:GetAttribute('setup_onleave'))",
+            "end",
             "local cliqueNamedButton = control:GetFrameRef('cliqueNamedButton')",
             "if not name then ",
             "  cliqueNamedButton:SetAttribute('unit', button:GetAttribute('unit'))",
@@ -638,6 +650,7 @@ function addon:GetBindingAttributes(global)
         clr = {
             "local button = self",
             "local name = button:GetName()",
+            -- "print('onleave: ' .. tostring(name and name or button))",
             "if blacklist[name] then return end",
             "danglingButton = nil",
         }
@@ -967,19 +980,19 @@ function addon:LeavingCombat()
     for idx, button in ipairs(self.regqueue) do
         self:RegisterFrame(button)
     end
-    if next(self.regqueue) then table.wipe(self.regqueue) end
+    if next(self.regqueue) then twipe(self.regqueue) end
 
     -- Process any frames in the unregistration queue
     for idx, button in ipairs(self.unregqueue) do
         self:UnregisterFrame(button)
     end
-    if next(self.regqueue) then table.wipe(self.regqueue) end
+    if next(self.regqueue) then twipe(self.regqueue) end
 
     -- Process any frames in the clickregister queue
     for idx, button in ipairs(self.regclickqueue) do
         self:UpdateRegisteredClicks(button)
     end
-    if next(self.regclickqueue) then table.wipe(self.regclickqueue) end
+    if next(self.regclickqueue) then twipe(self.regclickqueue) end
 
     -- Only apply attributes if we have an 'ooc' binding set
     if self.has_ooc then
@@ -1041,6 +1054,15 @@ function addon:IsFrameBlacklisted(frame)
     return self.settings.blacklist[name]
 end
 
+function addon:UpdateGlobalButtonClicks()
+    if self:IsDragonflight() then
+        self.globutton:RegisterForClicks("AnyUp", "AnyDown")
+    else
+        local direction = self.settings.downclick and "AnyDown" or "AnyUp"
+        self.globutton:RegisterForClicks(direction)
+    end
+end
+
 -- Update both registered clicks, and ensure that mousewheel events are enabled
 -- on the frame.
 function addon:UpdateRegisteredClicks(button)
@@ -1053,33 +1075,27 @@ function addon:UpdateRegisteredClicks(button)
 
     -- Short version that only updates clicks for one frame
     if button and not self:IsFrameBlacklisted(button) then
-        addon:RegisterForClicks(button, direction)
+        button:RegisterForClicks(direction)
         button:EnableMouseWheel(true)
         return
     end
 
     for button in pairs(self.ccframes) do
         if not self:IsFrameBlacklisted(button) then
-            addon:RegisterForClicks(button, direction)
+            button:RegisterForClicks(direction)
             button:EnableMouseWheel(true)
         end
     end
 
     for name, button in pairs(self.hccframes) do
        if not self:IsFrameBlacklisted(button) then
-           addon:RegisterForClicks(button, direction)
+            button:RegisterForClicks(direction)
            button:EnableMouseWheel(true)
        end
     end
-end
 
--- Some weird logic to handle direction buttons
-function addon:RegisterForClicks(button, direction)
-    if button == self.namedbutton then
-        button:RegisterForClicks("AnyUp", "AnyDown")
-    else
-        button:RegisterForClicks(direction)
-    end
+    -- Update the global button in case settings have changed
+    addon:UpdateGlobalButtonClicks()
 end
 
 -- Handler function for message indicating that a change as occurred

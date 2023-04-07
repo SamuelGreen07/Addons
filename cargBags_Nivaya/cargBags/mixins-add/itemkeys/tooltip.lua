@@ -24,11 +24,13 @@ DESCRIPTION:
 local parent, ns = ...
 local cargBags = ns.cargBags
 
+local isDF = select(4,GetBuildInfo()) >= 100000
+
 local tipName = parent.."Tooltip"
 local tooltip
 
 local function generateTooltip()
-	tooltip = CreateFrame("GameTooltip", tipName)
+	tooltip = CreateFrame("GameTooltip", tipName, nil)
 	tooltip:SetOwner(WorldFrame, "ANCHOR_NONE") 
 	tooltip:AddFontStrings( 
 		tooltip:CreateFontString("$parentTextLeft1", nil, "GameTooltipText"), 
@@ -36,24 +38,86 @@ local function generateTooltip()
 	)
 end
 
+local getBindOn
+
+if isDF then
+
+	local bindOnStrings = {
+		--ACCOUNT bound
+		[ITEM_BIND_TO_ACCOUNT] = "account",
+		[ITEM_ACCOUNTBOUND] = "account",
+		[ITEM_BIND_TO_BNETACCOUNT] = "account",
+		[ITEM_BNETACCOUNTBOUND] = "account",
+		
+		[ITEM_SOULBOUND] = "soul",
+		[ITEM_BIND_ON_PICKUP] = "pickup",
+
+		[ITEM_BIND_QUEST] = "quest",
+		
+		[ITEM_BIND_ON_EQUIP] = "equip",
+		
+		[ITEM_BIND_ON_USE] = "use",
+	}
+	
+	getBindOn = function(bagID, slotID)
+		local bindOn
+		local info = C_TooltipInfo.GetBagItem(bagID, slotID)
+		for line=1,#info.lines do
+			if line > 5 then break end	--stop after this since the information should be found by now
+			local args = info.lines[line].args
+			if args then
+				for k=1,#args do
+					if args[k].field == "leftText" then
+						bindOn = bindOnStrings[args[k].stringVal]
+						if bindOn then
+							return bindOn
+						end
+					end
+				end
+			end
+		end
+	end
+	
+else
+
+	getBindOn = function(bagID, slotID)
+		if(not tooltip) then generateTooltip() end
+		tooltip:ClearLines()
+		tooltip:SetBagItem(bagID, slotID)
+		local bound = _G[tipName.."TextLeft2"] and _G[tipName.."TextLeft2"]:GetText()
+		if(not bound) then return end
+
+		local bindOn
+		if(bound:match(ITEM_BIND_ON_EQUIP)) then bindOn = "equip"
+		elseif(bound:match(ITEM_SOULBOUND)) then bindOn = "soul"
+		elseif(bound:match(ITEM_BIND_QUEST)) then bindOn = "quest"
+		elseif(bound:match(ITEM_BIND_TO_ACCOUNT)) then bindOn = "account"
+		elseif(bound:match(ITEM_BIND_ON_PICKUP)) then bindOn = "pickup"
+		elseif(bound:match(ITEM_BIND_ON_USE)) then bindOn = "use" end
+		
+		return bindOn
+	end
+	
+end
+
 cargBags.itemKeys["bindOn"] = function(i)
 	if(not i.link) then return end
-
-	if(not tooltip) then generateTooltip() end
-	tooltip:ClearLines()
-	tooltip:SetBagItem(i.bagID, i.slotID)
-	local bound = _G[tipName.."TextLeft2"] and _G[tipName.."TextLeft2"]:GetText()
-	if(not bound) then return end
-
+	
 	local bindOn
-	if(bound:match(ITEM_BIND_ON_EQUIP)) then bindOn = "equip"
-	elseif(bound:match(ITEM_SOULBOUND)) then bindOn = "soul"
-	elseif(bound:match(ITEM_BIND_QUEST)) then bindOn = "quest"
-	elseif(bound:match(ITEM_BIND_TO_ACCOUNT)) then bindOn = "account"
-	elseif(bound:match(ITEM_BIND_ON_PICKUP)) then bindOn = "pickup"
-	elseif(bound:match(ITEM_BIND_ON_USE)) then bindOn = "use" end
-
-	i.bindOn = bindOn
+	
+	if not i.bindOnOld then
+		bindOn = getBindOn(i.bagID, i.slotID)
+	else
+		-- check again because these can change during play
+		if i.bindOnOld == "equip" or i.bindOnOld == "use" then
+			bindOn = getBindOn(i.bagID, i.slotID)
+		else
+			bindOn = i.bindOnOld
+		end
+	end
+	
+	i.bindOnOld = bindOn
 	return bindOn
+	
 end
 

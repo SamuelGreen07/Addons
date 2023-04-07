@@ -20,6 +20,9 @@ local print = TMW.print
 local SUG = TMW.SUG
 local strlowerCache = TMW.strlowerCache
 
+local GetNumTrackingTypes = GetNumTrackingTypes or C_Minimap.GetNumTrackingTypes
+local GetTrackingInfo = GetTrackingInfo or C_Minimap.GetTrackingInfo
+
 local _, pclass = UnitClass("Player")
 
 
@@ -29,7 +32,7 @@ Module.noMin = true
 Module.showColorHelp = false
 Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 
-Module.stances = {
+Module.stances = TMW.isWrath and {
 	WARRIOR = {
 		[2457] = 	GetSpellInfo(2457), 	-- Battle Stance
 		[71] = 		GetSpellInfo(71),		-- Defensive Stance
@@ -37,8 +40,10 @@ Module.stances = {
 	},
 	DRUID = {
 		[5487] = 	GetSpellInfo(5487), 	-- Bear Form
+		[9634] = 	GetSpellInfo(9634), 	-- Dire Bear Form
 		[768] = 	GetSpellInfo(768),		-- Cat Form
 		[783] = 	GetSpellInfo(783),		-- Travel Form
+		[1066] = 	GetSpellInfo(1066),		-- Aquatic Form
 		[24858] = 	GetSpellInfo(24858), 	-- Moonkin Form
 		[33891] = 	GetSpellInfo(33891), 	-- Tree of Life
 		[33943] = 	GetSpellInfo(33943), 	-- Flight Form
@@ -59,6 +64,23 @@ Module.stances = {
 		[19896] = 	GetSpellInfo(19891), 	-- Shadow Resistance Aura
 		[7294] = 	GetSpellInfo(7294),		-- Retribution Aura	
 	},
+	DEATHKNIGHT = {
+		[48266] = 	GetSpellInfo(48266), 	-- Blood
+		[48263] = 	GetSpellInfo(48263), 	-- Frost
+		[48265] = 	GetSpellInfo(48265), 	-- Unholy
+	},
+} or {
+	DRUID = {
+		[5487] = 	GetSpellInfo(5487), 	-- Bear Form
+		[768] = 	GetSpellInfo(768),		-- Cat Form
+		[783] = 	GetSpellInfo(783),		-- Travel Form
+		[24858] = 	GetSpellInfo(24858), 	-- Moonkin Form
+		[33891] = 	GetSpellInfo(33891), 	-- Incarnation: Tree of Life
+		[171745] = 	GetSpellInfo(171745), 	-- Claws of Shirvallah	
+	},
+	ROGUE = {
+		[1784] = 	GetSpellInfo(1784), 	-- Stealth	
+	},
 }
 function Module:Table_Get()
 	return self.stances[pclass]
@@ -77,7 +99,7 @@ function Module:Entry_AddToList_1(f, spellID)
 
 		f.Name:SetText(name)
 
-		f.tooltipmethod = "TMW_SetSpellByIDWithClassIcon"
+		f.tooltipmethod = TMW.GameTooltip_SetSpellByIDWithClassIcon
 		f.tooltiparg = spellID
 
 		f.insert = name
@@ -110,32 +132,19 @@ Module.showColorHelp = false
 Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 
 local TrackingCache = {}
-for _, id in pairs{
-	2580, -- Find Minerals
-	2383, -- Find Herbs
-	2481, -- Find Treasure
-	1494, -- Track Beasts
-	19878, -- Track Demons
-	19879, -- Track Dragonkin
-	19880, -- Track Elementals
-	19882, -- Track Giants
-	19885, -- Track Hidden
-	5225, -- Track Humanoids (druid)
-	19883, -- Track Humanoids
-	19884, -- Track Undead
-} do
-	local name = GetSpellInfo(id)
-	TrackingCache[id] = strlower(name)
-end
-
 function Module:Table_Get()
+	for i = 1, GetNumTrackingTypes() do
+		local name, _, active = GetTrackingInfo(i)
+		TrackingCache[i] = strlower(name)
+	end
+	
 	return TrackingCache
 end
 function Module:Table_GetSorter()
 	return nil
 end
 function Module:Entry_AddToList_1(f, id)
-	local name, _, texture = GetSpellInfo(id)
+	local name, texture = GetTrackingInfo(id)
 
 	f.Name:SetText(name)
 	f.ID:SetText(nil)
@@ -148,38 +157,36 @@ function Module:Entry_AddToList_1(f, id)
 end
 
 
+if C_EquipmentSet then
+	local Module = SUG:NewModule("blizzequipset", SUG:GetModule("default"))
+	Module.noMin = true
+	Module.showColorHelp = false
+	Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 
-local Module = SUG:NewModule("blizzequipset", SUG:GetModule("default"))
-Module.noMin = true
-Module.showColorHelp = false
-Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
+	local EquipSetCache = {}
+	function Module:Table_Get()
+		for i, id in pairs(C_EquipmentSet.GetEquipmentSetIDs()) do
+			local name, icon = C_EquipmentSet.GetEquipmentSetInfo(id)
 
-local EquipSetCache = {}
-function Module:Table_Get()
-	for i, id in pairs(C_EquipmentSet.GetEquipmentSetIDs()) do
+			EquipSetCache[id] = strlower(name)
+		end
+		
+		return EquipSetCache
+	end
+	function Module:Table_GetSorter()
+		return nil
+	end
+	function Module:Entry_AddToList_1(f, id)
 		local name, icon = C_EquipmentSet.GetEquipmentSetInfo(id)
 
-		EquipSetCache[id] = strlower(name)
+		f.Name:SetText(name)
+		f.ID:SetText(nil)
+
+		f.tooltipmethod = "SetEquipmentSet"
+		f.tooltiparg = name
+
+		f.insert = name
+
+		f.Icon:SetTexture(icon)
 	end
-	
-	return EquipSetCache
 end
-function Module:Table_GetSorter()
-	return nil
-end
-function Module:Entry_AddToList_1(f, id)
-	local name, icon = C_EquipmentSet.GetEquipmentSetInfo(id)
-
-	f.Name:SetText(name)
-	f.ID:SetText(nil)
-
-	f.tooltipmethod = "SetEquipmentSet"
-	f.tooltiparg = name
-
-	f.insert = name
-
-	f.Icon:SetTexture(icon)
-end
-
-
-

@@ -1,6 +1,6 @@
-## Interface: 30400
+## Interface: 30401
 ## Title: QuestFrameFixer
-## Version: 2.0
+## Version: 2.1
 ## LoadOnDemand: 0
 ## Author: Sveng
 ## Notes: Fixes the icons on the Quest Frame to be blue ? or ! for repeatable and daily quests

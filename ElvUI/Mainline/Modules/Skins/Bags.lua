@@ -5,19 +5,18 @@ local B = E:GetModule('Bags')
 
 local _G = _G
 local next = next
-local pairs = pairs
 local select = select
 local unpack = unpack
 
 local CreateFrame = CreateFrame
 local GetItemInfo = GetItemInfo
+local GetCVarBool = GetCVarBool
 local GetItemQualityColor = GetItemQualityColor
-local GetContainerItemInfo = GetContainerItemInfo
-local GetContainerItemCooldown = GetContainerItemCooldown
-local GetContainerItemQuestInfo = GetContainerItemQuestInfo
 local GetInventoryItemTexture = GetInventoryItemTexture
 local GetInventorySlotInfo = GetInventorySlotInfo
 local hooksecurefunc = hooksecurefunc
+
+local GetContainerItemCooldown = GetContainerItemCooldown or (C_Container and C_Container.GetContainerItemCooldown)
 
 local NUM_CONTAINER_FRAMES = NUM_CONTAINER_FRAMES
 local BACKPACK_TOOLTIP = BACKPACK_TOOLTIP
@@ -51,10 +50,19 @@ local function BackpackToken_Update(container)
 		if not token.Icon.backdrop then
 			S:HandleIcon(token.Icon, true)
 			token.Count:ClearAllPoints()
-			token.Count:SetPoint('RIGHT', token.Icon, 'LEFT', -3, 0)
+			token.Count:Point('RIGHT', token.Icon, 'LEFT', -3, 0)
 			token.Count:FontTemplate(nil, 12)
 			token.Icon:Size(14)
 		end
+	end
+end
+
+local function GetSlotAndBagID(button)
+	if button.GetSlotAndBagID then -- bags
+		return button:GetSlotAndBagID()
+	elseif button.GetBagID then -- bank
+		local slotID, bagID = button:GetID(), button:GetBagID()
+		return slotID, bagID
 	end
 end
 
@@ -79,10 +87,11 @@ local function SkinButton(button)
 	if button.Cooldown then
 		E:RegisterCooldown(button.Cooldown, 'bags')
 
-		-- initialize any cooldown
-		local slotID, bagID = button:GetSlotAndBagID()
-		local start, duration = GetContainerItemCooldown(bagID, slotID)
-		button.Cooldown:SetCooldown(start, duration)
+		local slotID, bagID = GetSlotAndBagID(button)
+		if slotID and bagID then -- initialize any cooldown
+			local start, duration = GetContainerItemCooldown(bagID, slotID)
+			button.Cooldown:SetCooldown(start, duration)
+		end
 	end
 
 	-- bag keybind support from actionbar module
@@ -130,8 +139,6 @@ local function SkinItemButton(button, bagID)
 end
 
 local function BagIcon(container, texture)
-	if not container.PortraitButton then return end
-
 	if not container.BagIcon then
 		container.BagIcon = container.PortraitButton:CreateTexture()
 		container.BagIcon:SetTexCoord(unpack(E.TexCoords))
@@ -163,15 +170,27 @@ local function UpdateContainerButton(frame)
 		end
 	end
 
-	_G.BagItemAutoSortButton:ClearAllPoints()
-	_G.BagItemAutoSortButton:Point('LEFT', _G.BagItemSearchBox, 'RIGHT', 5, 3)
+	local portrait = frame.PortraitButton
+	local combined = GetCVarBool('combinedBags')
+	if combined then
+		portrait:Size(50)
+		portrait:ClearAllPoints()
+		portrait:Point('TOPLEFT', 5, -5)
+	else
+		portrait:Size(35)
+
+		_G.BagItemAutoSortButton:ClearAllPoints()
+		_G.BagItemAutoSortButton:Point('LEFT', _G.BagItemSearchBox, 'RIGHT', 5, 3)
+	end
 
 	if frame.MoneyFrame then -- container 1
 		frame.MoneyFrame.Border:StripTextures()
 
-		_G.BagItemSearchBox:ClearAllPoints()
-		_G.BagItemSearchBox:Point('TOPLEFT', frame, 9, -45)
-		_G.BagItemSearchBox:Width(128)
+		if not combined then
+			_G.BagItemSearchBox:ClearAllPoints()
+			_G.BagItemSearchBox:Point('TOPLEFT', frame, 9, -45)
+			_G.BagItemSearchBox:Width(128)
+		end
 	end
 end
 
@@ -184,8 +203,8 @@ local function SkinContainer(container)
 	end
 end
 
-local function SkinBag(bagID)
-	local container = _G['ContainerFrame'..bagID]
+local function SkinBag(bagID, bag)
+	local container = bag or _G['ContainerFrame'..bagID]
 	if container and not container.template then
 		container:SetFrameStrata('HIGH')
 		container:StripTextures(true)
@@ -194,7 +213,6 @@ local function SkinBag(bagID)
 
 		S:HandleCloseButton(container.CloseButton)
 		S:HandleButton(container.PortraitButton)
-		container.PortraitButton:Size(35)
 		container.PortraitButton.Highlight:SetAlpha(0)
 
 		hooksecurefunc(container, 'UpdateItems', SkinContainer)
@@ -205,6 +223,8 @@ local function SkinAllBags()
 	for bagID = 1, NUM_CONTAINER_FRAMES do
 		SkinBag(bagID)
 	end
+
+	SkinBag(1, _G.ContainerFrameCombinedBags)
 end
 
 local function UpdateBankItem(button)
@@ -262,20 +282,18 @@ local function UpdateBankItem(button)
 
 	if not button.isBag then
 		local container = button:GetParent():GetID()
-		local _, _, _, rarity, _, _, itemLink, _, _, itemID = GetContainerItemInfo(container, slotID)
-		local isQuestItem, questId = GetContainerItemQuestInfo(container, slotID)
-		button.itemID, button.itemLink = itemID, itemLink
+		local info = B:GetContainerItemInfo(container, slotID)
+		local questInfo = B:GetContainerItemQuestInfo(container, slotID)
+		button.itemID, button.itemLink = info.itemID, info.hyperlink
 
-		if itemLink then
-			button.name, _, button.quality, _, _, button.type = GetItemInfo(itemLink)
-			if not button.quality then
-				button.quality = rarity
-			end
+		if info.hyperlink then
+			local _
+			button.name, _, button.quality, _, _, button.type = GetItemInfo(info.hyperlink)
 		else
 			button.name, button.quality, button.type = nil, nil, nil
 		end
 
-		if isQuestItem or questId then
+		if questInfo.isQuestItem or questInfo.questID then
 			button.type = QUESTS_LABEL
 		end
 
@@ -295,7 +313,7 @@ function S:ContainerFrame()
 	S:HandleButton(_G.ReagentBankFrame.DespositButton)
 	_G.ReagentBankFrame:HookScript('OnShow', _G.ReagentBankFrame.StripTextures)
 
-	for _, icon in pairs({_G.BagItemAutoSortButton, _G.BankItemAutoSortButton}) do
+	for _, icon in next, { _G.BagItemAutoSortButton, _G.BankItemAutoSortButton } do
 		icon:StripTextures()
 		icon:SetTemplate()
 		icon:StyleButton()

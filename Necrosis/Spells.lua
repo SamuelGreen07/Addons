@@ -279,8 +279,8 @@ Notes:
 	[11734] = {UsageRank = 6, SpellRank = 4, Timer = false, Usage = "armor", Length = 1800, Buff = true, SelfOnly = true, }, -- 
 	[11735] = {UsageRank = 7, SpellRank = 5, Timer = false, Usage = "armor", Length = 1800, Buff = true, SelfOnly = true, }, -- 
 	[27260] = {UsageRank = 8, SpellRank = 6, Timer = false, Usage = "armor", Length = 1800, Buff = true, SelfOnly = true, }, -- 
-	[47793] = {UsageRank = 8, SpellRank = 7, Timer = false, Usage = "armor", Length = 1800, Buff = true, SelfOnly = true, }, -- 
-	[47889] = {UsageRank = 8, SpellRank = 8, Timer = false, Usage = "armor", Length = 1800, Buff = true, SelfOnly = true, }, --
+	[47793] = {UsageRank = 9, SpellRank = 7, Timer = false, Usage = "armor", Length = 1800, Buff = true, SelfOnly = true, }, -- 
+	[47889] = {UsageRank = 10, SpellRank = 8, Timer = false, Usage = "armor", Length = 1800, Buff = true, SelfOnly = true, }, --
  	
 	--TBC Fel Armor
 	--[28176]	= {UsageRank = 8, SpellRank = 1, Timer = true, Usage = "armor", Length = 1800, Buff = true, SelfOnly = true, }, -- Fel Armor || Gangrarmure
@@ -309,7 +309,8 @@ Notes:
 	[1098] 	= {UsageRank = 1, SpellRank = 1, Timer = true, Usage = "enslave", Length = 300, Buff = false, }, -- Enslave Demon
 	[11725] = {UsageRank = 2, SpellRank = 2, Timer = true, Usage = "enslave", Length = 300, Buff = false, }, -- 
 	[11726] = {UsageRank = 3, SpellRank = 3, Timer = true, Usage = "enslave", Length = 300, Buff = false, }, --  
-
+	[61191] = {UsageRank = 4, SpellRank = 4, Timer = true, Usage = "enslave", Length = 300, Buff = false, }, --  
+	
 	[710]	= {UsageRank = 1, SpellRank = 1, Timer = true, Usage = "banish", Length = 20, Buff = false, }, -- Banish 
 	[18647] = {UsageRank = 2, SpellRank = 2, Timer = true, Usage = "banish", Length = 30, Buff = false, }, --  
 
@@ -355,6 +356,7 @@ Notes:
 
 	[603]	= {UsageRank = 1, SpellRank = 1, Timer = true, Usage = "doom", Length = 60, Cooldown = 60,}, -- Curse of Doom || Malédiction funeste 
 	[30910]	= {UsageRank = 2, SpellRank = 2, Timer = true, Usage = "doom", Length = 60, Cooldown = 60,},
+	[47867]	= {UsageRank = 3, SpellRank = 3, Timer = true, Usage = "doom", Length = 60, Cooldown = 60,}, -- r3:  https://www.wowhead.com/wotlk/spell=47867/curse-of-doom
 	
 	
 	[704]	= {UsageRank = 1, SpellRank = 1 , Timer = true, Usage = "recklessness", Length = 120, }, -- Curse of Recklessness - removed in patch 3.1 || Malédiction Témérité || 
@@ -380,7 +382,7 @@ Notes:
 	[47841]	= {UsageRank = 4, SpellRank = 4, Timer = true, Usage = "unstable_affliction", Length = 18, }, --  
 	[47843]	= {UsageRank = 5, SpellRank = 5, Timer = true, Usage = "unstable_affliction", Length = 18, }, --  	
 	
-	[48181]	= {UsageRank = 1, SpellRank = 1, Timer = true, Usage = "haunt", Length = 12, }, -- Affliction instable 
+	[59161]	= {UsageRank = 1, SpellRank = 1, Timer = true, Usage = "haunt", Length = 12, }, -- Haunt
 	
 	-- ::: Spells
 	[348]	= {UsageRank = 1, SpellRank = 1, Timer = true, Usage = "immolate", Length = 15, }, -- Immolate 
@@ -486,7 +488,9 @@ Notes:
 	[11661] = {UsageRank = 9, SpellRank = 9, Timer = false, Usage = "bolt"}, --
 	[28307] = {UsageRank = 10, SpellRank = 10, Timer = false, Usage = "bolt"}, --
 	[27209] = {UsageRank = 11, SpellRank = 11, Timer = false, Usage = "bolt"}, --
-
+	[47808] = {UsageRank = 12, SpellRank = 12, Timer = false, Usage = "bolt"},
+	[47809] = {UsageRank = 13, SpellRank = 13, Timer = false, Usage = "bolt"},
+	
 	[18220] = {UsageRank = 1, SpellRank = 1, Timer = false, Usage = "pact"}, -- Dark Pact || Pacte noir
 	[18937] = {UsageRank = 2, SpellRank = 2, Timer = false, Usage = "pact"}, 
 	[18938] = {UsageRank = 3, SpellRank = 3, Timer = false, Usage = "pact"},
@@ -583,7 +587,7 @@ Necrosis.Warlock_Buttons = {
 					norm = "Interface\\AddOns\\Necrosis\\UI\\SoulstoneButton-01",
 					high = "Interface\\AddOns\\Necrosis\\UI\\SoulstoneButton-04",
 					}, --
-	mounts 		= {f = "NecrosisMountButton", tip = "Mount",anchor = "ANCHOR_LEFT",
+	mounts 		= {f = "NecrosisMountButton", tip = "Mount",anchor = "ANCHOR_RIGHT",
 					norm = "Interface\\AddOns\\Necrosis\\UI\\MountButton-01",
 					high = "Interface\\AddOns\\Necrosis\\UI\\MountButton-02",
 					}, --

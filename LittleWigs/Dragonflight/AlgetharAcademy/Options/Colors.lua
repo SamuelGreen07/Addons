@@ -19,7 +19,7 @@ BigWigs:AddColors("Overgrown Ancient", {
 
 BigWigs:AddColors("Crawth", {
 	[376448] = {"green","red"},
-	[376467] = "red",
+	[376467] = {"green","red"},
 	[376997] = "purple",
 	[377004] = "yellow",
 	[377034] = "orange",
@@ -37,4 +37,25 @@ BigWigs:AddColors("Echo of Doragosa", {
 })
 
 BigWigs:AddColors("Algeth'ar Academy Trash", {
+	[377383] = "orange",
+	[377389] = "red",
+	[377912] = "red",
+	[377991] = "purple",
+	[378003] = "orange",
+	[387843] = {"blue","yellow"},
+	[387910] = {"blue","orange"},
+	[387955] = {"blue","orange"},
+	[388392] = "red",
+	[388863] = "yellow",
+	[388886] = {"orange","yellow"},
+	[388911] = "purple",
+	[388976] = "orange",
+	[388984] = {"blue","red"},
+	[389501] = "green",
+	[389512] = "green",
+	[389516] = "green",
+	[389521] = "green",
+	[389536] = "green",
+	[390912] = "orange",
+	[396812] = "red",
 })

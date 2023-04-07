@@ -1,6 +1,6 @@
 if not WeakAuras.IsLibsOK() then return end
 
-if GetLocale() ~= "zhCN" then
+if (GAME_LOCALE or GetLocale()) ~= "zhCN" then
   return
 end
 
@@ -43,8 +43,7 @@ local L = WeakAuras.L
 	L["Charge Tracking"] = "可用次数充能追踪"
 	L["cooldown"] = "冷却"
 	L["Cooldown Tracking"] = "冷却追踪"
-	--[[Translation missing --]]
-	L["Cooldowns"] = "Cooldowns"
+	L["Cooldowns"] = "冷却"
 	L["Create Auras"] = "创建光环"
 	L["debuff"] = "减益效果"
 	L["Debuffs"] = "减益"
@@ -60,6 +59,8 @@ local L = WeakAuras.L
 	L["Highlight while spell is active."] = "当法术激活时高亮"
 	L["Hold CTRL to create multiple auras at once"] = "按住 CTRL 键来一次性创建多个光环"
 	L["Keeps existing triggers intact"] = "保持现存触发器完整"
+	L["Max 3"] = "最大 3"
+	L["Max 4"] = "最大 4"
 	L["Next"] = "下一个"
 	L["Only show the aura if the target has the debuff."] = "只有在目标拥有减益效果时才显示此光环"
 	L["Only show the aura when the item is on cooldown."] = "只有当物品在冷却中时才显示此光环"

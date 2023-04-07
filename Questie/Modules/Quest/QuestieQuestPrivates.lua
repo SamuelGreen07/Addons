@@ -1,5 +1,8 @@
 ---@type QuestieQuest
 local QuestieQuest = QuestieLoader:ImportModule("QuestieQuest")
+---@type QuestieQuestPrivate
+QuestieQuest.private = QuestieQuest.private or {}
+---@class QuestieQuestPrivate
 local _QuestieQuest = QuestieQuest.private
 
 ---@type QuestieDB
@@ -106,7 +109,7 @@ monster = function(npcId, objective)
         Spawns = enableSpawns and spawns or {},
         Waypoints = enableWaypoints and QuestieDB.QueryNPCSingle(npcId, "waypoints") or {},
         Hostile = true,
-        Icon = ICON_TYPE_SLAY,
+        Icon = Questie.ICON_TYPE_SLAY,
         GetIconScale = _GetIconScaleForMonster,
         IconScale = _GetIconScaleForMonster(),
         TooltipKey = "m_" .. npcId, -- todo: use ID based keys
@@ -149,7 +152,7 @@ object = function(objectId, objective)
         Id = objectId,
         Name = name,
         Spawns = spawns,
-        Icon = ICON_TYPE_OBJECT,
+        Icon = Questie.ICON_TYPE_OBJECT,
         GetIconScale = _GetIconScaleForObject,
         IconScale = _GetIconScaleForObject(),
         TooltipKey = "o_" .. objectId,
@@ -176,7 +179,7 @@ event = function(eventId, objective)
         Id = eventId or 0,
         Name = objective.Description or "Event Trigger",
         Spawns = spawns,
-        Icon = ICON_TYPE_EVENT,
+        Icon = Questie.ICON_TYPE_EVENT,
         GetIconScale = _GetIconScaleForEvent,
         IconScale = _GetIconScaleForEvent(),
     }
@@ -221,13 +224,13 @@ item = function(itemId, objective)
                             ret[id].Spawns = {}
                             ret[id].Waypoints = {}
                             if source.Type == "object" then
-                                ret[id].Icon = ICON_TYPE_OBJECT
+                                ret[id].Icon = Questie.ICON_TYPE_OBJECT
                                 ret[id].GetIconScale = _GetIconScaleForObject
                                 ret[id].IconScale = _GetIconScaleForObject()
                             else
                                 ret[id].Icon = (
                                     (not QuestieDB.fakeTbcItemStartId) or itemId < QuestieDB.fakeTbcItemStartId) and
-                                    ICON_TYPE_LOOT or ICON_TYPE_EVENT
+                                    Questie.ICON_TYPE_LOOT or Questie.ICON_TYPE_EVENT
                                 ret[id].GetIconScale = _GetIconScaleForLoot
                                 ret[id].IconScale = _GetIconScaleForLoot()
                             end

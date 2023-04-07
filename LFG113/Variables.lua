@@ -3,7 +3,7 @@
 	L.Functions = {}
 
 	-- Default Values
-	L.Variables = { ["version"] = "Version 3.01", ["author"] = "Joseph Forrest", ["date"] = "09/20/2019", ["update"] = "08/30/2022" }
+	L.Variables = { ["version"] = "Version 3.03", ["author"] = "Joseph Forrest", ["date"] = "09/20/2019", ["update"] = "01/19/2023" }
 
 	-- Visual Frames
 	L.Frames = {}
@@ -40,9 +40,10 @@
 	L.Variables.InstancesSorted = { "any", "rfc", "wc", "vc", "sfk", "bfd", "stocks", "gnomer", "rfk", "internalsm", "sm gy", "sm lib", "sm arm", "sm cath", "rfd", "internalulda", "ulda front", "ulda back", "zf", "internalmara", "mara purple", "mara orange", "mara princess", "st", "internalbrd", "brd anger", "brd arena", "brd golem", "lbrs", "ubrs", "internaldm", "dm west", "dm north", "dm east", "dm tribute", "internalstrat", "strat live", "strat dead", "scholo",
 			"ramparts", "furnace", "shattered", "slavepens", "theunderbog", "thesteamvaults", "manatombs", "auchenaicrypts", "sethekkhalls", "shadowlabyrinth", "escapefromdurnholde", "blackmorass", "openingofthedarkportal", "themechanar", "thebotanica", "thearcatraz", "magistersterrace",
 			"hramparts", "hfurnace", "hshattered", "hslavepens", "htheunderbog", "hthesteamvaults", "hmanatombs", "hauchenaicrypts", "hsethekkhalls", "hshadowlabyrinth", "hescapefromdurnholde", "hblackmorass", "hopeningofthedarkportal", "hthemechanar", "hthebotanica", "hthearcatraz", "hmagistersterrace",
-			"upgardekeep", "thenexus", "azjolnerub", "ahnkahet", "draktharan", "theviolethold", "gundrak", "hallsofstone", "hallsoflightning", "theoculus", "utgardepinnacle", "cullingofstratholme", "trialofthechampion", "hallsofreflection", "pitofsaron", "forgeofsouls" }
+			"upgardekeep", "thenexus", "azjolnerub", "ahnkahet", "draktharan", "theviolethold", "gundrak", "hallsofstone", "hallsoflightning", "theoculus", "utgardepinnacle", "cullingofstratholme", "trialofthechampion", "hallsofreflection", "pitofsaron", "forgeofsouls",
+			"hupgardekeep", "hthenexus", "hazjolnerub", "hahnkahet", "hdraktharan", "htheviolethold", "hgundrak", "hhallsofstone", "hhallsoflightning", "htheoculus", "hutgardepinnacle", "hcullingofstratholme", "htrialofthechampion", "hhallsofreflection", "hpitofsaron", "hforgeofsouls" }
 	L.Variables.RaidsSorted = { "any", "ony", "zg", "mc", "bwl", "aq20", "aq40", "naxx", "magtheridonslair", "serpentshrinecavern", "theeye", "karazhan", "gruulslair", "thebattleformounthyjal", "blacktemple", "zulaman", "sunwellplateau", "doomwalker", "doomlordkazzak",
-			"naxxramas", "obsidiansanctum", "vaultofarchavon", "eyeofeternity", "ulduar", "trialofthecrusader", "onyxiaslair", "icecrowncitadel", "rubysanctum" }
+			"10naxxramas", "10obsidiansanctum", "10vaultofarchavon", "10eyeofeternity", "10ulduar", "10trialofthecrusader", "10onyxiaslair", "10icecrowncitadel", "10rubysanctum", "25naxxramas", "25obsidiansanctum", "25vaultofarchavon", "25eyeofeternity", "25ulduar", "25trialofthecrusader", "25onyxiaslair", "25icecrowncitadel", "25rubysanctum" }
 	L.Variables.PVPSorted = { "any", "world", "av", "wg", "ab", "eyeofthestorm" }
 	L.Variables.PlayerClass = { -- Roles = Tank, Healer, DPS
 		["warrior"]		= { ["roles"] = { true, false, true }, ["map"] = { ["sx"] = .625, ["ex"] = .75, ["sy"] = 0, ["ey"] = .25 } },	-- warrior { tank = { "protection" }, heals = {}, dps = { "arms", "fury" } }

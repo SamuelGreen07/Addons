@@ -262,6 +262,7 @@
         GRM_L["The Current Lvl Cap is {num}."] = "Das aktuelle Maximallevel ist {num}"
         GRM_L["Kick Inactive Player Reminder at"] = "Erinnerung zum Kicken inaktiver Spieler ab"        -- Context: "Kick Inactive Player Reminder at X Months" - Again, allignment will need to be adjusted for options UI, so please post
         GRM_L["Please choose a month between 1 and 99"] = "Bitte eine Zahl zwischen 1 und 99 auswählen!"
+        GRM_L["Please choose a month between 0 and 99"] = "Bitte eine Zahl zwischen 0 und 99 auswählen!"
         GRM_L["Sync BAN List With Guildies at Rank"] = "Bannliste teilen mit"     -- Context: "Sync Ban List with Guildies at Rank [DROPDOWNMENU OF RANKS] or Higher" - Please show where dropdown menu should be pinned
         GRM_L["or Higher"] = "oder höher"                               -- Context: Look at the above statement. Show where this needs to go in regards to dropdown menu of rank selection in Options
         GRM_L["Restore Defaults"] = "Standardeinstellungen\nwiederherstellen"
@@ -328,11 +329,8 @@
         GRM_L["Please choose a valid DAY"] = "Bitte einen gültigen Tag wählen"
         GRM_L["{name} has been Removed from the Ban List."] = "{name} wurde von der Bannliste entfernt."
         GRM_L["Scanning for Guild Changes Now. One Moment..."] = "Scanne nach Änderungen. Bitte warten..."
-        GRM_L["Breaking current Sync with {name}."] = "Breche Synchronisation mit {name} ab."
-        GRM_L["Breaking current Sync with the Guild..."] = "Breche Gildensynchronisation ab..."
         GRM_L["Initializing Sync Action. One Moment..."] = "Starte Synchronisation. Bitte warten..."
         GRM_L["No Players Currently Online to Sync With..."] = "Es sind keine Spieler online, mit denen du Änderungen synchronisieren kannst."
-        GRM_L["No Addon Users Currently Compatible for FULL Sync."] = "Es sind keine kompatiblen Spieler online, mit denen du Änderungen synchronisieren kannst."
         GRM_L["SYNC is currently not possible! Unable to Sync with guildies when guild chat is restricted."] = "Synchronisation nicht möglich, wenn der Gildenchat eingeschränkt ist."
         GRM_L["Manual Scan Complete"] = "Manueller Scan nach Änderungen abgeschlossen"
         GRM_L["Analyzing guild for the first time..."] = "Erstmalige Analyse der Gilde..."
@@ -386,18 +384,9 @@
         GRM_L["Initiating Sync with {name} Instead!"] = "Starte stattdessen Synchronisation mit {name}!"
         GRM_L["Sync Failed with {name}..."] = "Synchronisation mit {name} gescheitert..."
         GRM_L["The Player Appears to Be Offline."] = "Der Spieler scheint offline zu sein."
-        GRM_L["There Might be a Problem With Their Sync"] = "Es könnte ein Problem mit der Synchronisation bestehen"
-        GRM_L["While not ideal, Ask Them to /reload to Fix It and Please Report the Issue to Addon Creator"] = "Auch wenn es keine Lösung ist: Bitte die Anderen einen /reload zu machen und informiere den Addon-Autor über den Fehler."
-        GRM_L["Manually Syncing Data With Guildies Now... One Time Only."] = "Manuelle einmalige Synchronisation mit Mitgliedern läuft..."
         GRM_L["Syncing Data With Guildies Now..."] = "Synchronisiere jetzt mit Mitgliedern..."
         GRM_L["(Loading screens may cause sync to fail)"] = "(Ladebildschirme können die Synchronisation abbrechen)"
         GRM_L["Sync With Guildies Complete..."] = "Synchronisation abgeschlossen!"
-        GRM_L["Manual Sync With Guildies Complete..."] = "Manuelle Synchronisation abgeschlossen!"
-        GRM_L["No Players Currently Online to Sync With. Re-Disabling Sync..."] = "Keine Spieler online, mit denen synchronisiert werden kann..."
-        GRM_L["{name} tried to Sync with you, but their addon is outdated."] = "Spieler {name} hat versucht mit dir zu synchronisieren, aber sein Addon ist veraltet."
-        GRM_L["Remind them to update!"] = "Bitte erinnere ihn/sie, Guild Roster Manager zu aktualisieren!"
-    
--- TODO:
 
         -- ERROR MESSAGES
         GRM_L["Notification Has Already Been Arranged..."] = "Benachrichtigung wurde bereits eingestellt..."
@@ -417,7 +406,6 @@
         GRM_L["Prefix:"] = "Präfix:"
         GRM_L["Msg:"] = "Nachricht:"                                                -- Context: Msg is short for Message
         GRM_L["Unable to register prefix > 16 characters: {name}"] = "Kann Präfix nicht registrieren, maximal 16 Buchstaben: {name}"   -- Context: The {name} is the string code for the prefix. This is for debugging.
-    
     
         --SLASH COMMANDS
         -- These are generally written in general shorthand. The original commands will ALWAYS work, but if there is one that makes more sense in your language, please feel free to modify
@@ -655,7 +643,6 @@
         GRM_L["|CFFE6CC7FLeft-Click|r to Change the Font"] = "|CFFE6CC7FKlicken|r, um die Schriftart zu ändern"
     
         -- R1.1490
-        GRM_L["You will still share some outgoing data with the guild"] = "Du teilst weiterhin ausgehende Daten mit der Gilde"
         GRM_L["Unable to properly locate guild for backup"] = "Kann keine Gilde für Backup finden"
     
         -- R1.1500
@@ -747,7 +734,7 @@
         -- R1.30
         GRM_L["Sync With {name} is Complete..."] = true
         GRM_L["|CFFE6CC7FLeft-Click|r and drag to move this button."] = true
-        GRM_L["|CFFE6CC7FCtrl-Left-Click|r and drag to move this button anywhere."] = true
+        GRM_L["{custom1} and drag to move this button anywhere."] = true
         GRM_L["MOTD:"] = true       -- Message Of The Day = M.O.T.D = MOTD - 
         GRM_L["minimap"] = true
     
@@ -824,8 +811,6 @@
         GRM_L["|cffff0000WARNING!!!|r {num} BANNED player is currently in the guild."] = true        -- Singular  -- please keep the color coding... this keeps the Warning in red
     
         -- R1.41
-        GRM_L["{num} metadata profiles are being built for people previously in the guild. The data is being requested, but this may take some time."] = true                   -- PLURAL
-        GRM_L["One metadata profile is being built for a player previously in the guild. The data is being requested, but this may take some time."] = true           -- SINGULAR, same line.
         GRM_L["Auto-Focus the search box"] = true
         GRM_L["This will skip the first time if set to load on logon"] = true  -- Referring to the auto-focusing on the search box, this is a tooltip helper
         GRM_L["Please enter a valid level between 1 and {num}"] = true
@@ -1017,6 +1002,7 @@
         GRM_L["There are currently no names to remove"] = true
         GRM_L["Rules"] = true
         GRM_L["Please choose a day between 1 and 99"] = true
+        GRM_L["Please choose a day between 0 and 99"] = true
         GRM_L["Pressing the ESC key will also clear all lines"] = true
         GRM_L["Player's rank does not have permission to remove others from the guild"] = true
         GRM_L["Player's rank does not have permission to promote others in the guild"] = true
@@ -1144,7 +1130,6 @@
         GRM_L["Choose thoughtfully"] = true
         GRM_L["{name}'s note has been updated!"] = true
         GRM_L["Locked. Press ESC"] = true                                        -- Mouseover Locked text in top right.
-        GRM_L["{num} guild members have outdated GRM versions"] = true                      -- Player sync with another is outdated
         GRM_L["|CFFE6CC7FClick|r to Select for Removal"] = true
         GRM_L["Feel free to recommend a delimiter you wish to use to the author"] = true
         GRM_L["Export Tool"] = true
@@ -1297,6 +1282,7 @@
         GRM_L["Easily remove all Banned players still in the Guild with the Macro Tool"] = true
         GRM_L["GRM will automatically send messages to the \"{name}\" window if you remove all custom channels."] = true
         GRM_L["Multi-Channel support. Just separate with commas"] = true
+        GRM_L["Disable tooltip. Only show popout window."] = true
         
         --R1.89
         GRM_L["Does NOT apply to Ban List"] = "Wirkt sich NICHT auf die Einstellungen für die Bannliste"
@@ -1370,7 +1356,6 @@
         GRM_L["Shift Rank Down"] = true
 
         -- R1.90
-        GRM_L["Suggestions on kick filters? Submit to Discord"] = true
         GRM_L["GRM WARNING!!! FAILURE TO LOAD THIS KEY: {name}\nPLEASE REPORT TO ADDON DEV! THANK YOU!"] = true
         GRM_L["Sync is disabled for {num} seconds after logging in. Please wait {custom1} seconds longer."] = true      -- if sync is triggered after logon too soon
         GRM_L["Type '/grm sync' to initiate a one-time sync."] = true
@@ -1391,8 +1376,6 @@
         GRM_L["Promote to Rank:"] = true
         GRM_L["Demote to Rank:"] = true
         GRM_L["Only recommend to Demote if all player linked alts exceed max time"] = true
-        GRM_L["Suggestions on promote filters? Submit to Discord"] = true                                                                       -- promote
-        GRM_L["Suggestions on demote filters? Submit to Discord"] = true                                                                        -- demote
         GRM_L["Unable to promote players to this rank"] = true                                                                                  -- etc...
         GRM_L["Unable to demote players to this rank"] = true
         GRM_L["Unable to promote players at this rank."] = true
@@ -1439,6 +1422,7 @@
         GRM_L["Ctrl-Shift-Click"] = true
         GRM_L["Alt-Shiift-Click"] = true
         GRM_L["Right-Click"] = true
+        GRM_L["Ctrl-Left-Click"] = true
         
         GRM_L["{custom1} to add player to all 3 macro tool ignore lists" ] = true           -- custom1 = "Ctrl-Click"  - it is basically a macro action
         GRM_L["{custom1} to remove player from all 3 macro tool ignore lists"] = true
@@ -1562,6 +1546,75 @@
     -- R1.936
     GRM_L["Use '{name} search PlayerName' to also find guild members"] = true
     GRM_L["{custom1} to Copy Name to Chat"] = true  -- "Shift-Click to Copy Name to Chat" is the default
+
+    -- R1.944
+    GRM_L["Promote Player if in Guild for"] = true
+    GRM_L["Time in Guild: {name}"] = true
+    GRM_L["Time in Guild:"] = true
+    GRM_L["Notify if a member for at least {num} {name}"] = true
+    GRM_L["Player has been a member for more than {num} Day"] = true
+    GRM_L["Player has been a member for more than {num} Days"] = true
+    GRM_L["Player has been a member for more than {num} Month"] = true
+    GRM_L["Player has been a member for more than {num} Months"] = true
+    GRM_L["Ignore Rule With Text Match"] = true
+    GRM_L["This only searches the officer note for the safe tag"] = true
+    GRM_L["Examples of simple tags:"] = true
+    GRM_L["Do Not Kick" ] = true
+    GRM_L["[S]"] = true  -- While this is just a tag, it is short for the word "Safe"
+    GRM_L["Safe"] = true
+    GRM_L["Must be an exact match"] = true
+    GRM_L["No safe tag '{name}' in officer note"] = true
+    GRM_L["Safe Text Match:"] = true
+
+    -- R1.946
+    GRM_L["GRM Tools" ] = true
+    GRM_L["Style Choices:"] = true
+    GRM_L["Applies only to date format used for note"] = true
+    
+    -- R1.947
+    GRM_L["Currently syncing with {name}. Please wait until after sync completes to activate again."] = true
+    GRM_L["Be Informed When GRM is out of date."] = true
+    GRM_L["This only reports to chat once per session."] = true
+    GRM_L["Player GUID"] = true
+    GRM_L["Remove Alt-Code Letters From Names"] = true
+    GRM_L["Only Show Players Currently Online"] = true
+    GRM_L["{name} matches rules for a promotion and is currently online."] = true
+    GRM_L["{name} matches rules for a demotion and is currently online."] = true
+    GRM_L["Please choose a valid Month"] = true
+    GRM_L["Warcraft was not released until 2004. Please choose a valid year."] = true
+
+    --R1.953
+    GRM_L["{name} has rejoined their original alt group."] = true
+    
+    --R1.96
+    GRM_L["Not Currentlly Syncing"] = true;
+    GRM_L["Sync with {name} Successful"] = true
+    GRM_L["Sync failed at this point:"] = true
+    GRM_L["Sync with {name} next."] = true
+    GRM_L["Sync is Currently Disabled"] = true
+    GRM_L["Sync has failed..."] = true
+    GRM_L["Start Sync"] = true
+    GRM_L["Initializing Sync"] = true
+    GRM_L["Initializing Sync. One Moment..."] = true
+    GRM_L["No Member is Available to Sync"] = true
+    GRM_L["Outgoing Ban Data Restricted"] = true
+    GRM_L["Incoming Ban Data Restricted"] = true
+    GRM_L["Sync Ok, but their rank is too low to make changes."] = true
+    GRM_L["Sync Ok, but your rank is too low to sync your changes."] = true
+    GRM_L["Their Rank is too Low. All data is restricted."] = true
+    GRM_L["Your Rank is too Low. Player is restricting all data."] = true
+    GRM_L["Sync is Currently Disabled. Do you wish to re-enable?"] = true
+    GRM_L["SYNC DATA"] = true       -- AddonUsers Tab in Options
+    GRM_L["Players"] = true
+    GRM_L["Bans"] = true
+    GRM_L["Details"] = true
+    GRM_L["Syncing all player data."] = true
+    GRM_L["Syncing all data except ban list. Player rank is too low."] = true
+    GRM_L["Syncing all data except ban list. Your rank is too low."] = true
+    GRM_L["Currently Syncing With: {name}"] = true
+    GRM_L["{num}{custom1}: Bans"] = true
+    GRM_L["Sync has begun after waiting in queue for {num} seconds"] = true
+    GRM_L["Not Determined"] = true  -- Ban List
 
 end
     

@@ -14,7 +14,7 @@ local unpack = unpack
 local time = time
 local CLASS_ICON_TCOORDS = CLASS_ICON_TCOORDS
 
-local BNet_GetClientTexture = BNet_GetClientTexture
+local BNet_GetClientTexture = BNet_GetClientTexture or BNet_GetBattlenetClientAtlas
 local GetQuestDifficultyColor = GetQuestDifficultyColor
 local WrapTextInColorCode = WrapTextInColorCode
 local _G = _G
@@ -66,6 +66,22 @@ EFL.Icons = {
 	}
 }
 
+local StatusColor = {}
+for name, info in next, EFL.Icons.Status do
+	local r, g, b = unpack(info.Color)
+	StatusColor[name] = { Inside = CreateColor(r, g, b, .15), Outside = CreateColor(r, g, b, .0)}
+end
+
+function EFL:SetGradientColor(button, color1, color2)
+	if PA.Retail or PA.Wrath then
+		button.Left:SetGradient("Horizontal", color1, color2)
+		button.Right:SetGradient("Horizontal", color2, color1)
+	else
+		button.Left:SetGradientAlpha("Horizontal", color1.r, color1.g, color1.b, color1.a, color2.r, color2.g, color2.b, color2.a)
+		button.Right:SetGradientAlpha("Horizontal", color2.r, color2.g, color2.b, color2.a, color1.r, color1.g, color1.b, color1.a)
+	end
+end
+
 function EFL:CreateTexture(button, type, layer)
 	if button.efl and button.efl[type] then
 		button.efl[type].Left:SetTexture(PA.LSM:Fetch('statusbar', EFL.db['Texture']))
@@ -77,15 +93,15 @@ function EFL:CreateTexture(button, type, layer)
 	button.efl[type] = {}
 
 	button.efl[type].Left = button:CreateTexture(nil, layer)
-	button.efl[type].Left:SetWidth(button:GetWidth() / 2)
 	button.efl[type].Left:SetHeight(32)
 	button.efl[type].Left:SetPoint("LEFT", button, "CENTER")
+	button.efl[type].Left:SetPoint("TOPLEFT", button, "TOPLEFT")
 	button.efl[type].Left:SetTexture('Interface/Buttons/WHITE8X8')
 
 	button.efl[type].Right = button:CreateTexture(nil, layer)
-	button.efl[type].Right:SetWidth(button:GetWidth() / 2)
 	button.efl[type].Right:SetHeight(32)
 	button.efl[type].Right:SetPoint("RIGHT", button, "CENTER")
+	button.efl[type].Right:SetPoint("TOPRIGHT", button, "TOPRIGHT")
 	button.efl[type].Right:SetTexture('Interface/Buttons/WHITE8X8')
 end
 
@@ -96,23 +112,24 @@ function EFL:UpdateFriends(button)
 		local info = _G.C_FriendList.GetFriendInfoByIndex(button.id)
 		if info.connected then
 			local name, level, class = info.name, info.level, info.className
-			local classcolor = PA:ClassColorCode(class)
+			local classTag, color, diff = PA:GetClassName(class), PA:ClassColorCode(class), 'FFFFE519'
 			status = info.dnd and 'DND' or info.afk and 'AFK' or 'Online'
 			if EFL.db.ShowLevel then
 				if EFL.db.DiffLevel then
-					local diff = level ~= 0 and format('FF%02x%02x%02x', GetQuestDifficultyColor(level).r * 255, GetQuestDifficultyColor(level).g * 255, GetQuestDifficultyColor(level).b * 255) or 'FFFFFFFF'
-					nameText = format('%s |cFFFFFFFF(|r%s - %s %s|cFFFFFFFF)|r', WrapTextInColorCode(name, classcolor), class, LEVEL, WrapTextInColorCode(level, diff))
-				else
-					nameText = format('%s |cFFFFFFFF(|r%s - %s %s|cFFFFFFFF)|r', WrapTextInColorCode(name, classcolor), class, LEVEL, WrapTextInColorCode(level, 'FFFFE519'))
+					local diffColor = GetQuestDifficultyColor(level)
+					diff = level ~= 0 and format('FF%02x%02x%02x', diffColor.r * 255, diffColor.g * 255, diffColor.b * 255) or 'FFFFFFFF'
 				end
+				nameText = format('%s |cFFFFFFFF(|r%s - %s %s|cFFFFFFFF)|r', WrapTextInColorCode(name, color), class, LEVEL, WrapTextInColorCode(level, diff))
 			else
-				nameText = format('%s |cFFFFFFFF(|r%s|cFFFFFFFF)|r', WrapTextInColorCode(name, classcolor), class)
+				nameText = format('%s |cFFFFFFFF(|r%s|cFFFFFFFF)|r', WrapTextInColorCode(name, color), class)
 			end
 			infoText = info.area
 
-			button.gameIcon:Show()
-			button.gameIcon:SetTexture('Interface/WorldStateFrame/Icons-Classes')
-			button.gameIcon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[PA:GetClassName(class)]))
+			if classTag then
+				button.gameIcon:Show()
+				button.gameIcon:SetTexture('Interface/WorldStateFrame/Icons-Classes')
+				button.gameIcon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[classTag]))
+			end
 		else
 			nameText = info.name
 		end
@@ -123,7 +140,7 @@ function EFL:UpdateFriends(button)
 			nameText = info.accountName
 			infoText = info.gameAccountInfo.richPresence
 			if info.gameAccountInfo.isOnline then
-				local client = info.gameAccountInfo.clientProgram
+				local client, diff = info.gameAccountInfo.clientProgram, 'FFFFE519'
 				status = info.isDND and 'DND' or info.isAFK and 'AFK' or 'Online'
 
 				if client == _G.BNET_CLIENT_WOW then
@@ -133,18 +150,17 @@ function EFL:UpdateFriends(button)
 					if characterName then
 						if EFL.db.ShowLevel then
 							if EFL.db.DiffLevel then
-								local diff = level ~= 0 and format('FF%02x%02x%02x', GetQuestDifficultyColor(level).r * 255, GetQuestDifficultyColor(level).g * 255, GetQuestDifficultyColor(level).b * 255) or 'FFFFFFFF'
-								nameText = format('%s (%s - %s %s)', nameText, WrapTextInColorCode(characterName, classcolor), LEVEL, WrapTextInColorCode(level, diff))
-							else
-								nameText = format('%s (%s - %s %s)', nameText, WrapTextInColorCode(characterName, classcolor), LEVEL, WrapTextInColorCode(level, 'FFFFE519'))
+								local diffColor = GetQuestDifficultyColor(level)
+								diff = level ~= 0 and format('FF%02x%02x%02x', diffColor.r * 255, diffColor.g * 255, diffColor.b * 255) or 'FFFFFFFF'
 							end
+							nameText = format('%s (%s - %s %s)', nameText, WrapTextInColorCode(characterName, classcolor), LEVEL, WrapTextInColorCode(level, diff))
 						else
 							nameText = format('%s (%s)', nameText, WrapTextInColorCode(characterName, classcolor))
 						end
 					end
 
 					if info.gameAccountInfo.wowProjectID == _G.WOW_PROJECT_CLASSIC and info.gameAccountInfo.realmDisplayName ~= PA.MyRealm then
-						infoText = format('%s - %s', info.gameAccountInfo.areaName or UNKNOWN, infoText)
+						infoText = format('%s - %s', info.gameAccountInfo.areaName or _G.UNKNOWN, infoText)
 					elseif info.gameAccountInfo.realmDisplayName == PA.MyRealm then
 						infoText = info.gameAccountInfo.areaName
 					end
@@ -168,32 +184,23 @@ function EFL:UpdateFriends(button)
 		end
 	end
 
-	if button.summonButton:IsShown() then
-		button.gameIcon:SetPoint('TOPRIGHT', -50, -2)
-	else
-		button.gameIcon:SetPoint('TOPRIGHT', -21, -2)
-	end
+	--button.gameIcon:SetPoint('TOPRIGHT', button.summonButton:IsShown() and -50 or -21, -2)
 
 	if nameText then button.name:SetText(nameText) end
 	if infoText then button.info:SetText(infoText) end
 
-	local r, g, b = unpack(EFL.Icons.Status[status].Color)
 	if EFL.db.ShowStatusBackground then
-		EFL:CreateTexture(button, 'background', 'BACKGROUND')
-
-		button.efl.background.Left:SetGradientAlpha("Horizontal", r, g, b, .15, r, g, b, 0)
-		button.efl.background.Right:SetGradientAlpha("Horizontal", r, g, b, .0, r, g, b, .15)
-
 		button.background:Hide()
+
+		EFL:CreateTexture(button, 'background', 'BACKGROUND')
+		EFL:SetGradientColor(button.efl.background, StatusColor[status].Inside, StatusColor[status].Outside)
 	end
 
 	if EFL.db.ShowStatusHighlight then
-		EFL:CreateTexture(button, 'highlight', 'HIGHLIGHT')
-
-		button.efl.highlight.Left:SetGradientAlpha("Horizontal", r, g, b, .25, r, g, b, 0)
-		button.efl.highlight.Right:SetGradientAlpha("Horizontal", r, g, b, .0, r, g, b, .25)
-
 		button.highlight:SetVertexColor(0, 0, 0, 0)
+
+		EFL:CreateTexture(button, 'highlight', 'HIGHLIGHT')
+		EFL:SetGradientColor(button.efl.highlight, StatusColor[status].Inside, StatusColor[status].Outside)
 	end
 
 	button.name:SetFont(PA.LSM:Fetch('font', EFL.db.NameFont), EFL.db.NameFontSize, EFL.db.NameFontFlag)

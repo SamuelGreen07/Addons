@@ -2,8 +2,8 @@ local PA = _G.ProjectAzilroka
 local OzCD = PA:NewModule('OzCooldowns', 'AceEvent-3.0', 'AceTimer-3.0')
 PA.OzCD = OzCD
 
-OzCD.Title = '|cFF16C3F2Oz|r|cFFFFFFFFCooldowns|r'
-OzCD.Description = 'Minimalistic Cooldowns'
+OzCD.Title = PA.ACL['|cFF16C3F2Oz|r|cFFFFFFFFCooldowns|r']
+OzCD.Description = PA.ACL['Minimalistic Cooldowns']
 OzCD.Authors = 'Azilroka    Nimaear'
 OzCD.isEnabled = false
 
@@ -50,11 +50,11 @@ end
 OzCD.Cooldowns = {}
 OzCD.ActiveCooldowns = {}
 OzCD.DelayCooldowns = {}
-OzCD.IsChargeCooldown = {}
 OzCD.SpellList = {}
 
 local GLOBAL_COOLDOWN_TIME = 1.5
 local COOLDOWN_MIN_DURATION = .1
+local SpellOptions = {}
 
 -- Simpy Magic
 local t = {}
@@ -152,10 +152,14 @@ function OzCD:UpdateActiveCooldowns()
 
 			local Start, Duration, CurrentDuration, Charges
 
-			if OzCD.IsChargeCooldown[SpellID] then
-				Charges, _, Start, Duration = GetSpellCharges(SpellID)
-			else
-				Start, Duration = GetSpellCooldown(SpellID)
+			do
+				local start, duration = GetSpellCooldown(SpellID)
+				local charges, maxCharges, chargeStart, chargeDuration = GetSpellCharges(SpellID)
+				if ( charges and maxCharges and maxCharges > 1 and charges < maxCharges ) then
+					Charges, Start, Duration = charges, chargeStart, chargeDuration
+				else
+					Start, Duration = start, duration
+				end
 			end
 
 			CurrentDuration = (Start + Duration - GetTime())
@@ -186,19 +190,18 @@ function OzCD:UpdateActiveCooldowns()
 end
 
 function OzCD:UpdateDelayedCooldowns()
-	local Start, Duration, Enable, CurrentDuration, Charges, _
-
 	for SpellID in pairs(OzCD.DelayCooldowns) do
-		Start, Duration, Enable = GetSpellCooldown(SpellID)
+		local Start, Duration, Enable
 
-		if OzCD.IsChargeCooldown[SpellID] then
-			Charges, _, Start, Duration = GetSpellCharges(SpellID)
-			if Charges then
-				Start, Duration = Start, Duration
+		do
+			Start, Duration, Enable = GetSpellCooldown(SpellID)
+			local charges, maxCharges, chargeStart, chargeDuration = GetSpellCharges(SpellID)
+			if ( charges and maxCharges and maxCharges > 1 and charges < maxCharges ) then
+				Start, Duration = chargeStart, chargeDuration
 			end
 		end
 
-		CurrentDuration = (Start + Duration - GetTime())
+		local CurrentDuration = (Start + Duration - GetTime())
 
 		if Enable and CurrentDuration then
 			if (CurrentDuration < OzCD.db.SuppressDuration) and (CurrentDuration > GLOBAL_COOLDOWN_TIME) then
@@ -378,24 +381,15 @@ function OzCD:UNIT_SPELLCAST_SUCCEEDED(_, unit, _, SpellID)
 end
 
 function OzCD:SPELL_UPDATE_COOLDOWN()
-	local Start, Duration, Enable, Charges, _, ChargeStart, ChargeDuration, CurrentDuration
-
 	for SpellID in pairs(OzCD.Cooldowns) do
-		Start, Duration, Enable = GetSpellCooldown(SpellID)
+		local Charges, MaxCharges, ChargeStart, ChargeDuration = GetSpellCharges(SpellID)
+		local Start, Duration, Enable = GetSpellCooldown(SpellID)
 
-		if OzCD.IsChargeCooldown[SpellID] ~= false then
-			Charges, _, ChargeStart, ChargeDuration = GetSpellCharges(SpellID)
-
-			if OzCD.IsChargeCooldown[SpellID] == nil then
-				OzCD.IsChargeCooldown[SpellID] = Charges and true or false
-			end
-
-			if Charges then
-				Start, Duration = ChargeStart, ChargeDuration
-			end
+		if ( Charges and MaxCharges and MaxCharges > 1 and Charges < MaxCharges ) then
+			Start, Duration = ChargeStart, ChargeDuration
 		end
 
-		CurrentDuration = (Start + Duration - GetTime())
+		local CurrentDuration = (Start + Duration - GetTime())
 
 		if Enable and CurrentDuration and (CurrentDuration < OzCD.db.IgnoreDuration) then
 			if (CurrentDuration >= OzCD.db.SuppressDuration) or OzCD.HasCDDelay[SpellID] then
@@ -419,18 +413,18 @@ function OzCD:SPELLS_CHANGED()
 		OzCD:ScanSpellBook(_G.BOOKTYPE_PET, numPetSpells)
 
 		PA:AddKeysToTable(OzCD.db.SpellCDs, OzCD.SpellList)
-
-		PA.Options.args.OzCooldowns.args.General.args.Spells.args = OzCD:GenerateSpellOptions()
 	end
+
+	PA.Options.args.OzCooldowns.args.General.args.Spells.args = OzCD:GenerateSpellOptions()
 end
 
 function OzCD:GenerateSpellOptions()
-	local SpellOptions = {}
-
 	for SpellID, SpellName in pairs(OzCD.db.SpellCDs) do
 		local Name, _, Icon = GetSpellInfo(SpellID)
-		if Name then
-			SpellOptions[tostring(SpellID)] = {
+		local tblID = tostring(SpellID)
+
+		if Name and not SpellOptions[tblID] then
+			SpellOptions[tblID] = {
 				type = 'toggle',
 				image = Icon,
 				imageCoords = PA.TexCoords,

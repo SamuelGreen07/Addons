@@ -19,7 +19,7 @@ BigWigs:AddSounds("Overgrown Ancient", {
 
 BigWigs:AddSounds("Crawth", {
 	[376448] = {"info","long"},
-	[376467] = "long",
+	[376467] = {"info","long"},
 	[376997] = "alert",
 	[377004] = "warning",
 	[377034] = "alarm",
@@ -37,4 +37,25 @@ BigWigs:AddSounds("Echo of Doragosa", {
 })
 
 BigWigs:AddSounds("Algeth'ar Academy Trash", {
+	[377383] = "alarm",
+	[377389] = "warning",
+	[377912] = "alarm",
+	[377991] = "alert",
+	[378003] = "alarm",
+	[387843] = {"alarm","alert"},
+	[387910] = {"alarm","underyou"},
+	[387955] = "alert",
+	[388392] = "alert",
+	[388863] = "alert",
+	[388886] = {"alert","long"},
+	[388911] = "alarm",
+	[388976] = "alarm",
+	[388984] = {"alarm","alert"},
+	[389501] = "info",
+	[389512] = "info",
+	[389516] = "info",
+	[389521] = "info",
+	[389536] = "info",
+	[390912] = "alarm",
+	[396812] = "warning",
 })

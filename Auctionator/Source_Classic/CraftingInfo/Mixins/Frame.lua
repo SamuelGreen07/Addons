@@ -16,8 +16,6 @@ function AuctionatorCraftingInfoFrameMixin:OnLoad()
     end
   end)
   Auctionator.API.v1.RegisterForDBUpdate(AUCTIONATOR_L_REAGENT_SEARCH, function()
-    self:ShowIfRelevant()
-
     if self:IsVisible() then
       self:UpdateTotal()
     end
@@ -30,13 +28,28 @@ end
 
 function AuctionatorCraftingInfoFrameMixin:ShowIfRelevant()
   self:SetShown(Auctionator.Config.Get(Auctionator.Config.Options.CRAFTING_INFO_SHOW) and GetTradeSkillSelectionIndex() ~= 0 and self:IsAnyReagents())
-  if self:IsShown() then
+  if self:IsVisible() then
     self.SearchButton:SetShown(AuctionFrame ~= nil and AuctionFrame:IsShown())
 
-    self:SetPoint(unpack(self.originalDescriptionPoint))
     self.originalFirstLine:SetPoint("TOPLEFT", self, "BOTTOMLEFT")
   else
     self.originalFirstLine:SetPoint(unpack(self.originalDescriptionPoint))
+  end
+end
+
+-- Update the position of the search button and other anchors so that nothing
+-- gets hidden if crafting costs are hidden but the search button for the AH is
+-- left enabled.
+function AuctionatorCraftingInfoFrameMixin:AdjustPosition()
+  self:ClearAllPoints()
+  self.SearchButton:ClearAllPoints()
+  self:SetPoint(unpack(self.originalDescriptionPoint))
+  if self:GetHeight() == 0 then
+    self:SetPoint("LEFT")
+    self:SetPoint("RIGHT")
+    self.SearchButton:SetPoint("BOTTOMLEFT", 205, 6)
+  else
+    self.SearchButton:SetPoint("TOPLEFT", 205, 6)
   end
 end
 
@@ -48,7 +61,11 @@ function AuctionatorCraftingInfoFrameMixin:IsAnyReagents()
 end
 
 function AuctionatorCraftingInfoFrameMixin:UpdateTotal()
-  self.Total:SetText(Auctionator.CraftingInfo.GetInfoText())
+  local infoText, lines = Auctionator.CraftingInfo.GetInfoText()
+  self.Total:SetText(infoText)
+  self:SetHeight(16 * lines)
+
+  self:AdjustPosition()
 end
 
 function AuctionatorCraftingInfoFrameMixin:SearchButtonClicked()
@@ -58,7 +75,6 @@ function AuctionatorCraftingInfoFrameMixin:SearchButtonClicked()
 end
 
 function AuctionatorCraftingInfoFrameMixin:OnEvent(...)
-  self:ShowIfRelevant()
   if self:IsVisible() then
     self:UpdateTotal()
   end

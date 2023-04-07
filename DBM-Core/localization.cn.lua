@@ -1,7 +1,7 @@
 -- L.Core
 -- Diablohu(diablohudream@gmail.com)
 -- yleaf(yaroot@gmail.com)
--- Mini Dragon(projecteurs@gmail.com) <流浪者酒馆-Brilla@金色平原> 20221022
+-- Mini Dragon(projecteurs@gmail.com) <流浪者酒馆-Brilla@金色平原> 20230111
 
 if GetLocale() ~= "zhCN" then return end
 if not DBM_CORE_L then DBM_CORE_L = {} end
@@ -293,9 +293,9 @@ L.ACHIEVEMENT_TIMER_SPEED_KILL = "成就：限时击杀"
 
 -- Auto-generated Warning Localizations
 L.AUTO_ANNOUNCE_TEXTS.you				= "你中了%s"
-L.AUTO_ANNOUNCE_TEXTS.target				= "%s -> >%%s<"
-L.AUTO_ANNOUNCE_TEXTS.targetsource		= ">%%s< 施放 %s -> >%%s<"
-L.AUTO_ANNOUNCE_TEXTS.targetcount		= "%s (%%s) -> >%%s<"
+L.AUTO_ANNOUNCE_TEXTS.target			= "%s: >%%s<"
+L.AUTO_ANNOUNCE_TEXTS.targetsource		= ">%%s< 施放 %s 于 >%%s<"
+L.AUTO_ANNOUNCE_TEXTS.targetcount		= "%s (%%s)：>%%s<"
 L.AUTO_ANNOUNCE_TEXTS.spell				= "%s"
 L.AUTO_ANNOUNCE_TEXTS.ends 				= "%s 结束"
 L.AUTO_ANNOUNCE_TEXTS.endtarget			= "%s 结束: >%%s<"
@@ -310,7 +310,7 @@ L.AUTO_ANNOUNCE_TEXTS.bait				= "%s 即将到来 - 快引诱"
 L.AUTO_ANNOUNCE_TEXTS.stage				= "第%s阶段"
 L.AUTO_ANNOUNCE_TEXTS.prestage			= "第%s阶段 即将到来"
 L.AUTO_ANNOUNCE_TEXTS.count				= "%s (%%s)"
-L.AUTO_ANNOUNCE_TEXTS.stack				= "%s -> >%%s< (%%d)"
+L.AUTO_ANNOUNCE_TEXTS.stack				= ">%%s< 中了 %s (%%d)"
 L.AUTO_ANNOUNCE_TEXTS.moveto				= "%s - 移动到 >%%s<"
 
 L.AUTO_ANNOUNCE_OPTIONS.you				= "警报：中了%s时"
@@ -512,7 +512,8 @@ L.AUTO_YELL_ANNOUNCE_TEXT.combo		= "%s, %%s"
 L.AUTO_YELL_CUSTOM_FADE				= "%s 消失"
 L.AUTO_HUD_OPTION_TEXT				= "为$spell:%s显示HudMap(退休了)"
 L.AUTO_HUD_OPTION_TEXT_MULTI			= "为多个机制显示HudMap(退休了)"
-L.AUTO_NAMEPLATE_OPTION_TEXT			= "为$spell:%s显示姓名面板光环"
+L.AUTO_NAMEPLATE_OPTION_TEXT			= "为$spell:%s显示姓名面板光环，包括兼容插件和DBM"
+L.AUTO_NAMEPLATE_OPTION_TEXT_FORCED		= "为$spell:%s显示姓名面板光环，只包括DBM"
 L.AUTO_RANGE_OPTION_TEXT				= "距离监视(%s码)：$spell:%s"--string used for range so we can use things like "5/2" as a value for that field
 L.AUTO_RANGE_OPTION_TEXT_SHORT		= "距离监视(%s码)"--For when a range frame is just used for more than one thing
 L.AUTO_RRANGE_OPTION_TEXT			= "反转距离监视(%s码)：$spell:%s"--Reverse range frame (green when players in range, red when not)
@@ -570,6 +571,8 @@ L.DUR_CHECKING				= "全团装备耐久度检测请稍后... "
 L.DUR_HEADER					= L.DEADLY_BOSS_MODS .. "- 装备耐久度检测结果"
 L.DUR_ENTRY					= "%s: %d 耐久度 / %s件装备损坏"
 L.DUR_FOOTER					= "未反馈此次检测的团员:%s"
+
+L.OVERRIDE_ACTIVATED			= "本次战斗的配置已经被队长的配置覆盖"
 
 --LDB
 L.LDB_TOOLTIP_HELP1	= "左键 打开" .. L.DBM

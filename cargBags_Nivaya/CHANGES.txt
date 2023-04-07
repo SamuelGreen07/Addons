@@ -1,8 +1,10 @@
 ------------------------------------------------------------------------
-r96 | humfras | 2022-10-27 08:13:49 +0000 (Thu, 27 Oct 2022) | 1 line
+r121 | humfras | 2023-01-18 16:10:16 +0000 (Wed, 18 Jan 2023) | 1 line
 Changed paths:
-   M /trunk/cargBags/base/itembutton.lua
+   M /trunk/cargBags/mixins-add/itemkeys/tooltip.lua
+   M /trunk/cargBags_Nivaya_Wrath.toc
+   M /trunk/style.lua
 
-* fix typo in search function
+* update for 3.4.1
 ------------------------------------------------------------------------
 

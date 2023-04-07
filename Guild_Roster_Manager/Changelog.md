@@ -1,10 +1,258 @@
+## **VERSION 1.96 RELEASE - March 27th, 2023**
+
+**NEW FEATURE**
+
+* The "Sync Users" tab will now provide more clear and updated sync information so it is more clear what is being sync'd, what isn't, and why. Please note, due to the significant rewrite, the new SyncUsers page will not be forwards compatible so people with older versions will not be able to see your sync status as being unavailable. You will be able to see the outdated users, of course. This only applies to version prior to the 1.96 release.
+
+**PENDING SYNC PROGRESS PAR HAS BEEN DELAYED TIL NEXT UPDATE -- IT IS 100% Built, but some quirks are making it not perfect so I am working on that
+
+***TO BE RELEASE NEXT BUILD***
+* Sync Progress Bar - Sync will now show your progress as a % completed. This is a rough estimation to kind of gauge the speed of your sync, based on total volume of information being sync'd. It will also update you with the details of who you are syncing with, and it will even inform you as sync has failed.
+
+    -- You can hide this sync progress window
+    -- You can re-show this window by typing `/grm sync`
+    -- If you wish to manually trigger sync, just either click the "Start Sync" button or type /grm sync again
+    -- I built an API for creating progress bars that can be used for any purpose but I plan on using it to more easily implement my future "Guild stats" feature. This API can be utilitzed by any addon dev for their own projects, however, fairly easily. This can be found in the "GRM_Stats.lua" file and can be used in conjunction with the GRM_API namespace in the "GRM_API.lua" file.
+***PENDING FEATURE NEXT BUILD***
+
+
+***QUALITY OF LIFE FEATURES***
+
+* If a player has been removed from the guild, or they quit, it will retain the information on their previous alt group. When they rejoin the guild, GRM will now re-add them to their original alt group. While this is a minor thing, guild leadership has been known to joke around and "fake" kick players on occasion. This will save the hassle of having to re-link them to their alt group when they join. Or, just an alt kicked for inactivity from a guild will now auto-be linked back.
+
+* On adding custom channels for GRM to report to, you no longer need to hit ENTER after typing. You still can, to trigger window creation, but upon losing focus from the window, either by pressing ESC or clicking something else, it will auto-trigger the creation of window, or save the changes if new chat window already exists.
+
+* Adjusted the logic on sync leadership slightly. When dealing with a decentralized database, and to cut down on the "noise" of syncing across chat, there is a "sync leader" elected behind the scenes. This sync leader becomes the centralized database that session, that holds the most current sync data for all online to sync with. It will dynamically shift as people log off and on and request sync data. It now prioritises the sync leader a little more intelligently than just the previous method of relying on who is already the sync leader. The election process is more selective. Most people will not notice any difference since this process happens strictly behind the scenes, but it IS important as sync restrictions do matter for things like ban data and so on, so it doesn't make a whole lot of sense to have a non-officer as designated "sync leader" behind the scenes when a GRM officer is currently on, for example...
+
+
+***BUG FIXES***
+
+* Fixed many sync errors that were causing it to fail. I won't go into everyone but I found quite a few.
+
+* Fixed an issue where in some cases the main data would be completely skipped from being sync.
+
+* Same with birthday data -- fixed an issue where in some cases it would skip from being sync'd
+
+* Fixed an issue where main designations were occasionally getting removed on a sync. I did find a flaw where in some circumstances the "timestamp" of the action was being changed to the current time() rather than the sync'd time. This would create a problem during sync because if the timstamp was overwritten with the current epoch time(), then the database would be showing as that being the most recent event, thus it would possibly remove the main time tag.
+
+* Fixed a sync bug that would cause sync to fail when it finally got to comparing the alt data. If you noticed the join date and promotion dates syncing fine, but the alt group and main tags not syncing, and getting a "sync failed" message, this bug fix definitely applies to you.
+
+* To improve sync efficiency, due to the heavy server throttling of data, GRM does a "pre-check" of mismatched data between the 2 players to do a cursory check if they differ so that only the differing information will be compared and sync'd, for the sake of efficiency. This is why subsequent syncs should get shorter over time as there is less to sync. There was a bug that was allowing birthday data to show as not differing between the 2 players in a pre-check, so in some cases sync would skip over syncing the birthday information, whilst still sharing the bday changes, wasting sync time. This has been fixed.
+
+* Fixed an issue where the Event window would not load because if someone was on the events list of upcoming bdays or anniversaries, and they left the guild, it was in some cases not being removed, which ultimately caused an error as it looked up information on the player in the list. They now should properly be auto-removed from the list when they are no longer in the guild.
+
+* Fixed a lua error that would occur for some people who were not able to export FORMER MEMBER lists.
+
+* Fixed a lua error that could prevent patching if you haven't patched and updated GRM in several years.
+
+* Fixed an issue on updating the database to new format would not work for some people so GRM would never load.
+
+* Fixed an issue that caused the ban list to not load properly when viewing.
+
+* Fixed an issue where the "Player not found" or "No Player name..." system message was being swalled by GRM and hidden. It was supposed to only apply when syncing and when a player goes offline, but was permanently doing so for all of those messages.
+
+
+## **VERSION 1.954 RELEASE - January 23rd, 2023**
+
+* 10.0.5 Compatibility Retail
+
+## **VERSION 1.953 RELEASE - January 18th, 2023**
+
+* WOTLK Compatibility fix for 3.4.1 release - Build for all
+
+## **VERSION 1.952 RELEASE - December 4th, 2022**
+
+***QUALITY OF LIFE***
+
+* Super minor adjustment to the GRM Macro tool for promotions/demotions. You can now set the promotion to apply to a player at 0 days or months. In other words, you don't want to promote them until they become active again, so they may be at an "inactive" rank. Well, now, as soon as they come back to being active, with no delay, they can immediately be promoted from the rank. Prior to this you could not set the value to be zero days.
+
+***BUG FIXES***
+
+* Fixed a bug that could cause sync to fail, or in some cases, just not sync all of the join dates.
+
+* Fixed an issue that was affecting GRM from loading if you were running ElvUI - this would not affect all people, just some. Not really a conflict, but a load order issue around the minimap causing GRM to crash. This has been fixed.
+
+
+## **VERSION 1.951 RELEASE - Nov 30th, 2022**
+
+* Sync bug fix that was reported - seems to be affecting some people, not all. It shouldn't occur anymore.
+
+* (Vanilla Classic) Class coloring was not triggering in the chat until you opened the GRM window. So, if you logged in, the class chat coloring was not working until that was triggered. Slight load order error that has been fixed.
+
+
+## **VERSION 1.950 RELEASE - Nov 30th, 2022**
+
+* Fixed a critical issue with join/promo date sync that was overlooked due to some significant recent changes - oops!
+
+* Fixed an issue where if a player adds/removes a rank in the guild, it doesn't overwrite the whole guild's ranks as they shift, and become unverified promotion dates :(
+    -- If this did affect you, I encourage you to use this tool - WARNING - Only use you if this affected you DB recently -- `/run GRM_API.ClearAllUnverifiedPromoteDates()`  -- Copy that into chat and hit ENTER.
+
+
+## **VERSION R1.949 RELEASE - Nov 29th, 2022*
+
+***BUG FIXES***
+
+* Fixed an issue preventing GRM from patching to completion for some people who have recently updated. This was due to an error in pulling GUID data from the server from players no longer on the server returning "nil" data.
+
+* When adding a ban in Classic Vanilla or in Wrath, it should properly show the display of classes only for that expansion, and function properly. Previously, if you did the call to the server of a class that that expansion did not support, it would return no data, so I wrote the logic that if no data is received on the call, to just ignore that info, and I let the server handle it. Well, now, it actually provides the data regardless. So in Wrath, you can go `/dump RAID_CLASS_COLORS["MONK"]` and recived all class info, even though it doesn't exist in Wrath. This is likely due to efforts by Blizz to unify their API on the back end. This has been rewritten by build version control check now so it should not happen again in the future.
+
+* Ban list should work properly in adding names. There was an issue with adding Evoker previously.
+
+* Fixed an error where the Evnt log was not working if you tried to open the window
+
+* There was also an issue where you could no longer add events to the calendar. It looks like the "other" category has been added into an Enum table, hurray! `Enum.CalendarEventType.Other` is the new code line. I really like how Blizz has cleaned up a ton of their code to move lists into Enumerator tables.
+
+* The format `22-Nov-2022` for timestamp was broken in the audit tool and it was not being recognized. This was the only timestamp format affected and has now been rectified.
+
+* Exporting the join date timestamps to the player designated note was accidentally broken in a recent update. Oops! It is working again.
+
+* Fixed an issue where if a player deleted a toon or say, transfered servers, then joined the guild on a new toon with same name, it was not detecting it as a new join.
+
+* Fixed an issue that could cause sync to fail when syncing ban data
+
+* Fixed an issue where main tags were being lost during sync repeatedly. This should now be resolved. I have run my unit tests as well as tried to break it with some various edge cases, unsuccessfully, so we should be good, but there are a lot of moving parts during the sync process so please report if this is not fully resolved. Thank you!
+
+## **VERSION R1.948 RELEASE - Nov 17th, 2022*
+
+***VERSION COMPATIBILITY WITH 10.0.2 RELEASE***
+
+***BUG FIXES***
+
+* If a player logs on, and they match the macro rules for a promotion, the addon should now only inform you one time, even if they log off and on multiple times. It is just a once per session info message. There was an error where it was repeat reporting, but for only 1 player, everytime someone logged on, if there was a match.
+
+* New join's the history was reporting as a "Rejoin" in some cases, even though they weren't. This has been fixed.
+
+* Fairly significant flaw in the rank history and join history of player's rejoining the guild. This is a side effect of a recent overhaul of the database I did and something I just missed in the process and only noticed once some reports came in to discord. This should now work properly.
+
+* In some cases the live detection of people joining/leaving the guild was not being detected and/or not reporting at least the system message to chat. It should work now.
+
+* There was an issue where if someone left the guild, then rejoined the guild shortly after, the next scan of the roster then would erroneously report them as no longer in the guild... then the following scan would correct it saying they rejoined. How annoying! It's a little complicated to explain why this was happening, but we should be good now.
+
+* Classic Wrath was not parsing the guild log fully, and it now should - this will allow GRM to determine things like who promoted. I had this working, so I think I had a version control error and re-merged some old stuff and it has given me some issues I didn't realize until I was too deep into the next builds... Oops!
+
+* Issue with patching not completing for some people that has now been resolved.
+
+* You should no longer get an error when mousing over a player who is a Drenai race. There was a typo in the raceID here. It seems to have been there a while so this must be evidence that very few people play as that race as this is the first report I got of it ever lol.
+
+* Fixed an issue when mouseing over the "Custom Join Tag" in the officer tab of the GRM options - since this is a global control, in certain conditions the tooltip was erroring and throwing an error. It shouldn't anymore.
+
+* The dropdown menus for the default tab and changing the "main tag" in the GRM General options should be working again properly. There was a typo in my last build when I added the new timestamp option so dropdowns weren't loading. Oops!
+
+* Ignore players list was not refreshing properly when you removed or added people to the list and it was open. It now updates automatically on the fly without needing to reload the window.
+
+
+## **VERSION R1.947 RELEASE - Nov 11th, 2022*
+
+**HAPPY VETERAN'S DAY IN THE USA**
+
+***QUALITY OF LIFE***
+
+![Updated Export Window](https://i.imgur.com/9JE3w1w.jpg)
+
+* GUID is now an optonal export - this is disabled by default. Also, you can choose to normalize the player names to the 26 char English alphabet and remove the special alt-code characters. This is also disabled by default.
+
+![Macro Tool - Show Only Online](https://i.imgur.com/4HP8kpB.jpg)
+
+* You now have an option to filter just the people currently online in the macro tool, for demotions and promotions (I did not include the option for kick). It seems useful to maybe want to only promote someone when you have a chance to talk to them.
+
+* In addition - GRM will now inform you if the person logging on to the guild currently has a pending promotion/demotion. Sometimes you just get busy and forget. If they match a promotion rule and are due for a promotion, and they just came online, GRM will now remind you of this status.
+
+* The system messages are now silenced and replaced by the GRM log messages. This only affects the promote/demote/kick/leave/join live recording messages. This is just so it cleans up a little bit of the spam in chat due to GRM's additional log message. If you would prefer the system message over the GRM message, just uncheck the box on the right side of the log "ToChat" for those specific messagess and you will see the system messages again. The GRM log messages will still be recorded to the log.
+
+* It may not have been clear before, with the wording of this option, but you can silence the once per session message that your GRM version is outdated (if another guildie has a more current version). I have moved this checkbox to the "General" options tab. Also, for new addon users, the feature is disabled by default, but you are able to turn it on. I personally like it, but I know some people prefer to not be notified by addons in any way that there are updates.
+
+* Furthermore, some of the sync reporting has been streamlined a bit, and the `/grm sync` command should no longer have the option to break current syncs.
+
+* Re-wrote the GRM_API I am prepping for classic... Some preliminary stuff is put together. One I finish the core of it I will publish all the accessible API functions, but you can see them easily in the GRM_API lua file. This is also where some more powerful tools will be made that maybe do not apply to general addon use, but will allow some more advanced options.
+
+***BUG FIXES***
+
+* Fixed an issue where the log would report a demotion, immediately after a promotion was made, in error, then it would correctly re-report the promotion. This would seemingly affect only some people, oddly enough. In some rare cases this could also occur when someone leaves the guild, it would report they are returning. This should no longer occur.
+
+* Some people may have found their join dates disappeared recently. There was an error on a patch and was not caught until it was reported by someone it happened to. It does not affect everyone. Fortunately, you can use the "Advanced Join Date Tool" in the /grm audit window if you were affected, and re-import the dates from the notes. 
+
+* Issue with sync not starting properly for some has been resolved. There seems to be a few different issues here with sync failing and I am working to clean them up. If you are getting any issues where sync fails to start, please let me know, or you type /grm sync and it won't trigger, let me know. It should trigger automatically after X seconds after logging in (default is 60). But, some people set it as early zs 10 seconds, or just disable it altogether and only sync when theyt manually /grm sync command it.
+
+* Fixed an issue where the join date was not getting added to a public or officer note properly. This would not have affected you if the date was going to custom note. There was a slight API change I didn't realize. This should work in all cases again.
+
+* Fixed a bug where the "Apply promotions regardless of activity" was not sticking properly when editing the macro rule.
+
+* Fixed a bug where GRM would not load at all as it was crashing in the patch process for someone who had not updated the addon in a little while.
+
+
+## **VERSION R1.946 RELEASE - Nov 7th, 2022*
+
+* Timestamp that can be added to the player note, and can be controlled globally is now independent of player settings. So, the timestamp format join dates can be a different format than your own personal preference for GRM timestamps in just the GRM frames, like on the audit window or mouseover window. This was done because a guild leader may mandate a format for say, the join date exported to the Officer Note, but I personally would prefer to have my log showing a different timestamp format.
+
+![Officer controlled Timestamp format is different](https://i.imgur.com/pqCf80S.jpg.)
+
+
+* Tooltip on guildies in chat removed in favor of just an expanded right-click window - you can now Ctrl-Click or Shft-ctrl click. Eventually, I will expand this window a little more to add some additional controls, but for now, it's just informational, and to set Main or demot from main status. I will likely expand the options here. Also, this tooltip is not fully integrated into the built in tooltip for style reasons and is a GRM frame on top. Please note, this ONLY works on the chat window, not on the communities frame in retail. Blizzard has blocked addons from being able to access the guild chat stream in retail so addon actions are restricted strictly to your live chat window.
+
+![Right Click context Menu in Chat Frame](https://i.imgur.com/S0MQ7W3.jpg)
+
+
+* The shift ranks up and down should now, once again, be showing for Classic build players. Someone please confirm this as I have not yet had the opportunity to.
+
+* Should no longer get a warning on Evoker class missing localization.
+
+* Cleaned up the ordering of the GRM Options tabs a little as it was getting a bit crowded. Slightly extended the window.
+
+* RGB coloring of classes should stick and be compatible with the same coloring from the client, as is set by the player's client for colorblind play.
+
+* GRM has removed the option to sync with outdated addon users. By default, players must be using the same version of the addon to sync between each other. This is just something that is going to save me some headaches in the future.
+
+* Issue with completing patching for some people who haven't updated in a long time. This should actually be resolved now.
+
+* Fixed an issue where GRM would not load properly after a guild namechange.
+
+* (RETAIL ONLY) - Noticed that the mouseover still works when the recruitment window is open, sort of annoyingly. I now restrict the mouseover when the recruitment window is open.
+
+* (CLASSIC ONLY) - Due to repeated efforts to resolve the taint issue that has appeared only in classic, the ctrl-click ability has been forcibly hard restricted down to only showing the guild roster, and the GRM window. The small side window that is built-in with the promote/demote controls cannot be opened in any way by addon scripting or else taint is introduced. This is not the case in retail, funny enough. But in Classic, this is the compromise that needed to happen.
+
+
+## **VERSION R1.945 RELEASE - 30th Oct, 2022**
+
+* Fixed an issue where if you set the date timestamp format to one of the last 2 options, globally, it would reset to a different format. This only affected people using the 30-10-2022 or the 2022.10.30 date formatting styles and had set it globally with the guildInfo tag.
+
+* Additional bugs for the backend resolved reported on discord.
+
+
+## **VERSION R1.944 RELEASE - 30th Oct, 2022**
+
+***QUALITY OF LIFE***
+
+* Added 2 New Macro Rule filters:
+
+* > Promotion Rule - You can now choose to set a promotion based on the Time at Rank, or based on the Time in the Guild
+
+![New Promotion Macro Tool Rule](https://i.imgur.com/AytQLR9.jpg)
+
+* > Kick, Promote, Demote Rule - You can now search for a text match that will ignore the rule if a match is found. In other words, let's say your text match is "[S]" - The macro filter will skip over this player and deem them as "safe" from that specific rule. You can set any text tag you would like. However, I did make the decision that GRM will only search for the tag within the officer note. This is because the custom and public notes are typically widely available to players in the guild, and it doesn't make sense for a player who might discover the tag, to be able to add it to their own note.
+
+![New Promotion Macro Tool Rule](https://i.imgur.com/1MV5tmE.jpg)
+
+* Added compatibility to the YYYY.MM.DD timestamp formatting - This is another timestamp formatting option. This can be controlled as a global control for the guild. It is also a data format fully compatible with the "Advanced Join Date Tool" for importing/exporting join dates from player notes.
+
+
+***BUG FIXES***
+
+* Fixed the issue that is keeping new players' data from being added to the database properly when joining a guild. It also fixes the crashes of the log on load which was preventing the log from updating.
+
+* Ban list search now should match the names correctly, no matter what format you use in a name, special character or not. Oops!
+
+* Fixed an issue that could cause taint in Classic, which would block actions. These has been thoroughly tested to now be resolved, finally!
+
+* Fixed various misc. errors that popped up and were reported on Discord. Significant amount of work on this, so hopefully cleaner. Not all reported items are yet resolved, but the game breaking ones are.
+
+
 ## **VERSION R1.942 RELEASE - 27th Oct, 2022**
+
+* Fixed the new minimap compatibility issue error that was causing GRM to crash for people hiding the minimap button. If you are wondering why GRM stopped working for some people, this fix resolves that.
 
 * Fixed a Lua error that could occur when changing fonts or on load in Classic  
 
 * Fixed an issue where the mouseover could get locked even after closing the window. This seemed to only happen on the "Old" roster window.
-
-* Fixed the new minimap compatibility issue error that was causing GRM to crash for people hiding the minimap button.
 
 * Fixed an issue so export won't throw an error when looking at Race data for export in Classic, but trying to determine the source.
 

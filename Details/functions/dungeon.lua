@@ -4,6 +4,7 @@ local Details = _G._detalhes
 local debugmode = false --print debug lines
 local verbosemode = false --auto open the chart panel
 local _
+local addonName, Details222 = ...
 
 local Loc = _G.LibStub("AceLocale-3.0"):GetLocale( "Details" )
 
@@ -899,3 +900,9 @@ mythicDungeonCharts.ClassColors = {
 if (debugmode) then
 	--C_Timer.After(1, mythicDungeonCharts.ShowChart)
 end
+
+Details222.MythicPlus = {
+	IsMythicPlus = function()
+		return C_ChallengeMode and C_ChallengeMode.GetActiveKeystoneInfo() and true or false
+	end,
+}

@@ -10,8 +10,6 @@ local APIImageFunctions = false
 do
 	local metaPrototype = {
 		WidgetType = "image",
-		SetHook = detailsFramework.SetHook,
-		RunHooksForWidget = detailsFramework.RunHooksForWidget,
 		dversion = detailsFramework.dversion,
 	}
 
@@ -36,6 +34,7 @@ end
 local ImageMetaFunctions = _G[detailsFramework.GlobalWidgetControlNames["image"]]
 
 detailsFramework:Mixin(ImageMetaFunctions, detailsFramework.SetPointMixin)
+detailsFramework:Mixin(ImageMetaFunctions, detailsFramework.ScriptHookMixin)
 
 ------------------------------------------------------------------------------------------------------------
 --metatables
@@ -301,7 +300,7 @@ detailsFramework:Mixin(ImageMetaFunctions, detailsFramework.SetPointMixin)
 		if (texture) then
 			if (type(texture) == "table") then
 				if (texture.gradient) then
-					if (detailsFramework.IsDragonflight()) then
+					if (detailsFramework.IsDragonflight() or detailsFramework.IsWotLKWowWithRetailAPI()) then
 						ImageObject.image:SetColorTexture(1, 1, 1, 1)
 						local fromColor = detailsFramework:FormatColor("tablemembers", texture.fromColor)
 						local toColor = detailsFramework:FormatColor("tablemembers", texture.toColor)

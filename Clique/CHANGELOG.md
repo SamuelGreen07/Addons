@@ -1,7 +1,6 @@
 # Clique
 
-## [v3.4.6-release](https://github.com/jnwhiteh/Clique/tree/v3.4.6-release) (2022-10-27)
-[Full Changelog](https://github.com/jnwhiteh/Clique/compare/v3.4.5-release...v3.4.6-release) [Previous Releases](https://github.com/jnwhiteh/Clique/releases)
+## [v3.5.0-release](https://github.com/jnwhiteh/Clique/tree/v3.5.0-release) (2023-04-01)
+[Full Changelog](https://github.com/jnwhiteh/Clique/compare/v3.4.15-release...v3.5.0-release) [Previous Releases](https://github.com/jnwhiteh/Clique/releases)
 
-- Only show messages on Dragonflight until confirmed elsewhere  
-- Don't touch forbidden frames, ever!  
+- Fix for 10.1.0 PTR with removal of GetAddOnMetadata (#10)  

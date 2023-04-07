@@ -1,14 +1,6 @@
-@Terciob:
-- Updates to hit animations.
-- Use Plater internal class colors.
-
 @cont1nuity:
-- Several updates for Dragonflight compatibility.
-- Adding shadow priest execute for WotLK.
-- Retail toc bump for Dragonflight pre-patch.
-- Hide target glow on personal bar if the healthbar is disabled.
-- Quest info cache now holds 'groupAmount' and uses lowest amount from group for the top level default, while 'amount' in the quest-data contains the players value.
-- Fixing CVar restore not working properly in some cases.
-- Fixing an issue with mod/script options not working properly.
-- Fixing aura types auto tracking for Dragonflight.
+- Fixing and error on quest recognition rework.
+- Fixing and error for hiding blizzard healthbars.
+- Fixing some errors about unit flag changes when units are entering/leaving combat or change being attackable or not.
+- Fixing some default values for 'hide blizzard healthbars' on the different WoW versions.
 

@@ -127,12 +127,13 @@ function QuestieOptionsDefaults:Load()
             autocomplete = false,
             autoModifier = "shift",
             acceptTrivial = false,
-            questAnnounceChannel = "group",
+            questAnnounceChannel = "party",
             questAnnounceItems = true,
             questAnnounceAccepted = false,
             questAnnounceAbandoned = false,
             questAnnounceObjectives = true,
             questAnnounceCompleted = false,
+            questAnnounceLocally = false,
             isTrackerExpanded = true,
             hideUnexploredMapIcons = false,
             hideUntrackedQuestsMapIcons = false,
@@ -143,7 +144,8 @@ function QuestieOptionsDefaults:Load()
             showPvPQuests = true,
             showAQWarEffortQuests = false,
             showQuestsInNpcTooltip = true,
-            ldbDisplayText = "Questie"
+            ldbDisplayText = "Questie",
+            enableQuestFrameIcons = true
         },
         profile = { minimap = { hide = false } }
     }

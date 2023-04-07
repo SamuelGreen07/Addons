@@ -1,7 +1,7 @@
-## Interface: 30400
+## Interface: 30401
 ## Title: LFG113
 ## Author: Joseph Forrest
-## Version 3.01
+## Version 3.03
 ## SavedVariables: LFG113Saved
 ## SavedVariablesPerCharacter: LFG113BlackList, LFG113Searches, LFG113Premades, LFG113Ratings, LFG113InstanceKeys, LFG113Quests
 

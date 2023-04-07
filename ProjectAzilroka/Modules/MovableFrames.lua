@@ -94,6 +94,8 @@ local AddOnFrames = {
 	Blizzard_TrainerUI = { 'ClassTrainerFrame' },
 	Blizzard_VoidStorageUI = { 'VoidStorageFrame' },
 	Blizzard_WeeklyRewards = { 'WeeklyRewardsFrame' },
+	Blizzard_ProfessionsCustomerOrders = { 'ProfessionsCustomerOrdersFrame' },
+	Blizzard_Professions = { 'ProfessionsFrame' },
 }
 
 function MF:OnDragStart(frame)
@@ -134,7 +136,10 @@ function MF:MakeMovable(name)
 	end
 
 	if name == 'AchievementFrame' then
-		_G.AchievementFrameHeader:EnableMouse(false)
+		local header = _G.AchievementFrameHeader or _G.AchievementFrame.Header
+		if header then
+			header:EnableMouse(false)
+		end
 	end
 
 	frame:EnableMouse(true)

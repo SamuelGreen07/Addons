@@ -13,7 +13,42 @@ local function InitializeQualityDropDown(dropDown)
     table.insert(qualityStrings, Auctionator.Utilities.CreateColoredQuality(quality))
     table.insert(qualityIDs, tostring(quality))
   end
+
   dropDown:InitAgain(qualityStrings, qualityIDs)
+end
+
+local function InitializeTierDropDown(dropDown)
+  local tierStrings = {}
+  local tierIDs = {}
+
+  table.insert(tierStrings, AUCTIONATOR_L_ANY_UPPER)
+  table.insert(tierIDs, NO_QUALITY)
+
+  if not Auctionator.Constants.IsClassic then
+    for tier = 1, 3 do
+      table.insert(tierStrings, C_Texture.GetCraftingReagentQualityChatIcon(tier))
+      table.insert(tierIDs, tostring(tier))
+    end
+  end
+
+  dropDown:InitAgain(tierStrings, tierIDs)
+end
+
+local function InitializeExpansionDropDown(dropDown)
+  local expansionStrings = {}
+  local expansionIDs = {}
+
+  table.insert(expansionStrings, AUCTIONATOR_L_ANY_UPPER)
+  table.insert(expansionIDs, NO_QUALITY)
+
+  for i = 0, LE_EXPANSION_LEVEL_CURRENT do
+    local name = _G["EXPANSION_NAME" .. i]
+
+    table.insert(expansionStrings, name)
+    table.insert(expansionIDs, tostring(i))
+  end
+
+  dropDown:InitAgain(expansionStrings, expansionIDs)
 end
 
 function AuctionatorShoppingItemMixin:OnLoad()
@@ -25,6 +60,14 @@ function AuctionatorShoppingItemMixin:OnLoad()
 
   self.QualityContainer.ResetQualityButton:SetClickCallback(function()
     self.QualityContainer.DropDown:SetValue(NO_QUALITY)
+  end)
+
+  self.TierContainer.ResetTierButton:SetClickCallback(function()
+    self.TierContainer.DropDown:SetValue(NO_QUALITY)
+  end)
+
+  self.ExpansionContainer.ResetExpansionButton:SetClickCallback(function()
+    self.ExpansionContainer.DropDown:SetValue(NO_QUALITY)
   end)
 
   local onEnterCallback = function()
@@ -59,11 +102,23 @@ function AuctionatorShoppingItemMixin:OnLoad()
     end
   })
 
+  InitializeExpansionDropDown(self.ExpansionContainer.DropDown)
   InitializeQualityDropDown(self.QualityContainer.DropDown)
+  InitializeTierDropDown(self.TierContainer.DropDown)
+
+  if not Auctionator.Constants.IsClassic then
+    self:SetHeight(420)
+    self.TierContainer:Show()
+    self.ExpansionContainer:Show()
+  else
+    self:SetHeight(340)
+    self.TierContainer:Hide()
+    self.ExpansionContainer:Hide()
+  end
 
   Auctionator.EventBus:Register(self, {
-    Auctionator.Shopping.Events.ListSearchStarted,
-    Auctionator.Shopping.Events.ListSearchEnded
+    Auctionator.Shopping.Tab.Events.ListSearchStarted,
+    Auctionator.Shopping.Tab.Events.ListSearchEnded
   })
 end
 
@@ -79,7 +134,7 @@ function AuctionatorShoppingItemMixin:OnShow()
 
   Auctionator.EventBus
     :RegisterSource(self, "add item dialog")
-    :Fire(self, Auctionator.Shopping.Events.DialogOpened)
+    :Fire(self, Auctionator.Shopping.Tab.Events.DialogOpened)
     :UnregisterSource(self)
 end
 
@@ -88,7 +143,7 @@ function AuctionatorShoppingItemMixin:OnHide()
 
   Auctionator.EventBus
     :RegisterSource(self, "add item dialog")
-    :Fire(self, Auctionator.Shopping.Events.DialogClosed)
+    :Fire(self, Auctionator.Shopping.Tab.Events.DialogClosed)
     :UnregisterSource(self)
 end
 
@@ -123,19 +178,24 @@ function AuctionatorShoppingItemMixin:HasItemInfo()
 end
 
 function AuctionatorShoppingItemMixin:GetItemString()
-  local searchString = self.SearchContainer.SearchString:GetText()
-  if self.SearchContainer.IsExact:GetChecked() then
-    searchString = "\"" .. searchString .. "\""
-  end
-
-  return
-    searchString .. Auctionator.Constants.AdvancedSearchDivider ..
-    self.FilterKeySelector:GetValue() .. Auctionator.Constants.AdvancedSearchDivider ..
-    self.ItemLevelRange:GetValue() .. Auctionator.Constants.AdvancedSearchDivider ..
-    self.LevelRange:GetValue() .. Auctionator.Constants.AdvancedSearchDivider ..
-    self.CraftedLevelRange:GetValue() .. Auctionator.Constants.AdvancedSearchDivider ..
-    self.PriceRange:GetValue() .. Auctionator.Constants.AdvancedSearchDivider ..
-    self.QualityContainer.DropDown:GetValue()
+  local search = {
+    searchString = self.SearchContainer.SearchString:GetText(),
+    isExact = self.SearchContainer.IsExact:GetChecked(),
+    categoryKey = self.FilterKeySelector:GetValue(),
+    minLevel = self.LevelRange:GetMin(),
+    maxLevel = self.LevelRange:GetMax(),
+    minItemLevel = self.ItemLevelRange:GetMin(),
+    maxItemLevel = self.ItemLevelRange:GetMax(),
+    minCraftedLevel = self.CraftedLevelRange:GetMin(),
+    maxCraftedLevel = self.CraftedLevelRange:GetMax(),
+    minPrice = self.PriceRange:GetMin() * 10000,
+    maxPrice = self.PriceRange:GetMax() * 10000,
+    expansion = tonumber(self.ExpansionContainer.DropDown:GetValue()),
+    quality = tonumber(self.QualityContainer.DropDown:GetValue()),
+    tier = tonumber(self.TierContainer.DropDown:GetValue()),
+  }
+  
+  return Auctionator.Search.ReconstituteAdvancedSearch(search)
 end
 
 function AuctionatorShoppingItemMixin:SetItemString(itemString)
@@ -172,6 +232,18 @@ function AuctionatorShoppingItemMixin:SetItemString(itemString)
   else
     self.QualityContainer.DropDown:SetValue(tostring(search.quality))
   end
+
+  if Auctionator.Constants.IsClassic or search.tier == nil then
+    self.TierContainer.DropDown:SetValue(NO_QUALITY)
+  else
+    self.TierContainer.DropDown:SetValue(tostring(search.tier))
+  end
+
+  if Auctionator.Constants.IsClassic or search.expansion == nil then
+    self.ExpansionContainer.DropDown:SetValue(NO_QUALITY)
+  else
+    self.ExpansionContainer.DropDown:SetValue(tostring(search.expansion))
+  end
 end
 
 function AuctionatorShoppingItemMixin:ResetAll()
@@ -189,9 +261,9 @@ function AuctionatorShoppingItemMixin:ResetAll()
 end
 
 function AuctionatorShoppingItemMixin:ReceiveEvent(eventName)
-  if eventName == Auctionator.Shopping.Events.ListSearchStarted then
+  if eventName == Auctionator.Shopping.Tab.Events.ListSearchStarted then
     self.Finished:Disable()
-  elseif eventName == Auctionator.Shopping.Events.ListSearchEnded then
+  elseif eventName == Auctionator.Shopping.Tab.Events.ListSearchEnded then
     self.Finished:Enable()
   end
 end

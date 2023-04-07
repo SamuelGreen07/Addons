@@ -23,6 +23,16 @@ local cargBags = ns.cargBags
 local isClassic = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE
 local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 
+local isDF = select(4,GetBuildInfo()) >= 100000
+local NumBagContainer = isDF and 5 or 4
+local BankContainerStartID = NumBagContainer + 1
+local MaxNumContainer = isDF and 12 or 11
+
+local GetContainerNumSlots = GetContainerNumSlots or C_Container.GetContainerNumSlots
+local GetContainerItemLink = GetContainerItemLink or C_Container.GetContainerItemLink
+local GetContainerItemCooldown = GetContainerItemCooldown or C_Container.GetContainerItemCooldown
+local GetContainerItemEquipmentSetInfo = isRetail and (GetContainerItemEquipmentSetInfo or C_Container.GetContainerItemEquipmentSetInfo)
+
 local animaSpells = {
 	[336327] = true,
 	[336456] = true,
@@ -290,6 +300,7 @@ function Implementation:Init()
 	if isRetail then
 		self:RegisterEvent("PLAYERREAGENTBANKSLOTS_CHANGED", self, self.PLAYERREAGENTBANKSLOTS_CHANGED)
 	end
+	self:RegisterEvent("BANKFRAME_OPENED", self, self.BANKFRAME_OPENED)
 	self:RegisterEvent("UNIT_QUEST_LOG_CHANGED", self, self.UNIT_QUEST_LOG_CHANGED)
 	self:RegisterEvent("BAG_CLOSED", self, self.BAG_CLOSED)
 end
@@ -359,6 +370,7 @@ local function GetContainerItemLevel(link, bagID, slotID)
 	return itemDB[link]
 end]]
 
+
 function Implementation:GetCustomItemInfo(bagID, slotID, i)
 	i = i or defaultItem
 	for k in pairs(i) do i[k] = nil end
@@ -370,13 +382,31 @@ function Implementation:GetCustomItemInfo(bagID, slotID, i)
 	
 	if(clink) then
 		local _
-		i.texture, i.count, i.locked, i.quality, i.readable, _, _, _, _, i.id = GetContainerItemInfo(bagID, slotID)
-		i.cdStart, i.cdFinish, i.cdEnable = GetContainerItemCooldown(bagID, slotID)
+		if GetContainerItemInfo then
+			i.texture, i.count, i.locked, i.quality, i.readable, _, _, _, _, i.id, i.isBound = GetContainerItemInfo(bagID, slotID)
+			i.cdStart, i.cdFinish, i.cdEnable = GetContainerItemCooldown(bagID, slotID)
+		else
+			local cInfo = C_Container.GetContainerItemInfo(bagID, slotID)
+			i.texture = cInfo.iconFileID
+			i.count = cInfo.stackCount
+			i.locked = cInfo.isLocked
+			i.quality = cInfo.quality
+			i.readable = cInfo.isReadable
+			i.id = cInfo.itemID
+			i.isBound = cInfo.isBound
+		end
 		if isClassic then
 			i.isQuestItem, i.questID, i.questActive = nil, nil, nil
 			i.isInSet, i.setName = nil, nil
 		else
-			i.isQuestItem, i.questID, i.questActive = GetContainerItemQuestInfo(bagID, slotID)
+			if GetContainerItemQuestInfo then
+				i.isQuestItem, i.questID, i.questActive = GetContainerItemQuestInfo(bagID, slotID)
+			else
+				local qInfo = C_Container.GetContainerItemQuestInfo(bagID, slotID)
+				i.isQuestItem = qInfo.isQuestItem
+				i.questID = qInfo.questID
+				i.questActive = qInfo.isActive
+			end
 			i.isInSet, i.setName = GetContainerItemEquipmentSetInfo(bagID, slotID)
 		end
 
@@ -505,7 +535,7 @@ function Implementation:BAG_UPDATE(event, bagID, slotID)
 	elseif(bagID) then
 		self:UpdateBag(bagID)
 	else
-		for bagID = -2, 11 do
+		for bagID = -2, MaxNumContainer do
 			self:UpdateBag(bagID)
 		end
 	end
@@ -587,6 +617,15 @@ if isRetail then
 		self:BAG_UPDATE(event, bagID, slotID)
 	end
 end
+
+function Implementation:BANKFRAME_OPENED(event)
+	if isRetail then
+		local bagID = -3
+
+		self:BAG_UPDATE(event, bagID)
+	end
+end
+
 
 --[[
 	Fired when the quest log of a unit changes

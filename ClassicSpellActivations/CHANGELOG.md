@@ -1,6 +1,6 @@
 # ClassicSpellActivations
 
-## [3.0.6](https://github.com/rgd87/ClassicSpellActivations/tree/3.0.6) (2022-10-21)
-[Full Changelog](https://github.com/rgd87/ClassicSpellActivations/compare/3.0.5...3.0.6) [Previous Releases](https://github.com/rgd87/ClassicSpellActivations/releases)
+## [3.0.14](https://github.com/rgd87/ClassicSpellActivations/tree/3.0.14) (2023-02-01)
+[Full Changelog](https://github.com/rgd87/ClassicSpellActivations/compare/3.0.13...3.0.14) [Previous Releases](https://github.com/rgd87/ClassicSpellActivations/releases)
 
-- Keep Decimation highlighted indefinitely  
+- Added Killing Machine  

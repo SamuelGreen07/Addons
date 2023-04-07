@@ -1,10 +1,10 @@
--- $Id: Atlas-koKR.lua 374 2022-01-26 14:33:01Z arithmandar $
+-- $Id: Atlas-koKR.lua 431 2023-03-20 14:46:49Z arithmandar $
 --[[
 
 	Atlas, a World of Warcraft instance map browser
 	Copyright 2005 ~ 2010 - Dan Gilbert <dan.b.gilbert at gmail dot com>
 	Copyright 2010 - Lothaer <lothayer at gmail dot com>, Atlas Team
-	Copyright 2011 ~ 2022 - Arith Hsu, Atlas Team <atlas.addon at gmail dot com>
+	Copyright 2011 ~ 2023 - Arith Hsu, Atlas Team <atlas.addon at gmail dot com>
 
 	This file is part of Atlas.
 
@@ -92,18 +92,28 @@ L["ATLAS_DDL_EXPANSION_WOTLK"] = "리치왕의 분노 인스턴스"
 L["ATLAS_DDL_LEVEL"] = "레벨"
 L["ATLAS_DDL_LEVEL_100PLUS"] = "인스턴스 레벨 100+"
 L["ATLAS_DDL_LEVEL_100TO110"] = "인스턴스 레벨 100-110"
+L["ATLAS_DDL_LEVEL_10TO20"] = "인스턴스 레벨 10-20"
+L["ATLAS_DDL_LEVEL_10TO30"] = "인스턴스 레벨 10-30"
 L["ATLAS_DDL_LEVEL_110PLUS"] = "인스턴스 레벨 110+"
 L["ATLAS_DDL_LEVEL_110TO120"] = "인스턴스 레벨 110-120"
 L["ATLAS_DDL_LEVEL_120PLUS"] = "인스턴스 레벨 120+"
 L["ATLAS_DDL_LEVEL_120TO130"] = "인스턴스 레벨 120-130"
 L["ATLAS_DDL_LEVEL_130PLUS"] = "인스턴스 레벨 130+"
+L["ATLAS_DDL_LEVEL_20TO40"] = "인스턴스 레벨 20-40"
+L["ATLAS_DDL_LEVEL_30TO35"] = "인스턴스 레벨 30-35"
+L["ATLAS_DDL_LEVEL_35TO40"] = "인스턴스 레벨 35-40"
+L["ATLAS_DDL_LEVEL_40TO45"] = "인스턴스 레벨 40-45"
+L["ATLAS_DDL_LEVEL_40TO60"] = "인스턴스 레벨 40-60"
+L["ATLAS_DDL_LEVEL_45TO50"] = "인스턴스 레벨 45-50"
 L["ATLAS_DDL_LEVEL_45TO60"] = "인스턴스 레벨 45-60"
+L["ATLAS_DDL_LEVEL_50TO60"] = "인스턴스 레벨 50-60"
 L["ATLAS_DDL_LEVEL_60PLUS"] = "인스턴스 레벨 60+"
 L["ATLAS_DDL_LEVEL_60TO70"] = "인스턴스 레벨 60-70"
 L["ATLAS_DDL_LEVEL_70TO80"] = "인스턴스 레벨 70-80"
 L["ATLAS_DDL_LEVEL_80TO85"] = "인스턴스 레벨 80-85"
 L["ATLAS_DDL_LEVEL_85TO90"] = "인스턴스 레벨 85-90"
 L["ATLAS_DDL_LEVEL_90TO100"] = "인스턴스 레벨 90-100"
+L["ATLAS_DDL_LEVEL_UNDER30"] = "인스턴스 레벨 30 아래"
 L["ATLAS_DDL_LEVEL_UNDER45"] = "인스턴스 레벨 45 아래"
 L["ATLAS_DDL_PARTYSIZE"] = "파티 크기"
 L["ATLAS_DDL_PARTYSIZE_10"] = "10인 인스턴스"

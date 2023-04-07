@@ -1,4 +1,4 @@
-## Interface: 30400
+## Interface: 30401
 
 ## Title: BigWigs [|cffeda55fCore|r]
 ## Title-zhCN: BigWigs [|cffeda55f核心|r]
@@ -22,7 +22,7 @@
 ## Notes-ptBR: Core do BigWigs
 ## Notes-esES: Núcleo de BigWigs.
 ## Notes-esMX: Núcleo de BigWigs.
-## Version: v45.3-classic
+## Version: v48.1-classic
 
 ## LoadOnDemand: 1
 ## Dependencies: BigWigs

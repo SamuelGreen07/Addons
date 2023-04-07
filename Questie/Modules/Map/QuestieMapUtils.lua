@@ -32,12 +32,23 @@ function QuestieMap.utils:SetDrawOrder(frame)
     end
 
     -- Draw layer is between -8 and 7, please leave some number above so we don't paint ourselves into a corner...
+    -- These are sorted by order of most common occurrence to reduce if checks; it's less readable but more performant with so many icons
     if frame.data then
-        if frame.data.Icon == ICON_TYPE_REPEATABLE then
-            frame.texture:SetDrawLayer("OVERLAY", 4)
-        elseif frame.data.Icon == ICON_TYPE_AVAILABLE then
+        if frame.data.Icon == Questie.ICON_TYPE_AVAILABLE then
             frame.texture:SetDrawLayer("OVERLAY", 5)
-        elseif frame.data.Icon == ICON_TYPE_COMPLETE then
+        elseif frame.data.Icon == Questie.ICON_TYPE_REPEATABLE then
+            frame.texture:SetDrawLayer("OVERLAY", 4)
+        elseif frame.data.Icon == Questie.ICON_TYPE_EVENTQUEST then
+            frame.texture:SetDrawLayer("OVERLAY", 4)
+        elseif frame.data.Icon == Questie.ICON_TYPE_PVPQUEST then
+            frame.texture:SetDrawLayer("OVERLAY", 4)
+        elseif frame.data.Icon == Questie.ICON_TYPE_COMPLETE then
+            frame.texture:SetDrawLayer("OVERLAY", 6)
+        elseif frame.data.Icon == Questie.ICON_TYPE_REPEATABLE_COMPLETE then
+            frame.texture:SetDrawLayer("OVERLAY", 6)
+        elseif frame.data.Icon == Questie.ICON_TYPE_EVENTQUEST_COMPLETE then
+            frame.texture:SetDrawLayer("OVERLAY", 6)
+        elseif frame.data.Icon == Questie.ICON_TYPE_PVPQUEST_COMPLETE then
             frame.texture:SetDrawLayer("OVERLAY", 6)
         else
             frame.texture:SetDrawLayer("OVERLAY", 0)
@@ -162,7 +173,7 @@ end
 
 --- Rescale a single icon
 ---@param frameRef string|IconFrame @The global name/iconRef of the icon frame, e.g. "QuestieFrame1"
----@param mapScale number @Scale value for the final size of the Icon
+---@param mapScale number? @Scale value for the final size of the Icon
 function QuestieMap.utils:RescaleIcon(frameRef, mapScale)
     local frame = frameRef;
     local iconScale = mapScale or 1

@@ -3,8 +3,8 @@ local AR = PA:NewModule('AuraReminder', 'AceEvent-3.0', 'AceTimer-3.0')
 
 PA.AR = AR
 
-AR.Title = '|cFF16C3F2Aura|r |cFFFFFFFFReminder|r'
-AR.Description = 'Reminder for Buffs / Debuffs'
+AR.Title = PA.ACL['|cFF16C3F2Aura|r |cFFFFFFFFReminder|r']
+AR.Description = PA.ACL['Reminder for Buffs / Debuffs']
 AR.Authors = 'Azilroka'
 AR.isEnabled = false
 
@@ -22,11 +22,13 @@ local wipe = wipe
 
 local GetSpellCooldown = GetSpellCooldown
 local GetSpellInfo = GetSpellInfo
+local IsSpellKnownOrOverridesKnown = IsSpellKnownOrOverridesKnown
 local IsUsableSpell = IsUsableSpell
 local IsInInstance = IsInInstance
 local UnitAffectingCombat = UnitAffectingCombat
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local UnitLevel = UnitLevel
+local UnitInVehicle = UnitInVehicle
 local GetInventoryItemID = GetInventoryItemID
 local GetWeaponEnchantInfo = GetWeaponEnchantInfo
 local GetInventoryItemTexture = GetInventoryItemTexture
@@ -138,7 +140,7 @@ function AR:FilterCheck(db, isReverse)
 end
 
 function AR:Reminder_Update()
-	if UnitIsDeadOrGhost('player') then return end
+	if UnitIsDeadOrGhost('player') or UnitInVehicle('player') then return end
 
 	for _, button in ipairs(AR.CreatedReminders) do
 		button:Hide()
@@ -179,11 +181,15 @@ function AR:Reminder_Update()
 						if db.filterType == 'SPELL' then
 							local hasBuff, hasDebuff = AR:FindPlayerAura(db.spellGroup, db.personal), AR:FindPlayerAura(db.spellGroup, nil, 'HARMFUL')
 							local negate = AR:FindPlayerAura(db.negateGroup, db.personal)
-
+							local skip = false
 							if not (negate or hasBuff or hasDebuff) then
 								for buff, value in pairs(db.spellGroup) do
 									if value then
 										local usable = IsUsableSpell(buff);
+										if db.strictFilter then
+											usable = usable and IsSpellKnownOrOverridesKnown(buff);
+											skip = not usable;
+										end
 										if usable and AR:IsSpellOnCooldown(buff) then
 											break
 										end
@@ -196,7 +202,7 @@ function AR:Reminder_Update()
 									end
 								end
 
-								Button:SetShown((((not hasBuff) and (not hasDebuff)) and not db.reverseCheck) or (reverseCheck and db.reverseCheck and ((hasBuff or hasDebuff) or ((not hasBuff) and (not hasDebuff)))))
+								Button:SetShown(not skip and (((not hasBuff) and (not hasDebuff)) and not db.reverseCheck) or (reverseCheck and db.reverseCheck and ((hasBuff or hasDebuff) or ((not hasBuff) and (not hasDebuff)))))
 							end
 						end
 

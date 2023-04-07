@@ -84,6 +84,7 @@ Local.InWorld = false -- as addon id loaded / parsed
 -- Configuration defaults || Configuration par défaut
 -- To be used if the configuration savedvariables is missing, or if the NecrosisConfig.Version number is changed. || Se charge en cas d'absence de configuration ou de changement de version
 Local.DefaultConfig = {
+	AFK = true,
 	SoulshardContainer = 4,
 	ShadowTranceAlert = true,
 	ShowSpellTimers = true,
@@ -146,6 +147,7 @@ Local.DefaultConfig = {
 	DestroyShardwithsphere = true,
 	ShadowTranceScale = 100,
 	NecrosisButtonScale = 90,
+	NecroisButtonRadius = 1,
 	NecrosisColor = "Rose",
 	Sound = true,
 	SpellTimerPos = 1,
@@ -458,7 +460,7 @@ function UpdateIcons()
 	--]]
 	if Local.Stone.Soul.OnHand and (not SoulstoneInUse) then
 		-- If the stone in inventory contains a timer, and we leave a RL -> Mode 4 || Si la pierre en inventaire contient un timer, et qu'on sort d'un RL --> Mode 4
-		local start, duration = GetContainerItemCooldown(Local.Stone.Soul.Location[1],Local.Stone.Soul.Location[2])
+		local start, duration = C_Container.GetContainerItemCooldown(Local.Stone.Soul.Location[1],Local.Stone.Soul.Location[2])
 		if Necrosis.Debug.timers then
 			_G["DEFAULT_CHAT_FRAME"]:AddMessage("UpdateIcons - soul stone found"
 			.." s'"..tostring(start or "nyl").."'"
@@ -625,8 +627,11 @@ end
 -- Event : UNIT_SPELLCAST_SUCCEEDED
 -- Manages everything related to successful spell casts || Permet de gérer tout ce qui touche aux sorts une fois leur incantation réussie
 function SpellManagement(SpellCasted)
+	
+	
 	local SortActif = false
 	local cast_spell = SpellCasted
+	
 	if (cast_spell.Name) then
 	
 		
@@ -636,6 +641,9 @@ function SpellManagement(SpellCasted)
 		-- Handle any timers on cast spells
 		local spell = Necrosis.GetSpellById(cast_spell.Id)
 		
+		
+		
+			
 		if spell.Buff then
 			-- Handled by the aura events
 		elseif spell.Timer then
@@ -659,6 +667,7 @@ function SpellManagement(SpellCasted)
 --			end
 
 			local cast_info = {}
+			local spell = Necrosis.GetSpellById(cast_spell.Id)
 			cast_info = {
 				usage = spell.Usage,
 				spell_id  = cast_spell.Id,
@@ -675,13 +684,85 @@ function SpellManagement(SpellCasted)
 			end
 		--print (spell.Usage,cast_spell.Id,cast_spell.Guid)
 		--print (cast_spell.TargetName,cast_spell.TargetLevel,cast_spell.TargetGUID)
+		--print (cast_spell.TargetName,cast_spell.TargetLevel,cast_spell.TargetGUID)
 			Local.TimerManagement = Necrosis:TimerInsert(cast_info, target, Local.TimerManagement, "spell cast")
+			
+			--print (spell.Usage,cast_spell.Id,cast_spell.Guid)
 		end
 	end
 
 	return
 end
 
+function CheckCorruptionRefresh(target, cast_guid, spell_id)
+
+-- On verifie si la corruption doit etre refresh , si le talent(Afflication eternelle) est appris, a la suite de SB ou hanter le timer de la corru est réinitialisé
+			local guid = UnitGUID("target")
+			local name = select(1, GetSpellInfo(spell_id))
+			
+			if not target or not guid or target == "Player" or not Necrosis.GetSpellById(spell_id)  then
+			
+			-- nothing to do
+			return nil
+			
+			elseif Necrosis.Warlock_Spells[spell_id].Usage == "bolt" or Necrosis.Warlock_Spells[spell_id].Usage == "haunt" then-- Trait de l'ombre ou Hanter
+			--print (guid, cast_guid, spell_id , name, Necrosis.Warlock_Spells[spell_id].Usage)
+			
+				for i=1,40 do 
+						local NameDebuff, _, _, _, _,expirationTime = UnitAura("target", i, "PLAYER|HARMFUL")
+						
+						--On verifie que sur la cible on a bien corruption
+						if NameDebuff == Necrosis.GetSpellName("corruption") then
+									
+							
+								for index = 1, #Local.TimerManagement.SpellTimer, 1 do
+							
+									-- On recherche dans la table des Timer la corruption correspondante à la cible
+									--if Local.TimerManagement.SpellTimer[index] then
+									--print(Necrosis.TimerManagement.SpellTimer[index].Name,NameDebuff,Necrosis.TimerManagement.SpellTimer[index].TargetGUID,UnitGUID("target"))
+										if Necrosis.TimerManagement.SpellTimer[index].Name == NameDebuff and  Necrosis.TimerManagement.SpellTimer[index].TargetGUID == UnitGUID("target") then
+										
+									-- On delete le timer actuel pour le remplacer
+										Necrosis:RetraitTimerParIndex(index, Local.TimerManagement, "spell expired")
+										--print ("spell deleted",index)
+									-- On rajoute une Corruption avec un timer refresh
+										SpellManagement(Local.SpellCasted[cast_guid])
+																			
+										Necrosis.GetSpellName("corruption")
+										local spell = Necrosis.GetSpellById(Necrosis.GetSpell("corruption").ID)
+										local cast_info = {}
+										cast_info = {
+											usage = "corruption",
+											spell_id  = Necrosis.GetSpell("corruption").ID,
+											guid = cast_guid,
+											}
+										target = {
+											name = UnitName("Target"),--
+											lvl  = UnitLevel("Target"),
+											guid = UnitGUID("Target")
+											}
+										--Local.TimerManagement = Necrosis:TimerInsert(cast_info, target, Necrosis.TimerManagement, "spell cast")
+										
+										Local.TimerManagement = Necrosis:TimerInsert(cast_info, target, Local.TimerManagement, "spell cast")
+										
+										
+										
+										SpellManagement(Local.SpellCasted[cast_guid])
+										
+										
+										end
+						
+									
+									--end
+						
+								end
+						end
+				
+				end	
+
+			
+		end
+end
 -- Events : CHAT_MSG_SPELL_PERIODIC_SELF_BUFFS, CHAT_MSG_SPELL_AURA_GONE_SELF et CHAT_MSG_SPELL_BREAK_AURA
 -- Manage the appearing and disappearing effects on the warlock || Permet de gérer les effets apparaissants et disparaissants sur le démoniste
 -- Based on CombatLog || Basé sur le CombatLog
@@ -809,7 +890,7 @@ end
 -- Event : UNIT_PET
 -- Allows the servo to be timed, as well as to prevent for servo breaks || Permet de timer les asservissements, ainsi que de prévenir pour les ruptures d'asservissement
 -- Also change the name of the pet to the replacement of it || Change également le nom du pet au remplacement de celui-ci
-local function ChangeDemon()
+function Necrosis:ChangeDemon()
 	if Necrosis.IsSpellKnown("enslave") then -- can enslave a demon
 		-- If the new demon is a slave demon, we put a 5 minute timer || Si le nouveau démon est un démon asservi, on place un timer de 5 minutes
 		if UnitHasEffect("pet", Necrosis.GetSpellName("enslave")) then 
@@ -900,7 +981,7 @@ local function SetupSpells(reason)
 		on a reload / crash / other reason.
 		The event UNIT_PET is triggered at init / reload IF a pet is out
 	--]]
-	ChangeDemon() 
+	Necrosis:ChangeDemon() 
 end
 
 --[[ SetupBuffTimers
@@ -1006,9 +1087,11 @@ function Necrosis:OnUpdate(something, elapsed)
 			for index = 1, #Local.TimerManagement.SpellTimer, 1 do
 				
 				if Local.TimerManagement.SpellTimer[index] then
-					--print ("timers",Local.TimerManagement.SpellTimer[index].Name)
+				
+					
 					-- We remove the completed timers || On enlève les timers terminés
 					local TimeLocal = GetTime()
+					
 					if TimeLocal >= (Local.TimerManagement.SpellTimer[index].TimeMax - 0.5) then
 						local StoneFade = false
 						-- If the timer was that of Soul Stone, warn the Warlock || Si le timer était celui de la Pierre d'âme, on prévient le Démoniste
@@ -1024,6 +1107,7 @@ function Necrosis:OnUpdate(something, elapsed)
 						local enslave = -- get name if known
 							Necrosis.GetSpellName("enslave") -- 10
 						--print (enslave,Local.TimerManagement.SpellTimer[index].Name)
+												
 						if not (Local.TimerManagement.SpellTimer[index].Name == enslave) then
 							
 							Local.TimerManagement = Necrosis:RetraitTimerParIndex(index, Local.TimerManagement, "spell expired")
@@ -1050,6 +1134,8 @@ function Necrosis:OnUpdate(something, elapsed)
 		if not NecrosisConfig.Smooth then
 			NecrosisUpdateTimer(Local.TimerManagement.SpellTimer)
 		end
+		
+		
 		-- If configured, display warnings from Antifear || Si configuré, affichage des avertissements d'Antifear
 		if NecrosisConfig.AntiFearAlert then
 			ShowAntiFearWarning()
@@ -1252,10 +1338,13 @@ function Necrosis:OnEvent(self, event,...)
 		-- UNIT_SPELLCAST_SUCCEEDED: "unitTarget", "castGUID", spellID || https://wow.gamepedia.com/UNIT_SPELLCAST_SUCCEEDED
 		-- This can get chatty as other 'casts' are sent such as enchanting / skinning / ...
 		local target, cast_guid, spell_id = arg1, arg2, arg3
+		
+		
 		msg = " sid'"..tostring(spell_id or "nyl").."'"
 			.." t'"..tostring(target or "nyl").."'"
 			.." cg'"..tostring(cast_guid or "nyl").."'"
 		ev_out(event, msg, false, true, true)
+		
 		if Local.SpellCasted[cast_guid] then -- processing this one
 			local sc = Local.SpellCasted[cast_guid]
 
@@ -1284,6 +1373,7 @@ function Necrosis:OnEvent(self, event,...)
 			sc = nil
 
 			SpellManagement(Local.SpellCasted[cast_guid])
+			CheckCorruptionRefresh(target, cast_guid, spell_id)
 			Local.SpellCasted[cast_guid] = {} -- processed so clear
 		end
 		target, cast_guid, spell_id = nil, nil, nil
@@ -1296,16 +1386,21 @@ function Necrosis:OnEvent(self, event,...)
 		-- Rely on castGUID to be unique. This allows the exact timer, if any, to added or removed as needed
 
 		local unit, target, cast_guid, spell_id = arg1, arg2, arg3, arg4
+			
 		msg = " sid'"..tostring(spell_id or "nyl").."'"
 			.." sg'"..tostring(cast_guid or "nyl").."'"
 			.." u'"..tostring(unit or "nyl").."'"
 			.." t'"..tostring(target or "nyl").."'"
 		ev_out(event, msg, false, true, true)
 
+		
+		
+		
+		
 		Local.SpellCasted[cast_guid] = {} -- start an entry
 		if spell_id and Necrosis.GetSpellById(spell_id) then -- it is a spell to process
 			local spell = Necrosis.GetSpellById(spell_id)
-
+	
 			if (target == nil or target == "")
 			and spell.SelfOnly
 			then
@@ -1314,15 +1409,7 @@ function Necrosis:OnEvent(self, event,...)
 				Local.SpellCasted[cast_guid].TargetGUID = UnitGUID("player")
 				Local.SpellCasted[cast_guid].TargetLevel = UnitLevel("player")
 			elseif target == nil or target == "" then
---[[
-_G["DEFAULT_CHAT_FRAME"]:AddMessage("UNIT_SPELLCAST_SENT - set target "
-.." sid'"..tostring(spell_id or "nyl").."'"
-.." sg'"..tostring(cast_guid or "nyl").."'"
-.." u'"..tostring(unit or "nyl").."'"
-.." t'"..tostring(target or "nyl").."'"
-.." > '"..tostring(UnitName("target") or "nyl").."'"
-)
---]]
+
 				Local.SpellCasted[cast_guid].TargetName = UnitName("target")
 				Local.SpellCasted[cast_guid].TargetGUID = UnitGUID("target")
 				Local.SpellCasted[cast_guid].TargetLevel = UnitLevel("target")
@@ -1390,32 +1477,31 @@ _G["DEFAULT_CHAT_FRAME"]:AddMessage("UNIT_SPELLCAST_SENT - set target "
 		
 			if UnitCreatureType("target") == Necrosis.Unit.Demon  then 	-- Button Alerte Demon	
 			NecrosisCreatureAlertButton_demon:SetAlpha(1)		
-			NecrosisCreatureAlertButton_demon:EnableMouse(true)
+			--NecrosisCreatureAlertButton_demon:EnableMouse(true)
 			
 			NecrosisCreatureAlertButton_elemental:SetAlpha(1) 
-			NecrosisCreatureAlertButton_elemental:EnableMouse(true)
+			--NecrosisCreatureAlertButton_elemental:EnableMouse(true)
 			NecrosisCreatureAlertButton_elemental:SetMovable(true)
 			
 			elseif UnitCreatureType("target") == Necrosis.Unit.Elemental then-- Button Alerte Elemental
 			NecrosisCreatureAlertButton_elemental:SetAlpha(1)
-			NecrosisCreatureAlertButton_elemental:EnableMouse(true)
+			--NecrosisCreatureAlertButton_elemental:EnableMouse(true)
 			NecrosisCreatureAlertButton_demon:SetAlpha(0)
-			NecrosisCreatureAlertButton_demon:EnableMouse(true)
+			--NecrosisCreatureAlertButton_demon:EnableMouse(true)
 			NecrosisCreatureAlertButton_elemental:SetMovable(true)
 	
 			else
 			NecrosisCreatureAlertButton_demon:SetAlpha(0)
-			NecrosisCreatureAlertButton_demon:EnableMouse(true)
+			--NecrosisCreatureAlertButton_demon:EnableMouse(true)
 			
 			NecrosisCreatureAlertButton_elemental:SetAlpha(0) 
-			NecrosisCreatureAlertButton_elemental:EnableMouse(true)
+			--NecrosisCreatureAlertButton_elemental:EnableMouse(true)
 	
 			end
 		else
 		NecrosisCreatureAlertButton_demon:SetAlpha(0) 
 		NecrosisCreatureAlertButton_elemental:SetAlpha(0) 	
-		NecrosisCreatureAlertButton_demon:EnableMouse(true)		
-		NecrosisCreatureAlertButton_elemental:EnableMouse(true)
+
 		NecrosisCreatureAlertButton_demon:SetMovable(true)		
 		NecrosisCreatureAlertButton_elemental:SetMovable(true)			
 		--print(UnitCreatureType("target"))
@@ -1432,6 +1518,11 @@ _G["DEFAULT_CHAT_FRAME"]:AddMessage("UNIT_SPELLCAST_SENT - set target "
 	elseif (event == "PLAYER_REGEN_ENABLED") then
 		Local.PlayerInCombat = false
 		Local.TimerManagement = Necrosis:RetraitTimerCombat(Local.TimerManagement, "PLAYER_REGEN_ENABLED")
+		NecrosisCreatureAlertButton_demon:EnableMouse(true)		
+		NecrosisCreatureAlertButton_elemental:EnableMouse(true)
+		
+		
+		
 		--Necrosis:Msg("regen enabled", "USER")
 		-- We are redefining the attributes of spell buttons in a situational way || On redéfinit les attributs des boutons de sorts de manière situationnelle
 		Necrosis:NoCombatAttribute(Local.Stone.Soul.Mode, Local.Stone.Fire.Mode, Local.Stone.Spell.Mode, Local.Menu.Pet, Local.Menu.Buff, Local.Menu.Curse)
@@ -1439,7 +1530,7 @@ _G["DEFAULT_CHAT_FRAME"]:AddMessage("UNIT_SPELLCAST_SENT - set target "
 
 	-- When the warlock changes demon || Quand le démoniste change de démon
 	elseif (event == "UNIT_PET" and arg1 == "player") then
-		ChangeDemon()
+		Necrosis:ChangeDemon()
 
 	-- ============= COMBAT_LOG_EVENT_UNFILTERED
 	-- Reading the combat log || Lecture du journal de combat
@@ -1858,7 +1949,7 @@ function Necrosis:BuildButtonTooltip(button)
 			local str = ""
 			local cool = ""
 			if Local.Stone.Soul.Location[1] and Local.Stone.Soul.Location[2] then
-				local startTime, duration, isEnabled = GetContainerItemCooldown(Local.Stone.Soul.Location[1], Local.Stone.Soul.Location[2])
+				local startTime, duration, isEnabled = C_Container.GetContainerItemCooldown(Local.Stone.Soul.Location[1], Local.Stone.Soul.Location[2])
 				if startTime == 0 then
 					-- not on cool down
 				else
@@ -1908,7 +1999,7 @@ function Necrosis:BuildButtonTooltip(button)
 				)
 			end
 			if Local.Stone.Health.Location[1] and Local.Stone.Health.Location[2] then
-				local startTime, duration, isEnabled = GetContainerItemCooldown(Local.Stone.Health.Location[1], Local.Stone.Health.Location[2])
+				local startTime, duration, isEnabled = C_Container.GetContainerItemCooldown(Local.Stone.Health.Location[1], Local.Stone.Health.Location[2])
 				if startTime == 0 then
 					-- not on cool down
 				else
@@ -1952,7 +2043,7 @@ function Necrosis:BuildButtonTooltip(button)
 		local str = Necrosis.TooltipData[Type].Right..GetBindLocation()
 		local str2 = Necrosis.TooltipData[Type].Left
 		if Local.Stone.Hearth.Location[1] and Local.Stone.Hearth.Location[2] then
-			local startTime, duration, isEnabled = GetContainerItemCooldown(Local.Stone.Hearth.Location[1], Local.Stone.Hearth.Location[2])
+			local startTime, duration, isEnabled = C_Container.GetContainerItemCooldown(Local.Stone.Hearth.Location[1], Local.Stone.Hearth.Location[2])
 			if startTime == 0 then
 				color = "|CFFFFFFFF"
 			else
@@ -2139,7 +2230,7 @@ function Necrosis:UpdateMana()
 	if Local.Dead then return end
 --	if UnitIsDead("player") then return end
 
-	local ptype = UnitPowerType("player")
+	local ptype,ptype_txt = UnitPowerType("player")
 	local mana = UnitPower("player",ptype)
 	local manaMax = UnitPowerMax("player", ptype)
 
@@ -2242,7 +2333,7 @@ _G["DEFAULT_CHAT_FRAME"]:AddMessage("Necrosis:UpdateMana"
 	-- Timers button || Bouton des Timers
 	-----------------------------------------------
 	if Local.Stone.Hearth.Location[1] then
-		local start, duration, enable = GetContainerItemCooldown(Local.Stone.Hearth.Location[1], Local.Stone.Hearth.Location[2])
+		local start, duration, enable = C_Container.GetContainerItemCooldown(Local.Stone.Hearth.Location[1], Local.Stone.Hearth.Location[2])
 		local ft = _G[Necrosis.Warlock_Buttons.timer.f]
 		if duration > 20 and start > 0 then
 			if not Local.Stone.Hearth.Cooldown then
@@ -2269,8 +2360,8 @@ function Necrosis:MoveShard(nshard)
 	  
 		  for n in pairs(Necrosis.ShardToMove) do 
 
-		  PickupContainerItem(Necrosis.ShardToMove[n].FromContainer, Necrosis.ShardToMove[n].FromSlot)
-	      PickupContainerItem(Necrosis.EmptySlot[n].ToContainer, Necrosis.EmptySlot[n].ToSlot)
+		  C_Container.PickupContainerItem(Necrosis.ShardToMove[n].FromContainer, Necrosis.ShardToMove[n].FromSlot)
+	      C_Container.PickupContainerItem(Necrosis.EmptySlot[n].ToContainer, Necrosis.EmptySlot[n].ToSlot)
 		  --endS
 		  
 		  end
@@ -2294,8 +2385,8 @@ function Necrosis:SoulshardSwitch(nshard)
 		end
 	
 		--if not (container == NecrosisConfig.SoulshardContainer) then
-			for slot = 1, GetContainerNumSlots(container), 1 do
-				local itemLink = GetContainerItemLink(container, slot)
+			for slot = 1, C_Container.GetContainerNumSlots(container), 1 do
+				local itemLink = C_Container.GetContainerItemLink(container, slot)
 				if (itemLink) then
 					
 					local itemID, itemType, itemSubType, itemEquipLoc, icon, classID, subclassID = GetItemInfoInstant(itemLink)
@@ -2310,8 +2401,8 @@ function Necrosis:SoulshardSwitch(nshard)
 			end
 		--else	
 		--Search slot empty, 
-			for i=1,GetContainerNumSlots(NecrosisConfig.SoulshardContainer) do
-						icon, itemCount, locked, quality, readable, lootable, itemLink, isFiltered, noValue, itemID, isBound = GetContainerItemInfo(NecrosisConfig.SoulshardContainer, i)
+			for i=1,C_Container.GetContainerNumSlots(NecrosisConfig.SoulshardContainer) do
+						icon, itemCount, locked, quality, readable, lootable, itemLink, isFiltered, noValue, itemID, isBound = C_Container.GetContainerItemInfo(NecrosisConfig.SoulshardContainer, i)
 						
 							
 							-- If destination bag is soulbag or not
@@ -2398,8 +2489,8 @@ function Necrosis:BagExplore(arg)
 			break 
 		end
 
-		for slot=1, GetContainerNumSlots(container), 1 do
-			local item_link = GetContainerItemLink(container, slot)
+		for slot=1, C_Container.GetContainerNumSlots(container), 1 do
+			local item_link = C_Container.GetContainerItemLink(container, slot)
 			local item_id = Necrosis.Utils.ParseItemLink(item_link) --GetContainerItemLink(container, slot))
 			
 			item_id = tonumber(item_id)
@@ -2548,7 +2639,7 @@ function Necrosis:BagExplore(arg)
 
 	-- If bags are full (or if we have reached the limit) then display a notification message || S'il y a plus de fragment que d'emplacements dans le sac défini, on affiche un message d'avertissement
 	if NecrosisConfig.SoulshardSort then
-		local CompteMax = GetContainerNumSlots(NecrosisConfig.SoulshardContainer)
+		local CompteMax = C_Container.GetContainerNumSlots(NecrosisConfig.SoulshardContainer)
 		if Necrosis.Debug.bags then
 			_G["DEFAULT_CHAT_FRAME"]:AddMessage("BagExplore shard sort"
 			.." c'"..(NecrosisConfig.SoulshardContainer or "nyl")..'"'
@@ -2577,22 +2668,46 @@ end
 
 -- Display or Hide buttons depending on spell availability || Affiche ou masque les boutons de sort à chaque nouveau sort appris
 function Necrosis:ButtonSetup()
+	local NBRScale, rayondebase ,rayon , dist
+	
+-- (Min)50 to 100 
+if  NecrosisConfig.NecrosisButtonScale <= 100 then
 
-	local NBRScale = (100 + (NecrosisConfig.NecrosisButtonScale - 85)) / 100
-	local dist = 35 * NBRScale
-	dist = dist
-	if NecrosisConfig.NecrosisButtonScale <= 100 then
 		NBRScale = 1.1
 		dist = 40 * NBRScale
-	end
+end	
+--  100 to 150
+if NecrosisConfig.NecrosisButtonScale < 150 and NecrosisConfig.NecrosisButtonScale > 100 then
+		 NBRScale = (100 + (NecrosisConfig.NecrosisButtonScale - 85)) / 100
+		 rayondebase = 8
+		 rayon = rayondebase * (NecrosisConfig.NecrosisButtonScale/100)
+		 dist = 35 * NBRScale * 0.85
+		dist = dist - ((rayon-rayondebase)) 
+end
+
+-- 160 to 200 (max)		
+if NecrosisConfig.NecrosisButtonScale >= 150 then
+		 NBRScale = (100 + (NecrosisConfig.NecrosisButtonScale - 85)) / 100
+		 rayondebase = 13
+		 rayon = rayondebase * (NecrosisConfig.NecrosisButtonScale/100)
+		 dist = 35 * NBRScale * 0.85
+		dist = dist - ((rayon-rayondebase))
+end
+	
+
+
+		
+	
+	--print (dist,NBRScale,NecrosisConfig.NecrosisButtonScale)
 
 ---[==[
 	if Necrosis.Debug.buttons then
 		_G["DEFAULT_CHAT_FRAME"]:AddMessage("ButtonSetup === Begin"
 		)
 	end
+	
 	local fm = Necrosis.Warlock_Buttons.main.f
-	local indexScale = -36
+	local indexScale = - 36
 	
 	for index=1, #Necrosis.Warlock_Lists.on_sphere, 1 do
 		local v = Necrosis.Warlock_Lists.on_sphere[index]
@@ -2610,9 +2725,9 @@ function Necrosis:ButtonSetup()
 		--if (GetSpellInfo(GetSpellInfo(v.high_of))
 		
 		if (Necrosis.IsSpellKnown(v.high_of) 	-- in spell book
-		or v.menu                           	-- or on menu of spells
-		or v.item)                           	-- or item to use
-		and (sp and sp > 0) -- and requested
+			or v.menu                           	-- or on menu of spells
+			or v.item)                           	-- or item to use
+			and (sp and sp > 0) 					-- and requested
 		then
 		
 			if not f then
@@ -2626,8 +2741,8 @@ function Necrosis:ButtonSetup()
 			if NecrosisConfig.NecrosisLockServ then
 				f:SetPoint(
 					"CENTER", fm, "CENTER",
-					((dist) * cos(NecrosisConfig.NecrosisAngle - indexScale)),
-					((dist) * sin(NecrosisConfig.NecrosisAngle - indexScale))
+					((dist) * cos(NecrosisConfig.NecrosisAngle - indexScale)),-- Offset X
+					((dist) * sin(NecrosisConfig.NecrosisAngle - indexScale)) -- Offset Y
 				)
 				indexScale = indexScale + 36
 			else
@@ -2664,13 +2779,13 @@ function Necrosis:TradeStone()
 		-- If a friendly target is selected then trade the stone || Dans ce cas si un pj allié est sélectionné, on lui donne la pierre
 		-- Else use it || Sinon, on l'utilise
 		if Local.Trade.Request and Local.Stone.Health.OnHand and not Local.Trade.Complete then
-			PickupContainerItem(Local.Stone.Health.Location[1], Local.Stone.Health.Location[2])
+			C_Container.PickupContainerItem(Local.Stone.Health.Location[1], Local.Stone.Health.Location[2])
 			ClickTradeButton(1)
 			Local.Trade.Complete = true
 			return
 		elseif UnitExists("target") and UnitIsPlayer("target")
 		and not (UnitCanAttack("player", "target") or UnitName("target") == UnitName("player")) then
-				PickupContainerItem(Local.Stone.Health.Location[1], Local.Stone.Health.Location[2])
+				C_Container.PickupContainerItem(Local.Stone.Health.Location[1], Local.Stone.Health.Location[2])
 				if CursorHasItem() then
 					DropItemOnUnit("target")
 					Local.Trade.Complete = true
@@ -3131,15 +3246,15 @@ function Necrosis:DeleteShards()
         local RemainingShardsToDelete = Local.Soulshard.Count - NecrosisConfig.DestroyCount
         for container = 0, NUM_BAG_SLOTS, 1 do
             if Local.BagIsSoulPouch[container] then break end
-            for slot=1, GetContainerNumSlots(container), 1 do
+            for slot=1, C_Container.GetContainerNumSlots(container), 1 do
                 if math.floor(NecrosisConfig.DestroyCount) >= Local.Soulshard.Count then break end
-                local itemLink = GetContainerItemLink(container, slot)
+                local itemLink = C_Container.GetContainerItemLink(container, slot)
                 if (itemLink) then
                     local itemID, itemName = Necrosis.Utils.ParseItemLink(itemLink) --GetContainerItemLink(container, slot))
                     itemID = tonumber(itemID)
                     if (itemID == Necrosis.Warlock_Lists.reagents.soul_shard.id) then
                         if (RemainingShardsToDelete > 0) then
-                            PickupContainerItem(container, slot)
+                            C_Container.PickupContainerItem(container, slot)
                             local infoType, info1, info2 = GetCursorInfo()
                             if (CursorHasItem() and infoType == "item" and tonumber(info1) == Necrosis.Warlock_Lists.reagents.soul_shard.id) then
                                 DeleteCursorItem()

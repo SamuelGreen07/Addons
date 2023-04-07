@@ -139,6 +139,7 @@ L["CONFIG_BUTTON"] = "Button Settings"
 L["CONFIG_MENU"] = "Menu Settings"
 L["CONFIG_TIMER"] = "Timer Settings"
 L["CONFIG_MISC"] = "Miscellaneous"
+L["CONFIG_OVERLAY"] = "Overlay On Proc (Under Construction) "
 --
 L["MSG_POSITION"] = "<- Necrosis system messages will appear here ->"
 L["MSG_SHOW_TIPS"] = "Show tooltips"
@@ -160,7 +161,7 @@ L["SPHERE_SKIN"] = "Skin of the Sphere"
 L["SPHERE_EVENT"] = "Event shown by the Sphere"
 L["SPHERE_SPELL"] = "Spell casted by the Sphere"
 L["SPHERE_SPELL2"] = "Spell casted by the Sphere (Shift+clic)"
-L["SPHERE_SPELL_RIGHTCLICK"] = "Right click on Sphere to delete the stock overage"
+L["SPHERE_SPELL_RIGHTCLICK"] = "Right click on Sphere to del. the stock overage"
 L["SPHERE_SPELL_RIGHTCLICK_L2"] = "Ctrl+Left click to open config menu"
 
 L["SPHERE_SPELL+CTRL"] = "Open options menu"
@@ -287,3 +288,11 @@ L["ABOUT_CATEGORY"] = "Category";
 L["ABOUT_EMAIL"] = "E-mail";
 L["ABOUT_WEB"] = "Website";
 L["ABOUT_LICENSE"] = "License";
+
+---AFK Stand Alone
+AFKS_CAMPON = "\124cFFFFEA00CAMPING ON\124r"
+AFKS_CAMPOFF = "\124cFFFFEA00CAMPING OFF\124r"
+
+AFKS_NOGUILD = "No Guild"
+AFKS_DATEFORMAT = "%d-%d-%d\n%s\n\n%s"
+

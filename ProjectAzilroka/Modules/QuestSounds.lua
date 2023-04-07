@@ -42,9 +42,9 @@ function QS:PlaySoundFile(file)
 	QS.IsPlaying = true
 
 	if QS.db.UseSoundID then
-		PlaySound(tonumber(file))
+		PlaySound(tonumber(file), QS.db.Channel)
 	else
-		PlaySoundFile(PA.LSM:Fetch('sound', file))
+		PlaySoundFile(PA.LSM:Fetch('sound', file), QS.db.Channel)
 	end
 
 	QS:ScheduleTimer('ResetSoundPlayback', QS.db.Throttle)
@@ -144,17 +144,18 @@ function QS:GetOptions()
 	QuestSounds.args.General = PA.ACH:Group(PA.ACL['General'], nil, 2)
 	QuestSounds.args.General.inline = true
 	QuestSounds.args.General.args.Throttle = PA.ACH:Range(PA.ACL['Throttle'], nil, nil, { min = 1, max = 30, step = 1})
+	QuestSounds.args.General.args.Channel = PA.ACH:Select(PA.ACL['Channel'], nil, nil, {Master = PA.ACL['Master'], SFX = PA.ACL['SFX'], Ambience = PA.ACL['Ambience'], Dialog = PA.ACL['Dialog']})
 
 	QuestSounds.args.General.args.LSM = PA.ACH:Group(PA.ACL['Sound by LSM'], nil, 1, nil, nil, nil, function() return QS.db.UseSoundID end)
-	QuestSounds.args.General.args.LSM.args.QuestComplete = PA.ACH:SharedMediaSound('Quest Complete', nil, 1)
-	QuestSounds.args.General.args.LSM.args.ObjectiveComplete = PA.ACH:SharedMediaSound('Objective Complete', nil, 2)
-	QuestSounds.args.General.args.LSM.args.ObjectiveProgress = PA.ACH:SharedMediaSound('Objective Progress', nil, 3)
+	QuestSounds.args.General.args.LSM.args.QuestComplete = PA.ACH:SharedMediaSound(PA.ACL['Quest Complete'], nil, 1)
+	QuestSounds.args.General.args.LSM.args.ObjectiveComplete = PA.ACH:SharedMediaSound(PA.ACL['Objective Complete'], nil, 2)
+	QuestSounds.args.General.args.LSM.args.ObjectiveProgress = PA.ACH:SharedMediaSound(PA.ACL['Objective Progress'], nil, 3)
 
 	QuestSounds.args.General.args.ID = PA.ACH:Group(PA.ACL['Sound by SoundID'], nil, 2, nil, function(info) return tostring(QS.db[info[#info]]) end, function(info, value) QS.db[info[#info]] = tonumber(value) end, function() return (not QS.db.UseSoundID) end)
 	QuestSounds.args.General.args.ID.args.UseSoundID = PA.ACH:Toggle(PA.ACL['Use Sound ID'], nil, 0, nil, nil, nil, function(info) return QS.db[info[#info]] end, function(info, value) QS.db[info[#info]] = value end, false)
-	QuestSounds.args.General.args.ID.args.QuestCompleteID = PA.ACH:Input('Quest Complete Sound ID', nil, 1)
-	QuestSounds.args.General.args.ID.args.ObjectiveCompleteID = PA.ACH:Input('Objective Complete Sound ID', nil, 2)
-	QuestSounds.args.General.args.ID.args.ObjectiveProgressID = PA.ACH:Input('Objective Progress Sound ID', nil, 3)
+	QuestSounds.args.General.args.ID.args.QuestCompleteID = PA.ACH:Input(PA.ACL['Quest Complete Sound ID'], nil, 1)
+	QuestSounds.args.General.args.ID.args.ObjectiveCompleteID = PA.ACH:Input(PA.ACL['Objective Complete Sound ID'], nil, 2)
+	QuestSounds.args.General.args.ID.args.ObjectiveProgressID = PA.ACH:Input(PA.ACL['Objective Progress Sound ID'], nil, 3)
 
 	QuestSounds.args.AuthorHeader = PA.ACH:Header(PA.ACL['Authors:'], -4)
 	QuestSounds.args.Authors = PA.ACH:Description(QS.Authors, -3, 'large')
@@ -168,6 +169,7 @@ function QS:BuildProfile()
 	PA.Defaults.profile.QuestSounds = {
 		Enable = true,
 		Throttle = 3,
+		Channel = 'SFX',
 		QuestComplete = 'Peon Quest Complete',
 		ObjectiveComplete = 'Peon Objective Complete',
 		ObjectiveProgress = 'Peon Objective Progress',

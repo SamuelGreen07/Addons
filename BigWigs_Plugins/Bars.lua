@@ -330,7 +330,7 @@ do
 		end
 
 		if not bd.tukiborder then
-			local border = CreateFrame("Frame", nil, bd, BackdropTemplateMixin and "BackdropTemplate")
+			local border = CreateFrame("Frame", nil, bd, "BackdropTemplate")
 			if C then
 				border:SetInside(bd, 1, 1)
 			else
@@ -346,7 +346,7 @@ do
 		end
 
 		if not bd.tukoborder then
-			local border = CreateFrame("Frame", nil, bd, BackdropTemplateMixin and "BackdropTemplate")
+			local border = CreateFrame("Frame", nil, bd, "BackdropTemplate")
 			if C then
 				border:SetOutside(bd, 1, 1)
 			else
@@ -1125,7 +1125,7 @@ do
 						name = L.emphasizeAt,
 						order = 6,
 						min = 6,
-						max = 20,
+						max = 60, softMax = 30, -- Don't encourage bars longer than 30s in the GUI
 						step = 1,
 					},
 					fontSizeEmph = {
@@ -1554,13 +1554,15 @@ do
 		display:SetMovable(true)
 		display:SetResizable(true)
 		display:RegisterForDrag("LeftButton")
-		display:SetMinResize(80, 8)
-		display:SetFrameStrata("HIGH")
-		display:SetFrameLevel(title == "BigWigsAnchor" and 10 or 15)
-		if display.SetFixedFrameStrata then
-			display:SetFixedFrameStrata(true)
-			display:SetFixedFrameLevel(true)
+		if display.SetResizeBounds then -- XXX Classic Era compat
+			display:SetResizeBounds(80, 8)
+		else
+			display:SetMinResize(80, 8)
 		end
+		display:SetFrameStrata("HIGH")
+		display:SetFixedFrameStrata(true)
+		display:SetFrameLevel(title == "BigWigsAnchor" and 10 or 15)
+		display:SetFixedFrameLevel(true)
 		local bg = display:CreateTexture(nil, "BACKGROUND")
 		bg:SetAllPoints(display)
 		bg:SetColorTexture(0, 0, 0, 0.3)
@@ -2113,12 +2115,12 @@ function plugin:CreateBar(module, key, text, time, icon, isApprox, unitGUID)
 	return bar
 end
 
-function plugin:BigWigs_StartBar(_, module, key, text, time, icon, isApprox)
+function plugin:BigWigs_StartBar(_, module, key, text, time, icon, isApprox, maxTime)
 	if not text then text = "" end
 	self:StopSpecificBar(nil, module, text)
 
 	local bar = self:CreateBar(module, key, text, time, icon, isApprox)
-	bar:Start()
+	bar:Start(maxTime)
 	if db.emphasize and time < db.emphasizeTime then
 		self:EmphasizeBar(bar, true)
 	else
@@ -2433,6 +2435,9 @@ do
 			BigWigs:Print(L.sendCustomBar:format(barText))
 			plugin:Sync("CBar", input)
 			SendAddonMessage(BigWigsLoader.dbmPrefix, ("U\t%d\t%s"):format(seconds, barText), IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- DBM message
+			local name = plugin:UnitName("player")
+			local realm = GetRealmName()
+			SendAddonMessage(BigWigsLoader.dbmNewPrefix, ("%s-%s\t1\tU\t%d\t%s"):format(name, realm, seconds, barText), IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- DBM message
 		end
 	end
 	SLASH_BIGWIGSRAIDBAR1 = "/raidbar"
@@ -2466,6 +2471,9 @@ SlashCmdList.BIGWIGSBREAK = function(input)
 
 		if IsInGroup() then
 			SendAddonMessage(BigWigsLoader.dbmPrefix, ("BT\t%d"):format(seconds), IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- DBM message
+			local name = plugin:UnitName("player")
+			local realm = GetRealmName()
+			SendAddonMessage(BigWigsLoader.dbmNewPrefix, ("%s-%s\t1\tBT\t%d"):format(name, realm, seconds), IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- DBM message
 		end
 	else
 		BigWigs:Print(L.requiresLeadOrAssist)

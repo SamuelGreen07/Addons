@@ -64,7 +64,7 @@ AddSpellName("FrostShock", 49236, 49235, 25464, 10473, 10472, 8058, 8056)
 AddSpellName("FlameShock", 49233, 49232, 29228, 25457, 10448, 10447, 8053, 8052, 8050)
 AddSpellName("EarthShock", 49231, 49230, 25454, 10414, 10413, 10412, 8046, 8045, 8044, 8042)
 
-AddSpellName("HammerOfWrath", 48806, 48805, 27180, 24274, 24239, 24275)
+AddSpellName("HammerOfWrath", 48806, 48805, 27180, 24239, 24274, 24275)
 AddSpellName("Exorcism", 48801, 48800, 27138, 10314, 10313, 10312, 5615, 5614, 879)
 
 AddSpellName("ShadowBolt", 47809, 47808, 27209, 25307, 11661, 11660, 11659, 7641, 1106, 1088, 705, 695, 686)
@@ -90,6 +90,9 @@ AddSpellName("Starfire", 48465, 48464, 26986, 25298, 9876, 9875, 8951, 8950, 894
 AddSpellName("Wrath", 48461, 48459, 26985, 26984, 9912, 8905, 6780, 5180, 5179, 5178, 5177, 5176)
 AddSpellName("GreaterHeal", 48063, 48062, 25314, 25213, 25210, 10965, 10964, 10963, 2060)
 
+AddSpellName("HowlingBlast", 51411, 51410, 51409, 49184)
+AddSpellName("FrostStrike", 55268, 51419, 51418, 51417, 51416, 49143)
+
 
 local function OnAuraStateChange(conditionFunc, actions)
     local state = -1
@@ -112,6 +115,15 @@ function f:PLAYER_LOGIN()
         self:RegisterEvent("SPELLS_CHANGED")
         self:SPELLS_CHANGED()
 
+        self:RegisterEvent("UPDATE_BONUS_ACTIONBAR")
+        -- In case of button swaps for macros it goes like
+        -- ACTIONBAR_SLOT_CHANGED 77
+        -- ACTIONBAR_SLOT_CHANGED 78
+        -- ACTIONBAR_UPDATE_COOLDOWN -- UPDATE_COOLDOWN always finishing the chain of button updates
+        -- So only when detecting this pattern buttons are reactivated. Because normal ACTIONBAR_UPDATE_COOLDOWN happens all the time
+        self:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
+        self:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN")
+
         local bars = {"ActionButton","MultiBarBottomLeftButton","MultiBarBottomRightButton","MultiBarLeftButton","MultiBarRightButton"}
         for _,bar in ipairs(bars) do
             for i = 1,12 do
@@ -124,7 +136,7 @@ function f:PLAYER_LOGIN()
             ns.UpdateOverlayGlow(self)
         end)
 
-        local LAB = LibStub("LibActionButton-1.0", true) -- Bartener support
+        local LAB = LibStub and LibStub("LibActionButton-1.0", true) -- Bartener support
         if LAB then
             LBG = LibStub("LibButtonGlow-1.0", true)
             self:RegisterForActivations(LAB.eventFrame)
@@ -133,7 +145,7 @@ function f:PLAYER_LOGIN()
             end)
         end
 
-        local LAB2 = LibStub("LibActionButton-1.0-ElvUI", true) -- ElvUI support
+        local LAB2 = LibStub and LibStub("LibActionButton-1.0-ElvUI", true) -- ElvUI support
         if LAB2 then
             LCG = LibStub("LibCustomGlow-1.0", true)
             self:RegisterForActivations(LAB2.eventFrame)
@@ -282,6 +294,32 @@ function f:Activate(spellName, actID, duration, keepExpiration)
         state.expirationTime = duration and GetTime() + duration
     end
 end
+
+local slotJustChanged = false
+function f:ACTIONBAR_SLOT_CHANGED()
+    slotJustChanged = true
+end
+function f:ACTIONBAR_UPDATE_COOLDOWN()
+    if slotJustChanged then
+        return f:ReactivateButtons()
+    end
+    slotJustChanged = false
+end
+function f:UPDATE_BONUS_ACTIONBAR()
+    return f:ReactivateButtons()
+end
+function f:ReactivateButtons()
+    local now = GetTime()
+    for spellName, states in pairs(activations) do
+        for actID, state in pairs(states) do
+            if state.active and (state.expirationTime == nil or state.expirationTime > now) then
+                local highestRankSpellID = findHighestRank(spellName)
+                self:FanoutEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", highestRankSpellID)
+            end
+        end
+    end
+end
+
 function f:Deactivate(spellName, actID)
     local states = activations[spellName]
     if not states then return end
@@ -384,7 +422,10 @@ function ns.CheckRevenge(eventType, isSrcPlayer, isDstPlayer, ...)
             if eventType == "SWING_MISSED" then
                 missedType = select(1, ...)
             elseif eventType == "SPELL_MISSED" then
-                missedType = select(4, ...)
+                -- missedType = select(4, ...)
+                local spellID, _
+                spellID, _, _, missedType = select(1, ...)
+                if spellID == 53739 or spellID == 42463 then return end -- Ignore Seal of Vengeance
             end
             if missedType == "BLOCK" or missedType == "DODGE" or missedType == "PARRY" then
                 f:Activate("Revenge", "Parry", 5)
@@ -770,19 +811,21 @@ ns.configs.PALADIN = function(self)
 
     local hasArtOfWar = IsPlayerSpell(53486) or IsPlayerSpell(53488)
 
-    if ns.findHighestRank("Exorcism") then
-        self:RegisterEvent("PLAYER_TARGET_CHANGED")
-        self.PLAYER_TARGET_CHANGED = ns.PaladinExorcismCheck
+    if APILevel <= 2 then
+        if ns.findHighestRank("Exorcism") then
+            self:RegisterEvent("PLAYER_TARGET_CHANGED")
+            self.PLAYER_TARGET_CHANGED = ns.PaladinExorcismCheck
 
-        if ns.findHighestRank("HammerOfWrath") then
-            self:RegisterUnitEvent("UNIT_HEALTH", "target")
-            self.PLAYER_TARGET_CHANGED = function(...)
-                if not hasArtOfWar then
-                    ns.PaladinExorcismCheck(...)
+            if ns.findHighestRank("HammerOfWrath") then
+                self:RegisterUnitEvent("UNIT_HEALTH", "target")
+                self.PLAYER_TARGET_CHANGED = function(...)
+                    if not hasArtOfWar then
+                        ns.PaladinExorcismCheck(...)
+                    end
+                    ns.HOWCheck(...)
                 end
-                ns.HOWCheck(...)
+                self.UNIT_HEALTH = ns.HOWCheck
             end
-            self.UNIT_HEALTH = ns.HOWCheck
         end
     end
 
@@ -1112,3 +1155,53 @@ if APILevel == 3 then
     end
 
 end
+
+
+-----------------
+-- DEATHKNIGHT
+-----------------
+
+if APILevel == 3 then
+    local CheckFreezingFog = OnAuraStateChange(function() return FindAura("player", 59052, "HELPFUL") end,
+        function(present, duration)
+            if present then
+                f:Activate("HowlingBlast", "FreezingFog", duration, true)
+            else
+                f:Deactivate("HowlingBlast", "FreezingFog")
+            end
+        end
+    )
+
+    local CheckKillingMachine = OnAuraStateChange(function() return FindAura("player", 51124, "HELPFUL") end,
+        function(present, duration)
+            if present then
+                f:Activate("FrostStrike", "KillingMachine")
+            else
+                f:Deactivate("FrostStrike", "KillingMachine")
+            end
+        end
+    )
+
+    ns.configs.DEATHKNIGHT = function(self)
+        self:SetScript("OnUpdate", self.timerOnUpdate)
+        local hasRime = IsPlayerSpell(49188) or IsPlayerSpell(56822) or IsPlayerSpell(59057)
+        local hasKillingMachine = IsPlayerSpell(51123) or IsPlayerSpell(51127) or IsPlayerSpell(51128) or IsPlayerSpell(51129) or IsPlayerSpell(51130)
+        if hasRime or hasKillingMachine then
+            self:RegisterUnitEvent("UNIT_AURA", "player")
+            self:SetScript("OnUpdate", self.timerOnUpdate)
+            self.UNIT_AURA = function(self, event, unit)
+                if hasRime then
+                    CheckFreezingFog()
+                end
+                if hasKillingMachine then
+                    CheckKillingMachine()
+                end
+            end
+        else
+            self:SetScript("OnUpdate", nil)
+            self:UnregisterEvent("UNIT_AURA")
+        end
+    end
+
+end
+

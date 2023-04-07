@@ -15,11 +15,10 @@
 -- ADDON GLOBALS AND LOCALS
 -- ---------------------------------
 
-
-TELLMEWHEN_VERSION = "9.2.5"
+TELLMEWHEN_VERSION = GetAddOnMetadata("TellMeWhen", "Version")
 
 TELLMEWHEN_VERSION_MINOR = ""
-local projectVersion = "9.2.5-wrath" -- comes out like "6.2.2-21-g4e91cee"
+local projectVersion = "10.0.9" -- comes out like "6.2.2-21-g4e91cee"
 if projectVersion:find("project%-version") then
 	TELLMEWHEN_VERSION_MINOR = "dev"
 elseif strmatch(projectVersion, "%-%d+%-") then
@@ -27,14 +26,19 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 92500 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+
+local REVISION = 0
+if #TELLMEWHEN_VERSION > 6 or REVISION >= 100 then
+	return error("TELLMEWHEN: UNEXPECTEDLY HIGH VERSION/REVISION")
+end
+
+-- This number is used for running migrations, showing the last changelog version,
+-- and communicating new versions to other players.
+-- For a TOC version 10.2.3 and a REVISION=45, it'll be `102345`.
+TELLMEWHEN_VERSIONNUMBER = tonumber(TELLMEWHEN_VERSION:gsub("%.", "") .. ("%02d"):format(REVISION))
 
 TELLMEWHEN_FORCECHANGELOG = 86005 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
-if TELLMEWHEN_VERSIONNUMBER > 93000 or TELLMEWHEN_VERSIONNUMBER < 92000 then
-	-- safety check because i accidentally made the version number 414069 once
-	return error("TELLMEWHEN: THE VERSION NUMBER IS SCREWED UP OR MAYBE THE SAFETY LIMITS ARE WRONG")
-end
 
 if TELLMEWHEN_VERSION_MINOR == "dev" and not strfind(TELLMEWHEN_VERSIONNUMBER, TELLMEWHEN_VERSION:gsub("%.", ""), nil) then
 	return error("TELLMEWHEN: TELLMEWHEN_VERSION DOESN'T AGREE WITH TELLMEWHEN_VERSIONNUMBER")
@@ -74,26 +78,10 @@ This can happen especially if you use the Twitch app - ensure "Install Libraries
 	return
 end
 
-if WOW_PROJECT_ID ~= WOW_PROJECT_WRATH_CLASSIC  then
-	StaticPopupDialogs["TMW_PROJECT_MISMATCH"] = {
-		-- This is not localizable, because AceLocale might not have loaded
-		-- (this is why we don't bother to load AceLocale until after these checks).
-		text = ("You've installed TellMeWhen for Wrath Classic, but this is %s. Please double-check which version of TMW you downloaded."):format(_G["EXPANSION_NAME" .. GetExpansionLevel()]), 
-		button1 = RELOADUI,
-		button2 = CANCEL,
-		OnAccept = ReloadUI,
-		timeout = 0,
-		showAlert = true,
-		whileDead = true,
-		preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
-	}
-	StaticPopup_Show("TMW_PROJECT_MISMATCH")
-	return
-end
-
 local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
 
 LSM:Register("font", "Open Sans Regular", "Interface/Addons/TellMeWhen/Fonts/OpenSans-Regular.ttf")
+LSM:Register("font", "Roboto Mono", "Interface/Addons/TellMeWhen/Fonts/RobotoMono-Regular.ttf")
 LSM:Register("font", "Vera Mono", "Interface/Addons/TellMeWhen/Fonts/VeraMono.ttf")
 
 -- Standalone versions of these libs are LoD
@@ -104,6 +92,11 @@ local TMW = LibOO:GetNamespace("TellMeWhen"):NewClass("TMW", "Frame"):New("Frame
 _G.TMW = LibStub("AceAddon-3.0"):NewAddon(TMW, "TellMeWhen", "AceEvent-3.0", "AceTimer-3.0", "AceConsole-3.0", "AceComm-3.0", "AceSerializer-3.0")
 _G.TellMeWhen = _G.TMW
 local TMW = _G.TMW
+
+local tocVersion = select(4, GetBuildInfo());
+TMW.isWrath = tocVersion >= 30400 and tocVersion <= 30499
+TMW.isRetail = tocVersion >= 90000
+
 
 local DogTag = LibStub("LibDogTag-3.0", true)
 
@@ -343,7 +336,7 @@ function TMW:RegisterDatabaseDefaults(defaults)
 end
 
 function TMW:MergeDefaultsTables(src, dest)
-	--src and dest must have congruent data structure, otherwise shit will blow up.
+	--src and dest must have congruent data structure, otherwise things will blow up.
 	-- There are no safety checks to prevent this.
 	
 	for k in pairs(src) do
@@ -360,7 +353,7 @@ function TMW:MergeDefaultsTables(src, dest)
 		end
 	end
 	
-	return dest -- not really needed, but what the hell why not
+	return dest -- not really needed, but why not
 end
 
 
@@ -435,8 +428,12 @@ TMW.isNumber = setmetatable(
 end})
 
 
-TMW.SpellTexturesMetaIndex = {
-}
+TMW.SpellTexturesMetaIndex = {}
+if GetSpellInfo(336126) then
+	--hack for pvp tinkets
+	TMW.SpellTexturesMetaIndex[336126] = GetSpellTexture(336126)
+	TMW.SpellTexturesMetaIndex[strlowerCache[GetSpellInfo(336126)]] = GetSpellTexture(336126)
+end
 local SpellTexturesMetaIndex = TMW.SpellTexturesMetaIndex
 
 function TMW.GetSpellTexture(spell)
@@ -817,37 +814,37 @@ do
 	function TMW:Fire(event, ...)
 		local funcs = callbackregistry[event]
 
-		if funcs then
-			local wasInProgress = firingsInProgress
-			firingsInProgress = true
+		if not funcs then return end
+		
+		local wasInProgress = firingsInProgress
+		firingsInProgress = true
+		
+		local funcsNeedsFix
+		for t = 1, #funcs do
+			local args = funcs[t]
 			
-			local funcsNeedsFix
-			for t = 1, #funcs do
-				local args = funcs[t]
-				
-				if args then
-					local method = args.func
-					for index = 1, args.n do
-						local arg1 = args[index]
+			if args then
+				local method = args.func
+				for index = 1, args.n do
+					local arg1 = args[index]
 
-						if arg1 == nil then
-							funcsNeedsFix = true
-						elseif arg1 ~= true then
-							safecall(method, arg1, event, ...)
-						else
-							safecall(method, event, ...)
-						end
+					if arg1 == nil then
+						funcsNeedsFix = true
+					elseif arg1 ~= true then
+						safecall(method, arg1, event, ...)
+					else
+						safecall(method, event, ...)
 					end
 				end
 			end
-			
-			if not wasInProgress then
-				firingsInProgress = false
+		end
+		
+		if not wasInProgress then
+			firingsInProgress = false
 
-				if funcsNeedsFix then
-					for i = #funcs, 1, -1 do
-						cleanup(event, i, funcs[i])
-					end
+			if funcsNeedsFix then
+				for i = #funcs, 1, -1 do
+					cleanup(event, i, funcs[i])
 				end
 			end
 		end
@@ -1065,10 +1062,9 @@ function TMW:PLAYER_LOGIN()
 	TMW:UnregisterEvent("PLAYER_LOGIN")
 	TMW.PLAYER_LOGIN = nil
 
-	-- Check for wrong WoW version
 	if not LibStub("DRList-1.0", true) then
 		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
-			text = L["ERROR_MISSINGFILE_NOREQ"], 
+			text = L["ERROR_MISSINGFILE_NOREQ"],
 			button1 = OKAY,
 			timeout = 0,
 			showAlert = true,
@@ -1084,8 +1080,18 @@ function TMW:PLAYER_LOGIN()
 
 
 	
-	
-	TMW:RegisterEvent("CHARACTER_POINTS_CHANGED")
+	if C_BarberShop then
+		TMW:RegisterEvent("BARBER_SHOP_OPEN")
+		TMW:RegisterEvent("BARBER_SHOP_CLOSE")
+	end
+	TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED")
+	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
+	if TMW.isWrath then
+		TMW:RegisterEvent("CHARACTER_POINTS_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
+	else
+		TMW:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+		TMW:RegisterEvent("TRAIT_CONFIG_UPDATED", "PLAYER_SPECIALIZATION_CHANGED")
+	end
 
 
 
@@ -1121,7 +1127,7 @@ function TMW:PLAYER_LOGIN()
 	
 	TMW:Fire("TMW_INITIALIZE")
 	TMW:UnregisterAllCallbacks("TMW_INITIALIZE")
-	
+
 	TMW.Initialized = true
 	
 	TMW:SetScript("OnUpdate", TMW.OnUpdate)
@@ -1588,6 +1594,75 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 				ics.Alpha = nil
 				ics.UnAlpha = nil
 				ics.ShowWhen = nil
+			end,
+		},
+
+		[80005] = {
+			group = function(self, gs, domain, groupID)
+				if domain == "profile" and GetSpecialization then
+					local expectedProfileName = UnitName("player") .. " - " .. GetRealmName()
+					if expectedProfileName == TMW.db:GetCurrentProfile() or TMW.db.profile.Version > 70001 then
+						-- If the current profile is named after the current character,
+						-- or if the version is after 70001 (which is the all-profiles upgrade)
+						-- we can safely pull the player's current talents to get rid of these settings.
+
+						-- If neither of these things are the case, then just kill the settings without trying to upgrade.
+						-- The user will have to re-configure those groups that will now be showing when they shouldn't be.
+
+
+						-- Normalize these with their old default values to make this easier.
+						if gs.PrimarySpec == nil then
+							gs.PrimarySpec = true
+						end
+						if gs.SecondarySpec == nil then
+							gs.SecondarySpec = true
+						end
+
+						-- Only do anything if only one of these was enabled.
+						-- If both were enabled, don't disable anything (duh),
+						-- and if both were disabled, then.... why? Silly user!
+						if (gs.PrimarySpec and not gs.SecondarySpec)
+						or (not gs.PrimarySpec and gs.SecondarySpec)
+						then
+							local enabledSpec 
+							if gs.PrimarySpec then
+								enabledSpec = GetSpecialization(false, false, 1)
+							else
+								enabledSpec = GetSpecialization(false, false, 2)
+							end
+
+							-- Disable any specs that aren't the one that was enabled.
+							for i = 1, 4 do
+								if i ~= enabledSpec then
+									gs["Tree" .. i] = false
+								end
+							end
+						end
+
+
+						-- Now, upgrade the Tree settings. These are moving from being stored in one key per tree
+						-- to a table that stores specIDs. This prevents the stuff we had to go through for this upgrade:
+						-- the old settings we context-sensitive (on the player's class), while the new settings are not.
+
+						for treeID = 1, GetNumSpecializations() do
+							local specID = GetSpecializationInfo(treeID)
+							local specEnabled = gs["Tree" .. treeID]
+							if specEnabled == nil then
+								specEnabled = true
+							end
+
+							gs.EnabledSpecs[specID] = specEnabled
+						end
+					end
+				end
+
+				-- We're done with these now. Goodbye!
+				gs.PrimarySpec = nil
+				gs.SecondarySpec = nil
+
+				for i = 1, 4 do
+					gs["Tree" .. i] = false
+				end
 			end,
 		},
 
@@ -2811,20 +2886,38 @@ function TMW:ScheduleUpdate(delay)
 end
 
 function TMW:UpdateTalentTextureCache()
-	for tab = 1, GetNumTalentTabs() do
-		for index = 1, GetNumTalents(tab) do
-			local name, iconTexture = GetTalentInfo(tab, index)
+	if MAX_TALENT_TIERS then
+		for tier = 1, MAX_TALENT_TIERS do
+			for column = 1, NUM_TALENT_COLUMNS do
+				local id, name, tex = GetTalentInfo(tier, column, 1)
 
-			local lower = name and strlowerCache[name]
-			
-			if lower then
-				SpellTexturesMetaIndex[lower] = iconTexture
+				local lower = name and strlowerCache[name]
+				
+				if lower then
+					SpellTexturesMetaIndex[lower] = tex
+				end
+			end
+		end
+	elseif GetNumTalentTabs then
+		for tab = 1, GetNumTalentTabs() do
+			for index = 1, GetNumTalents(tab) do
+				local name, iconTexture = GetTalentInfo(tab, index)
+
+				local lower = name and strlowerCache[name]
+				
+				if lower then
+					SpellTexturesMetaIndex[lower] = iconTexture
+				end
 			end
 		end
 	end
 end
 
-function TMW:CHARACTER_POINTS_CHANGED()
+function TMW:PLAYER_SPECIALIZATION_CHANGED(event, unit)
+	if event == "PLAYER_SPECIALIZATION_CHANGED" and unit ~= "player" then
+		return
+	end
+
 	if not InCombatLockdown() then
 		TMW:ScheduleUpdate(.2)
 		--TMW:Update()
@@ -2861,6 +2954,14 @@ function TMW:OnProfile(event, arg2, arg3)
 	end
 	
 	TMW:Fire("TMW_ON_PROFILE", event, arg2, arg3)
+end
+
+function TMW:BARBER_SHOP_OPEN()
+	TMW:Hide()
+end
+
+function TMW:BARBER_SHOP_CLOSE()
+	TMW:Show()
 end
 
 
@@ -3234,7 +3335,7 @@ function TMW:OnCommReceived(prefix, text, channel, who)
 		then
 			-- If some of the data is missing (i dont know why it would be),
 			-- or if the notified revision is less than the currently installed revision,
-			-- or if the notified revision is 414069 (the time I fucked up the version number),
+			-- or if the notified revision is 414069 (the time I messed up the version number),
 			-- or if the notification is from an alpha version and the installed version is not an alpha version,
 			-- then don't notify.
 			return

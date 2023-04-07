@@ -63,7 +63,7 @@ GTFO.SpellID["55847"] = {
 };
 
 GTFO.SpellID["59014"] = {
-	--desc = "Shadow Void (Risen Drakkari Soulmage - Drak'Tharon Keep - Normal)";
+	--desc = "Shadow Void (Risen Drakkari Soulmage - Drak'Tharon Keep - Heroic)";
 	sound = 1;
 };
 
@@ -215,6 +215,16 @@ GTFO.SpellID["55627"] = {
 
 GTFO.SpellID["62466"] = {
 	--desc = "Lightning Charge (Thorim)";
+	sound = 1;
+};
+
+GTFO.SpellID["62576"] = {
+	--desc = "Blizzard (Thorim 10)";
+	sound = 1;
+};
+
+GTFO.SpellID["62602"] = {
+	--desc = "Blizzard (Thorim 25)";
 	sound = 1;
 };
 
@@ -1248,6 +1258,14 @@ GTFO.SpellID["50229"] = {
 GTFO.SpellID["59323"] = {
 	--desc = "Whirlwind (Skadi the Ruthless - Utgarde Pinnacle)";
 	sound = 1;
+};
+
+-- WotLK Classic
+
+GTFO.SpellID["398140"] = {
+	--desc = "Icy Path (Defense Protocol Alpha - Heroic+)";
+	sound = 1;
+	ignoreApplication = true;
 };
 
 end

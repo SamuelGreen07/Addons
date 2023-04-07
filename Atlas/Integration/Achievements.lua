@@ -1,10 +1,10 @@
--- $Id: Achievements.lua 404 2022-08-21 06:24:20Z arithmandar $
+-- $Id: Achievements.lua 431 2023-03-20 14:46:49Z arithmandar $
 --[[
 
 	Atlas, a World of Warcraft instance map browser
 	Copyright 2005 ~ 2010 - Dan Gilbert <dan.b.gilbert at gmail dot com>
 	Copyright 2010 - Lothaer <lothayer at gmail dot com>, Atlas Team
-	Copyright 2011 ~ 2022 - Arith Hsu, Atlas Team <atlas.addon at gmail dot com>
+	Copyright 2011 ~ 2023 - Arith Hsu, Atlas Team <atlas.addon at gmail dot com>
 
 	This file is part of Atlas.
 
@@ -104,7 +104,7 @@ function addon:AchievementButtonUpdate(button, achievementID)
 			name = format("      |T%d:0:0|t |CFF808080%s", icon, name)
 		end
 		button.Text:SetText(name)
-		button.tooltiptext = tooltiptext.."\n|CFF8080FF"..L["ATLAS_OPEN_ACHIEVEMENT"].."|R"
+		button.tooltiptext = tooltiptext--.."\n|CFF8080FF"..L["ATLAS_OPEN_ACHIEVEMENT"].."|R"
 	else
 		-- do nothing
 	end
@@ -119,6 +119,6 @@ function addon:OpenAchievement(achievementID)
 	if not IsAddOnLoaded("Blizzard_AchievementUI") then
 		LoadAddOn("Blizzard_AchievementUI")
 	end
-	ShowUIPanel(AchievementFrame)
-	AchievementFrame_SelectAchievement(achievementID)
+	--ShowUIPanel(AchievementFrame)
+	--AchievementFrame_SelectAchievement(achievementID, true)
 end

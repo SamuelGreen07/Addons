@@ -33,9 +33,12 @@ local unpack = unpack
 local math = math
 local string = string
 
+local GetContainerItemDurability = GetContainerItemDurability or C_Container.GetContainerItemDurability
+
 local BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate" or nil
 
-local function noop() end
+local showOverlayTextures = true
+local onlyShowCraftingQualityOverlay = true
 
 --[[
 local S_UPGRADE_LEVEL = "^" .. gsub(ITEM_UPGRADE_TOOLTIP_FORMAT, "%%d", "(%%d+)")	-- Search pattern
@@ -172,6 +175,21 @@ local function ItemButton_Update(self, item)
 		self.Count:Hide()
 	end
 	self.count = item.count -- Thank you Blizz for not using local variables >.> (BankFrame.lua @ 234 )
+	
+	if showOverlayTextures and SetItemButtonOverlay then
+		if onlyShowCraftingQualityOverlay then
+			ClearItemButtonOverlay(self)
+			SetItemCraftingQualityOverlay(self, item.link)	--creates the CraftingQuality overlay only
+		else
+			SetItemButtonOverlay(self, item.link, item.quality)	--creates overlays for AzeriteEmpowered, Corrupted, Cosmetic, Conduit and CraftingQuality items
+		end
+		--update ProfessionQualityOverlay position
+		local ovl = self.ProfessionQualityOverlay
+		if ovl then
+			ovl:ClearAllPoints()
+			ovl:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 2)	--default: ("TOPLEFT", self, "TOPLEFT", -3, 2)
+		end
+	end
 
 	-- Durability
 	local dCur, dMax = GetContainerItemDurability(item.bagID, item.slotID)

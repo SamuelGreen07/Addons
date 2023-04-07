@@ -859,7 +859,11 @@ do
 		end
 		proxAnchor:SetWidth(db.width)
 		proxAnchor:SetHeight(db.height)
-		proxAnchor:SetMinResize(100, 30)
+		if proxAnchor.SetResizeBounds then -- XXX Classic Era compat
+			proxAnchor:SetResizeBounds(80, 8)
+		else
+			proxAnchor:SetMinResize(80, 8)
+		end
 		proxAnchor:SetClampedToScreen(true)
 		proxAnchor:EnableMouse(true)
 
@@ -961,8 +965,13 @@ do
 		alpha2Out:SetToAlpha(0)
 		local scaleOut = animGroupOutbound:CreateAnimation("Scale")
 		scaleOut:SetOrder(1)
-		scaleOut:SetFromScale(0.4,0.4)
-		scaleOut:SetToScale(1.3,1.3)
+		if scaleOut.SetScaleFrom then
+			scaleOut:SetScaleFrom(0.4,0.4)
+			scaleOut:SetScaleTo(1.3,1.3)
+		else
+			scaleOut:SetFromScale(0.4,0.4)
+			scaleOut:SetToScale(1.3,1.3)
+		end
 		scaleOut:SetDuration(1)
 		proxAnchor.rangePulseAnimOut = animGroupOutbound
 		proxPulseOut = animGroupOutbound
@@ -986,8 +995,13 @@ do
 		alpha2In:SetToAlpha(0)
 		local scaleIn = animGroupInbound:CreateAnimation("Scale")
 		scaleIn:SetOrder(1)
-		scaleIn:SetFromScale(1.5,1.5)
-		scaleIn:SetToScale(0.5,0.5)
+		if scaleIn.SetScaleFrom then
+			scaleIn:SetScaleFrom(1.5,1.5)
+			scaleIn:SetScaleTo(0.5,0.5)
+		else
+			scaleIn:SetFromScale(1.5,1.5)
+			scaleIn:SetToScale(0.5,0.5)
+		end
 		scaleIn:SetDuration(1)
 		proxAnchor.rangePulseAnimIn = animGroupInbound
 		proxPulseIn = animGroupInbound

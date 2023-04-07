@@ -1,6 +1,43 @@
 -- We should probably move this into another file too
 local MESSAGES = {
   {
+    Version = "10.0.15",
+    Description = AUCTIONATOR_L_SPLASH_100015_DESCRIPTION,
+    Sections = {
+      {
+        Title = AUCTIONATOR_L_SPLASH_100015_ALL_VERSIONS_HEADER,
+        Entries = {
+          AUCTIONATOR_L_SPLASH_100015_ALL_VERSIONS_1,
+          AUCTIONATOR_L_SPLASH_100015_ALL_VERSIONS_2,
+          AUCTIONATOR_L_SPLASH_100015_ALL_VERSIONS_3,
+          AUCTIONATOR_L_SPLASH_100015_ALL_VERSIONS_4,
+          AUCTIONATOR_L_SPLASH_100015_ALL_VERSIONS_5,
+          AUCTIONATOR_L_SPLASH_100015_ALL_VERSIONS_6,
+        },
+      },
+      {
+        Title = AUCTIONATOR_L_SPLASH_100015_RETAIL_HEADER,
+        Entries = {
+          AUCTIONATOR_L_SPLASH_100015_RETAIL_1,
+          AUCTIONATOR_L_SPLASH_100015_RETAIL_2,
+          AUCTIONATOR_L_SPLASH_100015_RETAIL_3,
+        },
+      },
+      {
+        Title = AUCTIONATOR_L_SPLASH_100015_CLASSIC_HEADER,
+        Entries = {
+          AUCTIONATOR_L_SPLASH_100015_CLASSIC_1,
+          AUCTIONATOR_L_SPLASH_100015_CLASSIC_2,
+          AUCTIONATOR_L_SPLASH_100015_CLASSIC_3,
+          AUCTIONATOR_L_SPLASH_100015_CLASSIC_4,
+          AUCTIONATOR_L_SPLASH_100015_CLASSIC_5,
+          AUCTIONATOR_L_SPLASH_100015_CLASSIC_6,
+          AUCTIONATOR_L_SPLASH_100015_CLASSIC_7,
+        },
+      },
+    },
+  },
+  {
     Version = "9.2.25",
     Description = AUCTIONATOR_L_SPLASH_9225_DESCRIPTION,
     Sections = {
@@ -336,6 +373,15 @@ function AuctionatorSplashScreenMixin:OnLoad()
   --Trap mouse events (prevents click-through the frame)
   self:EnableMouse(true)
 
+  local view = CreateScrollBoxLinearView()
+  view:SetPadding(0, 25, 10, 10, 0)
+  view:SetPanExtent(50)
+  ScrollUtil.InitScrollBoxWithScrollBar(self.ScrollBox, self.ScrollBar, view);
+
+  self.ScrollBox.Content.OnCleaned = function()
+    self.ScrollBox:FullUpdate(ScrollBoxConstants.UpdateImmediately);
+  end
+
   table.insert(UISpecialFrames, self:GetName())
 
   self:ReformatCheckbox()
@@ -386,7 +432,6 @@ function AuctionatorSplashScreenMixin:CreateMessagesText()
 
   local previous
   local current
-  local height = 0
 
   for _, messageSpec in ipairs(MESSAGES) do
     -- Gray out previously viewed versions
@@ -396,35 +441,32 @@ function AuctionatorSplashScreenMixin:CreateMessagesText()
 
     -- Add version string
     current = self:CreateString(messageSpec.Version, fonts.version, previous, -30)
-    height = height + current:GetStringHeight()
     previous = current
 
     -- Add description string
     if messageSpec.Description ~= nil then
       current = self:CreateString(messageSpec.Description, fonts.description, previous)
-      height = height + current:GetStringHeight()
       previous = current
     end
 
     -- Add sections
     for _, section in ipairs(messageSpec.Sections or {}) do
       current = self:CreateString(section.Title, fonts.title, previous, -8)
-      height = height + current:GetStringHeight()
       previous = current
 
       for _, entry in ipairs(section.Entries) do
         current = self:CreateBulletedString(entry, fonts.entry, previous)
-        height = height + current:GetStringHeight()
         previous = current
       end
     end
   end
 
-  self.ScrollFrame.Content:SetSize(600, height)
+  self.ScrollBox.Content:SetWidth(600)
+  self.ScrollBox.Content:MarkDirty()
 end
 
 function AuctionatorSplashScreenMixin:CreateString(text, font, previousElement, offset)
-  local entry = self.ScrollFrame.Content:CreateFontString(nil, "ARTWORK")
+  local entry = self.ScrollBox.Content:CreateFontString(nil, "ARTWORK")
 
   if offset == nil then
     offset = -5
@@ -438,7 +480,7 @@ function AuctionatorSplashScreenMixin:CreateString(text, font, previousElement, 
   if previousElement ~= nil then
     entry:SetPoint("TOPLEFT", previousElement, "BOTTOMLEFT", 0, offset)
   else
-    entry:SetPoint("TOPLEFT", self.ScrollFrame.Content, "TOPLEFT", -5)
+    entry:SetPoint("TOPLEFT", self.ScrollBox.Content, "TOPLEFT", 0, -10)
   end
 
   return entry

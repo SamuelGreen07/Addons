@@ -77,6 +77,13 @@ plugin.pluginOptions = {
 					width = "full",
 					fontSize = "medium",
 				},
+				blockEmotes = {
+					type = "toggle",
+					name = L.blockEmotes,
+					desc = L.blockEmotesDesc,
+					width = "full",
+					order = 1,
+				},
 				blockSpellErrors = {
 					type = "toggle",
 					name = L.blockSpellErrors,
@@ -186,16 +193,33 @@ do
 		updateProfile()
 
 		-- Enable these CVars every time we load just in case some kind of disconnect/etc during the fight left it permanently disabled
+		-- Additionally, notify the user if a CVar has been force enabled by BossBlock.
 		if self.db.profile.disableSfx then
+			local sfx = GetCVar("Sound_EnableSFX")
+			if sfx == "0" then
+				BigWigs:Print(L.userNotifySfx);
+			end
 			SetCVar("Sound_EnableSFX", "1")
 		end
 		if self.db.profile.disableMusic then
+			local music = GetCVar("Sound_EnableMusic")
+			if music == "0" then
+				BigWigs:Print(L.userNotifyMusic);
+			end
 			SetCVar("Sound_EnableMusic", "1")
 		end
 		if self.db.profile.disableAmbience then
+			local ambience = GetCVar("Sound_EnableAmbience")
+			if ambience == "0" then
+				BigWigs:Print(L.userNotifyAmbience);
+			end
 			SetCVar("Sound_EnableAmbience", "1")
 		end
 		if self.db.profile.disableErrorSpeech then
+			local errorSpeech = GetCVar("Sound_EnableErrorSpeech")
+			if errorSpeech == "0" then
+				BigWigs:Print(L.userNotifyErrorSpeech);
+			end
 			SetCVar("Sound_EnableErrorSpeech", "1")
 		end
 	end
@@ -231,6 +255,11 @@ do
 	function plugin:OnEngage(event, module)
 		if not module or not module.journalId or module.worldBoss then return end
 
+		if self.db.profile.blockEmotes and not IsTestBuild() and BigWigsLoader.isWrath then -- Don't block emotes on WoW beta.
+			KillEvent(RaidBossEmoteFrame, "RAID_BOSS_EMOTE")
+			KillEvent(RaidBossEmoteFrame, "RAID_BOSS_WHISPER")
+		end
+
 		if self.db.profile.blockSpellErrors then
 			KillEvent(UIErrorsFrame, "UI_ERROR_MESSAGE")
 		end
@@ -252,6 +281,10 @@ do
 	end
 
 	function RestoreAll(self)
+		if self.db.profile.blockEmotes and BigWigsLoader.isWrath then
+			RestoreEvent(RaidBossEmoteFrame, "RAID_BOSS_EMOTE")
+			RestoreEvent(RaidBossEmoteFrame, "RAID_BOSS_WHISPER")
+		end
 		if self.db.profile.blockSpellErrors then
 			RestoreEvent(UIErrorsFrame, "UI_ERROR_MESSAGE")
 		end

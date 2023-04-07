@@ -6,6 +6,10 @@ end
 
 local _
 
+local getFrame = function(frame)
+	return rawget(frame, "widget") or frame
+end
+
 detailsFramework.WidgetFunctions = {
 	GetCapsule = function(self)
 		return self.MyObject
@@ -23,6 +27,53 @@ detailsFramework.DefaultMetaFunctionsGet = {
 
 	shown = function(object)
 		return object:IsShown()
+	end,
+}
+
+detailsFramework.TooltipHandlerMixin = {
+	SetTooltip = function(self, tooltip)
+		if (tooltip) then
+			if (detailsFramework.Language.IsLocTable(tooltip)) then
+				--register the locTable as a tableKey
+				local locTable = tooltip
+				detailsFramework.Language.RegisterTableKeyWithLocTable(self, "have_tooltip", locTable)
+			else
+				self.have_tooltip = tooltip
+			end
+		else
+			self.have_tooltip = nil
+		end
+	end,
+
+	GetTooltip = function(self)
+		return self.have_tooltip
+	end,
+
+	ShowTooltip = function(self)
+		local tooltipText = self:GetTooltip()
+
+		if (type(tooltipText) == "function") then
+			local tooltipFunction = tooltipText
+			local gotTooltip, tooltipString = xpcall(tooltipFunction, geterrorhandler())
+			if (gotTooltip) then
+				tooltipText = tooltipString
+			end
+		end
+
+		if (tooltipText) then
+			GameCooltip:Preset(2)
+			GameCooltip:AddLine(tooltipText)
+			GameCooltip:ShowCooltip(getFrame(self), "tooltip")
+		end
+	end,
+
+	HideTooltip = function(self)
+		local tooltipText = self:GetTooltip()
+		if (tooltipText) then
+			if (GameCooltip:IsOwner(getFrame(self))) then
+				GameCooltip:Hide()
+			end
+		end
 	end,
 }
 
@@ -71,10 +122,6 @@ detailsFramework.LayeredRegionMetaFunctionsGet = {
 		return subLevel
 	end,
 }
-
-local getFrame = function(frame)
-	return rawget(frame, "widget") or frame
-end
 
 detailsFramework.FrameMixin = {
 	SetFrameStrata = function(self, strata)
@@ -242,7 +289,7 @@ detailsFramework.OptionsFunctions = {
 	GetAllOptions = function(self)
 		if (self.options) then
 			local optionsTable = {}
-			for key, _ in pairs (self.options) do
+			for key, _ in pairs(self.options) do
 				optionsTable [#optionsTable + 1] = key
 			end
 			return optionsTable
@@ -253,8 +300,8 @@ detailsFramework.OptionsFunctions = {
 
 	BuildOptionsTable = function(self, defaultOptions, userOptions)
 		self.options = self.options or {}
-		detailsFramework.table.deploy (self.options, userOptions or {})
-		detailsFramework.table.deploy (self.options, defaultOptions or {})
+		detailsFramework.table.deploy(self.options, userOptions or {})
+		detailsFramework.table.deploy(self.options, defaultOptions or {})
 	end
 }
 
@@ -296,7 +343,85 @@ detailsFramework.PayloadMixin = {
 	end,
 }
 
+---mixin to use with DetailsFramework:Mixin(table, detailsFramework.ScriptHookMixin)
+---
+---@class DetailsFramework.ScriptHookMixin
+detailsFramework.ScriptHookMixin = {
+	RunHooksForWidget = function(self, event, ...)
+		local hooks = self.HookList[event]
+
+		if (not hooks) then
+			print(self.widget:GetName(), "no hooks for", event)
+			return
+		end
+
+		for i, func in ipairs(hooks) do
+			local success, canInterrupt = xpcall(func, geterrorhandler(), ...)
+
+			if (not success) then
+				--error("Details! Framework: " .. event .. " hook for " .. self:GetName() .. ": " .. canInterrupt)
+				return false
+
+			elseif (canInterrupt) then
+				return true
+			end
+		end
+	end,
+
+	SetHook = function(self, hookType, func)
+		if (self.HookList[hookType]) then
+			if (type(func) == "function") then
+				local isRemoval = false
+				for i = #self.HookList[hookType], 1, -1 do
+					if (self.HookList[hookType][i] == func) then
+						tremove(self.HookList[hookType], i)
+						isRemoval = true
+						break
+					end
+				end
+
+				if (not isRemoval) then
+					tinsert(self.HookList[hookType], func)
+				end
+			else
+				if (detailsFramework.debug) then
+					print(debugstack())
+					error("Details! Framework: invalid function for widget " .. self.WidgetType .. ".")
+				end
+			end
+		else
+			if (detailsFramework.debug) then
+				error("Details! Framework: unknown hook type for widget " .. self.WidgetType .. ": '" .. hookType .. "'.")
+			end
+		end
+	end,
+
+	HasHook = function(self, hookType, func)
+		if (self.HookList[hookType]) then
+			if (type(func) == "function") then
+				for i = #self.HookList[hookType], 1, -1 do
+					if (self.HookList[hookType][i] == func) then
+						return true
+					end
+				end
+			end
+		end
+	end,
+
+	ClearHooks = function(self)
+		for hookType, hookTable in pairs(self.HookList) do
+			table.wipe(hookTable)
+		end
+	end,
+}
+
+---mixin to use with DetailsFramework:Mixin(table, detailsFramework.SortFunctions)
+---add methods to be used on scrollframes
+---@class DetailsFramework.ScrollBoxFunctions
 detailsFramework.ScrollBoxFunctions = {
+	---refresh the scrollbox by resetting all lines created with :CreateLine(), then calling the refresh_func which was set at :CreateScrollBox()
+	---@param self table
+	---@return table
 	Refresh = function(self)
 		--hide all frames and tag as not in use
 		self._LinesInUse = 0
@@ -311,8 +436,10 @@ detailsFramework.ScrollBoxFunctions = {
 			offset = self:GetOffsetFaux()
 		end
 
+		--call the refresh function
 		detailsFramework:CoreDispatch((self:GetName() or "ScrollBox") .. ":Refresh()", self.refresh_func, self, self.data, offset, self.LineAmount)
 
+		--hide all frames that are not in use
 		for index, frame in ipairs(self.Frames) do
 			if (not frame._InUse) then
 				frame:Hide()
@@ -352,10 +479,15 @@ detailsFramework.ScrollBoxFunctions = {
 		return true
 	end,
 
+	---create a line within the scrollbox
+	---@param self table is the scrollbox
+	---@param func function|nil function to create the line object, this function will receive the line index as argument and return a table with the line object
+	---@return table line object (table)
 	CreateLine = function(self, func)
 		if (not func) then
 			func = self.CreateLineFunc
 		end
+
 		local okay, newLine = pcall(func, self, #self.Frames+1)
 		if (okay) then
 			if (not newLine) then
@@ -560,13 +692,198 @@ local SortByMemberReverse = function(t1, t2)
 	return t1[SortMember] < t2[SortMember]
 end
 
+---mixin to use with DetailsFramework:Mixin(table, detailsFramework.SortFunctions)
+---adds the method Sort() to a table, this method can be used to sort another table by a member, can't sort itself
+---@class DetailsFramework.SortFunctions
 detailsFramework.SortFunctions = {
-	Sort = function(self, thisTable, memberName, isReverse)
-		SortMember = memberName
-		if (not isReverse) then
-			table.sort(thisTable, SortByMember)
+	---sort a table by a member
+	---@param self table
+	---@param tThisTable table
+	---@param sMemberName string
+	---@param bIsReverse boolean
+	Sort = function(self, tThisTable, sMemberName, bIsReverse)
+		SortMember = sMemberName
+		if (not bIsReverse) then
+			table.sort(tThisTable, SortByMember)
 		else
-			table.sort(thisTable, SortByMemberReverse)
+			table.sort(tThisTable, SortByMemberReverse)
 		end
 	end
+}
+
+---mixin to use with DetailsFramework:Mixin(table, detailsFramework.DataMixin)
+---add 'data' to a table, this table can be used to store data for the object
+---@class DetailsFramework.DataMixin
+detailsFramework.DataMixin = {
+	---initialize the data table
+	---@param self table
+	DataConstructor = function(self)
+		self._dataInfo = {
+			data = {},
+			dataCurrentIndex = 1,
+			callbacks = {},
+		}
+	end,
+
+	---when data is changed, functions registered with this function will be called
+	---@param self table
+	---@param func function
+	---@param ... unknown
+	AddDataChangeCallback = function(self, func, ...)
+		assert(type(func) == "function", "invalid function for AddDataChangeCallback.")
+		local allCallbacks = self._dataInfo.callbacks
+		allCallbacks[func] = {...}
+	end,
+
+	---remove a previous registered callback function
+	---@param self table
+	---@param func function
+	RemoveDataChangeCallback = function(self, func)
+		assert(type(func) == "function", "invalid function for RemoveDataChangeCallback.")
+		local allCallbacks = self._dataInfo.callbacks
+		allCallbacks[func] = nil
+	end,
+
+	---set the data table
+	---@param self table
+	---@param data table
+	SetData = function(self, data)
+		assert(type(data) == "table", "invalid table for SetData.")
+		self._dataInfo.data = data
+		self:ResetDataIndex()
+
+		local allCallbacks = self._dataInfo.callbacks
+		for	func, payload in pairs(allCallbacks) do
+			xpcall(func, geterrorhandler(), data, unpack(payload))
+		end
+	end,
+
+	---get the data table
+	---@param self table
+	GetData = function(self)
+		return self._dataInfo.data
+	end,
+
+	---get the next value from the data table
+	---@param self table
+	---@return any
+	GetDataNextValue = function(self)
+		local currentValue = self._dataInfo.dataCurrentIndex
+		local value = self:GetData()[currentValue]
+		self._dataInfo.dataCurrentIndex = self._dataInfo.dataCurrentIndex + 1
+		return value
+	end,
+
+	---reset the data index, making GetDataNextValue() return the first value again
+	ResetDataIndex = function(self)
+		self._dataInfo.dataCurrentIndex = 1
+	end,
+
+	---get the size of the data table
+	---@param self table
+	---@return number
+	GetDataSize = function(self)
+		return #self:GetData()
+	end,
+
+	---get the first value from the data table
+	---@param self table
+	---@return any
+	GetDataFirstValue = function(self)
+		return self:GetData()[1]
+	end,
+
+	---get the last value from the data table
+	---@param self table
+	---@return any
+	GetDataLastValue = function(self)
+		local data = self:GetData()
+		return data[#data]
+	end,
+
+	---get the min and max values from the data table, if the value stored is number, return the min and max values
+	---@param self table
+	---@return number, number
+	GetDataMinMaxValues = function(self)
+		local minDataValue = 0
+		local maxDataValue = 0
+
+		local data = self:GetData()
+		for i = 1, #data do
+			local thisData = data[i]
+			if (thisData > maxDataValue) then
+				maxDataValue = thisData
+
+			elseif (thisData < minDataValue) then
+				minDataValue = thisData
+			end
+		end
+
+		return minDataValue, maxDataValue
+	end,
+
+	---when data uses sub tables, get the min max values from a specific index or key, if the value stored is number, return the min and max values
+	---@param self table
+	---@param key string
+	---@return number, number
+	GetDataMinMaxValueFromSubTable = function(self, key)
+		local minDataValue = 0
+		local maxDataValue = 0
+
+		local data = self:GetData()
+		for i = 1, #data do
+			local thisData = data[i]
+			if (thisData[key] > maxDataValue) then
+				maxDataValue = thisData[key]
+
+			elseif (thisData[key] < minDataValue) then
+				minDataValue = thisData[key]
+			end
+		end
+
+		return minDataValue, maxDataValue
+	end,
+}
+
+---mixin to use with DetailsFramework:Mixin(table, detailsFramework.ValueMixin)
+---add support to min value and max value into a table or object
+---@class DetailsFramework.ValueMixin
+detailsFramework.ValueMixin = {
+	ValueConstructor = function(self)
+		self.minValue = 0
+		self.maxValue = 1
+	end,
+
+	SetMinMaxValues = function(self, minValue, maxValue)
+		self.minValue = minValue
+		self.maxValue = maxValue
+	end,
+
+	GetMinMaxValues = function(self)
+		return self.minValue, self.maxValue
+	end,
+
+	GetMinValue = function(self)
+		return self.minValue
+	end,
+
+	GetMaxValue = function(self)
+		return self.maxValue
+	end,
+
+	SetMinValue = function(self, minValue)
+		self.minValue = minValue
+	end,
+
+	SetMinValueIfLower = function(self, ...)
+		self.minValue = min(self.minValue, ...)
+	end,
+
+	SetMaxValue = function(self, maxValue)
+		self.maxValue = maxValue
+	end,
+
+	SetMaxValueIfBigger = function(self, ...)
+		self.maxValue = max(self.maxValue, ...)
+	end,
 }

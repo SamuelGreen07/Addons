@@ -7,9 +7,23 @@ local L = cBnivL
 local isClassic = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE
 local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 
+local isDF = select(4,GetBuildInfo()) >= 100000
+local NumBagContainer = isDF and 5 or 4
+local BankContainerStartID = NumBagContainer + 1
+local MaxNumContainer = isDF and 12 or 11
+
 local LE_ITEM_CLASS_KEY = LE_ITEM_CLASS_KEY or Enum.ItemClass.Key
 
-local UseContainerItem = C_Container and C_Container.UseContainerItem or UseContainerItem
+local UseContainerItem = UseContainerItem or C_Container.UseContainerItem
+local GetContainerItemLink = GetContainerItemLink or C_Container.GetContainerItemLink
+local GetContainerNumFreeSlots = GetContainerNumFreeSlots or C_Container.GetContainerNumFreeSlots
+local GetContainerNumSlots = GetContainerNumSlots or C_Container.GetContainerNumSlots
+local GetContainerItemID = GetContainerItemID or C_Container.GetContainerItemID
+local PickupContainerItem = PickupContainerItem or C_Container.PickupContainerItem
+local SortBags = isRetail and (SortBags or C_Container.SortBags)
+local SortBankBags = isRetail and (SortBankBags or C_Container.SortBankBags)
+local SortReagentBankBags = isRetail and (SortReagentBankBags or C_Container.SortReagentBankBags)
+local ContainerIDToInventoryID = ContainerIDToInventoryID or C_Container.ContainerIDToInventoryID
 
 local BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate" or nil
 
@@ -55,7 +69,7 @@ local GetNumFreeSlots = function(bagType)
 		free = GetContainerNumFreeSlots(-3)
 		max = GetContainerNumSlots(-3)
 	else
-		local containerIDs = {-1,5,6,7,8,9,10,11}
+		local containerIDs = isDF and {-1,6,7,8,9,10,11,12} or {-1,5,6,7,8,9,10,11}
 		for _,i in next, containerIDs do	
 			free = free + GetContainerNumFreeSlots(i)
 			max = max + GetContainerNumSlots(i)
@@ -180,7 +194,7 @@ function MyContainer:OnContentsChanged(forced)
 	local tAS = (tName == "cBniv_Ammo") or (tName == "cBniv_Soulshards")
 	local bankShown = cB_Bags.bank:IsShown()
 	if (not tBankBags and cB_Bags.main:IsShown() and not (t or tAS)) or (tBankBags and bankShown) then 
-		if isEmpty then
+		if isEmpty and (not tReagent) then
 			self:Hide()
 			if bankShown then
 				cB_Bags.bank:Show()
@@ -260,21 +274,40 @@ JS:SetScript("OnEvent", function() SellJunk() end)
 -- Restack Items
 local restackItems
 if isClassic then
+
+	local containerItemLocked, containerItemCount
+	if C_Container then
+		containerItemLocked = function(bag, slot)
+			return C_Container.GetContainerItemInfo(bag, slot).isLocked
+		end
+		containerItemCount = function(bag, slot)
+			return C_Container.GetContainerItemInfo(bag, slot).stackCount
+		end
+	else
+		containerItemLocked = function(bag, slot)
+			return select(3, GetContainerItemInfo(bag, slot))
+		end
+		containerItemCount = function(bag, slot)
+			return select(2, GetContainerItemInfo(bag, slot))
+		end
+	end
 	
 	local ContainerID = { bags = { 0 }, bank = { -1 }, guild = { 42 } }
 	for i = 1, NUM_BAG_SLOTS do table.insert(ContainerID.bags, i) end
 	for i = NUM_BAG_SLOTS + 1, NUM_BAG_SLOTS + NUM_BANKBAGSLOTS do table.insert(ContainerID.bank, i) end
 
 	-- yielding function; items will get locked and we have to wait
-	local f = CreateFrame("Frame")
+	local f = CreateFrame("Frame", "cBNivRestacker")
 	local function coYield(loc, bag, slot, count)
 		local elapsed = 0
 		f:SetScript("OnUpdate", function(_, update)
 			elapsed = elapsed + update
 			if type(restacker) == "thread" and coroutine.status(restacker) == "suspended" and elapsed > 0.1 then
 				local locked = true
-				locked = select(3, GetContainerItemInfo(bag, slot))
-				if not locked then coroutine.resume(restacker) end
+				locked = containerItemLocked(bag, slot)
+				if not locked then
+					coroutine.resume(restacker)
+				end
 				elapsed = 0
 			end
 		end)
@@ -295,14 +328,18 @@ if isClassic then
 						if changed then break end
 						for slot = 1, (GetContainerNumSlots(bag)) do
 							while true do
-								local locked = select(3, GetContainerItemInfo(bag, slot))
-								if locked then coYield(loc, bag, slot) else break end
+								local locked = containerItemLocked(bag, slot)
+								if locked then
+									coYield(loc, bag, slot)
+								else
+									break
+								end
 							end
 							local item = GetContainerItemLink(bag, slot)
 							if item then
-								local itemid = tonumber(item:match("item:(%d+)"))
+								local itemid = (C_Container and C_Container.GetContainerItemID(bag, slot)) or tonumber(item:match("item:(%d+)"))
 								local stack = select(8, GetItemInfo(itemid))
-								local count = select(2, GetContainerItemInfo(bag, slot))
+								local count = containerItemCount(bag, slot)
 
 								-- do "special" things with "special" items by moving them into "special" bags
 								if select(9, GetItemInfo(itemid)) ~= "INVTYPE_BAG" then
@@ -329,24 +366,38 @@ if isClassic then
 										-- search through bags backwards for another partial stack with a matching itemid
 										for i = #ContainerID[loc], 1, -1 do
 											local _bag = ContainerID[loc][i]
-											if found or done then break end
+											if found or done then
+												break
+											end
 											local _slots = GetContainerNumSlots(_bag)
 											for _slot = _slots, 1, -1 do
 												if not (_bag == bag and _slot == slot) then
 													local _item = GetContainerItemLink(_bag, _slot)
 													if _item then
-														local _itemid = tonumber(_item:match("item:(%d+):"))
+														local _itemid = (C_Container and C_Container.GetContainerItemID(_bag, _slot)) or tonumber(_item:match("item:(%d+):"))
 														if _itemid == itemid then
 															local _stack = select(8, GetItemInfo(_itemid))
-															local _count = select(2, GetContainerItemInfo(_bag, _slot))
-															if _count < _stack then found, pbag, pslot = true, _bag, _slot; break end
+															local _count = containerItemCount(_bag, _slot)
+															if _count < _stack then
+																found = true
+																pbag = _bag
+																pslot = _slot
+																break
+															end
 														end
 													end
-												else done = true; break end
+												else
+													done = true
+													break
+												end
 											end
 										end
-										locked = found and select(3, GetContainerItemInfo(pbag, pslot)) or false
-										if locked then coYield(loc, pbag, pslot) else break end
+										locked = found and containerItemLocked(pbag, pslot) or false
+										if locked then
+											coYield(loc, pbag, pslot)
+										else
+											break
+										end
 									end
 
 									if found then
@@ -389,7 +440,7 @@ else
 			if tBank then
 				SortBankBags()
 				if IsReagentBankUnlocked() then
-					SortReagentBankBags()
+					C_Timer.After(1, function() SortReagentBankBags() end)
 				end
 			elseif tBag then
 				SortBags()
@@ -410,7 +461,7 @@ local resetNewItems = function(self)
 		end
 		cBniv.clean = true
 	end
-	for bag = 0, 4 do
+	for bag = 0, NumBagContainer do
 		local tNumSlots = GetContainerNumSlots(bag)
 		if tNumSlots > 0 then
 			for slot = 1, tNumSlots do
@@ -589,7 +640,7 @@ local GetFirstFreeSlot = function(bagtype)
 			end
 		end
 	else
-		local containerIDs = {-1,5,6,7,8,9,10,11}
+		local containerIDs = isDF and {-1,6,7,8,9,10,11,12} or {-1,5,6,7,8,9,10,11}
 		for _,i in next, containerIDs do
 			local t = GetContainerNumFreeSlots(i)
 			if t > 0 then
@@ -759,7 +810,7 @@ function MyContainer:OnCreate(name, settings)
 		local bagType = tBag and "bags" or "bank"
 		
 		local tS = tBag and "backpack+bags" or "bank"
-		local tI = tBag and 4 or 7
+		local tI = tBag and NumBagContainer or 7
 				
 		local bagButtons = self:SpawnPlugin("BagBar", tS)
 		bagButtons:SetSize(bagButtons:LayoutButtons("grid", tI))

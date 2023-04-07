@@ -1,18 +1,20 @@
 local AddOnName = ...
 local _G = _G
-local LibStub = LibStub
+local LibStub = _G.LibStub
 
 local PA = LibStub('AceAddon-3.0'):NewAddon('ProjectAzilroka', 'AceConsole-3.0', 'AceEvent-3.0', 'AceTimer-3.0')
 
 _G.ProjectAzilroka = PA
 
+local min, max = min, max
 local select = select
 local pairs = pairs
 local sort = sort
+local gsub = gsub
 local tinsert = tinsert
 local print = print
 local format = format
-local strsplit = strsplit
+local strsplit, strmatch, strlen, strsub = strsplit, strmatch, strlen, strsub
 
 local GetAddOnMetadata = GetAddOnMetadata
 local GetAddOnEnableState = GetAddOnEnableState
@@ -20,6 +22,7 @@ local UnitName = UnitName
 local UnitClass = UnitClass
 local GetRealmName = GetRealmName
 local UIParent = UIParent
+local CreateFrame = CreateFrame
 local BNGetFriendInfo = BNGetFriendInfo
 local BNGetGameAccountInfo = BNGetGameAccountInfo
 
@@ -70,10 +73,10 @@ end
 PA.UIScale = UIParent:GetScale()
 PA.MyFaction = UnitFactionGroup('player')
 
-PA.Retail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
-PA.Classic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
-PA.TBC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
-PA.Wrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
+PA.Retail = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE
+PA.Classic = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_CLASSIC
+PA.TBC = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+PA.Wrath = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_WRATH_CLASSIC
 
 -- Pixel Perfect
 PA.ScreenWidth, PA.ScreenHeight = GetPhysicalScreenSize()
@@ -115,22 +118,23 @@ PA.GrowthDirection = {
 
 PA.ElvUI = PA:IsAddOnEnabled('ElvUI', PA.MyName)
 PA.SLE = PA:IsAddOnEnabled('ElvUI_SLE', PA.MyName)
-PA.NUI = PA:IsAddOnEnabled('ElvUI_NihilistUI', PA.MyName)
+PA.NUI = PA:IsAddOnEnabled('ElvUI_NihilistzscheUI', PA.MyName)
 PA.Tukui = PA:IsAddOnEnabled('Tukui', PA.MyName)
 PA.AzilUI = PA:IsAddOnEnabled('AzilUI', PA.MyName)
+PA.SpartanUI = PA:IsAddOnEnabled('SpartanUI', PA.MyName)
 PA.AddOnSkins = PA:IsAddOnEnabled('AddOnSkins', PA.MyName)
 
 -- Setup oUF for pbuf
 local function GetoUF()
-	local key = PA.ElvUI and "ElvUI" or PA.Tukui and "Tukui"
+	local key = PA.ElvUI and "ElvUI_Libraries" or PA.Tukui and "Tukui" or PA.SpartanUI and "SpartanUI"
 	if not key then return end
 	return _G[_G.GetAddOnMetadata(key, 'X-oUF')]
 end
 PA.oUF = GetoUF()
 
 PA.Classes = {}
-for k, v in pairs(LOCALIZED_CLASS_NAMES_MALE) do PA.Classes[v] = k end
-for k, v in pairs(LOCALIZED_CLASS_NAMES_FEMALE) do PA.Classes[v] = k end
+for k, v in pairs(_G.LOCALIZED_CLASS_NAMES_MALE) do PA.Classes[v] = k end
+for k, v in pairs(_G.LOCALIZED_CLASS_NAMES_FEMALE) do PA.Classes[v] = k end
 
 function PA:ClassColorCode(class)
 	local color = PA:GetClassColor(PA.Classes[class])
@@ -150,7 +154,7 @@ PA.ScanTooltip:SetOwner(_G.UIParent, "ANCHOR_NONE")
 PA.PetBattleFrameHider = CreateFrame('Frame', 'PA_PetBattleFrameHider', UIParent, 'SecureHandlerStateTemplate')
 PA.PetBattleFrameHider:SetAllPoints()
 PA.PetBattleFrameHider:SetFrameStrata('LOW')
-RegisterStateDriver(PA.PetBattleFrameHider, 'visibility', '[petbattle] hide; show')
+_G.RegisterStateDriver(PA.PetBattleFrameHider, 'visibility', '[petbattle] hide; show')
 
 function PA:GetUIScale()
 	local effectiveScale = _G.UIParent:GetEffectiveScale()
@@ -170,8 +174,7 @@ function PA:GetClassName(class)
 end
 
 function PA:Color(name)
-	local color = '|cFF16C3F2%s|r'
-	return (color):format(name)
+	return format('|cFF16C3F2%s|r', name)
 end
 
 function PA:Print(...)
@@ -251,9 +254,9 @@ function PA:SetTemplate(frame)
 			frame:SetTemplate('Transparent', true)
 		else
 			frame:SetBackdrop({ bgFile = PA.Solid, edgeFile = PA.Solid, edgeSize = 1 })
+			frame:SetBackdropColor(.08, .08, .08, .8)
+			frame:SetBackdropBorderColor(0.2, 0.2, 0.2, 1)
 		end
-		frame:SetBackdropColor(.08, .08, .08, .8)
-		frame:SetBackdropBorderColor(0.2, 0.2, 0.2, 1)
 	end
 end
 
@@ -261,10 +264,20 @@ function PA:CreateBackdrop(frame)
 	if PA.AddOnSkins then
 		_G.AddOnSkins[1]:CreateBackdrop(frame)
 	else
-		frame.Backdrop = CreateFrame('Frame', nil, frame)
-		frame.Backdrop:SetFrameLevel(frame:GetFrameLevel() - 1)
-		PA:SetOutside(frame.Backdrop, frame)
-		PA:SetTemplate(frame.Backdrop)
+		local Parent = frame.IsObjectType and frame:IsObjectType('Texture') and frame:GetParent() or frame
+
+		local Backdrop = CreateFrame('Frame', nil, Parent)
+		if not Backdrop.SetBackdrop then _G.Mixin(Backdrop, _G.BackdropTemplateMixin) end
+		if (Parent:GetFrameLevel() - 1) >= 0 then
+			Backdrop:SetFrameLevel(Parent:GetFrameLevel() - 1)
+		else
+			Backdrop:SetFrameLevel(0)
+		end
+
+		PA:SetOutside(Backdrop, frame)
+		PA:SetTemplate(Backdrop)
+
+		frame.Backdrop = Backdrop
 	end
 end
 
@@ -315,7 +328,7 @@ end
 
 local accountInfo = { gameAccountInfo = {} }
 function PA:GetBattleNetInfo(friendIndex)
-	if PA.Retail then
+	if not PA.Classic then
 		accountInfo = _G.C_BattleNet.GetFriendAccountInfo(friendIndex)
 
 		return accountInfo
@@ -373,21 +386,21 @@ function PA:GetBattleNetInfo(friendIndex)
 	end
 end
 
-StaticPopupDialogs["PROJECTAZILROKA"] = {
+_G.StaticPopupDialogs["PROJECTAZILROKA"] = {
 	text = PA.ACL["A setting you have changed will change an option for this character only. This setting that you have changed will be uneffected by changing user profiles. Changing this setting requires that you reload your User Interface."],
-	button1 = ACCEPT,
-	button2 = CANCEL,
-	OnAccept = ReloadUI,
+	button1 = _G.ACCEPT,
+	button2 = _G.CANCEL,
+	OnAccept = _G.ReloadUI,
 	timeout = 0,
 	whileDead = 1,
 	hideOnEscape = false,
 }
 
-StaticPopupDialogs["PROJECTAZILROKA_RL"] = {
+_G.StaticPopupDialogs["PROJECTAZILROKA_RL"] = {
 	text = PA.ACL["This setting requires that you reload your User Interface."],
-	button1 = ACCEPT,
-	button2 = CANCEL,
-	OnAccept = ReloadUI,
+	button1 = _G.ACCEPT,
+	button2 = _G.CANCEL,
+	OnAccept = _G.ReloadUI,
 	timeout = 0,
 	whileDead = 1,
 	hideOnEscape = false,
@@ -430,21 +443,6 @@ PA.Defaults = {
 }
 
 PA.Options = PA.ACH:Group(PA:Color(PA.Title), nil, 6)
-PA.Options.args.Version = PA.ACH:Group('Version', nil, -1)
-
-do
-	local order = 1
-	local function SendRecieve(_, event, prefix, message, _, sender)
-		if prefix == 'ELVUI_VERSIONCHK' then
-			PA.Options.args.Version.args[sender] = PA.ACH:Description(format('%s - %s', sender, message), order + 1)
-			order = order + 1
-		end
-	end
-
-	local f = CreateFrame('Frame')
-	f:RegisterEvent('CHAT_MSG_ADDON')
-	f:SetScript('OnEvent', SendRecieve)
-end
 
 function PA:GetOptions()
 	if _G.ElvUI then

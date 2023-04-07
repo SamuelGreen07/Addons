@@ -4,9 +4,14 @@ local cargBags = ns.cargBags
 local isClassic = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE
 local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 
+local isDF = select(4,GetBuildInfo()) >= 100000
+local NumBagContainer = isDF and 5 or 4
+local BankContainerStartID = NumBagContainer + 1
+local MaxNumContainer = isDF and 12 or 11
+
 local cbNivaya = cargBags:NewImplementation("Nivaya")
 cbNivaya:RegisterBlizzard()
-function cbNivaya:UpdateBags() for i = -3, 11 do cbNivaya:UpdateBag(i) end end
+function cbNivaya:UpdateBags() for i = -3, MaxNumContainer do cbNivaya:UpdateBag(i) end end
 
 local L = cBnivL
 cB_Filters = {}
@@ -20,8 +25,8 @@ cB_filterEnabled = { Armor = true, Gem = true, Quest = true, TradeGoods = true, 
 --------------------
 --Basic filters
 --------------------
-cB_Filters.fBags = function(item) return item.bagID >= 0 and item.bagID <= 4 end
-cB_Filters.fBank = function(item) return item.bagID == -1 or item.bagID >= 5 and item.bagID <= 11 end
+cB_Filters.fBags = function(item) return item.bagID >= 0 and item.bagID <= NumBagContainer end
+cB_Filters.fBank = function(item) return item.bagID == -1 or item.bagID >= BankContainerStartID and item.bagID <= MaxNumContainer end
 if isRetail then
 	cB_Filters.fBankReagent = function(item) return item.bagID == -3 end
 end
@@ -37,7 +42,7 @@ cB_Filters.fItemClass = function(item, container)
 	
 	local t, bag = cB_ItemClass[item.id]
 
-	local isBankBag = item.bagID == -1 or (item.bagID >= 5 and item.bagID <= 11)
+	local isBankBag = item.bagID == -1 or (item.bagID >= BankContainerStartID and item.bagID <= MaxNumContainer)
 	if isBankBag then
 		bag = (cB_existsBankBag[t] and cBnivCfg.FilterBank and cB_filterEnabled[t]) and "Bank"..t or "Bank"
 	else
@@ -78,7 +83,7 @@ end
 ------------------------------------------
 cB_Filters.fNewItems = function(item)
 	if not cBnivCfg.NewItems then return false end
-	if not ((item.bagID >= 0) and (item.bagID <= 4)) then return false end
+	if not ((item.bagID >= 0) and (item.bagID <= NumBagContainer)) then return false end
 	if not item.link then return false end
 	if not cB_KnownItems[item.id] then return true end
 	local t = GetItemCount(item.id)	--cbNivaya:getItemCount(item.id)

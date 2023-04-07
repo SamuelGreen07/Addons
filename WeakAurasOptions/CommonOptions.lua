@@ -143,7 +143,9 @@ local function addCollapsibleHeader(options, key, input, order, isGroupTab)
         if notcollapsable then
           return "Interface\\AddOns\\WeakAuras\\Media\\Textures\\bullet1", 18, 18
         else
-          return isCollapsed() and "Interface\\AddOns\\WeakAuras\\Media\\Textures\\expand" or "Interface\\AddOns\\WeakAuras\\Media\\Textures\\collapse", 18, 18
+          return isCollapsed() and "Interface\\AddOns\\WeakAuras\\Media\\Textures\\expand"
+                                    or "Interface\\AddOns\\WeakAuras\\Media\\Textures\\collapse",
+                                    18, 18
         end
       end,
       control = "WeakAurasExpand",
@@ -1038,6 +1040,7 @@ local function PositionOptions(id, data, _, hideWidthHeight, disableSelfPoint, g
     __order = metaOrder,
     width = {
       type = "range",
+      control = "WeakAurasSpinBox",
       width = WeakAuras.normalWidth,
       name = L["Width"],
       order = 60,
@@ -1049,6 +1052,7 @@ local function PositionOptions(id, data, _, hideWidthHeight, disableSelfPoint, g
     },
     height = {
       type = "range",
+      control = "WeakAurasSpinBox",
       width = WeakAuras.normalWidth,
       name = L["Height"],
       order = 61,
@@ -1066,7 +1070,13 @@ local function PositionOptions(id, data, _, hideWidthHeight, disableSelfPoint, g
       hidden = function()
         return IsParentDynamicGroup() or IsGroupByFrame()
       end,
-      values = (data.regionType == "group" or data.regionType == "dynamicgroup") and OptionsPrivate.Private.anchor_frame_types_group or OptionsPrivate.Private.anchor_frame_types,
+      values = (data.regionType == "group" or data.regionType == "dynamicgroup")
+                and OptionsPrivate.Private.anchor_frame_types_group
+                or OptionsPrivate.Private.anchor_frame_types,
+      sorting = OptionsPrivate.Private.SortOrderForValues(
+                (data.regionType == "group" or data.regionType == "dynamicgroup")
+                and OptionsPrivate.Private.anchor_frame_types_group
+                or OptionsPrivate.Private.anchor_frame_types),
     },
     anchorFrameParent = {
       type = "toggle",
@@ -1078,7 +1088,7 @@ local function PositionOptions(id, data, _, hideWidthHeight, disableSelfPoint, g
         return data.anchorFrameParent or data.anchorFrameParent == nil;
       end,
       hidden = function()
-        return not IsGroupByFrame() and (data.anchorFrameType == "SCREEN" or data.anchorFrameType == "MOUSE" or IsParentDynamicGroup());
+        return not IsGroupByFrame() and (data.anchorFrameType == "SCREEN" or data.anchorFrameType == "UIPARENT" or data.anchorFrameType == "MOUSE" or IsParentDynamicGroup());
       end,
     },
     anchorFrameSpaceOne = {
@@ -1088,7 +1098,7 @@ local function PositionOptions(id, data, _, hideWidthHeight, disableSelfPoint, g
       order = 72,
       image = function() return "", 0, 0 end,
       hidden = function()
-        return IsParentDynamicGroup() or not (data.anchorFrameType == "SCREEN" or data.anchorFrameType == "MOUSE")
+        return IsParentDynamicGroup() or not (data.anchorFrameType == "SCREEN" or data.anchorFrameType == "UIPARENT" or data.anchorFrameType == "MOUSE")
       end,
     },
     -- Input field to select frame to anchor on
@@ -1134,7 +1144,7 @@ local function PositionOptions(id, data, _, hideWidthHeight, disableSelfPoint, g
       type = "select",
       width = WeakAuras.normalWidth,
       name = function()
-        if (data.anchorFrameType == "SCREEN") then
+        if (data.anchorFrameType == "SCREEN" or data.anchorFrameType == "UIPARENT") then
           return L["To Screen's"]
         elseif (data.anchorFrameType == "PRD") then
           return L["To Personal Ressource Display's"];
@@ -1151,7 +1161,7 @@ local function PositionOptions(id, data, _, hideWidthHeight, disableSelfPoint, g
           if IsParentDynamicGroup() then
             return true
           end
-          return data.anchorFrameType == "SCREEN" or data.anchorFrameType == "MOUSE";
+          return data.anchorFrameType == "SCREEN" or data.anchorFrameType == "UIPARENT" or data.anchorFrameType == "MOUSE";
         else
           return data.anchorFrameType == "MOUSE";
         end
@@ -1168,7 +1178,7 @@ local function PositionOptions(id, data, _, hideWidthHeight, disableSelfPoint, g
         if IsGroupByFrame() then
           return true
         end
-        if (data.anchorFrameType ~= "SCREEN") then
+        if (data.anchorFrameType ~= "SCREEN" and data.anchorFrameType ~= "UIPARENT") then
           return true;
         end
         if (data.parent) then
@@ -1193,6 +1203,7 @@ local function PositionOptions(id, data, _, hideWidthHeight, disableSelfPoint, g
     },
     xOffset = {
       type = "range",
+      control = "WeakAurasSpinBox",
       name = L["X Offset"],
       order = 79,
       width = WeakAuras.normalWidth,
@@ -1212,6 +1223,7 @@ local function PositionOptions(id, data, _, hideWidthHeight, disableSelfPoint, g
     },
     yOffset = {
       type = "range",
+      control = "WeakAurasSpinBox",
       name = L["Y Offset"],
       order = 80,
       width = WeakAuras.normalWidth,
@@ -1243,13 +1255,15 @@ local function PositionOptions(id, data, _, hideWidthHeight, disableSelfPoint, g
       order = 82,
       image = function() return "", 0, 0 end,
       hidden = function()
-        return not (data.anchorFrameType ~= "SCREEN" or IsParentDynamicGroup());
+        return not (data.anchorFrameType ~= "SCREEN" or data.anchorFrameType ~= "UIPARENT" or IsParentDynamicGroup());
       end
     },
   };
 
-  OptionsPrivate.commonOptions.AddCodeOption(positionOptions, data, L["Custom Anchor"], "custom_anchor", "https://github.com/WeakAuras/WeakAuras2/wiki/Custom-Code-Blocks#custom-anchor-function",
-                          71.5, function() return not(data.anchorFrameType == "CUSTOM" and not IsParentDynamicGroup()) end, {"customAnchor"}, false, { setOnParent = group })
+  OptionsPrivate.commonOptions.AddCodeOption(positionOptions, data, L["Custom Anchor"], "custom_anchor",
+                      "https://github.com/WeakAuras/WeakAuras2/wiki/Custom-Code-Blocks#custom-anchor-function",
+                      71.5, function() return not(data.anchorFrameType == "CUSTOM" and not IsParentDynamicGroup()) end,
+                      {"customAnchor"}, false, { setOnParent = group })
   return positionOptions;
 end
 
@@ -1288,6 +1302,7 @@ local function BorderOptions(id, data, showBackDropOptions, hiddenFunc, order)
     },
     borderOffset = {
       type = "range",
+      control = "WeakAurasSpinBox",
       width = WeakAuras.normalWidth,
       name = L["Border Offset"],
       order = order + 0.3,
@@ -1298,6 +1313,7 @@ local function BorderOptions(id, data, showBackDropOptions, hiddenFunc, order)
     },
     borderSize = {
       type = "range",
+      control = "WeakAurasSpinBox",
       width = WeakAuras.normalWidth,
       name = L["Border Size"],
       order = order + 0.4,
@@ -1308,6 +1324,7 @@ local function BorderOptions(id, data, showBackDropOptions, hiddenFunc, order)
     },
     borderInset = {
       type = "range",
+      control = "WeakAurasSpinBox",
       width = WeakAuras.normalWidth,
       name = L["Border Inset"],
       order = order + 0.5,
@@ -1377,7 +1394,8 @@ local function AddCodeOption(args, data, name, prefix, url, order, hiddenFunc, p
   tinsert(options.extraFunctions, 1, {
     buttonLabel = L["Expand"],
     func = function()
-      OptionsPrivate.OpenTextEditor(OptionsPrivate.GetPickedDisplay(), path, encloseInFunction, options.multipath, options.reloadOptions, options.setOnParent, url, options.validator)
+      OptionsPrivate.OpenTextEditor(OptionsPrivate.GetPickedDisplay(), path, encloseInFunction, options.multipath,
+                                    options.reloadOptions, options.setOnParent, url, options.validator)
     end
   });
 

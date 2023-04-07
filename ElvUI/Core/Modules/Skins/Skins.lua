@@ -104,21 +104,23 @@ function S:HandleButtonHighlight(frame, r, g, b)
 		frame:SetHighlightTexture(E.ClearTexture)
 	end
 
+	if not frame.highlightGradient then
+		local width, h = frame:GetSize()
+		local height = h * 0.95
+
+		local gradient = frame:CreateTexture(nil, 'HIGHLIGHT')
+		gradient:SetTexture(E.Media.Textures.Highlight)
+		gradient:Point('LEFT', frame)
+		gradient:Size(width, height)
+
+		frame.highlightGradient = gradient
+	end
+
 	if not r then r = 0.9 end
 	if not g then g = 0.9 end
 	if not b then b = 0.9 end
 
-	local leftGrad = frame:CreateTexture(nil, 'HIGHLIGHT')
-	leftGrad:Size(frame:GetWidth() * 0.5, frame:GetHeight() * 0.95)
-	leftGrad:Point('LEFT', frame, 'CENTER')
-	leftGrad:SetTexture(E.media.blankTex)
-	leftGrad:SetGradientAlpha('Horizontal', r, g, b, 0.35, r, g, b, 0)
-
-	local rightGrad = frame:CreateTexture(nil, 'HIGHLIGHT')
-	rightGrad:Size(frame:GetWidth() * 0.5, frame:GetHeight() * 0.95)
-	rightGrad:Point('RIGHT', frame, 'CENTER')
-	rightGrad:SetTexture(E.media.blankTex)
-	rightGrad:SetGradientAlpha('Horizontal', r, g, b, 0, r, g, b, 0.35)
+	frame.highlightGradient:SetVertexColor(r, g, b, 0.3)
 end
 
 function S:HandlePointXY(frame, x, y)
@@ -134,6 +136,7 @@ function S:HandleFrame(frame, setBackdrop, template, x1, y1, x2, y2)
 	local portraitFrame = name and _G[name..'Portrait'] or frame.Portrait or frame.portrait
 	local portraitFrameOverlay = name and _G[name..'PortraitOverlay'] or frame.PortraitOverlay
 	local artFrameOverlay = name and _G[name..'ArtOverlayFrame'] or frame.ArtOverlayFrame
+	local closeButton = frame.CloseButton or name and _G[name..'CloseButton']
 
 	frame:StripTextures()
 
@@ -145,8 +148,8 @@ function S:HandleFrame(frame, setBackdrop, template, x1, y1, x2, y2)
 		S:HandleInsetFrame(insetFrame)
 	end
 
-	if frame.CloseButton then
-		S:HandleCloseButton(frame.CloseButton)
+	if closeButton then
+		S:HandleCloseButton(closeButton)
 	end
 
 	if setBackdrop then
@@ -377,9 +380,31 @@ function S:SkinTalentListButtons(frame)
 end
 
 do
-	local function borderVertex(border, r, g, b, a)
-		border:StripTextures()
+	local quality = Enum.ItemQuality
+	local iconColors = {
+		['auctionhouse-itemicon-border-gray']		= E.QualityColors[quality.Poor],
+		['auctionhouse-itemicon-border-white']		= E.QualityColors[quality.Common],
+		['auctionhouse-itemicon-border-green']		= E.QualityColors[quality.Uncommon],
+		['auctionhouse-itemicon-border-blue']		= E.QualityColors[quality.Rare],
+		['auctionhouse-itemicon-border-purple']		= E.QualityColors[quality.Epic],
+		['auctionhouse-itemicon-border-orange']		= E.QualityColors[quality.Legendary],
+		['auctionhouse-itemicon-border-artifact']	= E.QualityColors[quality.Artifact],
+		['auctionhouse-itemicon-border-account']	= E.QualityColors[quality.Heirloom]
+	}
 
+	local function colorAtlas(border, atlas)
+		local color = iconColors[atlas]
+		if not color then return end
+
+		if border.customFunc then
+			local br, bg, bb = unpack(E.media.bordercolor)
+			border.customFunc(border, color.r, color.g, color.b, 1, br, bg, bb)
+		elseif border.customBackdrop then
+			border.customBackdrop:SetBackdropBorderColor(color.r, color.g, color.b)
+		end
+	end
+
+	local function colorVertex(border, r, g, b, a)
 		if border.customFunc then
 			local br, bg, bb = unpack(E.media.bordercolor)
 			border.customFunc(border, r, g, b, a, br, bg, bb)
@@ -388,7 +413,9 @@ do
 		end
 	end
 
-	local function borderHide(border)
+	local function borderHide(border, value)
+		if value == 0 then return end -- hiding blizz border
+
 		local br, bg, bb = unpack(E.media.bordercolor)
 		if border.customFunc then
 			local r, g, b, a = border:GetVertexColor()
@@ -398,8 +425,14 @@ do
 		end
 	end
 
+	local function borderShow(border)
+		border:Hide(0)
+	end
+
 	local function borderShown(border, show)
-		if not show then
+		if show then
+			border:Hide(0)
+		else
 			borderHide(border)
 		end
 	end
@@ -410,28 +443,34 @@ do
 			backdrop = parent.backdrop or parent
 		end
 
-		border.customBackdrop = backdrop
-
-		if not border.IconBorderHooked then
-			border:StripTextures()
-
-			hooksecurefunc(border, 'SetVertexColor', borderVertex)
-			hooksecurefunc(border, 'SetShown', borderShown)
-			hooksecurefunc(border, 'Hide', borderHide)
-
-			border.IconBorderHooked = true
-		end
-
 		local r, g, b, a = border:GetVertexColor()
+		local atlas = iconColors[border.GetAtlas and border:GetAtlas()]
 		if customFunc then
 			border.customFunc = customFunc
 			local br, bg, bb = unpack(E.media.bordercolor)
 			customFunc(border, r, g, b, a, br, bg, bb)
+		elseif atlas then
+			backdrop:SetBackdropBorderColor(atlas.r, atlas.g, atlas.b, 1)
 		elseif r then
 			backdrop:SetBackdropBorderColor(r, g, b, a)
 		else
 			local br, bg, bb = unpack(E.media.bordercolor)
 			backdrop:SetBackdropBorderColor(br, bg, bb)
+		end
+
+		if border.customBackdrop ~= backdrop then
+			border.customBackdrop = backdrop
+		end
+
+		if not border.IconBorderHooked then
+			border.IconBorderHooked = true
+			border:Hide()
+
+			hooksecurefunc(border, 'SetAtlas', colorAtlas)
+			hooksecurefunc(border, 'SetVertexColor', colorVertex)
+			hooksecurefunc(border, 'SetShown', borderShown)
+			hooksecurefunc(border, 'Show', borderShow)
+			hooksecurefunc(border, 'Hide', borderHide)
 		end
 	end
 end
@@ -1032,7 +1071,7 @@ do
 	local closeOnLeave = function(btn) if btn.Texture then btn.Texture:SetVertexColor(1, 1, 1) end end
 
 	function S:HandleCloseButton(f, point, x, y)
-		assert(f, 'doenst exist!')
+		if f.isSkinned then return end
 
 		f:StripTextures()
 
@@ -1049,6 +1088,8 @@ do
 		if point then
 			f:Point('TOPRIGHT', point, 'TOPRIGHT', x or 2, y or 2)
 		end
+
+		f.isSkinned = true
 	end
 
 	function S:HandleNextPrevButton(btn, arrowDir, color, noBackdrop, stripTexts, frameLevel)
@@ -1166,7 +1207,7 @@ function S:HandleSliderFrame(frame, template, frameLevel)
 	end
 end
 
--- ToDO: WoW10 => UpdateME => Credits: NDUI
+-- ToDO: DF => UpdateME => Credits: NDUI
 local sparkTexture = [[Interface\CastingBar\UI-CastingBar-Spark]]
 function S:HandleStepSlider(frame, minimal)
 	assert(frame, 'doesnt exist!')
@@ -1344,7 +1385,7 @@ do
 
 				local quality = portrait.quality or (follower.info and follower.info.quality)
 				local color = portrait.backdrop and ITEM_QUALITY_COLORS[quality]
-				if color then -- sometimes it doesn't have this data since WoW10
+				if color then -- sometimes it doesn't have this data since DF
 					portrait.backdrop:SetBackdropBorderColor(color.r, color.g, color.b)
 				end
 			end
@@ -1392,7 +1433,7 @@ do
 		if _G.GarrisonFollowerList_InitButton then
 			hooksecurefunc(_G, 'GarrisonFollowerList_InitButton', UpdateFollower)
 		else
-			hooksecurefunc(_G[frame], 'UpdateData', UpdateListScroll) -- pre WoW10
+			hooksecurefunc(_G[frame], 'UpdateData', UpdateListScroll) -- pre DF
 		end
 	end
 end
@@ -1510,6 +1551,7 @@ do
 
 		if not dontOffset then -- place it off to the side of parent with correct offsets
 			frame:HookScript('OnShow', selectionOffset)
+			frame:Height(frame:GetHeight() + 10)
 		end
 
 		local borderBox = frame.BorderBox or _G.BorderBox -- it's a sub frame only on retail, on wrath it's a global?
@@ -1521,7 +1563,6 @@ do
 
 		frame:StripTextures()
 		frame:SetTemplate('Transparent')
-		frame:Height(frame:GetHeight() + 10)
 
 		if borderBox then
 			borderBox:StripTextures()
@@ -1746,11 +1787,11 @@ function S:SkinWidgetContainer(widget)
 end
 
 function S:ADDON_LOADED(_, addonName)
-	if not self.allowBypass[addonName] and not E.initialized then
+	if not S.allowBypass[addonName] and not E.initialized then
 		return
 	end
 
-	local object = self.addonsToLoad[addonName]
+	local object = S.addonsToLoad[addonName]
 	if object then
 		S:CallLoadedAddon(addonName, object)
 	end
@@ -1782,23 +1823,23 @@ end
 
 function S:RegisterSkin(addonName, func, forceLoad, bypass, position)
 	if bypass then
-		self.allowBypass[addonName] = true
+		S.allowBypass[addonName] = true
 	end
 
 	if forceLoad then
 		xpcall(func, errorhandler)
-		self.addonsToLoad[addonName] = nil
+		S.addonsToLoad[addonName] = nil
 	elseif addonName == 'ElvUI' then
 		if position then
-			tinsert(self.nonAddonsToLoad, position, func)
+			tinsert(S.nonAddonsToLoad, position, func)
 		else
-			tinsert(self.nonAddonsToLoad, func)
+			tinsert(S.nonAddonsToLoad, func)
 		end
 	else
-		local addon = self.addonsToLoad[addonName]
+		local addon = S.addonsToLoad[addonName]
 		if not addon then
-			self.addonsToLoad[addonName] = {}
-			addon = self.addonsToLoad[addonName]
+			S.addonsToLoad[addonName] = {}
+			addon = S.addonsToLoad[addonName]
 		end
 
 		if position then
@@ -1814,19 +1855,25 @@ function S:CallLoadedAddon(addonName, object)
 		xpcall(func, errorhandler)
 	end
 
-	self.addonsToLoad[addonName] = nil
+	S.addonsToLoad[addonName] = nil
+end
+
+function S:UpdateAllWidgets()
+	for _, widget in pairs(_G.UIWidgetTopCenterContainerFrame.widgetFrames) do
+		S:SkinWidgetContainer(widget)
+	end
 end
 
 function S:Initialize()
-	self.Initialized = true
-	self.db = E.private.skins
+	S.Initialized = true
+	S.db = E.private.skins
 
-	for index, func in next, self.nonAddonsToLoad do
+	for index, func in next, S.nonAddonsToLoad do
 		xpcall(func, errorhandler)
-		self.nonAddonsToLoad[index] = nil
+		S.nonAddonsToLoad[index] = nil
 	end
 
-	for addonName, object in pairs(self.addonsToLoad) do
+	for addonName, object in pairs(S.addonsToLoad) do
 		local isLoaded, isFinished = IsAddOnLoaded(addonName)
 		if isLoaded and isFinished then
 			S:CallLoadedAddon(addonName, object)
@@ -1846,21 +1893,16 @@ function S:Initialize()
 			S:Ace3_SkinTooltip(LibStub(n, true))
 		end
 	end
-	if S.EarlyDropdowns then
+
+	if E.private.skins.libDropdown and S.EarlyDropdowns then
 		for _, n in next, S.EarlyDropdowns do
 			S:SkinLibDropDownMenu(n)
 		end
 	end
 
 	if E.Retail then
-		local frame = CreateFrame('Frame')
-		frame:RegisterEvent('PLAYER_ENTERING_WORLD')
-		frame:RegisterEvent('UPDATE_ALL_UI_WIDGETS')
-		frame:SetScript('OnEvent', function()
-			for _, widget in pairs(_G.UIWidgetTopCenterContainerFrame.widgetFrames) do
-				S:SkinWidgetContainer(widget)
-			end
-		end)
+		S:RegisterEvent('PLAYER_ENTERING_WORLD', 'UpdateAllWidgets')
+		S:RegisterEvent('UPDATE_ALL_UI_WIDGETS', 'UpdateAllWidgets')
 	end
 end
 

@@ -54,15 +54,17 @@ plugin.options =
 }
 
 function plugin.OnInitialize()
+	--DA.DEBUG(0,"DSA:OnInitialize()")
 	if not Skillet.db.profile.plugins.DSA then
 		Skillet.db.profile.plugins.DSA = {}
 		Skillet.db.profile.plugins.DSA.enabled = true
 	end
 	Skillet:AddPluginOptions(plugin.options)
 	if DataStore then
+		local player = UnitName("player")
 		for characterName, character in pairs(DataStore:GetCharacters()) do
-			--DA.DEBUG(0,"OnInitialize: characterName= "..tostring(characterName)..", character= "..tostring(character))
-			if characterName == Skillet.currentPlayer then
+			--DA.DEBUG(0,"DSA:OnInitialize: characterName= "..tostring(characterName)..", character= "..tostring(character))
+			if characterName == player then
 				Skillet.DSAPlayer = character
 			end
 		end
@@ -88,7 +90,7 @@ function plugin.RecipeNamePrefix(skill, recipe)
 			end
 			--DA.DEBUG(0,"RecipeNamePrefix: scrollID = "..tostring(itemID).." ("..tostring(itemName)..")")
 		end
-		if itemID then
+		if itemID and Skillet.DSAPlayer then
 			itemCount = DataStore:GetAuctionHouseItemCount(Skillet.DSAPlayer, itemID)
 			--DA.DEBUG(0,"RecipeNamePrefix: itemCount = "..tostring(itemCount))
 			prefix = "   "

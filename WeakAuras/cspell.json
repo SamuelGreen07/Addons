@@ -4,6 +4,12 @@
   "ignoreRegExpList": [
     "\\((.+?)\\)"
   ],
+  "ignorePaths": [
+    "WeakAurasModelPaths",
+    "WeakAuras/Types*.lua",
+    "WeakAuras/Libs",
+    ".luacheckrc"
+  ],
   "words": [
     "Adamantite",
     "Ahn'Qiraj",
@@ -91,6 +97,7 @@
     "fjtz",
     "Flamegor",
     "Fojji",
+    "foundfx",
     "frexp",
     "Frostwyrm",
     "funcs",
@@ -276,6 +283,7 @@
     "Transmisson",
     "tremove",
     "triggernum",
+    "Triggernums",
     "tsize",
     "tsort",
     "uids",

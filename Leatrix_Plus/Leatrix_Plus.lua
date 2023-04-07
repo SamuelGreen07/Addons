@@ -1,5 +1,5 @@
 ﻿----------------------------------------------------------------------
--- 	Leatrix Plus 3.0.44 (27th October 2022)
+-- 	Leatrix Plus 3.0.125 (2nd April 2023)
 ----------------------------------------------------------------------
 
 --	01:Functns, 02:Locks, 03:Restart, 20:Live, 30:Isolated, 40:Player
@@ -19,7 +19,7 @@
 	local void
 
 	-- Version
-	LeaPlusLC["AddonVer"] = "3.0.44"
+	LeaPlusLC["AddonVer"] = "3.0.125"
 
 	-- Get locale table
 	local void, Leatrix_Plus = ...
@@ -37,8 +37,9 @@
 		end
 	end
 
-	-- Check for ElvUI
+	-- Check for addons
 	if IsAddOnLoaded("ElvUI") then LeaPlusLC.ElvUI = unpack(ElvUI) end
+	if IsAddOnLoaded("Glass") then LeaPlusLC.Glass = true end
 
 ----------------------------------------------------------------------
 --	L00: Leatrix Plus
@@ -59,6 +60,10 @@
 	_G.BINDING_NAME_LEATRIX_PLUS_GLOBAL_TOGGLE = L["Toggle panel"]
 	_G.BINDING_NAME_LEATRIX_PLUS_GLOBAL_WEBLINK = L["Show web link"]
 	_G.BINDING_NAME_LEATRIX_PLUS_GLOBAL_RARE = L["Announce rare"]
+
+	-- Slash command taint
+	-- Enter combat, enter any addon slash command, open quest log with L, toggle tracking on a quest 4 times,
+	-- click the tracked quest in the objective tracker, taint and objective tracker no longer functions
 
 ----------------------------------------------------------------------
 --	L01: Functions
@@ -436,39 +441,38 @@
 		end
 	end
 
-	-- Check if a name is in your friends list or guild
-	function LeaPlusLC:FriendCheck(name)
+	-- Check if a name is in your friends list or guild (does not check realm as realm is unknown for some checks)
+	function LeaPlusLC:FriendCheck(name, guid)
+
+		-- Do nothing if name is empty (such as whispering from the Battle.net app)
+		if not name then return end
 
 		-- Update friends list
 		C_FriendList.ShowFriends()
 
+		-- Remove realm
+		name = strsplit("-", name, 2)
+
 		-- Check character friends
-		for i = 1, C_FriendList.GetNumOnlineFriends() do
-			-- Return true if name matches with or without realm
+		for i = 1, C_FriendList.GetNumFriends() do
+			-- Return true is character name matches and GUID matches if there is one (realm is not checked)
+			local friendInfo = C_FriendList.GetFriendInfoByIndex(i)
 			local charFriendName = C_FriendList.GetFriendInfoByIndex(i).name
-			if name == charFriendName or name == strsplit("-", charFriendName, 2) then
+			charFriendName = strsplit("-", charFriendName, 2)
+			if (name == charFriendName) and (guid and (guid == friendInfo.guid) or true) then
 				return true
 			end
-		end
-
-		-- Get realm name or set to player's own realm (same realm does not return realm)
-		local void, myRealm = UnitFullName(name)
-		if not myRealm or myRealm == "" then void, myRealm = UnitFullName("player") end
-		if not myRealm or myRealm == "" then return end
-
-		-- Add realm name to character name
-		if not string.find(name, "-") then
-			name = name .. "-" .. myRealm
 		end
 
 		-- Check Battle.net friends
 		local numfriends = BNGetNumFriends()
 		for i = 1, numfriends do
-			local numtoons = BNGetNumFriendGameAccounts(i)
+			local numtoons = C_BattleNet.GetFriendNumGameAccounts(i)
 			for j = 1, numtoons do
-				local void, toon, client, realm = BNGetFriendGameAccountInfo(i, j)
-				local toonname = toon .. "-" ..realm
-				if client == "WoW" and toonname == name then
+				local gameAccountInfo = C_BattleNet.GetFriendGameAccountInfo(i, j)
+				local characterName = gameAccountInfo.characterName
+				local client = gameAccountInfo.clientProgram
+				if client == "WoW" and characterName == name then
 					return true
 				end
 			end
@@ -478,13 +482,11 @@
 		if LeaPlusLC["FriendlyGuild"] == "On" then
 			local gCount = GetNumGuildMembers()
 			for i = 1, gCount do
-				local gName, void, void, void, void, void, void, void, gOnline, void, void, void, void, gMobile = GetGuildRosterInfo(i)
+				local gName, void, void, void, void, void, void, void, gOnline, void, void, void, void, gMobile, void, void, gGUID = GetGuildRosterInfo(i)
 				if gOnline and not gMobile then
-					local gCompare = gName
-					if not string.find(gName, "-") then
-						gCompare = gName .. "-" .. myRealm
-					end
-					if gCompare == name then
+					gName = strsplit("-", gName, 2)
+					-- Return true if character name matches including GUID if there is one
+					if (name == gName) and (guid and (guid == gGUID) or true) then
 						return true
 					end
 				end
@@ -548,6 +550,7 @@
 		LeaPlusLC:LockOption("SetWeatherDensity", "SetWeatherDensityBtn", false)	-- Set weather density
 		LeaPlusLC:LockOption("ViewPortEnable", "ModViewportBtn", true)				-- Enable viewport
 		LeaPlusLC:LockOption("MuteGameSounds", "MuteGameSoundsBtn", false)			-- Mute game sounds
+		LeaPlusLC:LockOption("MuteCustomSounds", "MuteCustomSoundsBtn", false)		-- Mute custom sounds
 		LeaPlusLC:LockOption("StandAndDismount", "DismountBtn", true)				-- Dismount me
 	end
 
@@ -595,7 +598,6 @@
 		or	(LeaPlusLC["TipNoHealthBar"]		~= LeaPlusDB["TipNoHealthBar"])			-- Tooltip hide health bar
 		or	(LeaPlusLC["EnhanceDressup"]		~= LeaPlusDB["EnhanceDressup"])			-- Enhance dressup
 		or	(LeaPlusLC["EnhanceQuestLog"]		~= LeaPlusDB["EnhanceQuestLog"])		-- Enhance quest log
-		or	(LeaPlusLC["EnhanceQuestTaller"]	~= LeaPlusDB["EnhanceQuestTaller"])		-- Enhance quest taller
 		or	(LeaPlusLC["EnhanceProfessions"]	~= LeaPlusDB["EnhanceProfessions"])		-- Enhance professions
 		or	(LeaPlusLC["EnhanceTrainers"]		~= LeaPlusDB["EnhanceTrainers"])		-- Enhance trainers
 		or	(LeaPlusLC["ShowVolume"]			~= LeaPlusDB["ShowVolume"])				-- Show volume slider
@@ -813,6 +815,13 @@
 					"levelup2.ogg#567478",
 				},
 
+				-- Login (sound/interface/)
+				["MuteLogin"] = {
+
+					-- This is handled with the PLAYER_LOGOUT event
+
+				},
+
 				-- Bikes
 				["MuteBikes"] = {
 
@@ -846,6 +855,12 @@
 				-- Gyrocopters
 				["MuteGyrocopters"] = {
 
+					-- Mimiron's Head (sound/creature/mimironheadmount/)
+					"mimironheadmount_jumpend.ogg#595097",
+					"mimironheadmount_jumpstart.ogg#595103",
+					"mimironheadmount_run.ogg#555364",
+					"mimironheadmount_walk.ogg#595100",
+
 					-- sound/creature/gyrocopter/
 					"gyrocopterfly.ogg#551390",
 					"gyrocopterflyidle.ogg#551398",
@@ -860,11 +875,21 @@
 					"gyrocoptershuffleleftorright2.ogg#551382",
 					"gyrocoptershuffleleftorright3.ogg#551392",
 					"gyrocopterstallinair.ogg#551395",
+					"gyrocopterstallinairlong.ogg#551394",
+					"gyrocopterstallongroundlong.ogg#551393",
 					"gyrocopterstand.ogg#551383",
 					"gyrocopterstandvar1_a.ogg#551388",
 					"gyrocopterstandvar1_b.ogg#551397",
 					"gyrocopterstandvar1_bnew.ogg#551400",
 					"gyrocopterwalk.ogg#551401",
+
+					-- Gear shift sounds (sound/vehicles/)
+					"vehicle_airplane_gearshift_1.ogg#569846",
+					"vehicle_airplane_gearshift_2.ogg#598739",
+					"vehicle_airplane_gearshift_3.ogg#569851",
+					"vehicle_airplane_gearshift_4.ogg#598742",
+					"vehicle_airplane_gearshift_5.ogg#598733",
+					"vehicle_airplane_gearshift_6.ogg#569850",
 
 					-- sound/spells/
 					"summongyrocopter.ogg#568252",
@@ -901,6 +926,14 @@
 
 					-- sound/events/
 					"archaniteripper.ogg#567384",
+
+				},
+
+				-- Rhonin
+				["MuteRhonin"] = {
+
+					-- sound/creature/rhonin/ur_rhonin_event
+					"01.ogg#559130", "02.ogg#559131", "03.ogg#559126", "04.ogg#559128", "05.ogg#559133", "06.ogg#559129", "07.ogg#559132", "08.ogg#559127",
 
 				},
 
@@ -990,30 +1023,32 @@
 
 			-- Add checkboxes
 			LeaPlusLC:MakeTx(SoundPanel, "General", 16, -72)
-			LeaPlusLC:MakeCB(SoundPanel, "MuteFizzle", "Fizzle", 16, -92, false, "If checked, the spell fizzle sounds will be muted.")
-			LeaPlusLC:MakeCB(SoundPanel, "MuteInterface", "Interface", 16, -112, false, "If checked, the interface button sound, the chat frame tab click sound and the game menu toggle sound will be muted.")
-			LeaPlusLC:MakeCB(SoundPanel, "MuteTrains", "Trains", 16, -132, false, "If checked, train sounds will be muted.")
-			LeaPlusLC:MakeCB(SoundPanel, "MuteEvents", "Events", 16, -152, false, "If checked, holiday event sounds will be muted.|n|nThis applies to Headless Horseman.")
-			LeaPlusLC:MakeCB(SoundPanel, "MuteChimes", "Chimes", 16, -172, false, "If checked, clock hourly chimes will be muted.")
-			LeaPlusLC:MakeCB(SoundPanel, "MuteVaults", "Vaults", 16, -192, false, "If checked, the mechanical guild vault idle sound will be muted.")
-			LeaPlusLC:MakeCB(SoundPanel, "MuteReady", "Ready", 16, -212, false, "If checked, the ready check sound will be muted.")
+			LeaPlusLC:MakeCB(SoundPanel, "MuteChimes", "Chimes", 16, -92, false, "If checked, clock hourly chimes will be muted.")
+			LeaPlusLC:MakeCB(SoundPanel, "MuteEvents", "Events", 16, -112, false, "If checked, holiday event sounds will be muted.|n|nThis applies to Headless Horseman.")
+			LeaPlusLC:MakeCB(SoundPanel, "MuteFizzle", "Fizzle", 16, -132, false, "If checked, the spell fizzle sounds will be muted.")
+			LeaPlusLC:MakeCB(SoundPanel, "MuteInterface", "Interface", 16, -152, false, "If checked, the interface button sound, the chat frame tab click sound and the game menu toggle sound will be muted.")
+			LeaPlusLC:MakeCB(SoundPanel, "MuteLogin", "Login", 16, -172, false, "If checked, login screen sounds will be muted when you logout of the game.|n|nNote that login screen sounds will not be muted when you initially launch the game.|n|nThey will only be muted when you logout of the game.  This includes manually logging out as well as being forcefully logged out by the game server for reasons such as being away for an extended period of time.|n|nNo more dragons roaring when you fall asleep while the game is running!")
+			LeaPlusLC:MakeCB(SoundPanel, "MuteReady", "Ready", 16, -192, false, "If checked, the ready check sound will be muted.")
+			LeaPlusLC:MakeCB(SoundPanel, "MuteTrains", "Trains", 16, -212, false, "If checked, train sounds will be muted.")
+			LeaPlusLC:MakeCB(SoundPanel, "MuteVaults", "Vaults", 16, -232, false, "If checked, the mechanical guild vault idle sound will be muted.")
 
 			LeaPlusLC:MakeTx(SoundPanel, "Mounts", 150, -72)
 			LeaPlusLC:MakeCB(SoundPanel, "MuteBikes", "Bikes", 150, -92, false, "If checked, bike mount sounds will be muted.|n|nThis applies to Mekgineer's Chopper and Mechano-hog.")
-			LeaPlusLC:MakeCB(SoundPanel, "MuteTravelers", "Travelers", 150, -112, false, "If checked, traveling merchant greetings and farewells will be muted.|n|nThis applies to Traveler's Tundra Mammoth.")
+			LeaPlusLC:MakeCB(SoundPanel, "MuteBrooms", "Brooms", 150, -112, false, "If checked, broom mounts will be muted.")
 			LeaPlusLC:MakeCB(SoundPanel, "MuteGyrocopters", "Gyrocopters", 150, -132, false, "If checked, gyrocopters will be muted.|n|nThis applies to the engineering flying machine mounts.")
-			LeaPlusLC:MakeCB(SoundPanel, "MuteStriders", "Mechstriders", 150, -152, false, "If checked, mechanostriders will be quieter.")
-			LeaPlusLC:MakeCB(SoundPanel, "MuteMechSteps", "Mechsteps", 150, -172, false, "If checked, footsteps for mechanical mounts will be muted.")
+			LeaPlusLC:MakeCB(SoundPanel, "MuteMechSteps", "Mechsteps", 150, -152, false, "If checked, footsteps for mechanical mounts will be muted.")
+			LeaPlusLC:MakeCB(SoundPanel, "MuteStriders", "Mechstriders", 150, -172, false, "If checked, mechanostriders will be quieter.")
 			LeaPlusLC:MakeCB(SoundPanel, "MuteNetherdrakes", "Netherdrakes", 150, -192, false, "If checked, netherdrakes will be quieter.")
-			LeaPlusLC:MakeCB(SoundPanel, "MuteBrooms", "Brooms", 150, -212, false, "If checked, broom mounts will be muted.")
+			LeaPlusLC:MakeCB(SoundPanel, "MuteTravelers", "Travelers", 150, -212, false, "If checked, traveling merchant greetings and farewells will be muted.|n|nThis applies to Traveler's Tundra Mammoth.")
 
 			LeaPlusLC:MakeTx(SoundPanel, "Pets", 284, -72)
-			LeaPlusLC:MakeCB(SoundPanel, "MuteYawns", "Yawns", 284, -92, false, "If checked, yawns from hunter pet cats will be muted.")
-			LeaPlusLC:MakeCB(SoundPanel, "MuteScreech", "Screech", 284, -112, false, "If checked, Screech will be muted.|n|nThis is a spell used by some flying pets.")
+			LeaPlusLC:MakeCB(SoundPanel, "MuteScreech", "Screech", 284, -92, false, "If checked, Screech will be muted.|n|nThis is a spell used by some flying pets.")
+			LeaPlusLC:MakeCB(SoundPanel, "MuteYawns", "Yawns", 284, -112, false, "If checked, yawns from hunter pet cats will be muted.")
 
 			LeaPlusLC:MakeTx(SoundPanel, "Misc", 418, -72)
 			LeaPlusLC:MakeCB(SoundPanel, "MuteAdal", "A'dal", 418, -92, false, "If checked, A'dal in Shattrath City will be muted.")
 			LeaPlusLC:MakeCB(SoundPanel, "MuteRipper", "Ripper", 418, -112, false, "If checked, the Arcanite Ripper guitar sound will be muted.")
+			LeaPlusLC:MakeCB(SoundPanel, "MuteRhonin", "Rhonin", 418, -132, false, "If checked, Rhonin will be muted.")
 
 			-- Set click width for sounds checkboxes
 			for k, v in pairs(muteTable) do
@@ -1100,6 +1135,48 @@
 					LeaPlusLC:HideFrames()
 				end
 			end)
+
+			----------------------------------------------------------------------
+			-- Login setting
+			----------------------------------------------------------------------
+
+			-- Create soundtable for PLAYER_LOGOUT (these sounds are only muted or unmuted when logging out
+			local muteLogoutTable = {
+
+				-- Ambiance (sound/ambience/gluescreen/gluescreenlogin.ogg)
+				"538968",
+
+				-- Dragon roaring sounds (sound/ambience/gluescreen/wrath_login_)
+				"538970", "538969", "538971", "538972",
+
+				-- Game music (sound/music/gluescreenmusic/wotlk_main_title.mp3)
+				"53222",
+
+			}
+
+			-- Handle sounds that get muted or unmuted when logging out
+			local logoutEvent = CreateFrame("FRAME")
+			logoutEvent:RegisterEvent("PLAYER_LOGOUT")
+
+			-- Mute or unmute sounds when logging out
+			logoutEvent:SetScript("OnEvent", function()
+				if LeaPlusLC["MuteGameSounds"] == "On" and LeaPlusLC["MuteLogin"] == "On" then
+					-- Mute logout table sounds on logout
+					for void, soundID in pairs(muteLogoutTable) do
+						MuteSoundFile(soundID)
+					end
+				else
+					-- Unmute logout table sounds on logout
+					for void, soundID in pairs(muteLogoutTable) do
+						UnmuteSoundFile(soundID)
+					end
+				end
+			end)
+
+			-- Unmute sounds when logging in
+			for void, soundID in pairs(muteLogoutTable) do
+				UnmuteSoundFile(soundID)
+			end
 
 		end
 
@@ -1425,40 +1502,13 @@
 		do
 
 			-- Function to skip gossip
-			local function SkipGossip()
-				if IsShiftKeyDown() then return end
-				local void, gossipType = GetGossipOptions()
-				if gossipType then
-					-- Completely automate gossip
-					if gossipType == "banker"
-					or gossipType == "taxi"
-					or gossipType == "trainer"
-					or gossipType == "vendor"
-					or gossipType == "battlemaster"
-					or gossipType == "arenamaster"
-					then
-						SelectGossipOption(1)
-					end
-					-- Automate gossip with ALT key
-					if IsAltKeyDown() then
-						if gossipType == "gossip"
-						then
-							SelectGossipOption(1)
-						end
-					end
+			local function SkipGossip(skipAltKeyRequirement)
+				if not skipAltKeyRequirement and not IsAltKeyDown() then return end
+				local gossipInfoTable = C_GossipInfo.GetOptions()
+				if gossipInfoTable and #gossipInfoTable == 1 and C_GossipInfo.GetNumAvailableQuests() == 0 and C_GossipInfo.GetNumActiveQuests() == 0 and gossipInfoTable[1] and gossipInfoTable[1].gossipOptionID then
+					C_GossipInfo.SelectOption(gossipInfoTable[1].gossipOptionID)
 				end
 			end
-
-			-- Create tables for specific NPC IDs
-			local npcTable = {
-
-				-- Stable masters (https://www.wowhead.com/wotlk/npcs?filter=27;1;0)
-				9988, 21518, 15131, 10055, 21517, 11069, 9985, 22469, 19476, 21336, 10060, 16586, 16094, 18250, 16824, 23392, 15722, 9977, 19018, 9987, 19368, 6749, 10058, 22468, 11104, 9986, 13617, 10046, 10048, 10051, 10053, 10054, 17485, 18244, 10045, 24974, 16665, 25037, 16656, 10057, 18984, 9984, 11105, 10056, 16185, 10059, 16764, 11119, 14741, 10085, 10061, 19019, 10052, 10047, 10063, 9979, 17666, 11117, 10049, 17896, 9983, 24905, 9989, 9982, 10050, 9980, 9981, 10062, 9976, 9978, 13616,
-
-				-- Dalaran: Brassbolt Mechawrench (Alliance) and Reginald Arcfire (Horde) (engineer auctioneers)
-				35594, 35607,
-
-			}
 
 			-- Create gossip event frame
 			local gossipFrame = CreateFrame("FRAME")
@@ -1476,30 +1526,60 @@
 			LeaPlusCB["AutomateGossip"]:HookScript("OnClick", SetupEvents)
 			if LeaPlusLC["AutomateGossip"] == "On" then SetupEvents() end
 
+			-- Create tables for specific NPC IDs (these are automatically selected with no alt key requirement)
+			local npcTable = {
+
+				-- Stable masters (https://www.wowhead.com/wotlk/npcs?filter=27;1;0)
+				9988, 21518, 15131, 10055, 21517, 11069, 9985, 22469, 19476, 21336, 10060, 16586, 16094, 18250, 16824, 23392, 15722, 9977, 19018, 9987, 19368, 6749, 10058, 22468, 11104, 9986, 13617, 10046, 10048, 10051, 10053, 10054, 17485, 18244, 10045, 24974, 16665, 25037, 16656, 10057, 18984, 9984, 11105, 10056, 16185, 10059, 16764, 11119, 14741, 10085, 10061, 19019, 10052, 10047, 10063, 9979, 17666, 11117, 10049, 17896, 9983, 24905, 9989, 9982, 10050, 9980, 9981, 10062, 9976, 9978, 13616,
+
+				-- Dalaran: Brassbolt Mechawrench (Alliance) and Reginald Arcfire (Horde) (engineer auctioneers)
+				35594, 35607,
+
+				-- Banker
+				2625, 2455, 2458, 31420, 19318, 3309, 21733, 21732, 29282, 30606, 28676, 30607, 38919, 2461, 18350, 30608, 5060, 2460, 19246, 29530, 17631, 8356, 16617, 17632, 36284, 3496, 4209, 17633, 2457, 16710, 3318, 31421, 4208, 28343, 19034, 2459, 16615, 4550, 17773, 29283, 16616, 8124, 8123, 5099, 31422, 3320, 28680, 28679, 30605, 28678, 28677, 28675, 2996, 36352, 4549, 8119, 38920, 38921, 8357, 7799, 4155, 13917, 19338, 2456, 36351, 30604, 21734,
+
+				-- Flightmaster
+				23859, 32571, 28574, 28674, 24795, 28615, 3310, 931, 29480, 1387, 25288, 26851, 18789, 10583, 26878, 11901, 12578, 11900, 20234, 26852, 26881, 27046, 2859, 26602, 10897, 6726, 4312, 26880, 18930, 6706, 16587, 16227, 6026, 4267, 2432, 8610, 28624, 18940, 26847, 1571, 27344, 7823, 28618, 1573, 18938, 8020, 22455, 22935, 4407, 1572, 13177, 8609, 18931, 4321, 2299, 16822, 20762, 12577, 26845, 12617, 17554, 26560, 23736, 4319, 21766, 18937, 19558, 12596, 18939, 7824, 3841, 2835, 28196, 15177, 19317, 18791, 2409, 22216, 8019, 22931, 19583, 2858, 3305, 28623, 18808, 22485, 20515, 18942, 18807, 18785, 2941, 19581, 11138, 4551, 26566, 4317, 10378, 21107, 11899, 26879, 18953, 2851, 3615, 352, 23612, 12740, 12636, 2861, 8018, 2226, 24851, 18788, 24366, 15178, 16189, 16192, 17555, 2995, 3838, 12616, 11139, 2389, 18809, 4314, 28197, 523,
+				37888, -- Added manually
+
+				-- Trainer
+				31238, 28701, 31247, 28697, 28699, 29631, 28746, 28705, 18988, 26989, 28703, 26953, 8126, 19186, 18987, 35093, 35135, 35133, 26992, 18911, 5482, 28693, 29156, 25277, 25099, 26986, 33676, 26905, 35100, 29233, 26972, 29513, 3494, 18773, 16583, 18753, 19778, 24868, 4752, 26990, 26991, 4732, 26982, 28742, 26975, 28698, 18774, 28694, 33682, 28706, 26956, 27001, 3399, 18993, 26976, 18990, 28700, 33680, 18751, 26964, 19775, 26974, 26997, 3026, 26955, 5159, 4552, 23734, 26999, 26969, 26994, 26980, 4586, 16253, 16588, 26912, 31084, 26907, 18991, 16280, 26960, 26915, 26987, 1430, 26962, 26954, 26910, 19252, 26914, 3028, 7406, 32474, 26963, 18802, 19052, 20914, 18775, 12042, 26988, 30721, 28702, 27000, 7954, 3690, 26998, 26981, 33614, 18779, 26993, 17637, 17634, 26906, 28958, 4772, 5493, 20500, 33613, 4773, 26951, 5518, 16823, 26958, 20511, 5938, 4210, 11869, 11868, 18749, 11865, 18777, 26903, 5174, 8736, 11557, 33638, 18747, 3067, 33610, 29505, 26977, 18772, 28696, 33617, 30722, 6251, 18752, 29194, 30713, 17110, 11867, 5491, 18771, 20791, 26952, 4218, 4753, 17246, 6297, 7944, 1651, 7953, 11870, 15501, 6707, 3332, 17204, 29514, 19185, 23128, 33679, 11017, 27703, 30706, 26995, 18755, 5885, 33611, 7866, 16676, 6286, 4568, 19540, 3064, 29195, 19187, 18776, 18748, 3355, 7867, 3032, 5161, 3412, 3352, 4217, 18018, 4606, 23127, 33615, 5513, 19180, 5511, 8306, 908, 11866, 4573, 925, 5127, 3324, 28472, 18754, 837, 2704, 19184, 28474, 3373, 26959, 28704, 30717, 928, 8146, 10993, 28956, 16681, 20407, 19063, 1218, 3036, 543, 375, 16646, 4156, 3136, 16773, 11074, 16621, 9584, 19539, 3347, 223, 11097, 3345, 6288, 987, 3401, 912, 5958, 7311, 8738, 26564, 1681, 7869, 7870, 461, 915, 985, 8128, 916, 3033, 16771, 16663, 957, 1346, 19341, 3365, 16499, 911, 13283, 29509, 2327, 3030, 5566, 17222, 3001, 5172, 33683, 33621, 3327, 895, 15400, 4258, 17215, 4211, 2367, 4165, 13417, 7871, 5564, 22477, 914, 2836, 16266, 2399, 7312, 1231, 14740, 1382, 11025, 11401, 5502, 2818, 5392, 3326, 3606, 5173, 13084, 17101, 30715, 4219, 4254, 11098, 17513, 11406, 376, 16653, 17509, 11072, 29196, 19340, 16633, 5880, 3967, 33608, 16662, 4215, 3047, 6291, 7946, 5515, 3181, 17520, 7231, 5113, 20124, 8144, 16755, 5506, 2798, 16277, 17481, 4212, 11073, 4588, 16669, 5144, 5149, 1701, 19251, 11031, 17482, 5165, 4576, 1473, 1317, 3137, 2329, 16721, 17219, 1458, 16684, 3607, 5957, 5690, 1355, 3963, 16667, 1229, 986, 3039, 5497, 27034, 3344, 3013, 3063, 28471, 2492, 27705, 913, 3357, 16719, 5166, 16679, 3034, 3354, 3706, 3041, 3007, 19576, 16728, 16658, 3009, 5114, 7232, 4598, 927, 20406, 5115, 5164, 6306, 16680, 2837, 3555, 3175, 8153, 30709, 5943, 514, 16647, 5505, 3171, 2857, 11052, 11029, 17483, 5495, 17844, 3406, 16651, 1632, 2390, 5148, 10090, 16367, 4593, 2129, 4609, 17488, 5498, 16774, 4214, 1470, 11037, 5492, 1404, 5499, 1292, 4591, 4583, 2834, 11397, 11096, 5137, 1386, 5496, 33618, 3173, 4163, 5171, 7088, 17212, 3040, 6295, 20125, 4160, 16660, 17484, 19369, 4611, 1676, 3353, 1234, 27704, 1411, 4138, 3170, 3038, 16640, 12961, 5941, 12032, 3045, 1226, 2489, 7089, 17442, 16752, 16726, 11177, 29506, 918, 5882, 15513, 10276, 5504, 4089, 5177, 3169, 6018, 5479, 4090, 23534, 1385, 5484, 2128, 4582, 23103, 4205, 16749, 17487, 5167, 16269, 5157, 17441, 16655, 11146, 11028, 3154, 3602, 2998, 17121, 3707, 3964, 3600, 16659, 16688, 3363, 1228, 12030, 12025, 16725, 16686, 16275, 16731, 1700, 377, 6287, 16366, 15283, 5939, 7949, 3065, 4900, 812, 16161, 4087, 1232, 17514, 11068, 17245, 16644, 16756, 8141, 16736, 3545, 2119, 7315, 3290, 16738, 3172, 16780, 3174, 16685, 5883, 17089, 5612, 9465, 4584, 4193, 3179, 10086, 5480, 4596, 3404, 5153, 4578, 5145, 4563, 4566, 16272, 17504, 16503, 7948, 3061, 331, 16160, 3604, 29507, 3597, 15284, 3044, 3605, 16654, 3066, 5150, 5146, 3328, 15285, 4567, 16729, 3155, 5567, 2391, 3407, 1383, 11026, 3004, 5516, 16500, 1246, 10088, 328, 16502, 30710, 5994, 1215, 8308, 17214, 2856, 16501, 2131, 4595, 17120, 3698, 11178, 1702, 5489, 4320, 16642, 3069, 3603, 10930, 11044, 6387, 459, 17005, 11081, 17511, 2114, 3046, 4204, 3594, 3153, 16712, 3060, 2627, 1699, 1466, 3622, 10277, 3557, 16675, 3059, 17983, 17519, 2124, 17510, 11066, 15279, 5501, 1901, 3043, 198, 17505, 7087, 33681, 11047, 3598, 11070, 4092, 2485, 4616, 1300, 16723, 5884, 3008, 11067, 2130, 4614, 2126, 3062, 3184, 11041, 3325, 17434, 11071, 3156, 5759, 5116, 2878, 18804, 16652, 3688, 16763, 17480, 2127, 7868, 3042, 16278, 3549, 3157, 10089, 2855, 4213, 16279, 11084, 5500, 5141, 10278, 3049, 5143, 16692, 10266, 1703, 5147, 11051, 11048, 1683, 11046, 16674, 3624, 3593, 17424, 4594, 3596, 16761, 4605, 3523, 4898, 6094, 2132, 3087, 3965, 11083, 2123, 2122, 3601, 6292, 1103, 4607, 4608, 3620, 4091, 15280, 4146, 5811, 2879, 988, 3306, 3484, 3703, 4564, 3704, 16273, 1680, 4159, 16724, 3185, 16276, 6289, 5117, 11049, 4565, 3595, 7230, 3403, 11042, 16672, 3011, 16271, 2326, 11065, 5517, 3031, 1241, 3478, 11050, 3048, 5695, 17122, 5784, 6014, 6290, 16648, 3408, 5142, 926, 8140, 6299, 19478, 21087, 16270, 3599, 8142, 917, 944, 16673, 460, 906,
+
+				-- Vendor
+				30431, 32538, 32287, 32540, 32533, 31238, 29529, 28997, 32172, 31580, 27730, 28995, 28701, 32763, 32565, 28992, 29636, 8137, 31579, 29523, 32514, 31582, 18960, 32216, 28721, 35507, 32564, 28718, 7947, 18484, 29537, 12781, 20096, 18988, 32515, 340, 19186, 18987, 31863, 19296, 29535, 31581, 31031, 18911, 4561, 2664, 8139, 28722, 16585, 35508, 20097, 25206, 8145, 19663, 35498, 31910, 32773, 19373, 32380, 20028, 12022, 2810, 18011, 28715, 12793, 2821, 29547, 21655, 4229, 18015, 31032, 32385, 18773, 2803, 2806, 16583, 18753, 19004, 31916, 5494, 8125, 32509, 29493, 19213, 28742, 66, 29744, 32774, 18756, 18774, 16786, 12919, 15174, 33026, 18993, 29532, 20916, 1448, 18990, 30472, 16826, 29527, 3556, 19383, 18751, 34252, 28951, 28714, 29587, 25977, 5940, 19038, 31911, 1465, 29478, 18382, 3027, 14846, 2685, 31865, 31864, 21113, 28776, 12944, 16253, 19662, 3482, 16588, 16657, 3323, 14753, 5594, 19837, 24539, 30885, 12783, 18005, 18991, 4877, 19074, 12246, 10618, 7564, 12245, 26484, 12788, 28040, 1275, 18957, 32834, 12778, 19575, 14754, 20980, 21432, 17904, 18525, 13219, 35496, 23489, 32594, 19042, 12796, 18802, 8678, 16782, 29528, 16624, 3489, 4574, 5162, 32832, 18775, 5817, 6548, 11189, 29628, 26941, 17512, 28687, 2393, 1286, 20080, 14847, 32383, 35497, 9499, 19227, 20240, 3954, 8666, 12043, 1148, 19661, 11185, 28692, 27037, 25046, 19617, 29715, 29491, 11187, 16823, 28589, 3348, 13217, 3313, 30006, 18749, 6367, 3497, 21643, 22212, 5483, 16860, 28038, 30825, 7775, 15419, 4305, 11557, 33638, 29049, 3546, 22208, 4879, 3333, 32631, 27012, 4897, 1257, 19331, 15127, 26977, 25314, 18772, 2663, 6779, 13218, 23732, 28990, 14860, 26110, 14624, 1285, 1263, 14322, 33027, 15126, 18897, 35099, 3335, 2381, 23007, 14921, 18752, 16262, 5519, 1684, 3029, 21019, 32356, 35500, 29495, 18771, 29497, 32337, 17657, 12033, 27011, 32381, 3881, 26938, 27668, 2480, 734, 13216, 5188, 17585, 23381, 17246, 233, 4307, 32382, 20377, 21474, 20241, 8665, 19772, 4453, 3346, 35132, 13476, 9179, 20242, 27722, 22213, 8401, 28685, 19196, 24780, 1301, 5193, 33679, 12795, 6746, 27039, 16635, 277, 4731, 5942, 24291, 29716, 19694, 15179, 26995, 3960, 19521, 20981, 16602, 19232, 3550, 23802, 25032, 1303, 35101, 30723, 29548, 19540, 27721, 3362, 989, 24341, 1460, 28991, 12943, 28993, 1347, 31781, 2848, 23367, 29496, 13433, 1318, 8679, 4200, 4217, 18672, 18018, 23604, 11056, 21485, 16631, 26352, 5101, 5151, 2832, 16528, 4553, 19182, 5611, 483, 29688, 18427, 7854, 21906, 5049, 24357, 167, 3614, 12794, 25976, 12384, 29499, 2805, 32641, 32334, 16015, 1307, 10667, 19538, 35131, 3495, 32639, 8161, 12942, 27142, 8681, 3413, 30730, 27063, 29203, 11057, 19197, 3133, 32413, 4226, 20278, 3400, 14637, 15351, 18754, 5514, 152, 29702, 15006, 5160, 31776, 5175, 15350, 789, 5815, 28723, 11278, 3334, 3366, 1261, 3081, 2670, 1302, 12957, 26600, 19053, 843, 1325, 5565, 25195, 21183, 27267, 28691, 8361, 3342, 27134, 829, 19539, 384, 1299, 222, 945, 29703, 12096, 3562, 4981, 836, 981, 3490, 22491, 9636, 2383, 227, 5753, 19857, 226, 2626, 12785, 3023, 6777, 26596, 2118, 20510, 17553, 16376, 16638, 24396, 29291, 980, 3685, 15165, 1311, 19015, 10118, 13420, 19321, 16264, 23521, 844, 8158, 2838, 1304, 28726, 956, 25178, 8176, 11555, 6740, 258, 793, 1237, 74, 23748, 4730, 791, 3351, 4577, 28725, 24188, 5178, 984, 982, 31557, 16442, 28994, 15293, 17222, 11038, 2672, 15197, 958, 20092, 28727, 1328, 16268, 19678, 3358, 4575, 29538, 9501, 372, 19342, 32354, 15471, 12784, 1313, 7955, 959, 27144, 4265, 4225, 19773, 4221, 17584, 26898, 896, 8404, 15400, 25196, 2481, 3364, 4165, 2687, 1213, 29905, 18907, 5111, 6929, 15291, 29510, 3135, 28716, 29908, 16224, 30438, 21905, 18266, 2482, 26945, 1321, 27138, 32355, 27030, 19536, 1298, 14437, 23437, 14740, 30735, 12792, 5848, 32412, 2380, 31804, 12799, 27195, 3488, 1146, 12956, 5173, 9087, 4602, 5128, 21112, 32477, 1669, 17101, 1250, 1314, 27935, 14337, 10216, 29962, 6741, 8150, 1305, 4590, 1287, 33019, 4878, 17930, 13018, 23159, 1308, 3955, 23208, 27711, 14522, 27146, 15011, 26599, 27031, 3481, 1291, 20986, 16708, 28728, 11188, 3369, 3493, 960, 1289, 23484, 19879, 11116, 1471, 12941, 4083, 1454, 3536, 3015, 4173, 8157, 16829, 12024, 32642, 27052, 18954, 16191, 20808, 16649, 1149, 4228, 25278, 16611, 3537, 28989, 29512, 1294, 24054, 27071, 5163, 27148, 16709, 16722, 3168, 4184, 3018, 23731, 17630, 6807, 8403, 23428, 6574, 3359, 8178, 4085, 24468, 7852, 11536, 23145, 7945, 10367, 27019, 2622, 1690, 5158, 29907, 7952, 2135, 4604, 7683, 4610, 14480, 19932, 1312, 25274, 11183, 24033, 23263, 26936, 2697, 3578, 20494, 12019, 29288, 26934, 18898, 4585, 3367, 12097, 3085, 29014, 4885, 16444, 2265, 16766, 3410, 19574, 16641, 19011, 26868, 1645, 27489, 22225, 20807, 1407, 3935, 2819, 16636, 3409, 23896, 1316, 16705, 3350, 20616, 228, 21488, 5110, 21084, 27817, 16553, 18906, 4894, 6374, 12021, 3577, 2668, 3180, 29277, 30434, 6300, 4170, 5100, 4556, 8508, 3962, 6731, 1247, 33018, 4892, 12023, 28046, 3134, 3958, 4558, 5758, 27140, 3658, 12959, 27186, 3551, 19718, 16678, 29122, 18017, 27055, 32478, 32416, 3178, 18019, 15864, 16612, 6568, 18542, 26569, 28707, 27667, 28796, 24333, 18267, 20081, 16367, 1351, 16739, 29922, 54, 29205, 4220, 19371, 2397, 26968, 15292, 23862, 21110, 2682, 32638, 3316, 28760, 3956, 2264, 7733, 6747, 19495, 2388, 7736, 6730, 5512, 3322, 19474, 3937, 1691, 27185, 27053, 28812, 27478, 19330, 19047, 26707, 1694, 11874, 19836, 2134, 8878, 12026, 4241, 12029, 2364, 1323, 3539, 19450, 16677, 19473, 8177, 14581, 14371, 30439, 1326, 5189, 4259, 27938, 19013, 19245, 3534, 2679, 8117, 16443, 18664, 26474, 27137, 27149, 8131, 6576, 31024, 12777, 12782, 20378, 20249, 7940, 24148, 19533, 19534, 27950, 24510, 4891, 23064, 4555, 19518, 4223, 6567, 12958, 4256, 23511, 24408, 5112, 16748, 26908, 18564, 2352, 5688, 6790, 6791, 3610, 19195, 13435, 30241, 17489, 19560, 13434, 24975, 32421, 19020, 30724, 3533, 3076, 4183, 2814, 16767, 8160, 30572, 19479, 16632, 18810, 16263, 16718, 18009, 3528, 3532, 27181, 491, 31115, 7879, 2699, 2684, 2688, 27057, 28871, 15199, 14737, 5520, 23606, 7976, 4562, 24342, 5169, 4899, 15176, 2842, 22099, 20082, 26568, 16664, 25248, 3952, 23244, 8359, 18581, 28807, 2816, 20463, 18255, 2113, 10856, 23522, 16713, 4893, 5620, 3097, 7978, 5570, 3096, 28827, 4182, 4266, 16683, 26398, 2137, 4587, 16670, 2845, 3091, 3298, 4600, 2698, 5820, 4232, 1692, 16716, 19561, 2839, 2844, 30731, 18905, 1464, 6930, 28682, 3491, 25245, 2483, 15012, 2401, 1697, 3589, 3588, 4231, 5748, 8305, 5411, 5870, 8362, 29511, 19520, 27147, 27143, 1297, 5129, 19239, 18010, 2394, 4888, 28791, 16620, 2357,
+
+				-- Battlemaster and Arenamaster
+				12197, 29318, 15006, 26007, 857, 907, 35007, 19859, 3890, 7029, 35023, 15008, 34999, 15972, 34955, 7885, 34991, 19905, 14981, 14982, 19907, 347, 7427, 7410, 20271, 19855, 29568, 19858, 2302, 14942, 17506, 15007, 34983, 5238, 29234, 32332, 1037, 10360, 2804, 30578, 20388, 30171, 5118, 18439, 32333, 20120, 19908, 30581, 20118, 14879, 16711, 20381, 35024, 22516, 25991, 20200, 7314, 20269, 34895, 35027, 30583, 18895, 20272, 30584, 35017, 19811, 20386, 34971, 20273, 34972, 19915, 20274, 30587, 20390, 19923, 20497, 34976, 12198, 19925, 16695, 20362, 35022, 20499, 14623, 16696, 20374, 21235, 19909, 40413, 20382, 32330, 20119, 30579, 35000, 34985, 30580, 35001, 35025, 35002, 17507, 20383, 34437, 35026, 20384, 19910, 35008, 20385, 19912, 29533, 30586, 35019, 34993, 35020, 16694, 30231, 19906, 34986, 34987, 19911, 34989, 30590, 35021, 30610, 30582, 34988, 20276, 34978, 34973, 34997, 34998
+
+			}
+
 			-- Event handler
 			gossipFrame:SetScript("OnEvent", function()
 				-- Special treatment for specific NPCs
 				local npcGuid = UnitGUID("target") or nil
-				if npcGuid then
+				if npcGuid and not IsShiftKeyDown() then
 					local void, void, void, void, void, npcID = strsplit("-", npcGuid)
 					if npcID then
-						if npcID == "9999999999" -- Reserved for future use
+						-- Open rogue doors in Dalaran (Broken Isles) automatically
+						if npcID == "96782"		-- Lucian Trias
+						or npcID == "93188"		-- Mongar
+						or npcID == "97004"		-- "Red" Jack Findle
 						then
 							SkipGossip()
 							return
-						else
-							-- Skip gossip for specific NPCs
-							if GetNumGossipOptions() == 1 and GetNumGossipAvailableQuests() == 0 and GetNumGossipActiveQuests() == 0 and tContains(npcTable, tonumber(npcID)) and not IsShiftKeyDown() then
-								SelectGossipOption(1)
-							end
+						end
+						-- Skip gossip with no alt key requirement
+						if npcID == "132969"	-- Katy Stampwhistle (toy)
+						or npcID == "104201"	-- Katy Stampwhistle (npc)
+						or tContains(npcTable, tonumber(npcID))
+						then
+							SkipGossip(true) 	-- true means skip alt key requirement
+							return
 						end
 					end
 				end
-
 				-- Process gossip
-				if GetNumGossipOptions() == 1 and GetNumGossipAvailableQuests() == 0 and GetNumGossipActiveQuests() == 0 then
-					SkipGossip()
-				end
+				SkipGossip()
 			end)
 
 		end
@@ -2105,12 +2185,11 @@
 				if event == "GOSSIP_SHOW" or event == "QUEST_GREETING" then
 
 					-- Select quests
-					if UnitExists("npc") or QuestFrameGreetingPanel:IsShown() or GossipFrameGreetingPanel:IsShown() then
+					if UnitExists("npc") or QuestFrameGreetingPanel:IsShown() or GossipFrame.GreetingPanel:IsShown() then
 
 						-- Don't select quests for blocked NPCs
 						if isNpcBlocked("Select") then return end
 
-						-- Select quests
 						if event == "QUEST_GREETING" then
 							-- Select quest greeting completed quests
 							if LeaPlusLC["AutoQuestCompleted"] == "On" then
@@ -2133,19 +2212,21 @@
 						else
 							-- Select gossip completed quests
 							if LeaPlusLC["AutoQuestCompleted"] == "On" then
-								for i = 1, GetNumGossipActiveQuests() do
-									local title, level, isTrivial, isComplete, isLegendary, isIgnored = select(i * 6 - 5, GetGossipActiveQuests())
-									if title and isComplete then
-										return SelectGossipActiveQuest(i)
+								local gossipQuests = C_GossipInfo.GetActiveQuests()
+								for titleIndex, questInfo in ipairs(gossipQuests) do
+									if questInfo.title and questInfo.isComplete then
+										if questInfo.questID then
+											return C_GossipInfo.SelectActiveQuest(questInfo.questID)
+										end
 									end
 								end
 							end
 							-- Select gossip available quests
 							if LeaPlusLC["AutoQuestAvailable"] == "On" then
-								for i = 1, GetNumGossipAvailableQuests() do
-									local title, level, isTrivial, isDaily, isRepeatable, isLegendary, isIgnored = select(i * 7 - 6, GetGossipAvailableQuests())
-									if title and DoesQuestHaveRequirementsMet(title) then
-										return SelectGossipAvailableQuest(i)
+								local GossipQuests = C_GossipInfo.GetAvailableQuests()
+								for titleIndex, questInfo in ipairs(GossipQuests) do
+									if questInfo.questID and DoesQuestHaveRequirementsMet(questInfo.questID) then
+										return C_GossipInfo.SelectAvailableQuest(questInfo.questID)
 									end
 								end
 							end
@@ -2193,7 +2274,31 @@
 
 			-- Declarations
 			local IterationCount, totalPrice = 500, 0
-			local SellJunkTicker, mBagID, mBagSlot
+			local SellJunkTicker
+
+			-- Create custom NewTicker function (from Wrath)
+			local function LeaPlusNewTicker(duration, callback, iterations)
+				local ticker = setmetatable({}, TickerMetatable)
+				ticker._remainingIterations = iterations
+				ticker._callback = function()
+					if (not ticker._cancelled) then
+						callback(ticker)
+						--Make sure we weren't cancelled during the callback
+						if (not ticker._cancelled) then
+							if (ticker._remainingIterations) then
+								ticker._remainingIterations = ticker._remainingIterations - 1
+							end
+							if (not ticker._remainingIterations or ticker._remainingIterations > 0) then
+								C_Timer.After(duration, ticker._callback)
+							end
+						end
+					end
+				end
+				C_Timer.After(duration, ticker._callback)
+				return ticker
+			end
+
+
 
 			-- Create configuration panel
 			local SellJunkFrame = LeaPlusLC:CreatePanel("Sell junk automatically", "SellJunkFrame")
@@ -2234,10 +2339,10 @@
 
 			-- Function to stop selling
 			local function StopSelling()
-				if SellJunkTicker then SellJunkTicker:Cancel() end
+				if SellJunkTicker then SellJunkTicker._cancelled = true; end
 				StartMsg:Hide()
 				SellJunkFrame:UnregisterEvent("ITEM_LOCKED")
-				SellJunkFrame:UnregisterEvent("ITEM_UNLOCKED")
+				SellJunkFrame:UnregisterEvent("UI_ERROR_MESSAGE")
 			end
 
 			-- Create excluded box
@@ -2318,9 +2423,6 @@
 					UpdateWhiteList()
 				end
 			end)
-
-			-- Editbox tooltip
-			local tipPrefix = ""
 
 			-- Function to make tooltip string
 			local function MakeTooltipString()
@@ -2448,8 +2550,8 @@
 
 				-- Traverse bags and sell grey items
 				for BagID = 0, 4 do
-					for BagSlot = 1, GetContainerNumSlots(BagID) do
-						CurrentItemLink = GetContainerItemLink(BagID, BagSlot)
+					for BagSlot = 1, C_Container.GetContainerNumSlots(BagID) do
+						CurrentItemLink = C_Container.GetContainerItemLink(BagID, BagSlot)
 						if CurrentItemLink then
 							void, void, Rarity, void, void, void, void, void, void, void, ItemPrice = GetItemInfo(CurrentItemLink)
 							-- Don't sell whitelisted items
@@ -2465,20 +2567,17 @@
 								end
 							end
 							-- Continue
-							local void, itemCount = GetContainerItemInfo(BagID, BagSlot)
+							local cInfo = C_Container.GetContainerItemInfo(BagID, BagSlot)
+							local itemCount = cInfo.stackCount
 							if Rarity == 0 and ItemPrice ~= 0 then
 								SoldCount = SoldCount + 1
 								if MerchantFrame:IsShown() then
 									-- If merchant frame is open, vendor the item
-									UseContainerItem(BagID, BagSlot)
+									C_Container.UseContainerItem(BagID, BagSlot)
 									-- Perform actions on first iteration
 									if SellJunkTicker._remainingIterations == IterationCount then
 										-- Calculate total price
 										totalPrice = totalPrice + (ItemPrice * itemCount)
-										-- Store first sold bag slot for analysis
-										if SoldCount == 1 then
-											mBagID, mBagSlot = BagID, BagSlot
-										end
 									end
 								else
 									-- If merchant frame is not open, stop selling
@@ -2488,6 +2587,7 @@
 							end
 						end
 					end
+
 				end
 
 				-- Stop selling if no items were sold for this iteration or iteration limit was reached
@@ -2518,32 +2618,27 @@
 			-- Event handler
 			SellJunkFrame:SetScript("OnEvent", function(self, event)
 				if event == "MERCHANT_SHOW" then
-					-- Reset variables
-					totalPrice, mBagID, mBagSlot = 0, -1, -1
+					-- Check for vendors that refuse to buy items
+					SellJunkFrame:RegisterEvent("UI_ERROR_MESSAGE")
+					-- Reset variable
+					totalPrice = 0
 					-- Do nothing if shift key is held down
 					if IsShiftKeyDown() then return end
 					-- Cancel existing ticker if present
-					if SellJunkTicker then SellJunkTicker:Cancel() end
+					if SellJunkTicker then SellJunkTicker._cancelled = true; end
 					-- Sell grey items using ticker (ends when all grey items are sold or iteration count reached)
-					SellJunkTicker = C_Timer.NewTicker(0.2, SellJunkFunc, IterationCount)
+					SellJunkTicker = LeaPlusNewTicker(0.2, SellJunkFunc, IterationCount)
 					SellJunkFrame:RegisterEvent("ITEM_LOCKED")
-					SellJunkFrame:RegisterEvent("ITEM_UNLOCKED")
 				elseif event == "ITEM_LOCKED" then
 					StartMsg:Show()
 					SellJunkFrame:UnregisterEvent("ITEM_LOCKED")
-				elseif event == "ITEM_UNLOCKED" then
-					SellJunkFrame:UnregisterEvent("ITEM_UNLOCKED")
-					-- Check whether vendor refuses to buy items
-					if mBagID and mBagSlot and mBagID ~= -1 and mBagSlot ~= -1 then
-						local texture, count, locked = GetContainerItemInfo(mBagID, mBagSlot)
-						if count and not locked then
-							-- Item has been unlocked but still not sold so stop selling
-							StopSelling()
-						end
-					end
 				elseif event == "MERCHANT_CLOSED" then
 					-- If merchant frame is closed, stop selling
 					StopSelling()
+				elseif event == "UI_ERROR_MESSAGE" then
+					if arg1 == 46 then
+						StopSelling() -- Vendor refuses to buy items
+					end
 				end
 			end)
 
@@ -2817,7 +2912,7 @@
 			ColTar:SetScript("OnEvent", TargetFrameCol) -- Events are registered if target option is enabled
 
 			-- Refresh color if focus frame size changes
-			hooksecurefunc("FocusFrame_SetSmallSize", function()
+			hooksecurefunc(FocusFrame, "SetSmallSize", function()
 				if LeaPlusLC["ClassColTarget"] == "On" then
 					TargetFrameCol()
 				end
@@ -2898,7 +2993,13 @@
 		--	Quest text size
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["QuestFontChange"] == "On" then
+		if LeaPlusLC["QuestFontChange"] == "On" and not LeaLockList["QuestFontChange"] then
+
+			-- Set gossip frame scroll box layout (fix for game patch 3.4.1)
+			GossipFrame.GreetingPanel.ScrollBox:SetHeight(320)
+			GossipFrame.GreetingPanel.ScrollBar:ClearAllPoints()
+			GossipFrame.GreetingPanel.ScrollBar:SetPoint("TOPLEFT", GossipFrame.GreetingPanel.ScrollBox, "TOPRIGHT", 4, 9)
+			GossipFrame.GreetingPanel.ScrollBar:SetPoint("BOTTOMLEFT", GossipFrame.GreetingPanel.ScrollBox, "BOTTOMRIGHT", 4, -14)
 
 			-- Create configuration panel
 			local QuestTextPanel = LeaPlusLC:CreatePanel("Resize quest text", "QuestTextPanel")
@@ -2908,9 +3009,11 @@
 
 			-- Function to update the font size
 			local function QuestSizeUpdate()
-				QuestTitleFont:SetFont(QuestFont:GetFont(), LeaPlusLC["LeaPlusQuestFontSize"] + 3, nil)
-				QuestFont:SetFont(QuestFont:GetFont(), LeaPlusLC["LeaPlusQuestFontSize"] + 1, nil)
-				QuestFontNormalSmall:SetFont(QuestFontNormalSmall:GetFont(), LeaPlusLC["LeaPlusQuestFontSize"], nil)
+				local a, b, c = QuestFont:GetFont()
+				QuestTitleFont:SetFont(a, LeaPlusLC["LeaPlusQuestFontSize"] + 3, c)
+				QuestFont:SetFont(a, LeaPlusLC["LeaPlusQuestFontSize"] + 1, c)
+				local d, e, f = QuestFontNormalSmall:GetFont()
+				QuestFontNormalSmall:SetFont(d, LeaPlusLC["LeaPlusQuestFontSize"], f)
 			end
 
 			-- Set text size when slider changes and on startup
@@ -2966,9 +3069,12 @@
 
 			-- Function to set the text size
 			local function MailSizeUpdate()
-				local MailFont = QuestFont:GetFont();
-				OpenMailBodyText:SetFont(MailFont, LeaPlusLC["LeaPlusMailFontSize"])
-				MailEditBox:GetEditBox():SetFont(MailFont, LeaPlusLC["LeaPlusMailFontSize"])
+				local MailFont, void, flags = QuestFont:GetFont()
+				OpenMailBodyText:SetFont("h1", MailFont, LeaPlusLC["LeaPlusMailFontSize"], flags)
+				OpenMailBodyText:SetFont("h2", MailFont, LeaPlusLC["LeaPlusMailFontSize"], flags)
+				OpenMailBodyText:SetFont("h3", MailFont, LeaPlusLC["LeaPlusMailFontSize"], flags)
+				OpenMailBodyText:SetFont("p", MailFont, LeaPlusLC["LeaPlusMailFontSize"], flags)
+				MailEditBox:GetEditBox():SetFont(MailFont, LeaPlusLC["LeaPlusMailFontSize"], flags) -- in DF, this is replaced with SendMailBodyEditBox
 			end
 
 			-- Set text size after changing slider and on startup
@@ -3023,8 +3129,8 @@
 
 			-- Function to set the text size
 			local function BookSizeUpdate()
-				local BookFont = QuestFont:GetFont()
-				ItemTextFontNormal:SetFont(BookFont, LeaPlusLC["LeaPlusBookFontSize"])
+				local BookFont, void, flags = QuestFont:GetFont()
+				ItemTextFontNormal:SetFont(BookFont, LeaPlusLC["LeaPlusBookFontSize"], flags)
 			end
 
 			-- Set text size after changing slider and on startup
@@ -3080,8 +3186,8 @@
 			cButton:SetSize(32, 32)
 
 			-- Create durability tables
-			local Slots = {"HeadSlot", "ShoulderSlot", "ChestSlot", "WristSlot", "HandsSlot", "WaistSlot", "LegsSlot", "FeetSlot", "MainHandSlot", "SecondaryHandSlot"}
-			local SlotsFriendly = {INVTYPE_HEAD, INVTYPE_SHOULDER, INVTYPE_CHEST, INVTYPE_WRIST, INVTYPE_HAND, INVTYPE_WAIST, INVTYPE_LEGS, INVTYPE_FEET, INVTYPE_WEAPONMAINHAND, INVTYPE_WEAPONOFFHAND}
+			local Slots = {"HeadSlot", "ShoulderSlot", "ChestSlot", "WristSlot", "HandsSlot", "WaistSlot", "LegsSlot", "FeetSlot", "MainHandSlot", "SecondaryHandSlot", "RangedSlot"}
+			local SlotsFriendly = {INVTYPE_HEAD, INVTYPE_SHOULDER, INVTYPE_CHEST, INVTYPE_WRIST, INVTYPE_HAND, INVTYPE_WAIST, INVTYPE_LEGS, INVTYPE_FEET, INVTYPE_WEAPONMAINHAND, INVTYPE_WEAPONOFFHAND, INVTYPE_RANGED}
 
 			-- Show durability status in tooltip or status line (tip or status)
 			local function ShowDuraStats(where)
@@ -3337,6 +3443,202 @@
 	function LeaPlusLC:Player()
 
 		----------------------------------------------------------------------
+		-- Mute custom sounds (no reload required)
+		----------------------------------------------------------------------
+
+		do
+
+			-- Create configuration panel
+			local MuteCustomPanel = LeaPlusLC:CreatePanel("Mute custom sounds", "MuteCustomPanel")
+
+			local titleTX = LeaPlusLC:MakeTx(MuteCustomPanel, "Editor", 16, -72)
+			titleTX:SetWidth(534)
+			titleTX:SetWordWrap(false)
+			titleTX:SetJustifyH("LEFT")
+
+			-- Show help button for title
+			LeaPlusLC:CreateHelpButton("MuteGameSoundsCustomHelpButton", MuteCustomPanel, titleTX, "Enter sound file IDs separated by comma then click the Mute button.|n|nIf you wish, you can enter a brief note for each file ID but do not include numbers in your notes.|n|nFor example, you can enter 'DevAura 569679, RetAura 568744' to mute the Devotion Aura and Retribution Aura spells.|n|nUse Leatrix Sounds to find, test and play sound file IDs.")
+
+			-- Add large editbox
+			local eb = CreateFrame("Frame", nil, MuteCustomPanel, "BackdropTemplate")
+			eb:SetSize(548, 180)
+			eb:SetPoint("TOPLEFT", 10, -92)
+			eb:SetBackdrop({
+				bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+				edgeFile = "Interface\\PVPFrame\\UI-Character-PVP-Highlight",
+				edgeSize = 16,
+				insets = { left = 8, right = 6, top = 8, bottom = 8 },
+			})
+			eb:SetBackdropBorderColor(1.0, 0.85, 0.0, 0.5)
+
+			eb.scroll = CreateFrame("ScrollFrame", nil, eb, "UIPanelScrollFrameTemplate")
+			eb.scroll:SetPoint("TOPLEFT", eb, 12, -10)
+			eb.scroll:SetPoint("BOTTOMRIGHT", eb, -30, 10)
+
+			eb.Text = CreateFrame("EditBox", nil, eb)
+			eb.Text:SetMultiLine(true)
+			eb.Text:SetWidth(494)
+			eb.Text:SetHeight(230)
+			eb.Text:SetPoint("TOPLEFT", eb.scroll)
+			eb.Text:SetPoint("BOTTOMRIGHT", eb.scroll)
+			eb.Text:SetMaxLetters(2000)
+			eb.Text:SetFontObject(GameFontNormalLarge)
+			eb.Text:SetAutoFocus(false)
+			eb.Text:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+			eb.scroll:SetScrollChild(eb.Text)
+
+			-- Set focus on the editbox text when clicking the editbox
+			eb:SetScript("OnMouseDown", function()
+				eb.Text:SetFocus()
+				eb.Text:SetCursorPosition(eb.Text:GetMaxLetters())
+			end)
+
+			-- Function to save the custom sound list
+			local function SaveString(self, userInput)
+				local keytext = eb.Text:GetText()
+				if keytext and keytext ~= "" then
+					LeaPlusLC["MuteCustomList"] = strtrim(eb.Text:GetText())
+				else
+					LeaPlusLC["MuteCustomList"] = ""
+				end
+			end
+
+			-- Save the custom sound list when it changes and at startup
+			eb.Text:SetScript("OnTextChanged", SaveString)
+			eb.Text:SetText(LeaPlusLC["MuteCustomList"])
+			SaveString()
+
+			-- Help button hidden
+			MuteCustomPanel.h:Hide()
+
+			-- Back button handler
+			MuteCustomPanel.b:SetScript("OnClick", function()
+				MuteCustomPanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page7"]:Show()
+				return
+			end)
+
+			-- Reset button hidden
+			MuteCustomPanel.r:Hide()
+
+			-- Show configuration panal when options panel button is clicked
+			LeaPlusCB["MuteCustomSoundsBtn"]:SetScript("OnClick", function()
+				if IsShiftKeyDown() and IsControlKeyDown() then
+					-- Preset profile
+					LeaPlusLC["MuteCustomList"] = "Devotion Aura 569679, Retribution Aura 568744"
+					eb.Text:SetText(LeaPlusLC["MuteCustomList"])
+				else
+					MuteCustomPanel:Show()
+					LeaPlusLC:HideFrames()
+				end
+			end)
+
+			-- Function to mute custom sound list
+			local function MuteCustomListFunc(unmute, userInput)
+				-- local mutedebug = true -- Debug
+				local counter = 0
+				local muteString = LeaPlusLC["MuteCustomList"]
+				if muteString and muteString ~= "" then
+					muteString = muteString:gsub("%s", ",")
+					muteString = muteString:gsub("[\n]", ",")
+					muteString = muteString:gsub("[^,%d]", "")
+					if mutedebug then print(muteString) end
+					local tList = {strsplit(",", muteString)}
+					if mutedebug then ChatFrame1:Clear() end
+					for i = 1, #tList do
+						if tList[i] then
+							tList[i] = tonumber(tList[i])
+							if tList[i] and tList[i] < 20000000 then
+								if mutedebug then print(tList[i]) end
+								if unmute then
+									UnmuteSoundFile(tList[i])
+								else
+									MuteSoundFile(tList[i])
+								end
+								counter = counter + 1
+							end
+						end
+					end
+					if userInput then
+						if unmute then
+							if counter == 1 then
+								LeaPlusLC:Print(L["Unmuted"] .. " " .. counter .. " " .. L["sound"] .. ".")
+							else
+								LeaPlusLC:Print(L["Unmuted"] .. " " .. counter .. " " .. L["sounds"] .. ".")
+							end
+						else
+							if counter == 1 then
+								LeaPlusLC:Print(L["Muted"] .. " " .. counter .. " " .. L["sound"] .. ".")
+							else
+								LeaPlusLC:Print(L["Muted"] .. " " .. counter .. " " .. L["sounds"] .. ".")
+							end
+						end
+					end
+				end
+			end
+
+			-- Mute custom list on startup if option is enabled
+			if LeaPlusLC["MuteCustomSounds"] == "On" then
+				MuteCustomListFunc()
+			end
+
+			-- Mute or unmute when option is clicked
+			LeaPlusCB["MuteCustomSounds"]:HookScript("OnClick", function()
+				if LeaPlusLC["MuteCustomSounds"] == "On" then
+					MuteCustomListFunc(false, false)
+				else
+					MuteCustomListFunc(true, false)
+				end
+			end)
+
+			-- Add mute button
+			local MuteCustomNowButton = LeaPlusLC:CreateButton("MuteCustomNowButton", MuteCustomPanel, "Mute", "TOPLEFT", 16, -292, 0, 25, true, "Click to mute sounds in the list.")
+			LeaPlusCB["MuteCustomNowButton"]:SetScript("OnClick", function() MuteCustomListFunc(false, true) end)
+
+			-- Add unmute button
+			local UnmuteCustomNowButton = LeaPlusLC:CreateButton("UnmuteCustomNowButton", MuteCustomPanel, "Unmute", "TOPLEFT", 16, -72, 0, 25, true, "Click to unmute sounds in the list.")
+			LeaPlusCB["UnmuteCustomNowButton"]:ClearAllPoints()
+			LeaPlusCB["UnmuteCustomNowButton"]:SetPoint("LEFT", MuteCustomNowButton, "RIGHT", 10, 0)
+			LeaPlusCB["UnmuteCustomNowButton"]:SetScript("OnClick", function() MuteCustomListFunc(true, true) end)
+
+			-- Add play sound file editbox
+			local willPlay, musicHandle
+			local MuteCustomSoundsStopButton = LeaPlusLC:CreateButton("MuteCustomSoundsStopButton", MuteCustomPanel, "Stop", "TOPRIGHT", -18, -66, 0, 25, true, "")
+			MuteCustomSoundsStopButton:SetScript("OnClick", function()
+				if musicHandle then StopSound(musicHandle) end
+			end)
+
+			local MuteCustomSoundsPlayButton = LeaPlusLC:CreateButton("MuteCustomSoundsPlayButton", MuteCustomPanel, "Play", "TOPRIGHT", -18, -66, 0, 25, true, "")
+			MuteCustomSoundsPlayButton:ClearAllPoints()
+			MuteCustomSoundsPlayButton:SetPoint("RIGHT", MuteCustomSoundsStopButton, "LEFT", -10, 0)
+
+			local MuteCustomSoundsSoundBox = LeaPlusLC:CreateEditBox("MuteCustomSoundsSoundBox", eb, 80, 8, "TOPRIGHT", -10, 20, "PlaySoundBox", "PlaySoundBox")
+			MuteCustomSoundsSoundBox:SetNumeric(true)
+			MuteCustomSoundsSoundBox:ClearAllPoints()
+			MuteCustomSoundsSoundBox:SetPoint("RIGHT", MuteCustomSoundsPlayButton, "LEFT", -10, 0)
+			MuteCustomSoundsPlayButton:SetScript("OnClick", function()
+				MuteCustomSoundsSoundBox:GetText()
+				if musicHandle then StopSound(musicHandle) end
+				willPlay, musicHandle = PlaySoundFile(MuteCustomSoundsSoundBox:GetText(), "Master")
+			end)
+
+			-- Add mousewheel support to the editbox
+			MuteCustomSoundsSoundBox:SetScript("OnMouseWheel", function(self, delta)
+				local endSound = tonumber(MuteCustomSoundsSoundBox:GetText())
+				if endSound then
+					if delta == 1 then endSound = endSound + 1 else endSound = endSound - 1 end
+					if endSound < 1 then endSound = 1 elseif endSound >= 10000000 then endSound = 10000000 end
+					MuteCustomSoundsSoundBox:SetText(endSound)
+					MuteCustomSoundsPlayButton:Click()
+				end
+			end)
+
+			local titlePlayer = LeaPlusLC:MakeTx(MuteCustomPanel, "Player", 16, -72)
+			titlePlayer:ClearAllPoints()
+			titlePlayer:SetPoint("TOPLEFT", MuteCustomSoundsSoundBox, "TOPLEFT", -4, 16)
+			LeaPlusLC:CreateHelpButton("MuteGameSoundsCustomPlayHelpButton", MuteCustomPanel, titlePlayer, "If you want to listen to a sound file, enter the sound file ID into the editbox and click the play button.|n|nYou can scroll the mousewheel over the editbox to play neighbouring sound files.")
+		end
+
+		----------------------------------------------------------------------
 		-- Manage vehicle
 		----------------------------------------------------------------------
 
@@ -3583,24 +3885,27 @@
 			historyFrame:SetScript("OnEvent", function(self, event)
 				if event == "PLAYER_LOGOUT" then
 					local name, realm = UnitFullName("player")
-					LeaPlusDB["ChatHistoryName"] = name .. "-" .. realm
-					LeaPlusDB["ChatHistoryTime"] = GetServerTime()
-					for i = 1, 50 do
-						if i ~= 2 and _G["ChatFrame" .. i] then
-							if FCF_IsChatWindowIndexActive(i) then
-								LeaPlusDB["ChatHistory" .. i] = {}
-								local chtfrm = _G["ChatFrame" .. i]
-								local NumMsg = chtfrm:GetNumMessages()
-								local StartMsg = 1
-								if NumMsg > 128 then StartMsg = NumMsg - 127 end
-								for iMsg = StartMsg, NumMsg do
-									local chatMessage, r, g, b, chatTypeID = chtfrm:GetMessageInfo(iMsg)
-									if chatMessage then
-										if r and g and b then
-											local colorCode = RGBToColorCode(r, g, b)
-											chatMessage = colorCode .. chatMessage
+					if not realm then realm = GetNormalizedRealmName() end
+					if name and realm then
+						LeaPlusDB["ChatHistoryName"] = name .. "-" .. realm
+						LeaPlusDB["ChatHistoryTime"] = GetServerTime()
+						for i = 1, 50 do
+							if i ~= 2 and _G["ChatFrame" .. i] then
+								if FCF_IsChatWindowIndexActive(i) then
+									LeaPlusDB["ChatHistory" .. i] = {}
+									local chtfrm = _G["ChatFrame" .. i]
+									local NumMsg = chtfrm:GetNumMessages()
+									local StartMsg = 1
+									if NumMsg > 128 then StartMsg = NumMsg - 127 end
+									for iMsg = StartMsg, NumMsg do
+										local chatMessage, r, g, b, chatTypeID = chtfrm:GetMessageInfo(iMsg)
+										if chatMessage then
+											if r and g and b then
+												local colorCode = RGBToColorCode(r, g, b)
+												chatMessage = colorCode .. chatMessage
+											end
+											tinsert(LeaPlusDB["ChatHistory" .. i], chatMessage)
 										end
-										tinsert(LeaPlusDB["ChatHistory" .. i], chatMessage)
 									end
 								end
 							end
@@ -3611,62 +3916,65 @@
 
 			-- Restore chat messages on login
 			local name, realm = UnitFullName("player")
-			if LeaPlusDB["ChatHistoryName"] and LeaPlusDB["ChatHistoryTime"] then
-				local timeDiff = GetServerTime() - LeaPlusDB["ChatHistoryTime"]
-				if LeaPlusDB["ChatHistoryName"] == name .. "-" .. realm and timeDiff and timeDiff < 10 then -- reload must be done within 15 seconds
+			if not realm then realm = GetNormalizedRealmName() end
+			if name and realm then
+				if LeaPlusDB["ChatHistoryName"] and LeaPlusDB["ChatHistoryTime"] then
+					local timeDiff = GetServerTime() - LeaPlusDB["ChatHistoryTime"]
+					if LeaPlusDB["ChatHistoryName"] == name .. "-" .. realm and timeDiff and timeDiff < 10 then -- reload must be done within 15 seconds
 
-					-- Store chat messages from current session and clear chat
-					for i = 1, 50 do
-						if i ~= 2 and _G["ChatFrame" .. i] and FCF_IsChatWindowIndexActive(i) then
-							LeaPlusDB["ChatTemp" .. i] = {}
-							local chtfrm = _G["ChatFrame" .. i]
-							local NumMsg = chtfrm:GetNumMessages()
-							for iMsg = 1, NumMsg do
-								local chatMessage, r, g, b, chatTypeID = chtfrm:GetMessageInfo(iMsg)
-								if chatMessage then
-									if r and g and b then
-										local colorCode = RGBToColorCode(r, g, b)
-										chatMessage = colorCode .. chatMessage
+						-- Store chat messages from current session and clear chat
+						for i = 1, 50 do
+							if i ~= 2 and _G["ChatFrame" .. i] and FCF_IsChatWindowIndexActive(i) then
+								LeaPlusDB["ChatTemp" .. i] = {}
+								local chtfrm = _G["ChatFrame" .. i]
+								local NumMsg = chtfrm:GetNumMessages()
+								for iMsg = 1, NumMsg do
+									local chatMessage, r, g, b, chatTypeID = chtfrm:GetMessageInfo(iMsg)
+									if chatMessage then
+										if r and g and b then
+											local colorCode = RGBToColorCode(r, g, b)
+											chatMessage = colorCode .. chatMessage
+										end
+										tinsert(LeaPlusDB["ChatTemp" .. i], chatMessage)
 									end
-									tinsert(LeaPlusDB["ChatTemp" .. i], chatMessage)
 								end
+								chtfrm:Clear()
 							end
-							chtfrm:Clear()
 						end
-					end
 
-					-- Restore chat messages from previous session
-					for i = 1, 50 do
-						if i ~= 2 and _G["ChatFrame" .. i] and LeaPlusDB["ChatHistory" .. i] and FCF_IsChatWindowIndexActive(i) then
-							LeaPlusDB["ChatHistory" .. i .. "Count"] = 0
-							-- Add previous session messages to chat
-							for k = 1, #LeaPlusDB["ChatHistory" .. i] do
-								if LeaPlusDB["ChatHistory" .. i][k] ~= string.match(LeaPlusDB["ChatHistory" .. i][k], "|cffffd800" .. L["Restored"] .. " " .. ".*" .. " " .. L["message"] .. ".*.|r") then
-									_G["ChatFrame" .. i]:AddMessage(LeaPlusDB["ChatHistory" .. i][k])
-									LeaPlusDB["ChatHistory" .. i .. "Count"] = LeaPlusDB["ChatHistory" .. i .. "Count"] + 1
+						-- Restore chat messages from previous session
+						for i = 1, 50 do
+							if i ~= 2 and _G["ChatFrame" .. i] and LeaPlusDB["ChatHistory" .. i] and FCF_IsChatWindowIndexActive(i) then
+								LeaPlusDB["ChatHistory" .. i .. "Count"] = 0
+								-- Add previous session messages to chat
+								for k = 1, #LeaPlusDB["ChatHistory" .. i] do
+									if LeaPlusDB["ChatHistory" .. i][k] ~= string.match(LeaPlusDB["ChatHistory" .. i][k], "|cffffd800" .. L["Restored"] .. " " .. ".*" .. " " .. L["message"] .. ".*.|r") then
+										_G["ChatFrame" .. i]:AddMessage(LeaPlusDB["ChatHistory" .. i][k])
+										LeaPlusDB["ChatHistory" .. i .. "Count"] = LeaPlusDB["ChatHistory" .. i .. "Count"] + 1
+									end
 								end
-							end
-							-- Show how many messages were restored
-							if LeaPlusDB["ChatHistory" .. i .. "Count"] == 1 then
-								_G["ChatFrame" .. i]:AddMessage("|cffffd800" .. L["Restored"] .. " " .. LeaPlusDB["ChatHistory" .. i .. "Count"] .. " " .. L["message from previous session"] .. ".|r")
+								-- Show how many messages were restored
+								if LeaPlusDB["ChatHistory" .. i .. "Count"] == 1 then
+									_G["ChatFrame" .. i]:AddMessage("|cffffd800" .. L["Restored"] .. " " .. LeaPlusDB["ChatHistory" .. i .. "Count"] .. " " .. L["message from previous session"] .. ".|r")
+								else
+									_G["ChatFrame" .. i]:AddMessage("|cffffd800" .. L["Restored"] .. " " .. LeaPlusDB["ChatHistory" .. i .. "Count"] .. " " .. L["messages from previous session"] .. ".|r")
+								end
 							else
-								_G["ChatFrame" .. i]:AddMessage("|cffffd800" .. L["Restored"] .. " " .. LeaPlusDB["ChatHistory" .. i .. "Count"] .. " " .. L["messages from previous session"] .. ".|r")
-							end
-						else
-							-- No messages to restore
-							LeaPlusDB["ChatHistory" .. i] = nil
-						end
-					end
-
-					-- Restore chat messages from this session
-					for i = 1, 50 do
-						if i ~= 2 and _G["ChatFrame" .. i] and LeaPlusDB["ChatTemp" .. i] and FCF_IsChatWindowIndexActive(i) then
-							for k = 1, #LeaPlusDB["ChatTemp" .. i] do
-								_G["ChatFrame" .. i]:AddMessage(LeaPlusDB["ChatTemp" .. i][k])
+								-- No messages to restore
+								LeaPlusDB["ChatHistory" .. i] = nil
 							end
 						end
-					end
 
+						-- Restore chat messages from this session
+						for i = 1, 50 do
+							if i ~= 2 and _G["ChatFrame" .. i] and LeaPlusDB["ChatTemp" .. i] and FCF_IsChatWindowIndexActive(i) then
+								for k = 1, #LeaPlusDB["ChatTemp" .. i] do
+									_G["ChatFrame" .. i]:AddMessage(LeaPlusDB["ChatTemp" .. i][k])
+								end
+							end
+						end
+
+					end
 				end
 			end
 
@@ -4054,6 +4362,7 @@
 				bFrame:SetFrameLevel(8)
 
 				LeaPlusLC.bFrame = bFrame -- Used in LibDBIcon callback
+				_G["LeaPlusGlobalMinimapCombinedButtonFrame"] = bFrame -- For third party addons
 
 				-- Hide button frame automatically
 				local ButtonFrameTicker
@@ -4172,26 +4481,29 @@
 								local buttonName = strlower(buttons[i])
 								if not strfind(strlower(LeaPlusDB["MiniExcludeList"]), buttonName) then
 									local button = LibDBIconStub:GetMinimapButton(buttons[i])
-									if not button.db.hide then
-										button:SetParent(bFrame)
-										button:ClearAllPoints()
-										if side == "Left" then
-											-- Minimap is on left side of screen
-											button:SetPoint("TOPLEFT", bFrame, "TOPLEFT", x, y)
-											col = col + 1; if col >= buttonsPerRow then col = 0; row = row + 1; x = 0; y = y - 30 else x = x + 30 end
-										else
-											-- Minimap is on right side of screen
-											button:SetPoint("TOPRIGHT", bFrame, "TOPRIGHT", x, y)
-											col = col + 1; if col >= buttonsPerRow then col = 0; row = row + 1; x = 0; y = y - 30 else x = x - 30 end
+									if button.db then
+										if buttonName == "armory" then button.db.hide = false end -- Armory addon sets hidden to true
+										if not button.db.hide then
+											button:SetParent(bFrame)
+											button:ClearAllPoints()
+											if side == "Left" then
+												-- Minimap is on left side of screen
+												button:SetPoint("TOPLEFT", bFrame, "TOPLEFT", x, y)
+												col = col + 1; if col >= buttonsPerRow then col = 0; row = row + 1; x = 0; y = y - 30 else x = x + 30 end
+											else
+												-- Minimap is on right side of screen
+												button:SetPoint("TOPRIGHT", bFrame, "TOPRIGHT", x, y)
+												col = col + 1; if col >= buttonsPerRow then col = 0; row = row + 1; x = 0; y = y - 30 else x = x - 30 end
+											end
+											if totalButtons <= buttonsPerRow then
+												bFrame:SetWidth(totalButtons * 30)
+											else
+												bFrame:SetWidth(buttonsPerRow * 30)
+											end
+											local void, void, void, void, e = button:GetPoint()
+											bFrame:SetHeight(0 - e + 30)
+											LibDBIconStub:Show(buttons[i])
 										end
-										if totalButtons <= buttonsPerRow then
-											bFrame:SetWidth(totalButtons * 30)
-										else
-											bFrame:SetWidth(buttonsPerRow * 30)
-										end
-										local void, void, void, void, e = button:GetPoint()
-										bFrame:SetHeight(0 - e + 30)
-										LibDBIconStub:Show(buttons[i])
 									end
 								end
 							end
@@ -4823,7 +5135,7 @@
 					--C_Timer.After(0.1, function() -- Removed for now
 						local buttonName = strlower(name)
 						if not strfind(strlower(LeaPlusDB["MiniExcludeList"]), buttonName) then
-							if not button.db.hide then
+							if button.db and not button.db.hide then
 								button:Hide()
 								button:SetScript("OnShow", function() if not LeaPlusLC.bFrame:IsShown() then button:Hide() end end)
 							end
@@ -5410,6 +5722,7 @@
 			local titleBox = titleFrame.EditBox
 			titleBox:Hide()
 			titleBox:SetEnabled(false)
+			titleBox:SetMaxLetters(0)
 
 			-- Create editbox
 			local editBox = editFrame.EditBox
@@ -5417,7 +5730,8 @@
 			editBox:SetTextInsets(4, 4, 4, 4)
 			editBox:SetWidth(editFrame:GetWidth() - 30)
 			editBox:SetSecurityDisablePaste()
-			editBox:SetFont(_G["ChatFrame1"]:GetFont(), 16)
+			editBox:SetFont(_G["ChatFrame1"]:GetFont())
+			editBox:SetMaxLetters(0)
 
 			local introMsg = L["Leatrix Plus needs to be updated with the flight details.  Press CTRL/C to copy the flight details below then paste them into an email to flight@leatrix.com.  When your report is received, Leatrix Plus will be updated and you will never see this window again for this flight."] .. "|n|n"
 			local startHighlight = string.len(introMsg)
@@ -5450,10 +5764,8 @@
 			editBox:EnableKeyboard(false)
 			editBox:SetScript("OnKeyDown", function() end)
 
-			-- Load library
-			if not LibStub("LibCandyBar-3.0", true) then
-				Leatrix_Plus:LeaPlusCandyBar()
-			end
+			-- Load LibCandyBar
+			Leatrix_Plus:LeaPlusCandyBar()
 
 			-- Variables
 			local data = Leatrix_Plus["FlightData"]
@@ -5508,7 +5820,7 @@
 
 						-- Build route string and debug string
 						local numHops = GetNumRoutes(node)
-						local debugString = '\t\t\t\t\t["' .. currentNode
+						local debugString = '["' .. currentNode
 						local routeString = currentNode
 						for i = 2, numHops + 1 do
 							local hopPosX, hopPosY = TaxiNodePosition(TaxiGetNodeSlot(node, i, true))
@@ -6033,16 +6345,14 @@
 
 		if LeaPlusLC["FilterChatMessages"] == "On" then
 
-			-- Enable LibChatAnims only if needed
-			if not LibStub("LibChatAnims", true) then
-				Leatrix_Plus:LeaPlusLCA()
-			end
+			-- Load LibChatAnims
+			Leatrix_Plus:LeaPlusLCA()
 
 			-- Create configuration panel
 			local ChatFilterPanel = LeaPlusLC:CreatePanel("Filter chat messages", "ChatFilterPanel")
 
 			LeaPlusLC:MakeTx(ChatFilterPanel, "Settings", 16, -72)
-			LeaPlusLC:MakeCB(ChatFilterPanel, "BlockSpellLinks", "Block spell links during combat", 16, -92, false, "If checked, messages containing spell links will be blocked while you are in combat.|n|nThis is useful for blocking spell interrupt spam.|n|nThis applies to the say, party, raid and emote channels.")
+			LeaPlusLC:MakeCB(ChatFilterPanel, "BlockSpellLinks", "Block spell links during combat", 16, -92, false, "If checked, messages containing spell links will be blocked while you are in combat.|n|nThis is useful for blocking spell interrupt spam.|n|nThis applies to the say, party, raid, emote and yell channels.")
 			LeaPlusLC:MakeCB(ChatFilterPanel, "BlockDrunkenSpam", "Block drunken spam", 16, -112, false, "If checked, drunken messages will be blocked unless they apply to your character.|n|nThis applies to the system channel.")
 			LeaPlusLC:MakeCB(ChatFilterPanel, "BlockDuelSpam", "Block duel spam", 16, -132, false, "If checked, duel victory and retreat messages will be blocked unless your character took part in the duel.|n|nThis applies to the system channel.")
 
@@ -6112,6 +6422,7 @@
 					ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID", ChatFilterFunc)
 					ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID_LEADER", ChatFilterFunc)
 					ChatFrame_AddMessageEventFilter("CHAT_MSG_EMOTE", ChatFilterFunc)
+					ChatFrame_AddMessageEventFilter("CHAT_MSG_YELL", ChatFilterFunc)
 				else
 					ChatFrame_RemoveMessageEventFilter("CHAT_MSG_SAY", ChatFilterFunc)
 					ChatFrame_RemoveMessageEventFilter("CHAT_MSG_PARTY", ChatFilterFunc)
@@ -6119,6 +6430,7 @@
 					ChatFrame_RemoveMessageEventFilter("CHAT_MSG_RAID", ChatFilterFunc)
 					ChatFrame_RemoveMessageEventFilter("CHAT_MSG_RAID_LEADER", ChatFilterFunc)
 					ChatFrame_RemoveMessageEventFilter("CHAT_MSG_EMOTE", ChatFilterFunc)
+					ChatFrame_RemoveMessageEventFilter("CHAT_MSG_YELL", ChatFilterFunc)
 				end
 				if LeaPlusLC["BlockDrunkenSpam"] == "On" or LeaPlusLC["BlockDuelSpam"] == "On" then
 					ChatFrame_AddMessageEventFilter("CHAT_MSG_SYSTEM", ChatFilterFunc)
@@ -6632,7 +6944,7 @@
 			LeaPlusLC["DressupAnim"] = 0 -- Defined here since the setting is not saved
 			LeaPlusLC:MakeSL(DressUpFrame, "DressupAnim", "", 1, #animTable - 1, 1, 356, -92, "%.0f")
 			LeaPlusCB["DressupAnim"]:ClearAllPoints()
-			LeaPlusCB["DressupAnim"]:SetPoint("BOTTOM", 0, 112)
+			LeaPlusCB["DressupAnim"]:SetPoint("BOTTOM", -12, 112)
 			LeaPlusCB["DressupAnim"]:SetWidth(226)
 			LeaPlusCB["DressupAnim"]:SetFrameLevel(5)
 			LeaPlusCB["DressupAnim"]:HookScript("OnValueChanged", function(self, setting)
@@ -7204,7 +7516,7 @@
 			local function TrainerFunc(frame)
 
 				-- Make the frame double-wide
-				UIPanelWindows["ClassTrainerFrame"] = {area = "override", pushable = 1, xoffset = -16, yoffset = 12, bottomClampOverride = 140 + 12, width = 714, height = 487, whileDead = 1}
+				UIPanelWindows["ClassTrainerFrame"] = {area = "override", pushable = 0, xoffset = -16, yoffset = 12, bottomClampOverride = 140 + 12, width = 714, height = 487, whileDead = 1}
 
 				-- Size the frame
 				_G["ClassTrainerFrame"]:SetSize(714, 487 + tall)
@@ -7336,6 +7648,9 @@
 				-- Create train all button
 				LeaPlusLC:CreateButton("TrainAllButton", ClassTrainerFrame, "Train All", "BOTTOMLEFT", 344, 54, 0, 22, false, "")
 
+				-- Give button global scope (useful for compatibility with other addons and essential for ElvUI)
+				_G.LeaPlusGlobalTrainAllButton = LeaPlusCB["TrainAllButton"]
+
 				-- Button tooltip
 				LeaPlusCB["TrainAllButton"]:SetScript("OnEnter", function(self)
 					-- Get number of available skills and total cost
@@ -7425,7 +7740,6 @@
 						_G["ClassTrainerTrainButton"]:SetPoint("BOTTOMRIGHT", _G["ClassTrainerFrame"], "BOTTOMRIGHT", -42, 78)
 						LeaPlusCB["TrainAllButton"]:ClearAllPoints()
 						LeaPlusCB["TrainAllButton"]:SetPoint("BOTTOMLEFT", _G["ClassTrainerFrame"], "BOTTOMLEFT", 344, 78)
-						_G.LeaPlusGlobalTrainAllButton = LeaPlusCB["TrainAllButton"]
 						E:GetModule("Skins"):HandleButton(_G.LeaPlusGlobalTrainAllButton)
 					end
 				end
@@ -7547,7 +7861,7 @@
 			local function TradeSkillFunc(frame)
 
 				-- Make the tradeskill frame double-wide
-				UIPanelWindows["TradeSkillFrame"] = {area = "override", pushable = 1, xoffset = -16, yoffset = 12, bottomClampOverride = 140 + 12, width = 714, height = 487, whileDead = 1}
+				UIPanelWindows["TradeSkillFrame"] = {area = "override", pushable = 3, xoffset = -16, yoffset = 12, bottomClampOverride = 140 + 12, width = 714, height = 487, whileDead = 1}
 
 				-- Size the tradeskill frame
 				_G["TradeSkillFrame"]:SetWidth(714)
@@ -7781,74 +8095,6 @@
 				end
 			end)
 
-			-- Taller quest log
-			if LeaPlusLC["EnhanceQuestTaller"] == "On" then
-
-				-- Set increased height of quest log frame and maximum number of quests listed
-				local tall, numTallQuests = 70, 4
-
-				-- Make the quest log frame double-wide
-				UIPanelWindows["QuestLogFrame"] = {area = "override", pushable = 0, xoffset = -16, yoffset = 12, bottomClampOverride = 140 + 12, width = 682, height = 487, whileDead = 1}
-
-				-- Size the quest log frame
-				QuestLogFrame:SetWidth(682)
-				QuestLogFrame:SetHeight(444 + tall)
-
-				hooksecurefunc("QuestLogDetailFrame_AttachToQuestLog", function()
-					QuestLogDetailScrollFrame:ClearAllPoints()
-					QuestLogDetailScrollFrame:SetPoint("TOPLEFT", QuestLogListScrollFrame, "TOPRIGHT", 28, -1)
-					QuestLogDetailScrollFrame:SetHeight(331 + tall)
-				end)
-
-				-- Expand the quest list to full height
-				QuestLogListScrollFrame:SetHeight(336 + tall - 4) -- Minus 4 for a slight bufffer
-
-				-- Create additional quest rows
-				local oldQuestsDisplayed = QUESTS_DISPLAYED
-				_G.QUESTS_DISPLAYED = _G.QUESTS_DISPLAYED + numTallQuests
-				for i = oldQuestsDisplayed + 1, QUESTS_DISPLAYED do
-					local button = CreateFrame("Button", "QuestLogTitle" .. i, QuestLogListScrollFrame.scrollChild, "QuestLogTitleButtonTemplate")
-					button:SetID(i)
-					button:Hide()
-					button:ClearAllPoints()
-					button:SetPoint("TOPLEFT", _G["QuestLogTitle" .. (i-1)], "BOTTOMLEFT", 0, 1)
-					button:SetPoint("TOPLEFT", QuestLogListScrollFrame.buttons[i - 1], "BOTTOMLEFT", 0, 0)
-					QuestLogListScrollFrame.buttons[i] = button
-				end
-
-				-- Get quest frame textures
-				local regions = {QuestLogFrame:GetRegions()}
-
-				-- Set top left texture
-				regions[2]:SetTexture("Interface\\AddOns\\Leatrix_Plus\\Leatrix_Plus")
-				regions[2]:SetTexCoord(0.25, 0.75, 0, 1)
-				regions[2]:SetSize(512, 506)
-
-				-- Set top right texture
-				regions[3]:ClearAllPoints()
-				regions[3]:SetPoint("TOPLEFT", regions[2], "TOPRIGHT", 0, 0)
-				regions[3]:SetTexture("Interface\\AddOns\\Leatrix_Plus\\Leatrix_Plus")
-				regions[3]:SetTexCoord(0.75, 1, 0, 1)
-				regions[3]:SetSize(256, 506)
-
-				-- Position and size close button
-				if LeaPlusLC.ElvUI then
-					QuestLogFrameCancelButton:ClearAllPoints()
-					QuestLogFrameCancelButton:SetPoint("BOTTOMRIGHT", QuestLogFrame, "BOTTOMRIGHT", -10, 11)
-					QuestLogFrameCancelButton:SetHeight(20)
-				end
-
-				-- Empty quest frame
-				QuestLogNoQuestsText:ClearAllPoints()
-				QuestLogNoQuestsText:SetPoint("CENTER", QuestLogListScrollFrame, 0, 0)
-				hooksecurefunc(EmptyQuestLogFrame, "Show", function()
-					EmptyQuestLogFrame:ClearAllPoints()
-					EmptyQuestLogFrame:SetPoint("BOTTOMLEFT", QuestLogFrame, "BOTTOMLEFT", 20, -4)
-					EmptyQuestLogFrame:SetHeight(447)
-				end)
-
-			end
-
 			-- Show quest level in quest log detail frame (but not when turning in quest)
 			hooksecurefunc("QuestLog_UpdateQuestDetails", function()
 				if LeaPlusLC["EnhanceQuestLevels"] == "On" then
@@ -7921,12 +8167,11 @@
 			local EnhanceQuestPanel = LeaPlusLC:CreatePanel("Enhance quest log", "EnhanceQuestPanel")
 
 			LeaPlusLC:MakeTx(EnhanceQuestPanel, "Settings", 16, -72)
-			LeaPlusLC:MakeCB(EnhanceQuestPanel, "EnhanceQuestTaller", "Taller quest log frame", 16, -92, true, "If checked, the quest log frame will be taller.")
-			LeaPlusLC:MakeCB(EnhanceQuestPanel, "EnhanceQuestHeaders", "Show toggle headers button", 16, -112, false, "If checked, the toggle headers button will be shown.")
+			LeaPlusLC:MakeCB(EnhanceQuestPanel, "EnhanceQuestHeaders", "Show toggle headers button", 16, -92, false, "If checked, the toggle headers button will be shown.")
 
-			LeaPlusLC:MakeTx(EnhanceQuestPanel, "Levels", 16, -152)
-			LeaPlusLC:MakeCB(EnhanceQuestPanel, "EnhanceQuestLevels", "Show quest levels", 16, -172, false, "If checked, quest levels will be shown.")
-			LeaPlusLC:MakeCB(EnhanceQuestPanel, "EnhanceQuestDifficulty", "Show quest difficulty in quest log list", 16, -192, false, "If checked, the quest difficulty will be shown next to the quest level in the quest log list.|n|nThis will indicate whether the quest requires a group (+), dungeon (D), raid (R) or PvP (P).|n|nThe quest difficulty will always be shown in the quest log detail pane regardless of this setting.")
+			LeaPlusLC:MakeTx(EnhanceQuestPanel, "Levels", 16, -132)
+			LeaPlusLC:MakeCB(EnhanceQuestPanel, "EnhanceQuestLevels", "Show quest levels", 16, -152, false, "If checked, quest levels will be shown.")
+			LeaPlusLC:MakeCB(EnhanceQuestPanel, "EnhanceQuestDifficulty", "Show quest difficulty in quest log list", 16, -172, false, "If checked, the quest difficulty will be shown next to the quest level in the quest log list.|n|nThis will indicate whether the quest requires a group (+), dungeon (D), raid (R) or PvP (P).|n|nThe quest difficulty will always be shown in the quest log detail pane regardless of this setting.")
 
 			-- Disable Show quest difficulty option if Show quest levels is disabled
 			LeaPlusCB["EnhanceQuestLevels"]:HookScript("OnClick", function()
@@ -8234,7 +8479,7 @@
 		--	Use class colors in chat
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ClassColorsInChat"] == "On" then
+		if LeaPlusLC["ClassColorsInChat"] == "On" and not LeaLockList["ClassColorsInChat"] then
 
 			SetCVar("chatClassColorOverride", "0")
 
@@ -8613,8 +8858,8 @@
 						else
 							-- Otherwise, search for the required item
 							local name = GetAuctionSellItemInfo()
-							BrowseName:SetText(name)
-							QueryAuctionItems(name, 0, 0, 0, false, 0, false, true)
+							BrowseName:SetText('"' .. name .. '"')
+							AuctionFrameBrowse_Search() -- Workaround for quoted search from QueryAuctionItems(name, 0, 0, 0, false, 0, false, true)
 							AuctionFrameTab1:Click()
 						end
 					end
@@ -9524,7 +9769,7 @@
 
 			-- Remove integrated movement function to avoid conflicts
 			_G.FocusFrame_SetLock = function() end
-			_G.FocusFrame_SetSmallSize = function() end
+			_G.FocusFrame.SetSmallSize = function() end
 
 			-- Allow focus frame to be moved
 			FocusFrame:SetMovable(true)
@@ -9754,14 +9999,18 @@
 
 			-- Function to highlight chat tabs and click to scroll to bottom
 			local function HighlightTabs(chtfrm)
-				-- Set position of bottom button
-				_G[chtfrm .. "ButtonFrameBottomButtonFlash"]:SetTexture("Interface/BUTTONS/GRADBLUE.png")
-				_G[chtfrm .. "ButtonFrameBottomButton"]:ClearAllPoints()
-				_G[chtfrm .. "ButtonFrameBottomButton"]:SetPoint("BOTTOM",_G[chtfrm .. "Tab"],0,-6)
-				_G[chtfrm .. "ButtonFrameBottomButton"]:Show()
-				_G[chtfrm .. "ButtonFrameBottomButtonFlash"]:SetAlpha(0.5)
-				_G[chtfrm .. "ButtonFrameBottomButton"]:SetWidth(_G[chtfrm .. "Tab"]:GetWidth()-10)
-				_G[chtfrm .. "ButtonFrameBottomButton"]:SetHeight(24)
+
+				-- Hide bottom button
+				_G[chtfrm .. "ButtonFrameBottomButton"]:SetSize(0.1, 0.1) -- Positions it away
+
+				-- Remove click from the bottom button
+				_G[chtfrm .. "ButtonFrameBottomButton"]:SetScript("OnClick", nil)
+
+				-- Remove textures
+				_G[chtfrm .. "ButtonFrameBottomButton"]:SetNormalTexture("")
+				_G[chtfrm .. "ButtonFrameBottomButton"]:SetHighlightTexture("")
+				_G[chtfrm .. "ButtonFrameBottomButton"]:SetPushedTexture("")
+				_G[chtfrm .. "ButtonFrameBottomButton"]:SetDisabledTexture("")
 
 				-- Resize bottom button according to tab size
 				_G[chtfrm .. "Tab"]:SetScript("OnSizeChanged", function()
@@ -9795,6 +10044,29 @@
 					end
 				end)
 
+				-- Create new bottom button under tab
+				_G[chtfrm .. "Tab"].newglow = _G[chtfrm .. "Tab"]:CreateTexture(nil, "BACKGROUND")
+				_G[chtfrm .. "Tab"].newglow:ClearAllPoints()
+				_G[chtfrm .. "Tab"].newglow:SetPoint("BOTTOMLEFT", _G[chtfrm .. "Tab"], "BOTTOMLEFT", 0, 0)
+				_G[chtfrm .. "Tab"].newglow:SetTexture("Interface\\ChatFrame\\ChatFrameTab-NewMessage")
+				_G[chtfrm .. "Tab"].newglow:SetWidth(_G[chtfrm .. "Tab"]:GetWidth())
+				_G[chtfrm .. "Tab"].newglow:SetVertexColor(0.6, 0.6, 1, 1)
+				_G[chtfrm .. "Tab"].newglow:Hide()
+
+				-- Show new bottom button when old one glows
+				_G[chtfrm .. "ButtonFrameBottomButtonFlash"]:HookScript("OnShow", function(self,arg1)
+					_G[chtfrm .. "Tab"].newglow:Show()
+				end)
+
+				_G[chtfrm .. "ButtonFrameBottomButtonFlash"]:HookScript("OnHide", function(self,arg1)
+					_G[chtfrm .. "Tab"].newglow:Hide()
+				end)
+
+				-- Match new bottom button size to tab
+				_G[chtfrm .. "Tab"]:HookScript("OnSizeChanged", function()
+					_G[chtfrm .. "Tab"].newglow:SetWidth(_G[chtfrm .. "Tab"]:GetWidth())
+				end)
+
 			end
 
 			-- Hide chat menu buttons
@@ -9825,13 +10097,16 @@
 				end
 			end)
 
+			-- Hide text to speech button
+			TextToSpeechButton:SetParent(tframe)
+
 		end
 
 		----------------------------------------------------------------------
 		-- Recent chat window
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["RecentChatWindow"] == "On" then
+		if LeaPlusLC["RecentChatWindow"] == "On" and not LeaLockList["RecentChatWindow"] then
 
 			-- Create recent chat frame
 			local editFrame = CreateFrame("ScrollFrame", nil, UIParent, "InputScrollFrameTemplate")
@@ -9896,8 +10171,7 @@
 
 			-- Drag to resize
 			editFrame:SetResizable(true)
-			editFrame:SetMinResize(600, 170)
-			editFrame:SetMaxResize(600, 560)
+			editFrame:SetResizeBounds(600, 170, 600, 560)
 
 			titleFrame:HookScript("OnMouseDown", function(self, btn)
 				if btn == "LeftButton" then
@@ -9923,6 +10197,7 @@
 			editBox:SetTextInsets(4, 4, 4, 4)
 			editBox:SetWidth(editFrame:GetWidth() - 30)
 			editBox:SetSecurityDisablePaste()
+			editBox:SetMaxLetters(0)
 
 			-- Manage focus
 			editBox:HookScript("OnEditFocusLost", function()
@@ -9977,7 +10252,7 @@
 					local chatMessage, r, g, b, chatTypeID = chtfrm:GetMessageInfo(iMsg)
 					if chatMessage then
 
-						-- Handle Battle.net
+						-- Handle Battle.net messages
 						if string.match(chatMessage, "k:(%d+):(%d+):BN_WHISPER:")
 						or string.match(chatMessage, "k:(%d+):(%d+):BN_INLINE_TOAST_ALERT:")
 						or string.match(chatMessage, "k:(%d+):(%d+):BN_INLINE_TOAST_BROADCAST:")
@@ -10008,6 +10283,7 @@
 						end
 
 						chatMessage = gsub(chatMessage, "|T.-|t", "") -- Remove textures
+						chatMessage = gsub(chatMessage, "|A.-|a", "") -- Remove atlases
 						editBox:Insert(chatMessage .. "|r|n")
 
 					end
@@ -11145,7 +11421,7 @@
 		--	Move chat editbox to top
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["MoveChatEditBoxToTop"] == "On" then
+		if LeaPlusLC["MoveChatEditBoxToTop"] == "On" and not LeaLockList["MoveChatEditBoxToTop"] then
 
 			-- Set options for normal chat frames
 			for i = 1, 50 do
@@ -11410,7 +11686,7 @@
 			subTitle:ClearAllPoints()
 			subTitle:SetPoint("BOTTOM", 0, 72)
 
-			local slashTitle = LeaPlusLC:MakeTx(interPanel, "/ltp", 0, 0)
+			local slashTitle = LeaPlusLC:MakeTx(interPanel, "/run leaplus()", 0, 0)
 			slashTitle:SetFont(slashTitle:GetFont(), 72)
 			slashTitle:ClearAllPoints()
 			slashTitle:SetPoint("BOTTOM", subTitle, "TOP", 0, 40)
@@ -11432,7 +11708,7 @@
 		-- Show first run message
 		if not LeaPlusDB["FirstRunMessageSeen"] then
 			C_Timer.After(1, function()
-				LeaPlusLC:Print(L["Enter"] .. " |cff00ff00" .. "/ltp" .. "|r " .. L["or click the minimap button to open Leatrix Plus."])
+				LeaPlusLC:Print(L["Enter"] .. " |cff00ff00" .. "/run leaplus()" .. "|r " .. L["or click the minimap button to open Leatrix Plus."])
 				LeaPlusDB["FirstRunMessageSeen"] = true
 			end)
 		end
@@ -12384,19 +12660,22 @@
 
 		if event == "CHAT_MSG_WHISPER" or event == "CHAT_MSG_BN_WHISPER" then
 			if (not UnitExists("party1") or UnitIsGroupLeader("player") or UnitIsGroupAssistant("player")) and strlower(strtrim(arg1)) == strlower(LeaPlusLC["InvKey"]) then
-				if not LeaPlusLC:IsInLFGQueue() then -- Needed as invite can reset battleground queue timer
+				if not LeaPlusLC:IsInLFGQueue() then
 					if event == "CHAT_MSG_WHISPER" then
-						if LeaPlusLC:FriendCheck(strsplit("-", arg2, 2)) or LeaPlusLC["InviteFriendsOnly"] == "Off" then
+						local void, void, void, void, viod, void, void, void, void, guid = ...
+						if LeaPlusLC:FriendCheck(arg2, guid) or LeaPlusLC["InviteFriendsOnly"] == "Off" then
 							InviteUnit(arg2)
 						end
 					elseif event == "CHAT_MSG_BN_WHISPER" then
 						local presenceID = select(11, ...)
 						if presenceID and BNIsFriend(presenceID) then
-							local index = BNGetFriendIndex(presenceID);
+							local index = BNGetFriendIndex(presenceID)
 							if index then
-								local presenceID, presenceName, battleTag, isBattleTagPresence, toonName, toonID = BNGetFriendInfo(index);
-								if toonID then
-									BNInviteFriend(toonID);
+								local accountInfo = C_BattleNet.GetFriendAccountInfo(index)
+								local gameAccountInfo = accountInfo.gameAccountInfo
+								local gameAccountID = gameAccountInfo.gameAccountID
+								if gameAccountID then
+									BNInviteFriend(gameAccountID)
 								end
 							end
 						end
@@ -12411,8 +12690,8 @@
 		----------------------------------------------------------------------
 
 		if event == "DUEL_REQUESTED" and not LeaPlusLC:FriendCheck(arg1) then
-			CancelDuel();
-			StaticPopup_Hide("DUEL_REQUESTED");
+			CancelDuel()
+			StaticPopup_Hide("DUEL_REQUESTED")
 			return
 		end
 
@@ -12439,13 +12718,14 @@
 		end
 
 		----------------------------------------------------------------------
-		-- Block party invites
+		-- Block party invites and party from friends
 		----------------------------------------------------------------------
 
 		if event == "PARTY_INVITE_REQUEST" then
 
 			-- If a friend, accept if you're accepting friends and not in battleground queue
-			if (LeaPlusLC["AcceptPartyFriends"] == "On" and LeaPlusLC:FriendCheck(arg1)) then
+			local void, void, void, void, guid = ...
+			if (LeaPlusLC["AcceptPartyFriends"] == "On" and LeaPlusLC:FriendCheck(arg1, guid)) then
 				if not LeaPlusLC:IsInLFGQueue() then
 					AcceptGroup()
 					for i=1, STATICPOPUP_NUMDIALOGS do
@@ -12465,12 +12745,12 @@
 
 			-- If not a friend and you're blocking invites, decline
 			if LeaPlusLC["NoPartyInvites"] == "On" then
-				if LeaPlusLC:FriendCheck(arg1) then
+				if LeaPlusLC:FriendCheck(arg1, guid) then
 					return
 				else
-					DeclineGroup();
-					StaticPopup_Hide("PARTY_INVITE");
-					StaticPopup_Hide("PARTY_INVITE_XREALM");
+					DeclineGroup()
+					StaticPopup_Hide("PARTY_INVITE")
+					StaticPopup_Hide("PARTY_INVITE_XREALM")
 					return
 				end
 			end
@@ -12644,7 +12924,6 @@
 				LeaPlusLC:LoadVarChk("DressupAnimControl", "On")			-- Dressup animation control
 				LeaPlusLC:LoadVarChk("HideDressupStats", "Off")				-- Hide dressup stats
 				LeaPlusLC:LoadVarChk("EnhanceQuestLog", "Off")				-- Enhance quest log
-				LeaPlusLC:LoadVarChk("EnhanceQuestTaller", "On")			-- Enhance quest log taller
 				LeaPlusLC:LoadVarChk("EnhanceQuestHeaders", "On")			-- Enhance quest log toggle headers
 				LeaPlusLC:LoadVarChk("EnhanceQuestLevels", "On")			-- Enhance quest log quest levels
 				LeaPlusLC:LoadVarChk("EnhanceQuestDifficulty", "On")		-- Enhance quest log quest difficulty
@@ -12756,6 +13035,8 @@
 
 				LeaPlusLC:LoadVarChk("NoRestedEmotes", "Off")				-- Silence rested emotes
 				LeaPlusLC:LoadVarChk("MuteGameSounds", "Off")				-- Mute game sounds
+				LeaPlusLC:LoadVarChk("MuteCustomSounds", "Off")				-- Mute custom sounds
+				LeaPlusLC:LoadVarStr("MuteCustomList", "")					-- Mute custom sounds list
 
 				LeaPlusLC:LoadVarChk("NoBagAutomation", "Off")				-- Disable bag automation
 				LeaPlusLC:LoadVarChk("CharAddonList", "Off")				-- Show character addons
@@ -12785,102 +13066,134 @@
 				-- Start page
 				LeaPlusLC:LoadVarNum("LeaStartPage", 0, 0, LeaPlusLC["NumberOfPages"])
 
-				-- Disable items that conflict with ElvUI
-				if LeaPlusLC.ElvUI then
-					local E = LeaPlusLC.ElvUI
-					if E and E.private then
+				-- Lock conflicting options
+				do
 
-						-- Function to disable and lock an option and add a note to the tooltip
-						local function LockOption(option, emodule)
-							LeaLockList[option] = LeaPlusLC[option]
-							LeaPlusLC:LockItem(LeaPlusCB[option], true)
-							if emodule == "Base" then
-								LeaPlusCB[option].tiptext = LeaPlusCB[option].tiptext .. "|n|n|cff00AAFF" .. L["Cannot be used with ElvUI."]
-							else
-								LeaPlusCB[option].tiptext = LeaPlusCB[option].tiptext .. "|n|n|cff00AAFF" .. L["Cannot be used with ElvUI"] .. " " .. L[emodule] .. " " .. L["module"] .. "."
-							end
+					-- Function to disable and lock an option and add a note to the tooltip
+					local function Lock(option, reason, optmodule)
+						LeaLockList[option] = LeaPlusLC[option]
+						LeaPlusLC:LockItem(LeaPlusCB[option], true)
+						LeaPlusCB[option].tiptext = LeaPlusCB[option].tiptext .. "|n|n|cff00AAFF" .. reason
+						if optmodule then
+							LeaPlusCB[option].tiptext = LeaPlusCB[option].tiptext .. " " .. optmodule .. " " .. L["module"]
 						end
-
-						-- Chat
-						if E.private.chat.enable then
-							LockOption("UseEasyChatResizing", "Chat") -- Use easy resizing
-							LockOption("NoCombatLogTab", "Chat") -- Hide the combat log
-							LockOption("NoChatButtons", "Chat") -- Hide chat buttons
-							LockOption("UnclampChat", "Chat") -- Unclamp chat frame
-							LockOption("MoreFontSizes", "Chat") --  More font sizes
-							LockOption("NoStickyChat", "Chat") -- Disable sticky chat
-							LockOption("UseArrowKeysInChat", "Chat") -- Use arrow keys in chat
-							LockOption("NoChatFade", "Chat") -- Disable chat fade
-							LockOption("MaxChatHstory", "Chat") -- Increase chat history
-							LockOption("RestoreChatMessages", "Chat") -- Restore chat messages
+						LeaPlusCB[option].tiptext = LeaPlusCB[option].tiptext .. "."
+						-- Remove hover from configuration button if there is one
+						local temp = {LeaPlusCB[option]:GetChildren()}
+						if temp and temp[1] and temp[1].t and temp[1].t:GetTexture() == "Interface\\WorldMap\\Gear_64.png" then
+							temp[1]:SetHighlightTexture(0)
+							temp[1]:SetScript("OnEnter", nil)
 						end
-
-						-- Minimap
-						if E.private.general.minimap.enable then
-							LockOption("MinimapModder", "Minimap") -- Enhance minimap
-						end
-
-						-- UnitFrames
-						if E.private.unitframe.enable then
-							LockOption("ShowRaidToggle", "UnitFrames") -- Show raid button
-						end
-
-						-- ActionBars
-						if E.private.actionbar.enable then
-							LockOption("NoGryphons", "ActionBars") -- Hide gryphons
-							LockOption("NoClassBar", "ActionBars") -- Hide stance bar
-							LockOption("HideKeybindText", "ActionBars") -- Hide keybind text
-							LockOption("HideMacroText", "ActionBars") -- Hide macro text
-						end
-
-						-- Bags
-						if E.private.bags.enable then
-							LockOption("NoBagAutomation", "Bags") -- Disable bag automation
-							LockOption("ShowBagSearchBox", "Bags") -- Show bag search box
-						end
-
-						-- Tooltip
-						if E.private.tooltip.enable then
-							LockOption("TipModEnable", "Tooltip") -- Enhance tooltip
-						end
-
-						-- Buffs: Disable Blizzard
-						if E.private.auras.disableBlizzard then
-							LockOption("ManageBuffs", "Buffs and Debuffs (Disable Blizzard)") -- Manage buffs
-						end
-
-						-- UnitFrames: Disabled Blizzard: Focus
-						if E.private.unitframe.disabledBlizzardFrames.focus then
-							LockOption("ManageFocus", "UnitFrames (Disabled Blizzard Frames Focus)") -- Manage focus
-						end
-
-						-- UnitFrames: Disabled Blizzard: Player
-						if E.private.unitframe.disabledBlizzardFrames.player then
-							LockOption("ShowPlayerChain", "UnitFrames (Disabled Blizzard Frames Player)") -- Show player chain
-							LockOption("NoHitIndicators", "UnitFrames (Disabled Blizzard Frames Player)") -- Hide portrait numbers
-						end
-
-						-- UnitFrames: Disabled Blizzard: Player and Target
-						if E.private.unitframe.disabledBlizzardFrames.player or E.private.unitframe.disabledBlizzardFrames.target then
-							LockOption("FrmEnabled", "UnitFrames (Disabled Blizzard Frames Player and Target)") -- Manage frames
-						end
-
-						-- UnitFrames: Disabled Blizzard: Player, Target and Focus
-						if E.private.unitframe.disabledBlizzardFrames.player or E.private.unitframe.disabledBlizzardFrames.target or E.private.unitframe.disabledBlizzardFrames.focus then
-							LockOption("ClassColFrames", "UnitFrames (Disabled Blizzard Frames Player, Target and Focus)") -- Class-colored frames
-						end
-
-						-- Base
-						do
-							LockOption("ManageWidget", "Base") -- Manage widget
-							LockOption("ManageTimer", "Base") -- Manage timer
-							LockOption("ManageDurability", "Base") -- Manage durability
-							LockOption("ManageVehicle", "Base") -- Manage vehicle
-						end
-
 					end
 
-					EnableAddOn("Leatrix_Plus")
+					-- Disable items that conflict with Glass
+					if LeaPlusLC.Glass then
+						local reason = L["Cannot be used with Glass"]
+						Lock("UseEasyChatResizing", reason) -- Use easy resizing
+						Lock("NoCombatLogTab", reason) -- Hide the combat log
+						Lock("NoChatButtons", reason) -- Hide chat buttons
+						Lock("UnclampChat", reason) -- Unclamp chat frame
+						Lock("MoveChatEditBoxToTop", reason) -- Move editbox to top
+						Lock("MoreFontSizes", reason) --  More font sizes
+						Lock("NoChatFade", reason) --  Disable chat fade
+						Lock("ClassColorsInChat", reason) -- Use class colors in chat
+						Lock("RecentChatWindow", reason) -- Recent chat window
+					end
+
+					-- Disable items that conflict with ElvUI
+					if LeaPlusLC.ElvUI then
+						local E = LeaPlusLC.ElvUI
+						if E and E.private then
+
+							local reason = L["Cannot be used with ElvUI"]
+
+							-- Chat
+							if E.private.chat.enable then
+								Lock("UseEasyChatResizing", reason, "Chat") -- Use easy resizing
+								Lock("NoCombatLogTab", reason, "Chat") -- Hide the combat log
+								Lock("NoChatButtons", reason, "Chat") -- Hide chat buttons
+								Lock("UnclampChat", reason, "Chat") -- Unclamp chat frame
+								Lock("MoreFontSizes", reason, "Chat") --  More font sizes
+								Lock("NoStickyChat", reason, "Chat") -- Disable sticky chat
+								Lock("UseArrowKeysInChat", reason, "Chat") -- Use arrow keys in chat
+								Lock("NoChatFade", reason, "Chat") -- Disable chat fade
+								Lock("MaxChatHstory", reason, "Chat") -- Increase chat history
+								Lock("RestoreChatMessages", reason, "Chat") -- Restore chat messages
+							end
+
+							-- Minimap
+							if E.private.general.minimap.enable then
+								Lock("MinimapModder", reason, "Minimap") -- Enhance minimap
+							end
+
+							-- UnitFrames
+							if E.private.unitframe.enable then
+								Lock("ShowRaidToggle", reason, "UnitFrames") -- Show raid button
+							end
+
+							-- ActionBars
+							if E.private.actionbar.enable then
+								Lock("NoGryphons", reason, "ActionBars") -- Hide gryphons
+								Lock("NoClassBar", reason, "ActionBars") -- Hide stance bar
+								Lock("HideKeybindText", reason, "ActionBars") -- Hide keybind text
+								Lock("HideMacroText", reason, "ActionBars") -- Hide macro text
+							end
+
+							-- Bags
+							if E.private.bags.enable then
+								Lock("NoBagAutomation", reason, "Bags") -- Disable bag automation
+								Lock("ShowBagSearchBox", reason, "Bags") -- Show bag search box
+							end
+
+							-- Tooltip
+							if E.private.tooltip.enable then
+								Lock("TipModEnable", reason, "Tooltip") -- Enhance tooltip
+							end
+
+							-- Buffs: Disable Blizzard
+							if E.private.auras.disableBlizzard then
+								Lock("ManageBuffs", reason, "Buffs and Debuffs (Disable Blizzard)") -- Manage buffs
+							end
+
+							-- UnitFrames: Disabled Blizzard: Focus
+							if E.private.unitframe.disabledBlizzardFrames.focus then
+								Lock("ManageFocus", reason, "UnitFrames (Disabled Blizzard Frames Focus)") -- Manage focus
+							end
+
+							-- UnitFrames: Disabled Blizzard: Player
+							if E.private.unitframe.disabledBlizzardFrames.player then
+								Lock("ShowPlayerChain", reason, "UnitFrames (Disabled Blizzard Frames Player)") -- Show player chain
+								Lock("NoHitIndicators", reason, "UnitFrames (Disabled Blizzard Frames Player)") -- Hide portrait numbers
+							end
+
+							-- UnitFrames: Disabled Blizzard: Player and Target
+							if E.private.unitframe.disabledBlizzardFrames.player or E.private.unitframe.disabledBlizzardFrames.target then
+								Lock("FrmEnabled", reason, "UnitFrames (Disabled Blizzard Frames Player and Target)") -- Manage frames
+							end
+
+							-- UnitFrames: Disabled Blizzard: Player, Target and Focus
+							if E.private.unitframe.disabledBlizzardFrames.player or E.private.unitframe.disabledBlizzardFrames.target or E.private.unitframe.disabledBlizzardFrames.focus then
+								Lock("ClassColFrames", reason, "UnitFrames (Disabled Blizzard Frames Player, Target and Focus)") -- Class-colored frames
+							end
+
+							-- Skins: Blizzard Gossip Frame
+							if E.private.skins.blizzard.enable and E.private.skins.blizzard.gossip then
+								Lock("QuestFontChange", reason, "Skins (Blizzard Gossip Frame)") -- Resize quest font
+							end
+
+							-- Base
+							do
+								Lock("ManageWidget", reason) -- Manage widget
+								Lock("ManageTimer", reason) -- Manage timer
+								Lock("ManageDurability", reason) -- Manage durability
+								Lock("ManageVehicle", reason) -- Manage vehicle
+							end
+
+						end
+
+						EnableAddOn("Leatrix_Plus")
+					end
+
 				end
 
 				-- Run other startup items
@@ -13021,7 +13334,6 @@
 			LeaPlusDB["DressupAnimControl"]		= LeaPlusLC["DressupAnimControl"]
 			LeaPlusDB["HideDressupStats"]		= LeaPlusLC["HideDressupStats"]
 			LeaPlusDB["EnhanceQuestLog"]		= LeaPlusLC["EnhanceQuestLog"]
-			LeaPlusDB["EnhanceQuestTaller"]		= LeaPlusLC["EnhanceQuestTaller"]
 			LeaPlusDB["EnhanceQuestHeaders"]	= LeaPlusLC["EnhanceQuestHeaders"]
 			LeaPlusDB["EnhanceQuestLevels"]		= LeaPlusLC["EnhanceQuestLevels"]
 			LeaPlusDB["EnhanceQuestDifficulty"]	= LeaPlusLC["EnhanceQuestDifficulty"]
@@ -13134,6 +13446,8 @@
 
 			LeaPlusDB["NoRestedEmotes"]			= LeaPlusLC["NoRestedEmotes"]
 			LeaPlusDB["MuteGameSounds"]			= LeaPlusLC["MuteGameSounds"]
+			LeaPlusDB["MuteCustomSounds"]		= LeaPlusLC["MuteCustomSounds"]
+			LeaPlusDB["MuteCustomList"]			= LeaPlusLC["MuteCustomList"]
 
 			LeaPlusDB["NoBagAutomation"]		= LeaPlusLC["NoBagAutomation"]
 			LeaPlusDB["CharAddonList"]			= LeaPlusLC["CharAddonList"]
@@ -13225,7 +13539,7 @@
 
 		-- Use class colors
 		if LeaPlusDB["ClassColorsInChat"] == "On" then
-			if wipe or (not wipe and LeaPlusLC["ClassColorsInChat"] == "Off") then
+			if wipe or (not wipe and LeaPlusLC["ClassColorsInChat"] == "Off") and not LeaLockList["ClassColorsInChat"] then
 				-- Restore local channel color
 				for i = 1, 18 do
 					if _G["ChatConfigChatSettingsLeftCheckBox" .. i .. "Check"] then
@@ -14575,10 +14889,8 @@
 			elseif str == "camp" then
 				-- Camp
 				if not LeaPlusLC.NoCampFrame then
-					-- First time initialisation
-					if not LibStub("LibChatAnims", true) then
-						Leatrix_Plus:LeaPlusLCA()
-					end
+					-- Load LibChatAnims
+					Leatrix_Plus:LeaPlusLCA()
 					-- Chat filter
 					function LeaPlusLC.CampFilterFunc(self, event, msg)
 						if msg:match(_G["MARKED_AFK_MESSAGE"]:gsub("%%s", "%s-"))
@@ -15149,7 +15461,6 @@
 				LeaPlusDB["EnhanceDressup"] = "On"				-- Enhance dressup
 				LeaPlusDB["HideDressupStats"] = "On"			-- Hide dressup stats
 				LeaPlusDB["EnhanceQuestLog"] = "On"				-- Enhance quest log
-				LeaPlusDB["EnhanceQuestTaller"] = "On"			-- Enhance quest log taller
 				LeaPlusDB["EnhanceQuestHeaders"] = "On"			-- Enhance quest log toggle headers
 				LeaPlusDB["EnhanceQuestLevels"] = "On"			-- Enhance quest log quest levels
 				LeaPlusDB["EnhanceQuestDifficulty"] = "On"		-- Enhance quest log quest difficulty
@@ -15252,6 +15563,8 @@
 				LeaPlusDB["ViewPortEnable"] = "On"				-- Enable viewport
 				LeaPlusDB["NoRestedEmotes"] = "On"				-- Silence rested emotes
 				LeaPlusDB["MuteGameSounds"] = "On"				-- Mute game sounds
+				LeaPlusDB["MuteCustomSounds"] = "On"			-- Mute custom sounds
+				LeaPlusDB["MuteCustomList"] = ""				-- Mute custom sounds list
 
 				LeaPlusDB["NoBagAutomation"] = "On"				-- Disable bag automation
 				LeaPlusDB["CharAddonList"] = "On"				-- Show character addons
@@ -15334,8 +15647,10 @@
 	end
 
 	-- Slash command for global function
-	_G.SLASH_Leatrix_Plus1 = "/ltp"
-	_G.SLASH_Leatrix_Plus2 = "/leaplus"
+	-- _G.SLASH_Leatrix_Plus1 = "/ltp"
+	-- _G.SLASH_Leatrix_Plus2 = "/leaplus"
+	_G.SLASH_Leatrix_Plus1 = "/ztp" -- temp
+
 	SlashCmdList["Leatrix_Plus"] = function(self)
 		-- Run slash command function
 		LeaPlusLC:SlashFunc(self)
@@ -15349,6 +15664,14 @@
 	SlashCmdList["LEATRIX_PLUS_RL"] = function()
 		ReloadUI()
 	end
+
+	-- Replacement for broken slash command system
+	function leaplus(self)
+		LeaPlusLC:SlashFunc(self)
+	end
+
+	-- To reproduce slash command bug, enter combat, enter an addn related slash command, toggle tracking on a
+	-- quest 4 times then click that quest in the objective tracker.
 
 ----------------------------------------------------------------------
 -- 	L90: Create options panel pages (no content yet)
@@ -15634,6 +15957,7 @@
 	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ViewPortEnable"			,	"Enable viewport"				,	146, -172, 	true,	"If checked, you will be able to create a viewport.  A viewport adds adjustable black borders around the game world.|n|nThe borders are placed on top of the game world but under the UI so you can place UI elements over them.")
 	LeaPlusLC:MakeCB(LeaPlusLC[pg], "NoRestedEmotes"			, 	"Silence rested emotes"			,	146, -192, 	true,	"If checked, emote sounds will be silenced while your character is resting or at the Grim Guzzler.|n|nEmote sounds will be enabled at all other times.")
 	LeaPlusLC:MakeCB(LeaPlusLC[pg], "MuteGameSounds"			, 	"Mute game sounds"				,	146, -212, 	false,	"If checked, you will be able to mute a selection of game sounds.")
+	LeaPlusLC:MakeCB(LeaPlusLC[pg], "MuteCustomSounds"			, 	"Mute custom sounds"			,	146, -232, 	false,	"If checked, you will be able to mute your own choice of sounds.")
 
 	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Game Options"				, 	340, -72);
 	LeaPlusLC:MakeCB(LeaPlusLC[pg], "NoBagAutomation"			, 	"Disable bag automation"		, 	340, -92, 	true,	"If checked, your bags will not be opened or closed automatically when you interact with a merchant, bank or mailbox.")
@@ -15649,6 +15973,7 @@
 	LeaPlusLC:CfgBtn("SetWeatherDensityBtn", LeaPlusCB["SetWeatherDensity"])
 	LeaPlusLC:CfgBtn("ModViewportBtn", LeaPlusCB["ViewPortEnable"])
 	LeaPlusLC:CfgBtn("MuteGameSoundsBtn", LeaPlusCB["MuteGameSounds"])
+	LeaPlusLC:CfgBtn("MuteCustomSoundsBtn", LeaPlusCB["MuteCustomSounds"])
 	LeaPlusLC:CfgBtn("DismountBtn", LeaPlusCB["StandAndDismount"])
 
 ----------------------------------------------------------------------
