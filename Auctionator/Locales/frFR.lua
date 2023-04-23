@@ -112,6 +112,12 @@ L["CONFIG_SELLING_ALL_ITEMS_CATEGORY"] = "Vente : Objets"
 L["CONFIG_SELLING_AUTO_SELECT_NEXT"] = "Sélection automatique de l'objet suivant"
 L["CONFIG_SELLING_AUTO_SELECT_NEXT_TOOLTIP_HEADER"] = "Sélectionne automatiquement l'objet suivant"
 L["CONFIG_SELLING_AUTO_SELECT_NEXT_TOOLTIP_TEXT"] = "Après une mise en vente, l'objet suivant sera automatiquement sélectionné."
+--[[Translation missing --]]
+L["CONFIG_SELLING_AUTO_SELECT_STACK_REMAINDER"] = "Select any partial stacks that exist after posting all complete stacks."
+--[[Translation missing --]]
+L["CONFIG_SELLING_AUTO_SELECT_STACK_REMAINDER_TOOLTIP_HEADER"] = "Automatic partial stack selection"
+--[[Translation missing --]]
+L["CONFIG_SELLING_AUTO_SELECT_STACK_REMAINDER_TOOLTIP_TEXT"] = "When posting add the partial stack as the next item to post if it exists. This won't cause any further searches."
 L["CONFIG_SELLING_BAG_SELECT_SHORTCUT"] = "sur un objet de votre inventaire le placera dans l'onglet Vente."
 L["CONFIG_SELLING_BUY_SHORTCUT"] = "sur une vente que vous ne possédez pas pour l'acheter."
 L["CONFIG_SELLING_CANCEL_SHORTCUT"] = "sur l'une de vos ventes pour l'annuler."

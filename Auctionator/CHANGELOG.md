@@ -1,17 +1,12 @@
 # Auctionator
 
-## [10.0.44](https://github.com/Auctionator/Auctionator/tree/10.0.44) (2023-03-28)
-[Full Changelog](https://github.com/Auctionator/Auctionator/compare/10.0.42...10.0.44) 
+## [10.0.45](https://github.com/Auctionator/Auctionator/tree/10.0.45) (2023-04-08)
+[Full Changelog](https://github.com/Auctionator/Auctionator/compare/10.0.44...10.0.45) 
 
-- [Fixes #1284] Classic: CraftingInfo: Show profit for enchants  
-- Remove unused frame name from list export and csv export dialog  
-- Shopping: Fix "Sort" button not working  
-- Mainline: CraftingInfo: Reposition for Blizz layout change on craft panel  
-- Update toc for 10.0.7  
-- [Fixes #1293] Mainline: Add expansion filter for shopping searches  
-- Shopping refactor (#1367)  
-    * Refactor shopping list code  
-    * Use ScrollBox for export list options frame  
-    * Use ScrollBox for import/export text frames  
-- [Fixes #1370] Mainline: CraftingInfo: Lua error in abominable stitching  
-- Restore "[Fixes #1364] Mainline: Cancelling: Option to ignore item level and"  
+- [Fixes #1373] Classic: Option to select remaining partial stacks when posting  
+- Mainline: Selling: Show seller names in sell search item row tooltip  
+- Add addon icon for addon list in 10.1.0  
+- Mainline: Fix for GetAddOnMetadata API on latest 10.1.0 build  
+- Use Blizzard frame pools instead of custom frame pools  
+- SplashScreen: Fix missing template error on classic era for close button  
+- Selling: Simplify scroll offset saving in bag view when collapsing sections  

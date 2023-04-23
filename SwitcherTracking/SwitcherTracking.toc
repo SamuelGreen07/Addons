@@ -1,0 +1,12 @@
+## Interface: 30401
+
+## Title: Switcher Tracking TBC-WOTLK Classic multilanguage
+## Version: 3.4.1
+## Author: lanscetre
+## Notes: Addon to switch between trackings when out of combat.
+## SavedVariables: TrackingSwitcherDB
+## SavedVariablesPerCharacter: SwitcherTrackingCharDB
+
+embeds.xml
+
+SwitcherTracking.lua
