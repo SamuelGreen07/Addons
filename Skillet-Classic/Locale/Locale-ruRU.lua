@@ -61,6 +61,8 @@ L["CONFIRMQUEUECLEARDESC"] = "Для сброса очереди использ�
 L["CONFIRMQUEUECLEARNAME"] = "Использовать Alt-нажатие для сброса очереди"
 L["Conflict with the addon TradeSkillMaster"] = "Конфликт с аддоном TradeSkillMaster"
 L["Copy"] = "Копировать"
+--[[Translation missing --]]
+L["Cost"] = "Cost"
 L["Could not find bag space for"] = "Нет места в сумках для"
 L["craftable"] = "создаваемый"
 L["CRAFTBUTTONSDESC"] = [=[Включить кнопки изготовить в рамку
@@ -165,6 +167,8 @@ L["Lock/Unlock"] = "Закрепить/Открепить"
 L["Market"] = "Торговля"
 L["Merchant"] = "Торговец"
 L["Merge items"] = "Объединить предметы"
+--[[Translation missing --]]
+L["Most Sold"] = "Most Sold"
 L["Move Down"] = "Преместить на позицию ниже"
 L["Move to Bottom"] = "Переместить в конец очереди"
 L["Move to Top"] = "Переместить в начало очереди"
@@ -230,6 +234,8 @@ L["Retrieve"] = "Отыскивать"
 L["Right-Click for filtering options"] = "Нажать правой кнопкой мышки для фильтрации настроек"
 --[[Translation missing --]]
 L["Sales for "] = "Sales for "
+--[[Translation missing --]]
+L["Sales Rate"] = "Sales Rate"
 L["Same faction"] = "Та же фракция"
 L["Save"] = "Сохранить"
 L["Scale"] = "Масштаб"
@@ -288,6 +294,8 @@ L["Start"] = "Начать"
 --[[Translation missing --]]
 L["Stop"] = "Stop"
 L["SubClass"] = "Подкласс"
+--[[Translation missing --]]
+L["Suffix"] = "Suffix"
 L["SUPPORTCRAFTINGDESC"] = "Включите поддержку для ремесленных профессий (требуется /reload)"
 L["SUPPORTCRAFTINGNAME"] = "Поддержка ремесла"
 L["Supported Addons"] = "Поддерживаемые модификации"

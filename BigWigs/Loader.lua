@@ -32,7 +32,7 @@ do
 	local RELEASE = "RELEASE"
 
 	local releaseType = RELEASE
-	local myGitHash = "9581348" -- The ZIP packager will replace this with the Git hash.
+	local myGitHash = "b4b1c17" -- The ZIP packager will replace this with the Git hash.
 	local releaseString = ""
 	--[=[@alpha@
 	-- The following code will only be present in alpha ZIPs.
@@ -243,7 +243,7 @@ end
 --
 
 local EnableAddOn, GetAddOnEnableState, GetAddOnInfo, IsAddOnLoaded, LoadAddOn = EnableAddOn, GetAddOnEnableState, GetAddOnInfo, IsAddOnLoaded, LoadAddOn
-local GetAddOnMetadata, IsInGroup, IsInRaid, UnitAffectingCombat = GetAddOnMetadata, IsInGroup, IsInRaid, UnitAffectingCombat
+local GetAddOnMetadata, IsInGroup, IsInRaid, UnitAffectingCombat = GetAddOnMetadata or C_AddOns.GetAddOnMetadata, IsInGroup, IsInRaid, UnitAffectingCombat
 local UnitIsDeadOrGhost, UnitSetRole = UnitIsDeadOrGhost, UnitSetRole
 
 local reqFuncAddons = {

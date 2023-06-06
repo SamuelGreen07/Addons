@@ -67,6 +67,8 @@ L["CONFIRMQUEUECLEARDESC"] = "使用Alt+左键代替左键来清除队列"
 L["CONFIRMQUEUECLEARNAME"] = "使用Alt键单击来清除队列"
 L["Conflict with the addon TradeSkillMaster"] = "与TradeSkillMaster插件冲突"
 L["Copy"] = "复制"
+--[[Translation missing --]]
+L["Cost"] = "Cost"
 L["Could not find bag space for"] = "背包无可用空格"
 L["craftable"] = "可制造"
 L["CRAFTBUTTONSDESC"] = "框架中包含专业制作按钮"
@@ -176,6 +178,8 @@ L["Market"] = "市场"
 --[[Translation missing --]]
 L["Merchant"] = "Merchant"
 L["Merge items"] = "合并物品"
+--[[Translation missing --]]
+L["Most Sold"] = "Most Sold"
 L["Move Down"] = "下移"
 L["Move to Bottom"] = "下移至底部"
 L["Move to Top"] = "上移至顶部"
@@ -242,6 +246,8 @@ L["Retrieve"] = "收回"
 L["Right-Click for filtering options"] = "Right-Click for filtering options"
 --[[Translation missing --]]
 L["Sales for "] = "Sales for "
+--[[Translation missing --]]
+L["Sales Rate"] = "Sales Rate"
 L["Same faction"] = "同阵营"
 L["Save"] = "储存"
 L["Scale"] = "比例"
@@ -299,6 +305,8 @@ L["Start"] = "开始"
 --[[Translation missing --]]
 L["Stop"] = "Stop"
 L["SubClass"] = "子类"
+--[[Translation missing --]]
+L["Suffix"] = "Suffix"
 L["SUPPORTCRAFTINGDESC"] = "包含制作专业支持 (需要重新加载 /reload)"
 L["SUPPORTCRAFTINGNAME"] = "制作支持"
 L["Supported Addons"] = "支持的插件"

@@ -797,7 +797,7 @@ function Skillet:UpdateTradeButtons(player)
 			end
 		end
 		--DA.DEBUG(3,"tradeLink= "..tostring(tradeLink))
-		if ranks and tradeID ~= MINING then
+		if self:IsSupportedTradeskill(tradeID) and ranks and tradeID ~= MINING then
 			local spellName, _, spellIcon = GetSpellInfo(tradeID)
 			if tradeID == SMELTING then
 				spellName = GetSpellInfo(MINING)
@@ -1686,6 +1686,13 @@ function Skillet:SetReagentToolTip(reagentID, numNeeded, numCraftable)
 				end
 			end
 		end
+	end
+	local server = self.data.server or 0
+	local customPrice = self.db.global.customPrice[server]
+	if customPrice and customPrice[reagentID] then
+		local price = customPrice[reagentID].value
+		local text = self:FormatMoneyFull(price,true)
+		GameTooltip:AddDoubleLine("Custom Price: ",text,0,1,0,1,1,1)
 	end
 	local inBoth = self:GetInventory(self.currentPlayer, reagentID)
 	local surplus = inBoth - numNeeded * numCraftable

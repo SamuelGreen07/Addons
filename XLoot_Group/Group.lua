@@ -13,6 +13,10 @@ local HistoryGetItem, HistoryGetPlayerInfo, HistoryGetNumItems
 local CanEquipItem, IsItemUpgrade, FancyPlayerName = XLoot.CanEquipItem, XLoot.IsItemUpgrade, XLoot.FancyPlayerName
 local RollFramePrototype
 
+local BUILD_NUMBER = select(4, GetBuildInfo())
+local BUILD_HAS_DISENCHANT = BUILD_NUMBER >= 30300
+local BUILD_HAS_TRANSMOG_GREED = BUILD_NUMBER >= 49407
+
 
 -------------------------------------------------------------------------------
 -- Settings
@@ -95,10 +99,17 @@ end
 function addon:OnEnable()
 	-- Register events
 	eframe:RegisterEvent('START_LOOT_ROLL')
-	eframe:RegisterEvent('LOOT_HISTORY_ROLL_CHANGED')
-	eframe:RegisterEvent('LOOT_HISTORY_ROLL_COMPLETE')
-	eframe:RegisterEvent('LOOT_ROLLS_COMPLETE')
 	eframe:RegisterEvent('MODIFIER_STATE_CHANGED')
+
+	if BUILD_HAS_TRANSMOG_GREED then
+		print("XLoot Group does not yet work on this version and will not be loaded")
+		return
+		eframe:RegisterEvent('LOOT_HISTORY_UPDATE_DROP')
+	else
+		eframe:RegisterEvent('LOOT_HISTORY_ROLL_CHANGED')
+		eframe:RegisterEvent('LOOT_HISTORY_ROLL_COMPLETE')
+		eframe:RegisterEvent('LOOT_ROLLS_COMPLETE')
+	end
 
 	-- Disable default frame
 	UIParent:UnregisterEvent("START_LOOT_ROLL")
@@ -175,44 +186,6 @@ function addon:OnEnable()
 			end
 		end
 	end
-
-	--[[ DISABLED-PATCH: LEGION PRE-PATCH
-	-- Hook alert actions
-	if opt.hook_alert then
-		hooksecurefunc('LootUpgradeFrame_SetUp', self.AlertFrameHook)
-		hooksecurefunc('LootWonAlertFrame_SetUp', self.AlertFrameHook)
-		hooksecurefunc('MoneyWonAlertFrame_SetUp', self.AlertFrameHook)
-		local SetLootWonAnchors = AlertFrame_SetLootWonAnchors
-		local SetLootUpgradeFrameAnchors = AlertFrame_SetLootUpgradeFrameAnchors
-		local SetMoneyWonAnchors = AlertFrame_SetMoneyWonAnchors
-
-		local function SetAnchorPassthrough(alertAnchor)
-			return alertAnchor
-		end
-
-		AlertFrame_SetLootWonAnchors = SetAnchorPassthrough
-		AlertFrame_SetLootUpgradeFrameAnchors = SetAnchorPassthrough
-		AlertFrame_SetMoneyWonAnchors = SetAnchorPassthrough
-
-		hooksecurefunc('AlertFrame_FixAnchors', self.FixAnchors)
-	end
-	-- hooksecurefunc('BonusRollFrame_StartBonusRoll', self.BonusRollFrame_StartBonusRoll)
-	-- hooksecurefunc('BonusRollFrame_FinishedFading', self.BonusRollFrame_Hide)
-	-- BonusRollFrame._SetPoint, BonusRollFrame.SetPoint = BonusRollFrame.SetPoint, addon.BonusRollFrame_SetPoint
-	if opt.hook_bonus then
-		hooksecurefunc(BonusRollFrame, 'SetPoint', self.BonusRollFrame_SetPoint)
-		hooksecurefunc(BonusRollFrame, 'Show', self.BonusRollFrame_Show)
-		hooksecurefunc(BonusRollFrame, 'Hide', self.BonusRollFrame_Hide)
-	end
-
-	if (opt.hook_alert or opt.hook_bonus) and not opt.shown_hook_warning then
-		local function gprint(text) print(('%s: %s'):format('|c2244dd22XLoot Group|r', text)) end
-		gprint("The 'Modify bonus rolls' or 'Modify loot alerts' options are currently enabled, but are now disabled by default.")
-		gprint("I cannot guarantee that you will not experience any issues with bonus rolls with these options enabled.")
-		gprint("If you do not accept that risk, please disable those options or XLoot Group entirely. You should only see this message once.")
-		opt.shown_hook_warning = true
-	end
-	]]
 end
 
 -------------------------------------------------------------------------------
@@ -255,7 +228,9 @@ function addon:START_LOOT_ROLL(id, length, uid, ongoing)
 
 	frame.need:Show()
 	frame.greed:Show()
-	frame.disenchant:Show()
+	if BUILD_HAS_DISENCHANT then
+		frame.disenchant:Show()
+	end
 	frame.pass:Show()
 	frame.text_status:Hide()
 	frame.text_status:SetText()
@@ -321,7 +296,7 @@ end
 local tidx = { [0] = 1, [3] = 2, [2] = 2, [1] = 3 }
 function addon:LOOT_HISTORY_ROLL_COMPLETE()
 	-- Locate history item
-	local hid, frame, rollid, players, done, _ = 1
+	local hid, frame, rollid, players, done, _ = 1, nil, nil, nil, nil, nil
 	while true do
 		rollid, _, players, done = HistoryGetItem(hid)
 		if not rollid or (rolls[rollid] and rolls[rollid].over) then
@@ -335,7 +310,7 @@ function addon:LOOT_HISTORY_ROLL_COMPLETE()
 
 	-- Active frame found
 	frame.over = true
-	local top_type, top_roll, top_pid, top_is_me = 0, 0
+	local top_type, top_roll, top_pid, top_is_me = 0, 0, nil, nil
 	for j=1, players do
 		local name, class, rtype, roll, is_winner, is_me = HistoryGetPlayerInfo(hid, j)
 		-- roll = roll and roll or true
@@ -389,7 +364,7 @@ function addon:LOOT_HISTORY_ROLL_CHANGED(hid, pid)
 	if not frame or frame.rollid ~= rollid or not frame:IsShown() then
 		return nil
 	end
-	
+
 	-- Acquire player information
 	local name, class, rtypeid, roll, winner, is_me = HistoryGetPlayerInfo(hid, pid)
 	local rtype = rtypes[rtypeid]
@@ -542,74 +517,6 @@ local AlertFrameTables = {
 	'MONEY_WON_ALERT_FRAMES'
 }
 
-function addon.FixAnchors(frames, anchor)
-	local anchor = alert_anchor
-	local up, first, x, y = opt.alert_anchor.direction == 'up', true, 44, -10
-	for ix=1, #AlertFrameTables do
-		local t = _G[AlertFrameTables[ix]]
-		for i=1, #t do
-			local frame = t[i]
-			if frame:IsShown() then
-				frame:ClearAllPoints()
-				if up then
-					frame:SetPoint("BOTTOM", anchor, "TOP", x, y)
-				else
-					frame:SetPoint("TOP", anchor, "BOTTOM", x, -y)
-				end
-				anchor = frame
-				if first then
-					first, x, y = false, 0, opt.alert_offset - 20
-				end
-			end
-		end
-	end
-end
-
--- function addon.BonusRollFrame_StartBonusRoll()
--- 	if BonusRollFrame:IsShown() then
--- 		addon.BonusRollFrame_Show()
--- 	end
--- end
-
-function addon.BonusRollFrame_SetPoint(self, _, frame)
-	if frame ~= anchor then
-		self:ClearAllPoints()
-	end
-end
-
-local bonus_elements
-function addon.BonusRollFrame_Show()
-	local frame = BonusRollFrame
-	if not bonus_elements then
-		bonus_elements = {}
-
-		frame.active = true -- Prevent anchor from acquiring as child
-		frame.scale_mod = 0.9 -- Anchor's scale modifier
-		if opt.bonus_skin then
-			frame.Background:Hide()
-			local overlay = CreateFrame('Frame', nil, frame, BackdropTemplateMixin and "BackdropTemplate")
-			overlay:SetAllPoints()
-			overlay:SetFrameLevel(frame:GetFrameLevel()-1)
-			Skinner:Skin(overlay, 'bonus')
-			overlay:SetGradientColor(.5, .5, .5, .4)
-			overlay:SetBorderColor(1, .8, .1)
-			bonus_elements.overlay = overlay
-		end
-	end
-
-	if anchor.children[1] ~= BonusRollFrame then
-		table.insert(anchor.children, 1, frame) -- Force in first position
-	end
-	anchor:Restack()
-end
-
-function addon.BonusRollFrame_Hide()
-	if anchor.children[1] == BonusRollFrame then
-		table.remove(anchor.children, 1)
-		anchor:Restack()
-	end
-end
-
 function addon.SlashHandler(msg)
 	if msg == 'reset' then
 		anchor:Position()
@@ -749,7 +656,7 @@ do
 		function RollButtonPrototype:OnClick()
 			RollOnLoot(self.parent.rollid, self.type)
 		end
-		
+
 		function RollButtonPrototype:Toggle(status)
 			if status then
 				self:Enable()
@@ -936,7 +843,7 @@ do
 		frame:SetScript('OnEnter', self.OnEnter)
 		frame:SetScript('OnLeave', self.OnLeave)
 		frame:SetScript('OnClick', self.OnClick)
-		
+
 		-- Overlay (For skin border)
 		local overlay = CreateFrame('frame', nil, frame, BackdropTemplateMixin and "BackdropTemplate")
 		overlay:SetFrameLevel(frame:GetFrameLevel())
@@ -958,7 +865,7 @@ do
 		icon:SetPoint('BOTTOMRIGHT', -3, 3)
 		icon:SetTexCoord(.07,.93,.07,.93)
 		frame.icon = icon
-		
+
 		-- Timer bar
 		local bar = CreateFrame('StatusBar', nil, frame)
 		bar:SetFrameLevel(frame:GetFrameLevel())
@@ -972,7 +879,7 @@ do
 		frame.bar = bar
 		-- Reference bar for quick re-skinning when XLoot skin changes
 		table.insert(addon.bars, bar)
-		
+
 		local spark = bar:CreateTexture(nil, 'OVERLAY')
 		spark:SetWidth(14)
 		spark:SetHeight(38)
@@ -999,7 +906,12 @@ do
 		local n = RollButtonPrototype:New(frame, 1, NEED, 'Dice', icon_frame, 3, -1, {.2, 1, .1})
 		local g = RollButtonPrototype:New(frame, 2, GREED, 'Coin', n, 0, -2, {.1, .2, 1})
 		local d = RollButtonPrototype:New(frame, 3, ROLL_DISENCHANT, 'DE', g, 0, 2, {.1, .2, 1})
-		local p = RollButtonPrototype:New(frame, 0, PASS, 'Pass', d, 0, 2, {.7, .7, .7})
+		local p_to = d
+		if not BUILD_HAS_DISENCHANT then
+			p_to = g
+			d:Hide()
+		end
+		local p = RollButtonPrototype:New(frame, 0, PASS, 'Pass', p_to, 0, 2, {.7, .7, .7})
 		frame.need, frame.greed, frame.disenchant, frame.pass = n, g, d, p
 
 		-- Roll status text
@@ -1087,4 +999,131 @@ function addon:ApplyOptions()
 	end
 end
 
+
+---------------------------------------------------------------------------
+-- Test rolls
+---------------------------------------------------------------------------
+local preview_loot = {
+	{ 52722, false, true, true, true },
+	{ 31304, true, false, true, true, 1 },
+	{ 37254, true, false, false, true, 2, 2 },
+	{ 13262, true, false, false, false, 4, 4, 4, 69 },
+	{ 15487, false, true, true, true }
+}
+-- Activate items
+for i, t in ipairs(preview_loot) do
+	GetItemInfo(t[1])
+end
+
+local init, tests, links, StartFakeRoll = false, {}, {}, nil
+
+local deframe = CreateFrame('Frame')
+
+-- Currently only debugs one roll at a time.
+function XLootGroup.TestSettings()
+	local FakeHistory
+	local schedule = {}
+	local type_index = { 'need', 'greed', 'disenchant', [0] = 'pass' }
+	if not init then
+		print(L.debug_warning)
+		init = true
+		local tick = 0
+		deframe:SetScript('OnUpdate', function(self, elapsed)
+			tick = tick + elapsed
+			if tick > 1 then
+				tick = 0
+				local time = GetTime()
+				for k,v in pairs(schedule) do
+					if v[1] < time then
+						local e = v
+						schedule[k] = nil
+						e[2]()
+						e[3](unpack(e[4]))
+					end
+				end
+			end
+		end)
+
+		FakeHistory = {
+			rolls = {},
+			links = {},
+			items = {}
+		}
+
+		local function after(seconds, func, target, ...)
+			table.insert(schedule, { GetTime() + seconds, func, target, {...} } )
+		end
+
+		local function changed(...)
+			addon:LOOT_HISTORY_ROLL_CHANGED(...)
+		end
+
+		function GetLootRollItemInfo(id)
+			return unpack(FakeHistory.rolls[id])
+		end
+
+		function GetLootRollItemLink(id)
+			return FakeHistory.links[id]
+		end
+
+		function GetLootRollTimeLeft()
+			return 1
+		end
+
+		function RollOnLoot(rollid, rtypeid)
+			FakeHistory.items[1].players[1][3] = rtypeid
+			changed(1, 1)
+		end
+
+		function UnitGroupRolesAssigned(player)
+			local s = math.random(1, 3)
+			if s == 1 then
+				return "HEALER"
+			elseif s == 2 then
+				return "DAMAGER"
+			end
+			return "TANK"
+		end
+
+		function HistoryGetItem(hid)
+			return unpack(FakeHistory.items[hid].item)
+		end
+
+		function HistoryGetPlayerInfo(hid, pid)
+			return unpack(FakeHistory.items[hid].players[pid])
+		end
+
+		function StartFakeRoll()
+			local fake = {}
+
+			local item = preview_loot[random(1, #preview_loot)]
+			local iname, ilink, iquality, _, _, _, _, _, _, itex = GetItemInfo(item[1])
+
+			local rollid = #FakeHistory.rolls + 1
+
+			fake.item = { rollid, ilink, 5, false, nil, false }
+			fake.players = {
+				{ me, select(2, UnitClass('player')), nil, nil, false, true },
+				{ 'Player1', 'MAGE', nil, nil, false, false },
+				{ 'Player2', 'PRIEST', nil, nil, false, false },
+				{ 'Player3', 'WARRIOR', nil, nil, false, false },
+				{ 'Player4', 'SHAMAN', nil, nil, false, false }
+			}
+			FakeHistory.rolls[rollid] = { itex, iname, 1, iquality, select(2, unpack(item)) }
+			FakeHistory.links[rollid] = ilink
+
+			table.insert(FakeHistory.items, 1, fake)
+
+			addon:START_LOOT_ROLL(rollid, random(20000, 40000), true)
+			after(5, function() fake.players[2][3] = 0 end, changed, 1, 2)
+			after(7, function() fake.players[3][3] = 2 end, changed, 1, 3)
+			after(9, function() fake.players[4][3] = 3 end, changed, 1, 4)
+			after(11, function() fake.players[5][3] = 1 end, changed, 1, 5)
+		end
+
+	end
+	StartFakeRoll()
+end
+
+XLoot:SetSlashCommand('xlgd', XLootGroup.TestSettings)
 

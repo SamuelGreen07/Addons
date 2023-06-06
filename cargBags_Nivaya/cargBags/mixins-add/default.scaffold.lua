@@ -107,7 +107,7 @@ local borderSize
 local function GetBorderSizeFromScreenSize()
 	if borderSize then return borderSize end
 	local width, height = GetPhysicalScreenSize()
-	local uiScale = GetCVar("uiScale")
+	local uiScale = UIParent:GetScale()	--GetCVar("uiScale")
 	
 	borderSize = 768/height/(uiScale*cBnivCfg.scale)
 	return borderSize

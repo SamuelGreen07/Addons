@@ -1,3 +1,242 @@
+
+## **VERSION 1.977 RELEASE - May 7th, 2023**
+
+***NEW FEATURE***
+
+*Due to the changes in 10.1 and the removal of the old guild roster by Blizzard, we are now no longer able to type `/groster` to bring it up! Given that the Communities window that guilds now use, introduced in BFA 8.0, does not have the ability to filter by "Last Online" I think we can all agree that this is a HUGE problem in regards to guild management, especially those of you who are in rather large guilds where scrolling is going to be a HUGE hassle. As a result, I have introduced a new feature. GRM now has its own custom guild roster. It is fairly limited right now, as I wanted to get this out ASAP for the sake of all our our sanity, but I will be able to expand on it further.*
+
+![New Custom GRM Roster](https://i.imgur.com/xKGzYth.jpg) 
+
+You can access this roster by clicking the new GRM button on your Communities window. I have also added it to the social "FriendsFrame" in Classic Era and Wrath.
+
+**MAIN FEATURES**
+
+* Sort the roster by Last Online - this is a bigger deal in retail, for now.
+
+* Right click any player to promote, demote, or kick from the guild, if it applies, and you have the rank permissions to do so. This will open the macro tool and all you will need to do is press your hotkey to continue.
+
+* Hold the control key down when mousewheel scrolling for triple speed, or shift key to jump to top or bottom instantly (this also works on any other GRM scroll frame ).
+
+* Search a player name easily.
+
+![Button Added to Guild window](https://i.imgur.com/E1MBeb5.jpg)
+
+* The `/roster` command will now open the NEW custom GRM roster window. You also can create your own localized custom slashcommand in your languages locale file. Just set it to `GRM.L["/YYYY"] = "/YourCommand"`
+
+[Roster Demo](https://imgur.com/3qboDU9)
+
+* Promote and Demote demo
+
+[Promote and Demote Easily](https://imgur.com/wmG1DIw)
+
+
+***BUG FIXES***
+
+* Fixed a lua error if clicking the "X" close button on the mouseover window.
+
+* Fixed an issue that could cause the GRM patching process to hang at loading...
+
+* Fixed a hybridScrollFrame bug on the macro tool where the name class coloring could sometimes get messed up when scrolling up and down on the names
+
+* Fixed a bug that could occur if you click the "Guild Log" button on the roster too quickly after logging in and GRM wasn't fully up dated yet.
+
+
+## **VERSION 1.976 RELEASE - May 2nd, 2023**
+
+**10.1 Compatibility Update!!**
+
+***Important note for 10.1 Change -- Loss of a staple feature due to UI Changes by Blizz***
+
+> Many of you are aware that in 10.1 Blizz has removed the old roster. Right now, there is the communities window that was introduced in 8.0 BFA. This replaced the old guild roster. However, the old roster you could still access just by typing `/groster` or by typing `Ctrl-J` on your keyboard, as I had GRM configured that way. Well, Blizz has officially removed this old guild roster window and it no longer exists in 10.1 -- this creates a problem for GRM.
+
+> A staple feature is the ability to  Ctrl-click players' names all through the addon and it will auto-bring up their player window, with the built-in side window where you can promote/demote,kick a player. Well, by Blizzard removing that old frame, being forced to use the CommunitiesFrame means this feature can no longer be used. Blizzard has the communitiesFrame so locked down that any action I do to try to auto-find the person in the guild, or even open that side window, introduces "taint" into the game, and thus all subsequent acctions of promote/demote/etc... will be blocked until you reload. Taint from an addon is just not acceptable. Just be aware that as a result of this change, it will now be harder for you to promote/demote as you are once again, forced to scroll to their position in the roster to do any action. 
+
+> The compromise is GRM will still bring up it's own window you can look at and work with, but that side details frame you will have to manually scroll to.
+
+
+***BUG FIXES***
+
+* Fixed sort of an edge case issue that could result in a macro rule getting purged because the data got corrupted. You will know if this happened to you as all other GRM addon data was fine, except you were missing your macro rule(s) only.
+
+* Fixed an issue that could arise in the name of a player joining the guild and GRm capturing an empty text string only.
+
+* Fixed an issue where a live kick detection was throwing a lua error.
+
+* Fixed an issue where a join detection could end up having a missing name with the GUID call to server. GRM will now look for that and recall as needed. For some reason some reason some calls using `GetPlayerInfoByGUID ( GUID )` were returning "nil" on the first 1 or 2, but after that they were correctly returning the player data.
+
+* The Check-all button on the `/grm export` member details window should no longer auto-check the button to replace alt-code chars from people's names.
+
+* In addition, the Main/alt radial buttons for filtering on who to export should now behave properly. You could uncheck both radial buttons by repeat clicking. Now, one should always be marked as selected.
+
+* In some cases GRM wasn't correctly picking up that someone joined the guild as it was rushing through the scan before the guild event log updated, thus GRM couldn't decipher who did the invite to the guild.
+
+
+## **VERSION 1.975 RELEASE - APRIL 30th, 2023**
+
+**QUALITY OF LIFE**
+
+* You can now export the qued list from the macro tool, if you wish.
+
+
+**BUG FIXES**
+
+* Fixed an issue with some people who were not able to login to the game due to a patching error that occurred on some backend updates. Should affect minimal people only, but that is now resolved.
+
+* Fixed an issue where join/leave/quit was not reporting to the chat window properly in Classic. It should now properly update and report when someone joins or gets kicked from the guild.
+
+* Fixed an issue where after a sync, if you were stuck waiting in a que to sync, even though it completed the sync, you were never informed. No errors, sync worked, it just failed to trigger the message. This only affected people in guilds where multiple were syncing at same time.
+
+## **VERSION 1.974 RELEASE - APRIL 30th, 2023**
+
+* BUG fix that prevented some people from being able to update. Oops!
+
+* Fixed an error that only affected *Classic Era* where Deathknight class was accidentally dropped in the ban list and was throwing errors since clearly that doesn't exist yet in that build.
+
+* The "Disabled in Classic" text should no longer overlap on the `/grm export` tool for members/former members.
+
+* The showing of the member faction option should now properly be check'd/set as true by default unless you are in any previous expansion prior to DF. This is in preparation of cross-faction guilds.
+
+
+## **VERSION 1.973 RELEASE - APRIL 29th, 2023**
+
+**QUALITY OF LIFE**
+
+![Macro Tool - kick sorting](https://i.imgur.com/R8BQuIm.jpg)
+
+* The Macro tool will now group all of the alts of a main underneath it if there are any toons in an alt group being kicked. It will only do this if you have a main designated. If you have an alt group with no main designated it will not do this.
+
+![Macro Tool tooltip with alts](https://i.imgur.com/TORzDCq.jpg)
+
+* The macro tooltip has been updated as well to show all of the player's alts still in the guild as often it is the case that you are kicking one toon, not the whole group, so it might be good for taking notes of that on occasion. Thank you @Poisonenvy for suggestions on these!
+
+* The Macro tool had a slight annoyance in that when setting and changing some of the values of the rules, like the level range, you needed to hit ENTER or tab off them to lose focus on the editbox for the values to be saved. If you just confirmed the rule edit, it would not save the change. This will no longer be an issue going forward as the kick, promote, and demote rule windows will update properly without needing to hit ENTER when making a change. Confirming at the bottom to save the update is all that is necessary.
+
+* Mythic+ Score can now be exported.
+
+* Player faction has been added and will appear on the mouseover, enabled by default in retail, though turned off in classic builds since redundant.
+
+* Player faction has been added to export list as well.
+
+* On transfering a guild, using the transfer tool, it will now import all of your officer and public notes to the new guild. This is necessary for people that did not use the "Follow your guild" transfer option.
+
+* In addition, on importing, it will no longer process it if in the middle of a sync with another player.
+
+
+***BUG FIXES***
+
+* Fixed a bug that affected CLASSIC ERA only, where if someone joined or left the guild it would mass spam it.
+
+* Fixed an issue where you were getting some incorrect join/leave/promo/demote reporting to the log with the recent scanning update changes. I thought this was resolved in last build but I overlooked something. Should be good now.
+
+* Fixed an issue where there was a missing localization key, or type, if you did `/grm help`
+
+* Fixed an issue where the scan for changes would fail and not report to the log.
+
+* Fixed some Lua errors that occurred preventing setting the join date.
+
+* Fixed an issue that would cause GRM not to finish patching and fail.
+
+* Fixed an issue where sorting the macro rules up and down could cause an error and not show properly until you refreshed.
+
+* when opening the macro tool window it was transparent unless you dragged the window. It should now properly load the background translucent texture when opening the first time.
+
+* Fixed an issue if you typed `/grm reset or /grm center` that the mouseover window would shrink really small rather than go back to default size. Oops! This is now resolved. It would self-fix between sessions, but now it is a permanent fix.
+
+* Fixed a bug where the "Time in:" on the zone, on the mouseover window, was overlapping the "Note" wording.
+
+* The Export Log feature the delimiter was not showing on the final line. This is necessary for certain parsing programs. It now should properly show the delimiter of your choice.
+
+* Fixed an issue with the macro tool where if you checked the box to disable chat spam when using the macro tool, it would ALSO disable the chat spam indefinitely as well until you unchecked that, even if not using the tool. Whoops!
+
+* Fixed an issue where if someone else is using the macro in your guild, you were silencing the kick messages from appearing.
+
+* Sort of an edge case, but in some circumstances your settings could get wiped/reset on a player, then get sync'd to your alts. This shouldn't happen now. Sorry about that one!
+
+
+
+## **VERSION 1.972 RELEASE - APRIL 20th, 2023**
+
+**NEW FEATURE - Guild Transfer - Preservation of Data**
+
+![Easier Guild Transfer - Keep your GRM Data!](https://i.imgur.com/GdtWI1z.jpg)
+
+* The Guild Backups window has been rebuilt. First, the "backups" was a bit misleading and I think confused some people. They were not a "true" backup of the addon data since WOW addons do not have write to file access to say, Windows. It did however provide a restore point if you had maybe an officer go rogue and mess up all your data. I don't want to confuse anyone further so I have rebuilt this feature more as a tool to preserve your guild's GRM data if you decide to transfer servers. This will also clear a lot of the overall GRM memory usage that was storing a copy of all GRM data mostly needlessly to now only be used when transferring guilds.
+
+> STEP BY STEP GUIDE FOR USE: 
+  * STEP 1: Login to the guild you are planning on transferring BEFORE you transfer.
+  * STEP 2: Open the GRM window *(/grm)* > Click Options Tab > Click Restore Tab
+  * STEP 3: Click "Set Restore Point" to the guild you are currently in (remove the old if necessary)
+  * STEP 4: Initiate the guild transfer process.
+  * STEP 5: Log into the new guild on the new server.
+  * STEP 6: Ensure that the new guild rank structure is identical to the previous (name changes are fine), otherwise it can only "guess" a player was promoted/demoted if the tier structure has been changed.
+  * STEP 7: Open the Restore Tab again and click "Transfer Data" from your old guild. Confirm YES.
+  * STEP 8: If you are satisfied with the transfer, remove the restore point to lower your memory usage next session.
+  * **NOTE:**
+    
+  -- It is recommended to WAIT to transfer and import the data to the guild until the majority of your members have also transferred, otherwise they will be designated as having left the guild since they are not found. Also, please be aware that the server GUID tag of each player changes on a guild transfer, so if your guild members change their names on the transfer, GRM will be unable to detect this and count them only has new members once they transfer. GRM will note them as a returning member who transferred, however, if they rejoin after the fact and are protected, but it can only do this if their name is still the same (I do check a few additional metadata points to verify other than name as then any person could change name to old member and join).
+
+  -- Also, BAN DATA IS NOW REDUNDANT. The ban data will be transferred, but because you are on a new server, the GUIDs will no longer match, so even if they changed servers and tried to join your guild, GRM will be unable to flag them if they have changed their names. While GRM will not automatically purge your old and now redundant ban list, I do recommend going into it and doing it yourself.
+
+
+***QUALITY OF LIFE***
+
+* Scaling corner drag has been added to the major frames, like the macro tool, the core /GRM frame, export window, etc... This is something I have wanted to implement for a while, but the logic of wrapping my head around "Drag-to-Scale" was sort of wonky as it required me to kind of hijack the "drag-to-size" ability, which doesn't really help GRM. I wanted the ability to quickly scale larger or smaller but keep frame sizing proportions consistent. It is now implemented. Just right-click to reset your scaling, or type /grm reset to manually reset ALL frames (this also re-centers your frames you have dragged). 50% to 150% is the acceptable scaling range.
+
+![Window Scaling Example](https://i.imgur.com/rGoKvRG.gif)
+
+* Added the ability to show Mythic+ Rating on the player mouseover window. I should note, that there is a flaw in the built-in guild roster in that if someone logs off and doesn't log back in, it only shows their M+ rating from when they last logged off. If this was say, over a year ago, it's just not accurate. So, GRM will ignore an outdated M+ rating on the mouseover and ONLY show the current rating for the current season, which I was able to deduce by just checking if the last time they logged in was AFTER the start of the current season. NOTE - THIS ONLY SHOWS WHEN A PLAYER IS MAX LEVEL.
+
+!["Enable or Disable showing Mythic Rating"](https://i.imgur.com/DYCA2cm.gif)
+
+
+* You will notice that the GRM scanning for changes and ackownledgment of things that change, like notes edited, or anything, will be far more responsive and quick. If you were to try a /grm scan, you will notice how quickly it makes it through the process now compared to before. The entire scanning logic has been rewritten. A lot of it was very old legacy code from when I was just tinkering with the idea of GRM, so it really could have used a revisit for a long time now. GRM should feel a bit more responsive now as a result. The code is also a LOT leaner.
+
+* GRM will now auto-import, from the Blizzard servers, the date that you personally joined the guild. This will apply ONLY to retail Warcraft, as the data is tied to "communities" launched in 8.0 and the server provides no information prior to communities. You cannot pull this information from others in your guild, as the server will only provide your own information. There is also a limitation that if you were in the guild prior to July 7, 2018, 8.0 BFA patch day, then it cannot provide an accurate date you joined the guild, unfortunately. I had mostly ignored this feature since almost everyone was basically grandfathered into communities from their current guilds, but now that nearly 5 years has past, I will not import this data automatically. You will need to login to each of your alts for it to work. If you already have a date set, then GRM will ignore automation of this process. It is only for new toons you make going forward, or ones that have not yet been configured.
+
+* 10.1 is going to be a fairly significant update due to the ability to have cross-faction guilds. I had my data storage tree separated by factions. This is forcing me to rebuild the database to remove faction separation since that is a bit redundant. Not hard, but we are talking about literally thousands of points of data. I wish it were as simple as mass-eliminating "editing all" but it isn't. Just to prevent any error, I do need to look at each line of code it affects and ensure it's not broken after I convert the DB. This is simple, but it will take some time. DF has had so so SOOO many changes it is just a huge time-sink.
+
+* If you logged in and players had left or were kicked, it was spamming your chat window. These should ONLY appear in the log now after immediately logging in.
+
+  ***BUG FIXES***
+
+* Sync message on the que was not properly localized so would through a chat message error.
+
+* Fixed a long-time bug that could cause erroneous reporting when player joined or left the guild, promoted or demoted. Basically, if you removed someone from the guild, for some people, and in some cases, it would report them as having rejoined the guild moments later, then it would FINALLY, some time later, correcelt re-report that they were no longer in the guild. This is just one example. It was due to an overlapping scan when something "live" happened. This has been rewritten and fixed.
+
+* Fixed an error if you did a search, or tried to add a person to friends list, if the system message triggered that the person was no online, it would crash the sync and force it to end. Sort of a weird bug, but I had something gated wrong and it is now resolved and shouldn't cause sync to stop and fail mid-sync.
+
+* Fixed an issue where on a merged realm the incorrect serverName was being tagged to a player that logged in so it was failing to add their chat tags, like the main tag, to their name. This ONLY affected some people on a different realm than you, for people on merged realms. It would not always happen, but in some cases it could. This shouldn't happen anymore.
+
+* GRM_FullBackup_Save was a deprecated saved variable that will no longer appear as a nil in the savedVariables file.
+
+* Fixed an error where if you are using the GRM > Options > UI > Tab fade feature a lua error could occur when selecting any tab but the Log tab. It didn't break anything, but it was a lua error needlessly.
+
+* Fixed in issue where if you were to ban someone who is still in the guild, in some cases it wouldn't sync if the person requesting the sync did not have the data.
+
+* Fixed a bug that could prvent someone who had not installed GRM since 2017 from updating to the current version.
+
+* Fixed an issue with the minimap icon where it was leaving a "ghost" empty icon, in addition to a correct one, if you were using certain minimap brokers like Azilroka. This should no longer be any issue with ANY minimap brokers. 
+
+* Fixed an issue where the minimap icon did not path around the minimap properly as of 10.0 changes in DF. I didn't notice this since mainly LibD minimap broker took it over, but if you disabled all addons but GRM and let GRM management, the pathing had changed on the minimap so this has now been fixed.
+
+* Noticed that the Export window (/grm export) was scaling with the core GRM window as a child frame. They should have been independent. This is now fixed and can be scaled separately.
+
+* Fixed an issue where the scaling on the windows was not scaling ALL text objects properly. Most was getting scaled, but some were not proper child frames to the core frame and were sister frames, so the logic of scaling applies to the given frame and all child frames. This is now resolved.
+
+* The mouseover window was incorrectly scaled as default. I don't know how I didn't notice this, or I messed it up and got lazy to change it back in the day, I don't remember, but the scaling was default at 1.33, which is incorrect. It should be 1.0 -- or 100% scale. This likely caused zero difference to addon user, but it COULD have been a problem for anyone that used custom addons that affected scaling of any frame.
+
+* Fixed a bug where a lot of "ghost" entries were added to the AltGroup savedvariable for people when they left the guild. This should no longer happen and all old entries will be cleaned up automatically from them.
+
+* Fixed a bug where the player status tooltip was ultra small in the text (size 1 font for some reason lol). This has been fixed. Probably an accidental typo some patch back.
+
+***MISC***
+
+* Massive database rewrite has been done and refactoring of much of the code. This was done as a necessity due to the massive changes in 10.1 that will allow cross-faction guilds, something I had never ocnsidered. I originally had compartmentalized the data in the guilds by faction, so this needed a rewrite, but I also was not using queries to pull data fro mthe saved variables, so I ended up having to edit > 1000 lines of code for this patch. To save myself the hassle, and to cleanup the code, I wrote a bunch of GET queries for data from teh which clean things up a bit, but did take significant effor to rewrite.
+
+* For those that monitor the .toc or savedVariable file, just a heads up, the "GRM_Misc" global variable is cleaned up and made a little more efficient and will cleanup the saved file a little and will NOT be stored needlessly. It's mostly redundant info and should ONLY be carried over between saves if a player logs off in the middle of an action.
+
+* Added a new memberData point -- "MythicScore" is the variable name and it will represent your Mythic+ Score. Of course, this only applies to retail WOW, not Classic. People parsing the save data, the player value is "MythicScore".
+
 ## **VERSION 1.96 RELEASE - March 27th, 2023**
 
 **NEW FEATURE**

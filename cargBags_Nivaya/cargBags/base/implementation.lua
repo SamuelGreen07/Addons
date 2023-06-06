@@ -384,7 +384,7 @@ function Implementation:GetCustomItemInfo(bagID, slotID, i)
 		local _
 		if GetContainerItemInfo then
 			i.texture, i.count, i.locked, i.quality, i.readable, _, _, _, _, i.id, i.isBound = GetContainerItemInfo(bagID, slotID)
-			i.cdStart, i.cdFinish, i.cdEnable = GetContainerItemCooldown(bagID, slotID)
+		--	i.cdStart, i.cdFinish, i.cdEnable = GetContainerItemCooldown(bagID, slotID)
 		else
 			local cInfo = C_Container.GetContainerItemInfo(bagID, slotID)
 			i.texture = cInfo.iconFileID
@@ -396,6 +396,7 @@ function Implementation:GetCustomItemInfo(bagID, slotID, i)
 			i.isBound = cInfo.isBound
 		end
 		if isClassic then
+			i.cdStart, i.cdFinish, i.cdEnable = GetContainerItemCooldown(bagID, slotID)
 			i.isQuestItem, i.questID, i.questActive = nil, nil, nil
 			i.isInSet, i.setName = nil, nil
 		else

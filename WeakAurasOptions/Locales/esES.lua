@@ -356,7 +356,8 @@ Off Screen]=] ] = "El aura está fuera de la pantalla"
 	L["Custom Untrigger"] = "Activador no-personalizado"
 	L["Custom Variables"] = "Variables personalizadas"
 	L["Debuff Type"] = "Tipo de perjuicio"
-	L["Debug Console"] = "Consola de depuración"
+	--[[Translation missing --]]
+	L["Debug Log"] = "Debug Log"
 	L["Debug Log:"] = "Registro de depuración:"
 	L["Default"] = "Por defecto"
 	L["Default Color"] = "Color por defecto"
@@ -383,6 +384,8 @@ Off Screen]=] ] = "El aura está fuera de la pantalla"
 	--[[Translation missing --]]
 	L["Do not group this display"] = "Do not group this display"
 	L["Do you want to ignore all future updates for this aura"] = "¿Quieres ignorar todas las actualizaciones futuras para esta aura?"
+	--[[Translation missing --]]
+	L["Do you want to stop ignoring all future updates for this aura"] = "Do you want to stop ignoring all future updates for this aura"
 	L["Documentation"] = "Documentación"
 	L["Done"] = "Hecho"
 	L["Drag to move"] = "Arrastra para mover"
@@ -498,8 +501,6 @@ Can use \ to escape -.]=] ] = "Formatos de filtro: 'Nombre', 'Nombre-Reino', '-R
 	L["Frequency"] = "Frecuencia"
 	--[[Translation missing --]]
 	L["Full Circle"] = "Full Circle"
-	--[[Translation missing --]]
-	L["Get Help"] = "Get Help"
 	L["Global Conditions"] = "Condiciones globales"
 	L["Glow %s"] = "Resplandor %s"
 	L["Glow Action"] = "Acción de Destello"
@@ -577,6 +578,8 @@ Con |cFF00CC00>= 0|r se activará siempre.]=]
 	L["Icon"] = "Icono"
 	L["Icon Info"] = "Información del Icono"
 	L["Icon Inset"] = "Interior del Icono"
+	--[[Translation missing --]]
+	L["Icon Picker"] = "Icon Picker"
 	L["Icon Position"] = "Posición del icono"
 	L["Icon Settings"] = "Ajustes del icono"
 	L["Icon Source"] = "Fuente del icono"
@@ -597,6 +600,8 @@ Con |cFF00CC00>= 0|r se activará siempre.]=]
 	L["Ignore out of checking range"] = "Ignorar fuera de rango de comprobación"
 	L["Ignore Self"] = "Ignorarse a sí mismo"
 	L["Ignore updates"] = "Ignorar actualizaciones"
+	--[[Translation missing --]]
+	L["Ignore Wago updates"] = "Ignore Wago updates"
 	L["Ignored"] = "Ignorar"
 	L["Ignored Aura Name"] = "Nombre del aura ignorado"
 	--[[Translation missing --]]
@@ -606,6 +611,8 @@ Con |cFF00CC00>= 0|r se activará siempre.]=]
 	--[[Translation missing --]]
 	L["Ignored Spell ID"] = "Ignored Spell ID"
 	L["Import"] = "Importar"
+	--[[Translation missing --]]
+	L["Import / Export"] = "Import / Export"
 	L["Import a display from an encoded string"] = "Importar un aura desde un texto cifrado"
 	--[[Translation missing --]]
 	L["Import as Copy"] = "Import as Copy"
@@ -638,6 +645,8 @@ Con |cFF00CC00>= 0|r se activará siempre.]=]
 	L["Is Boss Debuff"] = "Es perjuicio de jefe"
 	L["Is Stealable"] = "Se puede robar"
 	L["Is Unit"] = "Es unidad"
+	--[[Translation missing --]]
+	L["Join Discord"] = "Join Discord"
 	L["Justify"] = "Justificar"
 	L["Keep Aspect Ratio"] = "Mantener relación de aspecto"
 	L["Keep your Wago imports up to date with the Companion App."] = "Mantén tus importaciones de Wago actualizadas con la Companion App."
@@ -653,6 +662,8 @@ Con |cFF00CC00>= 0|r se activará siempre.]=]
 	L["Length"] = "Longitud"
 	L["Length of |cFFFF0000%s|r"] = "Longitud de |cFFFF0000%s|r"
 	L["Limit"] = "Límite"
+	--[[Translation missing --]]
+	L["Line"] = "Line"
 	L["Lines & Particles"] = "Líneas y partículas"
 	L["Linked aura: "] = "Aura vinculada:"
 	L["Load"] = "Cargar"
@@ -685,6 +696,8 @@ Con |cFF00CC00>= 0|r se activará siempre.]=]
 	L["Model"] = "Modelo"
 	--[[Translation missing --]]
 	L["Model %s"] = "Model %s"
+	--[[Translation missing --]]
+	L["Model Picker"] = "Model Picker"
 	--[[Translation missing --]]
 	L["Model Settings"] = "Model Settings"
 	--[[Translation missing --]]
@@ -727,6 +740,8 @@ Sólo un valor coincidente puede ser escogido.]=]
 	L["Nameplates"] = "Placas"
 	L["Negator"] = "Negar"
 	L["New Aura"] = "Nueva aura"
+	--[[Translation missing --]]
+	L["New Template"] = "New Template"
 	L["New Value"] = "Nuevo valor"
 	L["No Children"] = "Sin dependientes"
 	L["No Logs saved."] = "No hay registros guardados."
@@ -888,7 +903,6 @@ every 3 events starting from 2nd and ending at 11th: 2-11/3]=]
 	L["Saved Data"] = "Saved Data"
 	--[[Translation missing --]]
 	L["Scale"] = "Scale"
-	L["Search"] = "Buscar"
 	--[[Translation missing --]]
 	L["Select Talent"] = "Select Talent"
 	L["Select the auras you always want to be listed first"] = "Selecciona las auras que quieres que siempre sean listadas primero"
@@ -1049,6 +1063,8 @@ every 3 events starting from 2nd and ending at 11th: 2-11/3]=]
 	L["Texture"] = "Textura"
 	L["Texture Info"] = "Información de Textura"
 	--[[Translation missing --]]
+	L["Texture Picker"] = "Texture Picker"
+	--[[Translation missing --]]
 	L["Texture Rotation"] = "Texture Rotation"
 	--[[Translation missing --]]
 	L["Texture Settings"] = "Texture Settings"
@@ -1075,7 +1091,7 @@ every 3 events starting from 2nd and ending at 11th: 2-11/3]=]
 	--[[Translation missing --]]
 	L["This adds %role, %roleIcon as text replacements. Does nothing if the unit is not a group member."] = "This adds %role, %roleIcon as text replacements. Does nothing if the unit is not a group member."
 	--[[Translation missing --]]
-	L["This adds %tooltip, %tooltip1, %tooltip2, %tooltip3 as text replacements and also allows filtering based on the tooltip content/values."] = "This adds %tooltip, %tooltip1, %tooltip2, %tooltip3 as text replacements and also allows filtering based on the tooltip content/values."
+	L["This adds %tooltip, %tooltip1, %tooltip2, %tooltip3 and %tooltip4 as text replacements and also allows filtering based on the tooltip content/values."] = "This adds %tooltip, %tooltip1, %tooltip2, %tooltip3 and %tooltip4 as text replacements and also allows filtering based on the tooltip content/values."
 	--[[Translation missing --]]
 	L[ [=[This aura contains custom Lua code.
 Make sure you can trust the person who sent it!]=] ] = [=[This aura contains custom Lua code.
@@ -1233,11 +1249,9 @@ It might not work correctly with your version!]=]
 	--[[Translation missing --]]
 	L["Yellow Rune"] = "Yellow Rune"
 	--[[Translation missing --]]
-	L["Yes"] = "Yes"
+	L["Y-Offset"] = "Y-Offset"
 	--[[Translation missing --]]
 	L["y-Offset"] = "y-Offset"
-	--[[Translation missing --]]
-	L["Y-Offset"] = "Y-Offset"
 	--[[Translation missing --]]
 	L["You already have this group/aura. Importing will create a duplicate."] = "You already have this group/aura. Importing will create a duplicate."
 	--[[Translation missing --]]

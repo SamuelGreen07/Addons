@@ -29,10 +29,10 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Skillet")
 Skillet.L = L
 
 -- Get version info from the .toc file
-local MAJOR_VERSION = GetAddOnMetadata("Skillet-Classic", "Version");
-local ADDON_BUILD = ((select(4, GetBuildInfo())) < 20000 and "Classic") or ((select(4, GetBuildInfo())) < 30000 and "BCC") or ((select(4, GetBuildInfo())) < 40000 and "Wrath") or "Retail"
-Skillet.version = MAJOR_VERSION
-Skillet.build = ADDON_BUILD
+local GetAddOnMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
+Skillet.version = GetAddOnMetadata("Skillet-Classic", "Version")
+Skillet.interface = select(4, GetBuildInfo())
+Skillet.build = (Skillet.interface < 20000 and "Classic") or (Skillet.interface < 30000 and "BCC") or (Skillet.interface < 40000 and "Wrath") or "Retail"
 Skillet.project = WOW_PROJECT_ID
 local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
@@ -276,9 +276,6 @@ function Skillet:OnInitialize()
 --
 -- Clean up obsolete data
 --
-	if self.db.global.cachedGuildbank then
-		self.db.global.cachedGuildbank = nil
-	end
 
 --
 -- Change the dataVersion when (major) code changes
@@ -353,6 +350,9 @@ function Skillet:OnInitialize()
 	end
 	if not self.db.global.cachedGuildbank then
 		self.db.global.cachedGuildbank = {}
+	end
+	if not self.db.global.customPrice then
+		self.db.global.customPrice = {}
 	end
 
 --
@@ -803,7 +803,7 @@ function Skillet:PLAYER_ENTERING_WORLD()
 	local className, classFile, classId = UnitClass("player")
 	local locale = GetLocale()
 	local _,wowBuild,_,wowVersion = GetBuildInfo();
-	local guid = UnitGUID("player")		-- example: guid="Player-970-0002FD64" kind=="Player" server=="970" ID="0002FD64" 
+	local guid = UnitGUID("player")		-- example: guid="Player-970-0002FD64" kind=="Player" server=="970" ID="0002FD64"
 --
 -- PLAYER_ENTERING_WORLD happens on login and when changing zones so
 -- only save the time of the first one.
@@ -837,12 +837,19 @@ function Skillet:PLAYER_ENTERING_WORLD()
 --
 		self.db.realm.guid[player]= guid
 		if (server) then
+			if not self.data then
+				self.data = {}
+			end
 			self.data.server = server
 			self.data.realm = realm
 			if not self.db.global.server[server] then
 				self.db.global.server[server] = {}
 			end
 			self.db.global.server[server][realm] = player
+
+			if not self.db.global.customPrice[server] then
+				self.db.global.customPrice[server] = {}
+			end
 			if not self.db.global.faction[server] then
 				self.db.global.faction[server] = {}
 			end

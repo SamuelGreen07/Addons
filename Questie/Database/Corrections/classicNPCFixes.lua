@@ -78,6 +78,18 @@ function QuestieNPCFixes:Load()
             [npcKeys.zoneID] = zoneIDs.STRANGLETHORN_VALE,
             [npcKeys.spawns] = {[zoneIDs.STRANGLETHORN_VALE] = {{40.38,8.35}}},
         },
+        [871] = {
+            [npcKeys.zoneID] = zoneIDs.STRANGLETHORN_VALE,
+            [npcKeys.spawns] = {[zoneIDs.STRANGLETHORN_VALE] = {{23.2,25},{23.4,25.6},{23.8,25.6},{24,25.4},{24,28.8},{24.4,23.4},{24.4,24},{24.4,28},{24.6,24.8},{24.6,27.2},{24.8,23},{25,23.6},{25.2,29.6},{25.4,26.2},{25.4,29.4},{26,28.8},{26.4,26.2},{26.4,26.6},{26.6,26.6},{26.8,22.2},{26.8,23.6},{26.8,26.2},{27,23.2},{27,25.4}}},
+        },
+        [877] = {
+            [npcKeys.zoneID] = zoneIDs.STRANGLETHORN_VALE,
+            [npcKeys.spawns] = {[zoneIDs.STRANGLETHORN_VALE] = {{23.2,25},{23.4,24.4},{23.4,25.6},{23.4,29.2},{24,25.4},{24,25.6},{24,28.8},{24.4,27.4},{24.4,28},{24.6,27.2},{24.6,27.6},{24.8,30.8},{25,25.2},{25.2,29.4},{25.2,29.6},{25.4,26.2},{25.6,29.2},{25.6,29.8},{26.4,22},{26.4,26.2},{26.4,26.6},{26.6,26.6},{26.6,27.6},{26.8,22.2},{26.8,26.4},{27,23},{27,24.2},{27,25.4},{27.6,22.2},{27.6,22.6}}},
+        },
+        [879] = {
+            [npcKeys.zoneID] = zoneIDs.STRANGLETHORN_VALE,
+            [npcKeys.spawns] = {[zoneIDs.STRANGLETHORN_VALE] = {{23.4,25},{23.4,25.6},{24,25.4},{24.4,23.8},{24.4,28},{24.6,24.8},{24.6,27.2},{24.8,23.2},{25.2,24},{25.4,26.2},{26.2,26.2},{26.4,27},{26.6,26.6},{26.8,22.2},{26.8,26},{27,24.2},{27,25.4},{27.4,22.6}}},
+        },
         [950] = {
             [npcKeys.spawns] = {[zoneIDs.SWAMP_OF_SORROWS]={{60.4,84.4},{61.8,80.2},{61.8,84.2},{62.2,87.8},{62.4,81},{62.4,84.6},{62.8,80.8},{62.8,86.2},{62.8,90.6},{63,89.8},{63,91.6},{63.2,87.4},{63.6,86.4},{63.6,91.6},{64,91.2},{64.2,79.4},{64.4,82.4},{64.4,87.2},{64.4,90.2},{64.6,70.2},{64.8,88.4},{64.8,89.8},{65.2,72},{66,77.4},{66.8,76.4},{67.8,71},{70,76.6}}},
         },
@@ -384,6 +396,10 @@ function QuestieNPCFixes:Load()
         },
         [3560] = {
             [npcKeys.spawns] = {[zoneIDs.BADLANDS] = {{35.23,10.33}}},
+        },
+        [3616] = {
+            [npcKeys.questStarts] = {944,951,960,961},
+            [npcKeys.questEnds] = {948,950,951,952},
         },
         [3619] = {
             [npcKeys.zoneID] = zoneIDs.DARKSHORE,
@@ -1097,7 +1113,7 @@ function QuestieNPCFixes:Load()
             [npcKeys.spawns] = {[zoneIDs.BLACKROCK_DEPTHS] = {{-1,-1}}},
         },
         [9598] = {
-            [npcKeys.spawns] = {[zoneIDs.FELWOOD]={{49.4,31}}}, -- #1516
+            [npcKeys.spawns] = {[zoneIDs.FELWOOD]={{49.57,29.60}}}, -- #1516
             [npcKeys.zoneID] = zoneIDs.FELWOOD, -- #1516
         },
         [9621] = {
@@ -1795,26 +1811,15 @@ function QuestieNPCFixes:Load()
             [npcKeys.spawns] = {[zoneIDs.DUSTWALLOW_MARSH] = {{37.8,50.29},{49.06,57.33},{44.08,50.17},{42.35,55},{47.26,54.65}}},
         },
         [14305] = {
-            [npcKeys.zoneID] = zoneIDs.LOCH_MODAN,
-            [npcKeys.spawns] = {
-                [zoneIDs.DARNASSUS] = {{41.21,43.05}},
-                [zoneIDs.DUSTWALLOW_MARSH] = {{66.29,49.08}},
-                [zoneIDs.WESTFALL] = {{30.25,85.64}},
-                [zoneIDs.STORMWIND_CITY] = {{47.32,38.58}},
-                [zoneIDs.LOCH_MODAN] = {{47.71,14.26}},
-            },
+            [npcKeys.zoneID] = zoneIDs.STORMWIND_CITY, -- default zone where you start the chain
+            [npcKeys.spawns] = {[zoneIDs.STORMWIND_CITY] = {{47.32,38.58}}}, -- only SW for consistency
         },
         [14373] = {
             [npcKeys.spawns] = {[zoneIDs.FERALAS]={{74.4,44}}},
         },
         [14444] = {
-            [npcKeys.zoneID] = zoneIDs.UNDERCITY,
-            [npcKeys.spawns] = {
-                [zoneIDs.THUNDER_BLUFF] = {{59.32,51.65}},
-                [zoneIDs.THE_BARRENS] = {{47.91,5.49},{63.11,38.16}},
-                [zoneIDs.ORGRIMMAR] = {{70.92,25.62}},
-                [zoneIDs.UNDERCITY] = {{66.06,36.97}},
-            },
+            [npcKeys.zoneID] = zoneIDs.ORGRIMMAR, -- default zone where you start the chain
+            [npcKeys.spawns] = {[zoneIDs.ORGRIMMAR] = {{70.92,25.62}}}, -- only OG for consistency
         },
         [14500] = {
             [npcKeys.spawns] = {[zoneIDs.SCHOLOMANCE]={{-1, -1}}}, -- #1506

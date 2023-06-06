@@ -1,9 +1,10 @@
 ## Interface: 11403
 ## Title: cargBags_Nivaya
 ## Author: Luzzifus (Modified by Nibelheim, humfras)
-## OptionalDeps: nibRealUI, ItemRack, Outfitter
+## OptionalDeps: ItemRack, Outfitter
 ## SavedVariables: cBnivCfg, cB_CustomBags, cBniv_CatInfo
 ## SavedVariablesPerCharacter: cB_KnownItems, cBniv
+## IconTexture: 133640
 ## X-cargBags: cargBags
 
 config.lua

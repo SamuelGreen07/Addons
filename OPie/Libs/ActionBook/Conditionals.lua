@@ -1,7 +1,13 @@
-local _, T = ...
+local COMPAT, _, T = select(4, GetBuildInfo()), ...
 if T.SkipLocalActionBook then return end
-local MODERN = select(4,GetBuildInfo()) >= 8e4
-local KR, EV = assert(T.ActionBook:compatible("Kindred", 1,12), "A compatible version of Kindred is required"), T.Evie
+
+local MODERN, CF_WRATH = COMPAT >= 10e4, COMPAT < 10e4 and COMPAT >= 3e4
+local MODERN_CONTAINERS = MODERN or C_Container and C_Container.GetContainerNumSlots
+local EV = T.Evie
+local AB = T.ActionBook:compatible(2, 31)
+local KR = T.ActionBook:compatible("Kindred", 1,17)
+local RW = T.ActionBook:compatible("Rewire", 1,24)
+assert(EV and AB and KR and RW and 1, "Incompatible library bundle")
 local playerClassLocal, playerClass = UnitClass("player")
 
 local safequote do
@@ -57,7 +63,7 @@ end
 do -- me:Player Name/Class
 	KR:SetStateConditionalValue("me", UnitName("player") .. "/" .. playerClassLocal .. "/" .. playerClass)
 end
-do -- known:spell id
+if not MODERN then -- known:spell id
 	KR:SetSecureExecConditional("known", [=[-- KR_KnownSpell
 		local ids = ...
 		for sid in (type(ids) == "string" and ids or ""):gmatch("[^/]+") do
@@ -94,7 +100,7 @@ if MODERN then -- spec:id/name
 	if s then
 		RegisterStateConditional("spec", "spec", s, false)
 	end
-else
+elseif not CF_WRATH then
 	KR:SetStateConditionalValue("spec", "")
 end
 do -- form:token
@@ -146,14 +152,12 @@ do -- instance:arena/bg/ratedbg/lfr/raid/scenario + outland/northrend/...
 		[2222]="world/shadowlands",
 		[2453]="world/torghast", -- lobby
 		[2162]="torghast", -- towers
+		[2444]="world/dragon isles/df",
+		[2454]="world/zaralek/df",
 		
 		garrison="world/draenor/garrison",
-		[1158]="garrison",
-		[1331]="garrison",
-		[1159]="garrison",
-		[1152]="garrison",
-		[1330]="garrison",
-		[1153]="garrison",
+		[1158]="garrison", [1331]="garrison", [1159]="garrison",
+		[1152]="garrison", [1330]="garrison", [1153]="garrison",
 		
 		[1893]="island", -- The Dread Chain
 		[1814]="island", -- Havenswood (?)
@@ -166,9 +170,18 @@ do -- instance:arena/bg/ratedbg/lfr/raid/scenario + outland/northrend/...
 		[1882]="island", -- Verdant Wilds
 		[1883]="island", -- Whispering Reef
 	}
-	function EV.PLAYER_ENTERING_WORLD()
+	local mapZoneCheck, zoneChecked = {
+		[2512]="world/gta", [2085e6+2512]="world/dragon isles/df/gta"
+	}, true
+	local function syncInstance(e)
 		local _, itype, did, _, _, _, _, imid = GetInstanceInfo()
-		if imid and mapTypes[imid] then
+		if mapZoneCheck[imid] then
+			if e == "PLAYER_ENTERING_WORLD" and zoneChecked then
+				zoneChecked, EV.ZONE_CHANGED_NEW_AREA = false, syncInstance
+			end
+			local bm = C_Map.GetBestMapForUnit("player")
+			itype = mapZoneCheck[bm and bm*1e6 + imid or nil] or mapZoneCheck[imid] or mapTypes[imid]
+		elseif mapTypes[imid] then
 			itype = mapTypes[imid]
 		elseif itype == "pvp" and MODERN and C_PvP.IsRatedBattleground() then
 			itype = "ratedbg"
@@ -176,11 +189,16 @@ do -- instance:arena/bg/ratedbg/lfr/raid/scenario + outland/northrend/...
 			itype = "worldpvp"
 		elseif itype == "raid" then
 			if did == 7 then
-				itype = "lfr"
+				itype = "raid/lfr"
 			end
 		end
 		KR:SetStateConditionalValue("in", mapTypes[itype] or itype)
+		if e == "ZONE_CHANGED_NEW_AREA" then
+			zoneChecked = true
+			return "remove"
+		end
 	end
+	EV.PLAYER_ENTERING_WORLD = syncInstance
 	KR:SetAliasConditional("instance", "in")
 	KR:SetStateConditionalValue("in", "daze")
 end
@@ -214,9 +232,6 @@ if MODERN then -- outpost
 	EV.SPELLS_CHANGED = syncOutpost
 	syncOutpost()
 end
-do -- glyph:(defunct)
-	KR:SetStateConditionalValue("glyph", "")
-end
 do -- level:floor
 	local function syncLevel()
 		KR:SetThresholdConditionalValue("level", UnitLevel("player") or 0)
@@ -227,13 +242,15 @@ end
 do -- horde/alliance
 	local function syncFactionGroup(e, u)
 		if e ~= "UNIT_FACTION" or u == "player" then
-			local fg = UnitFactionGroup("player", true)
+			local fg = UnitFactionGroup("player")
 			KR:SetStateConditionalValue("horde", fg == "Horde" and "*" or "")
 			KR:SetStateConditionalValue("alliance", fg == "Alliance" and "*" or "")
+			KR:SetStateConditionalValue("merc", MODERN and UnitIsMercenary("player") and "*" or "")
 		end
 	end
 	syncFactionGroup()
 	EV.PLAYER_ENTERING_WORLD, EV.UNIT_FACTION = syncFactionGroup, syncFactionGroup
+	KR:SetAliasConditional("mercenary", "merc")
 end
 do -- moving
 	KR:SetNonSecureConditional("moving", function()
@@ -277,7 +294,7 @@ do -- ready:spell name/spell id/item name/item id
 				local _, iid = GetItemInfo(rc)
 				iid = tonumber((iid or rc):match("item:(%d+)"))
 				if iid then
-					cdS, cdL, _cdA = GetItemCooldown(iid)
+					cdS, cdL, _cdA = (MODERN_CONTAINERS and C_Container.GetItemCooldown or GetItemCooldown)(iid)
 				end
 			end
 			if cdL == 0 or (cdS and cdL and (cdS + cdL) <= gcE) then
@@ -368,13 +385,52 @@ do -- combo:count
 	end
 	EV.PLAYER_SPECIALIZATION_CHANGED, EV.PLAYER_ENTERING_WORLD = syncComboPower, syncComboPower
 end
+do -- near:oid/cid
+	local argCache, nearValue, nearGroup = {}
+	local typePrefix, groups = {GameObject="o", Creature="c"}, {}
+	for k, v in pairs({
+		["herb-overload"] = "o375245/o381199/o381213/o356536/o381202/o381210/o381196/o381205/o375242/o375244/o381214/o381201/o381200/o381212/o375246/o381198/o381203/o381197/o381211/o375243/o381204/o390141/o390140/o390142/o390139/o398761/o398760/o398759/o398762/o398767/o398764/o398765/o398766",
+		["mine-overload"] = "o381516/o375235/o375234/o381515/o381517/o375238/o375239/o381518/o381519/o375240/o390137/o390138",
+	}) do
+		for e in v:gmatch("[^/]+") do
+			groups[e] = k
+		end
+	end
+	KR:SetNonSecureConditional("near", function(_name, args)
+		if args == nil then
+			return nearValue ~= nil
+		end
+		local ca = argCache[args]
+		if ca == nil then
+			ca = {}
+			for v in args:gmatch("[^%s/][^/]*") do
+				ca[v:match("^(.-)%s*$")] = 1
+			end
+			argCache[args] = ca
+		end
+		return (ca[nearValue] or ca[nearGroup]) ~= nil
+	end)
+	function EV:PLAYER_SOFT_INTERACT_CHANGED(_, guid)
+		local ct, oid
+		if guid and not InCombatLockdown() then
+			ct, oid = guid:match("^(%a+)%-[-%d]+%-(%d+)%-[^-]+$")
+			ct = typePrefix[ct]
+			oid = ct and ct .. oid or nil
+		end
+		if oid ~= nearValue then
+			nearValue, nearGroup = oid, groups[oid]
+			KR:PokeConditional("near")
+		end
+	end
+end
 do -- race:token
 	local map, _, raceToken = {
-		Scourge="Scourage/Undead/Forsaken",
+		Scourge="Scourge/Undead/Forsaken",
 		LightforgedDraenei="LightforgedDraenei/Lightforged",
 		HighmountainTauren="HighmountainTauren/Highmountain",
 		MagharOrc="MagharOrc/Maghar",
 		ZandalariTroll="ZandalariTroll/Zandalari",
+		DarkIronDwarf="DarkIronDwarf/DarkIron",
 	}, UnitRace("player")
 	KR:SetStateConditionalValue("race", map[raceToken] or raceToken)
 end
@@ -623,12 +679,9 @@ do -- [visual]
 	KR:SetSecureExternalConditional("visual", f, function() return true end)
 end
 if MODERN then -- [coven]
-	local noPendingSync, cv, covMap = true, false, {
-		[1]="kyrian",
-		[2]="venthyr",
-		[3]="fae/nightfae",
-		[4]="necro/necrolord",
-	}
+	local cv, covMap = false, {"kyrian", "venthyr", "fae/nightfae", "necro/necrolord"}
+	local c8, p8 = false, {1, 4, 3, 2}
+	local noPendingSync, noPendingTimer, syncCovenTimer = true, true
 	local function syncCoven(e)
 		if InCombatLockdown() then
 			if noPendingSync then
@@ -642,9 +695,190 @@ if MODERN then -- [coven]
 			cv = nv
 			KR:SetStateConditionalValue("coven", nv)
 		end
+		if GetAchievementNumCriteria(15646) == 4 then
+			local n8 = false
+			for i=1,4 do
+				if select(3, GetAchievementCriteriaInfo(15646, i)) then
+					n8 = n8 and (n8 .. "/" .. covMap[p8[i]]) or covMap[p8[i]]
+				end
+			end
+			if n8 ~= c8 then
+				c8 = n8
+				KR:SetStateConditionalValue("acoven80", n8)
+			end
+		elseif noPendingTimer then
+			noPendingTimer = false
+			C_Timer.After(0.25, syncCovenTimer)
+		end
 		return e == "PLAYER_REGEN_ENABLED" and "remove"
 	end
+	function syncCovenTimer()
+		noPendingTimer = true
+		syncCoven()
+	end
 	KR:SetStateConditionalValue("coven", false)
+	KR:SetStateConditionalValue("acoven80", false)
 	KR:SetAliasConditional("covenant", "coven")
-	EV.COVENANT_CHOSEN, EV.PLAYER_ENTERING_WORLD = syncCoven, syncCoven
+	KR:SetAliasConditional("acovenant80", "acoven80")
+	EV.COVENANT_CHOSEN, EV.COVENANT_SANCTUM_RENOWN_LEVEL_CHANGED, EV.PLAYER_ENTERING_WORLD = syncCoven, syncCoven, syncCoven
+end
+do -- Flags
+	local core, cenv = CreateFrame("Frame", nil, nil, "SecureHandlerBaseTemplate")
+	core:SetFrameRef("KR", KR:seclib())
+	core:SetAttribute("seed", math.random(2^24)-1)
+	core:Execute([=[-- ActionBook:flag-init
+		KR, flags, cargcache, crand, crm = self:GetFrameRef('KR'), newtable(), newtable(), newtable(self:GetAttribute('seed')), 2^24
+	]=])
+	cenv = GetManagedEnvironment(core)
+	core:SetAttribute("RunSlashCmd", [=[-- flag-RunSlashCmd
+		local slash, clause, target = ...
+		local flag, nv
+		if (clause or "") == "" then
+		elseif slash == "/setflag" then
+			local name, eq, v = clause:match("^%s*([^=<%s/]+)%s*(=?)%s*(.-)%s*$")
+			if name then
+				flag, nv = name:lower(), eq == "" and "1" or (v ~= "" and v ~= "0" and v:lower()) or nil
+			end
+		elseif slash == "/cycleflag" then
+			local name, eq, top, step = clause:match("^%s*([^=<%s/]+)%s*([<=]?)%s*(%d*)%+?(%-?%d*)%s*$")
+			if name and (top == "") == (eq == "")then
+				flag, top, step = name:lower(), top ~= "" and 0+top or 2, step ~= "" and 0+step or 1
+				nv = ((tonumber(flags[flag]) or 0) + step) % top
+				nv = nv > 0 and nv .. "" or nil
+			end
+		elseif slash == "/randflag" then
+			local name, top = clause:match("^%s*([^=<%s/]+)%s*<%s*(%d*)%s*$")
+			if not name then return end
+			nv, flag, top = 0, name:lower(), top ~= "" and 0+top or 2
+			if top > 1 then
+				local cr = crand[clause]
+				local rv = ((cr or crand[1]) * 12616645 + 16777213) % crm
+				if cr == nil then
+					crand[1] = rv
+				end
+				crand[clause], nv = rv, rv % top
+			end
+			nv = nv ~= 0 and nv .. "" or nil
+		end
+		if flag ~= nil and flags[flag] ~= nv then
+			flags[flag] = nv
+			if KR then
+				KR:RunAttribute("PokeConditional", "flag")
+			end
+		end
+	]=])
+	core:SetAttribute("EvaluateMacroConditional", [=[-- flag-EvaluateMacroConditional
+		local name, cv, target = ...
+		if name ~= "flag" or not cv then return end
+		local ca, ni = cargcache[cv]
+		if not ca then
+			ca, ni = newtable(), 1
+			for s in cv:gmatch("[^/]*") do
+				local name, eq, v = s:match("^%s*([^=%s]+)%s*(=?)%s*(.-)%s*$")
+				if name then
+					name, v = name:lower(), v:lower()
+					if eq == "=" then
+						ca[ni], ca[ni+1], ni = name, v ~= "0" and v, ni + 2
+					else
+						ca[ni], ca[ni+1], ni = name, false, ni + 2
+					end
+				end
+			end
+			cargcache[cv] = ca
+		end
+		for i=1, #ca, 2 do
+			local cv, dv = flags[ca[i]], ca[i+1]
+			if cv == dv or (dv == false and cv) then
+				return true
+			end
+		end
+		return false
+	]=])
+
+	local flagHint, flagCommandHint do
+		local currentFutureID
+		local function newSpeculativeProxy(base)
+			local ov, ot = {}, {}
+			local function getValue(_, k)
+				if currentFutureID and ot[k] == currentFutureID then
+					return ov[k]
+				end
+				return base[k]
+			end
+			local function setValue(_, k, nv)
+				if k ~= nil and currentFutureID then
+					ov[k], ot[k] = nv, currentFutureID
+				end
+			end
+			return setmetatable({}, {__index=getValue, __newindex=setValue})
+		end
+		local flagProxy, crandProxy = newSpeculativeProxy(cenv.flags), newSpeculativeProxy(cenv.crand)
+		local flagHintI = loadstring(("local cargcache, flags, newtable = ... return function(...) %s end"):format(core:GetAttribute("EvaluateMacroConditional")))({}, flagProxy, function() return {} end)
+		local runSlashI = loadstring(("local KR, flags, crand, crm = false, ... return function(...) %s end"):format(core:GetAttribute("RunSlashCmd")))(flagProxy, crandProxy, cenv.crm)
+
+		function flagHint(...)
+			local _; _, _, _, _, currentFutureID = ...
+			return flagHintI(...)
+		end
+		function flagCommandHint(slash, _, args2, target, _, _, _, speculationID)
+			currentFutureID = speculationID
+			runSlashI(slash, args2, target)
+		end
+	end
+	
+	local pendingFlagRestore = nil
+	local function GetState()
+		local r = {}
+		for f, v in rtable.pairs(cenv.flags) do
+			r[f] = v
+		end
+		return next(r) ~= nil and {flags=r, at=GetServerTime()} or nil
+	end
+	local function DoFlagRestore(flags)
+		pendingFlagRestore = false
+		if rtable.next(cenv.flags) ~= nil then
+			return
+		end
+		for k,v in pairs(flags) do
+			if type(k) == 'string' and type(v) == 'string' then
+				core:SetAttribute('setflag-name', k)
+				core:SetAttribute('setflag-value', v)
+				core:Execute([[-- flag-RestoreFlagState
+					flags[self:GetAttribute('setflag-name')] = self:GetAttribute('setflag-value')
+				]])
+			end
+		end
+		core:SetAttribute('setflag-name', nil)
+		core:SetAttribute('setflag-value', nil)
+	end
+	local function RestoreState(_, state)
+		if type(state) == "table" and type(state.flags) == "table" and pendingFlagRestore == nil then
+			if InCombatLockdown() then
+				pendingFlagRestore = state.flags
+				EV.PLAYER_REGEN_ENABLED = function()
+					DoFlagRestore(pendingFlagRestore)
+					return "remove"
+				end
+			else
+				DoFlagRestore(state.flags)
+			end
+		end
+	end
+
+	KR:SetSecureExternalConditional("flag", core, flagHint)
+	RW:RegisterCommand("/setflag", true, true, core)
+	RW:RegisterCommand("/cycleflag", true, true, core)
+	RW:RegisterCommand("/randflag", true, true, core)
+	RW:SetCommandHint("/setflag", 9e9, flagCommandHint)
+	RW:SetCommandHint("/cycleflag", 9e9, flagCommandHint)
+	RW:SetCommandHint("/randflag", 9e9, flagCommandHint)
+	AB:RegisterModule("FlagMast", {
+		compatible=function(self, maj)
+			if maj == 1 then
+				return self
+			end
+		end,
+		GetState=GetState,
+		RestoreState=RestoreState,
+	})
 end

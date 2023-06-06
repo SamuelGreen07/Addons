@@ -26,11 +26,6 @@ local isWrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
 --
 -- All the options that we allow the user to control.
 --
-local MAJOR_VERSION = GetAddOnMetadata("Skillet-Classic", "Version");
-
---
--- All the options that we allow the user to control.
---
 Skillet.options =
 {
 	handler = Skillet,
@@ -44,7 +39,7 @@ Skillet.options =
 			args = {
 				header = {
 					type = "header",
-					name = L["Skillet Trade Skills"].." "..MAJOR_VERSION,
+					name = L["Skillet Trade Skills"].." "..Skillet.version,
 					order = 11
 				},
 				vendor_buy_button = {
@@ -1372,6 +1367,101 @@ Skillet.options =
 				print("CraftWait= "..tostring(Skillet.db.realm.craft_wait))
 			end,
 			order = 103
+		},
+--
+-- commands to manage the custom reagent price table
+--
+		customadd = {
+			type = 'input',
+			name = "customadd",
+			desc = "Add a custom price for a reagent (customadd id|link,price)",
+			get = function()
+				return value
+			end,
+			set = function(self,value)
+				if not (UnitAffectingCombat("player")) then
+					if value then
+						local item, id, price, name, link
+						local server = Skillet.data.server or 0
+						DA.DEBUG(0,"value= "..value)
+						item, price = string.split(",",value)
+						if string.find(item,"|H") then
+							id = Skillet:GetItemIDFromLink(item)
+						else
+							id = tonumber(item)
+						end
+						name, link = GetItemInfo(id)
+						price = tonumber(price)
+						DA.DEBUG(0,"id= "..tostring(id)..", name= "..tostring(name)..", price= "..tostring(price)..", link= "..tostring(link))
+						Skillet.db.global.customPrice[server][id] = { ["name"] = name, ["value"] = price }
+						end
+				else
+					DA.DEBUG(0,"|cff8888ffSkillet|r: Combat lockdown restriction." ..
+												  " Leave combat and try again.")
+				end
+			end,
+			order = 105
+		},
+		customdel = {
+			type = 'input',
+			name = "customdel",
+			desc = "Delete a custom reagent (customdel id|link)",
+			get = function()
+				return value
+			end,
+			set = function(self,value)
+				if not (UnitAffectingCombat("player")) then
+					if value then
+						local id
+						local server = Skillet.data.server or 0
+						DA.DEBUG(0,"value= "..value)
+						if string.find(value,"|H") then
+							id = Skillet:GetItemIDFromLink(value)
+						else
+							id = tonumber(value)
+						end
+						Skillet.db.global.customPrice[server][id] = nil
+						end
+				else
+					DA.DEBUG(0,"|cff8888ffSkillet|r: Combat lockdown restriction." ..
+												  " Leave combat and try again.")
+				end
+			end,
+			order = 106
+		},
+		customshow = {
+			type = 'execute',
+			name = "customshow",
+			desc = "Print the custom reagent price table",
+			func = function()
+				local server = Skillet.data.server or 0
+				for id,entry in pairs(Skillet.db.global.customPrice[server]) do
+					print(tostring(entry.name)..", "..Skillet:FormatMoneyFull(entry.value,true))
+				end
+			end,
+			order = 107
+		},
+		customdump = {
+			type = 'execute',
+			name = "customdump",
+			desc = "Print the custom reagent price table",
+			func = function()
+				local server = Skillet.data.server or 0
+				for id,entry in pairs(Skillet.db.global.customPrice[server]) do
+					print("id= "..tostring(id)..", name= "..tostring(entry.name)..", value= "..tostring(entry.value))
+				end
+			end,
+			order = 108
+		},
+		customclear = {
+			type = 'execute',
+			name = "customclear",
+			desc = "Clear the custom reagent price table",
+			func = function()
+				local server = Skillet.data.server or 0
+				Skillet.db.global.customPrice[server] = {}
+			end,
+			order = 109
 		},
 
 --

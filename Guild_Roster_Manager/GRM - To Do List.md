@@ -3,13 +3,31 @@
 *These are either my own notes, or mostly suggestions and reports from all of you. This does not yet include all reported or suggestions on Discord. There is no guarantee I am going to do all of these eventually, just notes of all things suggested that I am either moderately interested in, or extremely interested in implemented. Some items I have already largely built but are not yet ready for release. Most I have not even begun to brainstorm implementation on. If you would like to add to any of these suggestions or expand on things further, please look at Suggestions in Discord*
 
 
-** SCAN FOR CHANGES ** Trigger on GUILD_ROSTER_UPDATE - this will only check for changes to notes, leveling, etc...
-    --Event_Log_Update - check for promotion/demotion/kick/join/etc...
+**PRIORITY BUILD CHANGES**
+
+** SYNC PROGRESS BAR - Finish getting it working.
+    
+** SYNC ISSUES SOME STILL FAILING, particularly on manual triger
+
+** HYBRID SCROLLFRAME FOR BAN window...
+
+** ADD MYTHIC+ OPTION for macro tool on promotions/demotions...
+
+* Compress and decompress sync data.
+
+* Lightweight Note tool that does the following:
+
+  -- Auto sets iLvl to the note
+  -- [+XX] or [+20] highest M rating
+  -- RBG rating
+  -- Arena rating
+
+  -- Possibly give option to set it to custom note if you are in GRM, share alt data as well. 
 
 
 # **BUG FIXES**
 
-* StaticPopup is closing on Escape, which is bad if you die and hit escape. It should only on the GRM one. This seems to be affecting Classic.
+* StaticPopup is closing on Escape, which is bad if you die and hit escape. It should only on the GRM one. This seems to be affecting Classic Vanilla only, but I haven't been able to reproduce though I saw it once lol.
 
 * Birthday column on Audit window is not sorting when clicked. Note, when selecting "Include bdays as incomplete," the sorting works fine, interestingly enough.
 
@@ -18,11 +36,7 @@
 
 * UI 2.0 - See Discord for details
 
-* Re-scalable frames by dragging corner - NOT RESIZABLE, just scaling by dragging.
-
-* Online indicator on the alt popout mouseover toons beyond just alphabetically, but also tagged as main/alt group, etc...
-
-* Occasionally GRM's window is appearing when a player is logging out, the ban attachment. That should not happen. This seems to be happening in Classic, mainly.
+* Occasionally GRM's window is appearing when a player is logging out, the ban attachment. That should not happen. This seems to be happening in Classic Vanilla, mainly.
 
 * Make a video guide for the macro tool
 
@@ -44,36 +58,19 @@
  -- EXPORT: 'Excel: Paste data into Excel, Click the Data Tab, Click "Text to Columns" '
 - - 'Google Sheets: Paste data into Google Sheets, Click the Data Tab, Click Split "text to columns" ' 
 
-* Video on how to easily use the main tagging.
-
-* Expand addon users window, features, tooltips stating what rank they need to be, etc...
-- { "Ok!" , "Their Rank too Low" , "Your Rank too Low" , "Outdated Version" , "You Need Updated Version" , "Player Sync Disabled" }
-
-
 # **CODE IMPROVEMENTS**
 
 * BanList is outdated scrollframe format - just realized it is NOT a hybridscrollframe and needs to be updated. Completely forgot about this.
 
-* Adjust sync leadership structure and restrict sync leadership to the highest rank - if someone inquires who Is Leader and you determine they are a higher rank than you, then do not respond and let them reassess leadership.
+* Replace GRM.SlimName everywhere with GRM.FormatName -- this is to give player the option choose the full name or the slimname, and only force the full name as needed on the backend database. Right now it is my own discretionary use and should me normalized.
 
-* Replace GRM.SlimName everywhere with GRM.FormatName -- this is to give player the option choose the full name or the slimname, and only force the full name as needed on the backend database.
-
-* Leverage and/or support the LibAlts library so that the information could be shared with other addons - LibSharedMedia compatibility
-
-* Auto set verified join date when you self join a guild.
+* Leverage LibAlts data if it is found. Not relying on it, just pulling the data to help the alt lists automatically.
 
 * Auto-select proper font when adjusting the language.
 
-* Slash command to force all epoch stamps to be time() for sync purposes. Or, option for guild restore to force all updates to be today's date as well so resync doesn't just wipeout backup.
-
 * Add slash command /grm search to bring up audit window with search
 
-* On Sync request, check for a GRM user of higher rank, not just time, possibly designate new syncLeader
-
 * When configuring a guild for the first time, scan the log for recent changes and add those to the log immediately.
-
-* Auto set join date when installing GRM or configuring for a guild for the first time.
--- GRM.EpochToDateFormat ( math.floor (C_Club.GetClubInfo(GRM_G.gClubID).joinTime ) / 1000000 )
 
 
 # **SUGGESTIONS**
@@ -82,11 +79,7 @@
 
 *  Macro tool rule that excludes people from kick/promote/demotion rule if certain tag is included
 
-* Silence the yellow system messages that GRM replaces, but not ALL system messages, just the ones GRM replaces in chat. In further thinking
-
 * Ability to export main names to alts in the notes
-
-* Ban page add a search filter
 
 * Ability to search public/officer/custom notes
 
@@ -100,9 +93,9 @@
 
 * In the GRM menu, have a list of mains and when you mouseover it shows all the alts.
 
-* Titan Panel plugin support
+* Titan Panel plugin support ahs been requested
 
-* Merge multiple connected guilds to make them appear as 1 guild. This will only be a front end UI, but do it sort of how the cross-guild chat works. -- This will probably be a bit complicated as so much is integrated into actions that will only be doable with that current guild.
+* Merge multiple connected guilds to make them appear as 1 guild. This will only be a front end UI, but do it sort of how the cross-guild chat works. -- This will probably be a bit complicated as so much is integrated into actions that will only be doable with that current guild. This is not high priority for me, but I like the suggestion.
 
 * Control-click a player's name in chat to open the guild roster - or just clickable player names
 
@@ -142,7 +135,7 @@
 
 * Add nickname feature/pronouns.
 
-* Full name control - GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].useFullName
+* Full name control - GRM.S().useFullName
 
 *  Snapping back on the scrolling. Click the player locks the player, but it continues to allow mouseover scrolling, and snaps back when you scroll off... but lock is released if t he player's name is scrolled off.
 
@@ -160,8 +153,6 @@
   - Add join date to note, then fix mismatched dates with note date.
 
 * Add main info to ElvUI player mousover tooltip
-
-* Organize the macro tool names so they show main/alt, or even have alts as collapsable group under the main.
 
 * Pre-set messages you can send to guild chat or guild members, with click of a button, or with a slash command
   -- Example: /grm warn Ted
@@ -228,34 +219,34 @@
 
 *Code Notes:
 ```Lua
-/dump C_ClubFinder.ReturnClubApplicantList(GRM_G.clubID)
-C_ClubFinder.ReturnPendingClubApplicantList(GRM_G.clubID)
-/run for x in pairs (CommunitiesFrame.ApplicantList) do print(x) end
-/dump CommunitiesFrame.ApplicantList.ApplicantInfoList[1].playerGUID
-C_ClubFinder.RespondToApplicant(self:GetParent().Info.clubFinderGUID, self:GetParent().Info.playerGUID, shouldInvite, applicantType, self:GetParent().Info.name, forceAccept);
-/run GRM.CancelPendingInvite ("PlayerTextName")
-GRM.CancelPendingInvite = function ( playerName )
-    local applicants = C_ClubFinder.ReturnPendingClubApplicantList(GRM_G.gClubID);
-    local isFound = false;
+-- /dump C_ClubFinder.ReturnClubApplicantList(GRM_G.clubID)
+-- C_ClubFinder.ReturnPendingClubApplicantList(GRM_G.clubID)
+-- /run for x in pairs (CommunitiesFrame.ApplicantList) do print(x) end
+-- /dump CommunitiesFrame.ApplicantList.ApplicantInfoList[1].playerGUID
+-- C_ClubFinder.RespondToApplicant(self:GetParent().Info.clubFinderGUID, self:GetParent().Info.playerGUID, shouldInvite, applicantType, self:GetParent().Info.name, forceAccept);
+-- /run GRM.CancelPendingInvite ("PlayerTextName")
+-- GRM.CancelPendingInvite = function ( playerName )
+--     local applicants = C_ClubFinder.ReturnPendingClubApplicantList(GRM_G.gClubID);
+--     local isFound = false;
 
-    for i = 1 , #applicants do
-        if applicants[i].name == playerName then
-            isFound = true;
-            print(i)
-            C_ClubFinder.RespondToApplicant ( applicants[i].clubFinderGUID , applicants[i].playerGUID , false , 1 , applicants[i].name , false )
-            break;
-        end
-    end
+--     for i = 1 , #applicants do
+--         if applicants[i].name == playerName then
+--             isFound = true;
+--             print(i)
+--             C_ClubFinder.RespondToApplicant ( applicants[i].clubFinderGUID , applicants[i].playerGUID , false , 1 , applicants[i].name , false )
+--             break;
+--         end
+--     end
 
-    if not isFound then
-        GRM.Report ( "Player not Found in Pending Applicant List" );
-    end
-end
+--     if not isFound then
+--         GRM.Report ( "Player not Found in Pending Applicant List" );
+--     end
+-- end
 
 -- Events:
 -- CLUB FINDER APPLICANT INVITE RECIEVED
 -- CLUB FINDER APPLICATIONS UPDATED
-
+-- /dump C_Club.GetMemberInfo ( GRM_G.gClubID , C_Club.GetClubMembers ( GRM_G.gClubID )[67] ).overallDungeonScore
 -- C_Club.GetMemberInfo ( GRM_G.gClubID )
 -- C_Club.GetMemberInfo ( GRM_G.gClubID , C_Club.GetClubMembers ( GRM_G.gClubID )[1] )
 -- C_Club.GetClubMembers ( GRM_G.gClubID )

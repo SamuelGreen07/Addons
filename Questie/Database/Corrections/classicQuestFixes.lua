@@ -104,12 +104,6 @@ function QuestieQuestFixes:Load()
         [165] = {
             [questKeys.exclusiveTo] = {148}, --#1173
         },
-        [171] = {
-            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
-        },
-        [172] = {
-            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
-        },
         [201] = {
             [questKeys.triggerEnd] = {"Locate the hunters' camp", {[zoneIDs.STRANGLETHORN_VALE]={{35.65,10.59}}}},
         },
@@ -118,6 +112,9 @@ function QuestieQuestFixes:Load()
         },
         [235] = {
             [questKeys.exclusiveTo] = {742,6382,6383},
+        },
+        [249] = {
+            [questKeys.startedBy] = {{313},{31},nil},
         },
         [254] = {
             [questKeys.parentQuest] = 253,
@@ -241,6 +238,9 @@ function QuestieQuestFixes:Load()
         [495] = {
             [questKeys.exclusiveTo] = {518},
         },
+        [504] = {
+            [questKeys.objectivesText] = {"Slay 15 Crushridge Warmongers, then return to Marshal Redpath in Southshore."},
+        },
         [510] = {
             [questKeys.startedBy] = {nil,{1740},nil}, -- #1512
         },
@@ -274,7 +274,7 @@ function QuestieQuestFixes:Load()
         [558] = {
             [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
             [questKeys.preQuestGroup] = {1687,1479,1558},
-            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
+            [questKeys.inGroupWith] = nil,
         },
         [566] = {
             [questKeys.preQuestSingle] = {549}, -- #1484
@@ -451,14 +451,14 @@ function QuestieQuestFixes:Load()
         },
         [910] = {
             [questKeys.triggerEnd] = {"Go to the docks of Ratchet in the Barrens.", {[zoneIDs.THE_BARRENS]={{62.96,38.04}}}},
-            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
         },
         [911] = {
             [questKeys.triggerEnd] = {"Go to the Mor'shan Rampart in the Barrens.", {[zoneIDs.THE_BARRENS]={{47.9,5.36}}}},
-            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
         },
         [915] = {
-            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
+            [questKeys.objectivesText] = {"Get some Strawberry Ice Cream for your ward. The lad seems to prefer Tigule's brand ice cream."}, -- orc orphan
+            [questKeys.preQuestGroup] = {1800,910,911},
+            [questKeys.inGroupWith] = nil,
         },
         [918] = {
             [questKeys.preQuestSingle] = {},
@@ -468,7 +468,7 @@ function QuestieQuestFixes:Load()
         },
         [925] = {
             [questKeys.preQuestGroup] = {1800,910,911},
-            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
+            [questKeys.inGroupWith] = nil,
         },
         [926] = {
             [questKeys.parentQuest] = 924, -- #806
@@ -499,9 +499,44 @@ function QuestieQuestFixes:Load()
         [945] = {
             [questKeys.triggerEnd] = {"Escort Therylune away from the Master's Glaive", {[zoneIDs.DARKSHORE]={{40.51,87.08}}}},
         },
+        [949] = {
+            [questKeys.childQuests] = {960}, -- workaround, can't mimic ingame 100%
+        },
+        [950] = {
+            [questKeys.childQuests] = {961}, -- workaround, can't mimic ingame 100%
+        },
+        [960] = {
+            [questKeys.name] = "Onu is meditating",
+            [questKeys.startedBy] = {{3616}},
+            [questKeys.finishedBy] = {{3616}},
+            [questKeys.requiredLevel] = 1,
+            [questKeys.questLevel] = 1,
+            [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
+            [questKeys.requiredClasses] = nil,
+            [questKeys.objectivesText] = nil,
+            [questKeys.triggerEnd] = nil,
+            [questKeys.objectives] = nil,
+            [questKeys.sourceItemId] = nil,
+            [questKeys.preQuestGroup] = nil,
+            [questKeys.preQuestSingle] = nil,
+            [questKeys.childQuests] = nil,
+            [questKeys.inGroupWith] = nil,
+            [questKeys.exclusiveTo] = nil,
+            [questKeys.zoneOrSort] = 148,
+            [questKeys.requiredSkill] = nil,
+            [questKeys.requiredMinRep] = nil,
+            [questKeys.requiredMaxRep] = nil,
+            [questKeys.requiredSourceItems] = nil,
+            [questKeys.nextQuestInChain] = nil,
+            [questKeys.questFlags] = 8,
+            [questKeys.specialFlags] = 1,
+            [questKeys.parentQuest] = 949, -- workaround, can't mimic ingame 100%
+        },
         [961] = {
-            [questKeys.preQuestSingle] = {944}, -- #1517
-            [questKeys.exclusiveTo] = {950}, -- #1517
+            [questKeys.preQuestSingle] = nil,
+            [questKeys.exclusiveTo] = nil,
+            [questKeys.specialFlags] = 1,
+            [questKeys.parentQuest] = 950, -- workaround, can't mimic ingame 100%
         },
         [968] = {
             [questKeys.startedBy] = {{2338,2339},nil,{5352}}, -- temp correction for item start
@@ -510,7 +545,7 @@ function QuestieQuestFixes:Load()
             [questKeys.triggerEnd] = {"Protect Feero Ironhand", {[zoneIDs.DARKSHORE]={{43.54,94.39}}}},
         },
         [984] = {
-            [questKeys.triggerEnd] = {"Find a corrupt furbolg camp",{[zoneIDs.DARKSHORE]={{39.34,53.51},{39.86,53.89},{42.68,86.53}}}},
+            [questKeys.triggerEnd] = {"Find a corrupt furbolg camp",{[zoneIDs.DARKSHORE]={{50.91,34.74},{39.86,53.89},{42.68,86.53},{39.95,78.41}}}},
         },
         [994] = {
             [questKeys.triggerEnd] = {"Help Volcor to the road", {[zoneIDs.DARKSHORE]={{41.92,81.76}}}},
@@ -543,6 +578,9 @@ function QuestieQuestFixes:Load()
             [questKeys.requiredMinRep] = {87,3000},
             [questKeys.requiredMaxRep] = {21,-5999},
         },
+        [1046] = {
+            [questKeys.objectives] = {nil,nil,{{5388,nil},{5462,nil}}},
+        },
         [1047] = {
             [questKeys.exclusiveTo] = {1015,1019},
         },
@@ -570,6 +608,7 @@ function QuestieQuestFixes:Load()
             [questKeys.triggerEnd] = {"Keep Piznik safe while he mines the mysterious ore", {[zoneIDs.STONETALON_MOUNTAINS]={{71.76, 60.22}}}},
         },
         [1097] = {
+            [questKeys.startedBy] = {{415,514},nil,nil},
             [questKeys.exclusiveTo] = {353}, -- #2364
         },
         [1100] = {
@@ -613,6 +652,9 @@ function QuestieQuestFixes:Load()
         [1136] = {
             [questKeys.extraObjectives] = {{nil, Questie.ICON_TYPE_OBJECT, l10n("Use a Fresh Carcass at the Flame of Uzel"), 0, {{"object", 1770}}}},
         },
+        [1141] = {
+            [questKeys.extraObjectives] = {{{[zoneIDs.DARKSHORE]={{35.71,44.68}}}, Questie.ICON_TYPE_EVENT, l10n("Fish for Darkshore Groupers"),}},
+        },
         [1144] = {
             [questKeys.triggerEnd] = {"Help Willix the Importer escape from Razorfen Kraul", {[zoneIDs.THE_BARRENS]={{42.27,89.88}}}},
         },
@@ -622,6 +664,12 @@ function QuestieQuestFixes:Load()
         },
         [1173] = {
             [questKeys.triggerEnd] = {"Drive Overlord Mok'Morokk from Brackenwall Village", {[zoneIDs.DUSTWALLOW_MARSH]={{36.41,31.43}}}},
+        },
+        [1190] = {
+            [questKeys.childQuests] = {1191},
+        },
+        [1191] = {
+            [questKeys.parentQuest] = 1190,
         },
         [1193] = {
             [questKeys.specialFlags] = 1, -- #1348
@@ -745,9 +793,6 @@ function QuestieQuestFixes:Load()
         [1447] = {
             [questKeys.triggerEnd] = {"Defeat Dashel Stonefist", {[zoneIDs.STORMWIND_CITY]={{70.1,44.85}}}},
         },
-        [1468] = {
-            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
-        },
         [1470] = {
             [questKeys.exclusiveTo] = {1485}, -- #999
         },
@@ -771,10 +816,6 @@ function QuestieQuestFixes:Load()
         },
         [1479] = {
             [questKeys.triggerEnd] = {"Go to the bank in Darnassus, otherwise known as the Bough of the Eternals.", {[zoneIDs.DARNASSUS]={{41.31,43.54}}}},
-            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
-        },
-        [1480] = {
-            [questKeys.startedBy] = {{4663,4664,4665,4666,4667,4668,4705,13019},nil,{6766,20310}}, -- temp correction for item start
         },
         [1483] = {
             [questKeys.exclusiveTo] = {1093},
@@ -817,7 +858,6 @@ function QuestieQuestFixes:Load()
         },
         [1558] = {
             [questKeys.triggerEnd] = {"Go to the top of the Stonewrought Dam in Loch Modan.", {[zoneIDs.LOCH_MODAN]={{47.63,14.33}}}},
-            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
         },
         [1559] = {
             [questKeys.preQuestSingle] = {705},
@@ -825,8 +865,12 @@ function QuestieQuestFixes:Load()
         [1560] = {
             [questKeys.triggerEnd] = {"Lead Tooga to Torta", {[zoneIDs.TANARIS]={{66.56,25.65}}}},
         },
+        [1579] = {
+            [questKeys.extraObjectives] = {{{[zoneIDs.DARKSHORE]={{35.71,44.68}}}, Questie.ICON_TYPE_EVENT, l10n("Fish for Gaffer Jacks"),}},
+        },
         [1580] = {
             [questKeys.requiredSkill] = {356,30},
+            [questKeys.extraObjectives] = {{{[zoneIDs.DARKSHORE]={{50.7,23.8},{40,73.6},{44.3,74.4},{53.3,32.4},{43.3,80.6}}}, Questie.ICON_TYPE_EVENT, l10n("Fish for Electropellers"),}},
         },
         [1581] = { -- bad race data
             [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
@@ -883,6 +927,9 @@ function QuestieQuestFixes:Load()
             [questKeys.preQuestSingle] = {1639,1678,1683},
             [questKeys.exclusiveTo] = {1681}, -- #1724
         },
+        [1681] = {
+            [questKeys.preQuestSingle] = {},
+        },
         [1684] = {
             [questKeys.startedBy] = {{2151,3598,3657},nil,nil},
             [questKeys.exclusiveTo] = {1639,1666,1678,1686,1680},
@@ -892,7 +939,6 @@ function QuestieQuestFixes:Load()
         },
         [1687] = {
             [questKeys.triggerEnd] = {"Go to the Westfall Lighthouse.", {[zoneIDs.WESTFALL]={{30.41,85.61}}}},
-            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
         },
         [1700] = {
             [questKeys.requiredRaces] = raceIDs.HUMAN,
@@ -930,7 +976,6 @@ function QuestieQuestFixes:Load()
         },
         [1800] = {
             [questKeys.triggerEnd] = {"Go to the old Lordaeron Throne Room that lies just before descending into the Undercity.", {[zoneIDs.UNDERCITY]={{65.97,36.12}}}},
-            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
         },
         [1823] = {
             [questKeys.startedBy] = {{3041,3354,4595},nil,nil},
@@ -994,6 +1039,9 @@ function QuestieQuestFixes:Load()
         [2041] = {
             [questKeys.exclusiveTo] = {2040}, --#2068
         },
+        [2118] = {
+            [questKeys.objectives] = {{{2164,"Rabid Thistle Bear Captured"}}},
+        },
         [2198] = {
             [questKeys.startedBy] = {{4852},nil,{7666}},
         },
@@ -1054,8 +1102,7 @@ function QuestieQuestFixes:Load()
             [questKeys.triggerEnd] = {"Offer the sacrifice at the fountain", {[zoneIDs.DARNASSUS]={{38.63,85.99}}}},
         },
         [2561] = {
-            [questKeys.objectives] = {},
-            [questKeys.triggerEnd] = {"Release Oben Rageclaw's spirit", {[zoneIDs.TELDRASSIL]={{45.52,58.71}}}},
+            [questKeys.objectives] = {{{7318,"Release Oben Rageclaw's spirit"}}},
         },
         [2608] = {
             [questKeys.triggerEnd] = {"Diagnosis Complete", {[zoneIDs.STORMWIND_CITY]={{78.04,59}}}},
@@ -1108,6 +1155,9 @@ function QuestieQuestFixes:Load()
         },
         [2873] = {
             [questKeys.preQuestSingle] = {}, -- #1566
+        },
+        [2875] = {
+            [questKeys.startedBy] = {nil,{142122,150075},nil},
         },
         [2882] = {
             [questKeys.zoneOrSort] = 440, -- #1780
@@ -1231,8 +1281,32 @@ function QuestieQuestFixes:Load()
         [3525] = {
             [questKeys.triggerEnd] = {"Protect Belnistrasz while he performs the ritual to shut down the idol", {[zoneIDs.THE_BARRENS]={{50.86,92.87}}}},
         },
+        [3526] = {
+            [questKeys.requiredSpecialization] = specKeys.ENGINEERING,
+        },
         [3625] = {
             [questKeys.triggerEnd] = {"Weaponry Creation", {[zoneIDs.STRANGLETHORN_VALE]={{50.62,20.49}}}},
+        },
+        [3629] = {
+            [questKeys.requiredSpecialization] = specKeys.ENGINEERING,
+        },
+        [3630] = {
+            [questKeys.requiredSpecialization] = specKeys.ENGINEERING,
+        },
+        [3632] = {
+            [questKeys.requiredSpecialization] = specKeys.ENGINEERING,
+        },
+        [3633] = {
+            [questKeys.requiredSpecialization] = specKeys.ENGINEERING,
+        },
+        [3634] = {
+            [questKeys.requiredSpecialization] = specKeys.ENGINEERING,
+        },
+        [3635] = {
+            [questKeys.requiredSpecialization] = specKeys.ENGINEERING,
+        },
+        [3637] = {
+            [questKeys.requiredSpecialization] = specKeys.ENGINEERING,
         },
         [3639] = {
             [questKeys.exclusiveTo] = {3643,3641},
@@ -1258,6 +1332,12 @@ function QuestieQuestFixes:Load()
         [3765] = {
             [questKeys.exclusiveTo] = {1275}, -- corruption abroad breadcrumb
             [questKeys.requiredLevel] = 18,
+        },
+        [3787] = {
+            [questKeys.preQuestSingle] = {3781},
+        },
+        [3788] = {
+            [questKeys.preQuestSingle] = {3781},
         },
         [3789] = {
             [questKeys.exclusiveTo] = {3763,3790,3764},
@@ -1370,6 +1450,9 @@ function QuestieQuestFixes:Load()
         [4144] = {
             [questKeys.specialFlags] = 1, -- #1590
         },
+        [4181] = {
+            [questKeys.requiredSpecialization] = specKeys.ENGINEERING,
+        },
         [4185] = {
             [questKeys.triggerEnd] = {"Advice from Lady Prestor", {[zoneIDs.STORMWIND_CITY]={{78.04,17.96}}}},
         },
@@ -1475,7 +1558,8 @@ function QuestieQuestFixes:Load()
             [questKeys.extraObjectives] = {{nil, Questie.ICON_TYPE_OBJECT, l10n("Beat Emberstrife till his will is broken, then place the Unforged Seal of Ascension before him and use the Orb of Draconic Energy."), 0, {{"monster", 10321}}}},
         },
         [4763] = {
-            [questKeys.requiredSourceItems] = {12347,12341,12342,12343}, -- #798
+            [questKeys.requiredSourceItems] = {12341,12342,12343,12347}, -- #798
+            [questKeys.extraObjectives] = {{nil, Questie.ICON_TYPE_EVENT, l10n("Summon Xabraxxis once you have the required items from the Blackwood Stores."), 0, {{"object", 175338}}}},
         },
         [4764] = {
             [questKeys.preQuestSingle] = {}, -- #1916
@@ -1513,7 +1597,9 @@ function QuestieQuestFixes:Load()
             [questKeys.preQuestSingle] = {},
         },
         [4822] = {
-            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
+            [questKeys.objectivesText] = {"Get some Strawberry Ice Cream for your ward. The lad seems to prefer Tigule's brand ice cream."}, -- human orphan
+            [questKeys.inGroupWith] = nil,
+            [questKeys.preQuestGroup] = {1479,1558,1687},
         },
         [4866] = {
             [questKeys.triggerEnd] = {"Milked", {[zoneIDs.BURNING_STEPPES]={{65.11,23.68}}}},
@@ -1689,9 +1775,6 @@ function QuestieQuestFixes:Load()
         },
         [5421] = {
             [questKeys.questLevel] = 25,
-        },
-        [5502] = {
-            [questKeys.zoneOrSort] = sortKeys.SEASONAL,
         },
         [5503] = {
             [questKeys.requiredRaces] = raceIDs.NONE,
@@ -2009,6 +2092,9 @@ function QuestieQuestFixes:Load()
             [questKeys.questFlags] = 0,
             [questKeys.specialFlags] = 0,
         },
+        [6132] = {
+            [questKeys.triggerEnd] = {"Melizza Brimbuzzle escorted to safety", {[zoneIDs.DESOLACE]={{38.64,60.86}}}},
+        },
         [6136] = {
             [questKeys.preQuestSingle] = {6133}, -- #1572
         },
@@ -2324,7 +2410,7 @@ function QuestieQuestFixes:Load()
             [questKeys.sourceItemId] = 18746,
             [questKeys.zoneOrSort] = 1637,
             [questKeys.exclusiveTo] = {8258}, -- 8258 after Phase 4
-            [questKeys.childQuests] = {7769},
+            [questKeys.childQuests] = {7669},
         },
         [7669] = { --#1449
             [questKeys.name] = "Again Into the Great Ossuary",
@@ -2509,7 +2595,7 @@ function QuestieQuestFixes:Load()
         },
         [8258] = {
             [questKeys.exclusiveTo] = {7668}, -- 7668 before Phase 4
-            [questKeys.childQuests] = {7769},
+            [questKeys.childQuests] = {7669},
         },
         [8262] = {
             [questKeys.requiredMinRep] = {509,3000},

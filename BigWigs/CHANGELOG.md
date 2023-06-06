@@ -1,6 +1,7 @@
 # BigWigs
 
-## [v48.1-classic](https://github.com/BigWigsMods/BigWigs/tree/v48.1-classic) (2023-02-17)
-[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v48-classic...v48.1-classic) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
+## [v48.2-classic](https://github.com/BigWigsMods/BigWigs/tree/v48.2-classic) (2023-05-05)
+[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v48.1-classic...v48.2-classic) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
 
-- Plugins/BossBlock: Bring back the option to block middle-screen emotes for Wrath  
+- Update luacheck  
+- Loader: Fix `GetAddOnMetadata` on wrath PTR  

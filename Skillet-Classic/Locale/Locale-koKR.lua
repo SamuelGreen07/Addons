@@ -66,6 +66,8 @@ L["CONFIRMQUEUECLEARDESC"] = "예약을 지우기 위해 좌클릭 대신 Alt-�
 L["CONFIRMQUEUECLEARNAME"] = "예약을 지우기 위해 Alt-클릭 사용"
 L["Conflict with the addon TradeSkillMaster"] = "TradeSkillMaster 애드온과 충돌이 있습니다."
 L["Copy"] = "복사"
+--[[Translation missing --]]
+L["Cost"] = "Cost"
 L["Could not find bag space for"] = "가방에 공간이 없습니다."
 L["craftable"] = "제작 가능"
 L["CRAFTBUTTONSDESC"] = "프레임에 전문 제작 버튼을 표시합니다."
@@ -174,6 +176,8 @@ L["Market"] = "시장가"
 --[[Translation missing --]]
 L["Merchant"] = "Merchant"
 L["Merge items"] = "아이템 합침"
+--[[Translation missing --]]
+L["Most Sold"] = "Most Sold"
 L["Move Down"] = "아래로 이동"
 L["Move to Bottom"] = "맨 아래로 이동"
 L["Move to Top"] = "맨 위로 이동"
@@ -240,6 +244,8 @@ L["Retrieve"] = "회수"
 L["Right-Click for filtering options"] = "Right-Click for filtering options"
 --[[Translation missing --]]
 L["Sales for "] = "Sales for "
+--[[Translation missing --]]
+L["Sales Rate"] = "Sales Rate"
 L["Same faction"] = "같은 진영"
 L["Save"] = "저장"
 L["Scale"] = "크기"
@@ -297,6 +303,8 @@ L["Start"] = "시작"
 --[[Translation missing --]]
 L["Stop"] = "Stop"
 L["SubClass"] = "직업용 아이템"
+--[[Translation missing --]]
+L["Suffix"] = "Suffix"
 L["SUPPORTCRAFTINGDESC"] = "전문기술 제작에 대한 지원을 포함합니다. (/reload가 필요합니다.)"
 L["SUPPORTCRAFTINGNAME"] = "제작 지원"
 L["Supported Addons"] = "지원가능 애드온"

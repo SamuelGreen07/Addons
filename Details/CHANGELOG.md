@@ -1,6 +1,6 @@
 # Details! Damage Meter
 
-## [Details.DF.Wrath.10.0.7.10737.148](https://github.com/Tercioo/Details-Damage-Meter/tree/Details.DF.Wrath.10.0.7.10737.148) (2023-03-27)
-[Full Changelog](https://github.com/Tercioo/Details-Damage-Meter/compare/Details.DF.Wrath.10.0.7.10736.148...Details.DF.Wrath.10.0.7.10737.148) 
+## [Details.20230520.11023.151](https://github.com/Tercioo/Details-Damage-Meter/tree/Details.20230520.11023.151) (2023-05-20)
+[Full Changelog](https://github.com/Tercioo/Details-Damage-Meter/compare/Details.20230520.11022.151...Details.20230520.11023.151) 
 
-- Player breakdown window cleanup (1)  
+- Hour0 bug fix  

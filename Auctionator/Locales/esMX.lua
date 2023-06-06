@@ -4,12 +4,20 @@ AUCTIONATOR_LOCALES.esMX = function()
   L["ADD_FAVOURITE"] = "Añadir favorito"
 L["ADD_ITEM"] = "Añadir objeto"
 L["ADD_TERM_TO_LIST_DIALOG"] = "Ingrese el término de búsqueda para añadir"
+--[[Translation missing --]]
+L["ADD_TO_LIST"] = "Add To List"
 L["ALREADY_PURCHASED_X"] = "Ya compró %s"
 L["ALT_LEFT_CLICK"] = "Alt Clic Izquierdo"
 L["ALT_RIGHT_CLICK"] = "Alt Clic Derecho"
 L["ANY_LOWER"] = "alguno"
 L["ANY_UPPER"] = "Cualquiera"
 L["AUCTION"] = "Subasta"
+--[[Translation missing --]]
+L["AUCTION_AGE"] = "Auction Age"
+--[[Translation missing --]]
+L["AUCTION_AGE_TOOLTIP_TOOLTIP_HEADER"] = "Auction Age Tooltip"
+--[[Translation missing --]]
+L["AUCTION_AGE_TOOLTIP_TOOLTIP_TEXT"] = "Show auction information age in days for a given item's price in a tooltip (up to 21 days)."
 L["AUCTION_DURATION_12"] = "12 Horas"
 L["AUCTION_DURATION_24"] = "24 Horas"
 L["AUCTION_DURATION_48"] = "48 Horas"
@@ -44,6 +52,8 @@ L["CANNOT_AUCTION"] = "No subastable"
 L["CHAIN_BUY"] = "Compra en cadena"
 L["CHAIN_BUY_TOOLTIP_HEADER"] = "Cadena de compras múltiples"
 L["CHAIN_BUY_TOOLTIP_TEXT"] = "Cuando termine de comprar con el precio actual y el tamaño de pila, selecciona el siguiente precio y tamaño de pila."
+--[[Translation missing --]]
+L["CHEAPEST_QUALITY_COST_COLON"] = "Cheapest Quality Cost:"
 L["CLASSIC_SUPPORT_ERROR"] = "Esta versión de Auctionator NO es compatible con Classic. Las cosas pueden romperse y no funcionar."
 L["CLOSE"] = "Cerrar"
 L["CONFIG_ADVANCED_CATEGORY"] = "Avanzado"
@@ -51,6 +61,8 @@ L["CONFIG_ADVANCED_TEXT"] = "Solo mira aquí si sabes lo que estás haciendo"
 L["CONFIG_ALTERNATE_SCAN"] = "Utiliza el modo alternativo de escaneo lento por defecto"
 L["CONFIG_ALTERNATE_SCAN_HEADER"] = "Modo de escaneo alternativo"
 L["CONFIG_ALTERNATE_SCAN_TEXT"] = "El modo de escaneo rápido puede causar desconexiones en servidores ocupados. Esta configuración utiliza un método de escaneo más lento y con menos probabilidades de desconectarse."
+--[[Translation missing --]]
+L["CONFIG_AUCTION_AGE_TOOLTIP"] = "Show the number of days since a price was seen on the AH"
 L["CONFIG_AUCTION_TOOLTIP"] = "Mostrar información sobre herramientas de subasta."
 L["CONFIG_AUTO_LIST_SEARCH"] = [=[Escanear automáticamente en busca de objetos de la lista de compras
 ]=]
@@ -82,6 +94,12 @@ L["CONFIG_CHAT_LOG_TOOLTIP_TEXT"] = "Si esta opción está desactivada, sus suba
 --[[Translation missing --]]
 L["CONFIG_CRAFTING_INFO_SHOW"] = "Show crafting costs in the crafting view"
 --[[Translation missing --]]
+L["CONFIG_CRAFTING_INFO_SHOW_CHEAPEST_QUALITIES_COST"] = "Show reagent costs using the cheapest quality from auction house"
+--[[Translation missing --]]
+L["CONFIG_CRAFTING_INFO_SHOW_CHEAPEST_QUALITIES_COST_TOOLTIP_HEADER"] = "Crafting Info Show Cheapest Qualities Cost"
+--[[Translation missing --]]
+L["CONFIG_CRAFTING_INFO_SHOW_CHEAPEST_QUALITIES_COST_TOOLTIP_TEXT"] = "Enable this option to see the cost of crafting a specific recipe using the cheapest quality reagents when viewing it. By default Auctionator prioritises the reagents in your bags, but this value will ignore them."
+--[[Translation missing --]]
 L["CONFIG_CRAFTING_INFO_SHOW_COST"] = "Show reagent costs from auction house and vendors"
 --[[Translation missing --]]
 L["CONFIG_CRAFTING_INFO_SHOW_COST_TOOLTIP_HEADER"] = "Crafting Info Show Cost"
@@ -106,6 +124,16 @@ L["CONFIG_ENCHANT_TOOLTIP"] = "Mostrar información sobre herramientas de encant
 L["CONFIG_FULL_SCAN_STEP_SIZE"] = "Tamaño de paso de escaneo completo"
 L["CONFIG_LIFO_CATEGORY"] = "Vendiendo"
 L["CONFIG_MAIL_TOOLTIP"] = "Mostrar información sobre herramientas del buzón"
+--[[Translation missing --]]
+L["CONFIG_MATCHING"] = "Choose how the item price is automatically selected"
+--[[Translation missing --]]
+L["CONFIG_MATCHING_ITEM_ID"] = "Same item/pet id"
+--[[Translation missing --]]
+L["CONFIG_MATCHING_ITEM_ID_AND_LEVEL"] = "Same item/pet level with the same item/pet id"
+--[[Translation missing --]]
+L["CONFIG_MATCHING_ITEM_NAME"] = "Same item/pet id and title (ignoring level)"
+--[[Translation missing --]]
+L["CONFIG_MATCHING_ITEM_NAME_AND_LEVEL"] = "Same item/pet id, title and level"
 --[[Translation missing --]]
 L["CONFIG_MILL_TOOLTIP"] = "Show mill value for herbs from inscription in tooltips"
 L["CONFIG_NOT_LIFO_CATEGORY"] = "Equipo/Mascotas"
@@ -322,6 +350,10 @@ L["LOAD_MORE_RESULTS"] = "Load more results"
 L["MAIL_TOOLTIP_TOOLTIP_HEADER"] = "Información sobre herramientas de buzón"
 L["MAIL_TOOLTIP_TOOLTIP_TEXT"] = [=[Muestra información del Auctionator para los objetos en su buzón al pasar el mouse.
 ]=]
+--[[Translation missing --]]
+L["MAKE_PERMANENT"] = "Make Permanent"
+--[[Translation missing --]]
+L["MAKE_PERMANENT_CONFIRM"] = "To make '%s' permanent choose a new name for it:"
 L["MAX"] = "Máximo"
 L["MAX_COLON_X"] = "Máx: %s"
 --[[Translation missing --]]
@@ -343,8 +375,12 @@ L["MONTH_6"] = "Junio"
 L["MONTH_7"] = "Julio"
 L["MONTH_8"] = "Agosto"
 L["MONTH_9"] = "Septiembre"
+--[[Translation missing --]]
+L["MORE"] = "More"
 L["MULTIPLE_STACKS_AUCTION_INFO"] = "%s %s, totalizando %s"
 L["NAME"] = "Nombre"
+--[[Translation missing --]]
+L["NEW_LIST"] = "New List"
 L["NEW_SHOPPING_LIST"] = "+ Nueva lista de compras"
 L["NEXT_SCAN_MESSAGE"] = [=[Se podrá iniciar un escaneo completo en %s minutos y %s segundos.
 ]=]
@@ -379,6 +415,12 @@ L["PRICE_INCREASE_WARNING_2"] = "Price increased by %s. Do you want to continue?
 L["PROFILE_TOGGLE_TOOLTIP_HEADER"] = "Habilitar la configuración por personaje"
 L["PROFILE_TOGGLE_TOOLTIP_TEXT"] = "Los cambios en la configuración de Auctionator solo afectan a este personaje."
 L["PROFIT_COLON"] = "Ganancia:"
+--[[Translation missing --]]
+L["PROFIT_WARNING_AGE"] = "(price data at least 10 days old)"
+--[[Translation missing --]]
+L["PROFIT_WARNING_MISSING"] = "(no price data)"
+--[[Translation missing --]]
+L["PROFIT_WARNING_NOT_EXACT_ITEM"] = "(price data not exact match for item)"
 L["PROSPECT"] = "Prospectar"
 --[[Translation missing --]]
 L["PROSPECT_TOOLTIP_TOOLTIP_HEADER"] = "Prospect Tooltip Information"
@@ -414,6 +456,8 @@ L["SCANNING_PAGE_X"] = "Escaneando página %s..."
 L["SEARCH"] = "Buscar"
 L["SEARCH_ALL"] = "Busca todo"
 L["SEARCH_TERM"] = "Buscar termino"
+--[[Translation missing --]]
+L["SEARCH_TERM_COLON"] = "Search Term:"
 L["SELECT_ALL"] = "Seleccionar todo"
 L["SELECT_SHOPPING_LIST"] = "Seleccionar lista de la compra..."
 L["SELLERS_COLUMN"] = "Vendedor(es)"
@@ -427,6 +471,8 @@ L["SET_VALUE_SUFFIX"] = [=[Vender a menor precio que
 L["SHIFT_LEFT_CLICK"] = "Shift Clic Izquierdo"
 L["SHIFT_RIGHT_CLICK"] = "Shift Clic Derecho"
 L["SHOPPING_LIST"] = "Lista de compra"
+--[[Translation missing --]]
+L["SHOPPING_LISTS"] = "Shopping Lists"
 L["SHOPPING_TAB"] = "Compras"
 L["SHOPPING_TAB_HEADER_2"] = "Auctionator - Compras"
 L["SKIP"] = "Omitir"
@@ -661,6 +707,8 @@ L["TRANSLATORS_TURKISH_INFO"] = "Turco (disponible por separado)"
 L["UNDERCUT_BID"] = "Bid"
 L["UNDERCUT_NO"] = "No"
 L["UNDERCUT_PREFERENCE"] = "Preferencia de descuento"
+--[[Translation missing --]]
+L["UNDERCUT_PRICE"] = "Undercut Price"
 L["UNDERCUT_SCAN"] = "Escaneo de descuentos"
 L["UNDERCUT_TOOLTIP_HEADER"] = "Valor de descuento"
 L["UNDERCUT_TOOLTIP_TEXT"] = [=[El valor de descuento que se utilizará para calcular el precio de venta.
@@ -682,6 +730,8 @@ L["VENDOR_TOOLTIP_TOOLTIP_TEXT"] = [=[Mostrar información del proveedor al pasa
 L["VERSION_HEADER"] = "Versión"
 L["VERSION_MESSAGE"] = "Versión %s"
 L["WAITING_AT_MOST_X_LONGER"] = "Esperando como máximo %ss más..."
+--[[Translation missing --]]
+L["X_DAYS"] = "%s days"
 L["X_PRICE_HISTORY"] = "Historial de precios de %s"
 L["X_STACK_OF_X"] = "%s pila de %s"
 L["X_STACKS_OF_X"] = "%s pilas de %s"

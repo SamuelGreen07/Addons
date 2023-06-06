@@ -806,35 +806,55 @@ local CheckArtOfWar = OnAuraStateChange(function() return FindAura("player", 595
     end
 )
 
+
+-- 53672 -- Rank1
+-- 54149 -- Rank2
+local CheckInfusionOfLight = OnAuraStateChange(function() return FindAura("player", 54149, "HELPFUL") end,
+    function(present, duration)
+        if present then
+            f:Activate("FlashOfLight", "InfusionOfLight", duration, true)
+        else
+            f:Deactivate("FlashOfLight", "InfusionOfLight")
+        end
+    end
+)
+
+
+
 ns.configs.PALADIN = function(self)
     self:SetScript("OnUpdate", self.timerOnUpdate)
 
     local hasArtOfWar = IsPlayerSpell(53486) or IsPlayerSpell(53488)
+    local hasInfusionOfLight = IsPlayerSpell(53569) or IsPlayerSpell(53576)
 
     if APILevel <= 2 then
         if ns.findHighestRank("Exorcism") then
             self:RegisterEvent("PLAYER_TARGET_CHANGED")
             self.PLAYER_TARGET_CHANGED = ns.PaladinExorcismCheck
-
-            if ns.findHighestRank("HammerOfWrath") then
-                self:RegisterUnitEvent("UNIT_HEALTH", "target")
-                self.PLAYER_TARGET_CHANGED = function(...)
-                    if not hasArtOfWar then
-                        ns.PaladinExorcismCheck(...)
-                    end
-                    ns.HOWCheck(...)
-                end
-                self.UNIT_HEALTH = ns.HOWCheck
-            end
         end
     end
 
-    if hasArtOfWar then
+    if ns.findHighestRank("HammerOfWrath") then
+        self:RegisterUnitEvent("UNIT_HEALTH", "target")
+        self.PLAYER_TARGET_CHANGED = function(...)
+            if APILevel <= 2 then
+            -- if not hasArtOfWar then
+                ns.PaladinExorcismCheck(...)
+            end
+            ns.HOWCheck(...)
+        end
+        self.UNIT_HEALTH = ns.HOWCheck
+    end
+
+    if hasArtOfWar or hasInfusionOfLight then
         self:RegisterUnitEvent("UNIT_AURA", "player")
         self:SetScript("OnUpdate", self.timerOnUpdate)
         self.UNIT_AURA = function(self, event, unit)
             if hasArtOfWar then
                 CheckArtOfWar()
+            end
+            if hasInfusionOfLight then
+                CheckInfusionOfLight()
             end
         end
     else

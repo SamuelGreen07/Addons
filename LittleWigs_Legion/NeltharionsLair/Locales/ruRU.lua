@@ -14,6 +14,7 @@ if L then
 	L.stoneclaw_grubmaster = "Камнерукий повелитель личинок"
 	L.tarspitter_grub = "Личинка смолоплюя"
 	L.rotdrool_grabber = "Гнилослюнный червь"
+	L.understone_demolisher = "Разрушитель из Подкаменного разлома"
 	L.rockbound_trapper = "Скальный зверолов"
 	L.emberhusk_dominator = "Углепанцирный подчинитель"
 end
@@ -25,5 +26,5 @@ end
 
 L = BigWigs:NewBossLocale("Ularogg Cragshaper", "ruRU")
 if L then
-	--L.totems = "Totems"
+	L.totems = "Тотемы"
 end

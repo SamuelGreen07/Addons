@@ -124,12 +124,25 @@ GRML.listOfFonts = {
     "Interface\\AddOns\\Guild_Roster_Manager\\media\\fonts\\Nunito-ExtraBold.TTF" 
 }
 
+-- Method:          GRM.ConfigureAlternativeSlashCommands()
+-- What it Does:    Allows the creation of custom slash command.
+-- purpose:         Localization reasons.
+GRM.ConfigureAlternativeSlashCommands = function()
+    if GRM.L ( "/XXXX" ) ~= true then
+        SLASH_GRM2 = GRM.L ( "/XXXX" );
+    end
+
+    if GRM.L ( "/YYYY" ) ~= true then
+        SLASH_ROSTER2 = GRM.L ( "/YYYY" );
+    end
+end
+
 -- Method:          GRML.SetNewLanguage ( int , boolean , boolean )
 -- What it Does:    It establishes both the appropriate region font, and a modifier for the Mandarin text
 -- Purpose:         To be able to have an in-game UI option to change the player language.
 GRML.SetNewLanguage = function ( index , firstLoad , resetAllDefaults )
     GRML.LoadLanguage[index]();
-    GRM_G.FontChoice = GRML.listOfFonts[GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].selectedFont];
+    GRM_G.FontChoice = GRML.listOfFonts[GRM.S().selectedFont];
     GRML.SetFontModifier();
     if firstLoad then
         GRM_UI.ReloadAllFrames( false , false );
@@ -138,7 +151,7 @@ GRML.SetNewLanguage = function ( index , firstLoad , resetAllDefaults )
     end
 
     -- Allow implementation of custom slash command.
-    SLASH_GRM3 = GRM.L ( '/XXXX' );
+    GRM.ConfigureAlternativeSlashCommands();
 end
 
 -- Method:          GRML.SetFontModifier()
@@ -166,7 +179,7 @@ GRML.SetFontModifier = function()
     elseif GRM_G.FontChoice == "Interface\\AddOns\\Guild_Roster_Manager\\media\\fonts\\Roboto-Regular.TTF" then
         GRM_G.FontModifier = 1;
     end
-    GRM_G.FontModifier = GRM_G.FontModifier + GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].fontModifier;
+    GRM_G.FontModifier = GRM_G.FontModifier + GRM.S().fontModifier;
 end
 
 -- Method:          GRML.SetNewFont( int )
@@ -181,13 +194,15 @@ end
 -- Method:          GRML.GetFontChoice() -- Not necessary for the most part as I can use "STANDARD_TEXT_FONT" - but, just in case...
 -- What it Does:    Selects the proper font for the given locale of the addon user.
 -- Purpose:         To ensure no ???? are in place and all characters are accounted for.
-GRML.GetFontChoiceIndex = function( localizationIndex )
+GRML.GetFontChoiceIndex = function( localizationIndex , selectedFont )
     local result = 1;
-    if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].selectedFont ~= 1 then
+    local fontIndex = selectedFont or GRM.S().selectedFont;
+
+    if fontIndex ~= 1 then
         if ( localizationIndex < 5 or ( localizationIndex > 5 and localizationIndex < 10 ) or result > 13 ) then
             result = 2
         else
-            result = GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].selectedFont;
+            result = fontIndex;
         end
         -- For Russian, need Cyrilic compatible font.
         if localizationIndex == 5 and GRM_G.Region ~= "ruRU" then
@@ -698,70 +713,3 @@ elseif GRM_G.Region == "enUS" or GRM_G.Region == "enGB" or not GRM_G.Localized t
 
     GRML.LoadLanguage[1]();
 end
-
-
-
-
-
-
-
--- UI Helper to make my localization process much easier!!!
--- Disable when not using by commenting out.,..
--- GRM_LocalizationHelper = CreateFrame ( "Frame" , "GRM_LocalizationHelper" , UIParent , "TranslucentFrameTemplate" );
--- GRM_LocalizationHelper:SetPoint ( "CENTER" , UIParent );
--- GRM_LocalizationHelper:SetSize ( 400 , 200 );
--- GRM_LocalizationHelper:EnableMouse ( true );
--- GRM_LocalizationHelper:SetMovable ( true );
--- GRM_LocalizationHelper:RegisterForDrag ( "LeftButton" );
--- GRM_LocalizationHelper:SetScript ( "OnDragStart" , GRM_LocalizationHelper.StartMoving );
--- GRM_LocalizationHelper:SetScript ( "OnDragStop" , GRM_LocalizationHelper.StopMovingOrSizing );
-
--- GRM_LocalizationHelper.GRM_LocalizationHelperText = GRM_LocalizationHelper:CreateFontString ( "GRM_LocalizationHelper.GRM_LocalizationHelperText" , "OVERLAY" , "GameFontWhiteTiny" );
--- GRM_LocalizationHelper.GRM_LocalizationHelperText:SetPoint ( "CENTER" , GRM_LocalizationHelper , 0 , 25 );
--- GRM_LocalizationHelper.GRM_LocalizationHelperText:SetFont ( GRM_G.FontChoice , 12 );
--- GRM_LocalizationHelper.GRM_LocalizationHelperText:SetWordWrap ( true );
--- GRM_LocalizationHelper.GRM_LocalizationHelperText:SetWidth ( 375)
--- GRM_LocalizationHelper.GRM_LocalizationHelperText:SetText ( "Waiting for Chat Response" );
-
--- GRM_LocalizationHelper.GRM_LocalizationButton = CreateFrame ( "Button" , "GRM_LocalizationButton" , GRM_LocalizationHelper , "UIPanelButtonTemplate" );
--- GRM_LocalizationHelper.GRM_LocalizationButton:SetPoint ( "BOTTOM" , GRM_LocalizationHelper , 0 , 5 );
--- GRM_LocalizationHelper.GRM_LocalizationButton:SetSize ( 60 , 50 );
--- GRM_LocalizationHelper.GRM_LocalizationButton:SetText ( "Link" );
--- GRM_LocalizationHelper.GRM_LocalizationButton:SetScript ( "OnClick" , function( self , button )
---     if button == "LeftButton" then
---         ChatFrame1EditBox:SetFocus();
---         ChatFrame1EditBox:SetText ( GRM_LocalizationHelper.GRM_LocalizationHelperText:GetText() );
---     end
--- end);
-
--- local count = 0;
--- GRM_LocalizationHelper:RegisterEvent ( "CHAT_MSG_SYSTEM")
--- GRM_LocalizationHelper:SetScript ( "OnEvent" , function( self , event , msg )
---     if event == "CHAT_MSG_SYSTEM" then
---         count = count + 1;
---         -- if count == 2 then
---             GRM_LocalizationHelper.GRM_LocalizationHelperText:SetText ( msg );
---         -- end
---     end
--- end);
-
--- -- /run GRML.GetReputations() GRM_LocalizationHelper.GRM_LocalizationHelperText:SetText( ReputationBar14ReputationBarFactionStanding:GetText() )
-
--- GRML.GetReputations = function ()
---     ReputationListScrollFrameScrollBar:SetValue(2470)
---     local result = "";
---     for i = 1 , 5 do
---         if i == 1 then
---             result = "Neutral: " .. ReputationBar7ReputationBarFactionStanding:GetText();
---         elseif i == 2 then
---             result = result .. " -- " .. "Friendly: " .. ReputationBar6ReputationBarFactionStanding:GetText();
---         elseif i == 3 then
---             result = result .. " -- " .. "Honored: " .. ReputationBar4ReputationBarFactionStanding:GetText();
---         elseif i == 4 then
---             result = result .. " -- " .. "Revered: " .. ReputationBar9ReputationBarFactionStanding:GetText();
---         elseif i == 5 then
---             result = result .. " -- " .. "Exalted: " .. ReputationBar14ReputationBarFactionStanding:GetText();
---         end
---     end
---     GRM_LocalizationHelper.GRM_LocalizationHelperText:SetText( result );
--- end

@@ -17,7 +17,7 @@ function QuestieQuestBlacklist:Load()
         [615] = true, -- Duplicate of 8553. See #2215
         [618] = true, -- Duplicate of 8554
         [934] = true, -- Duplicate of 7383. See #2386
-        [960] = true, -- Duplicate of 961
+        --[960] = true, -- Duplicate of 961 -- different quests, not duplicate
         [9378] = true, -- Naxxramas quest which doesn't seem to be in the game
         [1318] = true, -- Duplicate of 7703 and not in the game
         [7704] = QuestieCorrections.CLASSIC_ONLY, -- Not implemented in Era, added in Wrath
@@ -272,8 +272,8 @@ function QuestieQuestBlacklist:Load()
         [8898] = true,
         [8899] = true,
         [9029] = true,
-        [8981] = QuestieCorrections.WOTLK_ONLY, --removed in wotlk
-        [8993] = QuestieCorrections.WOTLK_ONLY, --removed in wotlk
+        [8981] = true, --removed in wotlk
+        [8993] = true, --removed in wotlk
         [8900] = true,
         [8901] = true,
         [8902] = true,
@@ -1026,7 +1026,7 @@ function QuestieQuestBlacklist:Load()
         [64064] = true, -- Boosted character quest
         [64128] = true, -- Boosted character quest
         [64217] = true, -- Boosted character quest
-		
+
 		-- Paladin class quests with SWP patch
         [64319] = true, -- removed in wotlk
         [63866] = true, -- removed in wotlk
@@ -1124,7 +1124,7 @@ function QuestieQuestBlacklist:Load()
 
         ----- Wotlk -------------- Wotlk quests --------------- Wotlk -----
         ----- Wotlk ------------- starting here -------------- Wotlk -----
-        
+
         [10884] = QuestieCorrections.WOTLK_ONLY, -- no longer exists in wotlk
         [10885] = QuestieCorrections.WOTLK_ONLY, -- no longer exists in wotlk
         [10888] = QuestieCorrections.WOTLK_ONLY, -- Got replaced by 13430
@@ -1134,6 +1134,8 @@ function QuestieQuestBlacklist:Load()
         [6823] = QuestieCorrections.WOTLK_ONLY, -- Not in the game
         [6824] = QuestieCorrections.WOTLK_ONLY, -- Not in the game
         [7486] = QuestieCorrections.WOTLK_ONLY, -- Not in the game
+        [14351] = true, -- Not in the game
+        [14353] = true, -- Not in the game
         [11621] = true, -- Not in the game
         [11179] = true, -- Not in the game
         [11622] = true, -- Not in the game
@@ -1191,7 +1193,6 @@ function QuestieQuestBlacklist:Load()
         [12825] = true, -- Not in the game
         [12890] = true, -- Not in the game
         [12990] = true, -- Not in the game
-        [13183] = true, -- Not in the game
         [13184] = true, -- Not in the game
         [13176] = true, -- Not in the game
         [13173] = true, -- Not in the game
@@ -1200,7 +1201,8 @@ function QuestieQuestBlacklist:Load()
         [14032] = true, -- Not in the game
         [13825] = true, -- EXISTS ingame, but can only be picked up if quest 6610 was completed PRIOR to wrath - impossible for us to discern eligibility, better to hide than misinform everyone
         [13826] = true, -- EXISTS ingame, but can only be picked up if quest 6607 was completed PRIOR to wrath - impossible for us to discern eligibility, better to hide than misinform everyone
-        
+        [13843] = true, -- Questie NYI - only available if recipe 55252 is not known but quest 12889 is completed, we can't yet determine recipe knowledge
+
         [8367] = QuestieCorrections.WOTLK_ONLY, -- pvp marks removed in wotlk
         [8371] = QuestieCorrections.WOTLK_ONLY, -- pvp marks removed in wotlk
         [8385] = QuestieCorrections.WOTLK_ONLY, -- pvp marks removed in wotlk
@@ -1225,7 +1227,7 @@ function QuestieQuestBlacklist:Load()
         [9341] = QuestieCorrections.WOTLK_ONLY,
         [9343] = QuestieCorrections.WOTLK_ONLY,
         [10445] = QuestieCorrections.WOTLK_ONLY, -- replaced by 13432 in wotlk
-        
+
         -- Old Naxx quests (Naxx40 goes away in wotlk)
         [9120] = QuestieCorrections.WOTLK_ONLY, -- The Fall of Kel'Thuzad
         [9229] = QuestieCorrections.WOTLK_ONLY, -- The Fate of Ramaladni
@@ -1245,6 +1247,40 @@ function QuestieQuestBlacklist:Load()
         [9244] = QuestieCorrections.WOTLK_ONLY, -- Icy Scale Bracers
         [9245] = QuestieCorrections.WOTLK_ONLY, -- Icy Scale Gauntlets
         [9246] = QuestieCorrections.WOTLK_ONLY, -- Icy Scale Breastplate
+
+        -- Vanilla Onyxia Alliance attunement
+        [4182] = QuestieCorrections.WOTLK_ONLY,
+        [4183] = QuestieCorrections.WOTLK_ONLY,
+        [4184] = QuestieCorrections.WOTLK_ONLY,
+        [4185] = QuestieCorrections.WOTLK_ONLY,
+        [4186] = QuestieCorrections.WOTLK_ONLY,
+        [4223] = QuestieCorrections.WOTLK_ONLY,
+        [4224] = QuestieCorrections.WOTLK_ONLY,
+        [4241] = QuestieCorrections.WOTLK_ONLY,
+        [4242] = QuestieCorrections.WOTLK_ONLY,
+        [4264] = QuestieCorrections.WOTLK_ONLY,
+        [4282] = QuestieCorrections.WOTLK_ONLY,
+        [4322] = QuestieCorrections.WOTLK_ONLY,
+        [6402] = QuestieCorrections.WOTLK_ONLY,
+        [6403] = QuestieCorrections.WOTLK_ONLY,
+        [6501] = QuestieCorrections.WOTLK_ONLY,
+        [6502] = QuestieCorrections.WOTLK_ONLY,
+
+        -- Vanilla Onyxia Horde pre attunement
+        [4903] = QuestieCorrections.WOTLK_ONLY,
+        [4941] = QuestieCorrections.WOTLK_ONLY,
+        [4974] = QuestieCorrections.WOTLK_ONLY,
+        [6566] = QuestieCorrections.WOTLK_ONLY,
+        [6567] = QuestieCorrections.WOTLK_ONLY,
+        [6568] = QuestieCorrections.WOTLK_ONLY,
+        [6569] = QuestieCorrections.WOTLK_ONLY,
+        [6570] = QuestieCorrections.WOTLK_ONLY,
+        [6582] = QuestieCorrections.WOTLK_ONLY,
+        [6583] = QuestieCorrections.WOTLK_ONLY,
+        [6584] = QuestieCorrections.WOTLK_ONLY,
+        [6585] = QuestieCorrections.WOTLK_ONLY,
+        [6601] = QuestieCorrections.WOTLK_ONLY,
+        [6602] = QuestieCorrections.WOTLK_ONLY,
 
         -- "learn to ride" series (unimplemented)
         [14079] = true, -- elwynn (human)
@@ -1842,17 +1878,17 @@ function QuestieQuestBlacklist.LoadAutoBlacklistWotlk()
 --         [13864] = true, --* Battle Before The Citadel (https://www.wowhead.com/wotlk/quest=13864) (Retail Data)
 --         [14016] = true, --* The Black Knight's Curse (https://www.wowhead.com/wotlk/quest=14016) (Retail Data)
 --         [14017] = true, --* The Black Knight's Fate (https://www.wowhead.com/wotlk/quest=14017) (Retail Data)
---         [14076] = true, --* Breakfast Of Champions (https://www.wowhead.com/wotlk/quest=14076) (Retail Data)
---         [14090] = true, --* Gormok Wants His Snobolds (https://www.wowhead.com/wotlk/quest=14090) (Retail Data)
---         [14092] = true, --* Breakfast Of Champions (https://www.wowhead.com/wotlk/quest=14092) (Retail Data)
+        [14076] = true, --* Breakfast Of Champions (https://www.wowhead.com/wotlk/quest=14076) (Retail Data)
+        [14090] = true, --* Gormok Wants His Snobolds (https://www.wowhead.com/wotlk/quest=14090) (Retail Data)
+        [14092] = true, --* Breakfast Of Champions (https://www.wowhead.com/wotlk/quest=14092) (Retail Data)
 --         [14095] = true, --* Identifying the Remains (https://www.wowhead.com/wotlk/quest=14095) (Retail Data)
         [14101] = true, --* Drottinn Hrothgar (https://www.wowhead.com/wotlk/quest=14101) (Retail Data)
         [14102] = true, --* Mistcaller Yngvar (https://www.wowhead.com/wotlk/quest=14102) (Retail Data)
         [14104] = true, --* Ornolf The Scarred (https://www.wowhead.com/wotlk/quest=14104) (Retail Data)
         [14105] = true, --* Deathspeaker Kharos (https://www.wowhead.com/wotlk/quest=14105) (Retail Data)
         [14107] = true, --* The Fate Of The Fallen (https://www.wowhead.com/wotlk/quest=14107) (Retail Data)
---         [14141] = true, --* Gormok Wants His Snobolds (https://www.wowhead.com/wotlk/quest=14141) (Retail Data)
---         [14145] = true, --* What Do You Feed a Yeti, Anyway? (https://www.wowhead.com/wotlk/quest=14145) (Retail Data)
+        [14141] = true, --* Gormok Wants His Snobolds (https://www.wowhead.com/wotlk/quest=14141) (Retail Data)
+        [14145] = true, --* What Do You Feed a Yeti, Anyway? (https://www.wowhead.com/wotlk/quest=14145) (Retail Data)
 --         [14200] = true, --* Kickoff Mail Marker (https://www.wowhead.com/wotlk/quest=14200) (Retail Data)
 --         [24442] = true, --* Battle Plans Of The Kvaldir (https://www.wowhead.com/wotlk/quest=24442) (Retail Data)
 
@@ -2040,7 +2076,7 @@ function QuestieQuestBlacklist.LoadAutoBlacklistWotlk()
         [24656] = true, --* Pilfering Perfume (https://www.wowhead.com/wotlk/quest=24656) (Retail Data)
 
         -- Northrend -> Tournament (10 -> -241)
---         [14112] = true, --* What Do You Feed a Yeti, Anyway? (https://www.wowhead.com/wotlk/quest=14112) (Retail Data)
+        [14112] = true, --* What Do You Feed a Yeti, Anyway? (https://www.wowhead.com/wotlk/quest=14112) (Retail Data)
 
 
         --! 3.3.3

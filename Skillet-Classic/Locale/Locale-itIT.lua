@@ -62,6 +62,8 @@ L["CONFIRMQUEUECLEARDESC"] = "Use Alt-left-click instead of left-click to clear 
 L["CONFIRMQUEUECLEARNAME"] = "Use Alt-click to clear queue"
 L["Conflict with the addon TradeSkillMaster"] = "Conflict with the addon TradeSkillMaster"
 L["Copy"] = "Copy"
+--[[Translation missing --]]
+L["Cost"] = "Cost"
 L["Could not find bag space for"] = "Non trovo spazio nell borse per"
 L["craftable"] = "crabile"
 L["CRAFTBUTTONSDESC"] = "Include Craft buttons in frame"
@@ -171,6 +173,8 @@ L["Market"] = "Market"
 --[[Translation missing --]]
 L["Merchant"] = "Merchant"
 L["Merge items"] = "Unisce oggetti"
+--[[Translation missing --]]
+L["Most Sold"] = "Most Sold"
 L["Move Down"] = "Muovi verso il basso"
 L["Move to Bottom"] = "Muovi al fondo"
 L["Move to Top"] = "Muovi all'inizio"
@@ -237,6 +241,8 @@ L["Retrieve"] = "Recupera"
 L["Right-Click for filtering options"] = "Right-Click for filtering options"
 --[[Translation missing --]]
 L["Sales for "] = "Sales for "
+--[[Translation missing --]]
+L["Sales Rate"] = "Sales Rate"
 L["Same faction"] = "Same faction"
 L["Save"] = "Salva"
 L["Scale"] = "Scala"
@@ -294,6 +300,8 @@ L["Start"] = "Inizia"
 --[[Translation missing --]]
 L["Stop"] = "Stop"
 L["SubClass"] = "SubClass"
+--[[Translation missing --]]
+L["Suffix"] = "Suffix"
 L["SUPPORTCRAFTINGDESC"] = "Include support for Crafting professions (requires a /reload)"
 L["SUPPORTCRAFTINGNAME"] = "Support Crafting"
 L["Supported Addons"] = "Addon Supportati"

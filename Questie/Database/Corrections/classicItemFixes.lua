@@ -11,6 +11,7 @@ local QuestieDB = QuestieLoader:ImportModule("QuestieDB");
 
 function QuestieItemFixes:Load()
     local itemKeys = QuestieDB.itemKeys
+    local itemClasses = QuestieDB.itemClasses
 
     return {
         [730] = {
@@ -335,6 +336,12 @@ function QuestieItemFixes:Load()
             [itemKeys.npcDrops] = {},
             [itemKeys.objectDrops] = {},
         },
+        [5251] = {
+            [itemKeys.questRewards] = {960,961},
+        },
+        [5411] = {
+            [itemKeys.class] = itemClasses.QUEST,
+        },
         [5445] = {
             [itemKeys.npcDrops] = {3943,10559},
             [itemKeys.relatedQuests] = {1009},
@@ -343,6 +350,9 @@ function QuestieItemFixes:Load()
             [itemKeys.relatedQuests] = {1016},
             [itemKeys.npcDrops] = {},
             [itemKeys.objectDrops] = {},
+        },
+        [5461] = {
+            [itemKeys.npcDrops] = {4619},
         },
         [5475] = {
             [itemKeys.relatedQuests] = {},
@@ -470,6 +480,9 @@ function QuestieItemFixes:Load()
             [itemKeys.relatedQuests] = {},
             [itemKeys.npcDrops] = {6466},
             [itemKeys.objectDrops] = {},
+        },
+        [7228] = {
+            [itemKeys.name] = 'Tigule\'s Strawberry Ice Cream',
         },
         [7268] = { -- #1097
             [itemKeys.relatedQuests] = {1944},
@@ -718,6 +731,9 @@ function QuestieItemFixes:Load()
             [itemKeys.npcDrops] = {9453},
             [itemKeys.objectDrops] = {},
         },
+        [7067] = {
+            [itemKeys.npcDrops] = {92,2258,2359,2592,2735,2736,2752,2755,2791,2919,4034,4035,4120,4499,5465,7031,7032,7135,7136,7137,8278,9396,10119,11658,11659,11665,11746,11747,11777,11778,11781,11782,11783,11784,12076,12100,12101,13256,14462,14464,15205,15208,15307},
+        },
         [11947] = { -- #1315
             [itemKeys.relatedQuests] = {4512},
             [itemKeys.npcDrops] = {7086},
@@ -754,7 +770,7 @@ function QuestieItemFixes:Load()
             [itemKeys.objectDrops] = {},
         },
         [12347] = {
-            [itemKeys.relatedQuests] = {},
+            [itemKeys.relatedQuests] = {4763},
             [itemKeys.npcDrops] = {},
             [itemKeys.objectDrops] = {174795},
         },
@@ -1055,20 +1071,23 @@ function QuestieItemFixes:Load()
         [20023] = {
             [itemKeys.npcDrops] = {8766},
         },
+        [20310] = {
+            [itemKeys.relatedQuests] = {1480},
+        },
         [20378] = {
             [itemKeys.npcDrops] = {},
         },
-        [20454] = { 
+        [20454] = {
             [itemKeys.relatedQuests] = {8309},
             [itemKeys.objectDrops] = {180455},
             [itemKeys.npcDrops] = {},
         },
-        [20455] = { 
+        [20455] = {
             [itemKeys.relatedQuests] = {8309},
             [itemKeys.objectDrops] = {180454},
             [itemKeys.npcDrops] = {},
         },
-        [20456] = { 
+        [20456] = {
             [itemKeys.relatedQuests] = {8309},
             [itemKeys.objectDrops] = {180453},
             [itemKeys.npcDrops] = {},

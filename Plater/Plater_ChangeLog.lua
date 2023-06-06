@@ -7,7 +7,51 @@ local _
 function Plater.GetChangelogTable()
 	if (not Plater.ChangeLogTable) then
 		Plater.ChangeLogTable = {
-		
+			
+			{1685613078,  "Bug Fix", "June 1st, 2023", "Fixing an issue with aura updates not being done properly in some cases.", "cont1nuity"},
+			{1685613078,  "New Feature", "June 1st, 2023", "Adding auto-toggle for 'Hide Blizzard Healthbars' based on combat state.", "cont1nuity"},
+			{1685613078,  "Backend Change", "May 31st, 2023", "Fixing some issues on aura updates to increase performance.", "cont1nuity"},
+			{1685613078,  "Backend Change", "May 31st, 2023", "More detailed profiling.", "cont1nuity"},
+			{1685613078,  "Backend Change", "May 27th, 2023", "Refreshing healthbar colors now takes NPC colors into account.", "cont1nuity"},
+			{1685613078,  "Backend Change", "May 26th, 2023", "Adding more DF S2 units to be forced in combat.", "cont1nuity"},
+			{1685613078,  "Bug Fix", "May 26th, 2023", "Aura tooltips no longer block camera movement.", "cont1nuity"},
+			
+			{1683636158,  "Backend Change", "May 20th, 2023", "Fixed 'Ultra Important Cast' script showing red color for interruptible casts.", "Terciob"},
+			{1683636158,  "Backend Change", "May 12th, 2023", "Support new evoker spec.", "cont1nuity"},
+			
+			{1683636158,  "Backend Change", "May 9th, 2023", "Move addon compartment support to LibDBIcon.", "cont1nuity"},
+			{1683636158,  "Backend Change", "May 9th, 2023", "Updates to Plater default scripts for season 2.", "Terciob"},
+			{1683636158,  "Backend Change", "May 9th, 2023", "Additional work on DBM Boss-Mod-Icon-Bars.", "cont1nuity"},
+			{1683636158,  "Backend Change", "May 9th, 2023", "Do not print usage info by default.", "cont1nuity"},
+			{1683636158,  "New Feature", "May 8th, 2023", "Add addon compartment support", "kitsunekyo"},
+			{1683636158,  "Bug Fix", "May 6th, 2023", "Fixing an issue with internal default cast color handling.", "cont1nuity"},
+			{1683636158,  "Bug Fix", "May 6th, 2023", "Fixing an issue internal unit names.", "cont1nuity"},
+			{1683636158,  "Backend Change", "May 5th, 2023", "Details Framework updates.", "Terciob"},
+			{1683636158,  "Bug Fix", "May 5th, 2023", "Fixing an issue with the Tooltip API.", "cont1nuity"},
+			{1683636158,  "Bug Fix", "May 5th, 2023", "Ensure that no artifacts are shown on soft-interact objects.", "cont1nuity"},
+			{1683636158,  "Backend Change", "May 5th, 2023", "Further support for DBM Timer Icons.", "cont1nuity"},
+			{1683636158,  "Backend Change", "May 4th, 2023", "Export/Import of audio cues from the Cast Colors and Names tab.", "cont1nuity"},
+			{1683636158,  "New Feature", "May 4th, 2023", "Add options to show soft-interact icons and hide names on soft-interact objects.", "cont1nuity"},
+			{1683636158,  "Bug Fix", "May 4th, 2023", "Allow opt-out of auto-accepting NPC colors sent by raid-leaders.", "cont1nuity"},
+			{1683636158,  "Bug Fix", "May 4th, 2023", "Allow lower scaling range for personal resources, especially targeted at Blizzard Combo Points.", "cont1nuity"},
+			
+			{1683096614,  "Bug Fix", "May 3rd, 2023", "Blizzard allows changing nameplate distance again in retail -> nameplateMaxDistance 0-60y.", "cont1nuity"},
+			{1683096614,  "Bug Fix", "May 3rd, 2023", "Apply workaround for player nameplates not showing until blizzard fixes this.", "cont1nuity"},
+			{1683096614,  "Bug Fix", "April 28th, 2023", "Fix channeled casts not appearing on the cast colors tab under some conditions.", "cont1nuity"},
+			{1683096614,  "Backend Change", "April 27th, 2023", "Some code cleanup in auras.", "cont1nuity"},
+			{1683096614,  "Backend Change", "April 26th, 2023", "Changing default and value range for nameplate movement speed settings.", "cont1nuity"},
+			{1683096614,  "New Feature", "April 25th, 2023", "Adding support to show DBM timer bars as BossMod Icon on the nameplate.", "cont1nuity"},
+			{1683096614,  "Bug Fix", "April 23rd, 2023", "Fixing a minor error on the Wago Imports tab while importing mods/scripts.", "cont1nuity"},
+			{1683096614,  "Bug Fix", "April 22nd, 2023", "Hopefully fixing hunter feight death nameplates.", "cont1nuity"},
+			{1683096614,  "Backend Change", "April 20th, 2023", "Adding option to not automatically update plater internal scripts.", "Terciob"},
+			
+			{1681318363,  "Bug Fix", "April 19th, 2023", "Fixing an error with tooltip scanning rework.", "cont1nuity"},
+			{1681318363,  "Bug Fix", "April 17th, 2023", "Fixing Aura Icon sizes not updating properly with Ghost Auras set to a different size.", "cont1nuity"},
+			{1681318363,  "Bug Fix", "April 15th, 2023", "Fixing the search tab being broken.", "cont1nuity"},
+			{1681318363,  "Bug Fix", "April 15th, 2023", "Some locale fixes.", "cont1nuity"},
+			{1681318363,  "Backend Change", "March 28th, 2023", "Implementing on the fly locale change for Plater options.", "Terciob"},
+			{1681318363,  "Bug Fix", "March 20th, 2023", "Fixing y-offset for target arrow indicators.", "cont1nuity"},
+			
 			{1678652930,  "Bug Fix", "March 19th, 2023", "Fixing and error on quest recognition rework.", "cont1nuity"},
 			{1678652930,  "Bug Fix", "March 18th, 2023", "Fixing and error for hiding blizzard healthbars.", "cont1nuity"},
 			{1678652930,  "Bug Fix", "March 14th, 2023", "Fixing some errors about unit flag changes when units are entering/leaving combat or change being attackable or not.", "cont1nuity"},

@@ -96,7 +96,7 @@ GRMsyncGlobals.syncTempDelay2 = false;
 GRMsyncGlobals.finalSyncDataCount = 1;
 GRMsyncGlobals.finalSyncDataBanCount = 1;
 GRMsyncGlobals.finalSyncProgress = { false , false , false , false , false , false , false }; -- on each of the tables, if submitted fully
-GRMsyncGlobals.numGuildRanks = GuildControlGetNumRanks() - 1;
+GRMsyncGlobals.numGuildRanks = 0;
 GRMsyncGlobals.TempRoster = {};
 GRMsyncGlobals.TempAltRoster = {};
 GRMsyncGlobals.altTempRosterCleanedup = false;
@@ -570,7 +570,7 @@ GRMsync.SendTrackerCalculation = function()
 
     result = result .. GRMsyncGlobals.totalEstTime;
 
-    local msg = GRM_G.PatchDayString .. "?GRM_TRACKER?" .. GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank .. "?" .. result;
+    local msg = GRM_G.PatchDayString .. "?GRM_TRACKER?" .. GRM.S().syncRank .. "?" .. result;
 
     GRMsyncGlobals.SyncCount = GRMsyncGlobals.SyncCount + #msg;
     GRMsync.SendMessage ( "GRM_SYNC" , msg  , GRMsyncGlobals.DesignatedLeader );
@@ -593,11 +593,11 @@ end
 -- What it Does:    Parses the given messages and saves them to the tracker data table
 -- Purpose:         Ensure sync progress is unified between 2 players.
 GRMsync.CollectTrackerCalculation = function ( msg )
-    GRM_G.CheckTrackerPattern = GRM_G.CheckTrackerPattern or GRM.BuildComPattern ( 22 , "?" , false );
+    GRM_G.MatchPattern22 = GRM_G.MatchPattern22 or GRM.BuildComPattern ( 22 , "?" , false );
 
     GRMsync.InitializeTrackerData();
 
-    GRMsyncGlobals.TrackerData.JD[1] , GRMsyncGlobals.TrackerData.JD[2] , GRMsyncGlobals.TrackerData.JD[3] , GRMsyncGlobals.TrackerData.PD[1] , GRMsyncGlobals.TrackerData.PD[2] , GRMsyncGlobals.TrackerData.PD[3] , GRMsyncGlobals.TrackerData.ALT[1] , GRMsyncGlobals.TrackerData.ALT[2] , GRMsyncGlobals.TrackerData.ALT[3] , GRMsyncGlobals.TrackerData.MAIN[1] , GRMsyncGlobals.TrackerData.MAIN[2] , GRMsyncGlobals.TrackerData.MAIN[3] , GRMsyncGlobals.TrackerData.CUSTOMNOTE[1] , GRMsyncGlobals.TrackerData.CUSTOMNOTE[2] , GRMsyncGlobals.TrackerData.CUSTOMNOTE[3] , GRMsyncGlobals.TrackerData.BDAY[1] , GRMsyncGlobals.TrackerData.BDAY[2] , GRMsyncGlobals.TrackerData.BDAY[3] , GRMsyncGlobals.TrackerData.BAN[1] , GRMsyncGlobals.TrackerData.BAN[2] , GRMsyncGlobals.TrackerData.BAN[3] , GRMsyncGlobals.totalEstTime = GRM.ParseComMsg ( msg , GRM_G.CheckTrackerPattern );  -- Ban needs to be pared when added.
+    GRMsyncGlobals.TrackerData.JD[1] , GRMsyncGlobals.TrackerData.JD[2] , GRMsyncGlobals.TrackerData.JD[3] , GRMsyncGlobals.TrackerData.PD[1] , GRMsyncGlobals.TrackerData.PD[2] , GRMsyncGlobals.TrackerData.PD[3] , GRMsyncGlobals.TrackerData.ALT[1] , GRMsyncGlobals.TrackerData.ALT[2] , GRMsyncGlobals.TrackerData.ALT[3] , GRMsyncGlobals.TrackerData.MAIN[1] , GRMsyncGlobals.TrackerData.MAIN[2] , GRMsyncGlobals.TrackerData.MAIN[3] , GRMsyncGlobals.TrackerData.CUSTOMNOTE[1] , GRMsyncGlobals.TrackerData.CUSTOMNOTE[2] , GRMsyncGlobals.TrackerData.CUSTOMNOTE[3] , GRMsyncGlobals.TrackerData.BDAY[1] , GRMsyncGlobals.TrackerData.BDAY[2] , GRMsyncGlobals.TrackerData.BDAY[3] , GRMsyncGlobals.TrackerData.BAN[1] , GRMsyncGlobals.TrackerData.BAN[2] , GRMsyncGlobals.TrackerData.BAN[3] , GRMsyncGlobals.totalEstTime = GRM.ParseComMsg ( msg , GRM_G.MatchPattern22 );  -- Ban needs to be pared when added.
 
     for _ , y in pairs ( GRMsyncGlobals.TrackerData ) do
         for i = 1 , #y do
@@ -690,7 +690,7 @@ end
 -- Purpose:         Quality of life feature.
 GRMsync.LiveTracking = function()
 
-    if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncEnabled then
+    if GRM.S().syncEnabled then
 
         if GRM_G.InGroup then
             GRMsync.ResetSyncTracker();
@@ -976,7 +976,7 @@ GRMsync.InquireLeader = function()
     
     if GRMsyncGlobals.SyncOK then
         GRMsyncGlobals.IsLeaderRequested = true;
-        GRMsync.SendMessage ( "GRM_SYNC" , GRM_G.PatchDayString .. "?GRM_WHOISLEADER?" .. GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank .. "?" .. tostring ( GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRankBanList ) .. "?" , GRMsyncGlobals.channelName );
+        GRMsync.SendMessage ( "GRM_SYNC" , GRM_G.PatchDayString .. "?GRM_WHOISLEADER?" .. GRM.S().syncRank .. "?" .. tostring ( GRM.S().syncRankBanList ) .. "?" , GRMsyncGlobals.channelName );
 
     end
 
@@ -997,7 +997,7 @@ GRMsync.LeaderRespond = function ( sender , banRankRestriction )
         GRMsyncGlobals.ElectionProcessing = false;
 
         if GRMsyncGlobals.SyncOK then
-            local msg = GRM_G.PatchDayString .. "?GRM_IAMLEADER?" .. GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank .. "?" .. tostring ( GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRankBanList ) .. "?";
+            local msg = GRM_G.PatchDayString .. "?GRM_IAMLEADER?" .. GRM.S().syncRank .. "?" .. tostring ( GRM.S().syncRankBanList ) .. "?";
             GRMsyncGlobals.SyncCount = GRMsyncGlobals.SyncCount + #msg;
             GRMsync.SendMessage ( "GRM_SYNC" , msg , GRMsyncGlobals.channelName );
 
@@ -1040,7 +1040,7 @@ GRMsync.ReviewElectResponses = function()
 
         -- Send Message out
         if GRMsyncGlobals.SyncOK then
-            GRMsync.SendMessage ( "GRM_SYNC" , GRM_G.PatchDayString .. "?GRM_NEWLEADER?" .. GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank .. "?" .. highestName .. "?" .. banRankRestriction , GRMsyncGlobals.channelName );
+            GRMsync.SendMessage ( "GRM_SYNC" , GRM_G.PatchDayString .. "?GRM_NEWLEADER?" .. GRM.S().syncRank .. "?" .. highestName .. "?" .. banRankRestriction , GRMsyncGlobals.channelName );
         end
         -- Establishing leader.
         GRMsync.SetLeader ( highestName , true , banRankRestriction );
@@ -1064,7 +1064,7 @@ end
 GRMsync.RequestElection = function()
     GRMsyncGlobals.ElectionProcessing = true;
     if GRMsyncGlobals.SyncOK then
-        GRMsync.SendMessage ( "GRM_SYNC" , GRM_G.PatchDayString .. "?GRM_ELECT?" .. GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank .. "?" .. "" , GRMsyncGlobals.channelName );
+        GRMsync.SendMessage ( "GRM_SYNC" , GRM_G.PatchDayString .. "?GRM_ELECT?" .. GRM.S().syncRank .. "?" .. "" , GRMsyncGlobals.channelName );
     end
     -- Let's give it a time delay to receive responses. 3 seconds.
     C_Timer.After ( 4 , GRMsync.ReviewElectResponses );
@@ -1076,7 +1076,7 @@ end
 GRMsync.SendElectionInfo = function()
     if not GRMsyncGlobals.ElectionProcessing then
         if GRMsyncGlobals.SyncOK then
-            GRMsync.SendMessage ( "GRM_SYNC" , GRM_G.PatchDayString .. "?GRM_ELECTINFO?" .. GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank .. "?" .. GRM_G.addonUser .. "?" .. tostring ( GRMsyncGlobals.timeAtLogin ) .. "?" .. tostring ( GRM.GetPlayer ( GRM_G.addonUser ).rankIndex ) .. "?" .. tostring ( GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRankBanList ) , GRMsyncGlobals.channelName );
+            GRMsync.SendMessage ( "GRM_SYNC" , GRM_G.PatchDayString .. "?GRM_ELECTINFO?" .. GRM.S().syncRank .. "?" .. GRM_G.addonUser .. "?" .. tostring ( GRMsyncGlobals.timeAtLogin ) .. "?" .. tostring ( GRM.GetPlayer ( GRM_G.addonUser ).rankIndex ) .. "?" .. tostring ( GRM.S().syncRankBanList ) , GRMsyncGlobals.channelName );
         end
     end
 end
@@ -1086,8 +1086,8 @@ end
 -- Purpose:         Need to aggregate all the player data for voting!
 GRMsync.RegisterTimeStamps = function ( msg )
     -- Adding { timestamp , name } to the list of people giving their time... 3 second response time valid only.
-    GRM_G.ElectionPattern = GRM_G.ElectionPattern or GRM.BuildComPattern ( 4 , "?" , false );
-    local name , timeAtLogin , rankIndex , banRankRestriction = GRM.ParseComMsg ( msg , GRM_G.ElectionPattern );
+    GRM_G.MatchPattern4 = GRM_G.MatchPattern4 or GRM.BuildComPattern ( 4 , "?" , false );
+    local name , timeAtLogin , rankIndex , banRankRestriction = GRM.ParseComMsg ( msg , GRM_G.MatchPattern4 );
 
     GRMsyncGlobals.ElectTimeOnlineTable[name] = { tonumber ( timeAtLogin ) , tonumber ( rankIndex ) , tonumber ( banRankRestriction ) };
 end
@@ -1097,8 +1097,8 @@ end
 -- Purpose:         Final step in designating a leader!
 GRMsync.ElectedLeader = function ( msg )
     -- Message should just be the name, so no need to parse.
-    GRM_G.NewLeaderPattern = GRM_G.NewLeaderPattern or GRM.BuildComPattern ( 2 , "?" , false );
-    local leader , banRankRestriction = GRM.ParseComMsg ( msg , GRM_G.NewLeaderPattern );
+    GRM_G.MatchPattern2 = GRM_G.MatchPattern2 or GRM.BuildComPattern ( 2 , "?" , false );
+    local leader , banRankRestriction = GRM.ParseComMsg ( msg , GRM_G.MatchPattern2 );
     banRankRestriction = tonumber ( banRankRestriction );
     GRMsyncGlobals.senderBanRankReq = banRankRestriction;
 
@@ -1150,7 +1150,7 @@ GRMsync.EstablishLeader = function()
                     if GRMsyncGlobals.DesignatedLeader ~= GRM_G.addonUser then
                         GRMsyncGlobals.LeadSyncProcessing = false;
 
-                        GRMsync.SendMessage ( "GRM_SYNC" , GRM_G.PatchDayString .. "?GRM_REQUESTSYNC?" .. GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank .. "?" .. "" , GRMsyncGlobals.DesignatedLeader );
+                        GRMsync.SendMessage ( "GRM_SYNC" , GRM_G.PatchDayString .. "?GRM_REQUESTSYNC?" .. GRM.S().syncRank .. "?" .. "" , GRMsyncGlobals.DesignatedLeader );
 
                         if not GRMsyncGlobals.StartMessage then
                             GRMsync.SyncTriggerMessage ( GRM.GetClassifiedName ( GRMsyncGlobals.DesignatedLeader ) );
@@ -1209,6 +1209,9 @@ end
 -- What it Does:    If message received, designates the sender as the leader
 -- Purpose:         Need to designate a leader!
 GRMsync.SetLeader = function ( leader , initiateSync , banRankRestriction )
+
+    GRMsyncGlobals.numGuildRanks = GuildControlGetNumRanks() - 1;
+
     -- Error protection
     if string.find ( leader , "-" ) == nil then
         if GRM.IsMergedRealmServer() then
@@ -1237,11 +1240,11 @@ GRMsync.SetLeader = function ( leader , initiateSync , banRankRestriction )
         if leader ~= GRM_G.addonUser then
             GRMsyncGlobals.IsElectedLeader = false;
             -- Non leader sends request to sync
-            if GRMsyncGlobals.SyncOK and ( GRMsync.IsPlayerDataSyncCompatibleWithAnyOnline() or GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].exportAllRanks ) then
+            if GRMsyncGlobals.SyncOK and ( GRMsync.IsPlayerDataSyncCompatibleWithAnyOnline() or GRM.S().exportAllRanks ) then
                 if not GRMsyncGlobals.reloadControl then
                     GRMsyncGlobals.LeadSyncProcessing = false;
 
-                    GRMsync.SendMessage ( "GRM_SYNC" , GRM_G.PatchDayString .. "?GRM_REQUESTSYNC?" .. GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank .. "?" .. "" , GRMsyncGlobals.DesignatedLeader );
+                    GRMsync.SendMessage ( "GRM_SYNC" , GRM_G.PatchDayString .. "?GRM_REQUESTSYNC?" .. GRM.S().syncRank .. "?" .. "" , GRMsyncGlobals.DesignatedLeader );
                     
                    if not GRMsyncGlobals.StartMessage then
                         GRMsync.SyncTriggerMessage ( GRM.GetClassifiedName ( GRMsyncGlobals.DesignatedLeader ) );
@@ -1275,7 +1278,7 @@ GRMsync.SyncTriggerMessage = function ( name )
         GRMsyncGlobals.SyncTracker.TriggeringSync = true;
         GRM_UI.GRM_SyncTrackerWindow.SyncTrackerText:SetText ( GRM.L ( "Currently Syncing With: {name}" , name ) );
         
-        if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncChatEnabled then
+        if GRM.S().syncChatEnabled then
             GRM.Report ( GRM.L ( "GRM:" ) .. " " .. GRM.L ( "Syncing Data With Guildies Now..." ) .. "\n" .. GRM.L ( "(Loading screens may cause sync to fail)" ) );
         end
     end
@@ -1321,9 +1324,9 @@ GRMsync.CheckJoinDateChange = function( msg , sender , prefix )
         isSyncUpdate = true;
     end
 
-    GRM_G.CheckJoinDatePattern = GRM_G.CheckJoinDatePattern or GRM.BuildComPattern ( 7 , "?" , false );
+    GRM_G.MatchPattern7 = GRM_G.MatchPattern7 or GRM.BuildComPattern ( 7 , "?" , false );
 
-    local playerName , epochTimeOfChange , day , month , year , epochStamp , noteDestination = GRM.ParseComMsg ( msg , GRM_G.CheckJoinDatePattern );
+    local playerName , epochTimeOfChange , day , month , year , epochStamp , noteDestination = GRM.ParseComMsg ( msg , GRM_G.MatchPattern7 );
 
     epochStamp = tonumber ( epochStamp );
     epochTimeOfChange = tonumber ( epochTimeOfChange );
@@ -1333,7 +1336,7 @@ GRMsync.CheckJoinDateChange = function( msg , sender , prefix )
 
     -- set the timestamp
     local joinDate = GRM.FormatTimeStamp ( { day , month , year } );
-    local player = GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ][ playerName ];
+    local player = GRM.GetPlayer ( playerName );
 
     if player then
         -- Let's see if there was a change
@@ -1358,7 +1361,7 @@ GRMsync.CheckJoinDateChange = function( msg , sender , prefix )
             player.joinDateUnknown = false;
         
             -- Report the updates!
-            if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncChatEnabled and not isSyncUpdate then
+            if GRM.S().syncChatEnabled and not isSyncUpdate then
                 
                 GRM.Report ( GRM.L ( "{name} updated {name2}'s Join Date." , GRM.GetClassifiedName ( sender , true ) , GRM.GetClassifiedName ( playerName , true ) ) );
             end
@@ -1405,10 +1408,10 @@ GRMsync.CheckPromotionDateChange = function ( msg , sender , prefix )
         isSyncUpdate = true;
     end
 
-    GRM_G.CheckPromoDatePattern = GRM_G.CheckPromoDatePattern or GRM.BuildComPattern ( 6 , "?" , false );
+    GRM_G.MatchPattern6 = GRM_G.MatchPattern6 or GRM.BuildComPattern ( 6 , "?" , false );
 
-    local playerName , day , month , year , epochDate , epochTimeOfChange = GRM.ParseComMsg ( msg , GRM_G.CheckPromoDatePattern );
-    local player = GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ][ playerName ];
+    local playerName , day , month , year , epochDate , epochTimeOfChange = GRM.ParseComMsg ( msg , GRM_G.MatchPattern6 );
+    local player = GRM.GetPlayer ( playerName );
 
     if player then
 
@@ -1428,7 +1431,7 @@ GRMsync.CheckPromotionDateChange = function ( msg , sender , prefix )
             player.promoteDateUnknown = false;           
             
             -- Report the updates!
-            if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncChatEnabled and not isSyncUpdate then
+            if GRM.S().syncChatEnabled and not isSyncUpdate then
                 GRM.Report ( GRM.L ( "{name} updated {name2}'s Promotion Date." , GRM.GetClassifiedName ( sender , true ) , GRM.GetClassifiedName ( player.name , true ) ) );
             end
 
@@ -1461,8 +1464,8 @@ end
 -- Purpose:         Cleanliness. If it is removed from one person's list, it is removed from all!
 GRMsync.EventAddedToCalendarCheck = function ( msg , sender )
 
-    GRM_G.CheckAddToCalendarPattern = GRM_G.CheckAddToCalendarPattern or GRM.BuildComPattern ( 3 , "?" , false );
-    local name , title , index = GRM.ParseComMsg ( msg , GRM_G.CheckAddToCalendarPattern );
+    GRM_G.MatchPattern3 = GRM_G.MatchPattern3 or GRM.BuildComPattern ( 3 , "?" , false );
+    local name , title , index = GRM.ParseComMsg ( msg , GRM_G.MatchPattern3 );
     index = tonumber ( index );
 
 
@@ -1475,7 +1478,7 @@ GRMsync.EventAddedToCalendarCheck = function ( msg , sender )
             GRM.RefreshAddEventFrame();
         end
         -- Send chat update info.
-        if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncChatEnabled then
+        if GRM.S().syncChatEnabled then
             GRM.Report ( GRM.L ( "\"{custom1}\" event added to the calendar by {name}" , GRM.GetClassifiedName ( sender , true ) , nil , nil , title ) );
         end
     end
@@ -1491,15 +1494,15 @@ end
 -- Purpose:         Additional chcecks required to avoid message spamminess, but basically to sync alt lists on adding.
 GRMsync.CheckAddAltChange = function ( msg , sender , prefix )
 
-    GRM_G.CheckAddAltPattern = GRM_G.CheckAddAltPattern or GRM.BuildComPattern ( 3 , "?" , false );
-    local name , altName , altNameEpochTime = GRM.ParseComMsg ( msg , GRM_G.CheckAddAltPattern );
+    GRM_G.MatchPattern3 = GRM_G.MatchPattern3 or GRM.BuildComPattern ( 3 , "?" , false );
+    local name , altName , altNameEpochTime = GRM.ParseComMsg ( msg , GRM_G.MatchPattern3 );
     local addToAltsGroup = false;
 
     altNameEpochTime = tonumber ( altNameEpochTime );
 
     if name ~= altName then         -- To avoid spam message to all players...
 
-        local alt = GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ][ altName ];
+        local alt = GRM.GetPlayer ( altName );
 
         if alt and altNameEpochTime >= alt.altGroupModified then
 
@@ -1508,7 +1511,7 @@ GRMsync.CheckAddAltChange = function ( msg , sender , prefix )
             C_Timer.After ( 1 , function() 
                 GRM.SyncBirthdayWithNewAlt ( name , altName , addToAltsGroup );
         
-                if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncChatEnabled then
+                if GRM.S().syncChatEnabled then
                     GRM.Report ( GRM.L ( "{name} updated {name2}'s list of Alts." , GRM.GetClassifiedName ( sender , true ) , GRM.GetClassifiedName ( name , true ) ) );
                 end
         
@@ -1520,14 +1523,13 @@ GRMsync.CheckAddAltChange = function ( msg , sender , prefix )
     end
 end
 
-
 -- Method:          GRMsync.CollectAltFinalSyncData ( msg )
 -- What it Does:    Collects the alt data received and holds it until ready to compare all
 -- Purpose:         Sync alt data - this is necessary as each alt arrives one at a time so need all of them to full compare lists.
 GRMsync.CollectAltFinalSyncData = function ( msg , isLeader )
 
-    GRM_G.CheckAddAltSyncPattern = GRM_G.CheckAddAltSyncPattern or GRM.BuildComPattern ( 3 , "?" , false );
-    local name , altName , altGroupModified = GRM.ParseComMsg ( msg , GRM_G.CheckAddAltSyncPattern );
+    GRM_G.MatchPattern3 = GRM_G.MatchPattern3 or GRM.BuildComPattern ( 3 , "?" , false );
+    local name , altName , altGroupModified = GRM.ParseComMsg ( msg , GRM_G.MatchPattern3 );
     altGroupModified = tonumber ( altGroupModified );
 
     -- Now, we need to determine what to do with given list
@@ -1621,8 +1623,7 @@ GRMsync.ConvertToNamesList = function ( list )
 
     return result;
 end
--- GRMsync.ClearAltGroupsthatMatch ( GRMsyncGlobals.FinalCorrectAltList , GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ] , GRMsyncGlobals.guildAltData );
--- GRMsync.ClearAltGroupsthatMatch ( GRMsyncGlobals.FinalAltListReeceived , GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ] , GRMsyncGlobals.guildAltData );
+
 -- Method:          GRMsync.ClearAltGroupsthatMatch ( table , table , table )
 -- What it Does:    Cleans up the final list of alts so you don't process logic of adding/removing if groups already are the same.
 -- Purpose:         Keep the data sync'd properly.
@@ -1674,7 +1675,7 @@ GRMsync.CheckAddAltSyncChange = function ( finalList , countExpected )
 
     if countExpected == GRM.TableLength ( finalList ) then
         -- Now, we need to update the current database
-        local guildData = GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ]
+        local guildData = GRM.GetGuild();
         local altData = GRMsyncGlobals.guildAltData;
         local player = {};
         local currentAlts = {};
@@ -1798,13 +1799,13 @@ end
 GRMsync.CheckRemoveAltChange = function ( msg , sender )
     -- To avoid spamminess
     local isSyncUpdate = false;
-    GRM_G.CheckRemoveAltPattern = GRM_G.CheckRemoveAltPattern or GRM.BuildComPattern ( 3 , "?" , false );
+    GRM_G.MatchPattern3 = GRM_G.MatchPattern3 or GRM.BuildComPattern ( 3 , "?" , false );
     local altName , altChangeTimeStamp , name = "" , 0 , "";
 
-    altName , altChangeTimeStamp , name = GRM.ParseComMsg ( msg , GRM_G.CheckRemoveAltPattern );
+    altName , altChangeTimeStamp , name = GRM.ParseComMsg ( msg , GRM_G.MatchPattern3 );
     altChangeTimeStamp = tonumber ( altChangeTimeStamp );
 
-    local alt = GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ][ altName ];
+    local alt = GRM.GetPlayer ( altName );
 
     if alt and altChangeTimeStamp >= alt.altGroupModified then
 
@@ -1833,7 +1834,7 @@ GRMsync.CheckRemoveAltChange = function ( msg , sender )
             end
 
             if isRemoved then
-                if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncChatEnabled and not isSyncUpdate then
+                if GRM.S().syncChatEnabled and not isSyncUpdate then
                     
                     GRM.Report ( GRM.L ( "{name} removed {name2} from {custom1}'s list of Alts." , GRM.GetClassifiedName ( sender , true ) , GRM.GetClassifiedName ( altName , true ) , nil , GRM.GetClassifiedName ( name , true ) ) );
                 end
@@ -1853,14 +1854,14 @@ end
 -- Purpose:         Sync data between players LIVE
 GRMsync.CheckAltMainChange = function ( msg , sender )
 
-    GRM_G.CheckAltMainPattern = GRM_G.CheckAltMainPattern or GRM.BuildComPattern ( 3 , "?" , false );
-    local name , mainName , timestamp = GRM.ParseComMsg ( msg , GRM_G.CheckAltMainPattern );
+    GRM_G.MatchPattern3 = GRM_G.MatchPattern3 or GRM.BuildComPattern ( 3 , "?" , false );
+    local name , mainName , timestamp = GRM.ParseComMsg ( msg , GRM_G.MatchPattern3 );
 
     timestamp = tonumber ( timestamp );
 
     GRM.SetMain ( mainName , timestamp );
 
-    local player = GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ][ mainName ];
+    local player = GRM.GetPlayer ( mainName );
 
     -- We need to add the timestamps our selves as well! In the main program, the timestamps are only triggered on manually clicking and adding/removing
     if player then
@@ -1875,7 +1876,7 @@ GRMsync.CheckAltMainChange = function ( msg , sender )
             end
         end
 
-        if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncChatEnabled then
+        if GRM.S().syncChatEnabled then
             GRM.Report ( GRM.L ( "{name} set {name2} to be 'Main'" , GRM.GetClassifiedName ( sender , true ) , GRM.GetClassifiedName ( mainName , true ) ) );
         end
 
@@ -1901,13 +1902,13 @@ GRMsync.CheckMainSyncChange = function ( msg )
 
     else
 
-        GRM_G.CheckMainSyncPattern = GRM_G.CheckMainSyncPattern or GRM.BuildComPattern ( 3 , "?" , false );
-        mainName , mainStatus , mainChangeTimestamp = GRM.ParseComMsg ( msg , GRM_G.CheckMainSyncPattern );
+        GRM_G.MatchPattern3 = GRM_G.MatchPattern3 or GRM.BuildComPattern ( 3 , "?" , false );
+        mainName , mainStatus , mainChangeTimestamp = GRM.ParseComMsg ( msg , GRM_G.MatchPattern3 );
         mainChangeTimestamp = tonumber ( mainChangeTimestamp );
 
     end
 
-    local player = GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ][ mainName ];
+    local player = GRM.GetPlayer ( mainName );
 
     if player then
         if tostring ( player.isMain ) ~= mainStatus then
@@ -1942,8 +1943,8 @@ end
 -- Purpose:         Sync data between players LIVE
 GRMsync.CheckAltMainToAltChange = function ( msg , sender )
 
-    GRM_G.CheckAltMainToAltPattern = GRM_G.CheckAltMainToAltPattern or GRM.BuildComPattern ( 3 , "?" , false );
-    local name , mainName , timestamp = GRM.ParseComMsg ( msg , GRM_G.CheckAltMainToAltPattern );
+    GRM_G.MatchPattern3 = GRM_G.MatchPattern3 or GRM.BuildComPattern ( 3 , "?" , false );
+    local name , mainName , timestamp = GRM.ParseComMsg ( msg , GRM_G.MatchPattern3 );
 
     timestamp = tonumber ( timestamp );
     GRM.DemoteFromMain ( mainName , timestamp );
@@ -1953,7 +1954,7 @@ GRMsync.CheckAltMainToAltChange = function ( msg , sender )
             GRM_UI.GRM_MemberDetailMetaData.GRM_MemberDetailMainText:Hide();
         end
     end
-    if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncChatEnabled then
+    if GRM.S().syncChatEnabled then
         GRM.Report ( GRM.L ( "{name} has changed {name2} to be listed as an 'alt'" , GRM.GetClassifiedName ( sender , true ) , GRM.GetClassifiedName ( mainName , true ) ) );
     end
 
@@ -1967,17 +1968,17 @@ end
 -- Purpose:         Sync the information between guildies live, as well as obey the filtering rules between clients.
 GRMsync.CheckCustomNoteChange = function ( msg , sender )
     -- No need to do all the work if custom note sync disabled!
-    if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncCustomNote then
+    if GRM.S().syncCustomNote then
 
         if not GRMsyncGlobals.HalfSyncLive and string.find ( msg , "&X&" , 1 , true ) ~= nil then
             GRMsyncGlobals.HalfSyncLive = true;
             GRMsyncGlobals.HalfSyncMsgLive = string.sub ( msg , 1 , string.find ( msg , "&X&" , 1 , true ) - 1 );
         else
 
-            GRM_G.CheckCustomNotePattern = GRM_G.CheckCustomNotePattern or GRM.BuildComPattern ( 4 , "?#" , false );
+            GRM_G.MatchPattern4 = GRM_G.MatchPattern4 or GRM.BuildComPattern ( 4 , "?#" , false );
             local senderControlRankRequirement , playerName , timeStamp;
             local customNote = "";
-            senderControlRankRequirement , playerName , timeStamp , msg = GRM.ParseComMsg ( msg , GRM_G.CheckCustomNotePattern );
+            senderControlRankRequirement , playerName , timeStamp , msg = GRM.ParseComMsg ( msg , GRM_G.MatchPattern4 );
             senderControlRankRequirement = tonumber ( senderControlRankRequirement );
             timeStamp = tonumber ( timeStamp );
             
@@ -1998,7 +1999,8 @@ GRMsync.CheckCustomNoteChange = function ( msg , sender )
             end
 
             -- Check for changes!
-            local player = GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ][ playerName ];
+            local player = GRM.GetPlayer ( playerName );
+
             if player then
                 -- No need to check if this one note has sync turned off
                 if player.customNote[1] then
@@ -2039,17 +2041,18 @@ end
 -- Purpose:         For updating and syncing the custom notes!!!
 GRMsync.CheckCustomNoteSyncChange = function ( msg , isReceivedSync )
     -- No need to check if sync is disable for custo notes :D
-    if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncCustomNote then
+    if GRM.S().syncCustomNote then
 
         if not GRMsyncGlobals.HalfSyncup and string.find ( msg , "&X&" , 1 , true ) ~= nil then
             GRMsyncGlobals.HalfSyncup = true;
             GRMsyncGlobals.HalfSyncupMsg = string.sub ( msg , 1 , string.find ( msg , "&X&" , 1 , true ) - 1 );
         else
 
-            GRM_G.CheckCustomNoteSyncPattern = GRM_G.CheckCustomNoteSyncPattern or GRM.BuildComPattern ( 5 , "~X~" , false );
+            GRM_G.MatchPattern5 = GRM_G.MatchPattern5 or GRM.BuildComPattern ( 5 , "~X~" , false );
+
             local senderControlRankRequirement , playerName , timeStamp , editorName;
             local customNote = "";
-            senderControlRankRequirement , playerName , timeStamp , editorName , msg = GRM.ParseComMsg ( msg , GRM_G.CheckCustomNoteSyncPattern );
+            senderControlRankRequirement , playerName , timeStamp , editorName , msg = GRM.ParseComMsg ( msg , GRM_G.MatchPattern5 );
             senderControlRankRequirement = tonumber ( senderControlRankRequirement );
             timeStamp = tonumber ( timeStamp );
 
@@ -2070,7 +2073,8 @@ GRMsync.CheckCustomNoteSyncChange = function ( msg , isReceivedSync )
             end
 
             -- Check for changes!
-            local player = GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ][ playerName ];
+            local player = GRM.GetPlayer ( playerName );
+
             if player then
                 -- Player identified... now we need to find out what sync restriction you have on them.
                 if player.customNote[1] then
@@ -2116,7 +2120,7 @@ end
 -- Purpose:         All birthday info to be shared.
 GRMsync.CheckBirthdayChange = function ( msg , sender , isFullSync )
     -- No sense in doing the work if option is disabled...
-    if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncBDays then
+    if GRM.S().syncBDays then
         local name = string.sub ( msg , 1 , string.find ( msg , "?" ) - 1 );
         msg = GRM.Next ( msg );
         local day = tonumber ( string.sub ( msg , 1 , string.find ( msg , "?" ) - 1 ) );
@@ -2138,7 +2142,7 @@ end
 -- Purpose:         Updating and syncing birthday data
 GRMsync.CheckBirthdayForSync = function ( data )
 
-    if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncBDays then
+    if GRM.S().syncBDays then
 
         local name = ""
         local timestamp;
@@ -2148,8 +2152,8 @@ GRMsync.CheckBirthdayForSync = function ( data )
         local date = "";
 
         if type ( data ) == "string" then
-            GRM_G.BirthdaySyncPattern = GRM_G.BirthdaySyncPattern or GRM.BuildComPattern ( 4 , "?" , false );
-            name , timestamp , day , month = GRM.ParseComMsg ( data , GRM_G.BirthdaySyncPattern );
+            GRM_G.MatchPattern4 = GRM_G.MatchPattern4 or GRM.BuildComPattern ( 4 , "?" , false );
+            name , timestamp , day , month = GRM.ParseComMsg ( data , GRM_G.MatchPattern4 );
 
             timestamp = tonumber ( timestamp );
             day = tonumber (day);
@@ -2192,8 +2196,8 @@ end
 -- Purpose:         It is far more useful if more than one person maintains a BAN list...
 GRMsync.CheckBanListChange = function ( msg , sender )
 
-    GRM_G.CheckBanListPattern = GRM_G.CheckBanListPattern or GRM.BuildComPattern ( 5 , "?" , false );
-    local name , banAlts , reason , class , guid = GRM.ParseComMsg ( msg , GRM_G.CheckBanListPattern );
+    GRM_G.MatchPattern5 = GRM_G.MatchPattern5 or GRM.BuildComPattern ( 5 , "?" , false );
+    local name , banAlts , reason , class , guid = GRM.ParseComMsg ( msg , GRM_G.MatchPattern5 );
 
     local timeEpoch = time();
     local isAnEdit = false;
@@ -2202,8 +2206,8 @@ GRMsync.CheckBanListChange = function ( msg , sender )
         reason = "";
     end
 
-    local guildData = GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ];
-    local leftGuildData = GRM_PlayersThatLeftHistory_Save[ GRM_G.F ][ GRM_G.guildName ];
+    local guildData = GRM.GetGuild();
+    local leftGuildData = GRM.GetFormerMembers();
     local altData = GRMsyncGlobals.guildAltData;
     local player = guildData[ name ];
     
@@ -2341,7 +2345,16 @@ GRMsync.CheckBanListChange = function ( msg , sender )
         memberInfoToAdd.GUID = guid;                                            -- 15
         memberInfoToAdd.race = "";                                              -- 16
         memberInfoToAdd.sex = 1;                                                -- 17
-        memberInfoToAdd.rosterSelection = 0;                                    -- 18
+        memberInfoToAdd.rosterSelection = 0;                                    -- 18]
+        memberInfoToAdd.faction = GRM_G.faction;
+        
+        if GRM_G.BuildVersion >= 80000 then
+            memberInfoToAdd.MythicScore = { GRM_G.MythicSeasonInfo[1] , GRM_G.MythicSeasonInfo[2] , 0 };
+        end
+
+        if GRM_G.BuildVersion >= 100000 then
+            memberInfoToAdd.faction = GRM_G.faction;
+        end
         
         local _ , timeArray = GRM.EpochToDateFormat ( time() );
         GRM.AddMemberToLeftPlayers ( memberInfoToAdd , timeArray , time() , time() - 5000 , sender );
@@ -2371,7 +2384,7 @@ GRMsync.CheckBanListChange = function ( msg , sender )
     GRM.AddLog ( { 20 , logEntryWithTime , banAllAlts , isAnEdit , banningName , bannedName , reason , select ( 2 , GRM.GetTimestamp() ) } );
     
     -- Report the change to chat window...
-    if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncChatEnabled and GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser]["toChat"].banned then
+    if GRM.S().syncChatEnabled and GRM.S()["toChat"].banned then
         GRM.Report ( logEntry );
     end
     
@@ -2396,8 +2409,8 @@ GRMsync.CheckUnbanListChangeLive = function ( msg , sender )
     GRM.BanListUnban ( name , sender );
 
     -- Message
-    if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncChatEnabled then
-        if GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ][name] ~= nil then
+    if GRM.S().syncChatEnabled then
+        if GRM.GetPlayer ( name ) ~= nil then
             isInGuild = true;
         end
         if not isInGuild then
@@ -2410,7 +2423,7 @@ GRMsync.CheckUnbanListChangeLive = function ( msg , sender )
 
         GRM.AddLog ( { 21 , logReportWithTime , GRM.GetClassifiedName ( sender , true ) , name , select ( 2 , GRM.GetTimestamp() ) } );
 
-        if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncChatEnabled and GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser]["toChat"].banned then
+        if GRM.S().syncChatEnabled and GRM.S()["toChat"].banned then
             GRM.Report ( logReport );
         end
 
@@ -2430,9 +2443,9 @@ GRMsync.BanManagement = function ( msg , prefix , sender )
     local addLog = false;
     
     if prefix == "GRM_BANSYNCUPX" then
-        GRM_G.BanSyncPattern = GRM_G.BanSyncPattern or GRM.BuildComPattern ( 12 , "?" , false );
+        GRM_G.MatchPattern12 = GRM_G.MatchPattern12 or GRM.BuildComPattern ( 12 , "?" , false );
 
-        playerName , rankName , rankIndex , level , classIndex , joinDateEpoch , originalJoinEpoch , GUID , banTimeEpoch , banType , reason , playerWhoBanned = GRM.ParseComMsg ( msg , GRM_G.BanSyncPattern );
+        playerName , rankName , rankIndex , level , classIndex , joinDateEpoch , originalJoinEpoch , GUID , banTimeEpoch , banType , reason , playerWhoBanned = GRM.ParseComMsg ( msg , GRM_G.MatchPattern12 );
 
         rankIndex = tonumber ( rankIndex );
         level = tonumber ( level );
@@ -2462,7 +2475,24 @@ GRMsync.BanManagement = function ( msg , prefix , sender )
 
         GRMsync.UpdateLeftPlayerInfo ( { playerName , rankName , rankIndex , level , classIndex , joinDateEpoch , originalJoinEpoch , GUID } );
 
-    else
+    elseif prefix == "GRM_BANSYNCUPT" then
+
+        GRM_G.MatchPattern5 = GRM_G.MatchPattern5 or GRM.BuildComPattern ( 5 , "?" , false );
+        playerName , banTimeEpoch , banType , reason , playerWhoBanned = GRM.ParseComMsg ( msg , GRM_G.MatchPattern5 );
+
+        banTimeEpoch = tonumber ( banTimeEpoch );
+
+        if reason == "X" then
+            reason = "";
+        else
+            reason = string.gsub ( reason , "##" , "?" );   -- Returning the punctuation as this is user-input.
+        end
+
+        if playerWhoBanned == "X" then
+            playerWhoBanned = sender;
+        end
+
+    elseif prefix == "GRM_BANSYNCUP" then
         playerName = msg[1];
         banTimeEpoch = tonumber ( msg[2] );
         banType = msg[3];
@@ -2479,11 +2509,11 @@ GRMsync.BanManagement = function ( msg , prefix , sender )
 
     end
 
-    local player = GRM_PlayersThatLeftHistory_Save[ GRM_G.F ][ GRM_G.guildName ][ playerName ];
+    local player = GRM.GetFormerPlayer ( playerName );
     local isAnEdit = false;
     
     if not player then
-        player = GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ][ playerName ];
+        player = GRM.GetPlayer ( playerName );
     end
 
     if player then
@@ -3064,7 +3094,7 @@ GRMsync.CompareDatabaseMarkers = function ()
     local HashValuesMine = GRMsync.GetCustomPseudoHash();
     local isSame = false;
     local result = {};
-    local banPermissions = ( GRM_G.playerRankID <= GRMsyncGlobals.senderBanRankReq and GRMsyncGlobals.CurrentSyncPlayerRankID <= GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRankBanList );
+    local banPermissions = ( GRM_G.playerRankID <= GRMsyncGlobals.senderBanRankReq and GRMsyncGlobals.CurrentSyncPlayerRankID <= GRM.S().syncRankBanList );
     local bans = {};
 
     -- Databases do not currently align... Need another roster scan to align the changes.
@@ -3164,7 +3194,7 @@ end
 -- Purpose:         Efficiency in syncing data of course!
 GRMsync.SyncProgressInitialize = function()
     local result = false;
-    local banPermissions = ( ( GRMsyncGlobals.IsElectedLeader and GRMsyncGlobals.CurrentSyncPlayerRankID <= GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRankBanList ) or ( not GRMsyncGlobals.IsElectedLeader and GRM_G.playerRankID <= GRMsyncGlobals.senderBanRankReq ) );
+    local banPermissions = ( ( GRMsyncGlobals.IsElectedLeader and GRMsyncGlobals.CurrentSyncPlayerRankID <= GRM.S().syncRankBanList ) or ( not GRMsyncGlobals.IsElectedLeader and GRM_G.playerRankID <= GRMsyncGlobals.senderBanRankReq ) );
 
     for i = 1 , #GRMsyncGlobals.DatabaseMarkers do
 
@@ -3263,7 +3293,7 @@ GRMsync.SendCompletionMsg = function()
     GRMsyncGlobals.TimeSinceLastSyncAction = time();
     -- This string is reordered for legacy code reasons in change 1.50 that I just do not wish to have to restructure. Minor adaptation
 
-    local msg = GRM_G.PatchDayString .. "?GRM_STOP?" .. GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank .. "?" .. ( tostring ( GRMsyncGlobals.SyncProgress[1] ) .. "?" .. tostring ( GRMsyncGlobals.SyncProgress[2] ) .. "?" .. tostring ( GRMsyncGlobals.SyncProgress[3] ) .. "?" .. tostring ( GRMsyncGlobals.SyncProgress[4] ) .. "?" .. tostring ( GRMsyncGlobals.SyncProgress[5] ) .. "?" .. tostring ( GRMsyncGlobals.SyncProgress[6] ) );
+    local msg = GRM_G.PatchDayString .. "?GRM_STOP?" .. GRM.S().syncRank .. "?" .. ( tostring ( GRMsyncGlobals.SyncProgress[1] ) .. "?" .. tostring ( GRMsyncGlobals.SyncProgress[2] ) .. "?" .. tostring ( GRMsyncGlobals.SyncProgress[3] ) .. "?" .. tostring ( GRMsyncGlobals.SyncProgress[4] ) .. "?" .. tostring ( GRMsyncGlobals.SyncProgress[5] ) .. "?" .. tostring ( GRMsyncGlobals.SyncProgress[6] ) );
 
     GRMsyncGlobals.SyncCount = GRMsyncGlobals.SyncCount + #msg;
     GRMsync.SendMessage ( "GRM_SYNC" , msg  , GRMsyncGlobals.DesignatedLeader );
@@ -3284,7 +3314,7 @@ end
 GRMsync.SendBDAYCompletion = function()
     GRMsyncGlobals.TimeSinceLastSyncAction = time();
 
-    local msg = GRM_G.PatchDayString .. "?GRM_STOP2?" .. GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank .. "?";
+    local msg = GRM_G.PatchDayString .. "?GRM_STOP2?" .. GRM.S().syncRank .. "?";
 
     GRMsyncGlobals.SyncCount = GRMsyncGlobals.SyncCount + #msg;
     GRMsync.SendMessage ( "GRM_SYNC" , msg  , GRMsyncGlobals.DesignatedLeader );
@@ -3328,8 +3358,8 @@ GRMsync.SendJDPackets = function()
         GRMsyncGlobals.TimeSinceLastSyncAction = time(); 
 
         -- Messages need to be throttled, but sending them under controls.
-        local syncRankFilter = GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank;
-        if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].exportAllRanks then
+        local syncRankFilter = GRM.S().syncRank;
+        if GRM.S().exportAllRanks then
             syncRankFilter = GRMsyncGlobals.numGuildRanks;
         end
         local syncMessage = GRM_G.PatchDayString .. "?GRM_JDSYNC?" .. syncRankFilter;
@@ -3413,8 +3443,8 @@ GRMsync.SendPDPackets = function()
         GRMsyncGlobals.TimeSinceLastSyncAction = time();
     
         -- Messages need to be throttled, but sending them under controls.
-        local syncRankFilter = GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank;
-        if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].exportAllRanks then
+        local syncRankFilter = GRM.S().syncRank;
+        if GRM.S().exportAllRanks then
             syncRankFilter = GRMsyncGlobals.numGuildRanks;
         end
         local syncMessage = GRM_G.PatchDayString .. "?GRM_PDSYNC?" .. syncRankFilter;
@@ -3507,8 +3537,8 @@ GRMsync.SendAddAltPackets = function()
         GRMsyncGlobals.SyncAltDelay = time();
         GRMsyncGlobals.TimeSinceLastSyncAction = time();
 
-        local syncRankFilter = GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank;
-        if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].exportAllRanks then
+        local syncRankFilter = GRM.S().syncRank;
+        if GRM.S().exportAllRanks then
             syncRankFilter = GRMsyncGlobals.numGuildRanks;
         end
         GRMsyncGlobals.TimeSinceLastSyncAction = time();
@@ -3667,8 +3697,8 @@ GRMsync.SendMainPackets = function()
         GRMsyncGlobals.TimeSinceLastSyncAction = time();
 
         -- Messages need to be throttled, but sending them under controls.
-        local syncRankFilter = GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank;
-        if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].exportAllRanks then
+        local syncRankFilter = GRM.S().syncRank;
+        if GRM.S().exportAllRanks then
             syncRankFilter = GRMsyncGlobals.numGuildRanks;
         end
         local syncMessage = GRM_G.PatchDayString .. "?GRM_MAINSYNC?" .. syncRankFilter;
@@ -3760,9 +3790,11 @@ GRMsync.SendBANPackets = function()
         GRMsyncGlobals.TimeSinceLastSyncAction = time();
 
         -- One for former, one for current members.
-        local messageHeader = GRM_G.PatchDayString .. "?GRM_BANSYNC?" .. GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank .. "?" .. tostring ( GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRankBanList );
-        local messageHeader2 = GRM_G.PatchDayString .. "?GRM_BANSYNCX?" .. GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank .. "?" .. tostring ( GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRankBanList );
-        local messageHeader3 = GRM_G.PatchDayString .. "?GRM_BANSYNCXX?" .. GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank .. "?" .. tostring ( GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRankBanList );
+        local messageHeader = GRM_G.PatchDayString .. "?GRM_BANSYNC?" .. GRM.S().syncRank .. "?" .. tostring ( GRM.S().syncRankBanList );
+        local messageHeader2 = GRM_G.PatchDayString .. "?GRM_BANSYNCX?" .. GRM.S().syncRank .. "?" .. tostring ( GRM.S().syncRankBanList );
+        local messageHeader3 = GRM_G.PatchDayString .. "?GRM_BANSYNCXX?" .. GRM.S().syncRank .. "?" .. tostring ( GRM.S().syncRankBanList );
+        local messageHeader4 = GRM_G.PatchDayString .. "?GRM_BANSYNCSP?" .. GRM.S().syncRank .. "?" .. tostring ( GRM.S().syncRankBanList );
+        local messageHeader5 = GRM_G.PatchDayString .. "?GRM_BANSYNCSPX?" .. GRM.S().syncRank .. "?" .. tostring ( GRM.S().syncRankBanList );
         local syncMessage = "";
         local tempMessage = "";
         local messageReady;
@@ -3780,6 +3812,7 @@ GRMsync.SendBANPackets = function()
         local GUID = "";
         local formerMember = false;
         local rankName = "";
+        local msg = "";
 
         for i = GRMsyncGlobals.SyncCountBan , #banNames do
             messageReady = false;
@@ -3828,8 +3861,9 @@ GRMsync.SendBANPackets = function()
                         if player.GUID == nil then
                             player.GUID = "";
                         end
+                    elseif string.find ( GUID , "Player-.+" ) then
+                        GUID = string.sub ( player.GUID , 8 )
                     end
-                    
                     -- BANTYPE
                     if player.bannedInfo[1] then
                         banType = "1";
@@ -3863,10 +3897,16 @@ GRMsync.SendBANPackets = function()
                             rankName = "###";
                         end
 
-                        tempMessage = messageHeader .. "?" .. player.name .. "?" .. rankName .. "?" .. tostring ( player.rankIndex ) ..  "?" .. tostring ( player.level ) .. "?" .. class .. "?" .. tostring ( player.joinDateHist[1][4] ) .. "?" .. tostring ( oldJoinDateMeta ) .. "?" .. GUID .. "?" .. tostring ( player.bannedInfo[2] ) .. "?" .. banType .. "?" .. reason .. "?" .. playerWhoBanned;
+                        msg = player.name .. "?" .. rankName .. "?" .. tostring ( player.rankIndex ) ..  "?" .. tostring ( player.level ) .. "?" .. class .. "?" .. tostring ( player.joinDateHist[1][4] ) .. "?" .. tostring ( oldJoinDateMeta ) .. "?" .. GUID .. "?" .. tostring ( player.bannedInfo[2] ) .. "?" .. banType .. "?" .. reason .. "?" .. playerWhoBanned;
+
+
+                        tempMessage = messageHeader .. "?" .. msg;
 
                     else
-                        tempMessage = messageHeader2 .. "?" .. player.name .. "?" .. tostring ( player.bannedInfo[2] ) .. "?" .. banType .. "?" .. reason .. "?" .. playerWhoBanned;
+
+                        msg = player.name .. "?" .. tostring ( player.bannedInfo[2] ) .. "?" .. banType .. "?" .. reason .. "?" .. playerWhoBanned;
+                        tempMessage = messageHeader2 .. "?" .. msg;
+                        
                     end
 
                     if ( #tempMessage + GRMsyncGlobals.sizeModifier ) < 255 then
@@ -3874,13 +3914,21 @@ GRMsync.SendBANPackets = function()
                         messageReady = true;
 
                     else
-                        -- Possibly reason is too long, just slim it.
-                        reason = string.sub ( reason , 1 , #reason - ( ( #tempMessage + GRMsyncGlobals.sizeModifier ) - 254 ) );
-                        -- Reprocess the string
-
+                        
                         if formerMember then
-                            tempMessage = syncMessage .. "?" .. player.name .. "?" .. tostring ( player.rankIndex ) ..  "?" .. tostring ( player.level ) .. "?" .. class .. "?" .. tostring ( player.joinDateHist[1][4] ) .. "?" .. tostring ( oldJoinDateMeta ) .. "?" .. GUID .. "?" .. tostring ( player.bannedInfo[2] ) .. "?" .. banType .. "?" .. reason .. "?" .. playerWhoBanned;
+
+                            msg = messageHeader4 .. "?" .. player.name .. "?" .. tostring ( player.rankIndex ) ..  "?" .. tostring ( player.level ) .. "?" .. class .. "?" .. tostring ( player.joinDateHist[1][4] ) .. "?" .. tostring ( oldJoinDateMeta ) .. "?" .. GUID .. "?" .. tostring ( player.bannedInfo[2] ) .. "?" .. banType .. "?";
+
+                            GRMsyncGlobals.SyncCount = GRMsyncGlobals.SyncCount + #msg + GRMsyncGlobals.sizeModifier;
+                            GRMsync.SendMessage ( "GRM_SYNC" , msg , GRMsyncGlobals.DesignatedLeader );
+
+                            tempMessage = messageHeader5 .. "?" .. player.name .. "?" .. reason .. "?" .. playerWhoBanned;
+
                         else
+
+                            -- Possibly reason is too long, just slim it -- I don't know how this could happen, so this is semi redundant, but just in case.
+                            reason = string.sub ( reason , 1 , #reason - ( ( #tempMessage + GRMsyncGlobals.sizeModifier ) - 254 ) );
+
                             tempMessage = messageHeader2 .. "?" .. player.name .. "?" .. tostring ( player.bannedInfo[2] ) .. "?" .. banType .. "?" .. reason .. "?" .. playerWhoBanned;
                         end
 
@@ -3943,7 +3991,7 @@ GRMsync.SendCustomNotePackets = function()
         GRMsyncGlobals.SyncCustomDelay = time();
         GRMsyncGlobals.TimeSinceLastSyncAction = time();
 
-        local syncMessage = GRM_G.PatchDayString .. "?GRM_CUSTSYNC?" .. GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRankCustom;
+        local syncMessage = GRM_G.PatchDayString .. "?GRM_CUSTSYNC?" .. GRM.S().syncRankCustom;
         local tempMessage = "";
         local messageReady = false;
         local dataShouldBeSent = false;
@@ -3980,7 +4028,7 @@ GRMsync.SendCustomNotePackets = function()
                             end
                         else
                             messageReady = true;
-                            tempMsg3 = GRM_G.PatchDayString .. "?GRM_CUSTSYNC?" .. GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRankCustom .. "?" .. guildData[exactIndexes[5][i]].customNote[4] .. "?#" .. guildData[exactIndexes[5][i]].name .. "?#" .. tostring ( guildData[exactIndexes[5][i]].customNote[2] ) .. "?#" .. guildData[exactIndexes[5][i]].customNote[3];
+                            tempMsg3 = GRM_G.PatchDayString .. "?GRM_CUSTSYNC?" .. GRM.S().syncRankCustom .. "?" .. guildData[exactIndexes[5][i]].customNote[4] .. "?#" .. guildData[exactIndexes[5][i]].name .. "?#" .. tostring ( guildData[exactIndexes[5][i]].customNote[2] ) .. "?#" .. guildData[exactIndexes[5][i]].customNote[3];
                             -- Hold this value over...                            
                             if #customNote > 100 and not GRMsyncGlobals.CustomNoteLarge then
                                 tempMessage = tempMsg3 .. "?#" .. string.sub ( customNote , 1 , #customNote - 50 ) .. "?^?";
@@ -4024,7 +4072,7 @@ GRMsync.SendCustomNotePackets = function()
                             -- Reset to base values of first loop as not carrying over any data.
                             GRMsyncGlobals.CustomNoteLarge = false;
                             tempMessage = "";
-                            syncMessage = GRM_G.PatchDayString .. "?GRM_CUSTSYNC?" .. GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank;
+                            syncMessage = GRM_G.PatchDayString .. "?GRM_CUSTSYNC?" .. GRM.S().syncRank;
                         end
                     end
 
@@ -4093,8 +4141,8 @@ GRMsync.SendBDayPackets = function()
         GRMsyncGlobals.SyncBdayDelay = time();
         GRMsyncGlobals.TimeSinceLastSyncAction = time();
 
-        local syncRankFilter = GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank;
-        if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].exportAllRanks then
+        local syncRankFilter = GRM.S().syncRank;
+        if GRM.S().exportAllRanks then
             syncRankFilter = GRMsyncGlobals.numGuildRanks;
         end
 
@@ -4236,7 +4284,7 @@ GRMsync.ErrorCheck = function ( forceStop , sendMessage )
                 if #GRMsyncGlobals.SyncQue > 0 then
                     GRM.RegisterGuildAddonUsersRefresh();
                     C_Timer.After ( 4.1 , function()
-                        if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncChatEnabled then
+                        if GRM.S().syncChatEnabled then
                             if GRMsync.IsPlayerDataSyncCompatibleWithAnyOnline() then
                                 GRM.Report ( msg .. "\n" .. GRM.L ( "Initiating Sync with {name} Instead!" , GRM.GetClassifiedName ( GRMsyncGlobals.SyncQue[1] ) ) );
                             end
@@ -4245,7 +4293,7 @@ GRMsync.ErrorCheck = function ( forceStop , sendMessage )
                     end);
                 -- Sync failed, this is 2nd attempt, but no one else is in the que. Just end it.
                 else
-                    if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncChatEnabled then
+                    if GRM.S().syncChatEnabled then
                         GRM.Report ( msg );
                     end
                     
@@ -4263,7 +4311,7 @@ GRMsync.ErrorCheck = function ( forceStop , sendMessage )
                 GRM.RegisterGuildAddonUsersRefresh();
                 C_Timer.After ( 4.1 , function()
                     if #GRMsyncGlobals.SyncQue > 0 then
-                        if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncChatEnabled then
+                        if GRM.S().syncChatEnabled then
                             GRM.Report ( msg .. "\n" .. GRM.L ( "The Player Appears to Be Offline." ) .. "\n" .. GRM.L ( "Initiating Sync with {name} Instead!" , GRM.GetClassifiedName ( GRMsyncGlobals.SyncQue[1] ) ) );
                         end
 
@@ -4274,7 +4322,7 @@ GRMsync.ErrorCheck = function ( forceStop , sendMessage )
                             GRMsync.InitiateDataSync();
                         end);
                     else
-                        if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncChatEnabled then
+                        if GRM.S().syncChatEnabled then
                             GRM.Report ( msg .. "\n" .. GRM.L ( "The Player Appears to Be Offline." ) );
                         end
                         GRMsyncGlobals.currentlySyncing = false;
@@ -4316,7 +4364,7 @@ GRMsync.ErrorCheck = function ( forceStop , sendMessage )
             GRMsyncGlobals.ProgressControl ( "FINISH"); 
 
             if not playerIsOnline then
-                if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncChatEnabled then
+                if GRM.S().syncChatEnabled then
                     GRM.Report ( msg .. "\n" .. GRM.L ( "The Player Appears to Be Offline." ) );
                 end
             else
@@ -4347,7 +4395,7 @@ GRMsync.ErrorCheck = function ( forceStop , sendMessage )
         if tempTime >= GRMsyncGlobals.ErrorCD and tempTime > GRMsyncGlobals.ErrorCD * 2 then
             local playerIsOnline = GRM.IsGuildieOnline ( GRMsyncGlobals.DesignatedLeader );
             if not playerIsOnline then
-                if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncChatEnabled then
+                if GRM.S().syncChatEnabled then
                     GRM.Report ( GRM.L ( "GRM:" ) .. " " .. GRM.L ( "Sync Failed with {name}..." , GRM.GetClassifiedName ( GRMsyncGlobals.DesignatedLeader ) ) .. "\n" .. GRM.L ( "The Player Appears to Be Offline." ) );
                 end
 
@@ -4377,7 +4425,7 @@ GRMsync.SendQueUpdate = function()
     if #GRMsyncGlobals.SyncQue > 1 then
         local msg = "";
         for i = 2 , #GRMsyncGlobals.SyncQue do
-            msg = GRM_G.PatchDayString .. "?GRM_BUSY?" .. GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank .. "?" .. tostring ( i - 1 );
+            msg = GRM_G.PatchDayString .. "?GRM_BUSY?" .. GRM.S().syncRank .. "?" .. tostring ( i - 1 );
 
             GRMsyncGlobals.SyncCount = GRMsyncGlobals.SyncCount + #msg;
             GRMsync.SendMessage ( "GRM_SYNC" , msg , GRMsyncGlobals.SyncQue[i] );
@@ -4470,13 +4518,13 @@ GRMsync.InitiateDataSync = function ()
                     
                     GRMsyncGlobals.TimeSinceLastSyncAction = time();
 
-                    if GRMsync.IsPlayerDataSyncCompatibleWithAnyOnline() or GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].exportAllRanks then
+                    if GRMsync.IsPlayerDataSyncCompatibleWithAnyOnline() or GRM.S().exportAllRanks then
 
                         GRMsyncGlobals.SyncTracker.TriggeringSync = true;
                         GRMsyncGlobals.SyncTracker.EstablishingLeader = true;
                         GRM_UI.GRM_SyncTrackerWindow.SyncTrackerText:SetText ( GRM.L ( "Currently Syncing With: {name}" , GRM.GetClassifiedName ( GRMsyncGlobals.CurrentSyncPlayer ) ) );
 
-                        if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncChatEnabled and GRMsyncGlobals.firstSync then
+                        if GRM.S().syncChatEnabled and GRMsyncGlobals.firstSync then
                             GRM.Report ( GRM.L ( "GRM:" ) .. " " .. GRM.L ( "Syncing Data With Guildies Now..." ) .. "\n" .. GRM.L ( "(Loading screens may cause sync to fail)" ) );
                         end
                     end
@@ -4505,7 +4553,7 @@ GRMsync.InitiateDataSync = function ()
                 if #GRMsyncGlobals.SyncQue > 1 then
 
                     table.remove ( GRMsyncGlobals.SyncQue , 1 );
-                    if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncChatEnabled then
+                    if GRM.S().syncChatEnabled then
                         GRM.Report ( msg .. "\n" .. GRM.L ( "The Player Appears to Be Offline." ) .. "\n" .. GRM.L ( "Initiating Sync with {name} Instead!" , GRM.GetClassifiedName ( GRMsyncGlobals.SyncQue[1] ) ) );
                     end
                     GRMsync.SendQueUpdate();
@@ -4522,8 +4570,8 @@ GRMsync.InitiateDataSync = function ()
                     GRM_G.slashCommandSyncTimer = time();
                     GRMsyncGlobals.timeOfLastSyncCompletion = time();
 
-                    if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncChatEnabled then
-                        if GRMsync.IsPlayerDataSyncCompatibleWithAnyOnline() or GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].exportAllRanks then
+                    if GRM.S().syncChatEnabled then
+                        if GRMsync.IsPlayerDataSyncCompatibleWithAnyOnline() or GRM.S().exportAllRanks then
                             GRM.Report ( GRM.L ( "GRM:" ) .. " " .. GRM.L ( "Sync With Guildies Complete..." ) );
                             GRMsync.ReportAuditMessage();
                         end
@@ -4588,7 +4636,7 @@ GRMsync.SubmitFinalSyncData = function ()
 
                 GRMsync.SendMessage ( "GRM_SYNC" , tempMsg1 .. msg  , GRMsyncGlobals.CurrentSyncPlayer );
                 -- Do my own changes too if the rank is appropriate...
-                if ( GRMsyncGlobals.CurrentSyncPlayerRankID <= GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank and GRMsyncGlobals.CurrentSyncPlayerRankRequirement >= GRMsyncGlobals.CurrentLeaderRankID ) then
+                if ( GRMsyncGlobals.CurrentSyncPlayerRankID <= GRM.S().syncRank and GRMsyncGlobals.CurrentSyncPlayerRankRequirement >= GRMsyncGlobals.CurrentLeaderRankID ) then
                     GRMsync.CheckJoinDateChange ( msg , "" , "GRM_JDSYNCUP" );
                 end
                 if GRMsyncGlobals.SyncCount + 254 > GRMsyncGlobals.ThrottleCap then
@@ -4635,7 +4683,7 @@ GRMsync.SubmitFinalSyncData = function ()
 
                 GRMsync.SendMessage ( "GRM_SYNC" , tempMsg1 .. msg , GRMsyncGlobals.CurrentSyncPlayer ); 
                 -- Do my own changes too!
-                if ( GRMsyncGlobals.CurrentSyncPlayerRankID <= GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank and GRMsyncGlobals.CurrentSyncPlayerRankRequirement >= GRMsyncGlobals.CurrentLeaderRankID ) then
+                if ( GRMsyncGlobals.CurrentSyncPlayerRankID <= GRM.S().syncRank and GRMsyncGlobals.CurrentSyncPlayerRankRequirement >= GRMsyncGlobals.CurrentLeaderRankID ) then
                     GRMsync.CheckPromotionDateChange ( msg , "" , "GRM_PDSYNCUP" );
                 end
                 if GRMsyncGlobals.SyncCount + 254 > GRMsyncGlobals.ThrottleCap then
@@ -4746,14 +4794,14 @@ GRMsync.SubmitFinalSyncData = function ()
             toon.finished = true;
         end
 
-        local syncRankFilter = GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank;
-        if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].exportAllRanks then
+        local syncRankFilter = GRM.S().syncRank;
+        if GRM.S().exportAllRanks then
             syncRankFilter = GuildControlGetNumRanks() - 1;
         end
 
         GRMsync.SendMessage ( "GRM_SYNC" , GRM_G.PatchDayString .. "?GRM_FINALALTSYNCUP?" .. tostring ( GRM.TableLength ( GRMsyncGlobals.FinalCorrectAltList ) ) .. "?" .. GRMsyncGlobals.DesignatedLeader .. "?" .. tostring ( syncRankFilter ) .. "?" , GRMsyncGlobals.CurrentSyncPlayer );
 
-        if ( GRMsyncGlobals.CurrentSyncPlayerRankID <= GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank and GRMsyncGlobals.CurrentSyncPlayerRankRequirement >= GRMsyncGlobals.CurrentLeaderRankID ) then
+        if ( GRMsyncGlobals.CurrentSyncPlayerRankID <= GRM.S().syncRank and GRMsyncGlobals.CurrentSyncPlayerRankRequirement >= GRMsyncGlobals.CurrentLeaderRankID ) then
             GRMsync.CheckAddAltSyncChange ( GRMsyncGlobals.FinalCorrectAltList , GRM.TableLength ( GRMsyncGlobals.FinalCorrectAltList ) );
         end
 
@@ -4806,7 +4854,7 @@ GRMsync.SubmitFinalSyncData = function ()
                 
                 
                 -- Do my own changes too!
-                if ( GRMsyncGlobals.CurrentSyncPlayerRankID <= GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank and GRMsyncGlobals.CurrentSyncPlayerRankID <= GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRankCustom and GRMsyncGlobals.CurrentSyncPlayerRankRequirement >= GRMsyncGlobals.CurrentLeaderRankID ) then
+                if ( GRMsyncGlobals.CurrentSyncPlayerRankID <= GRM.S().syncRank and GRMsyncGlobals.CurrentSyncPlayerRankID <= GRM.S().syncRankCustom and GRMsyncGlobals.CurrentSyncPlayerRankRequirement >= GRMsyncGlobals.CurrentLeaderRankID ) then
                     GRMsync.CheckCustomNoteSyncChange ( msg , false );
                 end
                 if GRMsyncGlobals.SyncCount + 254 > GRMsyncGlobals.ThrottleCap then
@@ -4846,7 +4894,7 @@ GRMsync.SubmitFinalSyncData = function ()
             GRMsyncGlobals.ProgressControl ( "FINALBAN" );
         end
 
-        if ( GRMsyncGlobals.CurrentSyncPlayerRankID <= GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank and GRMsyncGlobals.CurrentSyncPlayerRankRequirement >= GRMsyncGlobals.CurrentLeaderRankID ) then
+        if ( GRMsyncGlobals.CurrentSyncPlayerRankID <= GRM.S().syncRank and GRMsyncGlobals.CurrentSyncPlayerRankRequirement >= GRMsyncGlobals.CurrentLeaderRankID ) then
 
             for i = GRMsyncGlobals.finalSyncDataBanCount , #GRMsyncGlobals.BanChanges do
                 GRMsyncGlobals.finalSyncDataBanCount = GRMsyncGlobals.finalSyncDataBanCount + 1;
@@ -4878,13 +4926,13 @@ GRMsync.SubmitFinalSyncData = function ()
                             msg = GRMsyncGlobals.BanChanges[i][1] .. "?" .. GRMsyncGlobals.BanChanges[i][8][1] .. "?" .. GRMsyncGlobals.BanChanges[i][8][2] ..  "?" .. GRMsyncGlobals.BanChanges[i][8][3] .. "?" .. GRMsyncGlobals.BanChanges[i][8][4] .. "?" .. GRMsyncGlobals.BanChanges[i][8][5] .. "?" .. GRMsyncGlobals.BanChanges[i][8][6] .. "?" .. GRMsyncGlobals.BanChanges[i][8][7] .. "?" .. tostring ( GRMsyncGlobals.BanChanges[i][2] ) .. "?" .. GRMsyncGlobals.BanChanges[i][3] .. "?" .. reason .. "?" .. playerWhoBanned;
 
                         else
-                            prefix = "?GRM_BANSYNCUP?";
+                            prefix = "?GRM_BANSYNCUPT?";
 
                             msg = GRMsyncGlobals.BanChanges[i][1] .. "?" .. tostring ( GRMsyncGlobals.BanChanges[i][2] ) .. "?" .. GRMsyncGlobals.BanChanges[i][3] .. "?" .. reason .. "?" .. playerWhoBanned;
 
                         end
 
-                        header = GRM_G.PatchDayString .. prefix .. GRMsyncGlobals.BanChanges[i][5] .. "?" .. tostring ( GRMsyncGlobals.BanChanges[i][6] ) .. "?" .. tostring ( GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRankBanList ) .. "?";
+                        header = GRM_G.PatchDayString .. prefix .. GRMsyncGlobals.BanChanges[i][5] .. "?" .. tostring ( GRMsyncGlobals.BanChanges[i][6] ) .. "?" .. tostring ( GRM.S().syncRankBanList ) .. "?";
                         msg = header .. msg;
 
                         GRMsyncGlobals.SyncCount = GRMsyncGlobals.SyncCount + #msg + GRMsyncGlobals.sizeModifier;
@@ -4917,8 +4965,8 @@ GRMsync.SubmitFinalSyncData = function ()
         GRMsync.FinalSyncComplete();
     else
         -- Need to request bday Data
-        local syncRankFilter = GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank;
-        if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].exportAllRanks then
+        local syncRankFilter = GRM.S().syncRank;
+        if GRM.S().exportAllRanks then
             syncRankFilter = GRMsyncGlobals.numGuildRanks;
         end
         GRMsync.SendMessage ( "GRM_SYNC" , GRM_G.PatchDayString .. "?GRM_REQBFINALDATA?" .. tostring ( GRMsyncGlobals.numGuildRanks ) .. "?" , GRMsyncGlobals.CurrentSyncPlayer );
@@ -4952,7 +5000,7 @@ GRMsync.SubmitFinalMainData = function()
 
                 GRMsync.SendMessage ( "GRM_SYNC" , tempMsg1 .. msg , GRMsyncGlobals.CurrentSyncPlayer );
                 -- Do my own changes too!
-                if ( GRMsyncGlobals.CurrentSyncPlayerRankID <= GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank and GRMsyncGlobals.CurrentSyncPlayerRankRequirement >= GRMsyncGlobals.CurrentLeaderRankID ) and GRMsyncGlobals.AltMainChanges[i][6] then
+                if ( GRMsyncGlobals.CurrentSyncPlayerRankID <= GRM.S().syncRank and GRMsyncGlobals.CurrentSyncPlayerRankRequirement >= GRMsyncGlobals.CurrentLeaderRankID ) and GRMsyncGlobals.AltMainChanges[i][6] then
                     GRMsync.CheckMainSyncChange ( { GRMsyncGlobals.AltMainChanges[i][1] , GRMsyncGlobals.AltMainChanges[i][2] , GRMsyncGlobals.AltMainChanges[i][3] } );
                 end
                 if GRMsyncGlobals.SyncCount + 254 > GRMsyncGlobals.ThrottleCap then
@@ -5005,7 +5053,7 @@ GRMsync.SubmitFinalBdayData = function()
                 GRMsync.SendMessage ( "GRM_SYNC" , tempMsg1 .. msg , GRMsyncGlobals.CurrentSyncPlayer )
 
                 -- Do my own changes too!
-                if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncBDays and ( GRMsyncGlobals.CurrentSyncPlayerRankID <= GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank and GRMsyncGlobals.CurrentSyncPlayerRankRequirement >= GRMsyncGlobals.CurrentLeaderRankID ) then
+                if GRM.S().syncBDays and ( GRMsyncGlobals.CurrentSyncPlayerRankID <= GRM.S().syncRank and GRMsyncGlobals.CurrentSyncPlayerRankRequirement >= GRMsyncGlobals.CurrentLeaderRankID ) then
                     GRMsync.CheckBirthdayForSync ( { GRMsyncGlobals.BDayChanges[i][1] , GRMsyncGlobals.BDayChanges[i][2] , GRMsyncGlobals.BDayChanges[i][3] , GRMsyncGlobals.BDayChanges[i][4] } );
                 end
 
@@ -5050,14 +5098,14 @@ GRMsync.FinalSyncComplete = function()
     if nameOfCurrentSyncSender ~= nil then
         local tempMsg = GRM_G.PatchDayString .. "?GRM_COMPLETE?" .. GRMsyncGlobals.numGuildRanks .. "?" .. nameOfCurrentSyncSender;
         GRMsyncGlobals.SyncCount = GRMsyncGlobals.SyncCount + #tempMsg + GRMsyncGlobals.sizeModifier;
-        GRMsync.SendMessage ( "GRM_SYNC" , tempMsg , GRMsyncGlobals.CurrentSyncPlayer );
+        GRMsync.SendMessage ( "GRM_SYNC" , tempMsg , nameOfCurrentSyncSender );
 
         -- We made it... remove from the syncQue
         if #GRMsyncGlobals.SyncQue > 1 then
             table.remove ( GRMsyncGlobals.SyncQue , 1 );
 
-            if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncChatEnabled then
-                GRM.Report ( GRM.L ( "Sync with {name} complete." , GRM.GetClassifiedName ( GRMsyncGlobals.CurrentSyncPlayer ) ) );
+            if GRM.S().syncChatEnabled then
+                GRM.Report ( GRM.L ( "Sync with {name} complete." , GRM.GetClassifiedName ( nameOfCurrentSyncSender ) ) );
                 GRM.Report ( GRM.L ( "Sync with {name} next." , GRM.GetClassifiedName ( GRMsyncGlobals.SyncQue[1] ) ) );
             end
 
@@ -5102,8 +5150,8 @@ GRMsync.UpdateLeftPlayerInfo = function ( playerData )
 
     else
         
-        GRM_G.BanSyncPattern2 = GRM_G.BanSyncPattern2 or GRM.BuildComPattern ( 6 , "?" , false );
-        playerName , rankName , rankIndex , level , classIndex , joinDateEpoch , originalJoinEpoch , GUID = GRM.ParseComMsg ( playerData , GRM_G.BanSyncPattern2 );
+        GRM_G.MatchPattern6 = GRM_G.MatchPattern6 or GRM.BuildComPattern ( 6 , "?" , false );
+        playerName , rankName , rankIndex , level , classIndex , joinDateEpoch , originalJoinEpoch , GUID = GRM.ParseComMsg ( playerData , GRM_G.MatchPattern6 );
 
         rankIndex = tonumber ( rankIndex );
         level = tonumber ( level );
@@ -5117,7 +5165,7 @@ GRMsync.UpdateLeftPlayerInfo = function ( playerData )
         
     end
     -- Ok, let's check if this player is already known...
-    local player = GRM_PlayersThatLeftHistory_Save[ GRM_G.F ][GRM_G.guildName][ playerName ];
+    local player = GRM.GetFormerPlayer ( playerName );
 
     if not player then
 
@@ -5176,13 +5224,19 @@ GRMsync.UpdateLeftPlayerInfo = function ( playerData )
         memberInfoToAdd.race = "";                                              -- 16
         memberInfoToAdd.sex = 1;                                                -- 17
         memberInfoToAdd.rosterSelection = 0;                                    -- 18
-        
+        memberInfoToAdd.faction = GRM_G.faction;
+
+        if GRM_G.BuildVersion >= 80000 then
+            memberInfoToAdd.MythicScore = { GRM_G.MythicSeasonInfo[1] , GRM_G.MythicSeasonInfo[2] , 0 };
+        end
+
         local _ , timeArray = GRM.EpochToDateFormat ( joinDateEpoch );
         GRM.AddMemberToLeftPlayers ( memberInfoToAdd , timeArray , joinDateEpoch , originalJoinEpoch , nil );
 
         -- Need to be added to the temp tables to during sync.  
-        if GRM_PlayersThatLeftHistory_Save[ GRM_G.F ][GRM_G.guildName][ playerName ] then
-            table.insert ( GRMsyncGlobals.formerGuildData , GRM_PlayersThatLeftHistory_Save[ GRM_G.F ][GRM_G.guildName][ playerName ] );
+        local player = GRM.GetFormerPlayer ( playerName );
+        if player then
+            table.insert ( GRMsyncGlobals.formerGuildData , player );
             sort ( GRMsyncGlobals.formerGuildData , function ( a , b ) return a.name < b.name end );
         end
     end
@@ -5248,14 +5302,45 @@ GRMsync.CollectData = function ( msg , prefix )
         end
     
     -- BAN/UNBAN scan of LEFT players
-    elseif prefix == "GRM_BANSYNC" then
+    elseif prefix == "GRM_BANSYNC" or prefix == "GRM_BANSYNCSP" then
         if not GRMsyncGlobals.SyncTracker.banData then
             GRMsyncGlobals.ProgressControl ( "BAN" );
         end
 
-        GRM_G.BanSyncPattern = GRM_G.BanSyncPattern or GRM.BuildComPattern ( 12 , "?" , false );
+        local playerName , rankName , rankIndex , level , classIndex , joinDateEpoch , originalJoinEpoch , GUID , banTimeEpoch , banType , reason , playerWhoBanned;
 
-        local playerName , rankName , rankIndex , level , classIndex , joinDateEpoch , originalJoinEpoch , GUID , banTimeEpoch , banType , reason , playerWhoBanned = GRM.ParseComMsg ( msg , GRM_G.BanSyncPattern );
+        if prefix == "GRM_BANSYNC" then
+            GRM_G.MatchPattern12 = GRM_G.MatchPattern12 or GRM.BuildComPattern ( 12 , "?" , false );
+
+            playerName , rankName , rankIndex , level , classIndex , joinDateEpoch , originalJoinEpoch , GUID , banTimeEpoch , banType , reason , playerWhoBanned = GRM.ParseComMsg ( msg , GRM_G.MatchPattern12 );
+
+            if reason == "X" then
+                reason = "";
+            else
+                reason = string.gsub ( reason , "##" , "?" );   -- Returning the punctuation as this is user-input.
+            end
+    
+            if playerWhoBanned == "X" then
+                playerWhoBanned = "";
+            end
+
+            if GUID == "X" then
+                GUID = "";
+            else
+                GUID = "Player-" .. GUID;
+            end
+
+        else
+            GRM_G.MatchPattern10 = GRM_G.MatchPattern10 or GRM.BuildComPattern ( 10 , "?" , false );
+
+            playerName , rankName , rankIndex , level , classIndex , joinDateEpoch , originalJoinEpoch , GUID , banTimeEpoch , banType = GRM.ParseComMsg ( msg , GRM_G.MatchPattern10 );
+
+            if GUID == "X" then
+                GUID = "";
+            else
+                GUID = "Player-" .. GUID;
+            end
+        end
 
         rankIndex = tonumber ( rankIndex );
         level = tonumber ( level );
@@ -5263,6 +5348,29 @@ GRMsync.CollectData = function ( msg , prefix )
         joinDateEpoch = tonumber ( joinDateEpoch );
         originalJoinEpoch = tonumber ( originalJoinEpoch );
         banTimeEpoch = tonumber ( banTimeEpoch );
+        
+        if rankIndex == 99 or rankName == "###" then
+            rankName = "";
+            rankIndex = 99
+        end
+
+        if prefix == "GRM_BANSYNC" then
+            table.insert ( GRMsyncGlobals.BanReceivedTemp , { playerName , banTimeEpoch , banType , reason , GRMsyncGlobals.CurrentSyncPlayer , GRMsyncGlobals.CurrentSyncPlayerRankRequirement , playerWhoBanned  , true } );
+
+        else
+            table.insert ( GRMsyncGlobals.BanReceivedTemp , { playerName , banTimeEpoch , banType , "" , GRMsyncGlobals.CurrentSyncPlayer , GRMsyncGlobals.CurrentSyncPlayerRankRequirement , ""  , true } );
+        end
+
+        GRMsync.UpdateLeftPlayerInfo ( { playerName , rankName , rankIndex , level , classIndex , joinDateEpoch , originalJoinEpoch , GUID } );
+
+    elseif prefix == "GRM_BANSYNCSPX" then
+        if not GRMsyncGlobals.SyncTracker.banData then
+            GRMsyncGlobals.ProgressControl ( "BAN" );
+        end
+
+        GRM_G.MatchPattern3 = GRM_G.MatchPattern3 or GRM.BuildComPattern ( 3 , "?" , false );
+
+        local playerName , reason , playerWhoBanned = GRM.ParseComMsg ( msg , GRM_G.MatchPattern3 );
 
         if reason == "X" then
             reason = "";
@@ -5274,18 +5382,14 @@ GRMsync.CollectData = function ( msg , prefix )
             playerWhoBanned = "";
         end
 
-        if GUID == "X" then
-            GUID = "";
+        -- Need to find the placement
+        for i = 1 , #GRMsyncGlobals.BanReceivedTemp do
+            if GRMsyncGlobals.BanReceivedTemp[i][1] == playerName then
+                GRMsyncGlobals.BanReceivedTemp[i][4] = reason;
+                GRMsyncGlobals.BanReceivedTemp[i][7]= playerWhoBanned;
+                break;
+            end
         end
-
-        if rankIndex == 99 or rankName == "###" then
-            rankName = "";
-            rankIndex = 99
-        end
-
-        table.insert ( GRMsyncGlobals.BanReceivedTemp , { playerName , banTimeEpoch , banType , reason , GRMsyncGlobals.CurrentSyncPlayer , GRMsyncGlobals.CurrentSyncPlayerRankRequirement , playerWhoBanned  , true } );
-
-        GRMsync.UpdateLeftPlayerInfo ( { playerName , rankName , rankIndex , level , classIndex , joinDateEpoch , originalJoinEpoch , GUID } );
 
         -- Note, the reason for 2 separate bans, is if this is a FORMER member, then additional metadata needs to be sync'd as the player may not have them in their former member DB. This is of the CURRENT MEMBERS>
     elseif prefix == "GRM_BANSYNCX" then
@@ -5293,9 +5397,9 @@ GRMsync.CollectData = function ( msg , prefix )
             GRMsyncGlobals.ProgressControl ( "BAN" );
         end
 
-        GRM_G.BanSyncPattern2 = GRM_G.BanSyncPattern2 or GRM.BuildComPattern ( 5 , "?" , false );
+        GRM_G.MatchPattern5 = GRM_G.MatchPattern5 or GRM.BuildComPattern ( 5 , "?" , false );
 
-        local playerName , banTimeEpoch , banType , reason , playerWhoBanned = GRM.ParseComMsg ( msg , GRM_G.BanSyncPattern2 );
+        local playerName , banTimeEpoch , banType , reason , playerWhoBanned = GRM.ParseComMsg ( msg , GRM_G.MatchPattern5 );
 
         banTimeEpoch = tonumber ( banTimeEpoch );
 
@@ -5651,7 +5755,7 @@ GRMsync.CheckingBANChanges = function ()
     local leftGuildData = GRMsyncGlobals.formerGuildData;
 
     -- Skip this all if player restrict ban list sync
-    if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncBanList then -- { name , timeStampOfBanChange , banStatus , reason }
+    if GRM.S().syncBanList then -- { name , timeStampOfBanChange , banStatus , reason }
 
         local isFound = false;
         local j = 0;
@@ -5735,8 +5839,8 @@ GRMsync.CheckingBANChanges = function ()
 
                         playerData = { rankName , tostring ( rankIndex ) , tostring ( player.level ) , classIndex , tostring ( player.joinDateHist[1][4] ) , tostring ( oldJoinDateMeta ) , GUID }
                     end
-
-                    table.insert ( GRMsyncGlobals.BanChanges , { player.name , player.bannedInfo[2] , banType , player.reasonBanned , GRMsyncGlobals.DesignatedLeader , GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRankBanList , player.bannedInfo[4] , playerData , true } );  -- Final position bool - if leader data
+                    print("Adding Ban Change: " .. player.name)
+                    table.insert ( GRMsyncGlobals.BanChanges , { player.name , player.bannedInfo[2] , banType , player.reasonBanned , GRMsyncGlobals.DesignatedLeader , GRM.S().syncRankBanList , player.bannedInfo[4] , playerData , true } );  -- Final position bool - if leader data
                 else
                     table.insert ( GRMsyncGlobals.BanChanges , { GRMsyncGlobals.BanReceivedTemp[i][1] , GRMsyncGlobals.BanReceivedTemp[i][2] , GRMsyncGlobals.BanReceivedTemp[i][3] , GRMsyncGlobals.BanReceivedTemp[i][4] , GRMsyncGlobals.BanReceivedTemp[i][5] , GRMsyncGlobals.BanReceivedTemp[i][6] , GRMsyncGlobals.BanReceivedTemp[i][7] , playerData , false } );
 
@@ -5880,7 +5984,7 @@ GRMsync.CheckingBdayChanges = function ( syncRankFilter )
     local player;
 
     -- No need to check my data if I am not going to share it. I must just accept their data and pass it along. I just wont' absorb it and then people will rely on their filters.
-    if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncBDays then
+    if GRM.S().syncBDays then
         -- Just checking my own data first...
         for i = 1 , #exactIndexes[6] do
 
@@ -5936,10 +6040,11 @@ GRMsync.CheckingBdayChanges = function ( syncRankFilter )
     local alts;
     local player;
     local count = #GRMsyncGlobals.BDayChanges
+    local guildData = GRM.GetGuild();
 
     while count > 0 do
 
-        player = GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ][GRMsyncGlobals.BDayChanges[count][1]];
+        player = guildData[GRMsyncGlobals.BDayChanges[count][1]];
 
         if player then
 
@@ -5977,8 +6082,8 @@ GRMsync.CompareAltLists = function()
     end
     
     local leaderListOfAlts = {};
-    local syncRankFilter = GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank;
-    if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].exportAllRanks then
+    local syncRankFilter = GRM.S().syncRank;
+    if GRM.S().exportAllRanks then
         syncRankFilter = GuildControlGetNumRanks() - 1;
     end
 
@@ -6174,9 +6279,9 @@ GRMsync.CompareAltLists = function()
         local listOfAlts = {};
         for name , alts in pairs ( GRMsyncGlobals.FinalCorrectAltList ) do
             
-            if GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ][name] then
+            if GRM.GetPlayer ( name ) then
                 -- Ok, collect the alts so we can compare.
-                listOfAlts = GRM.GetListOfAlts ( GRM_GuildMemberHistory_Save[ GRM_G.F ][ GRM_G.guildName ][name] , false , GRM_Alts[GRM_G.guildName] )
+                listOfAlts = GRM.GetListOfAlts ( GRM.GetPlayer ( name ) , false , GRM_Alts[GRM_G.guildName] )
                 if not GRMsync.IsListTheSame ( alts , listOfAlts ) then
                     GRMsyncGlobals.updateCount = GRMsyncGlobals.updateCount + 1;
                     GRMsyncGlobals.updatesEach[3] = GRMsyncGlobals.updatesEach[3] + 1;
@@ -6197,8 +6302,8 @@ end
 GRMsync.PreCheckChanges = function ( msg )
     local lists = { "JD" , "PD" , "MAIN" , "ALTS" , "CUSTOM" , "BAN" };
 
-    GRM_G.PreCheckSyncPattern = GRM_G.PreCheckSyncPattern or GRM.BuildComPattern ( 6 , "?" , false );
-    local jd , pd , alt , main , custom , ban = GRM.ParseComMsg ( msg , GRM_G.PreCheckSyncPattern );
+    GRM_G.MatchPattern6 = GRM_G.MatchPattern6 or GRM.BuildComPattern ( 6 , "?" , false );
+    local jd , pd , alt , main , custom , ban = GRM.ParseComMsg ( msg , GRM_G.MatchPattern6 );
 
     if jd == "true" then
         GRMsync.CheckChanges ( "JD" );
@@ -6232,9 +6337,9 @@ end
 -- What it Does:    Checks to see if the received data and the leader's data is different and then adds the most recent changes to update que
 -- Purpose:         Retroactive Sync Procedure fully defined here in this method. MUCH WORK!
 GRMsync.CheckChanges = function ( msg )
-    local syncRankFilter = GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank;
+    local syncRankFilter = GRM.S().syncRank;
     if msg ~= "BAN" then
-        if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].exportAllRanks then
+        if GRM.S().exportAllRanks then
             syncRankFilter = GuildControlGetNumRanks() - 1;
         end
     end
@@ -6327,10 +6432,10 @@ end
 -- Purpose:         Cleaner reporting.
 GRMsync.ReportSyncCompletion = function ( currentSyncer , finalAnnounce )
     if time() - GRMsyncGlobals.AnnounceDelay > 5 then
-        if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncChatEnabled and ( GRMsync.IsPlayerDataSyncCompatibleWithAnyOnline() or GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].exportAllRanks ) then
+        if GRM.S().syncChatEnabled and ( GRMsync.IsPlayerDataSyncCompatibleWithAnyOnline() or GRM.S().exportAllRanks ) then
             local announce = "";
             
-            if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncChatEnabled then
+            if GRM.S().syncChatEnabled then
 
                 if finalAnnounce then
                     announce = GRM.L ( "GRM:" ) .. " " .. GRM.L ( "Sync With Guildies Complete..." , currentSyncer );
@@ -6439,7 +6544,7 @@ comms.senderRankRequirement = 0;
 
 -- For eash call to.
 local commsLive = { ["GRM_JD"] = true , ["GRM_PD"] = true , ["GRM_ADDALT"] = true , ["GRM_AC"] = true , ["GRM_RMVALT"] = true , ["GRM_MAIN"] = true , ["GRM_RMVMAIN"] = true , ["GRM_BDAY"] = true , ["GRM_BDAYREM"] = true };
-local commsSyncUp = { ["GRM_JDSYNCUP"] = true , ["GRM_PDSYNCUP"] = true , ["GRM_ALTSYNCUP"] = true , ["GRM_MAINSYNCUP"] = true , ["GRM_BDSYNCUP"] = true , ["GRM_BANSYNCUP"] = true , ["GRM_BANSYNCUPX"] = true , ["GRM_FINALALTSYNCUP"] = true };
+local commsSyncUp = { ["GRM_JDSYNCUP"] = true , ["GRM_PDSYNCUP"] = true , ["GRM_ALTSYNCUP"] = true , ["GRM_MAINSYNCUP"] = true , ["GRM_BDSYNCUP"] = true , ["GRM_BANSYNCUP"] = true , ["GRM_BANSYNCUPX"] = true , ["GRM_BANSYNCUPT"] = true ,["GRM_FINALALTSYNCUP"] = true };
 local commsLead = { ["GRM_WHOISLEADER"] = true , ["GRM_IAMLEADER"] = true , ["GRM_ELECT"] = true , ["GRM_ELECTINFO"] = true , ["GRM_NEWLEADER"] = true , ["GRM_STARTMSG"] = true };
 local macroSync = { ["GRM_MACRO_T"] = true , ["GRM_Macro_SK"] = true , ["GRM_Macro_SP"] = true , ["GRM_Macro_SD"] = true , ["GRM_Macro_RK"] = true , ["GRM_Macro_RP"] = true , ["GRM_Macro_RD"] = true , ["GRM_Macro_LK"] = true , ["GRM_Macro_LP"] = true , ["GRM_Macro_LD"] = true , ["GRM_Macro_PQ"] = true , ["GRM_Macro_FN"] = true , ["GRM_Macro_XX"] = true , ["GRM_Macro_MK"] = true , ["GRM_Macro_MP"] = true , ["GRM_Macro_MD"] = true }; -- Received, sentKick , sentPromote , sentDemote , sentCustom
 
@@ -6507,7 +6612,7 @@ GRMsync.RegisterCommunicationProtocols = function()
                     end
 
                     -- At this point forward is strictly Member data syncing and if disabled just return
-                    if not GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncEnabled then
+                    if not GRM.S().syncEnabled then
                         return;
                     end
 
@@ -6544,13 +6649,13 @@ GRMsync.RegisterCommunicationProtocols = function()
                     -- Sender is not the designatedleader then return... Higher means lower in-game... 1 = guild leader; 10 = lowest initiate rank. So, if rank is higher than the restricted, it won't work. -- if the comms.senderRankRequirement is lower than the receiving player, then that means it won't sync either.
                     -- of note, leadership role will not be rank restricted, but it will send out restricted data with rank tags on it so others know not to sync it or not. In the meantime the leader will build a temporary database to parry against during sync
                     -- This allows all sync information to be shared, but capable of being restricted by the sending party.
-                    if ( commsLive[comms.prefix2] or commsSyncUp[comms.prefix2] ) and ( comms.senderRankRequirement < GRM_G.playerRankID or comms.senderRankID > GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank ) then
+                    if ( commsLive[comms.prefix2] or commsSyncUp[comms.prefix2] ) and ( comms.senderRankRequirement < GRM_G.playerRankID or comms.senderRankID > GRM.S().syncRank ) then
                         return
 
-                    elseif ( comms.prefix2 == "GRM_CNOTE" or comms.prefix2 == "GRM_CUSTSYNCUP" ) and ( comms.senderRankRequirement < GRM_G.playerRankID or comms.senderRankID > GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRankCustom ) then
+                    elseif ( comms.prefix2 == "GRM_CNOTE" or comms.prefix2 == "GRM_CUSTSYNCUP" ) and ( comms.senderRankRequirement < GRM_G.playerRankID or comms.senderRankID > GRM.S().syncRankCustom ) then
                         return
 
-                    elseif ( not GRMsyncGlobals.IsElectedLeader and not commsLead[comms.prefix2] and sender ~= GRMsyncGlobals.DesignatedLeader ) and ( comms.senderRankID > GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank or comms.senderRankRequirement < GRM_G.playerRankID ) then        -- If player's rank is below settings threshold, ignore message.
+                    elseif ( not GRMsyncGlobals.IsElectedLeader and not commsLead[comms.prefix2] and sender ~= GRMsyncGlobals.DesignatedLeader ) and ( comms.senderRankID > GRM.S().syncRank or comms.senderRankRequirement < GRM_G.playerRankID ) then        -- If player's rank is below settings threshold, ignore message.
                         return
                     
                     elseif comms.abortSync and not comms.isFound then
@@ -6603,12 +6708,12 @@ GRMsync.RegisterCommunicationProtocols = function()
                     elseif not GRM_G.InGroup then
 
                         -- For ensuring ban information is controlled!
-                        if ( comms.prefix2 == "GRM_BAN" or comms.prefix2 == "GRM_UNBAN" or comms.prefix2 == "GRM_BANSYNCUP" or comms.prefix2 == "GRM_BANSYNCUPX" or comms.prefix2 == "GRM_BANSYNC" or comms.prefix2 == "GRM_BANSYNCX" or comms.prefix2 == "GRM_BANSYNCXX" ) and GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncBanList then
+                        if ( comms.prefix2 == "GRM_BAN" or comms.prefix2 == "GRM_UNBAN" or comms.prefix2 == "GRM_BANSYNCUP" or comms.prefix2 == "GRM_BANSYNCUPX" or comms.prefix2 == "GRM_BANSYNCUPT" or comms.prefix2 == "GRM_BANSYNC" or comms.prefix2 == "GRM_BANSYNCX" or comms.prefix2 == "GRM_BANSYNCXX" or comms.prefix2 == "GRM_BANSYNCSP" or comms.prefix2 == "GRM_BANSYNCSPX" ) and GRM.S().syncBanList then
                             if tonumber ( msg ) == nil then -- Error protection on some edge cases for older versions talking to each other.
                                 local senderBanControlRankRequirement = tonumber ( string.sub ( msg , 1 , string.find ( msg , "?" ) - 1 ) );
                                 msg = GRM.Next ( msg );
                                 -- Should that be the player name, or should it be a name parsed from the sender??? -- Might need to investigate
-                                if ( comms.senderRankID > GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRankBanList or senderBanControlRankRequirement < GRM.GetGuildMemberRankID ( GRM_G.addonUser ) ) then
+                                if ( comms.senderRankID > GRM.S().syncRankBanList or senderBanControlRankRequirement < GRM.GetGuildMemberRankID ( GRM_G.addonUser ) ) then
                                     -- Abort
                                     return;
                                 else
@@ -6616,10 +6721,10 @@ GRMsync.RegisterCommunicationProtocols = function()
                                         GRMsync.CheckBanListChange ( msg , sender );                        -- For live ban occurences
                                     elseif comms.prefix2 == "GRM_UNBAN" then
                                         GRMsync.CheckUnbanListChangeLive ( msg , sender );                  -- For live unban occurrences
-                                    elseif comms.prefix2 == "GRM_BANSYNCUP" or comms.prefix2 == "GRM_BANSYNCUPX" then
+                                    elseif comms.prefix2 == "GRM_BANSYNCUP" or comms.prefix2 == "GRM_BANSYNCUPX" or comms.prefix2 == "GRM_BANSYNCUPT" then
                                         GRMsync.BanManagement ( msg , comms.prefix2 , sender );    -- For sync analysis final report changes!
                                         GRMsyncGlobals.TimeSinceLastSyncAction = time();
-                                    elseif comms.prefix2 == "GRM_BANSYNC" or comms.prefix2 == "GRM_BANSYNCX" or comms.prefix2 == "GRM_BANSYNCXX" then
+                                    elseif comms.prefix2 == "GRM_BANSYNC" or comms.prefix2 == "GRM_BANSYNCX" or comms.prefix2 == "GRM_BANSYNCXX" or comms.prefix2 == "GRM_BANSYNCSP" or comms.prefix2 == "GRM_BANSYNCSPX" then
 
                                         GRMsyncGlobals.TimeSinceLastSyncAction = time();                    -- For collecting sync data...
                                         GRMsync.CollectData ( msg , comms.prefix2 );
@@ -6674,7 +6779,7 @@ GRMsync.RegisterCommunicationProtocols = function()
                                 GRMsync.InitiateDataSync();
 
                             elseif ( #GRMsyncGlobals.SyncQue - 1 ) > 0 then
-                                local msg = GRM_G.PatchDayString .. "?GRM_BUSY?" .. GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncRank .. "?" .. tostring ( #GRMsyncGlobals.SyncQue - 1 );
+                                local msg = GRM_G.PatchDayString .. "?GRM_BUSY?" .. GRM.S().syncRank .. "?" .. tostring ( #GRMsyncGlobals.SyncQue - 1 );
 
                                 GRMsyncGlobals.SyncCount = GRMsyncGlobals.SyncCount + #msg;
                                 GRMsync.SendMessage ( "GRM_SYNC" , msg , sender );
@@ -6908,11 +7013,11 @@ end
 GRMsync.BusyMessage = function ( positionInQue )
     
     if not GRMsyncGlobals.WaitingInQue then
-        GRM.Report ( GRM.L ( "You are added to the sync queue. Position: {num} " , nil , nil , positionInQue ) );
+        GRM.Report ( GRM.L ( "You are added to the sync queue. Position: {num}" , nil , nil , positionInQue ) );
         GRMsyncGlobals.WaitingInQue = true;
         GRMsyncGlobals.WaitingInQueTimer = time();
     else
-        GRM.Report ( GRM.L ( "Sync Queue Position Update: {num} " , nil , nil , positionInQue ) );
+        GRM.Report ( GRM.L ( "Sync Queue Position Update: {num}" , nil , nil , positionInQue ) );
     end
         
 end
@@ -7000,25 +7105,28 @@ end
 -- Event Tracking
 GRMsync.Initialize = function()
     if GRMsyncGlobals.SyncOK then
-        if GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncEnabled and IsInGuild() and GRM_G.HasAccessToGuildChat then
+        if GRM.S().syncEnabled and IsInGuild() and GRM_G.HasAccessToGuildChat then
 
             if not GRMsyncGlobals.UILoaded then
                 GRMsync.LoadSyncUI();
             end
             
-            if ( time() - GRMsyncGlobals.timeAtLogin ) >= GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncDelay then
+            if ( time() - GRMsyncGlobals.timeAtLogin ) >= GRM.S().syncDelay then
                 GRMsync.TriggerFullReset();
                 GRM.RegisterGuildAddonUsersRefresh();
                 GRMsyncGlobals.LeadSyncProcessing = false;
                 GRMsyncGlobals.errorCheckEnabled = false;
                 GRMsync.MessageTracking = GRMsync.MessageTracking or CreateFrame ( "Frame" , "GRMsyncMessageTracking" );
                 GRM_G.playerRankID = GRM.GetGuildMemberRankID ( GRM_G.addonUser );
+                GRMsyncGlobals.numGuildRanks = GuildControlGetNumRanks() - 1;
 
-                GRMsync.BuildSyncNetwork();
+                if GRM_G.playerRankID and GRM_G.playerRankID ~= -1 then
+                    GRMsync.BuildSyncNetwork();
+                end
 
             else
 
-                GRM.Report ( GRM.L ( "Sync is disabled for {num} seconds after logging in. Please wait {custom1} seconds longer." , nil , nil , GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncDelay , ( GRM_AddonSettings_Save[GRM_G.F][GRM_G.addonUser].syncDelay - ( time() - GRMsyncGlobals.timeAtLogin ) ) ) );
+                GRM.Report ( GRM.L ( "Sync is disabled for {num} seconds after logging in. Please wait {custom1} seconds longer." , nil , nil , GRM.S().syncDelay , ( GRM.S().syncDelay - ( time() - GRMsyncGlobals.timeAtLogin ) ) ) );
 
             end
         end

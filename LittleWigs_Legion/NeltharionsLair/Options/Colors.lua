@@ -1,8 +1,9 @@
 
 BigWigs:AddColors("Rokmora", {
 	[188114] = "yellow",
-	[188169] = "orange",
+	[188169] = "purple",
 	[192800] = "blue",
+	[198024] = "orange",
 })
 
 BigWigs:AddColors("Ularogg Cragshaper", {
@@ -40,9 +41,11 @@ BigWigs:AddColors("Neltharions Lair Trash", {
 	[183548] = "yellow",
 	[186576] = {"blue","red"},
 	[186616] = {"blue","red"},
+	[188587] = "yellow",
 	[193505] = "purple",
 	[193585] = "red",
 	[193803] = "red",
+	[200154] = {"blue","orange"},
 	[201983] = "yellow",
 	[202108] = "orange",
 	[202181] = {"blue","red"},
