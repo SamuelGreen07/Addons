@@ -167,8 +167,8 @@ Enable this setting if you want this timer to be hidden, or when using a WeakAur
 	L["Anchor"] = "Ancrage"
 	L["Anchor Point"] = "Point d'ancrage"
 	L["Anchored To"] = "Ancré à"
-	L["And "] = "Et"
 	L["and"] = "et"
+	L["And "] = "Et"
 	L["and aligned left"] = "et aligné à gauche"
 	L["and aligned right"] = "et aligné à droite"
 	L["and rotated left"] = "et tourné vers la gauche"
@@ -289,8 +289,8 @@ Off Screen]=]
 	L["Collapse all pending Import"] = "Collapse all pending Import"
 	--[[Translation missing --]]
 	L["Collapsible Group"] = "Collapsible Group"
-	L["color"] = "couleur"
 	L["Color"] = "Couleur"
+	L["color"] = "couleur"
 	L["Column Height"] = "Hauteur de colonne"
 	L["Column Space"] = "Espace de colonne"
 	L["Columns"] = "Colonnes"
@@ -395,9 +395,10 @@ UNIT_POWER, UNIT_AURA PLAYER_TARGET_CHANGED
 	L["Distribute Horizontally"] = "Distribuer horizontalement"
 	L["Distribute Vertically"] = "Distribuer verticalement"
 	L["Do not group this display"] = "Ne pas grouper cet affichage"
-	L["Do you want to ignore all future updates for this aura"] = "Voulez-vous ignorer toutes les futures mises à jour de cette aura ?"
 	--[[Translation missing --]]
-	L["Do you want to stop ignoring all future updates for this aura"] = "Do you want to stop ignoring all future updates for this aura"
+	L["Do you want to enable updates for this aura"] = "Do you want to enable updates for this aura"
+	--[[Translation missing --]]
+	L["Do you want to ignore updates for this aura"] = "Do you want to ignore updates for this aura"
 	L["Documentation"] = "Documentation"
 	L["Done"] = "Terminé"
 	L["Drag to move"] = "Glisser pour déplacer"
@@ -810,7 +811,7 @@ Seule une unique valeur peut être choisie]=]
 	L["Npc ID"] = "Npc ID"
 	L["Number of Entries"] = "Nombre d'entrées"
 	--[[Translation missing --]]
-	L[ [=[Occurence of the event, reset when aura is unloaded
+	L[ [=[Occurrence of the event, reset when aura is unloaded
 Can be a range of values
 Can have multiple values separated by a comma or a space
 
@@ -819,7 +820,7 @@ Examples:
 2nd to 6th: 2-6
 every 2 events: /2
 every 3 events starting from 2nd: 2/3
-every 3 events starting from 2nd and ending at 11th: 2-11/3]=] ] = [=[Occurence of the event, reset when aura is unloaded
+every 3 events starting from 2nd and ending at 11th: 2-11/3]=] ] = [=[Occurrence of the event, reset when aura is unloaded
 Can be a range of values
 Can have multiple values separated by a comma or a space
 
@@ -1179,8 +1180,8 @@ It might not work correctly with your version!]=]
 	L["Use Display Info Id"] = "Utiliser les informations d'identifiant de l'affichage"
 	L["Use SetTransform"] = "Utiliser SetTransform"
 	L["Use Texture"] = "Utiliser une texture"
-	L["Used in Auras:"] = "Utilisé(e) dans les Auras:"
 	L["Used in auras:"] = "Utilisé dans les auras:"
+	L["Used in Auras:"] = "Utilisé(e) dans les Auras:"
 	--[[Translation missing --]]
 	L["Uses Texture Coordinates to rotate the texture."] = "Uses Texture Coordinates to rotate the texture."
 	--[[Translation missing --]]
@@ -1210,14 +1211,14 @@ It might not work correctly with your version!]=]
 	L["X Offset"] = "Décalage X"
 	L["X Rotation"] = "Rotation X"
 	L["X Scale"] = "Echelle X"
-	L["X-Offset"] = "Décalage X"
 	L["x-Offset"] = "x-Décalage"
+	L["X-Offset"] = "Décalage X"
 	L["Y Offset"] = "Décalage Y"
 	L["Y Rotation"] = "Rotation Y"
 	L["Y Scale"] = "Echelle Y"
 	L["Yellow Rune"] = "Rune jaune"
-	L["Y-Offset"] = "Décalage Y"
 	L["y-Offset"] = "y-Décalage"
+	L["Y-Offset"] = "Décalage Y"
 	--[[Translation missing --]]
 	L["You already have this group/aura. Importing will create a duplicate."] = "You already have this group/aura. Importing will create a duplicate."
 	L["You are about to delete %d aura(s). |cFFFF0000This cannot be undone!|r Would you like to continue?"] = "Vous êtes sur le point de supprimer %d aura(s). |cFFFF0000Cela ne peut pas être annulé !|r Voulez-vous continuer ?"

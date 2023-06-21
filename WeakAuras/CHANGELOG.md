@@ -1,41 +1,46 @@
-# [5.5.4](https://github.com/WeakAuras/WeakAuras2/tree/5.5.4) (2023-05-21)
+# [5.5.5](https://github.com/WeakAuras/WeakAuras2/tree/5.5.5) (2023-06-18)
 
-[Full Changelog](https://github.com/WeakAuras/WeakAuras2/compare/5.5.3...5.5.4)
+[Full Changelog](https://github.com/WeakAuras/WeakAuras2/compare/5.5.4...5.5.5)
 
 ## Highlights
 
- - Add an option to un-ignore aura updates from Wago
-- Include TaintLess so we..taint less
-- Add a 4th tooltip for people to use
-- The usual amount of bugfixes 
+ - Updates to the BW/DBM triggers
+- Bug fixes
+- Talent load checks now use talent instead of spell id 
 
 ## Commits
 
-InfusOnWoW (4):
+InfusOnWoW (14):
 
-- Hide tip popup on minimze and switching pages
-- Clean up code showing the bottom buttons
-- BT2: Limit size of returned tooltip for options display
-- Add a tooltip4, since a user actually wants that
+- Rework Talent load to check via talent id instead of spell id
+- Remove talents that don't exist
+- Rewrite Two Column Drop Down
+- Make Two ColumnDropDown work with table values
+- Fix lua error if GetSpecialization returns nil
+- Prevent an empty PlaySound from stopping sounds
+- Model: Fix setting of unit models in Wotlk
+- Animation Options: Fix rotate amount being invisible
+- DBM Stage Trigger: Fix if loaded after SetStage has already fired
+- BW Timer: Fixes lua error if remaining is a string
+- Fix TexturePicker Search box
+- BT2: Fix unloading auras prevents the next schedule of a recheck
+- In ActivateEnvironment for tsu variables, don't create the region
+- Tweak Ignore Update PR
 
-Jods (1):
+Logan Tracy (1):
 
-- add unignoring uption for WagoUpdates (#4443)
+- Added Unleash Life template for Restoration Shaman
 
-Stanzilla (5):
+Stanzilla (2):
 
-- Load TaintLess in Wrath as well
-- Fix typo
-- Include TaintLess as as lib (#4437)
-- Add a few more blocked functions that were added in 10.1
-- Fix up some types
+- Update Wrath TOC for 3.4.2
+- Spelling fixes
 
-emptyrivers (1):
+mrbuds (5):
 
-- simplify dragonriding detection
-
-mrbuds (2):
-
-- Fix anchored to nameplate preview with aura trigger
-- Essence trigger: fix nil error happening on import of an aura
+- Fix "BigWigs Timer" trigger remaining time option
+- BigWigs Stage trigger: set stage back to 0 after encounter end
+- Init BigWigs stage value when registering BigWigs_SetStage
+- BigWigs triggers: rename "Spell Id" field to "Key"
+- Fix printed nil on updating aura
 

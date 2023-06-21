@@ -152,7 +152,7 @@ do -- MageTravel
 		{"ring", "ExtraPortals", _u="e"}, -- Extra Portals
 		{id=m:format(32267, 32272), _u="l"}, -- Silvermoon
 		{id=m:format(32266, 32271), _u="x"}, -- Exodar
-		name=L"Portals and Teleports", hotkey="ALT-G", limit="MAGE", _u="OPCMP"
+		name=L"Portals and Teleports", hotkey="ALT-G", limit="MAGE", _u="OPCMV"
 	})
 	R:AddDefaultRing("ExtraPortals", {
 		{id=m:format(120146, 120145), _u="a"}, -- Ancient Dalaran
@@ -171,7 +171,7 @@ R:AddDefaultRing("PaladinTools", {
 	{id=322223, _u="u"}, --crusader
 	{id=183435, _u="r"}, --retribution
 	{id=31821, _u="m"}, --mastery
-	{id="/cast [help,dead,nocombat][nocombat,mod] {{spell:7328}}; {{spell:213644}}; {{spell:7328}}", _c="l"}, -- cleanse/res
+	{id="/cast [help,dead,nocombat][nocombat,mod] {{spell:7328}}; {{spell:213644}}; {{spell:7328}}", _u="l"}, -- cleanse/res
 	name=L"Utility", limit="PALADIN", hotkey="BUTTON4", _u="OPCPT"
 })
 R:AddDefaultRing("WarlockLTS", {

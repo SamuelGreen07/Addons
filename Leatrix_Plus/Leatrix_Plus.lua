@@ -1,5 +1,5 @@
 ﻿----------------------------------------------------------------------
--- 	Leatrix Plus 3.0.134 (3rd June 2023)
+-- 	Leatrix Plus 3.0.136 (19th June 2023)
 ----------------------------------------------------------------------
 
 --	01:Functns, 02:Locks, 03:Restart, 20:Live, 30:Isolated, 40:Player
@@ -19,7 +19,7 @@
 	local void
 
 	-- Version
-	LeaPlusLC["AddonVer"] = "3.0.134"
+	LeaPlusLC["AddonVer"] = "3.0.136"
 
 	-- Get locale table
 	local void, Leatrix_Plus = ...
@@ -34,6 +34,9 @@
 				print(L["LEATRIX PLUS: WRONG VERSION INSTALLED!"])
 			end)
 			return
+		end
+		if gametocversion and gametocversion == 30402 then -- 3.4.2
+			LeaPlusLC.NewPatch = true
 		end
 	end
 
@@ -10297,7 +10300,11 @@
 				end
 				titleFrame.m:SetText(L["Messages"] .. ": " .. totalMsgCount)
 				editFrame:SetVerticalScroll(0)
-				C_Timer.After(0.1, function() editFrame.ScrollBar.ScrollDownButton:Click() end)
+				if LeaPlusLC.NewPatch then
+					editFrame.ScrollBar:ScrollToEnd()
+				else
+					C_Timer.After(0.1, function() editFrame.ScrollBar.ScrollDownButton:Click() end)
+				end
 				editFrame:Show()
 				editBox:ClearFocus()
 			end
@@ -11694,7 +11701,7 @@
 			subTitle:ClearAllPoints()
 			subTitle:SetPoint("BOTTOM", 0, 72)
 
-			local slashTitle = LeaPlusLC:MakeTx(interPanel, "/run leaplus()", 0, 0)
+			local slashTitle = LeaPlusLC:MakeTx(interPanel, "/ltp", 0, 0)
 			slashTitle:SetFont(slashTitle:GetFont(), 72)
 			slashTitle:ClearAllPoints()
 			slashTitle:SetPoint("BOTTOM", subTitle, "TOP", 0, 40)
@@ -11716,7 +11723,7 @@
 		-- Show first run message
 		if not LeaPlusDB["FirstRunMessageSeen"] then
 			C_Timer.After(1, function()
-				LeaPlusLC:Print(L["Enter"] .. " |cff00ff00" .. "/run leaplus()" .. "|r " .. L["or click the minimap button to open Leatrix Plus."])
+				LeaPlusLC:Print(L["Enter"] .. " |cff00ff00" .. "/ltp" .. "|r " .. L["or click the minimap button to open Leatrix Plus."])
 				LeaPlusDB["FirstRunMessageSeen"] = true
 			end)
 		end
@@ -15655,9 +15662,8 @@
 	end
 
 	-- Slash command for global function
-	-- _G.SLASH_Leatrix_Plus1 = "/ltp"
-	-- _G.SLASH_Leatrix_Plus2 = "/leaplus"
-	_G.SLASH_Leatrix_Plus1 = "/ztp" -- temp
+	_G.SLASH_Leatrix_Plus1 = "/ltp"
+	_G.SLASH_Leatrix_Plus2 = "/leaplus"
 
 	SlashCmdList["Leatrix_Plus"] = function(self)
 		-- Run slash command function
@@ -15673,13 +15679,11 @@
 		ReloadUI()
 	end
 
-	-- Replacement for broken slash command system
-	function leaplus(self)
-		LeaPlusLC:SlashFunc(self)
-	end
-
-	-- To reproduce slash command bug, enter combat, enter an addn related slash command, toggle tracking on a
-	-- quest 4 times then click that quest in the objective tracker.
+	-- There is a slash command bug in the game code.  To reproduce it, enter combat, enter any addon related
+	-- slash command, toggle tracking on a quest 4 times then click that quest in the objective tracker.
+	-- The bug was originally found in Dragonflight.  Then Blizzard copied a lot of Dragonflight code to Wrath
+	-- Classic and the bug was copied along with it.  The bug has since been fixed in Dragonflight but has not
+	-- been fixed in Wrath Classic.
 
 ----------------------------------------------------------------------
 -- 	L90: Create options panel pages (no content yet)

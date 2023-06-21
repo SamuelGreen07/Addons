@@ -7,7 +7,7 @@ local function cc(m, f, ...)
 	return f
 end
 local function assert(condition, text, level)
-	return condition or error(text, level or 2)
+	return condition or error(text, level or 2)((0)[0])
 end
 
 local gfxBase = ([[Interface\AddOns\%s\gfx\]]):format((...))
@@ -341,8 +341,22 @@ local function updateSlice(self, originAngle, selected, tok, usable, state, icon
 	self:SetActive(active)
 	self:SetHighlighted(selected and not faded)
 end
+local ambiguateToken, wipeTokenCache do
+	local cache = {}
+	function ambiguateToken(tok, ...)
+		local atok = cache[tok]
+		if atok == nil and type(tok) == "string" then
+			atok = tok:match("^[^:]+")
+			cache[tok] = atok
+		end
+		return atok or tok, ...
+	end
+	function wipeTokenCache()
+		wipe(cache)
+	end
+end
 local function callElementUpdate(self, f, si, ni, a1, a2)
-	return true, f(self, a1, a2, PC:GetOpenRingSliceAction(si, ni))
+	return true, f(self, a1, a2, ambiguateToken(PC:GetOpenRingSliceAction(si, ni)))
 end
 
 local lastConAngle = nil
@@ -448,13 +462,13 @@ mainFrame:SetScript("OnHide", function(self)
 	end
 end)
 
-function iapi:Show(_, fcSlice, fastOpen)
+function iapi:Show(_, _, fastOpen)
 	lastConAngle, _, mainFrame.count, mainFrame.offset = nil, PC:GetOpenRing(configCache)
 	SwitchIndicatorFactory(configCache.IndicatorFactory)
 
 	local baseSize = 48 + 48*configCache.MIButtonMargin
 	mainFrame.radius = CalculateRingRadius(mainFrame.count or 3, baseSize, baseSize, 100, 90-(mainFrame.offset or 0))
-	mainFrame.eleft, mainFrame.fastClickSlice, mainFrame.oldSlice, mainFrame.angle, mainFrame.omState, mainFrame.oldIsGlowing = configCache.XTZoomTime * (fastOpen and 0.5 or 1), fcSlice or 0, -1
+	mainFrame.eleft, mainFrame.oldSlice, mainFrame.angle, mainFrame.omState, mainFrame.oldIsGlowing = configCache.XTZoomTime * (fastOpen and 0.5 or 1), -1
 	mainFrame.rotPeriod = nil
 	GhostIndication:Reset()
 
@@ -494,6 +508,7 @@ function iapi:Hide()
 	if GameTooltip:IsOwned(mainFrame) then
 		GameTooltip:Hide()
 	end
+	wipeTokenCache()
 end
 
 function api:SetDisplayOptions(token, icon, _, r,g,b)

@@ -140,8 +140,8 @@ Enable this setting if you want this timer to be hidden, or when using a WeakAur
 	L["Anchor"] = "锚点"
 	L["Anchor Point"] = "锚点指向"
 	L["Anchored To"] = "对齐到"
-	L["And "] = "和"
 	L["and"] = "和"
+	L["And "] = "和"
 	L["and aligned left"] = "并且左对齐"
 	L["and aligned right"] = "并且右对齐"
 	L["and rotated left"] = "并且向左旋转"
@@ -239,8 +239,8 @@ Off Screen]=] ] = "光环在屏幕外"
 	L["Collapse all non-loaded displays"] = "折叠所有未载入的图示"
 	L["Collapse all pending Import"] = "折叠所有待定的导入"
 	L["Collapsible Group"] = "可折叠的组"
-	L["color"] = "颜色"
 	L["Color"] = "颜色"
+	L["color"] = "颜色"
 	L["Column Height"] = "行高度"
 	L["Column Space"] = "行空间"
 	L["Columns"] = "列"
@@ -324,9 +324,8 @@ UNIT_POWER, UNIT_AURA PLAYER_TARGET_CHANGED]=]
 	L["Distribute Horizontally"] = "横向分布"
 	L["Distribute Vertically"] = "纵向分布"
 	L["Do not group this display"] = "不要将此图示编组"
-	L["Do you want to ignore all future updates for this aura"] = "你想忽略此光环未来的所有更新吗"
-	--[[Translation missing --]]
-	L["Do you want to stop ignoring all future updates for this aura"] = "Do you want to stop ignoring all future updates for this aura"
+	L["Do you want to enable updates for this aura"] = "你想启用这个光环的更新吗"
+	L["Do you want to ignore updates for this aura"] = "你想忽略这个光环的更新吗"
 	L["Documentation"] = "文档"
 	L["Done"] = "完成"
 	L["Drag to move"] = "拖拽来移动"
@@ -522,8 +521,7 @@ Can use \ to escape -.]=] ] = [=[过滤格式：'名称'，'名称-服务器'，
 	L["Ignore out of checking range"] = "忽略超出检查范围"
 	L["Ignore Self"] = "忽略自身"
 	L["Ignore updates"] = "忽略更新"
-	--[[Translation missing --]]
-	L["Ignore Wago updates"] = "Ignore Wago updates"
+	L["Ignore Wago updates"] = "忽略Wago更新"
 	L["Ignored"] = "被忽略"
 	L["Ignored Aura Name"] = "忽略光环名称"
 	L["Ignored Exact Spell ID(s)"] = "忽略精确法术 ID"
@@ -635,7 +633,7 @@ Can use \ to escape -.]=] ] = [=[过滤格式：'名称'，'名称-服务器'，
 	L["Note: Automated Messages to SAY and YELL are blocked outside of Instances."] = "注意：无法在副本外自动发送“说”与“大喊”信息。"
 	L["Npc ID"] = "NPC ID"
 	L["Number of Entries"] = "条目数"
-	L[ [=[Occurence of the event, reset when aura is unloaded
+	L[ [=[Occurrence of the event, reset when aura is unloaded
 Can be a range of values
 Can have multiple values separated by a comma or a space
 
@@ -858,8 +856,7 @@ every 3 events starting from 2nd and ending at 11th: 2-11/3]=] ] = [=[事件发�
 	L["Thickness"] = "粗细"
 	L["This adds %raidMark as text replacements."] = "这将添加 %raidMark 作为文本替换。"
 	L["This adds %role, %roleIcon as text replacements. Does nothing if the unit is not a group member."] = "这将添加 %role, %roleIcon 作为文本替换。如果单位不是队伍成员，则不产生效果。"
-	--[[Translation missing --]]
-	L["This adds %tooltip, %tooltip1, %tooltip2, %tooltip3 and %tooltip4 as text replacements and also allows filtering based on the tooltip content/values."] = "This adds %tooltip, %tooltip1, %tooltip2, %tooltip3 and %tooltip4 as text replacements and also allows filtering based on the tooltip content/values."
+	L["This adds %tooltip, %tooltip1, %tooltip2, %tooltip3 and %tooltip4 as text replacements and also allows filtering based on the tooltip content/values."] = "这将添加 %tooltip, %tooltip1, %tooltip2, %tooltip3, %tooltip4 作为文本替换，同时允许根据这些内容/值进行过滤。"
 	L[ [=[This aura contains custom Lua code.
 Make sure you can trust the person who sent it!]=] ] = "此光环包含自定义Lua代码。请确认你可以信任发送它的人！"
 	L[ [=[This aura was created with a different version (%s) of World of Warcraft.
@@ -950,8 +947,8 @@ It might not work correctly with your version!]=] ] = "此光环由更新版本�
 	L["Y Rotation"] = "Y轴旋转"
 	L["Y Scale"] = "长度比例"
 	L["Yellow Rune"] = "黄色符文"
-	L["Y-Offset"] = "Y 偏移"
 	L["y-Offset"] = "Y偏移"
+	L["Y-Offset"] = "Y 偏移"
 	L["You already have this group/aura. Importing will create a duplicate."] = "此组/光环已经存在，继续导入将会创建副本。"
 	L["You are about to delete %d aura(s). |cFFFF0000This cannot be undone!|r Would you like to continue?"] = "正在删除 %d 个光环，|cFFFF0000此操作无法被撤销！|r真的要删除吗?"
 	L["You are about to delete a trigger. |cFFFF0000This cannot be undone!|r Would you like to continue?"] = "你正在删除一个触发器。|cFFFF0000这个操作无法撤销！|r你要继续吗？"

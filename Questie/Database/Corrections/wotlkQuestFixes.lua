@@ -32,6 +32,12 @@ function QuestieWotlkQuestFixes:Load()
     local specKeys = QuestieProfessions.specializationKeys
 
     return {
+        [55] = {
+            [questKeys.objectives] = {{{1200}}},
+        },
+        [75] = {
+            [questKeys.specialFlags] = 0,
+        },
         [171] = {
             [questKeys.startedBy] = {{14305},nil,nil},
             [questKeys.questLevel] = -1,
@@ -136,8 +142,23 @@ function QuestieWotlkQuestFixes:Load()
             [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
             [questKeys.zoneOrSort] = sortKeys.SPECIAL,
         },
+        [2279] = {
+            [questKeys.preQuestSingle] = {2278},
+        },
         [2767] = {
             [questKeys.triggerEnd] = {"Escort OOX-22/FE to safety", {[zoneIDs.FERALAS]={{54.3,51.2}}}},
+        },
+        [3763] = {
+            [questKeys.startedBy] = {{6735}},
+            [questKeys.exclusiveTo] = {3789,3790},
+        },
+        [3789] = {
+            [questKeys.startedBy] = {{6740}},
+            [questKeys.exclusiveTo] = {3763,3790},
+        },
+        [3790] = {
+            [questKeys.startedBy] = {{5111}},
+            [questKeys.exclusiveTo] = {3763,3789},
         },
         [4362] = {
             [questKeys.preQuestSingle] = {4361},
@@ -186,6 +207,12 @@ function QuestieWotlkQuestFixes:Load()
         },
         [8552] = {
             [questKeys.specialFlags] = 0,
+        },
+        [8553] = {
+            [questKeys.requiredRaces] = raceIDs.NONE,
+        },
+        [8554] = {
+            [questKeys.requiredRaces] = raceIDs.NONE,
         },
         [8746] = {
             [questKeys.objectives] = {{{15664,"Find Metzen the Reindeer and rescue him"}},nil,{{21211}}},
@@ -300,6 +327,9 @@ function QuestieWotlkQuestFixes:Load()
             [questKeys.startedBy] = {{24657}},
             [questKeys.finishedBy] = {{24657}},
         },
+        [11137] = {
+            [questKeys.preQuestSingle] = {},
+        },
         [11140] = {
             [questKeys.requiredSourceItems] = {33040,33044},
         },
@@ -388,6 +418,7 @@ function QuestieWotlkQuestFixes:Load()
             [questKeys.objectives] = {{{23876,"Spores frozen"}}},
         },
         [11332] = {
+            [questKeys.sourceItemId] = 33634,
             [questKeys.preQuestSingle] = {11331},
         },
         [11343] = {
@@ -1073,6 +1104,9 @@ function QuestieWotlkQuestFixes:Load()
         [12249] = {
             [questKeys.objectives] = {{{26633,}}},
             [questKeys.extraObjectives] = {{nil, Questie.ICON_TYPE_TALK, l10n("Talk to Tur Ragepaw to summon Ursoc"),0,{{"monster", 27328}}}},
+        },
+        [12255] = {
+            [questKeys.extraObjectives] = {{nil, Questie.ICON_TYPE_TALK, l10n("Ride Flamebringer"),0,{{"monster", 27292}}}},
         },
         [12256] = {
             [questKeys.preQuestSingle] = {12468},
@@ -2496,62 +2530,62 @@ function QuestieWotlkQuestFixes:Load()
         [13245] = {
             [questKeys.startedBy] = {{20735},nil,nil},
             [questKeys.finishedBy] = {{20735},nil,nil},
-            [questKeys.exclusiveTo] = {13246,13247,13248,13249,13250,13251,13252,13253,13254,13255,13256},
+            [questKeys.exclusiveTo] = {13246,13247,13248,13249,13250,13251,13252,13253,13254,13255,13256,14199},
         },
         [13246] = {
             [questKeys.startedBy] = {{20735},nil,nil},
             [questKeys.finishedBy] = {{20735},nil,nil},
-            [questKeys.exclusiveTo] = {13245,13247,13248,13249,13250,13251,13252,13253,13254,13255,13256},
+            [questKeys.exclusiveTo] = {13245,13247,13248,13249,13250,13251,13252,13253,13254,13255,13256,14199},
         },
         [13247] = {
             [questKeys.startedBy] = {{20735},nil,nil},
             [questKeys.finishedBy] = {{20735},nil,nil},
-            [questKeys.exclusiveTo] = {13245,13246,13248,13249,13250,13251,13252,13253,13254,13255,13256},
+            [questKeys.exclusiveTo] = {13245,13246,13248,13249,13250,13251,13252,13253,13254,13255,13256,14199},
         },
         [13248] = {
             [questKeys.startedBy] = {{20735},nil,nil},
             [questKeys.finishedBy] = {{20735},nil,nil},
-            [questKeys.exclusiveTo] = {13245,13246,13247,13249,13250,13251,13252,13253,13254,13255,13256},
+            [questKeys.exclusiveTo] = {13245,13246,13247,13249,13250,13251,13252,13253,13254,13255,13256,14199},
         },
         [13249] = {
             [questKeys.startedBy] = {{20735},nil,nil},
             [questKeys.finishedBy] = {{20735},nil,nil},
-            [questKeys.exclusiveTo] = {13245,13246,13247,13248,13250,13251,13252,13253,13254,13255,13256},
+            [questKeys.exclusiveTo] = {13245,13246,13247,13248,13250,13251,13252,13253,13254,13255,13256,14199},
         },
         [13250] = {
             [questKeys.startedBy] = {{20735},nil,nil},
             [questKeys.finishedBy] = {{20735},nil,nil},
-            [questKeys.exclusiveTo] = {13245,13246,13247,13248,13249,13251,13252,13253,13254,13255,13256},
+            [questKeys.exclusiveTo] = {13245,13246,13247,13248,13249,13251,13252,13253,13254,13255,13256,14199},
         },
         [13251] = {
             [questKeys.startedBy] = {{20735},nil,nil},
             [questKeys.finishedBy] = {{20735},nil,nil},
-            [questKeys.exclusiveTo] = {13245,13246,13247,13248,13249,13250,13252,13253,13254,13255,13256},
+            [questKeys.exclusiveTo] = {13245,13246,13247,13248,13249,13250,13252,13253,13254,13255,13256,14199},
         },
         [13252] = {
             [questKeys.startedBy] = {{20735},nil,nil},
             [questKeys.finishedBy] = {{20735},nil,nil},
-            [questKeys.exclusiveTo] = {13245,13246,13247,13248,13249,13250,13251,13253,13254,13255,13256},
+            [questKeys.exclusiveTo] = {13245,13246,13247,13248,13249,13250,13251,13253,13254,13255,13256,14199},
         },
         [13253] = {
             [questKeys.startedBy] = {{20735},nil,nil},
             [questKeys.finishedBy] = {{20735},nil,nil},
-            [questKeys.exclusiveTo] = {13245,13246,13247,13248,13249,13250,13251,13252,13254,13255,13256},
+            [questKeys.exclusiveTo] = {13245,13246,13247,13248,13249,13250,13251,13252,13254,13255,13256,14199},
         },
         [13254] = {
             [questKeys.startedBy] = {{20735},nil,nil},
             [questKeys.finishedBy] = {{20735},nil,nil},
-            [questKeys.exclusiveTo] = {13245,13246,13247,13248,13249,13250,13251,13252,13253,13255,13256},
+            [questKeys.exclusiveTo] = {13245,13246,13247,13248,13249,13250,13251,13252,13253,13255,13256,14199},
         },
         [13255] = {
             [questKeys.startedBy] = {{20735},nil,nil},
             [questKeys.finishedBy] = {{20735},nil,nil},
-            [questKeys.exclusiveTo] = {13245,13246,13247,13248,13249,13250,13251,13252,13253,13254,13256},
+            [questKeys.exclusiveTo] = {13245,13246,13247,13248,13249,13250,13251,13252,13253,13254,13256,14199},
         },
         [13256] = {
             [questKeys.startedBy] = {{20735},nil,nil},
             [questKeys.finishedBy] = {{20735},nil,nil},
-            [questKeys.exclusiveTo] = {13245,13246,13247,13248,13249,13250,13251,13252,13253,13254,13255},
+            [questKeys.exclusiveTo] = {13245,13246,13247,13248,13249,13250,13251,13252,13253,13254,13255,14199},
         },
         [13258] = {
             [questKeys.preQuestGroup] = {12938,13224},
@@ -2887,6 +2921,8 @@ function QuestieWotlkQuestFixes:Load()
         },
         [13406] = {
             [questKeys.preQuestSingle] = {13373},
+            [questKeys.objectives] = {{{32769},{32771}},nil,nil,nil,{{{32770,32772},32770}}},
+            [questKeys.extraObjectives] = {{nil, Questie.ICON_TYPE_TALK, l10n("Talk to Rizzy Ratchwiggle"), 1, {{"monster", 31839}}}},
         },
         [13407] = {
             [questKeys.triggerEnd] = {"Victory in Strand of the Ancients", {
@@ -3119,8 +3155,8 @@ function QuestieWotlkQuestFixes:Load()
             [questKeys.parentQuest] = 0,
         },
         [13627] = {
-            [questKeys.startedBy] = {{33434}},
-            [questKeys.finishedBy] = {{33434}},
+            [questKeys.startedBy] = {},
+            [questKeys.finishedBy] = {},
         },
         [13631] = {
             [questKeys.startedBy] = {{32871},nil,{46052}},
@@ -3208,8 +3244,8 @@ function QuestieWotlkQuestFixes:Load()
             },
         },
         [13681] = {
-            [questKeys.startedBy] = {{33435}},
-            [questKeys.finishedBy] = {{33435}},
+            [questKeys.startedBy] = {},
+            [questKeys.finishedBy] = {},
         },
         [13682] = {
             [questKeys.preQuestSingle] = {13664},
@@ -3646,6 +3682,11 @@ function QuestieWotlkQuestFixes:Load()
             [questKeys.preQuestSingle] = {13938},
             [questKeys.exclusiveTo] = {13926},
         },
+        [14016] = {
+            [questKeys.specialFlags] = nil,
+            [questKeys.questFlags] = 128,
+            [questKeys.objectives] = {nil,nil,nil,nil,{{{35127},35127,"Investigate the Black Knight's Grave"}}},
+        },
         [14023] = {
             [questKeys.requiredRaces] = raceIDs.ALL_ALLIANCE,
             [questKeys.zoneOrSort] = sortKeys.PILGRIMS_BOUNTY,
@@ -3742,6 +3783,9 @@ function QuestieWotlkQuestFixes:Load()
             [questKeys.requiredRaces] = raceIDs.ALL_HORDE,
             [questKeys.zoneOrSort] = sortKeys.PILGRIMS_BOUNTY,
         },
+        [14076] = {
+            [questKeys.extraObjectives] = {{nil, Questie.ICON_TYPE_EVENT, l10n("Use your drum near a Mysterious Snow Mound"), 0, {{"object", 195309}}}},
+        },
         [14079] = {
             [questKeys.requiredRaces] = raceIDs.HUMAN,
         },
@@ -3771,6 +3815,37 @@ function QuestieWotlkQuestFixes:Load()
         },
         [14089] = {
             [questKeys.requiredRaces] = raceIDs.UNDEAD,
+        },
+        [14090] = {
+            [questKeys.objectives] = {{{29618,"Snowblind Follower captured"}}},
+        },
+        [14092] = {
+            [questKeys.extraObjectives] = {{nil, Questie.ICON_TYPE_EVENT, l10n("Use your drum near a Mysterious Snow Mound"), 0, {{"object", 195309}}}},
+        },
+        [14101] = {
+            [questKeys.extraObjectives] = {{{[zoneIDs.HROTHGARS_LANDING]={{50.4,15.6}}}, Questie.ICON_TYPE_EVENT, l10n("Summon Drottinn Hrothgar using the Kvaldir War Horn")}},
+        },
+        [14102] = {
+            [questKeys.extraObjectives] = {{{[zoneIDs.HROTHGARS_LANDING]={{43.8,24.6}}}, Questie.ICON_TYPE_EVENT, l10n("Summon Mistcaller Yngvar using the Mistcaller's Charm")}},
+        },
+        [14104] = {
+            [questKeys.extraObjectives] = {{{[zoneIDs.HROTHGARS_LANDING]={{58.59,31.72}}}, Questie.ICON_TYPE_EVENT, l10n("Provoke Ornolf the Scarred using the Captured Kvaldir Banner")}},
+        },
+        [14107] = {
+            [questKeys.objectives] = {nil,nil,nil,nil,{{{32149},32149,"Fallen Hero's Spirit blessed"}}},
+        },
+        [14108] = {
+            [questKeys.extraObjectives] = {{nil, Questie.ICON_TYPE_TALK, l10n("Mount up"), 0, {{"monster", 35117}}}},
+            [questKeys.objectives] = {{{34925,"Hurl Spears at North Sea Kraken"},{35092}}},
+        },
+        [14112] = {
+            [questKeys.extraObjectives] = {{nil, Questie.ICON_TYPE_LOOT, l10n("Take chum"), 0, {{"object", 195352}}}},
+        },
+        [14141] = {
+            [questKeys.objectives] = {{{29618,"Snowblind Follower captured"}}},
+        },
+        [14145] = {
+            [questKeys.extraObjectives] = {{nil, Questie.ICON_TYPE_LOOT, l10n("Take chum"), 0, {{"object", 195353}}}},
         },
         [14163] = {
             [questKeys.triggerEnd] = {"Victory in the Isle of Conquest", {
@@ -3847,6 +3922,11 @@ function QuestieWotlkQuestFixes:Load()
                 [zoneIDs.UNDERCITY]={{60.67,87.66}},
                 [zoneIDs.DALARAN]={{58.3,20.5}},
             }},
+        },
+        [14199] = {
+            [questKeys.startedBy] = {{20735},nil,nil},
+            [questKeys.finishedBy] = {{20735},nil,nil},
+            [questKeys.exclusiveTo] = {13245,13246,13247,13248,13249,13250,13251,13252,13253,13254,13255,13256},
         },
         [14352] = {
             [questKeys.requiredRaces] = raceIDs.ALL_HORDE,

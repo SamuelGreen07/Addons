@@ -1,4 +1,4 @@
-## Interface: 30401
+## Interface: 30402
 ## X-Min-Interface: 80000
 ## X-Min-Interface-Wrath: 30400
 ## Title:|cffffe00a<|r|cffff7d0aDBM|r|cffffe00a>|r |cff69ccf0Dungeons (WotLK)|r
@@ -41,7 +41,7 @@
 ## X-DBM-Mod-MapID: 619,601,595,600,604,602,599,576,578,574,575,608,658,632,668,650
 ## X-DBM-Mod-MinCoreRevision: 20200524142133
 ## X-DBM-Mod-MinExpansion: 2
-## Version: 3b16b88
+## Version: b1d73e0
 
 localization.en.lua
 localization.cn.lua

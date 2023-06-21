@@ -5,7 +5,7 @@ if not mod:IsClassic() then
 	mod.statTypes = "normal,heroic,timewalker"
 end
 
-mod:SetRevision("20230522095039")
+mod:SetRevision("20230621050852")
 mod:SetCreatureID(26668)
 mod:SetEncounterID(2030)
 mod:DisableESCombatDetection()--TODO, why is it disabled?

@@ -180,9 +180,9 @@ Enable this setting if you want this timer to be hidden, or when using a WeakAur
 	L["Anchor"] = "고정시키기"
 	L["Anchor Point"] = "고정 지점"
 	L["Anchored To"] = "다음에 고정:"
-	L["And "] = "와"
 	--[[Translation missing --]]
 	L["and"] = "and"
+	L["And "] = "와"
 	L["and aligned left"] = ", 왼쪽 정렬"
 	L["and aligned right"] = ", 오른쪽 정렬"
 	L["and rotated left"] = ", 왼쪽으로 회전"
@@ -295,8 +295,8 @@ Off Screen]=] ] = "Aura가 화면 밖에 있음"
 	L["Collapse all non-loaded displays"] = "불러오지 않은 모든 디스플레이 접기"
 	L["Collapse all pending Import"] = "보류 중인 모든 가져오기 접기"
 	L["Collapsible Group"] = "접을 수 있는 그룹"
-	L["color"] = "색상"
 	L["Color"] = "색상"
+	L["color"] = "색상"
 	L["Column Height"] = "열 높이"
 	L["Column Space"] = "열 간격"
 	L["Columns"] = "열"
@@ -392,9 +392,9 @@ UNIT_POWER_UPDATE, UNIT_AURA PLAYER_TARGET_CHANGED]=]
 	L["Distribute Vertically"] = "세로로 퍼뜨리기"
 	L["Do not group this display"] = "이 디스플레이 그룹하지 않기"
 	--[[Translation missing --]]
-	L["Do you want to ignore all future updates for this aura"] = "Do you want to ignore all future updates for this aura"
+	L["Do you want to enable updates for this aura"] = "Do you want to enable updates for this aura"
 	--[[Translation missing --]]
-	L["Do you want to stop ignoring all future updates for this aura"] = "Do you want to stop ignoring all future updates for this aura"
+	L["Do you want to ignore updates for this aura"] = "Do you want to ignore updates for this aura"
 	L["Documentation"] = "문서화"
 	L["Done"] = "완료"
 	L["Drag to move"] = "끌기 - 이동"
@@ -777,7 +777,7 @@ Can use \ to escape -.]=] ] = "필터 형식: '이름', '이름-서버', '-서�
 	L["Npc ID"] = "NPC ID"
 	L["Number of Entries"] = "항목 수"
 	--[[Translation missing --]]
-	L[ [=[Occurence of the event, reset when aura is unloaded
+	L[ [=[Occurrence of the event, reset when aura is unloaded
 Can be a range of values
 Can have multiple values separated by a comma or a space
 
@@ -786,7 +786,7 @@ Examples:
 2nd to 6th: 2-6
 every 2 events: /2
 every 3 events starting from 2nd: 2/3
-every 3 events starting from 2nd and ending at 11th: 2-11/3]=] ] = [=[Occurence of the event, reset when aura is unloaded
+every 3 events starting from 2nd and ending at 11th: 2-11/3]=] ] = [=[Occurrence of the event, reset when aura is unloaded
 Can be a range of values
 Can have multiple values separated by a comma or a space
 
@@ -1103,8 +1103,8 @@ It might not work correctly with your version!]=] ] = "이 효과는 최신 버�
 	L["Use Display Info Id"] = "디스플레이 정보 ID 사용"
 	L["Use SetTransform"] = "SetTransform 사용"
 	L["Use Texture"] = "텍스쳐 사용"
-	L["Used in Auras:"] = "사용되는 효과:"
 	L["Used in auras:"] = "사용되는 효과:"
+	L["Used in Auras:"] = "사용되는 효과:"
 	L["Uses Texture Coordinates to rotate the texture."] = "텍스처 좌표를 사용하여 텍스처를 회전합니다."
 	L["Uses UnitIsVisible() to check if in range. This is polled every second."] = "사정 거리를 확인하는 데 UnitIsVisible() 함수를 사용합니다. 매 초마다 확인합니다."
 	L["Value %i"] = "값 %i"
@@ -1135,8 +1135,8 @@ It might not work correctly with your version!]=] ] = "이 효과는 최신 버�
 	L["Y Rotation"] = "Y 회전"
 	L["Y Scale"] = "세로 크기"
 	L["Yellow Rune"] = "노란색 룬"
-	L["Y-Offset"] = "Y-좌표"
 	L["y-Offset"] = "Y-좌표"
+	L["Y-Offset"] = "Y-좌표"
 	L["You already have this group/aura. Importing will create a duplicate."] = "이미 이 그룹/효과가 있습니다. 가져오면 복제본이 생성됩니다."
 	L["You are about to delete %d aura(s). |cFFFF0000This cannot be undone!|r Would you like to continue?"] = "aura %d개를 삭제하려고 합니다. |cFFFF0000이는 취소할 수 없습니다!|r 계속할까요?"
 	L["You are about to delete a trigger. |cFFFF0000This cannot be undone!|r Would you like to continue?"] = "활성 조건을 삭제하려고 합니다. |cFFFF0000취소할 수 없습니다!|r 계속할까요?"

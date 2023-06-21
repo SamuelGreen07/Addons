@@ -670,7 +670,7 @@ do
 		end
 	end
 
-	function S:HandleTrimScrollBar(frame, small)
+	function S:HandleTrimScrollBar(frame)
 		assert(frame, 'does not exist.')
 
 		frame:StripTextures()
@@ -696,11 +696,6 @@ do
 
 			local r, g, b = unpack(E.media.rgbvaluecolor)
 			thumb.backdrop:SetBackdropColor(r, g, b, .25)
-
-			if not small then
-				thumb.backdrop:Point('TOPLEFT', 4, -1)
-				thumb.backdrop:Point('BOTTOMRIGHT', -4, 1)
-			end
 
 			thumb:HookScript('OnEnter', ThumbOnEnter)
 			thumb:HookScript('OnLeave', ThumbOnLeave)
@@ -1093,7 +1088,7 @@ do
 		f.isSkinned = true
 	end
 
-	function S:HandleNextPrevButton(btn, arrowDir, color, noBackdrop, stripTexts, frameLevel)
+	function S:HandleNextPrevButton(btn, arrowDir, color, noBackdrop, stripTexts, frameLevel, buttonSize)
 		if btn.isSkinned then return end
 
 		if not arrowDir then
@@ -1132,8 +1127,9 @@ do
 
 		local Normal, Disabled, Pushed = btn:GetNormalTexture(), btn:GetDisabledTexture(), btn:GetPushedTexture()
 
+		btn:Size(buttonSize or (noBackdrop and 20 or 18))
+
 		if noBackdrop then
-			btn:Size(20, 20)
 			Disabled:SetVertexColor(.5, .5, .5)
 			btn.Texture = Normal
 
@@ -1142,7 +1138,6 @@ do
 				btn:HookScript('OnLeave', closeOnLeave)
 			end
 		else
-			btn:Size(18, 18)
 			Disabled:SetVertexColor(.3, .3, .3)
 		end
 

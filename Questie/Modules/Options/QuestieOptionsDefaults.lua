@@ -88,6 +88,8 @@ function QuestieOptionsDefaults:Load()
             trackerBackdropFader = false,
             currentBackdropFader = false,
             sizerHidden = false,
+            listAchievementsFirst = false,
+            stickyVoiceOverFrame = false,
             alwaysShowTracker = false,
             globalTrackerLocation = true,
             trackerColorObjectives = 'white',

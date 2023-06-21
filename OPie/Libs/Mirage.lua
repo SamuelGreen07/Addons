@@ -10,6 +10,7 @@ local gx do
 		CooldownStar = [[Interface\cooldown\star4]],
 		CooldownSpark = b .. "spark",
 		Tri = b .. "tri",
+		IconMask = b .. "iconmask",
 	}
 end
 
@@ -414,7 +415,7 @@ local CreateIndicator do
 			w:SetPoint("BOTTOMRIGHT", -2, 4)
 		w, r.count = ef:CreateFontString(nil, "OVERLAY", "NumberFontNormalSmallGray"), w
 			w:SetJustifyH("RIGHT")
-			w:SetPoint("TOPRIGHT", -1, -4)
+			w:SetPoint("TOPRIGHT", -2, -3)
 		w, r.key = ef:CreateTexture(nil, "ARTWORK", nil, 2), w
 			w:SetSize(size/5, size/4)
 			w:SetTexture("Interface\\GuildFrame\\GuildDifficulty")
@@ -431,7 +432,10 @@ local CreateIndicator do
 			w:SetPoint("TOPLEFT", 4, -4)
 			w:SetSize(14,14)
 			w:Hide()
-		w, r.qualityMark = nil, w
+		w, r.qualityMark = ef:CreateMaskTexture(), w
+			w:SetTexture(gx.IconMask)
+			w:SetAllPoints()
+			r.icon:AddMaskTexture(w)
 		r.cdText = r.cd.cdText
 		return r
 	end

@@ -1,8 +1,6 @@
-local _, T = ...
+local L, _, T = 0, ...
 if T.SkipLocalActionBook then return end
-local AB = T.ActionBook:compatible(2, 21)
-assert(AB and 1, "Incompatible library bundle")
-local L = AB:locale(true)
+L, T.ActionBook.LW = T.ActionBook.LW, nil
 
 local C, z, V, K = GetLocale(), nil
 V =
@@ -21,8 +19,8 @@ V =
       "Monutra de tierra", "Artículo", "Artículos", "Macro", "Macros", "Misceláneo", "Montura", "Monturas", z, "Mostrar sólo al equipar",
       z, "Habilidades de mascota", "Marcador del mundo", "Marcador del mundo", "Marcadores del mundo", "Mostrar esta rodaja siempre", "Hechizo", "Juegete", z, z,
     }
-    or C == "frFR" and { -- 29/30 (96%)
-      "Compétences", "Également utiliser l'élément avec le même nom", "Mascotte de combat", "Mascottes de combat", "Macro personnalisée", z, "Set d'équipement", "Équipement de sets", "Bouton d'action supplémentaire", "Montures volantes",
+    or C == "frFR" and { -- 30/30 (100%)
+      "Compétences", "Également utiliser l'élément avec le même nom", "Mascotte de combat", "Mascottes de combat", "Macro personnalisée", "Monture draconique", "Set d'équipement", "Équipement de sets", "Bouton d'action supplémentaire", "Montures volantes",
       "Monture terrestre", "Objet", "Objets", "Macro", "Macros", "Divers", "Monture", "Montures", "Nouvelle Macro", "Afficher seulement quand équipé",
       "Compétence du Familier", "Compétences du familier", "Marqueur de Raid", "Marqueur de Terrain", "Marqueurs de Raid", "Afficher un remplacement quand indisponible", "Sort", "Jouet", "Jouets", "Utiliser le rang connu le plus élevé",
     }

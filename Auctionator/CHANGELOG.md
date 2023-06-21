@@ -1,9 +1,13 @@
 # Auctionator
 
-## [10.1.5](https://github.com/Auctionator/Auctionator/tree/10.1.5) (2023-06-02)
-[Full Changelog](https://github.com/Auctionator/Auctionator/compare/10.1.4...10.1.5) 
+## [10.1.8](https://github.com/Auctionator/Auctionator/tree/10.1.8) (2023-06-21)
+[Full Changelog](https://github.com/Auctionator/Auctionator/compare/10.1.7...10.1.8) 
 
-- [Fixes #1396] Fix new errors on classic era  
-- Mainline: Selling: Tweak to bid price carry over to avoid too high bid values  
-- Shopping: Add dragging to change list search terms position support back  
-- Mainline: Selling: Preserve bid price set by prior rows when clicking new rows  
+- Wrath: Update toc for 3.4.2  
+- Shopping: Fix import error when using thousands of item ids for the list  
+- Shopping: Refresh buy view if owned auction gets bid applied  
+- Shopping: Fix bid colour not showing on buy screens  
+- Shopping: Highlight owned items with bids differently on buy screens  
+- Cancelling: Adjust shade of purple in bid rows  
+- Cancelling: Change bid highlight to purple instead of green  
+- Mainline: Cancelling: Update view when active auctions have a bid placed  

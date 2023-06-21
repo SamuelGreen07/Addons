@@ -2,6 +2,8 @@ local E = unpack(ElvUI)
 local D = E:GetModule('Distributor')
 local S = E:GetModule('Skins')
 
+local GetAddOnMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
+
 local L = E.Libs.ACL:GetLocale('ElvUI', E.global.general.locale)
 local C = {
 	version = tonumber(GetAddOnMetadata('ElvUI_Options', 'Version')),
@@ -18,16 +20,6 @@ local format, gsub, ipairs, pairs = format, gsub, ipairs, pairs
 local tconcat, tinsert, tremove = table.concat, tinsert, tremove
 
 C.Values = {
-	FontFlags = {
-		NONE = L["None"],
-		OUTLINE = 'Outline',
-		THICKOUTLINE = 'Thick',
-		MONOCHROME = '|cffaaaaaaMono|r',
-		MONOCHROMEOUTLINE = '|cffaaaaaaMono|r Outline',
-		MONOCHROMETHICKOUTLINE = '|cffaaaaaaMono|r Thick',
-	},
-	FontSize = { min = 8, max = 64, step = 1 },
-	Strata = { BACKGROUND = 'BACKGROUND', LOW = 'LOW', MEDIUM = 'MEDIUM', HIGH = 'HIGH', DIALOG = 'DIALOG', TOOLTIP = 'TOOLTIP' },
 	GrowthDirection = {
 		DOWN_RIGHT = format(L["%s and then %s"], L["Down"], L["Right"]),
 		DOWN_LEFT = format(L["%s and then %s"], L["Down"], L["Left"]),
@@ -38,16 +30,29 @@ C.Values = {
 		LEFT_DOWN = format(L["%s and then %s"], L["Left"], L["Down"]),
 		LEFT_UP = format(L["%s and then %s"], L["Left"], L["Up"]),
 	},
+	FontFlags = {
+		NONE = L["None"],
+		OUTLINE = 'Outline',
+		THICKOUTLINE = 'Thick',
+		MONOCHROME = '|cffaaaaaaMono|r',
+		MONOCHROMEOUTLINE = '|cffaaaaaaMono|r Outline',
+		MONOCHROMETHICKOUTLINE = '|cffaaaaaaMono|r Thick',
+	},
+	FontSize = { min = 8, max = 64, step = 1 },
+	Roman = { 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX' }, -- 1 to 20
+	AllPositions = { LEFT = 'LEFT', RIGHT = 'RIGHT', TOP = 'TOP', BOTTOM = 'BOTTOM', CENTER = 'CENTER' },
+	SidePositions = { LEFT = 'LEFT', RIGHT = 'RIGHT', TOP = 'TOP', BOTTOM = 'BOTTOM' },
+	TextPositions = { BOTTOMRIGHT = 'BOTTOMRIGHT', BOTTOMLEFT = 'BOTTOMLEFT', TOPRIGHT = 'TOPRIGHT', TOPLEFT = 'TOPLEFT', BOTTOM = 'BOTTOM', TOP = 'TOP' },
 	AllPoints = { TOPLEFT = 'TOPLEFT', LEFT = 'LEFT', BOTTOMLEFT = 'BOTTOMLEFT', RIGHT = 'RIGHT', TOPRIGHT = 'TOPRIGHT', BOTTOMRIGHT = 'BOTTOMRIGHT', TOP = 'TOP', BOTTOM = 'BOTTOM', CENTER = 'CENTER' },
 	Anchors = { TOPLEFT = 'TOPLEFT', LEFT = 'LEFT', BOTTOMLEFT = 'BOTTOMLEFT', RIGHT = 'RIGHT', TOPRIGHT = 'TOPRIGHT', BOTTOMRIGHT = 'BOTTOMRIGHT', TOP = 'TOP', BOTTOM = 'BOTTOM' },
+	Strata = { BACKGROUND = 'BACKGROUND', LOW = 'LOW', MEDIUM = 'MEDIUM', HIGH = 'HIGH', DIALOG = 'DIALOG', TOOLTIP = 'TOOLTIP' },
 	SmartAuraPositions = {
 		DISABLED = L["Disable"],
 		BUFFS_ON_DEBUFFS = L["Buffs on Debuffs"],
 		DEBUFFS_ON_BUFFS = L["Debuffs on Buffs"],
 		FLUID_BUFFS_ON_DEBUFFS = L["Fluid Buffs on Debuffs"],
 		FLUID_DEBUFFS_ON_BUFFS = L["Fluid Debuffs on Buffs"],
-	},
-	Roman = { 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX' } -- 1 to 20
+	}
 }
 
 do
@@ -248,13 +253,13 @@ E.Options.args.info.args.spacer = ACH:Spacer(2)
 E.Options.args.info.args.support = ACH:Group(L["Support"], nil, 3)
 E.Options.args.info.args.support.inline = true
 E.Options.args.info.args.support.args.git = ACH:Execute(L["Ticket Tracker"], nil, 1, function() E:StaticPopup_Show('ELVUI_EDITBOX', nil, nil, 'https://github.com/tukui-org/ElvUI/issues') end, nil, nil, 140)
-E.Options.args.info.args.support.args.discord = ACH:Execute(L["Discord"], nil, 2, function() E:StaticPopup_Show('ELVUI_EDITBOX', nil, nil, 'https://discord.gg/xFWcfgE') end, nil, nil, 140)
+E.Options.args.info.args.support.args.discord = ACH:Execute(L["Discord"], nil, 2, function() E:StaticPopup_Show('ELVUI_EDITBOX', nil, nil, 'https://discord.tukui.org') end, nil, nil, 140)
 
 E.Options.args.info.args.download = ACH:Group(L["Download"], nil, 4)
 E.Options.args.info.args.download.inline = true
 E.Options.args.info.args.download.args.development = ACH:Execute(L["Development Version"], L["Link to the latest development version."], 1, function() E:StaticPopup_Show('ELVUI_EDITBOX', nil, nil, 'https://github.com/tukui-org/ElvUI/archive/refs/heads/development.zip') end, nil, nil, 140)
 E.Options.args.info.args.download.args.ptr = ACH:Execute(L["PTR Version"], L["Link to the latest PTR version."], 2, function() E:StaticPopup_Show('ELVUI_EDITBOX', nil, nil, 'https://github.com/tukui-org/ElvUI/archive/refs/heads/ptr.zip') end, nil, nil, 140)
-E.Options.args.info.args.download.args.changelog = ACH:Execute(L["Changelog"], nil, 3, function() E:StaticPopup_Show('ELVUI_EDITBOX', nil, nil, 'https://www.tukui.org/download.php?ui=elvui&changelog') end, nil, nil, 140)
+E.Options.args.info.args.download.args.changelog = ACH:Execute(L["Changelog"], nil, 3, function() E:StaticPopup_Show('ELVUI_EDITBOX', nil, nil, 'https://github.com/tukui-org/ElvUI/blob/development/CHANGELOG.md') end, nil, nil, 140)
 
 E.Options.args.info.args.credits = ACH:Group(L["Credits"], nil, 5)
 E.Options.args.info.args.credits.inline = true

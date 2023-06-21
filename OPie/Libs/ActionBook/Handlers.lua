@@ -4,10 +4,10 @@ local MODERN, CF_CLASSIC, CI_ERA = COMPAT >= 10e4, COMPAT < 10e4, COMPAT < 2e4
 local MODERN_CONTAINERS = MODERN or C_Container and C_Container.GetContainerNumSlots
 local EV = T.Evie
 local AB = T.ActionBook:compatible(2,21)
-local RW = T.ActionBook:compatible("Rewire",1,25)
-local KR = T.ActionBook:compatible("Kindred",1,14)
+local RW = T.ActionBook:compatible("Rewire", 1,27)
+local KR = T.ActionBook:compatible("Kindred", 1,14)
 assert(EV and AB and RW and KR and 1, "Incompatible library bundle")
-local L = AB:locale()
+local L = T.ActionBook.L
 local spellFeedback, itemHint, toyHint, mountHint, mountMap
 
 local NormalizeInRange = {[0]=0, 1, [true]=1, [false]=0}
@@ -68,14 +68,18 @@ if MODERN then -- mount: mount ID
 		end
 	end
 
+	local function checkUsableMountID(mid, myFactionId, trustMap, GetMountInfo)
+		local _1, sid, _3, _4, _5, _6, _7, factionLocked, factionId, hide, have = (GetMountInfo or C_MountJournal.GetMountInfoByID)(mid)
+		return (trustMap and trustMap[sid] or have and sid ~= 0 and not hide
+		        and (not factionLocked or factionId == (myFactionId or UnitFactionGroup("player") == "Horde" and 0 or 1)) and sid ~= 0
+		        and RW:IsSpellCastable(sid, 2)) and mid or nil, sid
+	end
 	local function mountSync()
 		local changed, myFactionId = false, UnitFactionGroup("player") == "Horde" and 0 or 1
-		local idm, GetMountInfo, oldID, curID = C_MountJournal.GetMountIDs(), C_MountJournal.GetMountInfoByID
+		local idm, GetMountInfo, oldID, curID, sid = C_MountJournal.GetMountIDs(), C_MountJournal.GetMountInfoByID
 		for mid=1,#idm do
 			mid = idm[mid]
-			local _1, sid, _3, _4, _5, _6, _7, factionLocked, factionId, hide, have = GetMountInfo(mid)
-			curID, oldID = not hide and (not factionLocked or factionId == myFactionId) and sid ~= 0
-			               and have and RW:IsSpellCastable(sid) and mid or nil, mountMap[sid]
+			oldID, curID, sid = mountMap[sid], checkUsableMountID(mid, myFactionId, nil, GetMountInfo)
 			if oldID ~= curID then
 				local sname, srank, rname = GetSpellInfo(sid), GetSpellSubtext(sid)
 				rname = sname .. "(" .. (srank or "") .. ")" -- Paladin/Warlock/Death Knight horses have spell ranks
@@ -94,11 +98,8 @@ if MODERN then -- mount: mount ID
 	end
 	local actionMap = {}
 	local function createMount(id)
-		if type(id) == "number" and not actionMap[id] then
-			local _, sid = C_MountJournal.GetMountInfoByID(id)
-			if mountMap[sid] then
-				actionMap[id] = AB:CreateActionSlot(mountHint, id, summonAction(id))
-			end
+		if type(id) == "number" and not actionMap[id] and checkUsableMountID(id, nil, mountMap) then
+			actionMap[id] = AB:CreateActionSlot(mountHint, id, summonAction(id))
 		end
 		return actionMap[id]
 	end
@@ -220,7 +221,7 @@ do -- spell: spell ID + mount spell ID
 			return
 		elseif rwCastType == "forced-id-cast" then
 			action = id
-		elseif rwCastType == "rewire-alias" or rwCastType == "rewire-escape" then
+		elseif rwCastType == "rewire-escape" then
 			return AB:GetActionSlot("macrotext", SLASH_CAST1 .. " " .. GetSpellInfo(id))
 		else
 			local s0, r0 = GetSpellInfo(id), GetSpellSubtext(id)
@@ -248,8 +249,8 @@ do -- spell: spell ID + mount spell ID
 	end
 	local function describeSpell(q, id, optToken)
 		local name2, sid2, icon2, rank, name, _, icon, _, _, _, _, icon1 = nil, nil, nil, GetSpellSubtext(id), GetSpellInfo(id)
-		local _, castType = RW:IsSpellCastable(id)
 		local laxRank = CF_CLASSIC and optToken ~= "lock-rank" and "lax-rank"
+		local _, castType = RW:IsSpellCastable(id, nil, laxRank)
 		if name and castType ~= "forced-id-cast" then
 			local qRank = (MODERN or q == "list-query" or not laxRank) and rank or nil
 			rank, name2, _, icon2, _, _, _, sid2 = GetSpellSubtext(name, rank), GetSpellInfo(name, qRank)
@@ -1051,59 +1052,4 @@ do -- disenchant: iid
 		return DISENCHANT_SN, name or ("item:" .. iid), icon, nil, disenchantTip, iid
 	end
 	AB:RegisterActionType("disenchant", createDisenchant, describeDisenchant)
-end
-
-if MODERN then -- Profession /cast alias: work around incorrectly inferred ranks
-	local activeSet, reserveSet, pendingSync = {}, {}
-	local function procProfessions(n, a, ...)
-		if a then
-			local _, _, _, _, scount, sofs = GetProfessionInfo(a)
-			for i=sofs+1, sofs+scount do
-				local et, eid = GetSpellBookItemInfo(i, "player")
-				if et == "SPELL" and not IsPassiveSpell(eid) then
-					local vid, sn, sr = "spell:" .. eid, GetSpellInfo(eid), GetSpellSubtext(eid)
-					reserveSet[sn], reserveSet[sn .. "()"] = vid, vid
-					if sr and sr ~= "" then
-						reserveSet[sn .. "(" .. sr .. ")"] = vid
-					end
-				end
-			end
-		end
-		if n > 1 then
-			return procProfessions(n-1, ...)
-		end
-	end
-	local function countValues(...)
-		return select("#", ...), ...
-	end
-	local function syncProf(e)
-		if InCombatLockdown() then
-			if not pendingSync then
-				EV.PLAYER_REGEN_ENABLED, pendingSync = syncProf, true
-			end
-			return
-		end
-		pendingSync = false
-		wipe(reserveSet)
-		procProfessions(countValues(GetProfessions()))
-		activeSet, reserveSet = reserveSet, activeSet
-		local changed
-		for k in pairs(reserveSet) do
-			if not activeSet[k] then
-				changed = true
-				RW:SetCastAlias(k, nil)
-			end
-		end
-		for k,v in pairs(activeSet) do
-			if v ~= reserveSet[k] then
-				changed = true
-				RW:SetCastAlias(k, v)
-			end
-		end
-		if changed then
-			AB:NotifyObservers("spell")
-		end
-		return e ~= "CHAT_MSG_SKILL" and "remove"
-	end
-	EV.PLAYER_LOGIN, EV.CHAT_MSG_SKILL = syncProf, syncProf
 end

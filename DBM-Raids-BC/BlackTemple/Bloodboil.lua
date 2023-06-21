@@ -1,9 +1,13 @@
 local mod	= DBM:NewMod("Bloodboil", "DBM-Raids-BC", 2)
 local L		= mod:GetLocalizedStrings()
 
-mod.statTypes = "normal25"
+if not mod:IsClassic() then
+	mod.statTypes = "normal,timewalker"
+else
+	mod.statTypes = "normal25"
+end
 
-mod:SetRevision("20230523070844")
+mod:SetRevision("20230620214325")
 mod:SetCreatureID(22948)
 mod:SetEncounterID(605, 2477)
 mod:SetModelID(21443)

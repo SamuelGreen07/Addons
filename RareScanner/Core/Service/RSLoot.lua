@@ -19,23 +19,6 @@ local RSTooltipScanners = private.ImportLib("RareScannerTooltipScanners")
 -- Filters to apply to the loot displayed under the main button and the worldmap
 ---============================================================================
 
-local function IsEquipable(itemClassID, itemSubClassID, itemEquipLoc)
-	local _, _, classIndex = UnitClass("player");
-	local isEquipable = false
-	for categoryID, subcategories in pairs(private.CLASS_PROFICIENCIES[classIndex]) do
-		if (categoryID == itemClassID and RSUtils.Contains(subcategories, itemSubClassID)) then
-			isEquipable = true
-			break
-		end
-	end
-	-- check if cloth and not cloak
-	if (not isEquipable and itemClassID == Enum.ItemClass.Armor and itemSubClassID == Enum.ItemArmorSubclass.Cloth and itemEquipLoc == "INVTYPE_CLOAK") then --check if its cloth and not cloak
-		return true
-	end
-
-	return isEquipable
-end
-
 local function IsToy(itemLink, itemID)
 	if (RSLootDB.IsToy(itemID)) then
 		return true
@@ -59,16 +42,16 @@ local function IsFilteredByCategory(itemLink, itemID, itemClassID, itemSubClassI
 	return false
 end
 
-function RSLoot.IsFiltered(itemID, itemLink, itemRarity, itemEquipLoc, itemClassID, itemSubClassID)
-	-- Quality filter
-	if (itemRarity < tonumber(RSConfigDB.GetLootFilterMinQuality())) then
-		RSLogger:PrintDebugMessageItemID(itemID, string.format("Item [%s]. Filtrado por su calidad.", itemID))
-		return true
-	end
-
+function RSLoot.IsFiltered(entityID, itemID, itemLink, itemRarity, itemEquipLoc, itemClassID, itemSubClassID)
 	-- Category filter
 	if (IsFilteredByCategory(itemLink, itemID, itemClassID, itemSubClassID)) then
 		RSLogger:PrintDebugMessageItemID(itemID, string.format("Item [%s]. Filtrado por su categoria.", itemID))
+		return true
+	end
+	
+	-- Quality filter
+	if (itemRarity < tonumber(RSConfigDB.GetLootFilterMinQuality())) then
+		RSLogger:PrintDebugMessageItemID(itemID, string.format("Item [%s]. Filtrado por su calidad.", itemID))
 		return true
 	end
 	

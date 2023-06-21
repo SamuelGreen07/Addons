@@ -223,8 +223,8 @@ Enable this setting if you want this timer to be hidden, or when using a WeakAur
 	L["Anchor"] = "Anker"
 	L["Anchor Point"] = "Ankerpunkt"
 	L["Anchored To"] = "Angeheftet an"
-	L["And "] = "Und"
 	L["and"] = "und"
+	L["And "] = "Und"
 	L["and aligned left"] = "und links ausgerichtet"
 	L["and aligned right"] = "und rechts ausgerichtet"
 	L["and rotated left"] = "und nach links gedreht"
@@ -477,9 +477,9 @@ UNIT_POWER, UNIT_AURA PLAYER_TARGET_CHANGED]=]
 	L["Distribute Vertically"] = "Vertikal verteilen"
 	L["Do not group this display"] = "Diese Anzeige nicht kopieren"
 	--[[Translation missing --]]
-	L["Do you want to ignore all future updates for this aura"] = "Do you want to ignore all future updates for this aura"
+	L["Do you want to enable updates for this aura"] = "Do you want to enable updates for this aura"
 	--[[Translation missing --]]
-	L["Do you want to stop ignoring all future updates for this aura"] = "Do you want to stop ignoring all future updates for this aura"
+	L["Do you want to ignore updates for this aura"] = "Do you want to ignore updates for this aura"
 	L["Documentation"] = "Dokumentation"
 	L["Done"] = "Fertig"
 	L["Drag to move"] = "Ziehen, um diese Anzeige zu verschieben"
@@ -943,7 +943,7 @@ Nur ein Wert kann ausgewählt werden.]=]
 	--[[Translation missing --]]
 	L["Number of Entries"] = "Number of Entries"
 	--[[Translation missing --]]
-	L[ [=[Occurence of the event, reset when aura is unloaded
+	L[ [=[Occurrence of the event, reset when aura is unloaded
 Can be a range of values
 Can have multiple values separated by a comma or a space
 
@@ -952,7 +952,7 @@ Examples:
 2nd to 6th: 2-6
 every 2 events: /2
 every 3 events starting from 2nd: 2/3
-every 3 events starting from 2nd and ending at 11th: 2-11/3]=] ] = [=[Occurence of the event, reset when aura is unloaded
+every 3 events starting from 2nd and ending at 11th: 2-11/3]=] ] = [=[Occurrence of the event, reset when aura is unloaded
 Can be a range of values
 Can have multiple values separated by a comma or a space
 
@@ -1402,16 +1402,16 @@ It might not work correctly with your version!]=]
 	L["X Offset"] = "X-Versatz"
 	L["X Rotation"] = "X-Rotation"
 	L["X Scale"] = "Skalierung (X)"
-	L["X-Offset"] = "X-Versatz"
 	--[[Translation missing --]]
 	L["x-Offset"] = "x-Offset"
+	L["X-Offset"] = "X-Versatz"
 	L["Y Offset"] = "Y-Versatz"
 	L["Y Rotation"] = "Y-Rotation"
 	L["Y Scale"] = "Skalierung (Y)"
 	L["Yellow Rune"] = "Gelbe Rune"
-	L["Y-Offset"] = "Y-Versatz"
 	--[[Translation missing --]]
 	L["y-Offset"] = "y-Offset"
+	L["Y-Offset"] = "Y-Versatz"
 	--[[Translation missing --]]
 	L["You already have this group/aura. Importing will create a duplicate."] = "You already have this group/aura. Importing will create a duplicate."
 	L["You are about to delete %d aura(s). |cFFFF0000This cannot be undone!|r Would you like to continue?"] = "Du bist im Begriff %d Aura/Auren zu löschen. |cFFFF0000Das Löschen kann nicht rückgängig gemacht werden!|r Willst du fortfahren?"

@@ -1,16 +1,12 @@
-lightweight tag 845f8fc84a01a2c02ae5ea657c915d90e23f8a10 8.1.11
-Author:	GitHub <noreply@github.com>
-Date:	Sat Apr 15 08:39:14 2023 +0200
+lightweight tag 1105d843f72a0a4645aa48ea8e798c937437bed0 8.1.12
+Author:	LANCESTRE <lancetre@intenebris.org>
+Date:	Wed Jun 21 21:38:12 2023 +0200
 
-commit 42aa65af7316af4f9c675051ffe359677f840238
-Author: dadec666 <dadec666@gmail.com>
-Date:   Thu Apr 13 11:13:10 2023 +0300
+commit 1105d843f72a0a4645aa48ea8e798c937437bed0
+Author: LANCESTRE <lancetre@intenebris.org>
+Date:   Wed Jun 21 21:38:12 2023 +0200
 
-    Update Localization.RU.lua
-
-commit 42aa65af7316af4f9c675051ffe359677f840238
-Author: dadec666 <dadec666@gmail.com>
-Date:   Thu Apr 13 11:13:10 2023 +0300
-
-    Update Localization.RU.lua
+    Update Necrosis.toc
+    
+    30402
 

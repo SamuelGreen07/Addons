@@ -1,4 +1,4 @@
-## Interface: 30401
+## Interface: 30402
 ## Title:|cffffe00a<|r|cffff7d0aDBM|r|cffffe00a>|r |cff0055FF Options GUI|r
 ## Title-deDE:|cffffe00a<|r|cffff7d0aDBM|r|cffffe00a>|r |cff0055FF GUI für Einstellungen|r
 ## Title-zhCN:|cffffe00a<|r|cffff7d0aDBM|r|cffffe00a>|r |cff0055FF 设置界面|r
@@ -26,7 +26,7 @@
 ## LoadOnDemand: 1
 ## DefaultState: enabled
 ## Author: MysticalOS, QartemisT
-## Version: d59f987
+## Version: 962c5cc
 ## X-Website: https://deadlybossmods.com
 
 localization.en.lua

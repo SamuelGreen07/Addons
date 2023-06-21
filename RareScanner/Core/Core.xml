@@ -42,6 +42,8 @@
 	<Include file="Service\RSCommandLine.lua"/>
 	<Include file="Service\RSAudioAlerts.lua"/>
 	<Include file="Service\RSEventHandler.lua"/>
+	<Include file="Service\RSButtonHandler.lua"/>
+	<Include file="Service\RSTargetUnitTracker.lua"/>
 	
 	<!-- Tooltips -->
 	<Include file="Plugins\MapPlugin\Tooltips\RSNotes.lua"/>
@@ -49,4 +51,7 @@
 	
 	<!-- Providers -->
 	<Include file="Providers\RareScannerMapProvider.lua"/>
+	
+	<!-- Static popups -->
+	<Include file="Libs\RSStaticPopups.lua"/>
 </Ui>

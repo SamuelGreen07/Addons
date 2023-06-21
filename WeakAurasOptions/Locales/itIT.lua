@@ -224,9 +224,9 @@ Enable this setting if you want this timer to be hidden, or when using a WeakAur
 	L["Anchor"] = "Ancora"
 	L["Anchor Point"] = "Punto di ancoraggio"
 	L["Anchored To"] = "Ancorato a"
-	L["And "] = "E"
 	--[[Translation missing --]]
 	L["and"] = "and"
+	L["And "] = "E"
 	--[[Translation missing --]]
 	L["and aligned left"] = "and aligned left"
 	--[[Translation missing --]]
@@ -361,8 +361,8 @@ Off Screen]=]
 	L["Collapse all pending Import"] = "Collapse all pending Import"
 	--[[Translation missing --]]
 	L["Collapsible Group"] = "Collapsible Group"
-	L["color"] = "Colore"
 	L["Color"] = "Colore"
+	L["color"] = "Colore"
 	L["Column Height"] = "Altezza Colonna"
 	--[[Translation missing --]]
 	L["Column Space"] = "Column Space"
@@ -504,9 +504,9 @@ Off Screen]=]
 	--[[Translation missing --]]
 	L["Do not group this display"] = "Do not group this display"
 	--[[Translation missing --]]
-	L["Do you want to ignore all future updates for this aura"] = "Do you want to ignore all future updates for this aura"
+	L["Do you want to enable updates for this aura"] = "Do you want to enable updates for this aura"
 	--[[Translation missing --]]
-	L["Do you want to stop ignoring all future updates for this aura"] = "Do you want to stop ignoring all future updates for this aura"
+	L["Do you want to ignore updates for this aura"] = "Do you want to ignore updates for this aura"
 	--[[Translation missing --]]
 	L["Documentation"] = "Documentation"
 	--[[Translation missing --]]
@@ -1069,7 +1069,7 @@ Can use \ to escape -.]=]
 	--[[Translation missing --]]
 	L["Number of Entries"] = "Number of Entries"
 	--[[Translation missing --]]
-	L[ [=[Occurence of the event, reset when aura is unloaded
+	L[ [=[Occurrence of the event, reset when aura is unloaded
 Can be a range of values
 Can have multiple values separated by a comma or a space
 
@@ -1078,7 +1078,7 @@ Examples:
 2nd to 6th: 2-6
 every 2 events: /2
 every 3 events starting from 2nd: 2/3
-every 3 events starting from 2nd and ending at 11th: 2-11/3]=] ] = [=[Occurence of the event, reset when aura is unloaded
+every 3 events starting from 2nd and ending at 11th: 2-11/3]=] ] = [=[Occurrence of the event, reset when aura is unloaded
 Can be a range of values
 Can have multiple values separated by a comma or a space
 
@@ -1623,9 +1623,9 @@ It might not work correctly with your version!]=]
 	--[[Translation missing --]]
 	L["Use Texture"] = "Use Texture"
 	--[[Translation missing --]]
-	L["Used in Auras:"] = "Used in Auras:"
-	--[[Translation missing --]]
 	L["Used in auras:"] = "Used in auras:"
+	--[[Translation missing --]]
+	L["Used in Auras:"] = "Used in Auras:"
 	--[[Translation missing --]]
 	L["Uses Texture Coordinates to rotate the texture."] = "Uses Texture Coordinates to rotate the texture."
 	--[[Translation missing --]]
@@ -1679,9 +1679,9 @@ It might not work correctly with your version!]=]
 	--[[Translation missing --]]
 	L["Yellow Rune"] = "Yellow Rune"
 	--[[Translation missing --]]
-	L["Y-Offset"] = "Y-Offset"
-	--[[Translation missing --]]
 	L["y-Offset"] = "y-Offset"
+	--[[Translation missing --]]
+	L["Y-Offset"] = "Y-Offset"
 	--[[Translation missing --]]
 	L["You already have this group/aura. Importing will create a duplicate."] = "You already have this group/aura. Importing will create a duplicate."
 	--[[Translation missing --]]

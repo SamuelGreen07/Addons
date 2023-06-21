@@ -9,5 +9,8 @@
 	<Include file="Plugins\MapPlugin\RSMinimapPinTemplate.xml"/>
 	<Include file="Plugins\MapPlugin\RSGuideTemplate.xml"/>
 	<Include file="Plugins\MapPlugin\RSWorldMapButtonTemplate.xml"/>
+		
+	<!-- Addon compartment -->
+	<Include file="Service/RSAddonCompartment.lua"/>
 	
 </Ui>

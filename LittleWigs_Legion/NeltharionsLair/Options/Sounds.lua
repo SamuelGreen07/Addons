@@ -35,6 +35,7 @@ BigWigs:AddSounds("Dargrul", {
 
 BigWigs:AddSounds("Neltharions Lair Trash", {
 	[183088] = "alarm",
+	[183407] = "underyou",
 	[183465] = "alarm",
 	[183526] = "long",
 	[183539] = "alarm",
@@ -45,11 +46,12 @@ BigWigs:AddSounds("Neltharions Lair Trash", {
 	[193505] = "alert",
 	[193585] = "warning",
 	[193803] = "warning",
-	[200154] = {"alarm","alert"},
+	[200154] = {"alert","info","warning"},
 	[201983] = "warning",
-	[202108] = "alarm",
+	[202108] = "info",
 	[202181] = {"alert","warning"},
 	[226287] = "alarm",
 	[226296] = "alarm",
+	[226388] = "underyou",
 	[226406] = "alarm",
 })

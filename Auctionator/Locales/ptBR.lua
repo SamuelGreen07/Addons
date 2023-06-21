@@ -21,6 +21,8 @@ L["AUCTION_AGE_TOOLTIP_TOOLTIP_TEXT"] = "Show auction information age in days fo
 L["AUCTION_DURATION_12"] = "12 Horas"
 L["AUCTION_DURATION_24"] = "24 Horas"
 L["AUCTION_DURATION_48"] = "48 Horas"
+--[[Translation missing --]]
+L["AUCTION_MEAN"] = "Auction Mean"
 L["AUCTION_TOOLTIP_TOOLTIP_HEADER"] = "Informações de Leilão na dica"
 L["AUCTION_TOOLTIP_TOOLTIP_TEXT"] = "Mostra as informações de leilão na dica quando passar o mouse sobre um item."
 L["AUCTIONATOR"] = "Auctionator"
@@ -35,6 +37,8 @@ L["BUG_REPORT"] = "Reportar um Erro"
 L["BUG_TOOLTIP_HEADER"] = "Reportar um Erro no Github"
 L["BUG_TOOLTIP_TEXT"] = "Se você encontrar um erro ao usar o Auctionator, reporte no Github. Forneça detalhes suficientes para que possamos reproduzí-lo. Usar os AddOns !BugGrabber e BugSack também nos ajudará."
 L["BUY"] = "Comprar"
+--[[Translation missing --]]
+L["BUY_NOW"] = "Buy Now"
 L["BUY_STACK"] = "Comprar pilha"
 L["BUYING"] = "Comprando"
 L["BUYING_X_FOR_X"] = [=[Comprando %s por %s
@@ -48,6 +52,8 @@ L["CANCEL_UNDERCUT"] = "Cancelar"
 L["CANCELLING_TAB"] = "Cancelar"
 L["CANCELLING_TAB_HEADER"] = "Auctionator - Cancelar"
 L["CANNOT_AUCTION"] = "Não é possível leiloar"
+--[[Translation missing --]]
+L["CAREFUL_CAPS"] = "CAREFUL"
 L["CHAIN_BUY"] = [=[Compra em cadeia
 ]=]
 L["CHAIN_BUY_TOOLTIP_HEADER"] = [=[Múltiplas compras em cadeia
@@ -214,6 +220,12 @@ L["CONFIG_SELLING_SPLIT_PANELS_TOOLTIP_TEXT"] = "Normalmente, os preços histór
 L["CONFIG_SELLING_TBC_ALL_ITEMS"] = [=[Opções para definir as configurações de lançamento padrão para todos os itens.
 ]=]
 L["CONFIG_SELLING_TEXT"] = "Opções para alterar o comportamento da guia Venda"
+--[[Translation missing --]]
+L["CONFIG_SHOPPING_ALWAYS_CONFIRM_QUANTITY"] = "Always type quantity twice when purchasing commodities from the shopping tab"
+--[[Translation missing --]]
+L["CONFIG_SHOPPING_ALWAYS_CONFIRM_QUANTITY_TOOLTIP_HEADER"] = "Confirm quantity every time"
+--[[Translation missing --]]
+L["CONFIG_SHOPPING_ALWAYS_CONFIRM_QUANTITY_TOOLTIP_TEXT"] = "By default the quantity is confirmed just once, this makes it so you have to type it a second time to confirm the purchase."
 L["CONFIG_SHOPPING_ALWAYS_LOAD_MORE"] = [=[Sempre carregue todos os resultados disponíveis.
 ]=]
 L["CONFIG_SHOPPING_ALWAYS_LOAD_MORE_TOOLTIP_HEADER"] = [=[Sempre carregue mais
@@ -251,6 +263,8 @@ L["CONFIRM_POST_BELOW_VENDOR"] = [=[Você pode ganhar mais ouro vendendo isso pa
 L["CONFIRM_POST_LOW_PRICE"] = [=[O preço de %s parece um pouco baixo. Tem certeza de que deseja postar a esse preço?
 ]=]
 L["CONFIRM_POST_PRICE_DROP"] = "O preço unitário de %s é uma grande queda de preço. Tem certeza de que deseja postar a esse preço?"
+--[[Translation missing --]]
+L["CONFIRM_PURCHASE_OF_X_FOR_X"] = "Confirm purchase of %s for %s?"
 --[[Translation missing --]]
 L["CONFIRM_UNHIDE_ALL"] = "Are you sure you want to unhide all hidden items?"
 --[[Translation missing --]]
@@ -303,6 +317,8 @@ L["EDIT_ITEM"] = "Editar Item"
 L["ENCHANT_TOOLTIP_TOOLTIP_HEADER"] = "Caixa de Texto para Informações de Encatamento"
 L["ENCHANT_TOOLTIP_TOOLTIP_TEXT"] = "Mostrar informação de encantamento na caixa de texto."
 L["ENGAGE_HEADER"] = "Engajar Com o Auctionator"
+--[[Translation missing --]]
+L["ENTER_QUANTITY_TO_CONFIRM_PURCHASE"] = "Enter the quantity of %s to confirm purchase:"
 L["ERROR_REOPEN_AUCTION_HOUSE"] = [=[Não foi possível concluir a ação, feche e reabra a casa de leilões.
 ]=]
 L["EXACT_SEARCH"] = "Procura Exata"
@@ -407,6 +423,8 @@ L["OPEN_ADDON_OPTIONS"] = "Abrir Opções do Addon"
 L["OPEN_IN_SHOPPING_TAB"] = [=[Abrir na guia Compras
 ]=]
 L["OWNED_COLUMN"] = "Próprio?"
+--[[Translation missing --]]
+L["PAYING_X"] = "Paying %s for one item"
 L["PERCENTAGE"] = "Porcentagem"
 L["PERCENTAGE_SUFFIX"] = "% Desconto"
 L["PERCENTAGE_TOOLTIP_HEADER"] = "Porcentagem de subcotação"
@@ -420,6 +438,12 @@ L["PRICE_HISTORY"] = "Histórico de Preços"
 L["PRICE_INCREASE_WARNING"] = [=[Preço aumentado em %s, aguardando %ss
 ]=]
 L["PRICE_INCREASE_WARNING_2"] = "Preço aumentado em %s. Deseja continuar?"
+--[[Translation missing --]]
+L["PRICE_INCREASED"] = "The price has increased!"
+--[[Translation missing --]]
+L["PRICE_INCREASED_X_X"] = "The price has increased: %s (%s each)"
+--[[Translation missing --]]
+L["PRICE_VARIES_WARNING"] = "The prices varies a lot between items."
 L["PROFILE_TOGGLE_TOOLTIP_HEADER"] = "Ativar definições específicas para cada personagem"
 L["PROFILE_TOGGLE_TOOLTIP_TEXT"] = "Faz mudanças para as configurações do Auctionator afetar apenas este personagem."
 L["PROFIT_COLON"] = [=[Lucro:
@@ -467,6 +491,8 @@ L["SCANNING_PAGE_X"] = [=[Digitalizando página %s...
 L["SEARCH"] = "Procurar"
 L["SEARCH_ALL"] = [=[Pesquisar tudo
 ]=]
+--[[Translation missing --]]
+L["SEARCH_OPTIONS"] = "Search Options"
 L["SEARCH_TERM"] = "Procurar Termo"
 --[[Translation missing --]]
 L["SEARCH_TERM_COLON"] = "Search Term:"
@@ -532,6 +558,52 @@ L["SPLASH_100015_RETAIL_2"] = "Selling tab has an expanded prices view with hist
 L["SPLASH_100015_RETAIL_3"] = "Reagents value on the auction house is shown when listing a crafting order."
 --[[Translation missing --]]
 L["SPLASH_100015_RETAIL_HEADER"] = "Recent features for Retail"
+--[[Translation missing --]]
+L["SPLASH_100106_CRAFTING_INFO_1"] = "Craft profits in crafting windows now warn if the price data is out of date."
+--[[Translation missing --]]
+L["SPLASH_100106_CRAFTING_INFO_2"] = "For retail: Optional minimum craft cost entry for crafting values in crafting windows."
+--[[Translation missing --]]
+L["SPLASH_100106_CRAFTING_INFO_3"] = "For classic: Enchants now show a profit value."
+--[[Translation missing --]]
+L["SPLASH_100106_CRAFTING_INFO_HEADER"] = "Crafting Info"
+--[[Translation missing --]]
+L["SPLASH_100106_DESCRIPTION"] = "The highlight of last 6 months is the reworked Shopping tab to be much more user friendly. As always there's bugfixes and other minor improvements, but those aren't listed."
+--[[Translation missing --]]
+L["SPLASH_100106_OTHER_1"] = "For classic: Optional stack price column in cancelling tab"
+--[[Translation missing --]]
+L["SPLASH_100106_OTHER_2"] = "Optional \"Auction Age\" tooltip entry to show how long it was since the price was scanned."
+--[[Translation missing --]]
+L["SPLASH_100106_OTHER_HEADER"] = "Other features"
+--[[Translation missing --]]
+L["SPLASH_100106_SELLING_TAB_CLASSIC_1"] = "Option to post partial stacks after posting your full stacks"
+--[[Translation missing --]]
+L["SPLASH_100106_SELLING_TAB_CLASSIC_2"] = "Warning about the price being abnormally low due to post bait auctions"
+--[[Translation missing --]]
+L["SPLASH_100106_SELLING_TAB_CLASSIC_HEADER"] = "Selling tab (for classic)"
+--[[Translation missing --]]
+L["SPLASH_100106_SELLING_TAB_RETAIL_1"] = "More options, level/id/name/name-and-level, when deciding what prices your item should be compared against when posting."
+--[[Translation missing --]]
+L["SPLASH_100106_SELLING_TAB_RETAIL_2"] = "Shows grey gear in the item list"
+--[[Translation missing --]]
+L["SPLASH_100106_SELLING_TAB_RETAIL_3"] = "Clicking on an auction with a bid listed will populate the bid price field if enabled"
+--[[Translation missing --]]
+L["SPLASH_100106_SELLING_TAB_RETAIL_HEADER"] = "Selling tab (for retail)"
+--[[Translation missing --]]
+L["SPLASH_100106_SHOPPING_TAB_BOTH_1"] = "All lists now show on the left of the tab without a dropdown."
+--[[Translation missing --]]
+L["SPLASH_100106_SHOPPING_TAB_BOTH_2"] = "Lists expand and collapse to show and hide search terms and have a one-click search button for the entire list."
+--[[Translation missing --]]
+L["SPLASH_100106_SHOPPING_TAB_BOTH_3"] = "Just one place for searches and adding entries to a shopping list now rather than 2."
+--[[Translation missing --]]
+L["SPLASH_100106_SHOPPING_TAB_BOTH_HEADER"] = "Shopping tab (retail and classic)"
+--[[Translation missing --]]
+L["SPLASH_100106_SHOPPING_TAB_RETAIL_1"] = "New purchase screens, with item purchases having fewer clicks and commodity purchases getting new purchase warnings when the prices are erratic."
+--[[Translation missing --]]
+L["SPLASH_100106_SHOPPING_TAB_RETAIL_2"] = "WoW expansion filter for search terms."
+--[[Translation missing --]]
+L["SPLASH_100106_SHOPPING_TAB_RETAIL_3"] = "Dragonflight item quality filter for crafting reagents"
+--[[Translation missing --]]
+L["SPLASH_100106_SHOPPING_TAB_RETAIL_HEADER"] = "Shopping tab (for retail)"
 L["SPLASH_830_BUGS_1"] = "Por favor junte-se a nós no Discord do Auctionator %s"
 L["SPLASH_830_BUGS_2"] = "Por favor comunique bugs no Github %s"
 L["SPLASH_830_BUGS_3"] = "Nós somos mais ativos no Discord, não reporte bugs na curseforge ou nos forums do Auctionator"
@@ -731,10 +803,14 @@ L["TOO_BIG_PERCENTAGE"] = "%% tem que ser <= 100 (considerando %s)"
 L["TOO_MANY_SEARCH_RESULTS"] = "Esta pesquisa teve resultados demais. Limitando o número de resultados mostrados."
 L["TOO_SMALL_PERCENTAGE"] = "%% tem que ser >= 0 (considerando %s)"
 L["TOTAL_ITEMS_COLORED"] = "Todal de |cFFAAAAFF %s itens|r"
+--[[Translation missing --]]
+L["TOTAL_OF_X_FOR_UNIT_PRICE_OF_X"] = "Total of %s for unit price of %s"
 L["TOTAL_ON_SALE"] = "Total vendendo: %s"
 L["TOTAL_PENDING"] = [=[(%s pendente)
 ]=]
 L["TOTAL_PRICE"] = "Preço total:"
+--[[Translation missing --]]
+L["TOTAL_PRICE_PLAIN"] = "Total Price"
 L["TRANSLATORS_BRAZIL_PORTUGUEUSE"] = "Português Brasileiro"
 L["TRANSLATORS_FRENCH"] = "Francês"
 L["TRANSLATORS_GERMAN"] = "Alemão"
@@ -764,6 +840,8 @@ L["UNHIDE"] = "Revelar"
 L["UNHIDE_ALL"] = "Revelar Todos"
 L["UNHIDE_ALL_HIDDEN_ITEMS"] = "Revelar todos os itens ocultos"
 L["UNIT_PRICE"] = "Preço por Unidade"
+--[[Translation missing --]]
+L["UNIT_PRICE_RANGE"] = "Unit price: %s - %s"
 L["UNKNOWN"] = "desconhecido"
 L["UNSELECT_ALL"] = "Desmarcar todos"
 L["UPPER_UNIT_PRICE"] = "Preço Unitário Mais Alto"

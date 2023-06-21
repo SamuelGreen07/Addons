@@ -17,15 +17,19 @@ local RSMinimap = private.ImportLib("RareScannerMinimap")
 -- RareScanner services
 local RSGuidePOI = private.ImportLib("RareScannerGuidePOI")
 
+-- RareScanner general libraries
+local RSUtils = private.ImportLib("RareScannerUtils")
+
 RSGroupPinMixin = CreateFromMixins(MapCanvasPinMixin);
 
 function RSGroupPinMixin:OnLoad()
 	self:SetScalingLimits(1, 1, 1.0);
 end
 
-function RSGroupPinMixin:OnAcquired(POI)
+function RSGroupPinMixin:OnAcquired(POI, dataProvider)
 	self:UseFrameLevelType("PIN_FRAME_LEVEL_VIGNETTE", self:GetMap():GetNumActivePinsByTemplate("RSGroupPinTemplate"));
 	self.POI = POI
+	self.dataProvider = dataProvider
 	if (POI.TopTexture) then
 		self.TopTexture:SetTexture(POI.TopTexture)
 		self.TopTexture:SetScale(RSConfigDB.GetIconsWorldMapScale())
@@ -44,7 +48,9 @@ function RSGroupPinMixin:OnAcquired(POI)
 	else
 		self.RightTexture:SetTexture(nil)
 	end
+	self.IconTexture:SetAtlas(POI.iconAtlas)
 	self:SetPosition(POI.x, POI.y);
+	self:SetPassThroughButtons("MiddleButton");
 end
 
 function RSGroupPinMixin:OnMouseEnter()

@@ -1090,6 +1090,8 @@ L["Keep Inside"] = "Keep Inside"
 --[[Translation missing --]]
 L["Kel'Thuzad"] = "Kel'Thuzad"
 --[[Translation missing --]]
+L["Key"] = "Key"
+--[[Translation missing --]]
 L["Kologarn"] = "Kologarn"
 --[[Translation missing --]]
 L["Koralon the Flame Watcher"] = "Koralon the Flame Watcher"
@@ -1526,9 +1528,9 @@ L["Pulse"] = "Pulso"
 L["PvP Flagged"] = "Marcado JcJ"
 --[[Translation missing --]]
 L["PvP Talent %i"] = "PvP Talent %i"
-L["PvP Talent selected"] = "JcJ - Talento seleccionado"
 --[[Translation missing --]]
 L["PvP Talent Selected"] = "PvP Talent Selected"
+L["PvP Talent selected"] = "JcJ - Talento seleccionado"
 --[[Translation missing --]]
 L["Queued Action"] = "Queued Action"
 L["Radius"] = "Radio"
@@ -1925,9 +1927,9 @@ L["Talent |cFFFF0000Not|r Known"] = "Talent |cFFFF0000Not|r Known"
 L["Talent |cFFFF0000Not|r Selected"] = "Talent |cFFFF0000Not|r Selected"
 --[[Translation missing --]]
 L["Talent Known"] = "Talent Known"
+L["Talent selected"] = "Talento seleccionado"
 --[[Translation missing --]]
 L["Talent Selected"] = "Talent Selected"
-L["Talent selected"] = "Talento seleccionado"
 L["Talent Specialization"] = "Especialización de talento"
 L["Tanking And Highest"] = "Tanqueando - El más alto"
 L["Tanking But Not Highest"] = "Tanqueando - No el más alto"
@@ -1955,6 +1957,8 @@ L["The effective level differs from the level in e.g. Time Walking dungeons."] =
 L["The Eye of Eternity"] = "The Eye of Eternity"
 --[[Translation missing --]]
 L["The Four Horsemen"] = "The Four Horsemen"
+--[[Translation missing --]]
+L["The 'Key' value can be found in the BigWigs options of a specific spell"] = "The 'Key' value can be found in the BigWigs options of a specific spell"
 --[[Translation missing --]]
 L["The Lich King"] = "The Lich King"
 --[[Translation missing --]]

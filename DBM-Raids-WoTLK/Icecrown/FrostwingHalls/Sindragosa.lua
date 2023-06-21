@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod("Sindragosa", "DBM-Raids-WoTLK", 2)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20230523072605")
+mod:SetRevision("20230620214313")
 mod:SetCreatureID(36853)
 mod:SetEncounterID(mod:IsClassic() and 855 or 1105)
 mod:SetModelID(30362)

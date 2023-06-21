@@ -25,6 +25,38 @@ local isWrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
 
 Skillet.NewsName = "Skillet-Classic News"
 Skillet.NewsData = {
+	{	version = "1.73",
+		data = {
+			{	name = "Fixes",
+				data = {
+					{ header = "Issue", body = "Fix issue #149, Scrolling" },
+				},
+			},
+		},
+	},
+	{	version = "1.72",
+		data = {
+			{	name = "Changes",
+				data = {
+					{ header = "TOC", body = "Update TOC" },
+				},
+			},
+		},
+	},
+	{	version = "1.71",
+		data = {
+			{	name = "Fixes",
+				data = {
+					{ header = "Issue", body = "Fix issue #148, Missing C_Container. in ShoppingList" },
+				},
+			},
+			{	name = "Changes",
+				data = {
+					{ header = "Plugins", body = "Update Auctionator plugin to match retail\nMove Auctionator plugin button" },
+				},
+			},
+		},
+	},
 	{	version = "1.70",
 		data = {
 			{	name = "Fixes",

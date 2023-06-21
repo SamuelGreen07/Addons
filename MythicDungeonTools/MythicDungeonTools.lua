@@ -127,12 +127,12 @@ end
 local defaultSavedVars = {
   global = {
     toolbarExpanded = true,
-    currentSeason = 8,
+    currentSeason = 10,
     scale = 1,
     nonFullscreenScale = 1.3,
     enemyForcesFormat = 2,
     enemyStyle = 1,
-    currentDungeonIdx = 42,
+    currentDungeonIdx = 49,
     currentDifficulty = 10,
     xoffset = -80,
     yoffset = -100,
@@ -251,13 +251,13 @@ end
 --https://www.wowhead.com/affixes
 --lvl 4 affix, lvl 7 affix, tyrannical/fortified, seasonal affix
 local affixWeeks = {
-  [1] = { 6, 124, 9},
+  [1] = { 124, 6, 9},
   [2] = { 134, 7, 10},
   [3] = { 136, 123, 9},
   [4] = { 135, 6, 10},
-  [5] = { 0, 0, 9},
-  [6] = { 0, 0, 10},
-  [7] = { 0, 0, 9},
+  [5] = { 3, 8, 9},
+  [6] = { 124, 11, 10},
+  [7] = { 135, 7, 9},
   [8] = { 0, 0, 10},
   [9] = { 0, 0, 9},
   [10] = { 0, 0, 10},
@@ -1826,7 +1826,8 @@ local emissaryIds = { [155432] = true,[155433] = true,[155434] = true }
 function MDT:IsCloneIncluded(enemyIdx, cloneIdx)
   local preset = MDT:GetCurrentPreset()
   local enemy = MDT.dungeonEnemies[db.currentDungeonIdx][enemyIdx]
-  local clone = enemy["clones"][cloneIdx]
+  local clone = enemy and enemy["clones"][cloneIdx]
+  if not clone then return false end
 
   local week = self:GetEffectivePresetWeek()
 

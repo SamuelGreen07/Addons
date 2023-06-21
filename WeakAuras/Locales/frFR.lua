@@ -929,6 +929,8 @@ L["Keep Inside"] = "Garder à l'Intérieur"
 --[[Translation missing --]]
 L["Kel'Thuzad"] = "Kel'Thuzad"
 --[[Translation missing --]]
+L["Key"] = "Key"
+--[[Translation missing --]]
 L["Kologarn"] = "Kologarn"
 --[[Translation missing --]]
 L["Koralon the Flame Watcher"] = "Koralon the Flame Watcher"
@@ -1614,8 +1616,8 @@ L["Talent |cFFFF0000Not|r Known"] = "Talent |cFFFF0000Not|r Known"
 L["Talent |cFFFF0000Not|r Selected"] = "Talent |cFFFF0000Not|r Selected"
 --[[Translation missing --]]
 L["Talent Known"] = "Talent Known"
-L["Talent Selected"] = "Talent sélectionné"
 L["Talent selected"] = "Talent sélectionné"
+L["Talent Selected"] = "Talent sélectionné"
 L["Talent Specialization"] = "Spécialisation"
 L["Tanking And Highest"] = "Tank et le plus haut"
 L["Tanking But Not Highest"] = "Tank mais pas le plus haut"
@@ -1641,6 +1643,8 @@ L["The effective level differs from the level in e.g. Time Walking dungeons."] =
 L["The Eye of Eternity"] = "The Eye of Eternity"
 --[[Translation missing --]]
 L["The Four Horsemen"] = "The Four Horsemen"
+--[[Translation missing --]]
+L["The 'Key' value can be found in the BigWigs options of a specific spell"] = "The 'Key' value can be found in the BigWigs options of a specific spell"
 --[[Translation missing --]]
 L["The Lich King"] = "The Lich King"
 --[[Translation missing --]]
