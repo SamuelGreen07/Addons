@@ -27,7 +27,7 @@ function mod:GetOptions()
 		374365, -- Volatile Mutation
 		375890, -- Magma Eruption
 		{375068, "OFF"}, -- Magma Lob
-		375251, -- Lava Spray
+		{375251, "SAY"}, -- Lava Spray
 		{375439, "SAY"}, -- Blazing Charge
 		375535, -- Lava Wave
 		{391457, "TANK"}, -- Lava Empowerment
@@ -42,7 +42,7 @@ function mod:OnBossEnable()
 	self:Log("SPELL_CAST_START", "MagmaLob", 375068)
 	self:Log("SPELL_CAST_START", "LavaSpray", 375251)
 	self:Log("SPELL_CAST_SUCCESS", "BlazingCharge", 375436)
-	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", nil, "boss1") -- Lava Wave
+	self:Log("SPELL_AURA_APPLIED", "BlazingChargeApplied", 375455)
 	self:Log("SPELL_AURA_APPLIED", "LavaEmpowermentApplied", 391457)
 	self:Log("SPELL_AURA_REMOVED", "LavaEmpowermentRemoved", 391457)
 end
@@ -115,24 +115,32 @@ do
 	end
 end
 
-function mod:LavaSpray(args)
-	-- boss takes too long (>1s) to target the player and there is no debuff, so we can't use TargetMessage
-	-- if 375247 is ever unhidden that presumably would have the target at the right time to alert
-	self:Message(args.spellId, "yellow")
-	self:PlaySound(args.spellId, "alarm")
-	lavaSprayCount = lavaSprayCount + 1
-	if lavaSprayCount == 2 then
-		self:CDBar(args.spellId, 29.1)
-	else
-		self:CDBar(args.spellId, 19.4)
+do
+	local function printTarget(self, name, guid)
+		self:TargetMessage(375251, "yellow", name)
+		self:PlaySound(375251, "alarm", nil, name)
+		if self:Me(guid) then
+			self:Say(375251)
+		end
 	end
-	-- soonest other abilities can happen after this is ~6.06s
-	local volatileMutationBarText = CL.count:format(self:SpellName(374365), volatileMutationCount) -- Volatile Mutation (n)
-	if self:BarTimeLeft(volatileMutationBarText) < 6.06 then
-		self:CDBar(374365, {6.06, 27.9}, volatileMutationBarText) -- Volatile Mutation
-	end
-	if self:BarTimeLeft(375439) < 6.06 then -- Blazing Charge
-		self:CDBar(375439, {6.06, 26.7})
+
+	function mod:LavaSpray(args)
+		-- Magmatusk targets a player about 1s into the the 3.5s Lava Spray cast
+		self:GetNextBossTarget(printTarget, args.sourceGUID, 2)
+		lavaSprayCount = lavaSprayCount + 1
+		if lavaSprayCount == 2 then
+			self:CDBar(args.spellId, 29.1)
+		else
+			self:CDBar(args.spellId, 19.4)
+		end
+		-- soonest other abilities can happen after this is ~6.06s
+		local volatileMutationBarText = CL.count:format(self:SpellName(374365), volatileMutationCount) -- Volatile Mutation (n)
+		if self:BarTimeLeft(volatileMutationBarText) < 6.06 then
+			self:CDBar(374365, {6.06, 27.9}, volatileMutationBarText) -- Volatile Mutation
+		end
+		if self:BarTimeLeft(375439) < 6.06 then -- Blazing Charge
+			self:CDBar(375439, {6.06, 26.7})
+		end
 	end
 end
 
@@ -154,11 +162,10 @@ function mod:BlazingCharge(args)
 	end
 end
 
-function mod:UNIT_SPELLCAST_SUCCEEDED(_, _, _, spellId)
-	if spellId == 375455 then -- Blazing Charge, when boss hits the wall
-		self:Message(375535, "orange") -- Lava Wave
-		self:PlaySound(375535, "alarm")
-	end
+function mod:BlazingChargeApplied(args)
+	-- when Magmatusk hits the wall it gets the Blazing Charge debuff and sends out a Lava Wave
+	self:Message(375535, "orange") -- Lava Wave
+	self:PlaySound(375535, "alarm")
 end
 
 do
@@ -171,8 +178,8 @@ do
 	end
 
 	function mod:LavaEmpowermentApplied(args)
-		-- allow 2 seconds of Magmatusk standing in lava before alerting
-		timer = self:ScheduleTimer(alertLavaEmpowerment, 2, args.spellName)
+		-- allow 1.5 seconds of Magmatusk standing in lava before alerting
+		timer = self:ScheduleTimer(alertLavaEmpowerment, 1.5, args.spellName)
 	end
 
 	function mod:LavaEmpowermentRemoved(args)

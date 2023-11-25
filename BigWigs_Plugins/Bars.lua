@@ -15,7 +15,7 @@ if not plugin then return end
 -- Locals
 --
 
-local colorize = nil
+local colorize
 do
 	local r, g, b
 	colorize = setmetatable({}, { __index =
@@ -49,7 +49,7 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 local clickHandlers = {}
 
-local findUnitByGUID = nil
+local findUnitByGUID
 do
 	local unitTable = {
 		"nameplate1", "nameplate2", "nameplate3", "nameplate4", "nameplate5", "nameplate6", "nameplate7", "nameplate8", "nameplate9", "nameplate10",
@@ -136,7 +136,7 @@ do
 		bd:SetPoint("BOTTOMRIGHT", bar, "BOTTOMRIGHT", 1, -1)
 		bd:Show()
 
-		local borders = nil
+		local borders
 		if #freeBorderSets > 0 then
 			borders = tremove(freeBorderSets)
 			for i, border in next, borders do
@@ -1554,11 +1554,7 @@ do
 		display:SetMovable(true)
 		display:SetResizable(true)
 		display:RegisterForDrag("LeftButton")
-		if display.SetResizeBounds then -- XXX Classic Era compat
-			display:SetResizeBounds(80, 8)
-		else
-			display:SetMinResize(80, 8)
-		end
+		display:SetResizeBounds(80, 8)
 		display:SetFrameStrata("HIGH")
 		display:SetFixedFrameStrata(true)
 		display:SetFrameLevel(title == "BigWigsAnchor" and 10 or 15)
@@ -1658,13 +1654,11 @@ function plugin:OnPluginEnable()
 	updateProfile()
 
 	self:RegisterMessage("BigWigs_StartBar")
-	self:RegisterMessage("BigWigs_StartNameplateBar")
+	self:RegisterMessage("BigWigs_StartNameplateTimer", "StartNameplateBar")
 	self:RegisterMessage("BigWigs_PauseBar", "PauseBar")
-	self:RegisterMessage("BigWigs_PauseNameplateBar", "PauseNameplateBar")
 	self:RegisterMessage("BigWigs_ResumeBar", "ResumeBar")
-	self:RegisterMessage("BigWigs_ResumeNameplateBar", "ResumeNameplateBar")
 	self:RegisterMessage("BigWigs_StopBar", "StopSpecificBar")
-	self:RegisterMessage("BigWigs_StopNameplateBar", "StopNameplateBar")
+	self:RegisterMessage("BigWigs_StopNameplateTimer", "StopNameplateBar")
 	self:RegisterMessage("BigWigs_StopBars", "StopModuleBars")
 	self:RegisterMessage("BigWigs_OnBossDisable", "StopModuleBars")
 	self:RegisterMessage("BigWigs_OnBossWipe", "StopModuleBars")
@@ -1687,12 +1681,12 @@ function plugin:OnPluginEnable()
 	-- XXX temporary workaround for wow custom font loading issues, start a dummy bar to force load the selected font into memory
 	self:SendMessage("BigWigs_StartBar", self, nil, "test", 0.01, 134376)
 
-	local tbl = BigWigsClassicDB.breakTime
+	local tbl = BigWigs3DB.breakTime
 	if tbl then -- Break time present, resume it
 		local prevTime, seconds, nick, isDBM = tbl[1], tbl[2], tbl[3], tbl[4]
 		local curTime = time()
 		if curTime-prevTime > seconds then
-			BigWigsClassicDB.breakTime = nil
+			BigWigs3DB.breakTime = nil
 		else
 			startBreak(seconds-(curTime-prevTime), nick, isDBM, true)
 		end
@@ -1713,20 +1707,6 @@ end
 --
 
 do
-	local errorDeprecated = "An addon registered the bar style '%s' using the old method. Visit github.com/BigWigsMods/BigWigs/wiki/Custom-Bar-Styles to learn how to do it correctly."
-	function plugin:RegisterBarStyle(key, styleData)
-		BigWigs:Print(errorDeprecated:format(key))
-		BigWigsAPI:RegisterBarStyle(key, styleData)
-	end
-end
-
-do
-	function plugin:SetBarStyle(styleName)
-		-- Ask users to select your bar styles. Forcing a selection is deprecated.
-		-- This is to allow users to install multiple styles gracefully, and to encourage authors to use new style entry APIs like `.barHeight` or `.fontSizeNormal`
-		-- Want more style API entries? We're open to suggestions!
-		BigWigs:Print(("SetBarStyle is deprecated, bar style '%s' was not set automatically, you may need to set it yourself."):format(styleName))
-	end
 	local errorNoStyle = "No style with the ID %q has been registered. Reverting to default style."
 	function SetBarStyle(styleName)
 		local style = BigWigsAPI:GetBarStyle(styleName)
@@ -1784,19 +1764,6 @@ function plugin:PauseBar(_, module, text)
 	end
 end
 
-function plugin:PauseNameplateBar(_, module, text, unitGUID)
-	local barInfo = nameplateBars[unitGUID] and nameplateBars[unitGUID][text]
-	if barInfo and not barInfo.paused then
-		barInfo.paused = true
-		if barInfo.bar then
-			barInfo.bar:Pause()
-		else
-			barInfo.deletionTimer:Cancel()
-		end
-		barInfo.remaining = barInfo.exp - GetTime()
-	end
-end
-
 function plugin:ResumeBar(_, module, text)
 	if not normalAnchor then return end
 	for k in next, normalAnchor.bars do
@@ -1810,20 +1777,6 @@ function plugin:ResumeBar(_, module, text)
 			k:Resume()
 			return
 		end
-	end
-end
-
-function plugin:ResumeNameplateBar(_, module, text, unitGUID)
-	local barInfo = nameplateBars[unitGUID] and nameplateBars[unitGUID][text]
-	if barInfo and barInfo.paused then
-		barInfo.paused = false
-		barInfo.exp = GetTime() + barInfo.remaining
-		if barInfo.bar then
-			barInfo.bar:Resume()
-		else
-			barInfo.deletionTimer = createDeletionTimer(barInfo)
-		end
-		barInfo.remaining = nil
 	end
 end
 
@@ -1914,19 +1867,6 @@ function plugin:GetBarTimeLeft(module, text)
 	return 0
 end
 
-function plugin:GetNameplateBarTimeLeft(module, text, guid)
-	if nameplateBars[guid] then
-		local barInfo = nameplateBars[guid][text]
-		local bar = barInfo and barInfo.bar
-		if bar and bar:Get("bigwigs:module") == module then
-			return bar.remaining
-		else
-			return barInfo.paused and barInfo.remaining or barInfo.exp - GetTime()
-		end
-	end
-	return 0
-end
-
 --------------------------------------------------------------------------------
 -- Clickable bars
 --
@@ -1939,12 +1879,12 @@ local function barClicked(bar, button)
 end
 
 local function barOnEnter(bar)
-	bar.candyBarBackground:SetVertexColor(1, 1, 1, 0.8)
+	bar:SetBackgroundColor(1, 1, 1, 0.8)
 end
 local function barOnLeave(bar)
 	local module = bar:Get("bigwigs:module")
 	local key = bar:Get("bigwigs:option")
-	bar.candyBarBackground:SetVertexColor(colors:GetColor("barBackground", module, key))
+	bar:SetBackgroundColor(colors:GetColor("barBackground", module, key))
 end
 
 local function refixClickOnBar(intercept, bar)
@@ -2068,7 +2008,6 @@ function plugin:CreateBar(module, key, text, time, icon, isApprox, unitGUID)
 		width, height = db.BigWigsAnchor_width, db.BigWigsAnchor_height
 	end
 	local bar = candy:New(media:Fetch(STATUSBAR, db.texture), width, height)
-	bar.candyBarBackground:SetVertexColor(colors:GetColor("barBackground", module, key))
 	bar:Set("bigwigs:module", module)
 	bar:Set("bigwigs:option", key)
 	if unitGUID then
@@ -2081,6 +2020,7 @@ function plugin:CreateBar(module, key, text, time, icon, isApprox, unitGUID)
 	bar:SetLabel(text)
 	bar:SetDuration(time, isApprox)
 	bar:SetColor(colors:GetColor("barColor", module, key))
+	bar:SetBackgroundColor(colors:GetColor("barBackground", module, key))
 	bar:SetTextColor(colors:GetColor("barText", module, key))
 	bar:SetShadowColor(colors:GetColor("barTextShadow", module, key))
 	bar.candyBarLabel:SetJustifyH(db.alignText)
@@ -2115,28 +2055,42 @@ function plugin:CreateBar(module, key, text, time, icon, isApprox, unitGUID)
 	return bar
 end
 
-function plugin:BigWigs_StartBar(_, module, key, text, time, icon, isApprox, maxTime)
-	if not text then text = "" end
-	self:StopSpecificBar(nil, module, text)
-
-	local bar = self:CreateBar(module, key, text, time, icon, isApprox)
-	bar:Start(maxTime)
-	if db.emphasize and time < db.emphasizeTime then
-		self:EmphasizeBar(bar, true)
-	else
-		currentBarStyler.ApplyStyle(bar)
+do
+	local function PauseAtZero(bar)
+		if bar.remaining < 0.045 then -- Pause at 0.0
+			bar:SetDuration(0.01) -- Make the bar look full
+			bar:Start()
+			bar:SetTimeVisibility(false)
+			bar:Pause()
+		end
 	end
-	rearrangeBars(bar:Get("bigwigs:anchor"))
 
-	self:SendMessage("BigWigs_BarCreated", self, bar, module, key, text, time, icon, isApprox)
-	-- Check if :EmphasizeBar(bar) was run and trigger the callback.
-	-- Bit of a roundabout method to approaching this so that we purposely keep callbacks firing last.
-	if bar:Get("bigwigs:emphasized") then
-		self:SendMessage("BigWigs_BarEmphasized", self, bar)
+	function plugin:BigWigs_StartBar(_, module, key, text, time, icon, isApprox, maxTime)
+		if not text then text = "" end
+		self:StopSpecificBar(nil, module, text)
+
+		local bar = self:CreateBar(module, key, text, time, icon, isApprox)
+		if isApprox then
+			bar:AddUpdateFunction(PauseAtZero)
+		end
+		bar:Start(maxTime)
+		if db.emphasize and time < db.emphasizeTime then
+			self:EmphasizeBar(bar, true)
+		else
+			currentBarStyler.ApplyStyle(bar)
+		end
+		rearrangeBars(bar:Get("bigwigs:anchor"))
+
+		self:SendMessage("BigWigs_BarCreated", self, bar, module, key, text, time, icon, isApprox)
+		-- Check if :EmphasizeBar(bar) was run and trigger the callback.
+		-- Bit of a roundabout method to approaching this so that we purposely keep callbacks firing last.
+		if bar:Get("bigwigs:emphasized") then
+			self:SendMessage("BigWigs_BarEmphasized", self, bar)
+		end
 	end
 end
 
-function plugin:BigWigs_StartNameplateBar(_, module, key, text, time, icon, isApprox, unitGUID)
+function plugin:StartNameplateBar(_, module, key, text, time, icon, isApprox, unitGUID)
 	if not text then text = "" end
 	self:StopNameplateBar(nil, module, text, unitGUID)
 
@@ -2301,7 +2255,7 @@ do
 			end
 			if seconds == 0 then
 				timerTbl = nil
-				BigWigsClassicDB.breakTime = nil
+				BigWigs3DB.breakTime = nil
 				BigWigs:Print(L.breakStopped:format(nick))
 				plugin:SendMessage("BigWigs_StopBar", plugin, L.breakBar)
 				plugin:SendMessage("BigWigs_StopBreak", plugin, seconds, nick, isDBM, reboot)
@@ -2310,7 +2264,7 @@ do
 		end
 
 		if not reboot then
-			BigWigsClassicDB.breakTime = {time(), seconds, nick, isDBM}
+			BigWigs3DB.breakTime = {time(), seconds, nick, isDBM}
 		end
 
 		BigWigs:Print(L.breakStarted:format(isDBM and "DBM" or "BigWigs", nick))
@@ -2327,7 +2281,7 @@ do
 		end
 		timerTbl[#timerTbl+1] = plugin:ScheduleTimer("SendMessage", seconds, "BigWigs_Message", plugin, nil, L.breakFinished, "red", 134062)
 		timerTbl[#timerTbl+1] = plugin:ScheduleTimer("SendMessage", seconds, "BigWigs_Sound", plugin, nil, "Long")
-		timerTbl[#timerTbl+1] = plugin:ScheduleTimer(function() BigWigsClassicDB.breakTime = nil timerTbl = nil end, seconds)
+		timerTbl[#timerTbl+1] = plugin:ScheduleTimer(function() BigWigs3DB.breakTime = nil timerTbl = nil end, seconds)
 
 		if seconds > 119 then -- 2min
 			timerTbl[#timerTbl+1] = plugin:ScheduleTimer("SendMessage", seconds - 60, "BigWigs_Message", plugin, nil, L.breakMinutes:format(1), "yellow", 134062)
@@ -2415,6 +2369,7 @@ end
 --
 
 local SendAddonMessage = BigWigsLoader.SendAddonMessage
+local dbmPrefix = BigWigsLoader.dbmPrefix
 do
 	local times
 	SlashCmdList.BIGWIGSRAIDBAR = function(input)
@@ -2434,10 +2389,10 @@ do
 			times[input] = t
 			BigWigs:Print(L.sendCustomBar:format(barText))
 			plugin:Sync("CBar", input)
-			SendAddonMessage(BigWigsLoader.dbmPrefix, ("U\t%d\t%s"):format(seconds, barText), IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- DBM message
 			local name = plugin:UnitName("player")
 			local realm = GetRealmName()
-			SendAddonMessage(BigWigsLoader.dbmNewPrefix, ("%s-%s\t1\tU\t%d\t%s"):format(name, realm, seconds, barText), IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- DBM message
+			local normalizedPlayerRealm = realm:gsub("[%s-]+", "") -- Has to mimic DBM code
+			SendAddonMessage(dbmPrefix, ("%s-%s\t1\tU\t%d\t%s"):format(name, normalizedPlayerRealm, seconds, barText), IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- DBM message
 		end
 	end
 	SLASH_BIGWIGSRAIDBAR1 = "/raidbar"
@@ -2470,10 +2425,10 @@ SlashCmdList.BIGWIGSBREAK = function(input)
 		plugin:Sync("Break", seconds)
 
 		if IsInGroup() then
-			SendAddonMessage(BigWigsLoader.dbmPrefix, ("BT\t%d"):format(seconds), IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- DBM message
 			local name = plugin:UnitName("player")
 			local realm = GetRealmName()
-			SendAddonMessage(BigWigsLoader.dbmNewPrefix, ("%s-%s\t1\tBT\t%d"):format(name, realm, seconds), IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- DBM message
+			local normalizedPlayerRealm = realm:gsub("[%s-]+", "") -- Has to mimic DBM code
+			SendAddonMessage(dbmPrefix, ("%s-%s\t1\tBT\t%d"):format(name, normalizedPlayerRealm, seconds), IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- DBM message
 		end
 	else
 		BigWigs:Print(L.requiresLeadOrAssist)

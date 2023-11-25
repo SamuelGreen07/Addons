@@ -18,7 +18,8 @@ local labels = {}
 local colorModule = nil
 
 local normalMessageAnchor, normalMessageFrame = nil, nil
-local emphMessageAnchor, emphMessageFrame, emphMessageText = nil, nil, nil
+local emphMessageAnchor, emphMessageText = nil, nil
+local emphMessageFrame
 
 local labelsPrimaryPoint, labelsSecondaryPoint = nil, nil
 
@@ -178,11 +179,9 @@ do
 		display:SetWidth(width)
 		display:SetHeight(height)
 		display:SetFrameStrata("HIGH")
+		display:SetFixedFrameStrata(true)
 		display:SetFrameLevel(5)
-		if display.SetFixedFrameStrata then
-			display:SetFixedFrameStrata(true)
-			display:SetFixedFrameLevel(true)
-		end
+		display:SetFixedFrameLevel(true)
 		display:SetScript("OnDragStart", OnDragStart)
 		display:SetScript("OnDragStop", OnDragStop)
 		display.RefixPosition = RefixPosition
@@ -215,11 +214,9 @@ do
 	normalMessageFrame:SetWidth(2000)
 	normalMessageFrame:SetHeight(80)
 	normalMessageFrame:SetFrameStrata("FULLSCREEN_DIALOG")
+	normalMessageFrame:SetFixedFrameStrata(true)
 	normalMessageFrame:SetFrameLevel(20) -- Behind GUI (level 100) & behind emphasized messages (level 30)
-	if normalMessageFrame.SetFixedFrameStrata then
-		normalMessageFrame:SetFixedFrameStrata(true)
-		normalMessageFrame:SetFixedFrameLevel(true)
-	end
+	normalMessageFrame:SetFixedFrameLevel(true)
 
 	local function FontFinish(self)
 		self:GetParent():Hide()
@@ -293,7 +290,7 @@ plugin.pluginOptions = {
 					return BL.toggleAnchorsBtnShow_desc
 				end
 			end,
-			func = function() 
+			func = function()
 				if not BigWigs:IsEnabled() then BigWigs:Enable() end
 				if BigWigsOptions:InConfigureMode() then
 					plugin:SendMessage("BigWigs_StopConfigureMode")
@@ -308,7 +305,7 @@ plugin.pluginOptions = {
 			type = "execute",
 			name = BigWigsAPI:GetLocale("BigWigs").testBarsBtn,
 			desc = BigWigsAPI:GetLocale("BigWigs").testBarsBtn_desc,
-			func = function() 
+			func = function()
 				BigWigs:Test()
 			end,
 			width = 1.5,
@@ -734,11 +731,9 @@ end
 do
 	emphMessageFrame = CreateFrame("Frame", nil, UIParent)
 	emphMessageFrame:SetFrameStrata("FULLSCREEN_DIALOG")
+	emphMessageFrame:SetFixedFrameStrata(true)
 	emphMessageFrame:SetFrameLevel(30) -- Behind GUI (level 100)
-	if emphMessageFrame.SetFixedFrameStrata then
-		emphMessageFrame:SetFixedFrameStrata(true)
-		emphMessageFrame:SetFixedFrameLevel(true)
-	end
+	emphMessageFrame:SetFixedFrameLevel(true)
 	emphMessageFrame:SetPoint("CENTER", emphMessageAnchor, "CENTER")
 	emphMessageFrame:SetWidth(2000)
 	emphMessageFrame:SetHeight(80)

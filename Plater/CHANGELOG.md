@@ -1,9 +1,11 @@
+@Terciob:
+- Framework Updates.
+
 @cont1nuity:
-- Fixing an issue with aura updates not being done properly in some cases.
-- Adding auto-toggle for 'Hide Blizzard Healthbars' based on combat state.
-- Fixing some issues on aura updates to increase performance.
-- More detailed profiling.
-- Refreshing healthbar colors now takes NPC colors into account.
-- Adding more DF S2 units to be forced in combat.
-- Aura tooltips no longer block camera movement.
+- Cleanup and repair of imported Ghost Aura data.
+- Retail toc bump to 10.2.
+- Fix threat not being updated properly when scripts denied color change.
+- Fixing some audio cues not being played.
+- Fixing an issue with filtering audio cues.
+- Fixing some channeled casts not showing up properly on the cast list.
 

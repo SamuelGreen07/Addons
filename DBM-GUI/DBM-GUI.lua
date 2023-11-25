@@ -405,28 +405,43 @@ function DBM_GUI:CreateBossModPanel(mod)
 		mod:Toggle()
 	end)
 
-	if mod.addon and not mod.addon.oldOptions and DBM.Options.GroupOptionsBySpell then
+	if mod.addon then
 		for spellID, options in getmetatable(mod.groupOptions).__pairs(mod.groupOptions) do
 			if spellID:find("^line") then
 				panel:CreateLine(options)
 			else
 				local title, desc, _, icon
-				if tonumber(spellID) then
-					local _title = DBM:GetSpellInfo(spellID)
-					if _title then
-						title, desc, icon = _title, tonumber(spellID), GetSpellTexture(spellID)
-					else--Not a valid spellid (Such as a ptr/beta mod loaded on live
-						title, desc, icon = spellID, L.NoDescription, 136116
+				local usedSpellID
+				if mod.groupOptions[spellID] and mod.groupOptions[spellID].customKeys then
+					usedSpellID = mod.groupOptions[spellID].customKeys--Color coding would be done in customKeys, not here
+				end
+				if mod.groupOptions[spellID].title then--Custom title, it's a bogus spellId, so we completely ignore it and bundle with localized custom title
+					title, desc, icon = mod.groupOptions[spellID].title, L.CustomOptions, 136116
+				elseif tonumber(spellID) then
+					spellID = tonumber(spellID)
+					if spellID < 0 then
+						title, desc, _, icon = DBM:EJ_GetSectionInfo(-spellID)
+					else
+						local _title = DBM:GetSpellInfo(spellID)
+						if _title then
+							title, desc, icon = _title, tonumber(spellID), GetSpellTexture(spellID)
+						end
 					end
 				elseif spellID:find("^ej") then
 					title, desc, _, icon = DBM:EJ_GetSectionInfo(spellID:gsub("ej", ""))
 				elseif spellID:find("^at") then
-					spellID = spellID:gsub("at", "")
-					_, title, _, _, _, _, _, desc, _, icon = GetAchievementInfo(spellID)
-				else
-					title = spellID
+					_, title, _, _, _, _, _, desc, _, icon = GetAchievementInfo(spellID:gsub("at", ""))
+					if not title then--Core has debug for spell and EJ, but this calls WoW API directly
+						DBM:Debug("|cffff0000Invalid call to GetAchievementInfo for achievementID: |r"..spellID:gsub("at", ""))
+					end
 				end
-				local catpanel = panel:CreateAbility(title, icon)
+				if not title then--Spell/EJ section/achievement not found - typo/removed/ptr or beta mod on live
+					title, desc, icon = spellID, L.NoDescription, 136116
+				end
+				if not usedSpellID then
+					usedSpellID = "|Hgarrmission:DBM:wacopy:"..spellID.."|h|cff69ccf0"..spellID.."|r|h"
+				end
+				local catpanel = panel:CreateAbility(title, icon, usedSpellID)
 				if desc then
 					catpanel:CreateSpellDesc(desc)
 				end
@@ -831,7 +846,6 @@ do
 						else
 							mod.panel = addon.panel:CreateNewPanel(mod.id or "Error: DBM.Mods", addon.optionsTab, nil, nil, mod.localization.general.name)
 						end
-						DBM_GUI:CreateBossModPanel(mod)
 					end
 				end
 			end

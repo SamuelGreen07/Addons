@@ -9,9 +9,16 @@
 GRM.GetAltGroupMain = function ( altGroup , includeGUID )
     local main = "";
     local GUID = "";
+    local class = "";
 
     if altGroup ~= "" and GRM_Alts[GRM_G.guildName][altGroup] then
         main = GRM_Alts[GRM_G.guildName][altGroup].main;
+
+        for i = 1 , #GRM_Alts[GRM_G.guildName][altGroup] do
+            if GRM_Alts[GRM_G.guildName][altGroup][i].name == main then
+                class = GRM_Alts[GRM_G.guildName][altGroup][i].class;
+            end
+        end
 
         local player = GRM.GetPlayer ( main );
         if includeGUID and player then
@@ -19,7 +26,7 @@ GRM.GetAltGroupMain = function ( altGroup , includeGUID )
         end
     end
 
-    return main , GUID;
+    return main , GUID , class;
 end
 
 -- Method:          GRM.GetPlayerMain ( string )
@@ -717,7 +724,12 @@ GRM.UpdateAltGroupModifiedTime = function ( altGroup , timestamp )
 
         if GRM_Alts[GRM_G.guildName][altGroup] then
             for i = 1 , #GRM_Alts[GRM_G.guildName][altGroup] do
-                GRM.GetPlayer ( GRM_Alts[GRM_G.guildName][altGroup][i].name ).altGroupModified = timestamp;
+                local player = GRM.GetPlayer ( GRM_Alts[GRM_G.guildName][altGroup][i].name );
+                if player then
+                    player.altGroupModified = timestamp;
+                else
+                    GRM_Alts[GRM_G.guildName][altGroup][i] = nil;   -- Redundance.
+                end
             end
         end
     end
@@ -898,15 +910,7 @@ GRM.ResetBirthdayForAltGroup = function ( name , isLiveSync , num , sender , isU
             end
         else
             GRMsyncGlobals.updateCount = GRMsyncGlobals.updateCount + 1;
-            GRMsyncGlobals.updatesEach[6] = GRMsyncGlobals.updatesEach[6] + 1;
-        -- elseif not isUnknown then
-            -- if GRM.S().syncChatEnabled then
-            --     if #alts > 0 then
-            --         GRM.Report ( GRM.L ( "{name}'s alt grouping has had their Birthday removed by: {name2}" , GRM.GetClassifiedName ( name , true ) , GRM.GetClassifiedName ( sender , true ) ) );
-            --     else
-            --         GRM.Report ( GRM.L ( "{name}'s Birthday has been removed by: {name2}" , GRM.GetClassifiedName ( name , true ) , GRM.GetClassifiedName ( sender , true ) ) );
-            --     end
-            -- end                
+            GRMsyncGlobals.updatesEach[6] = GRMsyncGlobals.updatesEach[6] + 1;              
         end
 
         if not isUnknown and GRM_UI.GRM_MemberDetailMetaData:IsVisible() and GRM_G.currentName == name then
@@ -1002,6 +1006,10 @@ GRM.SetMain = function ( mainName , timestamp )
                 GRM_UI.GRM_MemberDetailMetaData.GRM_MemberDetailAltText:Show();
             end
             
+            if player.altGroup == nil then
+                player.altGroup = "";
+            end
+
             if player.altGroup ~= "" then
 
                 -- Set old main to NOT alt.
@@ -1041,8 +1049,11 @@ GRM.SetMain = function ( mainName , timestamp )
                     GRM_UI.GRM_MemberDetailMetaData.GRM_MemberDetailAltText:Hide();
                 end
 
-                if GRM.GetPlayer ( GRM_G.currentName ).altGroup == player.altGroup then
-                    GRM.PopulateAltFrames ( GRM_G.currentName );
+                if GRM_G.currentName and GRM_G.currentName ~= "" then
+                    local tempPlayer = GRM.GetPlayer ( GRM_G.currentName );
+                    if tempPlayer and tempPlayer.altGroup and tempPlayer.altGroup == player.altGroup then
+                        GRM.PopulateAltFrames ( GRM_G.currentName );
+                    end
                 end
             end
         end
@@ -1671,7 +1682,7 @@ GRM.SyncJoinDatesOnAllAlts = function ( playerName )
     if player then
         -- now, let's check the alt info.
         local date = { player.joinDateHist[1][1] , player.joinDateHist[1][2] , player.joinDateHist[1][3] };
-        local finalTStampEpoch = player.joinDateHist[1][4]
+        local standardFormat = player.joinDateHist[1][4]
         local syncEpochStamp = time();
         local tempAlt;
         local alts = GRM.GetListOfAlts ( player );
@@ -1688,7 +1699,7 @@ GRM.SyncJoinDatesOnAllAlts = function ( playerName )
                 tempAlt.joinDateHist[1][1] = date[1];
                 tempAlt.joinDateHist[1][2] = date[2];
                 tempAlt.joinDateHist[1][3] = date[3];
-                tempAlt.joinDateHist[1][4] = finalTStampEpoch;
+                tempAlt.joinDateHist[1][4] = standardFormat;
                 tempAlt.joinDateHist[1][5] = syncEpochStamp
                 tempAlt.joinDateHist[1][6] = true;
                 tempAlt.joinDateHist[1][7] = 1;
@@ -1741,7 +1752,7 @@ GRM.SyncJoinDatesOnAllAlts = function ( playerName )
                     if GRM.S().exportAllRanks then
                         syncRankFilter = GuildControlGetNumRanks() - 1;
                     end
-                    GRMsync.SendMessage ( "GRM_SYNC" , GRM_G.PatchDayString .. "?GRM_JDSYNCUP?" .. GRM_G.addonUser .. "?" .. syncRankFilter .. "?" .. tempAlt.name .. "?" .. tostring ( finalTStampEpoch ) .. "?" .. tostring ( date[1] ) .. "?" .. tostring ( date[2] ) .. "?" .. tostring ( date[3] ) .. "?" .. tostring ( syncEpochStamp ) .. "?" .. noteDestination , "GUILD");
+                    GRMsync.SendMessage ( "GRM_SYNC" , GRM_G.PatchDayString .. "?GRM_JDSYNCUP?" .. GRM_G.addonUser .. "?" .. syncRankFilter .. "?" .. tempAlt.name .. "?" .. tostring ( syncEpochStamp ) .. "?" .. standardFormat  .. "?" .. noteDestination , "GUILD");
                 end
 
             end
@@ -1794,8 +1805,8 @@ GRM.GetAltWithOldestJoinDate = function ( playerName )
         local alts = GRM.GetListOfAlts ( player );
         local playerAlt;
 
-        if player.joinDateHist[1][4] > 0 then
-            oldestPlayer[2] = player.joinDateHist[1][4];
+        if player.joinDateHist[1][1] > 0 then
+            oldestPlayer[2] = tonumber ( player.joinDateHist[1][4] );
             oldestPlayer[1] = playerName;
             oldestDate = GRM.FormatTimeStamp ( { player.joinDateHist[1][1] , player.joinDateHist[1][2] , player.joinDateHist[1][3] } , false , false );
         end
@@ -1803,10 +1814,10 @@ GRM.GetAltWithOldestJoinDate = function ( playerName )
         for i = 1 , #alts do
             playerAlt = GRM.GetPlayer ( alts[i][1] );
             if playerAlt then
-                if playerAlt.joinDateHist[1][4] > 0 then                           -- First, double check it is set
+                if playerAlt.joinDateHist[1][1] > 0 then                           -- First, double check it is set
                     
-                    if oldestPlayer[2] == 0 or playerAlt.joinDateHist[1][4] < oldestPlayer[2] then
-                        oldestPlayer = { alts[i][1] , playerAlt.joinDateHist[1][4] };
+                    if oldestPlayer[2] == 0 or tonumber ( playerAlt.joinDateHist[1][4] ) < oldestPlayer[2] then
+                        oldestPlayer = { alts[i][1] , tonumber ( playerAlt.joinDateHist[1][4] ) };
                         oldestDate = GRM.FormatTimeStamp ( { playerAlt.joinDateHist[1][1] , playerAlt.joinDateHist[1][2] , playerAlt.joinDateHist[1][3] } , false , false );
                     end
 
@@ -1829,14 +1840,14 @@ GRM.IsAltJoinDatesSynced = function ( playerName )
         local alts = GRM.GetListOfAlts ( player );
         local playerAlt;
 
-        if #alts > 0 and player.joinDateHist[1][4] > 0 then
+        if #alts > 0 and player.joinDateHist[1][1] > 0 then
             -- Cycle through each alt...
             local isNotSync = false;
 
             for i = 1 , #alts do
                 playerAlt = GRM.GetPlayer ( alts[i][1] );
                 if playerAlt then
-                    if playerAlt.joinDateHist[1][4] == 0 or ( playerAlt.joinDateHist[1][4] > 0 and ( playerAlt.joinDateHist[1][1] ~= player.joinDateHist[1][1] or playerAlt.joinDateHist[1][2] ~= player.joinDateHist[1][2] or playerAlt.joinDateHist[1][3] ~= player.joinDateHist[1][3] ) ) then
+                    if playerAlt.joinDateHist[1][1] == 0 or ( playerAlt.joinDateHist[1][1] > 0 and ( playerAlt.joinDateHist[1][1] ~= player.joinDateHist[1][1] or playerAlt.joinDateHist[1][2] ~= player.joinDateHist[1][2] or playerAlt.joinDateHist[1][3] ~= player.joinDateHist[1][3] ) ) then
                         isNotSync = true;
                     end
                 end
@@ -1866,14 +1877,14 @@ GRM.PlayerOrAltHasJD = function ( playerName )
         local playerAlt;
 
         if #alts > 0 then                       -- The player needs to have at least one alt.
-            if player.joinDateHist[1][4] > 0 then        -- Player Has a join date!
+            if player.joinDateHist[1][1] > 0 then        -- Player Has a join date!
                 result = true;
             else
                 -- player does not have a JD... let's check if any of the alts do.
                 for i = 1 , #alts do       -- cycle through the alts
                     playerAlt = GRM.GetPlayer ( alts[i][1] );
                     if playerAlt then
-                        if playerAlt.joinDateHist[1][4] > 0 then
+                        if playerAlt.joinDateHist[1][1] > 0 then
                             result = true;
                         end
                     end

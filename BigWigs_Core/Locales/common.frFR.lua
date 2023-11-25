@@ -23,6 +23,7 @@ L.count_rticon = "%s (%d{rt%d})"
 L.rticon = "%s ({rt%d})"
 L.near = "%s près de VOUS"
 L.on_group = "%s sur le GROUPE" -- spell on group
+--L.boss = "BOSS"
 
 L.phase = "Phase %d"
 L.stage = "Phase %d"
@@ -76,7 +77,7 @@ L.custom_sec = "%s dans %d sec."
 
 L.focus_only = "|cffff0000Alertes de la cible de focalisation uniquement.|r "
 L.trash = "Trash"
---L.affixes = "Affixes" -- Seasonal affixes for raids and mythic+ dungeons
+L.affixes = "Affixes" -- Seasonal affixes for raids and mythic+ dungeons
 
 -- Common raid marking locale
 L.marker = "Marquage %s"
@@ -97,9 +98,27 @@ L.amount_two = "%dM" -- Millions 1,000,000
 L.amount_three = "%dK" -- Thousands 1,000
 L.seconds = "%.1fs" -- 1.1 seconds
 
+-- Directions
+--L.top = "Top"
+--L.up = "Up"
+--L.middle = "Middle"
+--L.down = "Down"
+--L.bottom = "Bottom"
+--L.left = "Left"
+--L.right = "Right"
+L.north = "Nord"
+--L.north_east = "North-East"
+--L.east = "East"
+--L.south_east = "South-East"
+L.south = "Sud"
+--L.south_west = "South-West"
+--L.west = "West"
+--L.north_west = "North-West"
+
 -- Common ability name replacements
---L.tank_combo = "Tank Combo" -- Used for tank swap mechanics where the boss casts a sequence of tank buster attacks
+L.tank_combo = "Combo Tank" -- Used for tank swap mechanics where the boss casts a sequence of tank buster attacks
 L.laser = "Laser" -- Used for abilities that act like a laser. Usually from the boss to a player, or, from the boss to a specific area
+L.lasers = "Lasers" -- Plural of L.lasers
 L.beam = "Rayon" -- Similar to "Laser" (a beam from boss to player/boss to area) but can be used to better describe certain abilities that don't look like a Laser
 L.beams = "Rayons" -- Plural of L.beam
 L.bomb = "Bombe" -- Used for debuffs that make players explode
@@ -107,8 +126,23 @@ L.bombs = "Bombes" -- Plural of L.bomb
 L.explosion = "Explosion" -- When the explosion from a bomb-like ability will occur
 L.fixate = "Fixer" -- Used when a boss or add is chasing/fixated on a player
 L.knockback = "Repousser" -- Used when an ability knocks players away from a certain point, like a "smash" type ability that knocks you back 10 meters
+L.pushback = "Repousser continu" -- Used when an ability slowly and continually pushes a player away, like winds gradually pushing you away over time
 L.traps = "Pièges" -- Used for abilities that act like traps on the floor e.g. move into it and something bad happens like you die, or are rooted, etc.
 L.meteor = "Météore" -- This one will probably only ever be used for actual meteors
 L.shield = "Bouclier" -- Abilities that absorb damage/healing creating a "shield" around the boss/player e.g. "Shield on boss" or "Shield remaining"
 L.teleport = "Téléportation" -- A boss/add/etc teleported somewhere
 L.fear = "Peur" -- For abilities that cause you to flee in fear
+L.breath = "Souffle" -- When a boss breathes fire/frost/etc on to a player or the raid e.g. a Dragon breathing fire on everyone
+L.roar = "Cri" -- When a boss opens their mouth to let out a loud roar, sometimes used to inflict damage on the raid
+L.leap = "Bond" -- When a boss leaps through the air from one location to another location, or from a location to a player, etc
+L.full_energy = "Energie pleine" -- When a boss reaches full/maximum energy, usually the boss will cast something big and powerful when this happens
+L.pool = "Flaque" -- A pool or puddle on the ground, usually something bad that you should avoid standing in
+L.pools = "Flaques" -- Plural of L.pool
+--L.totem = "Totem" -- A totem, usually summoned by a boss, the same thing that shamans summon
+--L.totems = "Totems" -- Plural of L.totem
+L.portal = "Portail" -- A portal somewhere, usually leading to a different location
+L.portals = "Portails" -- Plural of L.portal
+L.rift = "Faille" -- Can be used in a similar way as a portal e.g. "Time Rift" but can also be used as a debuff/pool underneath you that you need to run through to remove/despawn it e.g. "Dread Rift"
+L.rifts = "Failles" -- Plural of L.rift
+L.orb = "Orbe" -- A ball/sphere object usually moving and you need to avoid it
+L.orbs = "Orbes" -- Plural for L.orb

@@ -15,6 +15,7 @@ local RSContainerDB = private.ImportLib("RareScannerContainerDB")
 local RSConfigDB = private.ImportLib("RareScannerConfigDB")
 local RSGeneralDB = private.ImportLib("RareScannerGeneralDB")
 local RSMapDB = private.ImportLib("RareScannerMapDB")
+local RSCollectionsDB  = private.ImportLib("RareScannerCollectionsDB")
 
 -- RareScanner internal libraries
 local RSLogger = private.ImportLib("RareScannerLogger")
@@ -2200,13 +2201,84 @@ local function GetLootFilterOptions()
 					handler = RareScanner,
 					desc = AL["LOOT_FILTERS_DESC"],
 					args = {
-						separator_reset = {
+						separator_explorer = {
 							order = 1,
+							type = "header",
+							name = AL["LOOT_EXPLORER"],
+						},
+						filter_explorer_desc = {
+							order = 2,
+							type = "description",
+							name = AL["LOOT_EXPLORER_FILTER_LONG_DESC"]
+						},
+						filter_explorer = {
+							order = 3,
+							type = "toggle",
+							name = AL["LOOT_EXPLORER_FILTER"],
+							desc = AL["LOOT_EXPLORER_FILTER_DESC"],
+							get = function() return RSConfigDB.IsFilteringByExplorerResults() end,
+							set = function(_, value)
+								if (value and RSUtils.GetTableLength(RSCollectionsDB.GetAllEntitiesCollectionsLoot()) == 0) then
+									LibDialog:Spawn(RSConstants.EXPLORER_SCAN_NOT_DONE)
+								else
+									RSConfigDB.SetFilteringByExplorerResults(value)
+								end
+							end,
+							width = "full"
+						},
+						show_mounts = {
+							order = 4,
+							type = "toggle",
+							name = AL["LOOT_EXPLORER_SHOW_MISSING_MOUNTS"],
+							desc = AL["LOOT_EXPLORER_SHOW_MISSING_MOUNTS_DESC"],
+							get = function() return RSConfigDB.IsShowingMissingMounts() end,
+							set = function(_, value)
+								RSConfigDB.SetShowingMissingMounts(value)
+							end,
+							width = "full",
+							disabled = function() return (not RSConfigDB.IsFilteringByExplorerResults()) end,
+						},
+						show_pets = {
+							order = 5,
+							type = "toggle",
+							name = AL["LOOT_EXPLORER_SHOW_MISSING_PETS"],
+							desc = AL["LOOT_EXPLORER_SHOW_MISSING_PETS_DESC"],
+							get = function() return RSConfigDB.IsShowingMissingPets() end,
+							set = function(_, value)
+								RSConfigDB.SetShowingMissingPets(value)
+							end,
+							width = "full",
+							disabled = function() return (not RSConfigDB.IsFilteringByExplorerResults()) end,
+						},
+						show_toys = {
+							order = 6,
+							type = "toggle",
+							name = AL["LOOT_EXPLORER_SHOW_MISSING_TOYS"],
+							desc = AL["LOOT_EXPLORER_SHOW_MISSING_TOYS_DESC"],
+							get = function() return RSConfigDB.IsShowingMissingToys() end,
+							set = function(_, value)
+								RSConfigDB.SetShowingMissingToys(value)
+							end,
+							width = "full",
+							disabled = function() return (not RSConfigDB.IsFilteringByExplorerResults()) end,
+						},
+						open_explorer = {
+							order = 7,
+							name = AL["LOOT_EXPLORER_OPEN"],
+							desc = AL["LOOT_EXPLORER_OPEN"],
+							type = "execute",
+							func = function() 
+								RSExplorerFrame:Show()
+							end,
+							width = "normal",
+						},
+						separator_reset = {
+							order = 8,
 							type = "header",
 							name = AL["LOOT_RESET"],
 						},
 						reset = {
-							order = 2,
+							order = 9,
 							name = AL["LOOT_RESET"],
 							desc = AL["LOOT_RESET_DESC"],
 							type = "execute",
@@ -2218,7 +2290,7 @@ local function GetLootFilterOptions()
 						},
 						category_filters = {
 							type = "group",
-							order = 3,
+							order = 10,
 							name = AL["LOOT_CATEGORY_FILTERS"],
 							handler = RareScanner,
 							desc = AL["LOOT_CATEGORY_FILTERS_DESC"],
@@ -2290,7 +2362,7 @@ local function GetLootFilterOptions()
 						},
 						individual = {
 							type = "group",
-							order = 4,
+							order = 11,
 							name = AL["LOOT_INDIVIDUAL_FILTERS"],
 							handler = RareScanner,
 							desc = AL["LOOT_INDIVIDUAL_FILTERS_DESC"],
@@ -2326,7 +2398,7 @@ local function GetLootFilterOptions()
 						},
 						other_filters = {
 							type = "group",
-							order = 5,
+							order = 12,
 							name = AL["LOOT_OTHER_FILTERS"],
 							handler = RareScanner,
 							desc = AL["LOOT_OTHER_FILTERS_DESC"],

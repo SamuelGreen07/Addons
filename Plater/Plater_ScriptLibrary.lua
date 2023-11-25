@@ -1076,9 +1076,83 @@ do
 			end
 		end,
 	})
+	
+	--#30 cleanup of renamed npcs string-indexed values
+	tinsert (PlaterPatchLibrary, {
+		NotEssential = false,
+		
+		Notes = {
+			"- Cleanup wrong indexes in npcs_renamed."
+		},
+		Func = function()
+			local renamedNPCs = Plater.db.profile.npcs_renamed
+			local renamedNPCsTemp = DetailsFramework.table.copy({}, renamedNPCs)
+			
+			for npcId, renamedName in pairs(renamedNPCsTemp) do
+				if tonumber(npcId) then 
+					renamedNPCs[tonumber(npcId)] = renamedNPCs[npcId] or renamedName -- ensure not to overwrite already existing (changed) after import
+					renamedNPCs[npcId] = nil
+				end
+			end
+		end
+	})
+	
+	--#31 adjust level text and bar sizes for hardcore
+	tinsert (PlaterPatchLibrary, {
+		NotEssential = true,
+		
+		Notes = {
+			"- Adjust level text and bar sizes for hardcore realms."
+		},
+		Func = function()
+			if (C_GameRules and C_GameRules.IsHardcoreActive and C_GameRules.IsHardcoreActive()) then
+				Plater.db.profile.plate_config.enemyplayer.level_text_alpha = 1
+				Plater.db.profile.plate_config.enemynpc.level_text_alpha = 1
+				Plater.db.profile.plate_config.friendlyplayer.level_text_alpha = 1
+				Plater.db.profile.plate_config.friendlynpc.level_text_alpha = 1
+				
+				if (not Plater.db.profile.first_run3) then
+					Plater.db.profile.plate_config.enemynpc.health[1] = 90
+					Plater.db.profile.plate_config.enemynpc.health[2] = 10
+					Plater.db.profile.plate_config.enemynpc.health_incombat[1] = 100
+					Plater.db.profile.plate_config.enemynpc.health_incombat[2] = 12
+				end
+			end
+		end
+	})
+	
+	--#32 Cleanup Ghost Auras indexes to be numbers again and remove trash.
+	tinsert (PlaterPatchLibrary, {
+		NotEssential = false,
+		
+		Notes = {
+			"- Cleanup and repair Ghost Auras data."
+		},
+		Func = function()
+			--cleanup is needed for proper number indexing. will remove crap as well.
+			
+			local ghostAuras = Plater.db.profile.ghost_auras.auras
+			local ghostAurasTemp = DetailsFramework.table.copy({}, ghostAuras)
+			local ghostAurasDefault = PLATER_DEFAULT_SETTINGS.profile.ghost_auras.auras
+			
+			for class, specs in pairs(ghostAurasTemp) do
+				for specID, specData in pairs(specs) do
+					ghostAuras[class][specID] = nil
+					if ghostAurasDefault[class][tonumber(specID)] then
+						ghostAuras[class][tonumber(specID)] = ghostAuras[class][tonumber(specID)] or {}
+						for spellId, enabled in pairs(specData) do
+							if tonumber(spellId) then
+								ghostAuras[class][tonumber(specID)][tonumber(spellId)] = enabled 
+							end
+						end
+					end
+				end
+			end
+		end
+	})
 
 	--to tag an update as non-essential, add "NotEssential = true," to the table
-	--/run Plater.db.profile.patch_version = 27
+	--/run Plater.db.profile.patch_version = 30
 end --end of patch library
 
 local listOfTriggersToDeprecateOnExpansion = {

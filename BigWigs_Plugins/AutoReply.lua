@@ -21,42 +21,14 @@ plugin.defaultDB = {
 -- Locals
 --
 
-local SendChatMessage, GetTime = BigWigsLoader.SendChatMessage, GetTime
+local Ambiguate, SendChatMessage, GetTime = BigWigsLoader.Ambiguate, BigWigsLoader.SendChatMessage, GetTime
 local L = BigWigsAPI:GetLocale("BigWigs: Plugins")
 plugin.displayName = L.autoReply
 local curDiff = 0
 local curModule = nil
 local throttle, throttleBN, friendlies = {}, {}, {}
-local hogger = "Hogger"
-do
-	local locale = GetLocale()
-	if locale == "frFR" then
-		hogger = "Lardeur"
-	elseif locale == "itIT" then
-		hogger = "Boccalarga"
-	elseif locale == "koKR" then
-		hogger = "들창코"
-	elseif locale == "ruRU" then
-		hogger = "Дробитель"
-	elseif locale == "zhCN" then
-		hogger = "霍格"
-	elseif locale == "zhTW" then
-		hogger = "霍格"
-	end
-end
 local healthPools, healthPoolNames = {}, {}
 local timer = nil
-
--- Compat
-local BNGetNumFriendGameAccounts = BNGetNumFriendGameAccounts or C_BattleNet.GetFriendNumGameAccounts
-local BNGetGameAccountInfoByGUID = BNGetGameAccountInfoByGUID or function(guid)
-	local gameAccountInfo = C_BattleNet.GetGameAccountInfoByGUID(guid)
-	return true, gameAccountInfo.characterName or "", gameAccountInfo.clientProgram, gameAccountInfo.realmName or ""
-end
-local BNGetFriendGameAccountInfo = BNGetFriendGameAccountInfo or function(friendIndex, accountIndex)
-	local gameAccountInfo = C_BattleNet.GetFriendGameAccountInfo(friendIndex, accountIndex)
-	return	true, gameAccountInfo.characterName or "", gameAccountInfo.clientProgram, gameAccountInfo.realmName or ""
-end
 
 -------------------------------------------------------------------------------
 -- Options
@@ -64,15 +36,17 @@ end
 
 do
 	local disabled = function() return plugin.db.profile.disabled end
+	local bossText = BigWigsAPI:GetLocale("BigWigs: Common").boss
+	local heroicText = BigWigsAPI:GetLocale("BigWigs").heroic
 	local modeTbl = {
 		type = "select",
 		name = L.responseType,
 		order = 1,
 		values = {
 			L.autoReplyBasic,
-			L.autoReplyNormal:format(hogger),
-			L.autoReplyAdvanced:format(hogger, 12, 20),
-			-- L.autoReplyExtreme:format(hogger, 12, 20, L.healthFormat:format(hogger, 42)),
+			L.autoReplyNormal:format(bossText),
+			L.autoReplyAdvanced:format(bossText, heroicText, 12, 20),
+			L.autoReplyExtreme:format(bossText, heroicText, 12, 20, L.healthFormat:format(bossText, 42)),
 		},
 		width = "full",
 		style = "radio",
@@ -84,8 +58,8 @@ do
 		values = {
 			L.none,
 			L.autoReplyLeftCombatBasic,
-			"|cFF00FF00".. L.autoReplyLeftCombatNormalWin:format(hogger) .."|r   |cFFFF0000".. L.autoReplyLeftCombatNormalWipe:format(hogger) .. "|r",
-			"|cFF00FF00".. L.autoReplyLeftCombatAdvancedWin:format(hogger, 1, 20) .."|r   |cFFFF0000".. L.autoReplyLeftCombatNormalWipe:format(hogger) .."|r",
+			"|cFF00FF00".. L.autoReplyLeftCombatNormalWin:format(bossText) .."|r   |cFFFF0000".. L.autoReplyLeftCombatNormalWipe:format(bossText) .. "|r",
+			"|cFF00FF00".. L.autoReplyLeftCombatAdvancedWin:format(bossText, 1, 20) .."|r   |cFFFF0000".. L.autoReplyLeftCombatAdvancedWipe:format(bossText, L.healthFormat:format(bossText, 0.1)) .."|r",
 		},
 		width = "full",
 		style = "radio",
@@ -153,10 +127,10 @@ do
 			end
 		end
 
-		if db.mode < 1 or db.mode > 3 then
+		if db.mode < 1 or db.mode > 4 then
 			db.mode = plugin.defaultDB.mode
 		end
-		if db.modeOther < 1 or db.modeOther > 3 then
+		if db.modeOther < 1 or db.modeOther > 4 then
 			db.modeOther = plugin.defaultDB.modeOther
 		end
 		if db.exitCombat < 1 or db.exitCombat > 4 then
@@ -171,6 +145,7 @@ do
 		self:RegisterMessage("BigWigs_OnBossEngage")
 		self:RegisterMessage("BigWigs_OnBossWin", "WinOrWipe")
 		self:RegisterMessage("BigWigs_OnBossWipe", "WinOrWipe")
+		self:RegisterMessage("BigWigs_OnBossDisable")
 		self:RegisterMessage("BigWigs_ProfileUpdate", updateProfile)
 		updateProfile()
 	end
@@ -187,7 +162,7 @@ end
 --
 
 function plugin:BigWigs_OnBossEngage(event, module, difficulty)
-	if not self.db.profile.disabled and module and module.journalId and not module.worldBoss then
+	if not self.db.profile.disabled and module and module:GetJournalID() and not module.worldBoss then
 		curDiff = difficulty
 		curModule = module
 		throttle, throttleBN, friendlies = {}, {}, {}
@@ -208,19 +183,19 @@ do
 			end
 			return L.autoReplyLeftCombatAdvancedWin:format(curModule.displayName, playersAlive, playersTotal)
 		else
-			-- local totalHp = ""
-			-- for i = 1, 5 do
-			-- 	local hp = healthPools[i]
-			-- 	local name = healthPoolNames[i]
-			-- 	if hp then
-			-- 		if totalHp == "" then
-			-- 			totalHp = L.healthFormat:format(name, hp*100)
-			-- 		else
-			-- 			totalHp = totalHp .. L.comma .. L.healthFormat:format(name, hp*100)
-			-- 		end
-			-- 	end
-			-- end
-			return L.autoReplyLeftCombatNormalWipe:format(curModule.displayName)
+			local totalHp = ""
+			for i = 1, 5 do
+				local hp = healthPools[i]
+				local name = healthPoolNames[i]
+				if hp then
+					if totalHp == "" then
+						totalHp = L.healthFormat:format(name, hp*100)
+					else
+						totalHp = totalHp .. L.comma .. L.healthFormat:format(name, hp*100)
+					end
+				end
+			end
+			return L.autoReplyLeftCombatAdvancedWipe:format(curModule.displayName, totalHp)
 		end
 	end
 
@@ -279,29 +254,42 @@ do
 			curModule = nil
 		end
 	end
+
+	function plugin:BigWigs_OnBossDisable(event, module) -- Manual disable or reboot of the boss module
+		if not self.db.profile.disabled and module and module == curModule then
+			curDiff = 0
+			self:UnregisterEvent("CHAT_MSG_WHISPER")
+			self:UnregisterEvent("CHAT_MSG_BN_WHISPER")
+			if timer then
+				self:CancelTimer(timer)
+				timer = nil
+			end
+			curModule = nil
+		end
+	end
 end
 
 do
-	-- local units = {"boss1", "boss2", "boss3", "boss4", "boss5"}
+	local units = {"boss1", "boss2", "boss3", "boss4", "boss5"}
 
-	-- local UnitHealth, UnitHealthMax, UnitName, IsEncounterInProgress = UnitHealth, UnitHealthMax, UnitName, IsEncounterInProgress
-	-- local function StoreHealth()
-	-- 	if IsEncounterInProgress() then
-	-- 		for i = 1, 5 do
-	-- 			local unit = units[i]
-	-- 			local rawHealth = UnitHealth(unit)
-	-- 			if rawHealth > 0 then
-	-- 				local maxHealth = UnitHealthMax(unit)
-	-- 				local health = rawHealth / maxHealth
-	-- 				healthPools[i] = health
-	-- 				healthPoolNames[i] = UnitName(unit)
-	-- 			elseif healthPools[i] then
-	-- 				healthPools[i] = nil
-	-- 				healthPoolNames[i] = nil
-	-- 			end
-	-- 		end
-	-- 	end
-	-- end
+	local UnitHealth, UnitHealthMax, IsEncounterInProgress = UnitHealth, UnitHealthMax, IsEncounterInProgress
+	local function StoreHealth()
+		if IsEncounterInProgress() then
+			for i = 1, 5 do
+				local unit = units[i]
+				local rawHealth = UnitHealth(unit)
+				if rawHealth > 0 then
+					local maxHealth = UnitHealthMax(unit)
+					local health = rawHealth / maxHealth
+					healthPools[i] = health
+					healthPoolNames[i] = plugin:UnitName(unit)
+				elseif healthPools[i] then
+					healthPools[i] = nil
+					healthPoolNames[i] = nil
+				end
+			end
+		end
+	end
 
 	local function CreateResponse(mode)
 		if mode == 2 then
@@ -315,35 +303,31 @@ do
 				end
 			end
 			-- In combat with encounterName, difficulty, playersAlive
-			return L.autoReplyAdvanced:format(curModule.displayName, playersAlive, playersTotal)
-		-- elseif mode == 4 then
-		-- 	local _, _, _, instanceId = UnitPosition("player")
-		-- 	local playersTotal, playersAlive = 0, 0
-		-- 	for unit in curModule:IterateGroup() do
-		-- 		local _, _, _, tarInstanceId = UnitPosition(unit)
-		-- 		if tarInstanceId == instanceId then
-		-- 			playersTotal = playersTotal + 1
-		-- 			if not UnitIsDeadOrGhost(unit) then
-		-- 				playersAlive = playersAlive + 1
-		-- 			end
-		-- 		end
-		-- 	end
-		-- 	local totalHp = ""
-		-- 	for i = 1, 5 do
-		-- 		local unit = units[i]
-		-- 		local hp = UnitHealth(unit)
-		-- 		local name = UnitName(unit)
-		-- 		if hp > 0 then
-		-- 			hp = hp / UnitHealthMax(unit)
-		-- 			if totalHp == "" then
-		-- 				totalHp = L.healthFormat:format(name, hp*100)
-		-- 			else
-		-- 				totalHp = totalHp .. L.comma .. L.healthFormat:format(name, hp*100)
-		-- 			end
-		-- 		end
-		-- 	end
-		-- 	-- In combat with encounterName, difficulty, playersAlive, bossHealth
-		-- 	return L.autoReplyExtreme:format(curModule.displayName, playersAlive, playersTotal, totalHp)
+			return L.autoReplyAdvanced:format(curModule.displayName, GetDifficultyInfo(curDiff) or "??", playersAlive, playersTotal)
+		elseif mode == 4 then
+			local playersTotal, playersAlive = 0, 0
+			for unit in curModule:IterateGroup() do
+				playersTotal = playersTotal + 1
+				if not UnitIsDeadOrGhost(unit) then
+					playersAlive = playersAlive + 1
+				end
+			end
+			local totalHp = ""
+			for i = 1, 5 do
+				local unit = units[i]
+				local hp = UnitHealth(unit)
+				local name = plugin:UnitName(unit)
+				if hp > 0 then
+					hp = hp / UnitHealthMax(unit)
+					if totalHp == "" then
+						totalHp = L.healthFormat:format(name, hp*100)
+					else
+						totalHp = totalHp .. L.comma .. L.healthFormat:format(name, hp*100)
+					end
+				end
+			end
+			-- In combat with encounterName, difficulty, playersAlive, bossHealth
+			return L.autoReplyExtreme:format(curModule.displayName, GetDifficultyInfo(curDiff) or "??", playersAlive, playersTotal, totalHp)
 		else
 			return L.autoReplyBasic -- In combat
 		end
@@ -361,19 +345,19 @@ do
 			end
 			if not throttle[sender] or (GetTime() - throttle[sender]) > 30 then
 				throttle[sender] = GetTime()
-				local _, characterName = BNGetGameAccountInfoByGUID(guid)
+				local isBnetFriend = C_BattleNet.GetGameAccountInfoByGUID(guid)
 				local msg
-				if characterName or IsGuildMember(guid) or C_FriendList.IsFriend(guid) then
+				if isBnetFriend or IsGuildMember(guid) or C_FriendList.IsFriend(guid) then
 					friendlies[sender] = true
 					msg = CreateResponse(self.db.profile.mode)
-					-- if not timer and self.db.profile.exitCombat == 4 then
-					-- 	timer = self:ScheduleRepeatingTimer(StoreHealth, 2)
-					-- end
+					if not timer and self.db.profile.exitCombat == 4 then
+						timer = self:ScheduleRepeatingTimer(StoreHealth, 2)
+					end
 				else
 					msg = CreateResponse(self.db.profile.modeOther)
-					-- if not timer and self.db.profile.exitCombatOther == 4 then
-					-- 	timer = self:ScheduleRepeatingTimer(StoreHealth, 2)
-					-- end
+					if not timer and self.db.profile.exitCombatOther == 4 then
+						timer = self:ScheduleRepeatingTimer(StoreHealth, 2)
+					end
 				end
 				SendChatMessage("[BigWigs] ".. msg, "WHISPER", nil, sender)
 			end
@@ -385,24 +369,31 @@ do
 			if not throttleBN[bnSenderID] or (GetTime() - throttleBN[bnSenderID]) > 30 then
 				throttleBN[bnSenderID] = GetTime()
 				local index = BNGetFriendIndex(bnSenderID)
-				local gameAccs = BNGetNumFriendGameAccounts(index)
+				local gameAccs = C_BattleNet.GetFriendNumGameAccounts(index)
 				for i=1, gameAccs do
-					local _, player, game, server = BNGetFriendGameAccountInfo(index, i)
-					if game == "WoW" then
-						if server ~= GetRealmName() then
-							player = player .. "-" .. server
+					local gameAccountInfo = C_BattleNet.GetFriendGameAccountInfo(index, i)
+					local player = gameAccountInfo.characterName
+					local realmName = gameAccountInfo.realmName -- Short name "ServerOne"
+					local realmDisplayName = gameAccountInfo.realmDisplayName -- Full name "Server One"
+					if gameAccountInfo.clientProgram == "WoW" and gameAccountInfo.wowProjectID == 1 and realmName and realmDisplayName and player then
+						if realmDisplayName ~= GetRealmName() then
+							player = player .. "-" .. realmName
 						end
 						if UnitInRaid(player) or UnitInParty(player) then -- Player is in our group
-							throttleBN[bnSenderID] = nil
-							return
+							local _, _, _, myInstanceId = UnitPosition("player")
+							local _, _, _, tarInstanceId = UnitPosition(player)
+							if myInstanceId == tarInstanceId then -- Player is also in our instance
+								throttleBN[bnSenderID] = nil
+								return
+							end
 						end
 					end
 				end
 				local msg = CreateResponse(self.db.profile.mode)
 				BNSendWhisper(bnSenderID, "[BigWigs] ".. msg)
-				-- if not timer and self.db.profile.exitCombat == 4 then
-				-- 	timer = self:ScheduleRepeatingTimer(StoreHealth, 2)
-				-- end
+				if not timer and self.db.profile.exitCombat == 4 then
+					timer = self:ScheduleRepeatingTimer(StoreHealth, 2)
+				end
 			end
 		end
 	end

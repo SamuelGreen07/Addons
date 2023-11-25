@@ -25,7 +25,7 @@ RSConstants.LOOT_ITEM_ID = nil
 ---============================================================================
 
 RSConstants.CURRENT_DB_VERSION = 2
-RSConstants.CURRENT_LOOT_DB_VERSION = 3
+RSConstants.CURRENT_LOOT_DB_VERSION = 6
 
 ---============================================================================
 -- Current maps (newer)
@@ -60,6 +60,12 @@ RSConstants.BUTTON_TIMER = 1 --1 seconds
 RSConstants.ITEM_SOURCE = {
 	NPC = 1,
 	CONTAINER = 2
+}
+
+RSConstants.ITEM_TYPE = {
+	TOY = 1,
+	PET = 2,
+	MOUNT = 3
 }
 
 ---============================================================================
@@ -142,10 +148,9 @@ RSConstants.PROFILE_DEFAULTS = {
 			searchingPets = true,
 			searchingMounts = true,
 			searchingToys = true,
-			searchingAppearances = true,
 			showFiltered = true,
-			showDead = true,
-			showWithoutCollectibles = false
+			showWithoutCollectibles = false,
+			lockingMap = false
 		},
 		map = {
 			displayNpcIcons = true,
@@ -198,6 +203,10 @@ RSConstants.PROFILE_DEFAULTS = {
 			filterItemsCompletedQuest = true,
 			filterNotMatchingClass = false,
 			filterNotMatchingFaction = true,
+			filterByExplorerResults = false,
+			showingMissingMounts = true,
+			showingMissingPets = true,
+			showingMissingToys = true,
 			numItems = 10,
 			numItemsPerRow = 10,
 			tooltipsCommands = true
@@ -345,7 +354,21 @@ RSConstants.STEP7 = "7"
 -- Dialogs
 ---============================================================================
 
+RSConstants.APPLY_COLLECTIONS_LOOT_FILTERS = "RARESCANNER_APPLY_COLLECTIONS_LOOT_FILTERS"
+RSConstants.EXPLORER_FILTERING_DIALOG = "RARESCANNER_EXPLORER_FILTERING_DIALOG"
+RSConstants.EXPLORER_SCAN_NOT_DONE = "RARESCANNER_EXPLORER_SCAN_NOT_DONE"
 RSConstants.TARGET_UNIT_WARNING = "RARESCANNER_TARGET_UNIT_WARNING"
+
+---============================================================================
+-- Explorer filters
+---============================================================================
+
+RSConstants.EXPLORER_FILTER_DROP_MOUNTS = 1
+RSConstants.EXPLORER_FILTER_DROP_PETS = 2
+RSConstants.EXPLORER_FILTER_DROP_TOYS = 3
+RSConstants.EXPLORER_FILTER_PART_ACHIEVEMENT = 4
+RSConstants.EXPLORER_FILTER_FILTERED = 5
+RSConstants.EXPLORER_FILTER_WITHOUT_COLLECTIBLES = 6
 
 ---============================================================================
 -- Others

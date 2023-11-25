@@ -1,4 +1,4 @@
-## Interface: 30401
+## Interface: 100200
 
 ## Title: BigWigs [|cffeda55fPlugins|r]
 ## Title-zhCN: BigWigs [|cffeda55f插件|r]
@@ -22,7 +22,8 @@
 ## Notes-ptBR: Plugins principais do BigWigs
 ## Notes-esES: Plugins del núcleo de BigWigs.
 ## Notes-esMX: Plugins del núcleo de BigWigs.
-## Version: v48.2-classic
+## IconTexture: Interface\AddOns\BigWigs\Media\Icons\minimap_raid.tga
+## Version: v298.1
 
 ## LoadOnDemand: 1
 ## Dependencies: BigWigs, BigWigs_Core

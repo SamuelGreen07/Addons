@@ -22,12 +22,14 @@ local RSUtils = private.ImportLib("RareScannerUtils")
 
 RSGroupPinMixin = CreateFromMixins(MapCanvasPinMixin);
 
+RSGroupPinMixin.SetPassThroughButtons = function() end
+
 function RSGroupPinMixin:OnLoad()
 	self:SetScalingLimits(1, 1, 1.0);
 end
 
 function RSGroupPinMixin:OnAcquired(POI, dataProvider)
-	self:UseFrameLevelType("PIN_FRAME_LEVEL_VIGNETTE", self:GetMap():GetNumActivePinsByTemplate("RSGroupPinTemplate"));
+	self:UseFrameLevelType("PIN_FRAME_LEVEL_AREA_POI", self:GetMap():GetNumActivePinsByTemplate("RSGroupPinTemplate"));
 	self.POI = POI
 	self.dataProvider = dataProvider
 	if (POI.TopTexture) then
@@ -50,7 +52,10 @@ function RSGroupPinMixin:OnAcquired(POI, dataProvider)
 	end
 	self.IconTexture:SetAtlas(POI.iconAtlas)
 	self:SetPosition(POI.x, POI.y);
-	self:SetPassThroughButtons("MiddleButton");
+	
+	if (self.SetPassThroughButtons) then
+		self:SetPassThroughButtons("MiddleButton");
+	end
 end
 
 function RSGroupPinMixin:OnMouseEnter()

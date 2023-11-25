@@ -3,10 +3,10 @@ BigWigs:AddSounds("Skycap'n Kragg", {
 	[255952] = "alert",
 	[256005] = "info",
 	[256016] = "underyou",
+	[256056] = "long",
 	[256060] = "warning",
 	[256106] = "alert",
 	[272046] = "alarm",
-	["stages"] = "long",
 })
 
 BigWigs:AddSounds("Council o' Captains", {
@@ -48,10 +48,10 @@ BigWigs:AddSounds("Freehold Trash", {
 	[257436] = "alert",
 	[257732] = "alarm",
 	[257736] = "warning",
-	[257739] = "alarm",
+	[257739] = "warning",
 	[257756] = "alarm",
 	[257775] = "alert",
-	[257784] = "alarm",
+	[257784] = "warning",
 	[257870] = "alarm",
 	[257899] = {"alert","info"},
 	[257908] = {"alert","warning"},
@@ -61,8 +61,8 @@ BigWigs:AddSounds("Freehold Trash", {
 	[258672] = "alarm",
 	[258777] = "alarm",
 	[272402] = "alert",
-	[274383] = "alarm",
+	[274383] = {"alarm","info"},
 	[274400] = "alarm",
 	[274507] = {"alarm","alert"},
-	[274555] = "alert",
+	[274555] = {"alert","warning"},
 })

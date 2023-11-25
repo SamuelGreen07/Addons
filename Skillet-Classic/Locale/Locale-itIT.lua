@@ -153,9 +153,9 @@ L["INCLUDEREAGENTSNAME"] = "Include Reagents in Search"
 L["INTERRUPTCLEARDESC"] = "Moving, jumping, closing the frame, or clicking the Pause button clears the in progress queue entry"
 --[[Translation missing --]]
 L["INTERRUPTCLEARNAME"] = "Spell interrupt clears queue entry"
+L["Inventory"] = "Inventario"
 --[[Translation missing --]]
 L["inventory"] = "inventory"
-L["Inventory"] = "Inventario"
 L["INVENTORYDESC"] = "Informazioni dell'Inventario"
 L["InvSlot"] = "InvSlot"
 L["is now disabled"] = "e' ora disabilitato"
@@ -293,6 +293,10 @@ L["Sold amount"] = "Ammontare di vendita"
 L["SORTASC"] = "Elenca la lista ricette dal piu' alto al piu' basso"
 L["SORTDESC"] = "Elenca la lista delle ricette dal piu' basso al piu' alto"
 L["Sorting"] = "Riordinango"
+--[[Translation missing --]]
+L["SOUNDONEMPTYQUEUEDESC"] = "Play a sound when the queue is empty"
+--[[Translation missing --]]
+L["SOUNDONEMPTYQUEUENAME"] = "Sound on Empty Queue"
 L["Source:"] = "Sorgente:"
 L["STANDBYDESC"] = "Scambia stato di attesa acceso/spento"
 L["STANDBYNAME"] = "attesa"

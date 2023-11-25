@@ -70,11 +70,9 @@ do
 	display = CreateFrame("Frame", "BigWigsInfoBox", UIParent)
 	display:SetSize(infoboxWidth, infoboxHeight)
 	display:SetFrameStrata("MEDIUM")
+	display:SetFixedFrameStrata(true)
 	display:SetFrameLevel(130)
-	if display.SetFixedFrameStrata then
-		display:SetFixedFrameStrata(true)
-		display:SetFixedFrameLevel(true)
-	end
+	display:SetFixedFrameLevel(true)
 	display:SetClampedToScreen(true)
 	display:EnableMouse(true)
 	display:SetMovable(true)
@@ -93,14 +91,14 @@ do
 	display.background = bg
 
 	local xxx1 = display:CreateTexture()
-	xxx1:SetPoint("TOP", display, "BOTTOM")
+	xxx1:SetPoint("LEFT", display, "RIGHT")
 	xxx1:SetColorTexture(0, 0, 0, 0.3)
 	xxx1:SetSize(infoboxWidth, infoboxHeight)
 	xxx1:Hide()
 	display.xxx1 = xxx1
 
 	local xxx2 = display:CreateTexture()
-	xxx2:SetPoint("LEFT", display, "RIGHT")
+	xxx2:SetPoint("TOP", display, "BOTTOM")
 	xxx2:SetColorTexture(0, 0, 0, 0.3)
 	xxx2:SetSize(infoboxWidth, infoboxHeight)
 	xxx2:Hide()
@@ -236,7 +234,7 @@ end
 -- Event Handlers
 --
 
-function plugin:BigWigs_ShowInfoBox(_, module, title, blocks)
+function plugin:BigWigs_ShowInfoBox(_, module, title, TEMP)
 	if opener then
 		self:Close()
 	end
@@ -248,9 +246,14 @@ function plugin:BigWigs_ShowInfoBox(_, module, title, blocks)
 	display.title:SetText(title)
 	display:Show()
 
-	blocks = blocks or 1
-	for i = 1, 3 do
-		display["xxx"..i]:SetShown(blocks > i)
+	if TEMP then
+		display.xxx1:Show()
+		display.xxx2:Show()
+		display.xxx3:Show()
+	else
+		display.xxx1:Hide()
+		display.xxx2:Hide()
+		display.xxx3:Hide()
 	end
 end
 

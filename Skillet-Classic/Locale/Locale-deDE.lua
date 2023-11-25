@@ -288,6 +288,10 @@ L["Sold amount"] = "verkaufte Menge"
 L["SORTASC"] = "Sortiere aufsteigend"
 L["SORTDESC"] = "Sortiere absteigend"
 L["Sorting"] = "Sortierung"
+--[[Translation missing --]]
+L["SOUNDONEMPTYQUEUEDESC"] = "Play a sound when the queue is empty"
+--[[Translation missing --]]
+L["SOUNDONEMPTYQUEUENAME"] = "Sound on Empty Queue"
 L["Source:"] = "Quelle:"
 L["STANDBYDESC"] = "Standby-Modus ein-/ausschalten"
 L["STANDBYNAME"] = "standby"

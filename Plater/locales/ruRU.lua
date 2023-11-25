@@ -4,12 +4,23 @@ do
     local L = languageTable
 
 ------------------------------------------------------------
+--[[Translation missing --]]
+L["EXPORT"] = "Export"
+--[[Translation missing --]]
+L["EXPORT_CAST_COLORS"] = "Share Colors"
+--[[Translation missing --]]
+L["EXPORT_CAST_SOUNDS"] = "Share Sounds"
 L["HIGHLIGHT_HOVEROVER"] = "Подсвечивание при наведении курсора"
 L["HIGHLIGHT_HOVEROVER_ALPHA"] = "Степень подсвечивания при наведении курсора"
 L["HIGHLIGHT_HOVEROVER_DESC"] = "Эффект подсвечивания при наведении курсора мыши над индикаторами здоровья"
-L["OPTIONS_ALPHA"] = "Прозрачность"
 --[[Translation missing --]]
-L["OPTIONS_ALPHABYFRAME_ALPHAMULTIPLIER"] = "Transparency multiplier."
+L["IMPORT"] = "Import"
+--[[Translation missing --]]
+L["IMPORT_CAST_COLORS"] = "Import Colors"
+--[[Translation missing --]]
+L["IMPORT_CAST_SOUNDS"] = "Import Sounds"
+L["OPTIONS_ALPHA"] = "Прозрачность"
+L["OPTIONS_ALPHABYFRAME_ALPHAMULTIPLIER"] = "Множитель прозрачности."
 L["OPTIONS_ALPHABYFRAME_DEFAULT"] = "Прозрачность по умолчанию"
 --[[Translation missing --]]
 L["OPTIONS_ALPHABYFRAME_DEFAULT_DESC"] = "Amount of transparency applyed to all the components of a single nameplate."
@@ -19,8 +30,7 @@ L["OPTIONS_ALPHABYFRAME_ENABLE_FRIENDLY"] = "Включить для союзн�
 L["OPTIONS_ALPHABYFRAME_ENABLE_FRIENDLY_DESC"] = "Применять настройки прозрачности для союзных юнитов."
 --[[Translation missing --]]
 L["OPTIONS_ALPHABYFRAME_TARGET_INRANGE"] = "Target Alpha/In-Range"
---[[Translation missing --]]
-L["OPTIONS_ALPHABYFRAME_TARGET_INRANGE_DESC"] = "Transparency for targets or in-range units."
+L["OPTIONS_ALPHABYFRAME_TARGET_INRANGE_DESC"] = "Прозрачность для целей или находящихся в радиусе действия юнитов."
 --[[Translation missing --]]
 L["OPTIONS_ALPHABYFRAME_TITLE_ENEMIES"] = "Transparency Amount Per Frame (enemies)"
 --[[Translation missing --]]
@@ -70,8 +80,7 @@ L["OPTIONS_CAST_SHOW_TARGETNAME_TANK_DESC"] = "Если вы танк, то пр
 L["OPTIONS_CASTBAR_FADE_ANIM_ENABLED"] = "Включить анимации затухания"
 L["OPTIONS_CASTBAR_FADE_ANIM_ENABLED_DESC"] = "Включить анимации затухания на старте и окончании произнесения заклинаний."
 L["OPTIONS_CASTBAR_FADE_ANIM_TIME_END"] = "На окончании"
---[[Translation missing --]]
-L["OPTIONS_CASTBAR_FADE_ANIM_TIME_END_DESC"] = "When a cast ends, this is the amount of time the cast bar takes to go from 100% transparency to not be visible at all."
+L["OPTIONS_CASTBAR_FADE_ANIM_TIME_END_DESC"] = "Когда каст заканчивается, это время, которое требуется полосе каста, чтобы перейти от прозрачности 100% к полной невидимости."
 L["OPTIONS_CASTBAR_FADE_ANIM_TIME_START"] = "На старте"
 --[[Translation missing --]]
 L["OPTIONS_CASTBAR_FADE_ANIM_TIME_START_DESC"] = "When a cast starts, this is the amount of time the cast bar takes to go from zero transparency to full opaque."
@@ -89,6 +98,8 @@ L["OPTIONS_CASTBAR_SPARK_HIDE_INTERRUPT"] = "Скрыть искру при пр
 L["OPTIONS_CASTBAR_TOGGLE_TEST"] = "Тест полосы заклинаний"
 L["OPTIONS_CASTBAR_TOGGLE_TEST_DESC"] = "Активировать тестовую полосу заклинаний, нажмите снова для остановки теста"
 L["OPTIONS_CASTBAR_WIDTH"] = "Ширина полосы заклинаний."
+--[[Translation missing --]]
+L["OPTIONS_CASTCOLORS_DISABLECOLORS"] = "Disable All Colors"
 L["OPTIONS_CLICK_SPACE_HEIGHT"] = "Высота области допустимая при выборе цели кликом мышью."
 L["OPTIONS_CLICK_SPACE_WIDTH"] = "Ширина области допустимая при выборе цели кликом мышью."
 L["OPTIONS_COLOR"] = "Цвет"
@@ -225,6 +236,8 @@ L["OPTIONS_NOESSENTIAL_NAME"] = "Disable non-essential script updates during Pla
 L["OPTIONS_NOESSENTIAL_SKIP_ALERT"] = "Skipped non-essential patch:"
 --[[Translation missing --]]
 L["OPTIONS_NOESSENTIAL_TITLE"] = "Skip Non Essential Script Patches"
+--[[Translation missing --]]
+L["OPTIONS_NOTHING_TO_EXPORT"] = "There's nothing to export."
 L["OPTIONS_OKAY"] = "Ок"
 L["OPTIONS_OUTLINE"] = "Контур"
 L["OPTIONS_PERSONAL_HEALTHBAR_HEIGHT"] = "Высота полосы здоровья."
@@ -282,6 +295,10 @@ L["OPTIONS_SHIELD_BAR"] = "Полоса Щита"
 L["OPTIONS_SHOW_CASTBAR"] = "Показывать полосу заклинаний"
 --[[Translation missing --]]
 L["OPTIONS_SHOW_POWERBAR"] = "Show power bar"
+--[[Translation missing --]]
+L["OPTIONS_SHOWOPTIONS"] = "Show Options"
+--[[Translation missing --]]
+L["OPTIONS_SHOWSCRIPTS"] = "Show Scripts"
 L["OPTIONS_SHOWTOOLTIP"] = "Показывать описание"
 --[[Translation missing --]]
 L["OPTIONS_SHOWTOOLTIP_DESC"] = "Show tooltip when hovering over the aura icon."
@@ -360,8 +377,7 @@ L["OPTIONS_THREAT_MODIFIERS_HEALTHBARCOLOR"] = "Цвет полосы здоро
 L["OPTIONS_THREAT_MODIFIERS_NAMECOLOR"] = "Окрашивать имена"
 --[[Translation missing --]]
 L["OPTIONS_THREAT_PULL_FROM_ANOTHER_TANK"] = "Pulling From Another Tank"
---[[Translation missing --]]
-L["OPTIONS_THREAT_PULL_FROM_ANOTHER_TANK_TANK"] = "The unit has aggro on another tank and you're about to pull it."
+L["OPTIONS_THREAT_PULL_FROM_ANOTHER_TANK_TANK"] = "У юнита есть агро на другом танке, и вы собираетесь его перетянуть."
 --[[Translation missing --]]
 L["OPTIONS_THREAT_USE_AGGRO_FLASH"] = "Enable aggro flash"
 --[[Translation missing --]]

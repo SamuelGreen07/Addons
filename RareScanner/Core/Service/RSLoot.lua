@@ -8,6 +8,7 @@ local RSLoot = private.NewLib("RareScannerLoot")
 -- RareScanner database libraries
 local RSConfigDB = private.ImportLib("RareScannerConfigDB")
 local RSLootDB = private.ImportLib("RareScannerLootDB")
+local RSCollectionsDB = private.ImportLib("RareScannerCollectionsDB")
 
 -- RareScanner general libraries
 local RSLogger = private.ImportLib("RareScannerLogger")
@@ -42,9 +43,24 @@ local function IsFilteredByCategory(itemLink, itemID, itemClassID, itemSubClassI
 	return false
 end
 
+local function IsCollectionFiltered(type, entityID, itemID)
+	local items = RSCollectionsDB.GetEntityCollectionsLoot(entityID, type)
+	if (RSUtils.Contains(items, itemID)) then
+		return false
+	end
+	
+	RSLogger:PrintDebugMessageItemID(itemID, string.format("Item [%s]. Filtrado por estar ya conseguido o estar filtrado en el explorador", itemID))
+	return true
+end
+
 function RSLoot.IsFiltered(entityID, itemID, itemLink, itemRarity, itemEquipLoc, itemClassID, itemSubClassID)
+	-- Filter by explorer results
+	if (RSConfigDB.IsFilteringByExplorerResults() and RSUtils.GetTableLength(RSCollectionsDB.GetAllEntitiesCollectionsLoot()) > 0) then
+		return IsCollectionFiltered(RSConstants.ITEM_SOURCE.NPC, entityID, itemID) and IsCollectionFiltered(RSConstants.ITEM_SOURCE.CONTAINER, entityID, itemID)
+	end
+	
 	-- Category filter
-	if (IsFilteredByCategory(itemLink, itemID, itemClassID, itemSubClassID)) then
+	if (not RSConfigDB.IsFilteringByExplorerResults() and IsFilteredByCategory(itemLink, itemID, itemClassID, itemSubClassID)) then
 		RSLogger:PrintDebugMessageItemID(itemID, string.format("Item [%s]. Filtrado por su categoria.", itemID))
 		return true
 	end

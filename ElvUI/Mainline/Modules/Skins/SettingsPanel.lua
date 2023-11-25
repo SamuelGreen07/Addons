@@ -44,7 +44,7 @@ local function HandleCheckbox(checkbox)
 					checkedTexture:SetInside(checkbox.backdrop)
 				end
 			else
-				region:SetTexture('')
+				region:SetTexture(E.ClearTexture)
 			end
 		end
 	end
@@ -202,7 +202,7 @@ function S:SettingsPanel()
 				S:HandleCheckBox(child)
 			elseif child:IsObjectType('Button') then
 				S:HandleButton(child)
-			elseif child.Left and child.Middle and child.Right and child:IsObjectType('Frame') then
+			elseif child:IsObjectType('Frame') and (child.Left and child.Middle and child.Right) then
 				S:HandleDropdownBox(child)
 			end
 		end
@@ -216,6 +216,11 @@ function S:SettingsPanel()
 		_G.CompactUnitFrameProfilesGeneralOptionsFrameAutoActivateBG:Hide()
 		_G.CompactUnitFrameProfilesGeneralOptionsFrameAutoActivateBG:CreateBackdrop('Transparent')
 	end
+
+	-- New Voice Sliders
+	S:HandleSliderFrame(_G.UnitPopupVoiceSpeakerVolume.Slider)
+	S:HandleSliderFrame(_G.UnitPopupVoiceMicrophoneVolume.Slider)
+	S:HandleSliderFrame(_G.UnitPopupVoiceUserVolume.Slider)
 end
 
 S:AddCallback('SettingsPanel')

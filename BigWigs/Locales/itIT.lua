@@ -19,8 +19,6 @@ L.already_registered = "|cffff0000ATTENZIONE:|r |cff00ff00%s|r (|cffffff00%s|r) 
 L.testNameplate = "Bersaglio rilevato, creo una barra di test sulla barra del bersaglio. |cFF33FF99Questa funzione è usata raramente, di solito è solo una barra, e serve per tracciare i tempi di recupero mentre si combattono più boss/add che lanciano la stessa magia.|r"
 
 -- Loader / Options.lua
-L.classicWarning1 = "|cFF33FF99BigWigs|r: Stai usando la versione sbagliata di BigWigs su un server classic."
-L.classicWarning2 = "|cFF33FF99BigWigs|r: Ti preghiamo di installare la versione classic di BigWigs."
 L.officialRelease = "Stai usando una versione ufficiale di BigWigs %s (%s)"
 L.alphaRelease = "Stai usando una VERSIONE ALPHA di BigWigs %s (%s)"
 L.sourceCheckout = "Stai usando una versione di BigWigs %s presa direttamente dal repository."
@@ -40,12 +38,23 @@ L.dbmUsers = "Utilizzatori DBM:"
 L.noBossMod = "Nessun Boss mod:"
 L.offline = "Disconnesso"
 
-L.missingPlugin = "Per favore, prendi nota che questa zona richiede il plugin |cFF436EEE%s|r per fare in modo di visualizzare barre e timers."
---L.missingAddOn = "The |cFF436EEE%s|r addon is missing!"
+L.missingAddOn = "L'addon |cFF436EEE%s|r è mancante!"
 L.disabledAddOn = "L'addon |cFF436EEE%s|r è disattivato, i timer non saranno mostrati."
-
 L.removeAddOn = "Per favore rimuovi '|cFF436EEE%s|r' perché è stato rimpiazzato da '|cFF436EEE%s|r'."
 L.alternativeName = "%s (|cFF436EEE%s|r)"
+
+--L.expansionNames = {
+--	"Classiche", -- Classic
+--	"The Burning Crusade", -- The Burning Crusade
+--	"Wrath of the Lich King", -- Wrath of the Lich King
+--	"Cataclysm", -- Cataclysm
+--	"Mists of Pandaria", -- Mists of Pandaria
+--	"Warlords of Draenor", -- Warlords of Draenor
+--	"Legion", -- Legion
+--	"Battle for Azeroth", -- Battle for Azeroth
+--	"Shadowlands", -- Shadowlands
+--	"Dragonflight", -- Dragonflight
+--}
 
 -- Media.lua (These are the names of the sounds in the dropdown list in the "sounds" section)
 L.Beware = "Attenti! (Algalon)"
@@ -57,6 +66,7 @@ L.spell_under_you = "BigWigs: Abilità sotto di te"
 
 -- Options.lua
 L.options = "Opzioni"
+--L.optionsKey = "Key: %s" -- The key that messages/bars/options use
 L.raidBosses = "Boss delle Incursioni"
 L.dungeonBosses = "Boss delle Spedizioni"
 L.introduction = "Benvenuto in BigWigs, dove imposti i combattimenti dei boss. Allacciati le cinture, Prendi le patatine e goditi il viaggio. Non mangia i tuoi bambini, ma ti aiuta a preparare i nuovi boss in modo completo per le tue incursioni."
@@ -71,6 +81,8 @@ L.flashScreen = "Lampeggia Schermo"
 L.flashScreenDesc = "Alcune abilità sono così importanti che richiedono la tua completa attenzione. Quando sei il bersaglio diretto di queste abilità BigWigs può far lampeggiare lo schermo."
 L.minimapIcon = "Icona MiniMappa"
 L.minimapToggle = "Visualizza/Nasconde l'icona di BigWigs nella minimappa."
+--L.compartmentMenu = "No compartment icon"
+--L.compartmentMenu_desc = "Turning this option off will make BigWigs show up in the addon compartment menu. We recommend leaving this option enabled."
 L.configure = "Configura"
 L.test = "Prova"
 L.resetPositions = "Ripristina le Posizioni"
@@ -88,7 +100,7 @@ L.slashDescPull = "|cFFFED000/pull:|r Invia un conto alla rovescia per l'ingaggi
 L.slashDescBreak = "|cFFFED000/break:|r Invia un timer di pausa a tutta la tua incursione."
 L.slashDescRaidBar = "|cFFFED000/raidbar:|r Invia una barra personalizzata alla tua Incursione."
 L.slashDescLocalBar = "|cFFFED000/localbar:|r Crea una barra personale solo per te stesso."
-L.slashDescRange = "|cFFFED000/range:|r Apri l'indicatore di porossimità."
+L.slashDescRange = "|cFFFED000/range:|r Apri l'indicatore di prossimità."
 L.slashDescVersion = "|cFFFED000/bwv:|r Esegui un controllo di versione di BigWigs."
 L.slashDescConfig = "|cFFFED000/bw:|r Apri la configurazione di BigWigs."
 
@@ -126,10 +138,12 @@ L.VOICE = "Voce"
 L.VOICE_desc = "Se hai un plugin vocale installato, questa opzione lo indurrà a riprodurre un file sonoro per annunciarti l'avvertimento."
 L.COUNTDOWN = "Conto alla rovescia"
 L.COUNTDOWN_desc = "Se abilitato, un conto alla rovescia vocale e visuale verrà aggiunto per gli ultimi 5 secondi. Immagina qualcuno che esegue un conto alla rovescia \"5... 4... 3... 2... 1...\" con numeri grandi proprio nel centro dello schermo."
+--L.CASTBAR_COUNTDOWN = "Countdown (cast bars only)"
+--L.CASTBAR_COUNTDOWN_desc = "If enabled, a vocal and visual countdown will be added for the last 5 seconds of the cast bars."
 L.INFOBOX = L.infobox
 L.INFOBOX_desc = L.infobox_desc
 L.SOUND = "Suono"
-L.SOUND_desc = "Le abilità dei boss di solito riproducono dei suoni per aiutarti ad avvertirle. Se disattivi questa opzione nessun suono verrà riprodotto."
+L.SOUND_desc = "Le abilità dei boss di solito riproducono dei suoni per aiutarti ad avvertirle. Se disattivi questa opzione non verrà riprodotto alcun suono."
 L.CASTBAR = "Barra di lancio"
 L.CASTBAR_desc = "Le barre di lancio sono mostrate su alcuni boss, per avvertirti di abilità in arrivo. Se questa abilità è accompagnata da una barra di lancio che vuoi nascondere, disattiva questa opzione."
 L.SAY_COUNTDOWN = "Dici il conto alla rovescia"
@@ -138,6 +152,8 @@ L.ME_ONLY_EMPHASIZE = "Enfatizza (solo per me)"
 L.ME_ONLY_EMPHASIZE_desc = "Se attivo enfatizzerà tutti i messaggi associati a questa abilità SOLO se lanciati su di te, rendendoli più grandi e più visibili."
 L.NAMEPLATEBAR = "Barre dei nomi"
 L.NAMEPLATEBAR_desc = "Le barre sono mostrate vicino alle barre dei nomi se più di un nemico lancia la stessa abilità. Se questa abilità è associata ad una barra dei nomi che vuoi nascondere, disattiva questa opzione."
+--L.PRIVATE = "Private Aura"
+--L.PRIVATE_desc = "Private auras can't be tracked normally, but the \"on you\" sound (Warning) can be set in the Sound tab."
 
 L.advanced = "Opzioni Avanzate"
 L.back = "<< Indietro"
@@ -149,7 +165,7 @@ L.dispeller = "|cFFFF0000Messaggio solo per Dissolutori Magici.|r "
 
 -- Statistics
 L.statistics = "Statistiche"
-L.lfr = "RDI"
+L.LFR = "RDI"
 L.normal = "Normale"
 L.heroic = "Eroica"
 L.mythic = "Mitica"

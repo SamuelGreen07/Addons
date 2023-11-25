@@ -87,8 +87,6 @@ local AURA_TYPE_POISON = "Poison"
 local AURA_TYPE_CURSE = "Curse"
 local AURA_TYPE_UNKNOWN = nil
 
-local MEMBER_UNITID = "namePlateUnitToken"
-
 local PLATER_REFRESH_ID = 1
 function Plater.IncreaseRefreshID_Auras()
     PLATER_REFRESH_ID = PLATER_REFRESH_ID + 1
@@ -331,6 +329,82 @@ local NamePlateTooltip = _G.NamePlateTooltip -- can be removed later
 local PlaterNamePlateAuraTooltip = CreatePlaterNamePlateAuraTooltip()
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--> Private Aura handling
+
+function Plater.HandlePrivateAuraAnchors(unitFrame, maxIndex)
+	if true then return end -- disable for now...
+	if not unitFrame then return end
+	if not C_UnitAuras or not C_UnitAuras.RemovePrivateAuraAnchor then return end
+
+	if unitFrame.privateAuraAnchors then
+		for index, anchorID in pairs(unitFrame.privateAuraAnchors) do
+			C_UnitAuras.RemovePrivateAuraAnchor(anchorID)
+		end
+		table.wipe(unitFrame.privateAuraAnchors)
+	else
+		unitFrame.privateAuraAnchors = {}
+	end
+	
+	if not unitFrame.PlaterOnScreen then return end
+	
+	--anchor building
+	local anchorSide = Plater.db.profile.aura_frame1_anchor.side
+	local rowGrowthDirectionUp = (anchorSide < 3 or anchorSide > 5)
+	local maxIndex = maxIndex or 2
+	local relIconPoint = "bottom"
+	local relIconPointTo = "top"
+	local paddingMult = 1
+	
+	-- --> left to right
+	if (DB_AURA_GROW_DIRECTION == 3) then
+		relIconPoint = rowGrowthDirectionUp and "bottomleft" or "topleft"
+		relIconPointTo = rowGrowthDirectionUp and "topleft" or "bottomleft"
+		paddingMult = 1
+		
+	-- <-- right to left
+	elseif (DB_AURA_GROW_DIRECTION == 1) then
+		relIconPoint = rowGrowthDirectionUp and "bottomright" or "topright"
+		relIconPointTo = rowGrowthDirectionUp and "topright" or "bottomright"
+		paddingMult = -1
+	end
+	
+	local unit = unitFrame.IsSelf and "player" or unitFrame[MEMBER_UNITID]
+	
+	for index = 1, maxIndex do
+		local privateAnchorArgs = {
+			unitToken = unit,
+			auraIndex = index,
+			parent = unitFrame,
+			showCountdownFrame = true,
+			showCountdownNumbers = true,
+			iconInfo = {
+				iconAnchor = {
+					point = relIconPoint,
+					relativeTo = unitFrame.BuffFrame,
+					relativePoint = relIconPointTo,
+					offsetX = ((Plater.db.profile.aura_width * (index - 1)) + DB_AURA_PADDING * (index -1)) * paddingMult, --((Plater.db.profile.aura_width * Plater.db.profile.ui_parent_scale_tune * (index - 1)) + DB_AURA_PADDING * (index -1)) * paddingMult,
+					offsetY = Plater.db.profile.aura_breakline_space,
+				},
+				iconWidth = Plater.db.profile.aura_width, -- * Plater.db.profile.ui_parent_scale_tune,
+				iconHeight = Plater.db.profile.aura_height, -- * Plater.db.profile.ui_parent_scale_tune,
+			},
+			durationAnchor = {
+				point = relIconPoint,
+				relativeTo = unitFrame.BuffFrame,
+				relativePoint = relIconPointTo,
+				offsetX = ((Plater.db.profile.aura_width * (index - 1)) + DB_AURA_PADDING * (index -1)) * paddingMult, --((Plater.db.profile.aura_width * Plater.db.profile.ui_parent_scale_tune * (index - 1)) + DB_AURA_PADDING * (index -1)) * paddingMult,
+				offsetY = Plater.db.profile.aura_breakline_space,
+			},
+		}
+		
+		unitFrame.privateAuraAnchors[index] = C_UnitAuras.AddPrivateAuraAnchor(privateAnchorArgs)
+	end
+	--anchored, so we should 'show' the buffframe as anchor point. TODO: how to handle this for name only and other stuff?... might need separate anchor frame
+	unitFrame.BuffFrame:Show()
+	unitFrame.BuffFrame:SetSize(1,1)
+end
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --> UNIT_AURA event handling
 
 local ValidateAuraForUpdate = function (unit, aura)
@@ -501,9 +575,7 @@ function Plater.AddToAuraUpdate (unit)
 	if not unit then return end
 	UnitAuraEventHandlerValidUnits[unit] = true
 	UnitAuraEventHandlerData[unit] = { hasBuff = true, hasDebuff = true } --update at least once
-	if IS_NEW_UNIT_AURA_AVAILABLE then
-		UpdateUnitAuraCacheData(unit, nil)
-	end
+	UpdateUnitAuraCacheData(unit, nil)
 end
 
 
@@ -793,7 +865,7 @@ end
 			local iconFrame = iconFrameContainer [i]
 			local icon = iconFrame.texture
 			local spellName = iconFrame.SpellName
-			local index = spellName .. icon
+			local index = spellName .. (icon or spellName or math.random(1, 1000000))
 
 			if (aurasDuplicated [index]) then
 				tinsert (aurasDuplicated [index], {iconFrame, iconFrame.RemainingTime})
@@ -859,13 +931,13 @@ end
 							local spellIcon, spellId = spellTable[1], spellTable[2]
 							local auraIconFrame = Plater.GetAuraIcon(buffFrame) -- show on debuff frame
 							auraIconFrame.InUse = true --don't play animation
-							Plater.AddAura(buffFrame, auraIconFrame, -1, spellName.."_player_ghost", spellIcon, 1, "DEBUFF", 0, 0, "player", false, false, spellId, false, false, false, false, "DEBUFF", 1)
+							Plater.AddAura(buffFrame, auraIconFrame, -1, spellName.."_player_ghost", spellIcon, 1, "DEBUFF", 0, 0, "player", false, false, -spellId, false, false, false, false, "DEBUFF", 1)
 							auraIconFrame:EnableMouse (false) --don't use tooltips, as there is no real aura
 							if IS_WOW_PROJECT_MAINLINE then
 								auraIconFrame:EnableMouseMotion (false) --don't use tooltips, as there is no real aura
 							end
 							auraIconFrame.IsGhostAura = true
-							Plater.Auras.GhostAuras.ApplyAppearance(auraIconFrame, spellName.."_player_ghost", spellIcon, spellId)
+							Plater.Auras.GhostAuras.ApplyAppearance(auraIconFrame, spellName.."_player_ghost", spellIcon, -spellId)
 							nameplateGhostAuraCache[spellName.."_player_ghost"] = true --this is shown as ghost aura
 						end
 					else
@@ -973,7 +1045,27 @@ end
 			--get the amount of auras shown in the frame; iterate over all if not sorting
 			local amountFramesShown = #iconFrameContainer
 			
+			
+			if IS_NEW_UNIT_AURA_AVAILABLE then
+				-- still sort by auraInstanceID for some consistency
+				local iconFrameContainerCopy = {}
+				local index = 0
+				for _, icon in pairs(iconFrameContainer) do
+					if icon:IsShown() then
+						index = index + 1
+						iconFrameContainerCopy[index] = icon
+					end
+				end
+				iconFrameContainer = iconFrameContainerCopy
+				table.sort (iconFrameContainer, function(aura1, aura2) 
+					return (aura1.auraInstanceID or 0) < (aura2.auraInstanceID or 0)
+				end)
+				--when sorted, this is reliable
+				amountFramesShown = index
+			end
+			
 			if (profile.aura_sort) then
+				-- this needs to be done in addition. the above is just to keep them consistent in order
 				local iconFrameContainerCopy = {}
 				local index = 0
 				for _, icon in pairs(iconFrameContainer) do
@@ -1111,16 +1203,12 @@ end
 				
 			end
 			
-			if (not firstIcon) then
-				return
-			end
-			
 			if curRowLength > horizontalLength then
 				horizontalLength = curRowLength
 			end
 			
 			--remove 1 icon padding value
-			horizontalLength = horizontalLength - DB_AURA_PADDING
+			horizontalLength = (horizontalLength > 1) and (horizontalLength - DB_AURA_PADDING) or 1
 			--set the size of the buff frame
 			self:SetWidth (horizontalLength)
 			self:SetHeight (verticalHeight)
@@ -1260,7 +1348,7 @@ end
 	local function AuraIconOnTick_UpdateCooldown (self, deltaTime)
 		local now = GetTime()
 		if (self.lastUpdateCooldown + 0.05) <= now then
-			self.RemainingTime = self.ExpirationTime - now
+			self.RemainingTime = (self.ExpirationTime - now) / (self.ModRate or 1)
 			if self.RemainingTime > 0 then
 				if self.formatWithDecimals then
 					self.Cooldown.Timer:SetText (Plater.FormatTimeDecimal (self.RemainingTime))
@@ -1850,10 +1938,9 @@ end
 		
 		--> reset auras
 		if resetDebuffs or not DB_AURA_SEPARATE_BUFFS then
-			if not DB_AURA_SEPARATE_BUFFS then
-				wipe (self.unitFrame.GhostAuraCache) -- ghost and extra are on aura frame 1, needs to be cleared.
-				platerInternal.ExtraAuras.WipeCache(self.unitFrame)
-			end
+			wipe (self.unitFrame.GhostAuraCache) -- ghost and extra are on aura frame 1, needs to be cleared.
+			platerInternal.ExtraAuras.WipeCache(self.unitFrame)
+			
 			wipe (self.AuraCache)
 			self.HasBuff = false
 			self.HasDebuff = false
@@ -1863,10 +1950,6 @@ end
 		
 		--> second buff anchor
 		if resetBuffs then
-			if DB_AURA_SEPARATE_BUFFS then
-				wipe (self.unitFrame.GhostAuraCache) -- ghost and extra are on aura frame 1, needs to be cleared.
-				platerInternal.ExtraAuras.WipeCache(self.unitFrame)
-			end
 			wipe (self.BuffFrame2.AuraCache)
 			self.BuffFrame2.HasBuff = false 
 			self.BuffFrame2.HasDebuff = false
@@ -2325,7 +2408,7 @@ end
 				unitAuraCache.hasEnrage = unitAuraCache.hasEnrage or dispelName == AURA_TYPE_ENRAGE
 				
 				--> only show buffs casted by the player it self and less than 1 minute in duration
-				if ((not DB_BUFF_BANNED [name] and not DB_BUFF_BANNED [spellId]) and (noBuffDurationLimitation or (duration and (duration > 0 and duration < 60)) and (sourceUnit and UnitIsUnit (sourceUnit, "player")))) then
+				if ((not DB_BUFF_BANNED [name] and not DB_BUFF_BANNED [spellId]) and (noBuffDurationLimitation or (duration and (duration > 0 and duration < 60))) and (sourceUnit and UnitIsUnit (sourceUnit, "player"))) then
 					local auraIconFrame, buffFrame = Plater.GetAuraIcon (self, true)
 					Plater.AddAura (buffFrame, auraIconFrame, id, name, icon, applications, auraType, duration, expirationTime, sourceUnit, isStealable, nameplateShowPersonal, spellId, true, false, false, true, dispelName, timeMod)
 
@@ -2495,6 +2578,7 @@ end
 		end
 
 		auraOptionsFrame:SetScript ("OnShow", function()
+			--Plater.DisableAuraTest = not Plater.db.profile.aura_enabled
 			if (not Plater.DisableAuraTest) then
 				auraOptionsFrame.EnableAuraTest()
 			end

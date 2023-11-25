@@ -156,9 +156,9 @@ L["INCLUDEREAGENTSNAME"] = "검색 시 재료를 포함"
 L["INTERRUPTCLEARDESC"] = "Moving, jumping, closing the frame, or clicking the Pause button clears the in progress queue entry"
 --[[Translation missing --]]
 L["INTERRUPTCLEARNAME"] = "Spell interrupt clears queue entry"
+L["Inventory"] = "인벤토리"
 --[[Translation missing --]]
 L["inventory"] = "inventory"
-L["Inventory"] = "인벤토리"
 L["INVENTORYDESC"] = "인벤토리 정보"
 L["InvSlot"] = "소지품 아이템"
 L["is now disabled"] = "사용안함"
@@ -296,6 +296,10 @@ L["Sold amount"] = "판매량"
 L["SORTASC"] = "레시피 목록을 오름차순으로 정렬합니다."
 L["SORTDESC"] = "레시피 목록을 내림차순으로 정렬합니다."
 L["Sorting"] = "정렬"
+--[[Translation missing --]]
+L["SOUNDONEMPTYQUEUEDESC"] = "Play a sound when the queue is empty"
+--[[Translation missing --]]
+L["SOUNDONEMPTYQUEUENAME"] = "Sound on Empty Queue"
 L["Source:"] = "획득 방법:"
 L["STANDBYDESC"] = "standby 모드를 켜고 끕니다."
 L["STANDBYNAME"] = "standby"

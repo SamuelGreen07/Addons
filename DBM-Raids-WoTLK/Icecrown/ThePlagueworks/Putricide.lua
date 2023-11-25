@@ -3,7 +3,7 @@ local L		= mod:GetLocalizedStrings()
 
 mod.statTypes = "normal,normal25,heroic,heroic25"
 
-mod:SetRevision("20230620214313")
+mod:SetRevision("20231107113735")
 mod:SetCreatureID(36678)
 mod:SetEncounterID(mod:IsClassic() and 851 or 1102)
 mod:SetModelID(30881)
@@ -36,10 +36,10 @@ local warnChokingGasBombSoon		= mod:NewPreWarnAnnounce(71255, 5, 3, nil, "Melee"
 local warnChokingGasBomb			= mod:NewSpellAnnounce(71255, 3, nil, "Melee")		-- Phase 2 ability
 local warnPhase3Soon				= mod:NewPrePhaseAnnounce(3)
 local warnMutatedPlague				= mod:NewStackAnnounce(72451, 3, nil, "Tank|Healer") -- Phase 3 ability
-local warnUnboundPlague				= mod:NewTargetNoFilterAnnounce(70911, 3)		-- Heroic Ability
+local warnUnboundPlague				= mod:NewTargetNoFilterAnnounce(70911, 3, nil, false, 2)		-- Heroic Ability
 
 local specWarnVolatileOozeAdhesive	= mod:NewSpecialWarningYou(70447, nil, nil, nil, 1, 2)
-local specWarnVolatileOozeAdhesiveT	= mod:NewSpecialWarningMoveTo(70447, nil, nil, nil, 1, 2)
+local specWarnVolatileOozeAdhesiveT	= mod:NewSpecialWarningMoveTo(70447, false, nil, 2, 1, 2)
 local specWarnGaseousBloat			= mod:NewSpecialWarningRun(70672, nil, nil, nil, 4, 2)
 local specWarnMalleableGoo			= mod:NewSpecialWarningYou(72295, nil, nil, nil, 1, 2)
 local yellMalleableGoo				= mod:NewYell(72295)
@@ -77,7 +77,7 @@ mod.vb.warned_preP2 = false
 mod.vb.warned_preP3 = false
 
 local function NextPhase(self)
-	self:SetStage(0)
+	self:SetStage(0.5)--Should up 1.5 to 2 and 2.5 to 3
 	if self.vb.phase == 2 then
 		warnUnstableExperimentSoon:Schedule(15)
 		timerUnstableExperimentCD:Start(20)
@@ -137,6 +137,7 @@ function mod:SPELL_CAST_START(args)
 		timerUnstableExperimentCD:Start()
 		warnUnstableExperimentSoon:Schedule(33)
 	elseif args.spellId == 71617 then		--Tear Gas, normal phase change trigger
+		self:SetStage(0.5)--Should up 1 to 1.5 and 2 to 2.5
 		warnTearGas:Show()
 		warnUnstableExperimentSoon:Cancel()
 		warnChokingGasBombSoon:Cancel()
@@ -146,6 +147,7 @@ function mod:SPELL_CAST_START(args)
 		timerChokingGasBombCD:Cancel()
 		timerUnboundPlagueCD:Cancel()
 	elseif args.spellId == 72840 then		--Volatile Experiment (heroic phase change begin)
+		self:SetStage(0.5)--Should up 1 to 1.5 and 2 to 2.5
 		warnVolatileExperiment:Show()
 		warnUnstableExperimentSoon:Cancel()
 		warnChokingGasBombSoon:Cancel()
@@ -171,7 +173,7 @@ function mod:SPELL_CAST_START(args)
 end
 
 function mod:SPELL_CAST_SUCCESS(args)
-	if args.spellId == 70341 and self:AntiSpam(5, 1) then
+	if args.spellId == 70341 and self:AntiSpam(5, 3) then
 		warnSlimePuddle:Show()
 		if self.vb.phase == 3 then
 			timerSlimePuddleCD:Start(20)--In phase 3 it's faster
@@ -199,7 +201,7 @@ function mod:SPELL_AURA_APPLIED(args)
 	if args.spellId == 70447 then--Green Slime
 		if args:IsPlayer() then--Still worth warning 100s because it does still do knockback
 			specWarnVolatileOozeAdhesive:Show()
-		elseif not self:IsTank() then
+		elseif not self:IsTank() and self.Options.SpecWarn70447moveto2 and not DBM:UnitDebuff("player", 70353) then
 			specWarnVolatileOozeAdhesiveT:Show(args.destName)
 			specWarnVolatileOozeAdhesiveT:Play("helpsoak")
 		else
@@ -241,13 +243,14 @@ function mod:SPELL_AURA_APPLIED(args)
 		if self.Options.UnboundPlagueIcon then
 			self:SetIcon(args.destName, 3)
 		end
-		if args:IsPlayer() and not self:IsTrivial() then
+		if args:IsPlayer() and not self:IsTrivial() and self:AntiSpam(2, 1) then
 			specWarnUnboundPlague:Show()
 			specWarnUnboundPlague:Play("targetyou")
 			timerUnboundPlague:Start()
 			yellUnboundPlague:Yell()
 		else
-			warnUnboundPlague:Show(args.destName)
+			warnUnboundPlague:Cancel()
+			warnUnboundPlague:Schedule(1, args.destName)
 		end
 	end
 end

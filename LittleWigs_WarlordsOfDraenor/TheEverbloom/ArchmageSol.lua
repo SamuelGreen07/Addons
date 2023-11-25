@@ -1,13 +1,12 @@
-
 --------------------------------------------------------------------------------
 -- Module Declaration
 --
 
 local mod, CL = BigWigs:NewBoss("Archmage Sol", 1279, 1208)
 if not mod then return end
-mod:RegisterEnableMob(82682)
-mod.engageId = 1751
-mod.respawnTime = 15
+mod:RegisterEnableMob(82682) -- Archmage Sol
+mod:SetEncounterID(1751)
+mod:SetRespawnTime(30)
 
 --------------------------------------------------------------------------------
 -- Initialization
@@ -15,52 +14,77 @@ mod.respawnTime = 15
 
 function mod:GetOptions()
 	return {
-		168885, -- Parasitic Growth
-		{166492, "FLASH"}, -- Firebloom
-		166726, -- Frozen Rain
-		"stages",
+		427899, -- Cinderbolt Storm
+		428082, -- Glacial Fusion
+		428139, -- Spatial Compression
 	}
 end
 
 function mod:OnBossEnable()
-	self:Log("SPELL_CAST_START", "ParasiticGrowth", 168885)
-	self:Log("SPELL_AURA_APPLIED", "MagicSchools", 166475, 166476, 166477) -- Fire, Frost, Arcane
-	self:Log("SPELL_AURA_APPLIED", "FrozenRain", 166726)
-	self:Log("SPELL_CAST_SUCCESS", "Firebloom", 166492)
+	self:Log("SPELL_AURA_APPLIED", "CinderboltStorm", 427899)
+	self:Log("SPELL_AURA_APPLIED", "GlacialFusion", 428082)
+	self:Log("SPELL_CAST_START", "SpatialCompression", 428139)
 end
 
 function mod:OnEngage()
-	self:MessageOld("stages", "cyan", nil, 166475) -- Fire
-	self:CDBar(168885, 33) -- Parasitic Growth
+	self:CDBar(427899, 3.3) -- Cinderbolt Storm
+	self:CDBar(428082, 24.2) -- Glacial Fusion
+	self:CDBar(428139, 43.3) -- Spatial Compression
+end
+
+function mod:OnWin()
+    local trashMod = BigWigs:GetBossModule("The Everbloom Trash", true)
+    if trashMod then
+        trashMod:Enable()
+        trashMod:ArchmageSolDefeated()
+    end
 end
 
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
 
-function mod:ParasiticGrowth(args)
-	self:MessageOld(args.spellId, "orange", "warning")
-	self:Bar(args.spellId, 34)
-end
-
-function mod:MagicSchools(args)
-	self:MessageOld("stages", "cyan", nil, args.spellId)
-end
-
-do
-	local prev = 0
-	function mod:Firebloom(args)
-		local t = GetTime()
-		if t-prev > 7 then
-			prev = t
-			self:MessageOld(args.spellId, "red", "alert")
-			self:Flash(args.spellId)
+function mod:CinderboltStorm(args)
+	self:Message(args.spellId, "red")
+	self:PlaySound(args.spellId, "long")
+	if self:Mythic() then
+		if self:MobId(args.sourceGUID) == 82682 then -- Archmage Sol
+			self:CDBar(args.spellId, 20.5)
+			self:CDBar(428082, 20.5) -- Glacial Fusion
+		else -- 213689, Spore Image
+			self:CDBar(args.spellId, 39.0)
 		end
+	else
+		self:CDBar(args.spellId, 59.5)
 	end
 end
 
-function mod:FrozenRain(args)
-	if self:Me(args.destGUID) then
-		self:MessageOld(args.spellId, "blue", "alarm", CL.you:format(args.spellName))
+function mod:GlacialFusion(args)
+	self:Message(args.spellId, "orange")
+	self:PlaySound(args.spellId, "alarm")
+	if self:Mythic() then
+		if self:MobId(args.sourceGUID) == 82682 then -- Archmage Sol
+			self:CDBar(args.spellId, 20.5)
+			self:CDBar(428139, 20.5) -- Spatial Compression
+		else -- 213689, Spore Image
+			self:CDBar(args.spellId, 39.0)
+		end
+	else
+		self:CDBar(args.spellId, 59.5)
+	end
+end
+
+function mod:SpatialCompression(args)
+	self:Message(args.spellId, "yellow")
+	self:PlaySound(args.spellId, "info")
+	if self:Mythic() then
+		if self:MobId(args.sourceGUID) == 82682 then -- Archmage Sol
+			self:CDBar(args.spellId, 20.5)
+			self:CDBar(427899, 20.5) -- Cinderbolt Storm
+		else -- 213689, Spore Image
+			self:CDBar(args.spellId, 39.0)
+		end
+	else
+		self:CDBar(args.spellId, 59.5)
 	end
 end

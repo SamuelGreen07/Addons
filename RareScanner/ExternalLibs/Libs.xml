@@ -24,5 +24,6 @@
 	<Include file="Krowi_WorldMapButtons-1.4\Krowi_WorldMapButtons-1.4.lua"/>
 	<Include file="LibDBIcon-1.0\lib.xml"/>
 	<Include file="LibTime-1.0\LibTime-1.0.xml"/>
+	<Include file="LibBabble-Zone-3.0\lib.xml"/>
 	
 </Ui>

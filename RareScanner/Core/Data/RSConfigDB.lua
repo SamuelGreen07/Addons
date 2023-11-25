@@ -908,6 +908,38 @@ function RSConfigDB.SetFilteringLootByNotMatchingFaction(value)
 	private.db.loot.filterNotMatchingFaction = value
 end
 
+function RSConfigDB.IsFilteringByExplorerResults()
+	return private.db.loot.filterByExplorerResults
+end
+
+function RSConfigDB.SetFilteringByExplorerResults(value)
+	private.db.loot.filterByExplorerResults = value
+end
+
+function RSConfigDB.IsShowingMissingMounts()
+	return private.db.loot.showingMissingMounts
+end
+
+function RSConfigDB.SetShowingMissingMounts(value)
+	private.db.loot.showingMissingMounts = value
+end
+
+function RSConfigDB.IsShowingMissingPets()
+	return private.db.loot.showingMissingPets
+end
+
+function RSConfigDB.SetShowingMissingPets(value)
+	private.db.loot.showingMissingPets = value
+end
+
+function RSConfigDB.IsShowingMissingToys()
+	return private.db.loot.showingMissingToys
+end
+
+function RSConfigDB.SetShowingMissingToys(value)
+	private.db.loot.showingMissingToys = value
+end
+
 ---============================================================================
 -- Collection filters
 ---============================================================================
@@ -1000,6 +1032,14 @@ function RSConfigDB.GetExplorerMapID()
 	return private.db.collections.mapID
 end
 
+function RSConfigDB.SetLockingCurrentMap(value)
+	private.db.collections.lockingMap = value
+end
+
+function RSConfigDB.IsLockingCurrentMap()
+	return private.db.collections.lockingMap
+end
+
 function RSConfigDB.ResetLootFilters()
 	-- Quality Uncommon and supperior
 	RSConfigDB.SetLootFilterMinQuality(Enum.ItemQuality.Poor)
@@ -1012,6 +1052,7 @@ function RSConfigDB.ResetLootFilters()
 	end
 	
 	-- Custom filters
+	RSConfigDB.SetFilteringByExplorerResults(false)
 	RSConfigDB.SetFilteringLootByNotMatchingClass(false)
 	RSConfigDB.SetFilteringLootByNotMatchingFaction(true)
 end

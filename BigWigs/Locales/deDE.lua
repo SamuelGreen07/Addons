@@ -19,8 +19,6 @@ L.already_registered = "|cffff0000WARNUNG:|r |cff00ff00%s|r (|cffffff00%s|r) exi
 L.testNameplate = "Ziel erkannt, erstelle Test Leiste über Namensplakette des Ziels. |cFF33FF99Diese Funktion wird selten genutzt, besteht aus 1 Leiste und wird verwendet, wenn mehrere Bosse/Adds die gleichen Zauber wirken.|r"
 
 -- Loader / Options.lua
-L.classicWarning1 = "|cFF33FF99BigWigs|r: Du nutzt die falsche Version von BigWigs auf einem Classic Server."
-L.classicWarning2 = "|cFF33FF99BigWigs|r: Bitte Classic Version von BigWigs installieren."
 L.officialRelease = "Bei dir läuft ein offizieller Release von BigWigs %s (%s)."
 L.alphaRelease = "Bei dir läuft ein ALPHA RELEASE von BigWigs %s (%s)."
 L.sourceCheckout = "Bei dir läuft ein Source Code Checkout von BigWigs %s direkt aus dem Repository."
@@ -40,12 +38,23 @@ L.dbmUsers = "DBM-Nutzer:"
 L.noBossMod = "Kein Bossmod:"
 L.offline = "Offline"
 
-L.missingPlugin = "Bitte beachte, dass diese Zone das |cFF436EEE%s|r-Plugin für Timer zur Anzeige benötigt."
 L.missingAddOn = "Das |cFF436EEE%s|r Addon fehlt!"
 L.disabledAddOn = "Du hast das Addon |cFF436EEE%s|r deaktiviert, Timer werden nicht angezeigt."
-
 L.removeAddOn = "Bitte entferne '|cFF436EEE%s|r', da es durch '|cFF436EEE%s|r' ersetzt wurde."
 L.alternativeName = "%s (|cFF436EEE%s|r)"
+
+--L.expansionNames = {
+--	"Classic", -- Classic
+--	"The Burning Crusade", -- The Burning Crusade
+--	"Wrath of the Lich King", -- Wrath of the Lich King
+--	"Cataclysm", -- Cataclysm
+--	"Mists of Pandaria", -- Mists of Pandaria
+--	"Warlords of Draenor", -- Warlords of Draenor
+--	"Legion", -- Legion
+--	"Battle for Azeroth", -- Battle for Azeroth
+--	"Schattenlande", -- Shadowlands
+--	"Dragonflight", -- Dragonflight
+--}
 
 -- Media.lua (These are the names of the sounds in the dropdown list in the "sounds" section)
 L.Beware = "Hütet Euch (Algalon)"
@@ -57,6 +66,7 @@ L.spell_under_you = "BigWigs: Zauber unter Dir"
 
 -- Options.lua
 L.options = "Optionen"
+L.optionsKey = "Schlüssel: %s" -- The key that messages/bars/options use
 L.raidBosses = "Schlachtzugsbosse"
 L.dungeonBosses = "Dungeonbosse"
 L.introduction = "Willkommen bei BigWigs, dort, wo die Bossbegegnungen rumschwirren. Bitte legen Sie Ihren Sicherheitsgurt an, stellen Sie die Rückenlehne gerade und genießen Sie den Flug. Wir werden Ihnen und Ihrer Raidgruppe bei der Begegnung mit Bossen zur Hand gehen und sie Ihnen als 7-Gänge-Menü zubereiten."
@@ -71,6 +81,8 @@ L.flashScreen = "Bildschirm aufleuchten lassen"
 L.flashScreenDesc = "Einige wichtige Fähigkeiten erfordern volle Aufmerksamkeit. Beim Auftreten dieser Fähigkeiten kann BigWigs den Bildschirm aufleuchten lassen."
 L.minimapIcon = "Minikartensymbol"
 L.minimapToggle = "Zeigt oder versteckt das Minikartensymbol."
+L.compartmentMenu = "Kein Addonmenü Icon"
+L.compartmentMenu_desc = "Durch Deaktivieren dieser Option wird BigWigs im Addons Menü an der Minimap angezeigt. Wir empfehlen, diese Option aktiviert zu lassen."
 L.configure = "Einstellungen"
 L.test = "Testen"
 L.resetPositions = "Positionen zurücksetzen"
@@ -132,12 +144,16 @@ L.SOUND = "Sound"
 L.SOUND_desc = "Bossfähigkeiten nutzen in der Regel Sounds um wahrgenommen zu werden. Wenn diese Option deaktiviert wird, werden die zugehörigen Sounds nicht abgespielt."
 L.CASTBAR = "Zauberbalken"
 L.CASTBAR_desc = "Manchmal werden Zauberbalken bei diversen Bossen angezeigt um auf wichtige Fähigkeiten aufmerksam zu machen. Wenn diese Zauberbalken nicht angezeigt werden sollen, muss diese Option deaktiviert werden."
+L.CASTBAR_COUNTDOWN = "Countdown (nur Zauberbalken)"
+L.CASTBAR_COUNTDOWN_desc = "Bei Aktivierung werden ein Stimm- und visueller Countdown für die letzten 5 Sekunden eines Zauberbalkens hinzugefügt."
 L.SAY_COUNTDOWN = "Sprechblasen-Countdown"
 L.SAY_COUNTDOWN_desc = "Sprechblasen sind gut sichtbar. BigWigs nutzt oftmals Sprechblasen zum Herunterzählen, um Spieler in der Nähe vor auslaufenden Fähigkeiten zu warnen."
 L.ME_ONLY_EMPHASIZE = "Hervorheben (nur auf mir)"
 L.ME_ONLY_EMPHASIZE_desc = "Die Aktivierung dieser Option hebt Nachrichten zu dieser Fähigkeit NUR DANN hervor, wenn diese auf Dich angewandt wurden. Dadurch werden diese größer und sichtbarer dargestellt."
 L.NAMEPLATEBAR = "Leisten an Namensplaketten"
 L.NAMEPLATEBAR_desc = "Manchmal werden Leisten an Namensplaketten angezeigt wenn mehr als ein Gegner den gleichen Zauber wirkt. Wenn diese Fähigkeit von einer Leiste an der Namensplakette begleitet wird, die ausgeblendet werden soll, deaktiviere diese Option."
+L.PRIVATE = "Private Aura"
+L.PRIVATE_desc = "Private Auren können normalerweise nicht verfolgt werden, aber der \"auf Dir\" Sound (Warnung) kann im Sound Register gesetzt werden."
 
 L.advanced = "Erweiterte Optionen"
 L.back = "<< Zurück"
@@ -149,7 +165,7 @@ L.dispeller = "|cFFFF0000Warnungen nur für Banner.|r "
 
 -- Statistics
 L.statistics = "Statistiken"
-L.lfr = "LFR"
+L.LFR = "LFR"
 L.normal = "Normal"
 L.heroic = "Heroisch"
 L.mythic = "Mythisch"

@@ -158,9 +158,9 @@ L["INCLUDEREAGENTSNAME"] = "包含搜索中的材料"
 L["INTERRUPTCLEARDESC"] = "Moving, jumping, closing the frame, or clicking the Pause button clears the in progress queue entry"
 --[[Translation missing --]]
 L["INTERRUPTCLEARNAME"] = "Spell interrupt clears queue entry"
+L["Inventory"] = "背包"
 --[[Translation missing --]]
 L["inventory"] = "inventory"
-L["Inventory"] = "背包"
 L["INVENTORYDESC"] = "背包信息"
 L["InvSlot"] = "插槽"
 L["is now disabled"] = "现已停用"
@@ -298,6 +298,10 @@ L["Sold amount"] = "贩卖数量"
 L["SORTASC"] = "递减排序"
 L["SORTDESC"] = "递增排序"
 L["Sorting"] = "排序"
+--[[Translation missing --]]
+L["SOUNDONEMPTYQUEUEDESC"] = "Play a sound when the queue is empty"
+--[[Translation missing --]]
+L["SOUNDONEMPTYQUEUENAME"] = "Sound on Empty Queue"
 L["Source:"] = "来源:"
 L["STANDBYDESC"] = "切换待命模式开启/关闭"
 L["STANDBYNAME"] = "待命"

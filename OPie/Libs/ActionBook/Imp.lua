@@ -1,4 +1,4 @@
-local MAJ, REV, COMPAT, _, T = 1, 3, select(4,GetBuildInfo()), ...
+local MAJ, REV, COMPAT, _, T = 1, 5, select(4,GetBuildInfo()), ...
 if T.SkipLocalActionBook then return end
 
 local EV, AB, RW = T.Evie, T.ActionBook:compatible(2,34), T.ActionBook:compatible("Rewire", 1,27)
@@ -22,9 +22,13 @@ local commandType, addCommandType = {["#show"]=0, ["#showtooltip"]=0, ["#imp"]=-
 	for n, ct in ("CAST:1 USE:1 CASTSEQUENCE:2 CASTRANDOM:3 USERANDOM:3"):gmatch("(%a+):(%d+)") do
 		addCommandType(n, ct+0)
 	end
+	if MODERN then
+		addCommandType("PING", 4)
+	end
 end
 
 local toMacroText, quantizeMacro, formatMacro, formatToken, setMountPreference do
+	local COMMA_LIST_COMMAND_TYPES, CAST_ESCAPE_COMMAND_TYPES = {[2]=1, [3]=1}, {[0]=1, [1]=1, [3]=1}
 	local genParser do
 		local doRewrite, replaceFunc, critFail, critLine
 		local function replaceAlternatives(ctype, args)
@@ -114,7 +118,7 @@ local toMacroText, quantizeMacro, formatMacro, formatToken, setMountPreference d
 		end
 	end
 	local function replaceSpellID(ctype, sidlist, prefix, tk)
-		local noEscapes, sr, ar = ctype == 2
+		local noEscapes, sr, ar = not CAST_ESCAPE_COMMAND_TYPES[ctype]
 		for id, sn in sidlist:gmatch("%d+") do
 			id = id + 0
 			sn, sr = GetSpellInfo(id), GetSpellSubtext(id)
@@ -172,8 +176,7 @@ local toMacroText, quantizeMacro, formatMacro, formatToken, setMountPreference d
 			return cs
 		end
 		function replaceMountTag(ctype, tag, prefix)
-			if not MODERN then
-			elseif tag == "ground" then
+			if tag == "ground" then
 				gmSid = gmSid and IsKnownSpell(gmSid) or findMount(gmPref or gmSid, 230, ctype)
 				return replaceSpellID(ctype, tostring(gmSid), prefix)
 			elseif tag == "air" then
@@ -185,6 +188,9 @@ local toMacroText, quantizeMacro, formatMacro, formatToken, setMountPreference d
 			end
 			return nil
 		end
+		if not (MODERN or CF_WRATH) then
+			replaceMountTag = function () end
+		end
 		local function editPreference(orig, new)
 			return type(new) == "number" and new or new ~= false and orig or nil
 		end
@@ -195,12 +201,23 @@ local toMacroText, quantizeMacro, formatMacro, formatToken, setMountPreference d
 			return gmPref, fmPref, drPref
 		end
 	end
+	local pingTextMap, pingTokenMap = {}, {
+		assist=PING_TYPE_ASSIST,
+		attack=PING_TYPE_ATTACK,
+		onmyway=PING_TYPE_ON_MY_WAY,
+		warning=PING_TYPE_WARNING,
+	}
+	for k,v in pairs(pingTokenMap) do
+		pingTextMap[v:lower()], pingTextMap[k] = k, k
+	end
 	toMacroText = genParser(function(ctype, value)
 		local prefix, tkey, tval = value:match("^%s*(!?){{(%a+):([%a%d/]+)}}%s*$")
 		if tkey == "spell" or tkey == "spellr" then
 			return replaceSpellID(ctype, tval, prefix, tkey)
 		elseif tkey == "mount" then
 			return replaceMountTag(ctype, tval, prefix)
+		elseif tkey == "ping" and ctype == 4 then
+			return pingTokenMap[tval] or value
 		elseif value:match('^%s*!?|Hiptok|h|h%s*$') then
 			return '-'
 		end
@@ -208,16 +225,22 @@ local toMacroText, quantizeMacro, formatMacro, formatToken, setMountPreference d
 	end)
 	local toImpText, prepareQuantizer do
 		local spells, specialTokens, OTHER_SPELL_IDS = {}, {}, {150544, 243819}
-		local abTokens = {["Ground Mount"]="{{mount:ground}}", ["Flying Mount"]="{{mount:air}}", ["Dragonriding Mount"]="{{mount:dragon}}"}
+		local abMountTokens = {["Ground Mount"]="{{mount:ground}}", ["Flying Mount"]="{{mount:air}}", ["Dragonriding Mount"]=MODERN and "{{mount:dragon}}" or nil}
 		toImpText = genParser(function(ctype, value, ctx, args, cpos)
 			if type(ctx) == "number" and ctx > 0 then
 				return nil, ctx-1
 			end
-			local noEscapes, cc, pre, name, tws = ctype == 2, 0, value:match("^(%s*!?)(.-)(%s*)$")
+			local commaList, noEscapes = COMMA_LIST_COMMAND_TYPES[ctype], not CAST_ESCAPE_COMMAND_TYPES[ctype]
+			local cc, pre, name, tws = 0, value:match("^(%s*!?)(.-)(%s*)$")
 			repeat
 				local lowname = name:lower()
 				local sid, peek, cnpos = spells[lowname]
-				if sid and noEscapes and RW:IsCastEscape(lowname, true) then
+				if ctype == 4 then
+					name = pingTextMap[lowname]
+					if name then
+						return pre .. "{{ping:" .. name.. "}}" .. tws
+					end
+				elseif sid and noEscapes and RW:IsCastEscape(lowname, true) then
 					-- Don't tokenize escapes in contexts they wont't work in
 				elseif sid then
 					if not MODERN then
@@ -233,7 +256,7 @@ local toMacroText, quantizeMacro, formatMacro, formatToken, setMountPreference d
 				elseif name:match("^{{.*}}$") then
 					return pre .. name .. tws, cc
 				end
-				if ctype >= 2 and args then
+				if commaList and args then
 					peek, cnpos = args:match("^([^,]+),?()", cpos)
 					if peek then
 						cc, cpos, name, tws = cc + 1, cnpos, (name .. "," .. peek):match("^(.-)(%s*)$")
@@ -242,7 +265,7 @@ local toMacroText, quantizeMacro, formatMacro, formatToken, setMountPreference d
 			until not peek or cc > 5
 			return value
 		end)
-		local function addModernSpells()
+		local function addMountSpells()
 			local gmi, idm = C_MountJournal.GetMountInfoByID, C_MountJournal.GetMountIDs()
 			for i=1, #idm do
 				local _, sid = gmi(idm[i])
@@ -251,6 +274,11 @@ local toMacroText, quantizeMacro, formatMacro, formatToken, setMountPreference d
 					spells[sname:lower()] = sid
 				end
 			end
+			for k, tok in pairs(abMountTokens) do
+				specialTokens[k:lower()], specialTokens[L(k):lower()] = tok, tok
+			end
+		end
+		local function addModernSpells()
 			local cid = C_ClassTalents.GetActiveConfigID()
 			if not cid then
 				local spec = GetSpecializationInfo(GetSpecialization())
@@ -313,20 +341,15 @@ local toMacroText, quantizeMacro, formatMacro, formatToken, setMountPreference d
 				end
 			end
 			if MODERN then
+				addMountSpells()
 				addModernSpells()
-				local L = T.ActionBook.L
-				for k, tok in pairs(abTokens) do
-					specialTokens[k:lower()], specialTokens[L(k):lower()] = tok, tok
-				end
 			elseif CF_WRATH then
-				for k=1,2 do
-					k = k == 1 and "MOUNT" or "CRITTER"
-					for i=1,GetNumCompanions(k) do
-						local _, _, sid = GetCompanionInfo(k, i)
-						local sn = GetSpellInfo(sid)
-						if sn then
-							addSpell(sn, sid)
-						end
+				addMountSpells()
+				for i=1,GetNumCompanions("CRITTER") do
+					local _, _, sid = GetCompanionInfo("CRITTER", i)
+					local sn = GetSpellInfo(sid)
+					if sn then
+						addSpell(sn, sid)
 					end
 				end
 			end
@@ -338,6 +361,7 @@ local toMacroText, quantizeMacro, formatMacro, formatToken, setMountPreference d
 					end
 				end
 			end
+			spells[""], spells["()"] = nil
 		end
 	end
 	function quantizeMacro(macro, skipCacheRefresh)
@@ -373,6 +397,11 @@ local toMacroText, quantizeMacro, formatMacro, formatToken, setMountPreference d
 					end
 				elseif token == "mount" then
 					return mountTokens[targ]
+				elseif token == "ping" then
+					local tname = pingTokenMap[targ]
+					if tname then
+						return "|cff71d5ff|Hilt" .. token .. ":" .. targ .. "|h" .. tname .. "|h|r"
+					end
 				end
 				return '{{' .. token .. ':' .. targ .. '}}'
 			end
@@ -482,7 +511,7 @@ do -- AB imptext action type
 		end
 		return L"Custom Macro", "", ico or "interface/icons/inv_misc_questionmark"
 	end
-	AB:RegisterActionType("imptext", createImpMacro, describeImpMacro)
+	AB:RegisterActionType("imptext", createImpMacro, describeImpMacro, 1)
 end
 do -- Editor UI
 	local multilineInput do
@@ -503,7 +532,8 @@ do -- Editor UI
 			scroller.ScrollBar:Hide() -- BUG[10.0.7]: Thumb sometimes waits until next frame to move
 			scroller.ScrollBar:Show()
 		end
-		local function onClick(self)
+		local function onSFClick(self)
+			self.input:SetCursorPosition(#self.input:GetText())
 			self.input:SetFocus()
 		end
 		local function onSCSizeChange(self)
@@ -532,7 +562,7 @@ do -- Editor UI
 			input:SetScript("OnSizeChanged", onSCSizeChange)
 			scroller:SetScript("OnScrollRangeChanged", onSCSizeChange)
 			scroller:SetScript("OnSizeChanged", onSFSizeChange)
-			scroller:SetScript("OnMouseDown", onClick)
+			scroller:SetScript("OnMouseDown", onSFClick)
 			scroller:EnableMouse(1)
 			scroller:SetScrollChild(input)
 			input.scroll, scroller.input = scroller, input

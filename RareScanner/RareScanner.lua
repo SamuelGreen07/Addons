@@ -346,6 +346,7 @@ function scanner_button:SimulateRareFound(npcID, objectGUID, name, x, y, atlasNa
 	vignetteInfo.objectGUID = objectGUID or string.format("a-a-a-a-a-%s-a", npcID)
 	vignetteInfo.x = x
 	vignetteInfo.y = y
+	vignetteInfo.simulated = true
 	self:DetectedNewVignette(self, vignetteInfo)
 end
 
@@ -438,8 +439,12 @@ function scanner_button:ShowButton()
 
 		-- show model
 		if (self.displayID and RSConfigDB.IsDisplayingModel()) then
-			self.ModelView:SetDisplayInfo(self.displayID)
-			self.ModelView:Show()
+			self.ModelView:SetCreature(self.npcID, self.displayID)
+			
+			C_Timer.After(1, function()
+				self.ModelView:SetCreature(self.npcID, self.displayID)
+				self.ModelView:Show() 
+			end)
 		else
 			self.ModelView:Hide()
 		end

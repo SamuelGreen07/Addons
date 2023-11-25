@@ -5,6 +5,7 @@ local ADDON_NAME, private = ...
 
 local LibStub = _G.LibStub
 local AL = LibStub("AceLocale-3.0"):GetLocale("RareScanner", false)
+local LB = LibStub("LibBabble-Zone-3.0"):GetUnstrictLookupTable()
 
 local RSMap = private.NewLib("RareScannerMap")
 
@@ -248,6 +249,8 @@ function RSMap.GetMapName(mapID)
 		else
 			return mapInfo.name
 		end
+	elseif (private.DUNGEONS_IDS[mapID]) then
+		return LB[private.DUNGEONS_IDS[mapID]]
 	end
 	
 	return AL["ZONES_CONTINENT_LIST"][mapID]

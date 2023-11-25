@@ -277,6 +277,10 @@ L["Sold amount"] = "Cantidad vendida"
 L["SORTASC"] = "Ordenar la lista de recetas de la más alta (arriba) a la más baja (abajo)"
 L["SORTDESC"] = "Ordena la lista de recetas de la más baja (arriba) a la más alta (abajo)"
 L["Sorting"] = "Ordenando"
+--[[Translation missing --]]
+L["SOUNDONEMPTYQUEUEDESC"] = "Play a sound when the queue is empty"
+--[[Translation missing --]]
+L["SOUNDONEMPTYQUEUENAME"] = "Sound on Empty Queue"
 L["Source:"] = "Fuente:"
 L["STANDBYDESC"] = "Activar/desactivar el modo de espera"
 L["STANDBYNAME"] = "Espera"

@@ -1,7 +1,6 @@
 
-## v10.1.1
-* Fix #2081 - Cooldown of Eternity Surge not trackable when Font of Magic learned.
-* Fix #2082 - Increase Insanity condition max to 150.
+## v10.1.6
+* Support for WoW Classic Era 1.14.4. The classic era codebase has been merged into the main codebase, so some features that don't support classic may be present in a non-working state.
 
 
-[View Full Changelog](https://github.com/ascott18/TellMeWhen/blob/995b5b26f8b27dc0d79eb8aa8ba2cb3a63ad02e0/CHANGELOG.md)
+[View Full Changelog](https://github.com/ascott18/TellMeWhen/blob/417ec7a24296326ce5fb3a80b69b261e4f82fe9c/CHANGELOG.md)

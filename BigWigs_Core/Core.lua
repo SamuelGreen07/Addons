@@ -19,7 +19,7 @@ do
 end
 
 local adb = LibStub("AceDB-3.0")
---local lds = LibStub("LibDualSpec-1.0")
+local lds = LibStub("LibDualSpec-1.0", true)
 
 local L = BigWigsAPI:GetLocale("BigWigs")
 local CL = BigWigsAPI:GetLocale("BigWigs: Common")
@@ -96,13 +96,26 @@ end
 -- ENCOUNTER event handler
 --
 
-function mod:ENCOUNTER_START(_, id)
-	for _, module in next, bosses do
-		if module.engageId == id then
-			if not module.enabled then
+if loader.isRetail then
+	function mod:ENCOUNTER_START(_, id)
+		for _, module in next, bosses do
+			if module:GetEncounterID() == id and not module:IsEnabled() then
 				module:Enable()
+				if UnitGUID("boss1") then -- Only if _START fired after IEEU
+					module:Engage()
+				end
 			end
-			module:Engage()
+		end
+	end
+else
+	function mod:ENCOUNTER_START(_, id)
+		for _, module in next, bosses do
+			if module:GetEncounterID() == id then
+				if not module:IsEnabled() then
+					module:Enable()
+				end
+				module:Engage()
+			end
 		end
 	end
 end
@@ -113,7 +126,7 @@ end
 
 local enablezones, enablemobs = {}, {}
 local function enableBossModule(module, sync)
-	if not module.enabled then
+	if not module:IsEnabled() then
 		module:Enable()
 		if sync and not module.worldBoss then
 			module:Sync("Enable", module.moduleName)
@@ -123,7 +136,7 @@ end
 
 local function shouldReallyEnable(unit, moduleName, mobId, sync)
 	local module = bosses[moduleName]
-	if not module or module.enabled then return end
+	if not module or module:IsEnabled() then return end
 	if (not module.VerifyEnable or module:VerifyEnable(unit, mobId, GetBestMapForUnit("player"))) then
 		enableBossModule(module, sync)
 	end
@@ -156,7 +169,7 @@ local function targetCheck(unit, sync)
 end
 
 local function updateMouseover() targetCheck("mouseover", true) end
-local function unitTargetChanged(event, target)
+local function unitTargetChanged(_, target)
 	targetCheck(target .. "target")
 end
 
@@ -202,7 +215,7 @@ do
 	local colors = {"green", "red", "orange", "yellow", "cyan", "blue", "blue", "purple"}
 	local sounds = {"Long", "Warning", "Alert", "Alarm", "Info", "onyou", "underyou", false}
 
-	local function barStopped(event, bar)
+	local function barStopped(_, bar)
 		local a = bar:Get("bigwigs:anchor")
 		local key = bar:GetLabel()
 		if a and messages[key] then
@@ -232,7 +245,7 @@ do
 
 		local msg = CL.count:format(L.test, lastTest)
 		local icon = GetSpellTexture(lastSpell)
-		while not icon or icon == 136235 do -- 136235 = samwise
+		while not icon or icon == ((loader.isVanilla or loader.isTBC) and 136235 or 136243) do -- 136243 = cogwheel, 136235 = samwise (classic)
 			lastSpell = lastSpell + 1
 			icon = GetSpellTexture(lastSpell)
 		end
@@ -244,21 +257,23 @@ do
 
 		core:SendMessage("BigWigs_StartBar", core, msg, msg, time, icon)
 
-		-- local guid = UnitGUID("target")
-		-- if guid and UnitCanAttack("player", "target") then
-		-- 	for i = 1, 40 do
-		-- 		local unit = ("nameplate%d"):format(i)
-		-- 		if UnitGUID(unit) == guid then
-		-- 			local t = GetTime()
-		-- 			if (t - lastNamePlateBar) > 25 then
-		-- 				lastNamePlateBar = t
-		-- 				core:Print(L.testNameplate)
-		-- 				core:SendMessage("BigWigs_StartNameplateBar", core, msg, msg, 25, icon, false, guid)
-		-- 			end
-		-- 			return
-		-- 		end
-		-- 	end
-		-- end
+		if loader.isRetail then
+			local guid = UnitGUID("target")
+			if guid and UnitCanAttack("player", "target") then
+				for i = 1, 40 do
+					local unit = ("nameplate%d"):format(i)
+					if UnitGUID(unit) == guid then
+						local t = GetTime()
+						if (t - lastNamePlateBar) > 25 then
+							lastNamePlateBar = t
+							core:Print(L.testNameplate)
+							core:SendMessage("BigWigs_StartNameplateTimer", core, msg, msg, 25, icon, false, guid)
+						end
+						return
+					end
+				end
+			end
+		end
 	end
 end
 
@@ -269,14 +284,14 @@ end
 local function bossComm(_, msg, extra, sender)
 	if msg == "Enable" and extra then
 		local m = bosses[extra]
-		if m and not m.enabled and sender ~= pName then
+		if m and not m:IsEnabled() and sender ~= pName then
 			enableBossModule(m)
 		end
 	end
 end
 
 function mod:RAID_BOSS_WHISPER(_, msg) -- Purely for Transcriptor to assist in logging purposes.
-	if msg ~= "" and IsInGroup() then -- https://github.com/Stanzilla/WoWUIBugs/issues/216
+	if msg ~= "" and IsInGroup() then
 		SendAddonMessage("Transcriptor", msg, IsInGroup(2) and "INSTANCE_CHAT" or "RAID")
 	end
 end
@@ -316,8 +331,10 @@ do
 				watchedMovies = {},
 			},
 		}
-		local db = adb:New("BigWigsClassicDB", defaults, true)
-		--lds:EnhanceDatabase(db, "BigWigs3DB")
+		local db = adb:New("BigWigs3DB", defaults, true)
+		if lds then
+			lds:EnhanceDatabase(db, "BigWigs3DB")
+		end
 
 		db.RegisterCallback(mod, "OnProfileChanged", profileUpdate)
 		db.RegisterCallback(mod, "OnProfileCopied", profileUpdate)
@@ -414,9 +431,11 @@ function core:Print(msg)
 	print("BigWigs: |cffffff00"..msg.."|r")
 end
 
-function core:Error(msg)
-	core:Print(msg)
-	geterrorhandler()(msg)
+function core:Error(msg, noPrint)
+	if not noPrint then
+		core:Print(msg)
+	end
+	geterrorhandler()("BigWigs: ".. msg)
 end
 
 -------------------------------------------------------------------------------
@@ -424,11 +443,11 @@ end
 --
 
 do
-	local L = GetLocale()
-	if L == "enGB" then L = "enUS" end
+	local currentLocale = GetLocale()
+	if currentLocale == "enGB" then currentLocale = "enUS" end
 	function core:NewBossLocale(moduleName, locale)
 		local module = bosses[moduleName]
-		if module and L == locale then
+		if module and currentLocale == locale then
 			return module:GetLocale()
 		end
 	end
@@ -442,10 +461,10 @@ do
 	local errorAlreadyRegistered = "%q already exists as a module in BigWigs, but something is trying to register it again."
 	local errorJournalIdInvalid = "%q is using the invalid journal id of %q."
 	local bossMeta = { __index = bossPrototype, __metatable = false }
-	function core:NewBoss(moduleName, zoneId, journalId, instanceId)
-		-- Don't load modules for zones we aren't interested in
-		if not BigWigsLoader.zoneTbl[zoneId] then return end
-
+	local EJ_GetEncounterInfo = EJ_GetEncounterInfo or function(key)
+		return BigWigsAPI:GetLocale("BigWigs: Encounters")[key]
+	end
+	function core:NewBoss(moduleName, zoneId, journalId)
 		if bosses[moduleName] then
 			core:Print(errorAlreadyRegistered:format(moduleName))
 		else
@@ -466,10 +485,10 @@ do
 			initModules[#initModules+1] = m
 
 			if journalId then
-				local name = BigWigsAPI:GetLocale("BigWigs: Encounters")[journalId]
-				if name then
+				local name = EJ_GetEncounterInfo(journalId)
+				if name or journalId < 0 then
 					m.journalId = journalId
-					m.displayName = name
+					m.displayName = name or moduleName
 				else
 					m.displayName = moduleName
 					core:Print(errorJournalIdInvalid:format(moduleName, journalId))
@@ -539,7 +558,9 @@ end
 
 do
 	local GetSpellInfo = GetSpellInfo
-	local C_EncounterJournal_GetSectionInfo = function(key) return BigWigsAPI:GetLocale("BigWigs: Encounter Info")[key] end
+	local C_EncounterJournal_GetSectionInfo = C_EncounterJournal and C_EncounterJournal.GetSectionInfo or function(key)
+		return BigWigsAPI:GetLocale("BigWigs: Encounter Info")[key]
+	end
 	local C = core.C -- Set from Constants.lua
 	local standardFlag = C.BAR + C.CASTBAR + C.MESSAGE + C.ICON + C.SOUND + C.SAY + C.SAY_COUNTDOWN + C.PROXIMITY + C.FLASH + C.ALTPOWER + C.VOICE + C.INFOBOX + C.NAMEPLATEBAR
 	local defaultToggles = setmetatable({

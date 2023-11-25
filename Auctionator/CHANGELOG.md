@@ -1,13 +1,9 @@
 # Auctionator
 
-## [10.1.8](https://github.com/Auctionator/Auctionator/tree/10.1.8) (2023-06-21)
-[Full Changelog](https://github.com/Auctionator/Auctionator/compare/10.1.7...10.1.8) 
+## [10.2.0](https://github.com/Auctionator/Auctionator/tree/10.2.0) (2023-11-15)
+[Full Changelog](https://github.com/Auctionator/Auctionator/compare/10.1.36...10.2.0) 
 
-- Wrath: Update toc for 3.4.2  
-- Shopping: Fix import error when using thousands of item ids for the list  
-- Shopping: Refresh buy view if owned auction gets bid applied  
-- Shopping: Fix bid colour not showing on buy screens  
-- Shopping: Highlight owned items with bids differently on buy screens  
-- Cancelling: Adjust shade of purple in bid rows  
-- Cancelling: Change bid highlight to purple instead of green  
-- Mainline: Cancelling: Update view when active auctions have a bid placed  
+- Add addon logo to classic addon lists ingame  
+- Update toc for 1.15  
+- [Fixes #1442] Groups: Sort by item ID and then by modifiers for view  
+- [Fixes #1456] Mainline: Selling: Trying to sell soulbound item causes lua error  

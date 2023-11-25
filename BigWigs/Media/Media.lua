@@ -1,9 +1,4 @@
 
-if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-	print("|cFF33FF99BigWigs|r: You're trying to run the Classic version of BigWigs on a live server.")
-	return
-end
-
 local L = BigWigsAPI:GetLocale("BigWigs")
 local media = LibStub("LibSharedMedia-3.0")
 
@@ -31,16 +26,14 @@ do
 	media:Register(SOUND, "BigWigs: Alarm", "Interface\\AddOns\\BigWigs\\Media\\Sounds\\Alarm.ogg")
 
 	-- Ingame sounds that DBM uses for DBM converts
-	if WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC then
-		media:Register(SOUND, "BigWigs: [DBM] ".. L.FlagTaken, "Sound\\Spells\\PVPFlagTaken.ogg")
-		--media:Register(SOUND, "BigWigs: [DBM] ".. L.Beware, "Sound\\Creature\\AlgalonTheObserver\\UR_Algalon_BHole01.ogg")
-		media:Register(SOUND, "BigWigs: [DBM] ".. L.Destruction, "Sound\\Creature\\KilJaeden\\KILJAEDEN02.ogg")
-		media:Register(SOUND, "BigWigs: [DBM] ".. L.RunAway, "Sound\\Creature\\HoodWolf\\HoodWolfTransformPlayer01.ogg")
-	end
+	media:Register(SOUND, "BigWigs: [DBM] ".. L.FlagTaken, 569200) -- Sound\\Spells\\PVPFlagTaken
+	media:Register(SOUND, "BigWigs: [DBM] ".. L.Beware, 543587) -- Sound\\Creature\\AlgalonTheObserver\\UR_Algalon_BHole01
+	media:Register(SOUND, "BigWigs: [DBM] ".. L.Destruction, 553193) -- Sound\\Creature\\KilJaeden\\KILJAEDEN02
+	media:Register(SOUND, "BigWigs: [DBM] ".. L.RunAway, 552035) -- Sound\\Creature\\HoodWolf\\HoodWolfTransformPlayer01
 
 	-- Ingame sounds used by Blizzard
-	media:Register(SOUND, "BigWigs: Raid Warning", "Sound\\Interface\\RaidWarning.ogg")
-	--media:Register(SOUND, "BigWigs: Raid Boss Whisper", "Sound\\Interface\\UI_RaidBossWhisperWarning.ogg")
+	media:Register(SOUND, "BigWigs: Raid Warning", 567397) -- Sound\\Interface\\RaidWarning
+	media:Register(SOUND, "BigWigs: Raid Boss Whisper", 876098) -- Sound\\Interface\\UI_RaidBossWhisperWarning
 
 	-- Victory
 	media:Register(SOUND, "BigWigs: Victory", "Interface\\AddOns\\BigWigs\\Media\\Sounds\\Victory.ogg")
@@ -51,6 +44,6 @@ end
 -- Fonts
 do
 	local FONT = media.MediaType and media.MediaType.FONT or "font"
-	media:Register(FONT, "Noto Sans Regular", "Interface\\AddOns\\BigWigs\\Media\\Fonts\\Noto.ttf", 130) -- 130 latin + cyr
-	media:Register(FONT, "Noto Sans SemiCondensed", "Interface\\AddOns\\BigWigs\\Media\\Fonts\\NotoSans-SemiCondensed.ttf", 130) -- 130 latin + cyr
+	media:Register(FONT, "Noto Sans Regular", "Interface\\AddOns\\BigWigs\\Media\\Fonts\\NotoSans-Regular.otf", 130) -- 130 latin + cyr
+	media:Register(FONT, "Noto Sans SemiCondensed", "Interface\\AddOns\\BigWigs\\Media\\Fonts\\NotoSans-SemiCondensed.otf", 130) -- 130 latin + cyr
 end

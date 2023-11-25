@@ -266,7 +266,6 @@ GRML.Portuguese = function()
     GRM_L["Please choose between 1 and 180 days!"] = true
     GRM_L["Announce Events"] = true                         -- Context: "Announce Events X number of days in advance" -- the X is the editbox to modify number of days. Please include the location of where to pin that.
     GRM_L["Days in Advance"] = true
-    GRM_L["Please choose between 1 and 28 days!"] = true
     GRM_L["Add Events to Calendar"] = true
     GRM_L["SYNC Changes With Guildies at Rank"] = true      -- Context: at Rank [DROPDOWNRANKSELECTION] or Higher. - Please note where to place dropdown box in the position of the sentence.
     GRM_L["Reactivating Data SYNC with Guildies..."] = true
@@ -1653,4 +1652,104 @@ GRML.Portuguese = function()
     GRM_L["Whisper"] = true
     GRM_L["{custom1} to Whisper"] = true
 
+    -- R1.979
+    GRM_L["{name}'s Settings"] = true
+    GRM_L["Reserved for GRM Macro Tool Usage. Please do not delete."] = true
+    GRM_L["Verify Promotion Dates"] = true
+    GRM_L["Verify Join Dates"] = true
+    GRM_L["Number of Unverified Promotion Dates: {num}"] = true
+    GRM_L["Number of Unverified Join Dates: {num}"] = true
+    GRM_L["Verify Only if Within Number of Days:"] = true
+    GRM_L["Confirm All"] = true
+    GRM_L["Only Confirm Dates Within {num} Days"] = true
+    GRM_L["1 Promotion Date Has Been Confirmed."] = true;
+    GRM_L["{num} Promotion Dates Have Been Confirmed."] = true
+    GRM_L["1 Join Date Has Been Confirmed."] = true;
+    GRM_L["{num} Join Dates Have Been Confirmed."] = true
+    GRM_L["Searching Log..."] = true
+    
+    -- R1.990
+    GRM_L["M+ Score" ] = true
+    GRM_L["Search Public and Officer Notes"] = true
+    GRM_L["Note Search"] = true
+    GRM_L["Tips"] = true    -- Options > Help tab - "Tips" as in helpful info.
+    GRM_L["Hold the CONTROL key down to scroll 3x the speed"] = true
+    GRM_L["Hold the SHIFT key down to scroll instantly to the top or bottom"] = true
+    
+    -- R1.981
+    GRM_L["Player Level Range:"] = true
+    
+    -- R1.982
+    GRM_L["Announce Member Join Date Anniversaries."] = true
+    GRM_L["Announce Player Birthdates."] = true
+    GRM_L["Anniversaries, Birthdays, and Other Events can be viewed."] = true
+    GRM_L["Please confirm the removal of {num} events."] = true
+    GRM_L["Show Offline Members"] = true
+    GRM_L["{num}/{custom1} Online"] = true  -- Format on GRM Roster "10/154 Online"
+    GRM_L["Hide Options"] = true
+    GRM_L["Show Options"] = true
+    GRM_L["Show Mains"] = true
+    GRM_L["Show Alts"] = true
+    GRM_L["Show Tag"] = true
+    GRM_L["Group Alts With Main"] = true  -- Roster Options - grouping alts under the main.
+    GRM_L["If enabled, sorting will be based on the Mains"] = true
+    GRM_L["Rows:"] = true       -- Referencing the number of rows on the Guild Roster
+    GRM_L["{num} Rows"] = true
+    GRM_L["Right-Click to Reset to {num} Rows"] = true
+    GRM_L["Mythic+ Rating is"] = true -- New Macro rule
+    GRM_L["Mythic+ Rating:"] = true
+    GRM_L["Mythic+ Rating: {num}"] = true
+    GRM_L["Mythic+ Rating greater or equal to {num}"] = true
+    GRM_L["Mythic+ Rating equal to {num}"] = true
+    GRM_L["Mythic+ Rating less than {num}"] = true
+    
+    -- R1.983
+    GRM_L["Special Rules that don't fit nicely into the other categories."] = true
+    GRM_L["Special"] = true     -- Macro Tool tab "Special"
+    GRM_L["Special Rules Not Available at Current Rank"] = true
+    GRM_L["Add Special Rule"] = true
+    GRM_L["The \"Special\" rules bypass any safe and ignore restrictions."] = true
+    GRM_L["Unable to promote or demote players within the guild at current rank."] = true
+    GRM_L["Special Rule Match:"] = true
+    
+    -- R1.984
+    GRM_L["Edit Hot Key"] = true
+    GRM_L["Clear"] = true
+    GRM_L["Start Building Your Hot Key"] = true
+    GRM_L["Control"] = true
+    GRM_L["Shift"] = true
+    GRM_L["Confirm New Hot Key?"] = true
+    GRM_L["Please Build Your Hot Key First"] = true
+    GRM_L["Control key is already added."] = true
+    GRM_L["Shift key is already added."] = true
+    GRM_L["Please add only 1 character"] = true
+    GRM_L["Hot Key is the Same"] = true
+    GRM_L["Please add final key"] = true
+    GRM_L["Final Key"] = true
+    GRM_L["WARNING! Keybind is already in use for \"{name}\"."] = true
+    
+    -- R1.986
+    GRM_L["D"] = true -- Hardcore mode death tag [D] -- Change to any letter
+    GRM_L["Classic Hardcore Mode"] = true
+    GRM_L["Hardcore"] = true
+    GRM_L["Include Date Player Died"] = true
+    GRM_L["Add Death Indicator Tag to Player Note"] = true
+    GRM_L["Hardcore Deaths"] = true
+    GRM_L["{name} has died at level {num}."] = true
+    GRM_L["Player is Still Alive"] = true
+    GRM_L["{name} is no longer reported as Dead."] = true
+    GRM_L["The \"{custom1}\" indicates the player is dead." ] = true
+    GRM_L["Your rank does not have permission to remove the tag."] = true
+    GRM_L["R.I.P. - {custom1}"] = true      -- "R.I.P. - 15/09/2023"
+    GRM_L["Dead"] = true
+    GRM_L["Total Deaths Recorded: {num}"] = true
+    GRM_L["Time of Death"] = true
+    GRM_L["Sort Deaths:"] = true
+    GRM_L["*Max Export is 500 Recorded Deaths at a Time"] = true
+
+    -- R1.988
+    GRM_L["In-combat. Hiding all GRM windows"] = true
+    GRM_L["Auto-Hide all GRM windows when entering combat."] = true
+    
 end
+

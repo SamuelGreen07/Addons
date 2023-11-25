@@ -32,7 +32,7 @@ Skillet.L = L
 local GetAddOnMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
 Skillet.version = GetAddOnMetadata("Skillet-Classic", "Version")
 Skillet.interface = select(4, GetBuildInfo())
-Skillet.build = (Skillet.interface < 20000 and "Classic") or (Skillet.interface < 30000 and "BCC") or (Skillet.interface < 40000 and "Wrath") or "Retail"
+Skillet.build = (Skillet.interface < 11404 and "Classic") or (Skillet.interface < 20000 and "Classic2") or (Skillet.interface < 30000 and "BCC") or (Skillet.interface < 40000 and "Wrath") or "Retail"
 Skillet.project = WOW_PROJECT_ID
 local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
@@ -84,6 +84,7 @@ local defaults = {
 		include_tradebuttons = true,
 		search_includes_reagents = true,
 		interrupt_clears_queue = false,
+		sound_on_empty_queue = false,
 		clamp_to_screen = true,
 		scale_tooltip = false,
 		transparency = 1.0,
@@ -166,7 +167,7 @@ function Skillet:EnableBlizzardFrame()
 		self.BlizzardTradeSkillFrame = nil
 		TradeSkillFrame:SetScript("OnHide", Skillet.tradeSkillHide)
 		Skillet.tradeSkillHide = nil
-		ShowUIPanel(TradeSkillFrame)
+--		ShowUIPanel(TradeSkillFrame)
 	end
 	if self.BlizzardCraftFrame ~= nil then
 		if (not IsAddOnLoaded("Blizzard_CraftUI")) then
@@ -176,7 +177,7 @@ function Skillet:EnableBlizzardFrame()
 		CraftFrame:SetScript("OnHide", Skillet.craftHide)
 		self.craftHide = nil
 		self:RestoreEnchantButton(true)
-		ShowUIPanel(CraftFrame)
+--		ShowUIPanel(CraftFrame)
 	end
 end
 
@@ -696,8 +697,10 @@ function Skillet:OnEnable()
 --
 -- Events that replace *_SHOW and *_CLOSED by adding a PlayerInteractionType parameter
 --
---	self:RegisterEvent("PLAYER_INTERACTION_MANAGER_FRAME_SHOW")
---	self:RegisterEvent("PLAYER_INTERACTION_MANAGER_FRAME_HIDE")
+	if isWrath then
+		self:RegisterEvent("PLAYER_INTERACTION_MANAGER_FRAME_SHOW")
+		self:RegisterEvent("PLAYER_INTERACTION_MANAGER_FRAME_HIDE")
+	end
 --
 -- MERCHANT_SHOW, MERCHANT_HIDE, MERCHANT_UPDATE events needed for auto buying.
 --
@@ -1073,6 +1076,45 @@ function Skillet:UNIT_PET_TRAINING_POINTS()
 end
 
 --
+-- Dragonflight replacement for *_SHOW events
+--
+function Skillet:PLAYER_INTERACTION_MANAGER_FRAME_SHOW(event,interactionType)
+	DA.TRACE("PLAYER_INTERACTION_MANAGER_FRAME_SHOW("..tostring(interactionType)..")")
+	if interactionType == Enum.PlayerInteractionType.Merchant then -- 5
+--		Skillet:Skillet:MERCHANT_SHOW()
+		Skillet:MerchantShow()
+	end
+	if interactionType == Enum.PlayerInteractionType.Banker then -- 8
+		Skillet:BANKFRAME_OPENED()
+	end
+	if interactionType == Enum.PlayerInteractionType.GuildBanker then -- 10
+		Skillet:GUILDBANKFRAME_OPENED()
+	end
+	if interactionType == Enum.PlayerInteractionType.Auctioneer then -- 21
+		Skillet:AUCTION_HOUSE_SHOW()
+	end
+end
+
+--
+-- Dragonflight replacement for *_CLOSED events
+--
+function Skillet:PLAYER_INTERACTION_MANAGER_FRAME_HIDE(event,interactionType)
+	DA.TRACE("PLAYER_INTERACTION_MANAGER_FRAME_HIDE("..tostring(interactionType)..")")
+	if interactionType == Enum.PlayerInteractionType.Merchant then -- 5
+--		Skillet:MERCHANT_CLOSED()
+	end
+	if interactionType == Enum.PlayerInteractionType.Banker then -- 8
+		Skillet:BANKFRAME_CLOSED()
+	end
+	if interactionType == Enum.PlayerInteractionType.GuildBanker then -- 10
+		Skillet:GUILDBANKFRAME_CLOSED()
+	end
+	if interactionType == Enum.PlayerInteractionType.Auctioneer then -- 21
+		Skillet:AUCTION_HOUSE_CLOSED()
+	end
+end
+
+--
 -- Called when the addon is disabled
 --
 function Skillet:OnDisable()
@@ -1113,9 +1155,9 @@ end
 --
 function Skillet:IsModKey1Down()
 	if not Skillet.db.profile.nomodkeys and IsShiftKeyDown() then
-		return true
+		return not Skillet.db.profile.invertshiftkey
 	end
-	return false
+	return Skillet.db.profile.invertshiftkey
 end
 
 --
@@ -1180,23 +1222,23 @@ function Skillet:SkilletShow()
 	else
 		name, rank, maxRank = GetTradeSkillLine()
 	end
-	--DA.DEBUG(0,"name= '"..tostring(name).."', rank= "..tostring(rank)..", maxRank= "..tostring(maxRank))
+	DA.DEBUG(1,"SkilletShow: name= '"..tostring(name).."', rank= "..tostring(rank)..", maxRank= "..tostring(maxRank))
 	if name then self.currentTrade = self.tradeSkillIDsByName[name] end
 	if self:IsSupportedTradeskill(self.currentTrade) and not self.linkedSkill then
-		DA.DEBUG(0,"SkilletShow: "..self.currentTrade..", name= '"..tostring(name).."', rank= "..tostring(rank)..", maxRank= "..tostring(maxRank))
+		DA.DEBUG(1,"SkilletShow: (supported)"..self.currentTrade..", name= '"..tostring(name).."', rank= "..tostring(rank)..", maxRank= "..tostring(maxRank))
 		self.selectedSkill = nil
 		self.dataScanned = false
 		self.tradeSkillOpen = true
 		if self.db.profile.hide_blizzard_frame and not TSM_API then
 			if self.isCraft then
-				DA.DEBUG(0,"HideUIPanel(CraftFrame)")
+				DA.DEBUG(1,"SkilletShow: HideUIPanel(CraftFrame)")
 				Skillet.hideCraftFrame = true
 				HideUIPanel(CraftFrame)
 				if Skillet.tradeShow then
 					CloseTradeSkill()
 				end
 			else
-				DA.DEBUG(0,"HideUIPanel(TradeSkillFrame)")
+				DA.DEBUG(1,"SkilletShow: HideUIPanel(TradeSkillFrame)")
 				Skillet.hideTradeSkillFrame = true
 				HideUIPanel(TradeSkillFrame)
 				if Skillet.craftShow then
@@ -1207,25 +1249,23 @@ function Skillet:SkilletShow()
 		end
 --
 -- Processing will continue in SkilletShowWindow when the TRADE_SKILL_UPDATE or CRAFT_UPDATE event fires
--- (Wrath needs a little help)
 --
-		if isWrath then
-			if self.isCraft then
-				Skillet:CRAFT_UPDATE()
-			else
-				Skillet:TRADE_SKILL_UPDATE()
-			end
+		if self.isCraft then
+			Skillet:CRAFT_UPDATE()
+		else
+			Skillet:TRADE_SKILL_UPDATE()
 		end
 	else
 --
 -- give Hunter Beast Training a pass
 -- for everything else bring up the appropriate Blizzard UI
 --
+		DA.DEBUG(1,"SkilletShow: (unsupported)"..self.currentTrade..", name= '"..tostring(name).."', rank= "..tostring(rank)..", maxRank= "..tostring(maxRank))
 		if self.castSpellID == 5149 then
 			return
 		elseif not self:IsModKey1Down() and not UnitAffectingCombat("player") and not self.linkedSkill then
-			DA.DEBUG(0,"SkilletShow: "..tostring(self.currentTrade).." ("..tostring(name)..") is not supported")
-			DA.DEBUG(0,"tradeSkillIDsByName= "..DA.DUMP(self.tradeSkillIDsByName))
+			DA.DEBUG(1,"SkilletShow: "..tostring(self.currentTrade).." ("..tostring(name)..") is not supported")
+			DA.DEBUG(1,"SkilletShow: tradeSkillIDsByName= "..DA.DUMP(self.tradeSkillIDsByName))
 		end
 		self:HideAllWindows()
 		if self.isCraft then

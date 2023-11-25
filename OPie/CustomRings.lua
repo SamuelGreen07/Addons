@@ -1,4 +1,4 @@
-local MAJ, REV, _, T = 3, 57, ...
+local MAJ, REV, _, T = 3, 59, ...
 local EV, ORI, PC = T.Evie, OPie.UI, T.OPieCore
 local AB, RW, IM = T.ActionBook:compatible(2,37), T.ActionBook:compatible("Rewire", 1,10), T.ActionBook:compatible("Imp", 1, 0)
 assert(ORI and AB and RW and IM and EV and PC and 1, "Missing required libraries")
@@ -242,6 +242,28 @@ local function copy(t, copies)
 	end
 	return into
 end
+local function updateSliceAction_Z3(slice)
+	local at, v
+	if type(slice[1]) == "string" then
+		at = slice[1]
+	else
+		at = type(slice.id)
+		at = at == "string" and "imptext" or at == "number" and "spell" or nil
+	end
+	if at == "item" then
+		v = (slice.byName and 2 or 0) + (slice.forceShow and 1 or 0) + (slice.onlyEquipped and 4 or 0)
+		slice.byName, slice.forceShow, slice.onlyEquipped = nil
+	elseif at == "macro" or at == "extrabutton" or at == "toy" then
+		v = (slice.forceShow and 1 or 0)
+		slice.forceShow = nil
+	elseif at == "opie.databroker.launcher" then
+		v = (slice.clickUsingRightButton and 8 or 0)
+		slice.clickUsingRightButton = nil
+	elseif at == "spell" then
+		slice[3] = slice[3] == "lock-rank" and 16 or nil
+	end
+	slice[3] = v and v > 0 and v or slice[3] or nil
+end
 
 local RK_SetRingDesc
 local function RK_SyncRing(name, force, tok)
@@ -325,14 +347,12 @@ local function RK_SanitizeDescription(name, props, isLaxInput)
 				end
 			end
 			v.show = v.show ~= "" and v.show or nil
-			local sliceToken = v.sliceToken or (uprefix and type(v._u) == "string" and (uprefix .. v._u))
+			local sliceToken = v.sliceToken or uprefix and type(v._u) == "string" and (uprefix .. v._u) or v.sliceToken
 			local tokenOK = marks[sliceToken] == nil and sliceToken and AB:ReserveToken(sliceToken, NS, name, colID)
 			if not tokenOK then
 				if not isLaxInput then
 					-- Persistent, globally-unique slice tokens are required for rings created/persisted by external code
-					local msg = string.format("desc[%d].sliceToken value is missing, invalid, or not [globally] unique (%s)", i, type(sliceToken))
-					-- DEPRECATED[2306/Y11]: deterministic error() after 2023-08-29
-					PC:FutureDeprecationError(msg, 5, 1688169600,1689379200, 1692057600,1693267200)
+					assert(false, string.format("desc[%d].sliceToken value is missing, invalid, or not [globally] unique (%s)", i, type(sliceToken)), 4)
 				end
 				sliceToken = AB:CreateToken()
 			end
@@ -351,6 +371,7 @@ local function RK_SerializeDescription(props)
 	end
 	dropUnderscoreKeys(props)
 	props.sortScope = nil
+	props.quarantineBind = nil -- DEPRECATED [2310/Z2]
 	return props
 end
 local function resyncRings()
@@ -391,10 +412,10 @@ local function svInitializer(event, _name, sv)
 		
 		local storageVersion = flags.StoreVersion or (flags.FlushedDefaultColors and 1) or 0
 		storageVersion = type(storageVersion) == "number" and storageVersion or 0
-		local onOpenFlush = storageVersion < 2
-		RK_FlagStore.StoreVersion, RK_FlagStore.FlushedDefaultColors = 2, nil
+		local onOpenFlush, updateZ3 = storageVersion < 2, storageVersion < 3
+		RK_FlagStore.StoreVersion, RK_FlagStore.FlushedDefaultColors = 3, nil
 
-		loadLock = 1; C_Timer.After(0, unlockSync)
+		loadLock = 1; EV.After(0, unlockSync)
 		for k, v in pairs(queue) do
 			if v.hotkey then v.hotkey = v.hotkey:gsub("[^-; ]+", mousemap) end
 			if deleted[k] == nil and SV[k] == nil then
@@ -408,6 +429,9 @@ local function svInitializer(event, _name, sv)
 			if type(v) == "table" then
 				if onOpenFlush and v.onOpen ~= nil then
 					v.quarantineOnOpen, v.onOpen = v.onOpen, nil
+				end
+				for i=1, updateZ3 and #v or 0 do
+					updateSliceAction_Z3(v[i])
 				end
 			end
 			securecall(RK_SetRingDesc, k, v, true)
@@ -506,7 +530,8 @@ function private:GetRingSnapshot(name, bundleNested)
 	repeat
 		local props = m[table.remove(q)] or props
 		RK_SerializeDescription(props)
-		props.limit, props.save = type(props.limit) == "string" and props.limit:match("[^A-Z]") and "PLAYER" or props.limit
+		props.limit = type(props.limit) == "string" and props.limit:match("[^A-Z]") and "PLAYER" or props.limit
+		props.save, props.hotkey, props.v = nil
 		for i=1,#props do
 			local v = props[i]
 			local st = v[1]
@@ -524,7 +549,7 @@ function private:GetRingSnapshot(name, bundleNested)
 			v.sliceToken = nil
 		end
 	until not q[1]
-	props._bundle = next(m) ~= nil and m or nil
+	props._scv, props._bundle = 1, next(m) ~= nil and m or nil
 	return serialize(props)
 end
 function private:GetSnapshotRing(snap)
@@ -532,6 +557,9 @@ function private:GetSnapshotRing(snap)
 	if snap == "" then return end
 	local ok, root = pcall(unserialize, snap)
 	if not ok or type(root) ~= "table" then return end
+	local scv = type(root._scv) == "number" and root._scv or 0
+	if scv > 1 or scv < 0 then return end
+	local preZ3 = scv < 1
 	local q, bun, bs = {}, {}, type(root._bundle) == "table" and root._bundle or nil
 	repeat
 		local ri = bun[table.remove(q)] or root
@@ -551,10 +579,13 @@ function private:GetSnapshotRing(snap)
 					bun[sa], q[#q+1] = bd, sa
 				end
 			end
+			if preZ3 then
+				updateSliceAction_Z3(v)
+			end
 			dropUnderscoreKeys(v)
 		end
 		ri.name = ri.name:gsub("|?|", "||")
-		ri.quarantineBind, ri.hotkey = type(ri.hotkey) == "string" and ri.hotkey or nil
+		ri.quarantineBind, ri.hotkey = nil, nil
 		ri.quarantineOnOpen, ri.onOpen = ri.onOpen, nil
 		dropUnderscoreKeys(ri)
 	until q[1] == nil

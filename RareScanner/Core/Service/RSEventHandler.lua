@@ -13,6 +13,7 @@ local RSMapDB = private.ImportLib("RareScannerMapDB")
 local RSNpcDB = private.ImportLib("RareScannerNpcDB")
 local RSContainerDB = private.ImportLib("RareScannerContainerDB")
 local RSAchievementDB = private.ImportLib("RareScannerAchievementDB")
+local RSCollectionsDB = private.ImportLib("RareScannerCollectionsDB")
 
 -- RareScanner services
 local RSMinimap = private.ImportLib("RareScannerMinimap")
@@ -203,7 +204,7 @@ local function OnLootOpened()
 				local npcID = id and tonumber(id) or nil
 				
 				-- If its a supported NPC
-				if (RSGeneralDB.GetAlreadyFoundEntity(npcID)) then
+				if (RSGeneralDB.GetAlreadyFoundEntity(npcID) or RSNpcDB.GetInternalNpcInfo(npcID)) then
 					local itemLink = GetLootSlotLink(i)
 					if (itemLink) then
 						local _, _, _, lootType, id, _, _, _, _, _, _, _, _, _, name = string.find(itemLink, "|?c?f?f?(%x*)|?H?([^:]*):?(%d+):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%-?%d*):?(%-?%d*):?(%d*):?(%d*)|?h?%[?([^%[%]]*)%]?|?h?|?r?")
@@ -242,6 +243,39 @@ end
 
 function RSEventHandler.IsCinematicPlaying()
 	return isCinematicPlaying
+end
+
+---============================================================================
+-- Event: NEW_MOUNT_ADDED
+-- Fired when a new mount is added to the collection
+---============================================================================
+
+local function OnNewMountAdded(mountID)
+	RSCollectionsDB.RemoveNotCollectedMount(mountID, function()
+		RSExplorerFrame:Refresh()
+	end)
+end
+
+---============================================================================
+-- Event: NEW_PET_ADDED
+-- Fired when a new pet is added to the collection
+---============================================================================
+
+local function OnNewPetAdded(petGUID)
+	RSCollectionsDB.RemoveNotCollectedPet(petGUID, function()
+		RSExplorerFrame:Refresh()
+	end)
+end
+
+---============================================================================
+-- Event: NEW_TOY_ADDED
+-- Fired when a new toy is added to the collection
+---============================================================================
+
+local function OnNewToyAdded(itemID)
+	RSCollectionsDB.RemoveNotCollectedToy(itemID, function()
+		RSExplorerFrame:Refresh()
+	end)
 end
 
 ---============================================================================
@@ -292,6 +326,12 @@ local function HandleEvent(rareScannerButton, event, ...)
 		OnCinematicStart(rareScannerButton)
 	elseif (event == "CINEMATIC_STOP") then
 		OnCinematicStop()
+	elseif (event == "NEW_MOUNT_ADDED") then
+		OnNewMountAdded(...)
+	elseif (event == "NEW_PET_ADDED") then
+		OnNewPetAdded(...)
+	elseif (event == "NEW_TOY_ADDED") then
+		OnNewToyAdded(...)
 	elseif (event == "CRITERIA_EARNED") then
 		OnCriteriaEarned(...)
 	end
@@ -307,6 +347,9 @@ function RSEventHandler.RegisterEvents(rareScannerButton, addon)
 	rareScannerButton:RegisterEvent("LOOT_OPENED")
 	rareScannerButton:RegisterEvent("CINEMATIC_START")
 	rareScannerButton:RegisterEvent("CINEMATIC_STOP")
+	rareScannerButton:RegisterEvent("NEW_MOUNT_ADDED")
+	rareScannerButton:RegisterEvent("NEW_PET_ADDED")
+	rareScannerButton:RegisterEvent("NEW_TOY_ADDED")
 	rareScannerButton:RegisterEvent("CRITERIA_EARNED")
 
 	-- Captures all events

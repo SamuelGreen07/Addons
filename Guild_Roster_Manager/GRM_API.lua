@@ -155,12 +155,6 @@ end
 -- end
 
 
--- GRM_API.GetPronouns = function()    -- Pending GRM Feature (as requested)
-
--- end
-
-
-
 ------------------------------------------------------
 ------------------------------------------------------
 ---- TOOLBOX FOR UNIQUE API POWER TOOLS --------------
@@ -236,6 +230,54 @@ GRM_API.RestoreAllOfficerNotesFromSave = function()
     end
 end
 
+-- Method:          GRM_API.RestoreAllPublicNotes ( [string] )
+-- What it Does:    Takes all the saved strings and overwrites all public notes
+-- Purpose:         To enable players to restore all their public notes from a GRM physical backup save of the WTF \
+--                  saveVariables file if they did not have an internal save point. Run the script immediately after logging in.
+-- TIP:             Disable all other addons aside from GRM to ensure speedy login and run this script immediately after logging in. You only have seconds.
+-- Example:         /run GRM_API.RestoreAllPublicNotes()  -- Paste into chat ASAP
+GRM_API.RestoreAllPublicNotes = function( name )
+
+    if IsInGuild() then
+        if GRM.CanEditPublicNote() then
+            local guildName = "";
+
+            if not name then
+                local gName , _ , _ , server = GetGuildInfo ( "PLAYER" );
+
+                if server ~= nil then
+                    guildName = gName .. "-" .. string.gsub ( string.gsub ( server , "-" , "" ) , "%s+" , "" );
+                else
+                    guildName = gName .. "-" .. GRM_G.realmName;
+                end
+            else
+                guildName = name;
+            end
+            local guildData = GRM_GuildMemberHistory_Save[guildName]
+    
+            if guildData then
+                for i = 1 , GRM.GetNumGuildies() do 
+                    name = GetGuildRosterInfo ( i );
+                    for n , player in pairs ( guildData ) do 
+                        if type ( player ) == "table" and name == n then 
+
+                            GuildRosterSetPublicNote ( i , player.note);
+                            break;
+                        end
+                    end
+                end
+
+            else
+                print("Trouble finding guild...")
+            end
+        else
+            print("Player does not have permission to edit public notes")
+        end
+    else
+        print("Player is not currently in a guild")
+    end    
+end
+
 -- Method:          GRM_API.SetAllUnlinkedPlayersToMain()
 -- What it Does:    Any player that is not a main, and does not have any linked alts will be set as main.
 -- Purpose:         Mass tool for OCD people who want to set all as main.
@@ -275,7 +317,7 @@ GRM_API.SetAllUnknownPromoteDates = function ( day , month , year )
                     player.rankHist[1][2] = day;
                     player.rankHist[1][3] = month;
                     player.rankHist[1][4] = year;
-                    player.rankHist[1][5] = GRM.TimeStampToEpoch ( { day , month , year } );
+                    player.rankHist[1][5] = GRM.ConvertToStandardFormatDate ( day , month , year );
                     player.rankHist[1][6] = time();
                     player.rankHist[1][7] = true;
                     player.rankHist[1][8] = 1;
@@ -310,7 +352,7 @@ GRM_API.SetAllUnknownJoinDates = function ( day , month , year )
                 if player.joinDateUnknown or player.joinDateHist[1][1] == 0 then
 
                     player.joinDateHist = {};
-                    table.insert ( player.joinDateHist , { day , month , year , GRM.TimeStampToEpoch ( { day , month , year } ) , time() , true , 1 } );
+                    table.insert ( player.joinDateHist , { day , month , year , GRM.ConvertToStandardFormatDate ( day , month , year ) , time() , true , 1 } );
 
                     player.joinDateUnknown = false;
 

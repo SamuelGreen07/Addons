@@ -18,8 +18,6 @@ L.already_registered = "|cffff0000WARNING:|r |cff00ff00%s|r (|cffffff00%s|r) alr
 L.testNameplate = "Target detected, creating a test nameplate bar over target nameplate. |cFF33FF99This feature is rarely used, is usually just 1 bar, and is needed to keep track of cooldowns when fighting multiple bosses/ads that cast the same spell.|r"
 
 -- Loader / Options.lua
-L.classicWarning1 = "|cFF33FF99BigWigs|r: You're using the wrong version of BigWigs on a classic server."
-L.classicWarning2 = "|cFF33FF99BigWigs|r: Please install the classic version of BigWigs."
 L.officialRelease = "You are running an official release of BigWigs %s (%s)"
 L.alphaRelease = "You are running an ALPHA RELEASE of BigWigs %s (%s)"
 L.sourceCheckout = "You are running a source checkout of BigWigs %s directly from the repository."
@@ -39,12 +37,23 @@ L.dbmUsers = "DBM users:"
 L.noBossMod = "No boss mod:"
 L.offline = "Offline"
 
-L.missingPlugin = "Please note that this zone requires the |cFF436EEE%s|r plugin for timers to be displayed."
 L.missingAddOn = "The |cFF436EEE%s|r addon is missing!"
 L.disabledAddOn = "You have the |cFF436EEE%s|r addon disabled, timers will not be shown."
-
 L.removeAddOn = "Please remove '|cFF436EEE%s|r' as it's been replaced by '|cFF436EEE%s|r'."
 L.alternativeName = "%s (|cFF436EEE%s|r)"
+
+L.expansionNames = {
+	"Classic", -- Classic
+	"The Burning Crusade", -- The Burning Crusade
+	"Wrath of the Lich King", -- Wrath of the Lich King
+	"Cataclysm", -- Cataclysm
+	"Mists of Pandaria", -- Mists of Pandaria
+	"Warlords of Draenor", -- Warlords of Draenor
+	"Legion", -- Legion
+	"Battle for Azeroth", -- Battle for Azeroth
+	"Shadowlands", -- Shadowlands
+	"Dragonflight", -- Dragonflight
+}
 
 -- Media.lua (These are the names of the sounds in the dropdown list in the "sounds" section)
 L.Beware = "Beware (Algalon)"
@@ -56,6 +65,7 @@ L.spell_under_you = "BigWigs: Spell under you"
 
 -- Options.lua
 L.options = "Options"
+L.optionsKey = "Key: %s" -- The key that messages/bars/options use
 L.raidBosses = "Raid Bosses"
 L.dungeonBosses = "Dungeon Bosses"
 L.introduction = "Welcome to BigWigs, where the boss encounters roam. Please fasten your seatbelt, eat peanuts and enjoy the ride. It will not eat your children, but it will assist you in preparing that new boss encounter as a 7-course dinner for your raid group."
@@ -70,6 +80,8 @@ L.flashScreen = "Flash Screen"
 L.flashScreenDesc = "Certain abilities are important enough to need your full attention. When these abilities affect you BigWigs can flash the screen."
 L.minimapIcon = "Minimap icon"
 L.minimapToggle = "Toggle show/hide of the minimap icon."
+L.compartmentMenu = "No compartment icon"
+L.compartmentMenu_desc = "Turning this option off will make BigWigs show up in the addon compartment menu. We recommend leaving this option enabled."
 L.configure = "Configure"
 L.test = "Test"
 L.resetPositions = "Reset positions"
@@ -125,6 +137,8 @@ L.VOICE = "Voice"
 L.VOICE_desc = "If you have a voice plugin installed, this option will enable it to play a sound file that speaks this warning out loud for you."
 L.COUNTDOWN = "Countdown"
 L.COUNTDOWN_desc = "If enabled, a vocal and visual countdown will be added for the last 5 seconds. Imagine someone counting down \"5... 4... 3... 2... 1...\" with a big number in the middle of your screen."
+L.CASTBAR_COUNTDOWN = "Countdown (cast bars only)"
+L.CASTBAR_COUNTDOWN_desc = "If enabled, a vocal and visual countdown will be added for the last 5 seconds of the cast bars."
 L.INFOBOX = L.infobox
 L.INFOBOX_desc = L.infobox_desc
 L.SOUND = "Sound"
@@ -137,6 +151,8 @@ L.ME_ONLY_EMPHASIZE = "Emphasize (me only)"
 L.ME_ONLY_EMPHASIZE_desc = "Enabling this will emphasize any messages associated with this ability ONLY if it is casted on you, making them larger and more visible."
 L.NAMEPLATEBAR = "Nameplate Bars"
 L.NAMEPLATEBAR_desc = "Bars are sometimes attached to nameplates when more than one mob casts the same spell. If this ability is accompanied by a nameplate bar that you want to hide, disable this option."
+L.PRIVATE = "Private Aura"
+L.PRIVATE_desc = "Private auras can't be tracked normally, but the \"on you\" sound (Warning) can be set in the Sound tab."
 
 L.advanced = "Advanced options"
 L.back = "<< Back"
@@ -148,7 +164,7 @@ L.dispeller = "|cFFFF0000Dispeller alerts only.|r "
 
 -- Statistics
 L.statistics = "Statistics"
-L.lfr = "LFR"
+L.LFR = "LFR"
 L.normal = "Normal"
 L.heroic = "Heroic"
 L.mythic = "Mythic"

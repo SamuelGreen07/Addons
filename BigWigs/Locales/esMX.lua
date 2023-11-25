@@ -19,8 +19,6 @@ L.already_registered = "|cffff0000ATENCIÓN:|r |cff00ff00%s|r (|cffffff00%s|r) y
 L.testNameplate = "Objetivo detectado, creando una barra test en la placa de nombre sobre la placa de nombre del objetivo. |cFF33FF99Esta funcionalidad se usa muy poco, suele ser de sólo 1 barra, y es necesaria para llevar la cuenta de los enfriamientos cuando se lucha contra varios jefes/esbirros que lanzan el mismo hechizo.|r"
 
 -- Loader / Options.lua
-L.classicWarning1 = "|cFF33FF99BigWigs|r: Estás usando la versión incorrecta de BigWigs en un servidor classic"
-L.classicWarning2 = "|cFF33FF99BigWigs|r: Por favor instala la versión para classic de BigWigs."
 L.officialRelease = "Estás usando la versión oficial de BigWigs %s (%s)"
 L.alphaRelease = "Estás usando la VERSION ALPHA de BigWigs %s (%s)"
 L.sourceCheckout = "Estás usando la versión de BigWigs %s directamente del repositorio."
@@ -40,12 +38,23 @@ L.dbmUsers = "Jugadores con DBM:"
 L.noBossMod = "Sin boss mod:"
 L.offline = "Desconectado"
 
-L.missingPlugin = "Tenga en cuenta que esta zona requiere el plugin |cFF436EEE%s|r para que los contadores sean mostrados."
 --L.missingAddOn = "The |cFF436EEE%s|r addon is missing!"
 L.disabledAddOn = "Tienes el addon |cFF436EEE%s|r deshabilitado, los contadores no se mostrarán."
-
 L.removeAddOn = "Por favor elimina '|cFF436EEE%s|r' ya que está siendo reemplazado por '|cFF436EEE%s|r'."
 L.alternativeName = "%s (|cFF436EEE%s|r)"
+
+--L.expansionNames = {
+--	"Classic", -- Classic
+--	"The Burning Crusade", -- The Burning Crusade
+--	"Wrath of the Lich King", -- Wrath of the Lich King
+--	"Cataclysm", -- Cataclysm
+--	"Mists of Pandaria", -- Mists of Pandaria
+--	"Warlords of Draenor", -- Warlords of Draenor
+--	"Legion", -- Legion
+--	"Battle for Azeroth", -- Battle for Azeroth
+--	"Shadowlands", -- Shadowlands
+--	"Dragonflight", -- Dragonflight
+--}
 
 -- Media.lua (These are the names of the sounds in the dropdown list in the "sounds" section)
 L.Beware = "Cuidado (Algalon)"
@@ -57,6 +66,7 @@ L.spell_under_you = "BigWigs: Habilidad debajo de ti"
 
 -- Options.lua
 L.options = "Opciones"
+--L.optionsKey = "Key: %s" -- The key that messages/bars/options use
 L.raidBosses = "Jefes de Banda"
 L.dungeonBosses = "Jefes de Mazmorras"
 L.introduction = "Bienvenido a BigWigs. Abróchate el cinturón y come cacahuetes mientras disfrutas del paseo. De manera no intrusiva te ayudará a preparar ese nuevo encuentro de banda como una cena de 7 platos para tu grupo de banda."
@@ -71,6 +81,8 @@ L.flashScreen = "Destello de pantalla"
 L.flashScreenDesc = "Ciertas habilidades son suficientemente importantes para necesitar de tu total atención. Cuando estas habilidades te afecten BigWigs puede hacer desterllar la pantalla."
 L.minimapIcon = "Ícono del minimapa"
 L.minimapToggle = "Cambia entre mostrar/ocultar el ícono en el minimapa."
+--L.compartmentMenu = "No compartment icon"
+--L.compartmentMenu_desc = "Turning this option off will make BigWigs show up in the addon compartment menu. We recommend leaving this option enabled."
 L.configure = "Configurar"
 L.test = "Probar"
 L.resetPositions = "Restablecer posiciones"
@@ -126,6 +138,8 @@ L.VOICE = "Voz"
 L.VOICE_desc = "Si tienes un plugin de voz instalado, esta opción le permitirá reproducir un archivo de sonido que hable en este aviso para ti."
 L.COUNTDOWN = "Cuenta regresiva"
 L.COUNTDOWN_desc = "Si está activo, una cuenta regresiva vocal y visual será agregada para los últimos 5 segundos. Imagina a alguien contando hacia atrás \"5... 4... 3... 2... 1...\" con un número grande en el medio de la pantalla."
+--L.CASTBAR_COUNTDOWN = "Countdown (cast bars only)"
+--L.CASTBAR_COUNTDOWN_desc = "If enabled, a vocal and visual countdown will be added for the last 5 seconds of the cast bars."
 L.INFOBOX = L.infobox
 L.INFOBOX_desc = L.infobox_desc
 L.SOUND = "Sonido"
@@ -138,6 +152,8 @@ L.ME_ONLY_EMPHASIZE = "Enfatizar (sólo en mi)"
 L.ME_ONLY_EMPHASIZE_desc = "Habilitar esto enfatizará cualquier mensaje asociado con esta habilidad SOLO si se lanza sobre ti, mostrandolo más grande y visible."
 L.NAMEPLATEBAR = "Barras en placas de nombre"
 L.NAMEPLATEBAR_desc = "Las barras algunas veces están pegadas a las placas de nombre cuando más de un objetivo castea el mismo hechizo. Si esta habilidad está acompañada por una barra de placa de nombre que quieres ocultar, deshabilita esta opción."
+--L.PRIVATE = "Private Aura"
+--L.PRIVATE_desc = "Private auras can't be tracked normally, but the \"on you\" sound (Warning) can be set in the Sound tab."
 
 L.advanced = "Opciones avanzadas"
 L.back = "<< Volver"
@@ -149,7 +165,7 @@ L.dispeller = "|cFFFF0000Alertas para dispelear únicamente.|r "
 
 -- Statistics
 L.statistics = "Estadísticas"
-L.lfr = "LFR"
+L.LFR = "LFR"
 L.normal = "Normal"
 L.heroic = "Heroico"
 L.mythic = "Mítico"

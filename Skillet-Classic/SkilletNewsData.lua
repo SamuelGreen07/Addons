@@ -25,6 +25,62 @@ local isWrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
 
 Skillet.NewsName = "Skillet-Classic News"
 Skillet.NewsData = {
+	{	version = "1.78",
+		data = {
+			{	name = "New Feature",
+				data = {
+					{ header = "Option", body = "Add option to play a sound when the processing queue is emptied" },
+				},
+			},
+			{	name = "Changes",
+				data = {
+					{ header = "TOC", body = "Update TOC" },
+				},
+			},
+			{	name = "Fixes",
+				data = {
+					{ header = "ShoppingList", body = "Fix undefined function" },
+				},
+			},
+		},
+	},
+	{	version = "1.77",
+		data = {
+			{	name = "Fixes",
+				data = {
+					{ header = "Localization", body = "Fix issue #153, esES leatherworking" },
+				},
+			},
+		},
+	},
+	{	version = "1.76",
+		data = {
+			{	name = "Fixes",
+				data = {
+					{ header = "Compatibility", body = "More updates for 1.14.4 compatibility" },
+					{ header = "Plugins", body = "Fix error when Auctionator plugin is enabled but addon is not" },
+				},
+			},
+		},
+	},
+	{	version = "1.75",
+		data = {
+			{	name = "Changes",
+				data = {
+					{ header = "Compatibility", body = "Updates for 1.14.4 compatibility" },
+				},
+			},
+		},
+	},
+	{	version = "1.74",
+		data = {
+			{	name = "Fixes",
+				data = {
+					{ header = "Issue", body = "Fix issue #150, Merchant Buy" },
+				},
+			},
+		},
+	},
 	{	version = "1.73",
 		data = {
 			{	name = "Fixes",

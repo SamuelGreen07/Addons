@@ -6,6 +6,8 @@ L["ADD_ITEM"] = "Adicionar Item"
 L["ADD_TERM_TO_LIST_DIALOG"] = "Escreva o termo de busca a ser adicionado:"
 --[[Translation missing --]]
 L["ADD_TO_LIST"] = "Add To List"
+--[[Translation missing --]]
+L["ADD_TO_X"] = "Add to %s"
 L["ALREADY_PURCHASED_X"] = "Já comprou %s"
 L["ALT_LEFT_CLICK"] = "ALT + Clique Esquerdo"
 L["ALT_RIGHT_CLICK"] = "ALT + Clique Direito"
@@ -199,6 +201,8 @@ L["CONFIG_SELLING_GREY_POST_BUTTON_TOOLTIP_TEXT"] = "Quando uma postagem pode fa
 L["CONFIG_SELLING_ICON_SIZE"] = "Tamanho do ícone da bolsa (necessário recarregar)"
 L["CONFIG_SELLING_ICON_SIZE_TOOLTIP_HEADER"] = "Tamanho dos ícones"
 L["CONFIG_SELLING_ICON_SIZE_TOOLTIP_TEXT"] = "Isso permite aumentar os ícones dos itens da bolsa na aba de vendas (até 50) ou menores (até 10). O tamanho padrão é 42."
+--[[Translation missing --]]
+L["CONFIG_SELLING_IGNORE_ITEM_LEVEL"] = "Ignore item level when searching for matching auctions"
 L["CONFIG_SELLING_LIFO_HEADER"] = "Vendendo"
 L["CONFIG_SELLING_LIFO_TEXT"] = "Opções para definir porcentagem ou valor de subcotação e duração da maioria dos itens. Sem subcotação, essas categorias são agrupadas com o último item adicionado sendo o primeiro a vender. Subcotação pode não ser necessária."
 L["CONFIG_SELLING_MISSING_FAVOURITES"] = "Sempre mostrar os itens favoritos, mesmo se não houver nenhum na sua bolsa."
@@ -206,8 +210,22 @@ L["CONFIG_SELLING_MISSING_FAVOURITES_TOOLTIP_HEADER"] = "Favoritos não disponí
 L["CONFIG_SELLING_MISSING_FAVOURITES_TOOLTIP_TEXT"] = "Mostrar os itens favoritos na amostra da bolsa mesmo quando eles não estão na sua bolsa."
 L["CONFIG_SELLING_NOT_LIFO_HEADER"] = "Vendendo Equipamento/Bichos de estimação"
 L["CONFIG_SELLING_NOT_LIFO_TEXT"] = "Opções para definir porcentagem ou valor de subcotação e duração para equipamento e bichos de estimação em gaiolas. Essas categorias de itens são postadas individualmente e um comprador pode escolher qual ele(a) quer. Subcotação pode ser útil."
+--[[Translation missing --]]
+L["CONFIG_SELLING_POSSESSED_FAVOURITES_FIRST"] = "In favourites item list place favourites you have in your bag first"
+--[[Translation missing --]]
+L["CONFIG_SELLING_POSSESSED_FAVOURITES_FIRST_TOOLTIP_HEADER"] = "Possessed favourites first"
+--[[Translation missing --]]
+L["CONFIG_SELLING_POSSESSED_FAVOURITES_FIRST_TOOLTIP_TEXT"] = "Set the favourites ordering to force any items in your bag to be at the start of the list."
 L["CONFIG_SELLING_POST_SHORTCUT"] = "O atalho de teclado/mouse para postar o item selecionado é"
 L["CONFIG_SELLING_POST_SHORTCUT_TOOLTIP_TEXT"] = "Clique e depois pressione o botão (ou tecla) que você gostaria de usar para o atalho. Esse atalho vai apenas funcionar na aba de vendas e não vai afetar outros atalhos para a mesma tecla."
+--[[Translation missing --]]
+L["CONFIG_SELLING_PREV_SHORTCUT"] = "A shortcut to go back to the previously selected item"
+--[[Translation missing --]]
+L["CONFIG_SELLING_RESELECT_ITEM"] = "Select the last item selected for posting when opening the Selling tab"
+--[[Translation missing --]]
+L["CONFIG_SELLING_RESELECT_ITEM_TOOLTIP_HEADER"] = "Reselect previous item"
+--[[Translation missing --]]
+L["CONFIG_SELLING_RESELECT_ITEM_TOOLTIP_TEXT"] = "After closing the Selling tab and reopening it either during the current session or a later one (including logging out and back in) restore the item selected for posting."
 L["CONFIG_SELLING_SHORTCUTS_CATEGORY"] = "Vendas: Atalhos"
 L["CONFIG_SELLING_SHORTCUTS_TEXT"] = "Opções para atalhos de teclado e mouse para a aba de vendas"
 L["CONFIG_SELLING_SHOW_BID_PRICE"] = "Mostrar a opção de oferta quando estiver listando um item (necessita um /reload)"
@@ -247,6 +265,10 @@ L["CONFIG_SMALL_TABS_TOOLTIP_TEXT"] = "Quando há muitos addons adicionando abas
 L["CONFIG_STACK_TOOLTIP"] = "Mostrar o preço da pilha inteira quando se pressiona o shift."
 L["CONFIG_TOOLTIPS_CATEGORY"] = "Caixas de Texto"
 L["CONFIG_TOOLTIPS_TEXT"] = "Opções para apresentar diferentes informações relacionadas a leilões na caixa de texto do jogo."
+--[[Translation missing --]]
+L["CONFIG_UNDERCUT_ITEMS_AHEAD"] = "How many items can be ahead of your listings before they count as undercut"
+--[[Translation missing --]]
+L["CONFIG_UNDERCUT_ITEMS_AHEAD_CLASSIC"] = "How many items can be ahead of your listings before they count as undercut (max 50)"
 --[[Translation missing --]]
 L["CONFIG_UNDERCUT_SCAN_MATCH_ILVL_VARIANTS"] = "For gear use item level and title when doing undercut checks"
 --[[Translation missing --]]
@@ -288,6 +310,10 @@ L["CURRENT"] = "Atual"
 L["CURRENT_PRICES"] = [=[Preços atuais
 ]=]
 L["CUSTOM_KEYBOARD_SHORTCUTS"] = "Atalhos de teclado"
+--[[Translation missing --]]
+L["CUSTOMISE"] = "Customise"
+--[[Translation missing --]]
+L["CUSTOMISE_BAG_GROUPS"] = "Customise Bag Groups"
 L["DATE"] = "Data"
 L["DAY_1"] = "Domingo"
 L["DAY_2"] = "Segunda-feira"
@@ -296,6 +322,8 @@ L["DAY_4"] = "Quarta-feira"
 L["DAY_5"] = "Quinta-feira"
 L["DAY_6"] = "Sexta-feira"
 L["DAY_7"] = "Sábado"
+--[[Translation missing --]]
+L["DEFAULT"] = "default"
 L["DEFAULT_AUCTION_DURATION"] = "Duração Padrão de Leilão"
 L["DEFAULT_LIST_HEADER"] = "Lista de Compras Padrão"
 L["DEFAULT_QUANTITY"] = "Quantidade Padrão"
@@ -304,6 +332,8 @@ L["DEFAULT_STACK_SIZES"] = [=[Tamanhos de pilha padrão
 L["DEFAULT_TAB"] = "Aba Padrão"
 L["DEFAULT_TAB_TEXT"] = "mosta a aba padrão"
 L["DELETE"] = "Deletar"
+--[[Translation missing --]]
+L["DELETE_GROUP_DIALOG"] = "Are you sure you want to delete group \"%s\"?"
 L["DELETE_LIST_CONFIRM"] = "Você tem certeza de que quer deletar '%s'?"
 L["DELETE_LIST_NONE_SELECTED"] = "Você precisa selecionar uma lista para deletar."
 L["DEPOSIT"] = "Depósito:"
@@ -332,8 +362,12 @@ L["EXPORT_WHISPER"] = "Sussurrar para"
 --[[Translation missing --]]
 L["EXTENDED_SEARCH_ACTIVE_TEXT"] = "%extended search active%"
 L["FAVOURITES"] = "Favoritos"
+--[[Translation missing --]]
+L["FAVOURITES_GROUP"] = "Favourites Group"
 L["FETCHING_ITEM_INFO"] = "Obtendo informações sobre o item..."
 L["FINISHED_PROCESSING"] = "Terminado de processar %s itens."
+--[[Translation missing --]]
+L["FOCUS"] = "Focus"
 L["FULL_SCAN_ALTERNATE_FAILED"] = "Varredura completa (mode alternativo) não foi completada com sucesso."
 L["FULL_SCAN_BUTTON"] = "Varredura Completa"
 L["FULL_SCAN_FAILED"] = "Não foi possível completar a varredura completa."
@@ -342,6 +376,8 @@ L["FULL_SCAN_FAILED_REPLICATE"] = [=[Falha na verificação completa (modo de re
 L["FULL_SCAN_FAILED_SUMMARY"] = "A verificação completa (modo de resumo) não foi concluída."
 L["FULL_SCAN_IN_PROGRESS"] = "Varredura completa em progresso."
 L["GEAR_VENDOR_PRICE_MULTIPLIER"] = "Multiplicador de preço de venda de equipamentos"
+--[[Translation missing --]]
+L["GROUP_EXISTS_ALREADY"] = "That group name is already in use"
 L["HIDE"] = "Esconder"
 L["HISTORY"] = "História"
 L["IMPORT"] = "Importar"
@@ -353,7 +389,11 @@ L["IS_UNDERCUT"] = "Subcotado?"
 L["ITEM_CLASS"] = "Classe de Item"
 L["ITEM_LEVEL"] = "Nível do Item"
 L["ITEM_LEVEL_COLUMN"] = "Nível do Item"
+--[[Translation missing --]]
+L["ITEM_NAME_X_ITEM_LEVEL_X"] = "%s (%s)"
 L["ITEM_PRICE_HISTORY"] = "Histórico de Preços do Item"
+--[[Translation missing --]]
+L["ITEMS_AHEAD"] = "Items Ahead"
 L["LEFT_CLICK"] = "Clique Esquerdo"
 L["LEVEL"] = "Nível"
 L["LIMITED_FUNCTIONALITY_MESSAGE"] = "Funcionalidade limitada por causa das atualizações do patch 8.3 na casa de leilões."
@@ -405,6 +445,10 @@ L["MULTIPLE_STACKS_AUCTION_INFO"] = [=[%s %s, totalizando %s
 ]=]
 L["NAME"] = "Nome"
 --[[Translation missing --]]
+L["NEW_GROUP"] = "New Group"
+--[[Translation missing --]]
+L["NEW_GROUP_DIALOG"] = "Enter the name to be used for the new group"
+--[[Translation missing --]]
 L["NEW_LIST"] = "New List"
 L["NEW_SHOPPING_LIST"] = [=[+ Nova lista de compras
 ]=]
@@ -433,6 +477,10 @@ L["PET_TOOLTIP_TOOLTIP_HEADER"] = "Caixa de Texto de Bichos de Estimação"
 L["PET_TOOLTIP_TOOLTIP_TEXT"] = "Mostrar informações do Auctionator para bichos de estimação em gaiolas."
 L["POST"] = "Postar"
 L["POST_ATTEMPT_FAILED"] = "Sua última tentativa de postagem não funcionou. Tente novamente."
+--[[Translation missing --]]
+L["POSTING_SETTINGS_COLON"] = "Posting Settings:"
+--[[Translation missing --]]
+L["PREVIOUS"] = "Previous"
 L["PRICE"] = "Preço"
 L["PRICE_HISTORY"] = "Histórico de Preços"
 L["PRICE_INCREASE_WARNING"] = [=[Preço aumentado em %s, aguardando %ss
@@ -466,11 +514,17 @@ L["REALM_HISTORY"] = "Histórico do Servidor"
 L["RECENT_SEARCHES"] = "Pesquisas Recentes"
 L["REFRESH"] = "Atualizar"
 L["REMOVE_FAVOURITE"] = "Remover Favorito"
+--[[Translation missing --]]
+L["REMOVE_FROM_X"] = "Remove from %s"
 L["RENAME"] = "Renomear"
+--[[Translation missing --]]
+L["RENAME_GROUP_DIALOG"] = "Choose a new name for \"%s\""
 L["RENAME_LIST_CONFIRM"] = [=[Digite o novo nome para '%s':
 ]=]
 L["RENAME_LIST_DIALOG"] = "Escreve o novo nome para a lista de compras:"
 L["RESET_ALL"] = "Resetar Tudo"
+--[[Translation missing --]]
+L["RESET_COLOR"] = "Reset color"
 L["RESTORE_ALL"] = "Restaurar Tudo"
 L["RESULTS_AVAILABLE_COLUMN"] = "Disponível"
 L["RESULTS_NAME_COLUMN"] = "Nome"
@@ -492,6 +546,8 @@ L["SEARCH"] = "Procurar"
 L["SEARCH_ALL"] = [=[Pesquisar tudo
 ]=]
 --[[Translation missing --]]
+L["SEARCH_FOR_QUANTITY"] = "Search For Quantity"
+--[[Translation missing --]]
 L["SEARCH_OPTIONS"] = "Search Options"
 L["SEARCH_TERM"] = "Procurar Termo"
 --[[Translation missing --]]
@@ -506,10 +562,16 @@ L["SELLING_TAB"] = "Vendas"
 L["SELLING_TAB_HEADER"] = "Auctionator - Vendas"
 L["SERVER_TOOK_TOO_LONG"] = [=[O servidor demorou muito para responder. Sua ação pode não ter surtido efeito.
 ]=]
+--[[Translation missing --]]
+L["SET_BAG_ITEM_SELECTION_COLOR"] = "Set bag item selection color"
 L["SET_VALUE"] = "Estabelecer Valor"
 L["SET_VALUE_SUFFIX"] = "Desconto"
+--[[Translation missing --]]
+L["SHIFT_DOWN"] = "Shift Down"
 L["SHIFT_LEFT_CLICK"] = "Shift Clique Esquerdo"
 L["SHIFT_RIGHT_CLICK"] = "Shift Clique Direito"
+--[[Translation missing --]]
+L["SHIFT_UP"] = "Shift Up"
 L["SHOPPING_LIST"] = [=[Lista de compras
 ]=]
 --[[Translation missing --]]

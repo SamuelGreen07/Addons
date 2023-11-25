@@ -511,7 +511,7 @@ do
 	function plugin:OnRegister()
 		-- XXX temp 9.0.5
 		upgradeDB(self.db)
-		upgradeDB(BigWigsClassicDB.namespaces["BigWigs_Plugins_Pull"])
+		upgradeDB(BigWigs3DB.namespaces["BigWigs_Plugins_Pull"])
 	end
 end
 

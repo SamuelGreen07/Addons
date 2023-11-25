@@ -8,6 +8,8 @@ L["ADD_ITEM"] = "아이템 추가"
 L["ADD_TERM_TO_LIST_DIALOG"] = "추가할 검색어 입력"
 --[[Translation missing --]]
 L["ADD_TO_LIST"] = "Add To List"
+--[[Translation missing --]]
+L["ADD_TO_X"] = "Add to %s"
 L["ALREADY_PURCHASED_X"] = "%s 구매함"
 L["ALT_LEFT_CLICK"] = "클릭"
 L["ALT_RIGHT_CLICK"] = "우클릭"
@@ -196,6 +198,8 @@ L["CONFIG_SELLING_GREY_POST_BUTTON_TOOLTIP_TEXT"] = "When a post may fail the po
 L["CONFIG_SELLING_ICON_SIZE"] = "가방 아이콘 크기 (재시작 필요)"
 L["CONFIG_SELLING_ICON_SIZE_TOOLTIP_HEADER"] = "아이콘 크기"
 L["CONFIG_SELLING_ICON_SIZE_TOOLTIP_TEXT"] = "판매 탭의 아이콘 크기를 조절합니다. (기본 42)"
+--[[Translation missing --]]
+L["CONFIG_SELLING_IGNORE_ITEM_LEVEL"] = "Ignore item level when searching for matching auctions"
 L["CONFIG_SELLING_LIFO_HEADER"] = "판매: 일반"
 L["CONFIG_SELLING_LIFO_TEXT"] = "일반 품목을 최저가를 %로 계산할 지 골드로 계산할지 설정합니다. 최저가가 아닐 경우, 현재 경매장의 최저가로 계산됩니다."
 L["CONFIG_SELLING_MISSING_FAVOURITES"] = "항상 즐겨찾기 아이템믈 표시합니다(가방에 없는 경우도 포함)"
@@ -204,9 +208,23 @@ L["CONFIG_SELLING_MISSING_FAVOURITES_TOOLTIP_HEADER"] = "누락된 즐겨찾기 
 L["CONFIG_SELLING_MISSING_FAVOURITES_TOOLTIP_TEXT"] = "Show favourite items in the bag view even when they aren't in your bag."
 L["CONFIG_SELLING_NOT_LIFO_HEADER"] = "판매: 장비/펫"
 L["CONFIG_SELLING_NOT_LIFO_TEXT"] = "장비/펫의 최저가를 %로 계산할 지 골드로 계산할 지 설정합니다. 해당 카테고리는 목록이 개인화되며 최저가를 설정할 수 있습니다."
+--[[Translation missing --]]
+L["CONFIG_SELLING_POSSESSED_FAVOURITES_FIRST"] = "In favourites item list place favourites you have in your bag first"
+--[[Translation missing --]]
+L["CONFIG_SELLING_POSSESSED_FAVOURITES_FIRST_TOOLTIP_HEADER"] = "Possessed favourites first"
+--[[Translation missing --]]
+L["CONFIG_SELLING_POSSESSED_FAVOURITES_FIRST_TOOLTIP_TEXT"] = "Set the favourites ordering to force any items in your bag to be at the start of the list."
 L["CONFIG_SELLING_POST_SHORTCUT"] = "현재 아이템을 게시하는 키보드/마우스 단축키는"
 --[[Translation missing --]]
 L["CONFIG_SELLING_POST_SHORTCUT_TOOLTIP_TEXT"] = "Click and then press the buttons that you wish to use as the shortcut. This shortcut will only be active in the Selling tab and won't affect any other shortcuts bound to the buttons."
+--[[Translation missing --]]
+L["CONFIG_SELLING_PREV_SHORTCUT"] = "A shortcut to go back to the previously selected item"
+--[[Translation missing --]]
+L["CONFIG_SELLING_RESELECT_ITEM"] = "Select the last item selected for posting when opening the Selling tab"
+--[[Translation missing --]]
+L["CONFIG_SELLING_RESELECT_ITEM_TOOLTIP_HEADER"] = "Reselect previous item"
+--[[Translation missing --]]
+L["CONFIG_SELLING_RESELECT_ITEM_TOOLTIP_TEXT"] = "After closing the Selling tab and reopening it either during the current session or a later one (including logging out and back in) restore the item selected for posting."
 L["CONFIG_SELLING_SHORTCUTS_CATEGORY"] = "판매: 단축키"
 L["CONFIG_SELLING_SHORTCUTS_TEXT"] = "판매 탭 내 키보드 및 마우스 단축키 옵션"
 --[[Translation missing --]]
@@ -245,6 +263,10 @@ L["CONFIG_STACK_TOOLTIP"] = "쉬프트로 전체 가격 표시"
 L["CONFIG_TOOLTIPS_CATEGORY"] = "툴팁"
 L["CONFIG_TOOLTIPS_TEXT"] = "게임 내 툴팁에 대한 설정을 변경합니다."
 --[[Translation missing --]]
+L["CONFIG_UNDERCUT_ITEMS_AHEAD"] = "How many items can be ahead of your listings before they count as undercut"
+--[[Translation missing --]]
+L["CONFIG_UNDERCUT_ITEMS_AHEAD_CLASSIC"] = "How many items can be ahead of your listings before they count as undercut (max 50)"
+--[[Translation missing --]]
 L["CONFIG_UNDERCUT_SCAN_MATCH_ILVL_VARIANTS"] = "For gear use item level and title when doing undercut checks"
 --[[Translation missing --]]
 L["CONFIG_UNDERCUT_SCAN_MATCH_ILVL_VARIANTS_TOOLTIP_HEADER"] = "Gear Use Item Level and Title"
@@ -278,6 +300,10 @@ L["CREATE_LIST_DIALOG"] = "새로운 목록을 생성합니다."
 L["CURRENT"] = "현재"
 L["CURRENT_PRICES"] = "현재 가격"
 L["CUSTOM_KEYBOARD_SHORTCUTS"] = "사용자 정의 키보드 단축키"
+--[[Translation missing --]]
+L["CUSTOMISE"] = "Customise"
+--[[Translation missing --]]
+L["CUSTOMISE_BAG_GROUPS"] = "Customise Bag Groups"
 L["DATE"] = "날짜"
 L["DAY_1"] = "일요일"
 L["DAY_2"] = "월요일"
@@ -286,6 +312,8 @@ L["DAY_4"] = "수요일"
 L["DAY_5"] = "목요일"
 L["DAY_6"] = "금요일"
 L["DAY_7"] = "토요일"
+--[[Translation missing --]]
+L["DEFAULT"] = "default"
 L["DEFAULT_AUCTION_DURATION"] = "기본 경매 시간"
 L["DEFAULT_LIST_HEADER"] = "기본 구매목록"
 L["DEFAULT_QUANTITY"] = "자동으로 경매장에 올리는 갯수를 설정"
@@ -293,6 +321,8 @@ L["DEFAULT_STACK_SIZES"] = "기본 묶음 갯수"
 L["DEFAULT_TAB"] = "기본 탭"
 L["DEFAULT_TAB_TEXT"] = "경매장을 열었을 때 나오는 기본 탭 설정"
 L["DELETE"] = "목록 삭제"
+--[[Translation missing --]]
+L["DELETE_GROUP_DIALOG"] = "Are you sure you want to delete group \"%s\"?"
 L["DELETE_LIST_CONFIRM"] = "'%s' 목록을 삭제합니까?"
 L["DELETE_LIST_NONE_SELECTED"] = "삭제하려면 목록을 선택하세요"
 L["DEPOSIT"] = "보증금:"
@@ -320,8 +350,12 @@ L["EXPORT_WHISPER"] = "귓말하기"
 --[[Translation missing --]]
 L["EXTENDED_SEARCH_ACTIVE_TEXT"] = "%extended search active%"
 L["FAVOURITES"] = "즐겨찾기"
+--[[Translation missing --]]
+L["FAVOURITES_GROUP"] = "Favourites Group"
 L["FETCHING_ITEM_INFO"] = "경매 정보 불러오는 중..."
 L["FINISHED_PROCESSING"] = "불러오기 완료"
+--[[Translation missing --]]
+L["FOCUS"] = "Focus"
 L["FULL_SCAN_ALTERNATE_FAILED"] = "일반 검색 실패"
 L["FULL_SCAN_BUTTON"] = "전체 검색"
 L["FULL_SCAN_FAILED"] = "전체 검색 실패"
@@ -329,6 +363,8 @@ L["FULL_SCAN_FAILED_REPLICATE"] = "전체 검사(복제 모드)를 완료하지 
 L["FULL_SCAN_FAILED_SUMMARY"] = "전체 검사(요약 모드)를 완료하지 못했습니다."
 L["FULL_SCAN_IN_PROGRESS"] = "전체 검색 진행 중."
 L["GEAR_VENDOR_PRICE_MULTIPLIER"] = "상점에 판매하는 가격의 배수로 장비를 판매"
+--[[Translation missing --]]
+L["GROUP_EXISTS_ALREADY"] = "That group name is already in use"
 L["HIDE"] = "숨기기"
 L["HISTORY"] = "거래 기록"
 L["IMPORT"] = "가져오기"
@@ -340,7 +376,11 @@ L["IS_UNDERCUT"] = "최저가 아님"
 L["ITEM_CLASS"] = "품목 분류"
 L["ITEM_LEVEL"] = "아이템 레벨"
 L["ITEM_LEVEL_COLUMN"] = "아이템 레벨"
+--[[Translation missing --]]
+L["ITEM_NAME_X_ITEM_LEVEL_X"] = "%s (%s)"
 L["ITEM_PRICE_HISTORY"] = "아이템 가격 내역"
+--[[Translation missing --]]
+L["ITEMS_AHEAD"] = "Items Ahead"
 L["LEFT_CLICK"] = "클릭"
 L["LEVEL"] = "레벨"
 L["LIMITED_FUNCTIONALITY_MESSAGE"] = "8.3 경매장 업데이트로 인한 기능 제한"
@@ -387,6 +427,10 @@ L["MORE"] = "More"
 L["MULTIPLE_STACKS_AUCTION_INFO"] = "%s %s, 총 합계 %s"
 L["NAME"] = "이름"
 --[[Translation missing --]]
+L["NEW_GROUP"] = "New Group"
+--[[Translation missing --]]
+L["NEW_GROUP_DIALOG"] = "Enter the name to be used for the new group"
+--[[Translation missing --]]
 L["NEW_LIST"] = "New List"
 L["NEW_SHOPPING_LIST"] = "+ 새로운 구매 목록"
 L["NEXT_SCAN_MESSAGE"] = "전체 검색은 %s분 %s초 후 시작됩니다."
@@ -412,6 +456,10 @@ L["PET_TOOLTIP_TOOLTIP_TEXT"] = "우리에 담긴 펫의 경매장 가격을 표
 L["POST"] = "경매 시작"
 --[[Translation missing --]]
 L["POST_ATTEMPT_FAILED"] = "Your last post attempt didn't work. Try again."
+--[[Translation missing --]]
+L["POSTING_SETTINGS_COLON"] = "Posting Settings:"
+--[[Translation missing --]]
+L["PREVIOUS"] = "Previous"
 L["PRICE"] = "가격"
 L["PRICE_HISTORY"] = "가격 기록"
 L["PRICE_INCREASE_WARNING"] = "가격 %s 오름, %s초 대기 중"
@@ -446,10 +494,16 @@ L["REALM_HISTORY"] = "서버 내역"
 L["RECENT_SEARCHES"] = "최근 검색"
 L["REFRESH"] = "새로고침"
 L["REMOVE_FAVOURITE"] = "즐겨찾기 삭제"
+--[[Translation missing --]]
+L["REMOVE_FROM_X"] = "Remove from %s"
 L["RENAME"] = "목록명 변경"
+--[[Translation missing --]]
+L["RENAME_GROUP_DIALOG"] = "Choose a new name for \"%s\""
 L["RENAME_LIST_CONFIRM"] = "'%s'의 새 이름 입력:"
 L["RENAME_LIST_DIALOG"] = "목록의 이름을 변경합니다."
 L["RESET_ALL"] = "모두 삭제"
+--[[Translation missing --]]
+L["RESET_COLOR"] = "Reset color"
 L["RESTORE_ALL"] = "모두 복원"
 L["RESULTS_AVAILABLE_COLUMN"] = "경매 수량"
 L["RESULTS_NAME_COLUMN"] = "이름"
@@ -466,6 +520,8 @@ L["SCANNING_PAGE_X"] = "%s 페이지 검색중..."
 L["SEARCH"] = "검색"
 L["SEARCH_ALL"] = "전체 검색"
 --[[Translation missing --]]
+L["SEARCH_FOR_QUANTITY"] = "Search For Quantity"
+--[[Translation missing --]]
 L["SEARCH_OPTIONS"] = "Search Options"
 L["SEARCH_TERM"] = "이름 추가"
 --[[Translation missing --]]
@@ -477,10 +533,16 @@ L["SELLERS_OVERFLOW_TEXT"] = "%s, %s 추가"
 L["SELLING_TAB"] = "판매하기"
 L["SELLING_TAB_HEADER"] = "옥셔네이터 - 판매하기"
 L["SERVER_TOOK_TOO_LONG"] = "서버가 응답하는데 오래 걸렸습니다. 적용되지 않았을 수 있습니다."
+--[[Translation missing --]]
+L["SET_BAG_ITEM_SELECTION_COLOR"] = "Set bag item selection color"
 L["SET_VALUE"] = "가격별 설정"
 L["SET_VALUE_SUFFIX"] = "최저가"
+--[[Translation missing --]]
+L["SHIFT_DOWN"] = "Shift Down"
 L["SHIFT_LEFT_CLICK"] = "쉬프트 + 클릭"
 L["SHIFT_RIGHT_CLICK"] = "쉬프트 + 우클릭"
+--[[Translation missing --]]
+L["SHIFT_UP"] = "Shift Up"
 L["SHOPPING_LIST"] = "구매 목록"
 --[[Translation missing --]]
 L["SHOPPING_LISTS"] = "Shopping Lists"

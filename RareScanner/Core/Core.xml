@@ -20,6 +20,7 @@
 	<Include file="Data\RSAchievementDB.lua"/>
 	<Include file="Data\RSLootDB.lua"/>
 	<Include file="Data\RSGuideDB.lua"/>
+	<Include file="Data\RSCollectionsDB.lua"/>
 	
 	<!-- Services -->
 	<Include file="Service\RSRecentlySeenTracker.lua"/>

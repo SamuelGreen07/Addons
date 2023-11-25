@@ -12,6 +12,8 @@ if not plugin then return end
 local L = BigWigsAPI:GetLocale("BigWigs: Plugins")
 local GetInstanceInfo = BigWigsLoader.GetInstanceInfo
 local SendAddonMessage = BigWigsLoader.SendAddonMessage
+local dbmPrefix = BigWigsLoader.dbmPrefix
+local zoneTable = BigWigsLoader.zoneTbl
 local isLogging = false
 local IsEncounterInProgress, PlaySoundFile = IsEncounterInProgress, PlaySoundFile
 local media = LibStub("LibSharedMedia-3.0")
@@ -240,11 +242,14 @@ do
 	end
 	function plugin:StartPull(seconds, nick, isDBM)
 		if IsEncounterInProgress() then return end -- Doesn't make sense to allow this in combat
-		if not IsInGroup() or UnitIsGroupLeader(nick) or UnitIsGroupAssistant(nick) then
+		if not IsInGroup() or ((IsInGroup(2) or not IsInRaid()) and UnitGroupRolesAssigned(nick) == "TANK") or UnitIsGroupLeader(nick) or UnitIsGroupAssistant(nick) then
 			local _, _, _, instanceId = UnitPosition("player")
 			local _, _, _, tarInstanceId = UnitPosition(nick)
-			if instanceId ~= tarInstanceId then -- Don't fire pull timers from people in different zones
-				return
+			if instanceId ~= tarInstanceId then -- Don't fire pull timers from people in different zones...
+				local _, instanceType = GetInstanceInfo() -- ...unless you're in a raid instance and the sender isn't, to allow raid leaders outside to send you pull timers
+				if not (instanceType == "raid" and not zoneTable[tarInstanceId]) then
+					return
+				end
 			end
 
 			seconds = tonumber(seconds)
@@ -307,7 +312,7 @@ function plugin:BigWigs_OnBossWin()
 end
 
 function plugin:BigWigs_OnBossEngage(_, module)
-	if module and module.allowWin then
+	if module and module:GetJournalID() then
 		local soundName = self.db.profile.engageSound
 		if soundName ~= "None" then
 			local sound = media:Fetch(SOUND, soundName, true)
@@ -324,7 +329,7 @@ end
 
 SlashCmdList.BIGWIGSPULL = function(input)
 	if IsEncounterInProgress() then BigWigs:Print(L.encounterRestricted) return end -- Doesn't make sense to allow this in combat
-	if not IsInGroup() or UnitIsGroupLeader("player") or UnitIsGroupAssistant("player") then -- Solo or leader/assist
+	if not IsInGroup() or UnitIsGroupLeader("player") or UnitIsGroupAssistant("player") or ((IsInGroup(2) or not IsInRaid()) and UnitGroupRolesAssigned("player") == "TANK") then -- Solo or leader/assist or tank in LFG/5m
 		if not plugin:IsEnabled() then BigWigs:Enable() end
 		if input == "" then
 			input = "10" -- Allow typing /pull to start a 10 second pull timer
@@ -341,10 +346,10 @@ SlashCmdList.BIGWIGSPULL = function(input)
 		if IsInGroup() then
 			local _, _, _, _, _, _, _, id = GetInstanceInfo()
 			local instanceId = tonumber(id) or 0
-			SendAddonMessage(BigWigsLoader.dbmPrefix, ("PT\t%s\t%d"):format(input, instanceId), IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- DBM message
 			local name = plugin:UnitName("player")
 			local realm = GetRealmName()
-			SendAddonMessage(BigWigsLoader.dbmNewPrefix, ("%s-%s\t1\tPT\t%s\t%d"):format(name, realm, input, instanceId), IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- DBM message
+			local normalizedPlayerRealm = realm:gsub("[%s-]+", "") -- Has to mimic DBM code
+			SendAddonMessage(dbmPrefix, ("%s-%s\t1\tPT\t%s\t%d"):format(name, normalizedPlayerRealm, input, instanceId), IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- DBM message
 		end
 	else
 		BigWigs:Print(L.requiresLeadOrAssist)

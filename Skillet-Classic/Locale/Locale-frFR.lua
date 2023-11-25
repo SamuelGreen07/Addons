@@ -277,6 +277,10 @@ L["Sold amount"] = "Montant vendu"
 L["SORTASC"] = "Trier la liste des patrons du plus élevé (haut) vers le plus faible (en bas)"
 L["SORTDESC"] = "Trier la liste des patrons du plus faible (haut) vers le plus élevé (en bas)"
 L["Sorting"] = "Tri"
+--[[Translation missing --]]
+L["SOUNDONEMPTYQUEUEDESC"] = "Play a sound when the queue is empty"
+--[[Translation missing --]]
+L["SOUNDONEMPTYQUEUENAME"] = "Sound on Empty Queue"
 L["Source:"] = "Source : "
 L["STANDBYDESC"] = "Activer/désactiver le mode veille"
 L["STANDBYNAME"] = "veille"

@@ -25,7 +25,6 @@ local RSNotificationTracker = private.ImportLib("RareScannerNotificationTracker"
 local RSLogger = private.ImportLib("RareScannerLogger")
 local RSEventHandler = private.ImportLib("RareScannerEventHandler")
 local RSRecentlySeenTracker = private.ImportLib("RareScannerRecentlySeenTracker")
-local RSWaypoints = private.ImportLib("RareScannerWaypoints")
 local RSAudioAlerts = private.ImportLib("RareScannerAudioAlerts")
 
 -- RareScanner other addons integration services
@@ -143,8 +142,16 @@ local function ShowAlert(button, vignetteInfo, isNavigating)
 			UpdateRareFound(entityID, vignetteInfo, vignettePosition)
 		else
 			vignettePosition = UpdateRareFound(entityID, vignetteInfo)
+			
+			-- If the entity doesn't have coordinates (for example a custom NPC) set a random coordinate set so at least it shows the notification
 			if (not vignettePosition) then
-				return
+				if (RSConstants.IsNpcAtlas(vignetteInfo.atlasName)) then
+					vignettePosition = {}
+					vignettePosition.x = -1
+					vignettePosition.y = -1
+				else
+					return
+				end
 			end
 		end
 	else
@@ -192,7 +199,6 @@ local function ShowAlert(button, vignetteInfo, isNavigating)
 		if (not RSConfigDB.IsButtonDisplayingForContainers()) then
 			RSRecentlySeenTracker.AddRecentlySeen(entityID, vignetteInfo.atlasName, false)
 			RSTomtom.AddTomtomAutomaticWaypoint(mapID, vignettePosition.x, vignettePosition.y, vignetteInfo.name)
-			RSWaypoints.AddAutomaticWaypoint(mapID, vignettePosition.x, vignettePosition.y)
 
 			if (RSNotificationTracker.IsAlreadyNotificated(vignetteInfo.id, false, entityID)) then
 				RSLogger:PrintDebugMessage(string.format("El contenedor [%s] se ignora porque se ha avisado de esta hace menos de 2 minutos", entityID))
@@ -280,7 +286,6 @@ local function ShowAlert(button, vignetteInfo, isNavigating)
 	-- If navigation disabled, control Tomtom waypoint externally
 	if (not RSConfigDB.IsButtonDisplaying() or not RSConfigDB.IsDisplayingNavigationArrows()) then
 		RSTomtom.AddTomtomAutomaticWaypoint(mapID, vignettePosition.x, vignettePosition.y, vignetteInfo.name)
-		RSWaypoints.AddAutomaticWaypoint(mapID, vignettePosition.x, vignettePosition.y)
 	end
 
 	-- Add recently seen

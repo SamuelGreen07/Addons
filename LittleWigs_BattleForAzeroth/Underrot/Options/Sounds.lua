@@ -13,7 +13,7 @@ BigWigs:AddSounds("Cragmaw the Infested", {
 })
 
 BigWigs:AddSounds("Sporecaller Zancha", {
-	[259718] = "warning",
+	[259718] = {"alarm","warning"},
 	[259732] = "alarm",
 	[259830] = "info",
 	[272457] = "alert",
@@ -49,5 +49,5 @@ BigWigs:AddSounds("Underrot Trash", {
 	[272609] = "alarm",
 	[278755] = "warning",
 	[278961] = {"alert","warning"},
-	[413044] = "alarm",
+	[413044] = "warning",
 })

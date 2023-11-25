@@ -1066,8 +1066,8 @@ L:SetWarningLocalization{
 	WarnSpecialSpellSoon		= "곧 특수 기술",
 	SpecWarnSpecial				= "색깔 변경",
 	SpecWarnSwitchTarget		= "대상 변경",
-	SpecWarnKickNow				= "지금 차단",
-	WarningTouchDebuff			= "디버프: >%s<",
+	SpecWarnKickNow				= "차단",
+	WarningTouchDebuff			= ">%s<에게 디버프",
 	WarningPoweroftheTwins2		= "쌍둥이의 힘 - >%s< 폭힐",
 }
 
@@ -1080,9 +1080,9 @@ L:SetOptionLocalization{
 	TimerSpecialSpell			= "다음 특수 기술 타이머 바 보기",
 	WarnSpecialSpellSoon		= "특수 기술 사전 경고 보기",
 	SpecWarnSpecial				= "색깔 변경을 해야할 때 특수 알림 보기",
-	SpecWarnSwitchTarget		= "다른 쌍둥이가 힐을 시전하면 대상 변경 특수 알림 보기",
-	SpecWarnKickNow				= "차단 스킬이 있다면 힐 차단 특수 알림 보기",
-	SpecialWarnOnDebuff			= "손길 디버프에 걸리면 색깔 변경 특수 알림 보기 (디버프 속성 변경)",
+	SpecWarnSwitchTarget		= "다른 쌍둥이가 치유를 시전하면 대상 변경 특수 알림 보기",
+	SpecWarnKickNow				= "치유 차단이 가능하다면 차단 특수 알림 보기",
+	SpecialWarnOnDebuff			= "손길 디버프에 걸리면 색깔 변경 특수 알림 보기 (디버프 속성 바꾸기)",
 	SetIconOnDebuffTarget		= "빛/어둠의 손길 디버프 대상에 공격대 징표 설정 (영웅)",
 	WarningTouchDebuff			= "빛/어둠의 손길 대상 알림",
 	WarningPoweroftheTwins2		= "쌍둥이의 힘 대상 알림"
@@ -1168,6 +1168,7 @@ L:SetOptionLocalization{
 
 L:SetMiscLocalization{
 	YellReanimatedFanatic	= "일어나라, 순수한 모습을 기뻐하라!",
+	ReanimatedAdd				= "쫄 부활"
 }
 
 ----------------------
@@ -1231,8 +1232,7 @@ L:SetGeneralLocalization{
 }
 
 L:SetOptionLocalization{
-	AnnounceSporeIcons		= "$spell:69279 대상의 공격대 징표를 공격대 대화로 알림<br/>(공격대장 권한 필요)",
-	AchievementCheck		= "'역병 예방접종' 업적 실패시 공격대에 알림<br/>(승급 상태 필요)"
+	AchievementCheck		= "'역병 예방접종' 업적 실패시 공격대에 알림<br/>(공대장 권한 필요)"
 }
 
 L:SetMiscLocalization{
@@ -1343,14 +1343,16 @@ L:SetTimerLocalization{
 L:SetOptionLocalization{
 	SetIconOnBlazingSkeleton	= "타오르는 해골에 공격대 징표 설정 (해골)",
 	WarnPortalOpen				= "악몽의 차원문이 열렸을 때 경고 보기",
-	TimerPortalsOpen			= "악몽의 차원문 열림 타이머 바 보기",
-	TimerPortalsClose			= "악몽의 차원문 닫힘 타이머 바 보기",
+	TimerPortalsOpen			= "악몽의 차원문이 열릴 때 시전 타이머 바 보기",
+	TimerPortalsClose			= "악몽의 차원문이 닫힐 때 타이머 바 보기",
 	TimerBlazingSkeleton		= "다음 타오르는 해골 등장 타이머 바 보기",
 	TimerAbom					= "다음 걸신들린 누더기골렘 등장 타이머 바 보기 (시험용)"
 }
 
 L:SetMiscLocalization{
-	YellPortals		= "에메랄드의 꿈으로 가는 차원문을 열어두었다. 너희의 구원은 그 안에 있다..."
+	YellPortals		= "에메랄드의 꿈으로 가는 차원문을 열어두었다. 너희의 구원은 그 안에 있다...",
+	BlazingSkeleton				= "타오르는 해골",
+	GluttonousAbomination		= "걸신들린 누더기골렘"
 }
 
 ------------------
@@ -1379,7 +1381,7 @@ L:SetOptionLocalization{
 	TimerNextAirphase			= "다음 공중 단계 타이머 바 보기",
 	TimerNextGroundphase		= "다음 지상 단계 타이머 바 보기",
 	AnnounceFrostBeaconIcons	= "$spell:70126 대상의 공격대 징표를 공격대 대화로 알림<br/>(공격대장 권한 필요)",
-	ClearIconsOnAirphase		= "공중 단계 전에 모든 공격대 징표 제거",
+	ClearIconsOnAir			= "공중 단계 전에 모든 공격대 징표 제거",
 	AchievementCheck			= "'신비한 아픔' 업적 경고를 공격대에 알림<br/>(승급 상태 필요)",
 }
 
