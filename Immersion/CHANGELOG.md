@@ -1,6 +1,7 @@
 # Immersion
 
-## [1.4.30](https://github.com/seblindfors/Immersion/tree/1.4.30) (2023-11-09)
-[Full Changelog](https://github.com/seblindfors/Immersion/compare/1.4.29...1.4.30) [Previous Releases](https://github.com/seblindfors/Immersion/releases)
+## [1.4.32](https://github.com/seblindfors/Immersion/tree/1.4.32) (2024-02-18)
+[Full Changelog](https://github.com/seblindfors/Immersion/compare/1.4.31...1.4.32) [Previous Releases](https://github.com/seblindfors/Immersion/releases)
 
+- Update Immersion.toc  
 - Update Immersion.toc  

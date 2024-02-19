@@ -1,4 +1,4 @@
--- Made by Nnoggie, 2017-2022
+-- Made by Nnoggie, 2017-2024
 local AddonName, MDT = ...
 local L = MDT.L
 local mainFrameStrata = "HIGH"
@@ -27,6 +27,9 @@ MDT.externalLinks = {
     texture = { "Interface\\AddOns\\MythicDungeonTools\\Textures\\icons", 0.5, .75, 0.75, 1 }
   },
 }
+
+BINDING_HEADER_MDT = "Mythic Dungeon Tools (MDT)"
+BINDING_NAME_MDTTOGGLE = L["Toggle MDT"]
 
 local mythicColor = "|cFFFFFFFF"
 MDT.BackdropColor = { 0.058823399245739, 0.058823399245739, 0.058823399245739, 0.9 }
@@ -63,7 +66,11 @@ local LDB = LibStub("LibDataBroker-1.1"):NewDataObject("MythicDungeonTools", {
         minimapIcon:Lock("MythicDungeonTools")
       end
     elseif (buttonPressed == 'MiddleButton') then
-      MDT:HideMinimapButton()
+      if db.minimap.hide then
+        MDT:ShowMinimapButton()
+      else
+        MDT:HideMinimapButton()
+      end
     else
       MDT:Async(function() MDT:ShowInterfaceInternal() end, "showInterface")
     end
@@ -76,11 +83,6 @@ local LDB = LibStub("LibDataBroker-1.1"):NewDataObject("MythicDungeonTools", {
     tooltip:AddLine(L["Middle-click to disable Minimap Button"])
   end,
 })
-
--- Global for Addon Compartment
-MDT_OnAddonCompartmentClick = function()
-  MDT:Async(function() MDT:ShowInterfaceInternal() end, "showInterface")
-end
 
 SLASH_MYTHICDUNGEONTOOLS1 = "/mplus"
 SLASH_MYTHICDUNGEONTOOLS2 = "/mdt"
@@ -152,6 +154,7 @@ local defaultSavedVars = {
     scale = 1,
     nonFullscreenScale = 1.3,
     enemyForcesFormat = 2,
+    useForcesCount = false, -- replaces percent in pull buttons with count
     enemyStyle = 1,
     currentDungeonIdx = 100,
     currentDifficulty = 10,
@@ -163,6 +166,7 @@ local defaultSavedVars = {
     tooltipInCorner = false,
     minimap = {
       hide = false,
+      compartmentHide = false,
     },
     toolbar = {
       color = { r = 1, g = 1, b = 1, a = 1 },
@@ -212,6 +216,7 @@ do
   function MDT.ADDON_LOADED(self, addon)
     if addon == "MythicDungeonTools" then
       db = LibStub("AceDB-3.0"):New("MythicDungeonToolsDB", defaultSavedVars).global
+      if not db then return end
       ---@diagnostic disable-next-line: param-type-mismatch
       minimapIcon:Register("MythicDungeonTools", LDB, db.minimap)
       if not db.minimap.hide then
@@ -220,6 +225,10 @@ do
       if db.newDataCollectionActive or MDT:IsOnBetaServer() then
         MDT.DataCollection:Init()
         MDT.DataCollection:InitHealthTrack()
+      end
+      --compartment
+      if not db.minimap.compartmentHide then
+        minimapIcon:AddButtonToCompartment("MythicDungeonTools")
       end
       --fix db corruption
       do
@@ -275,15 +284,15 @@ end
 --lvl 4 affix, lvl 7 affix, tyrannical/fortified, seasonal affix
 local affixWeeks = {
   [1] = { 136, 8, 10 },
-  [2] = { 0, 0, 0 },
-  [3] = { 0, 0, 0 },
-  [4] = { 0, 0, 0 },
-  [5] = { 0, 0, 0 },
-  [6] = { 0, 0, 0 },
-  [7] = { 0, 0, 0 },
-  [8] = { 0, 0, 0 },
-  [9] = { 0, 0, 0 },
-  [10] = { 0, 0, 0 },
+  [2] = { 134, 11, 9 },
+  [3] = { 3, 123, 10 },
+  [4] = { 124, 6, 9 },
+  [5] = { 134, 7, 10 },
+  [6] = { 136, 123, 9 },
+  [7] = { 135, 6, 10 },
+  [8] = { 3, 8, 9 },
+  [9] = { 124, 11, 10 },
+  [10] = { 135, 7, 9 },
 }
 
 MDT.mapInfo = {}
@@ -389,7 +398,7 @@ function MDT:CreateMenu()
   -- Close button
   self.main_frame.closeButton = CreateFrame("Button", "MDTCloseButton", self.main_frame, "UIPanelCloseButton")
   self.main_frame.closeButton:ClearAllPoints()
-  self.main_frame.closeButton:SetPoint("TOPRIGHT", self.main_frame.sidePanel, "TOPRIGHT", 0, 0)
+  self.main_frame.closeButton:SetPoint("TOPRIGHT", self.main_frame.sidePanel, "TOPRIGHT", -1, -4)
   self.main_frame.closeButton:SetScript("OnClick", function() self:HideInterface() end)
   self.main_frame.closeButton:SetFrameLevel(4)
 
@@ -410,10 +419,12 @@ function MDT:CreateMenu()
   local liveReturnButton = self.main_frame.liveReturnButton
   liveReturnButton:ClearAllPoints()
   liveReturnButton:SetPoint("RIGHT", self.main_frame.topPanel, "RIGHT", 0, 0)
+  liveReturnButton:Hide()
   liveReturnButton.Icon = liveReturnButton:CreateTexture(nil, "OVERLAY", nil, 0)
   liveReturnButton.Icon:SetTexture("Interface\\Buttons\\UI-RefreshButton")
   liveReturnButton.Icon:SetSize(16, 16)
   liveReturnButton.Icon:SetTexCoord(1, 0, 0, 1) --flipped image
+  ---@diagnostic disable-next-line: param-type-mismatch
   liveReturnButton.Icon:SetPoint("CENTER", liveReturnButton, "CENTER")
   liveReturnButton:SetScript("OnClick", function() self:ReturnToLivePreset() end)
   liveReturnButton:SetFrameLevel(4)
@@ -426,9 +437,11 @@ function MDT:CreateMenu()
   setLivePresetButton:ClearAllPoints()
   ---@diagnostic disable-next-line: param-type-mismatch
   setLivePresetButton:SetPoint("RIGHT", liveReturnButton, "LEFT", 0, 0)
+  setLivePresetButton:Hide()
   setLivePresetButton.Icon = setLivePresetButton:CreateTexture(nil, "OVERLAY", nil, 0)
   setLivePresetButton.Icon:SetTexture("Interface\\ChatFrame\\ChatFrameExpandArrow")
   setLivePresetButton.Icon:SetSize(16, 16)
+  ---@diagnostic disable-next-line: param-type-mismatch
   setLivePresetButton.Icon:SetPoint("CENTER", setLivePresetButton, "CENTER")
   setLivePresetButton:SetScript("OnClick", function() self:SetLivePreset() end)
   setLivePresetButton:SetFrameLevel(4)
@@ -457,6 +470,7 @@ function MDT:CreateMenu()
     self:UpdateEnemyInfoFrame()
     self:UpdateMap()
     self:CreateTutorialButton(self.main_frame)
+    self:UpdateBottomText()
     self.main_frame:SetScript("OnSizeChanged", function()
     end)
   end)
@@ -628,6 +642,10 @@ local bottomTips = {
 
 function MDT:UpdateBottomText()
   local f = self.main_frame.bottomPanelString
+  if db.scale < 1 then
+    f:SetText("")
+    return
+  end
   f:SetText(bottomTips[math.random(#bottomTips)])
 end
 
@@ -712,6 +730,7 @@ function MDT:MakeTopBottomTextures(frame)
   frame.bottomLeftPanelString:SetJustifyV("CENTER")
   frame.bottomLeftPanelString:SetPoint("LEFT", frame.bottomPanel, "LEFT", 0, 0)
   frame.bottomLeftPanelString:SetTextColor(1, 1, 1, 1)
+  ---@diagnostic disable-next-line: redundant-parameter
   frame.bottomLeftPanelString:SetText(" v"..GetAddOnMetadata(AddonName, "Version"))
   frame.bottomLeftPanelString:Show()
 
@@ -723,7 +742,7 @@ function MDT:MakeTopBottomTextures(frame)
   end
   externalButtonGroup.frame:SetBackdropColor(0, 0, 0, 0)
   externalButtonGroup:SetHeight(40)
-  externalButtonGroup:SetPoint("LEFT", frame.bottomLeftPanelString, "RIGHT", -5, -1)
+  externalButtonGroup:SetPoint("LEFT", frame.bottomLeftPanelString, "RIGHT", 0, 0)
   externalButtonGroup:SetLayout("Flow")
   externalButtonGroup.frame:SetFrameStrata("High")
   externalButtonGroup.frame:SetFrameLevel(7)
@@ -868,7 +887,7 @@ function MDT:MakeSidePanel(frame)
   frame.sidePanel.WidgetGroup = AceGUI:Create("SimpleGroup")
   frame.sidePanel.WidgetGroup:SetWidth(245)
   frame.sidePanel.WidgetGroup:SetHeight(frame:GetHeight() + (frame.topPanel:GetHeight() * 2) - 31)
-  frame.sidePanel.WidgetGroup:SetPoint("TOP", frame.sidePanel, "TOP", 3, -1)
+  frame.sidePanel.WidgetGroup:SetPoint("TOP", frame.sidePanel, "TOP", 3, 5)
   frame.sidePanel.WidgetGroup:SetLayout("Flow")
 
   frame.sidePanel.WidgetGroup.frame:SetFrameStrata(mainFrameStrata)
@@ -926,6 +945,21 @@ function MDT:MakeSidePanel(frame)
   MDT:UpdatePresetDropDown()
   frame.sidePanel.WidgetGroup:AddChild(dropdown)
 
+  --Settings cogwheel
+  frame.settingsCogwheel = AceGUI:Create("Icon")
+  local settinggsCogwheel = frame.settingsCogwheel
+  settinggsCogwheel:SetImage("Interface\\AddOns\\MythicDungeonTools\\Textures\\helpIconGrey")
+  settinggsCogwheel:SetImageSize(25, 25)
+  settinggsCogwheel:SetWidth(30)
+  settinggsCogwheel:SetCallback("OnClick", function(...)
+    self:ToggleSettingsDialog()
+  end)
+  frame.sidePanel.WidgetGroup:AddChild(frame.settingsCogwheel)
+
+  local function anchorTooltip(anchorFrame)
+    GameTooltip:SetOwner(anchorFrame, "ANCHOR_BOTTOMLEFT", -7, anchorFrame:GetHeight() + 3)
+  end
+
   ---new profile,rename,export,delete
   local buttonWidth = 75
   frame.sidePanelNewButton = AceGUI:Create("Button")
@@ -944,8 +978,7 @@ function MDT:MakeSidePanel(frame)
     MDT:OpenNewPresetDialog()
   end)
   frame.sidePanelNewButton.frame:SetScript("OnEnter", function()
-    GameTooltip:SetOwner(frame.sidePanelNewButton.frame, "ANCHOR_BOTTOMLEFT",
-      frame.sidePanelNewButton.frame:GetWidth() * (-0), frame.sidePanelNewButton.frame:GetHeight())
+    anchorTooltip(frame.sidePanelNewButton.frame)
     GameTooltip:AddLine(L["Create a new preset"], 1, 1, 1)
     GameTooltip:Show()
   end)
@@ -972,8 +1005,7 @@ function MDT:MakeSidePanel(frame)
     MDT.main_frame.RenameFrame.Editbox:SetFocus()
   end)
   frame.sidePanelRenameButton.frame:SetScript("OnEnter", function()
-    GameTooltip:SetOwner(frame.sidePanelRenameButton.frame, "ANCHOR_BOTTOMLEFT",
-      frame.sidePanelRenameButton.frame:GetWidth() * (-1), frame.sidePanelRenameButton.frame:GetHeight())
+    anchorTooltip(frame.sidePanelNewButton.frame)
     GameTooltip:AddLine(L["Rename the preset"], 1, 1, 1)
     GameTooltip:Show()
   end)
@@ -995,8 +1027,7 @@ function MDT:MakeSidePanel(frame)
     MDT:OpenImportPresetDialog()
   end)
   frame.sidePanelImportButton.frame:SetScript("OnEnter", function()
-    GameTooltip:SetOwner(frame.sidePanelImportButton.frame, "ANCHOR_BOTTOMLEFT",
-      frame.sidePanelImportButton.frame:GetWidth() * (-1), frame.sidePanelImportButton.frame:GetHeight())
+    anchorTooltip(frame.LinkToChatButton.frame)
     GameTooltip:AddLine(L["Import a preset from a text string"], 1, 1, 1)
     GameTooltip:Show()
   end)
@@ -1033,8 +1064,7 @@ function MDT:MakeSidePanel(frame)
     if db.colorPaletteInfo.forceColorBlindMode then MDT:ColorAllPulls() end
   end)
   frame.sidePanelExportButton.frame:SetScript("OnEnter", function()
-    GameTooltip:SetOwner(frame.sidePanelExportButton.frame, "ANCHOR_BOTTOMLEFT",
-      frame.sidePanelExportButton.frame:GetWidth() * (-2), frame.sidePanelExportButton.frame:GetHeight())
+    anchorTooltip(frame.LinkToChatButton.frame)
     GameTooltip:AddLine(L["Export the preset as a text string"], 1, 1, 1)
     GameTooltip:AddLine(L["stringShareExternalWebsite"], 1, 1, 1, 1)
     GameTooltip:Show()
@@ -1047,8 +1077,7 @@ function MDT:MakeSidePanel(frame)
   frame.sidePanelDeleteButton:SetText(L["Delete"])
   frame.sidePanelDeleteButton:SetWidth(buttonWidth)
   frame.sidePanelDeleteButton.frame:SetScript("OnEnter", function()
-    GameTooltip:SetOwner(frame.sidePanelDeleteButton.frame, "ANCHOR_BOTTOMLEFT",
-      frame.sidePanelDeleteButton.frame:GetWidth() * (-2), frame.sidePanelDeleteButton.frame:GetHeight())
+    anchorTooltip(frame.sidePanelNewButton.frame)
     GameTooltip:AddLine(L["Delete this preset"], 1, 1, 1)
     GameTooltip:AddLine(L["Shift-Click to delete all presets for this dungeon"], 1, 1, 1)
     GameTooltip:Show()
@@ -1094,17 +1123,10 @@ function MDT:MakeSidePanel(frame)
       frame.LiveSessionButton:SetText("...")
       MDT:SendToGroup(distribution)
     end
-    local presetSize = self:GetPresetSize(false, 5)
-    if presetSize > 25000 then
-      local prompt = string.format(L["LargePresetWarning"], presetSize, "\n", "\n", "\n")
-      MDT:OpenConfirmationFrame(450, 150, L["Sharing large preset"], "Share", prompt, callback)
-    else
-      callback()
-    end
+    MDT:CheckPresetSize(callback)
   end)
   frame.LinkToChatButton.frame:SetScript("OnEnter", function()
-    GameTooltip:SetOwner(frame.sidePanelDeleteButton.frame, "ANCHOR_BOTTOMLEFT",
-      frame.LinkToChatButton.frame:GetWidth() * (-2), -frame.LinkToChatButton.frame:GetHeight())
+    anchorTooltip(frame.LinkToChatButton.frame)
     GameTooltip:AddLine(L["Share the preset with your party members"], 1, 1, 1)
     GameTooltip:Show()
   end)
@@ -1118,26 +1140,6 @@ function MDT:MakeSidePanel(frame)
   else
     MDT.main_frame.LinkToChatButton.text:SetTextColor(0.5, 0.5, 0.5)
   end
-
-  frame.ClearPresetButton = AceGUI:Create("Button")
-  frame.ClearPresetButton:SetText(L["Reset"])
-  frame.ClearPresetButton:SetWidth(buttonWidth)
-  frame.ClearPresetButton.frame:SetNormalFontObject(fontInstance)
-  frame.ClearPresetButton.frame:SetHighlightFontObject(fontInstance)
-  frame.ClearPresetButton.frame:SetDisabledFontObject(fontInstance)
-  frame.ClearPresetButton:SetCallback("OnClick", function(widget, callbackName, value)
-    MDT:OpenClearPresetDialog()
-  end)
-  frame.ClearPresetButton.frame:SetScript("OnEnter", function()
-    GameTooltip:SetOwner(frame.ClearPresetButton.frame, "ANCHOR_BOTTOMLEFT",
-      frame.ClearPresetButton.frame:GetWidth() * (-0), frame.ClearPresetButton.frame:GetHeight())
-    GameTooltip:AddLine(L["Reset the preset to the default state"], 1, 1, 1)
-    GameTooltip:AddLine(L["Does not delete your drawings"], 1, 1, 1)
-    GameTooltip:Show()
-  end)
-  frame.ClearPresetButton.frame:SetScript("OnLeave", function()
-    GameTooltip:Hide()
-  end)
 
   frame.LiveSessionButton = AceGUI:Create("Button")
   frame.LiveSessionButton:SetText(L["Live"])
@@ -1155,8 +1157,7 @@ function MDT:MakeSidePanel(frame)
     end
   end)
   frame.LiveSessionButton.frame:SetScript("OnEnter", function()
-    GameTooltip:SetOwner(frame.LiveSessionButton.frame, "ANCHOR_BOTTOMLEFT",
-      frame.LiveSessionButton.frame:GetWidth() * (-1), frame.LiveSessionButton.frame:GetHeight())
+    anchorTooltip(frame.LinkToChatButton.frame)
     GameTooltip:AddLine(L["Start or join the current |cFF00FF00Live Session|r"], 1, 1, 1)
     GameTooltip:AddLine(L[
     "Clicking this button will attempt to join the ongoing Live Session of your group or create a new one if none is found"
@@ -1183,33 +1184,13 @@ function MDT:MakeSidePanel(frame)
     MDT.main_frame.LiveSessionButton.text:SetTextColor(0.5, 0.5, 0.5)
   end
 
-  --Settings cogwheel
-  frame.settingsCogwheel = AceGUI:Create("Icon")
-  local settinggsCogwheel = frame.settingsCogwheel
-  settinggsCogwheel:SetImage("Interface\\AddOns\\MythicDungeonTools\\Textures\\helpIconGrey")
-  settinggsCogwheel:SetImageSize(25, 25)
-  settinggsCogwheel:SetWidth(30)
-  settinggsCogwheel:SetCallback("OnEnter", function(...)
-    GameTooltip:SetOwner(settinggsCogwheel.frame, "ANCHOR_CURSOR")
-    GameTooltip:AddLine(L["openSettingsTooltip"], 1, 1, 1)
-    GameTooltip:Show()
-  end)
-  settinggsCogwheel:SetCallback("OnLeave", function(...)
-    GameTooltip:Hide()
-  end)
-  settinggsCogwheel:SetCallback("OnClick", function(...)
-    self:OpenSettingsDialog()
-  end)
-
   frame.sidePanel.WidgetGroup:AddChild(frame.sidePanelNewButton)
   frame.sidePanel.WidgetGroup:AddChild(frame.sidePanelRenameButton)
   frame.sidePanel.WidgetGroup:AddChild(frame.sidePanelDeleteButton)
-  frame.sidePanel.WidgetGroup:AddChild(frame.ClearPresetButton)
-  frame.sidePanel.WidgetGroup:AddChild(frame.sidePanelImportButton)
-  frame.sidePanel.WidgetGroup:AddChild(frame.sidePanelExportButton)
   frame.sidePanel.WidgetGroup:AddChild(frame.LinkToChatButton)
+  frame.sidePanel.WidgetGroup:AddChild(frame.sidePanelExportButton)
+  frame.sidePanel.WidgetGroup:AddChild(frame.sidePanelImportButton)
   frame.sidePanel.WidgetGroup:AddChild(frame.LiveSessionButton)
-  frame.sidePanel.WidgetGroup:AddChild(frame.settingsCogwheel)
 
   --Week Dropdown (Infested / Affixes)
   local function makeAffixString(week, affixes, longText)
@@ -2034,12 +2015,26 @@ end
 
 function MDT:SetLivePreset()
   local preset = self:GetCurrentPreset()
-  self:SetUniqueID(preset)
-  self.livePresetUID = preset.uid
-  self:LiveSession_SendPreset(preset)
-  self:UpdatePresetDropdownTextColor()
-  self.main_frame.setLivePresetButton:Hide()
-  self.main_frame.liveReturnButton:Hide()
+  local callback = function()
+    self:SetUniqueID(preset)
+    self.livePresetUID = preset.uid
+    self:LiveSession_SendPreset(preset)
+    self:UpdatePresetDropdownTextColor()
+    self.main_frame.setLivePresetButton:Hide()
+    self.main_frame.liveReturnButton:Hide()
+  end
+  MDT:CheckPresetSize(callback)
+end
+
+function MDT:CheckPresetSize(callback, cancelCallback, fireCancelOnClose)
+  local presetSize = self:GetPresetSize(false, 5)
+  if presetSize > 3500 then
+    local timeToSend = 1 + math.max(presetSize - 2550, 0) / 255
+    local prompt = string.format(L["LargePresetWarning"], timeToSend, "\n", "\n", "\n")
+    MDT:OpenConfirmationFrame(450, 150, L["Sharing large preset"], "Share", prompt, callback, nil, cancelCallback, fireCancelOnClose)
+  else
+    callback()
+  end
 end
 
 ---Returns if the current week has an affix week set that includes the teeming affix
@@ -2320,27 +2315,31 @@ function MDT:OpenClearPresetDialog()
   MDT.main_frame.ClearConfirmationFrame:Show()
 end
 
-function MDT:OpenSettingsDialog()
+function MDT:ToggleSettingsDialog()
   if not MDT.main_frame.settingsFrame then
     MDT:MakeSettingsFrame(MDT.main_frame)
     MDT:MakeCustomColorFrame(MDT.main_frame.settingsFrame)
   end
-  MDT:HideAllDialogs()
-  MDT.main_frame.settingsFrame:ClearAllPoints()
-  MDT.main_frame.settingsFrame:SetPoint("CENTER", MDT.main_frame, "CENTER", 0, 50)
-  MDT.main_frame.settingsFrame:SetStatusText("")
-  MDT.main_frame.settingsFrame:Show()
-  MDT.main_frame.settingsFrame.CustomColorFrame:Hide()
-  if db.colorPaletteInfo.colorPaletteIdx == 6 then
-    MDT:OpenCustomColorsDialog()
+  if MDT.main_frame.settingsFrame:IsShown() then
+    MDT.main_frame.settingsFrame:Hide()
+  else
+    MDT:HideAllDialogs()
+    MDT.main_frame.settingsFrame:ClearAllPoints()
+    MDT.main_frame.settingsFrame:SetPoint("CENTER", MDT.main_frame, "CENTER", 0, 50)
+    MDT.main_frame.settingsFrame:SetStatusText("")
+    MDT.main_frame.settingsFrame:Show()
+    MDT.main_frame.settingsFrame.CustomColorFrame:Hide()
+    if db.colorPaletteInfo.colorPaletteIdx == 6 then
+      MDT:OpenCustomColorsDialog()
+    end
   end
 end
 
-function MDT:OpenCustomColorsDialog(frame)
+function MDT:OpenCustomColorsDialog()
   MDT:HideAllDialogs()
   MDT.main_frame.settingsFrame:Show() --Not the prettiest way to handle this, but it works.
   MDT.main_frame.settingsFrame.CustomColorFrame:ClearAllPoints()
-  MDT.main_frame.settingsFrame.CustomColorFrame:SetPoint("CENTER", 264, -7)
+  MDT.main_frame.settingsFrame.CustomColorFrame:SetPoint("TOPLEFT", MDT.main_frame.settingsFrame.frame, "TOPRIGHT", 1, 0)
   MDT.main_frame.settingsFrame.CustomColorFrame:SetStatusText("")
   MDT.main_frame.settingsFrame.CustomColorFrame:Show()
 end
@@ -2634,6 +2633,7 @@ MDT.zoneIdToDungeonIdx = {}
 
 local lastUpdatedDungeonIdx
 function MDT:CheckCurrentZone(init)
+  if C_ChallengeMode.IsChallengeModeActive() then return end
   local zoneId = C_Map.GetBestMapForUnit("player")
   local dungeonIdx = MDT.zoneIdToDungeonIdx[zoneId]
   if dungeonIdx and (not lastUpdatedDungeonIdx or dungeonIdx ~= lastUpdatedDungeonIdx) then
@@ -2743,6 +2743,7 @@ function MDT:MakeChatPresetImportFrame(frame)
       MDT.main_frame.sidePanelDeleteButton.text:SetTextColor(1, 0.8196, 0)
     end
   end)
+  chatImport.statustext:GetParent():Hide()
   chatImport.defaultText = L["Import Preset"]..":\n"
   chatImport.importLabel = AceGUI:Create("Label")
   chatImport.importLabel:SetText(chatImport.defaultText)
@@ -2802,6 +2803,7 @@ function MDT:MakePresetImportFrame(frame)
       MDT.main_frame.sidePanelDeleteButton.text:SetTextColor(1, 0.8196, 0)
     end
   end)
+  frame.presetImportFrame.statustext:GetParent():Hide()
 
   frame.presetImportLabel = AceGUI:Create("Label")
   frame.presetImportLabel:SetText(nil)
@@ -2918,12 +2920,12 @@ function MDT:MakePresetCreationFrame(frame)
       MDT.main_frame.sidePanelDeleteButton.text:SetTextColor(1, 0.8196, 0)
     end
   end)
-
+  frame.presetCreationFrame.statustext:GetParent():Hide()
 
   frame.PresetCreationEditbox = AceGUI:Create("EditBox")
   frame.PresetCreationEditbox:SetLabel(L["Preset Name"]..":")
   frame.PresetCreationEditbox:SetWidth(255)
-  frame.PresetCreationEditbox:SetCallback("OnEnterPressed", function(widget, event, text)
+  frame.PresetCreationEditbox:SetCallback("OnTextChanged", function(widget, event, text)
     --check if name is valid, block button if so, unblock if valid
     if MDT:SanitizePresetName(text) then
       frame.presetCreationLabel:SetText(nil)
@@ -2935,6 +2937,12 @@ function MDT:MakePresetCreationFrame(frame)
       frame.presetCreationCreateButton.text:SetTextColor(0.5, 0.5, 0.5)
     end
     frame.presetCreationFrame:DoLayout()
+  end)
+  frame.PresetCreationEditbox:SetCallback("OnEnterPressed", function(widget, event, text)
+    local name = frame.PresetCreationEditbox:GetText()
+    if MDT:SanitizePresetName(name) then
+      MDT:CreateNewPreset(name)
+    end
   end)
   frame.presetCreationFrame:AddChild(frame.PresetCreationEditbox)
 
@@ -3213,6 +3221,7 @@ function MDT:MakeCustomColorFrame(frame)
   frame.CustomColorFrame:SetHeight(220)
   frame.CustomColorFrame:EnableResize(false)
   frame.CustomColorFrame:SetLayout("Flow")
+  frame.CustomColorFrame.statustext:GetParent():Hide()
   frame:AddChild(frame.CustomColorFrame)
 
   --Slider to adjust number of different colors and remake the frame OnMouseUp
@@ -3253,7 +3262,7 @@ function MDT:MakeCustomColorFrame(frame)
     ColorPicker[i]:SetLabel(" "..i)
     ColorPicker[i]:SetRelativeWidth(0.25)
     ColorPicker[i]:SetHeight(15)
-    ColorPicker[i]:SetCallback("OnValueConfirmed", function(widget, event, r, g, b)
+    ColorPicker[i]:SetCallback("OnValueChanged", function(widget, event, r, g, b)
       db.colorPaletteInfo.customPaletteValues[i] = { r, g, b }
       MDT:SetPresetColorPaletteInfo()
       MDT:ReloadPullButtons()
@@ -3266,13 +3275,17 @@ end
 function MDT:MakeSettingsFrame(frame)
   frame.settingsFrame = AceGUI:Create("Frame")
   frame.settingsFrame:SetTitle(L["Settings"])
-  frame.settingsFrame:SetWidth(240)
-  frame.settingsFrame:SetHeight(220)
+  local frameWidth = 300
+  frame.settingsFrame:SetWidth(frameWidth)
+  frame.settingsFrame:SetHeight(350)
   frame.settingsFrame:EnableResize(false)
   frame.settingsFrame:SetLayout("Flow")
+  frame.settingsFrame.statustext:GetParent():Hide()
+  MDT:FixAceGUIShowHide(frame.settingsFrame, nil, nil, true)
 
   frame.minimapCheckbox = AceGUI:Create("CheckBox")
   frame.minimapCheckbox:SetLabel(L["Enable Minimap Button"])
+  frame.minimapCheckbox:SetWidth(frameWidth-10)
   frame.minimapCheckbox:SetValue(not db.minimap.hide)
   frame.minimapCheckbox:SetCallback("OnValueChanged", function(widget, callbackName, value)
     db.minimap.hide = not value
@@ -3284,19 +3297,40 @@ function MDT:MakeSettingsFrame(frame)
   end)
   frame.settingsFrame:AddChild(frame.minimapCheckbox)
 
+  frame.compartmentCheckbox = AceGUI:Create("CheckBox")
+  frame.compartmentCheckbox:SetLabel(L["Enable Compartment Button"])
+  frame.compartmentCheckbox:SetWidth(frameWidth-10)
+  frame.compartmentCheckbox:SetValue(not db.minimap.compartmentHide)
+  frame.compartmentCheckbox:SetCallback("OnValueChanged", function(widget, callbackName, value)
+    db.minimap.compartmentHide = not value
+    if not db.minimap.compartmentHide then
+      minimapIcon:AddButtonToCompartment("MythicDungeonTools")
+    else
+      minimapIcon:RemoveButtonFromCompartment("MythicDungeonTools")
+    end
+  end)
+  frame.settingsFrame:AddChild(frame.compartmentCheckbox)
+
+  frame.forcesCheckbox = AceGUI:Create("CheckBox")
+  frame.forcesCheckbox:SetLabel(L["Use forces count"])
+  frame.forcesCheckbox:SetWidth(frameWidth-10)
+  frame.forcesCheckbox:SetValue(db.useForcesCount)
+  frame.forcesCheckbox:SetCallback("OnValueChanged", function(widget, callbackName, value)
+    db.useForcesCount = value
+    MDT:ReloadPullButtons()
+  end)
+  frame.settingsFrame:AddChild(frame.forcesCheckbox)
+
   frame.AutomaticColorsCheck = AceGUI:Create("CheckBox")
   frame.AutomaticColorsCheck:SetLabel(L["Automatically color pulls"])
+  frame.AutomaticColorsCheck:SetWidth(frameWidth-10)
   frame.AutomaticColorsCheck:SetValue(db.colorPaletteInfo.autoColoring)
   frame.AutomaticColorsCheck:SetCallback("OnValueChanged", function(widget, callbackName, value)
     db.colorPaletteInfo.autoColoring = value
     MDT:SetPresetColorPaletteInfo()
-    if value == true then
-      frame.toggleForceColorBlindMode:SetDisabled(false)
-      MDT:ReloadPullButtons()
-      MDT.main_frame.settingsCogwheel:SetImage("Interface\\AddOns\\MythicDungeonTools\\Textures\\helpIconRnbw")
-    else
-      frame.toggleForceColorBlindMode:SetDisabled(true)
-      MDT.main_frame.settingsCogwheel:SetImage("Interface\\AddOns\\MythicDungeonTools\\Textures\\helpIconGrey")
+    frame.toggleForceColorBlindMode:SetDisabled(not value)
+    if value then
+      MDT:ReloadPullButtons(true)
     end
   end)
   frame.settingsFrame:AddChild(frame.AutomaticColorsCheck)
@@ -3304,17 +3338,19 @@ function MDT:MakeSettingsFrame(frame)
   --Toggle local color blind mode
   frame.toggleForceColorBlindMode = AceGUI:Create("CheckBox")
   frame.toggleForceColorBlindMode:SetLabel(L["Local color blind mode"])
+  frame.toggleForceColorBlindMode:SetWidth(frameWidth-10)
   frame.toggleForceColorBlindMode:SetValue(db.colorPaletteInfo.forceColorBlindMode)
   frame.toggleForceColorBlindMode:SetCallback("OnValueChanged", function(widget, callbackName, value)
     db.colorPaletteInfo.forceColorBlindMode = value
     MDT:SetPresetColorPaletteInfo()
-    MDT:ReloadPullButtons()
+    MDT:ReloadPullButtons(true)
   end)
   frame.settingsFrame:AddChild(frame.toggleForceColorBlindMode)
 
   frame.PaletteSelectDropdown = AceGUI:Create("Dropdown")
   frame.PaletteSelectDropdown:SetList(colorPaletteNames)
   frame.PaletteSelectDropdown:SetLabel(L["Choose preferred color palette"])
+  frame.PaletteSelectDropdown:SetWidth(frameWidth-10)
   frame.PaletteSelectDropdown:SetValue(db.colorPaletteInfo.colorPaletteIdx)
   frame.PaletteSelectDropdown:SetCallback("OnValueChanged", function(widget, callbackName, value)
     if value == 6 then
@@ -3325,7 +3361,7 @@ function MDT:MakeSettingsFrame(frame)
       db.colorPaletteInfo.colorPaletteIdx = value
     end
     MDT:SetPresetColorPaletteInfo()
-    MDT:ReloadPullButtons()
+    MDT:ReloadPullButtons(true)
   end)
   frame.settingsFrame:AddChild(frame.PaletteSelectDropdown)
 
@@ -3333,17 +3369,43 @@ function MDT:MakeSettingsFrame(frame)
   -- Without the need to untoggle/toggle or swap back and forth in the PaletteSelectDropdown
   frame.button = AceGUI:Create("Button")
   frame.button:SetText(L["Apply to preset"])
+  frame.button:SetWidth(frameWidth-10)
   frame.button:SetCallback("OnClick", function(widget, callbackName)
     if not db.colorPaletteInfo.autoColoring then
       db.colorPaletteInfo.autoColoring = true
       frame.AutomaticColorsCheck:SetValue(db.colorPaletteInfo.autoColoring)
-      MDT.main_frame.settingsCogwheel:SetImage("Interface\\AddOns\\MythicDungeonTools\\Textures\\helpIconRnbw")
       frame.toggleForceColorBlindMode:SetDisabled(false)
     end
     MDT:SetPresetColorPaletteInfo()
-    MDT:ReloadPullButtons()
+    MDT:ReloadPullButtons(true)
   end)
   frame.settingsFrame:AddChild(frame.button)
+
+  frame.localeHeading = AceGUI:Create("Heading")
+  frame.localeHeading:SetText(L["Language"])
+  frame.localeHeading:SetFullWidth(true)
+  frame.settingsFrame:AddChild(frame.localeHeading)
+
+  frame.localeButton = AceGUI:Create("Button")
+  frame.localeButton:SetText(L["Change Language"])
+  frame.localeButton:SetWidth(frameWidth-10)
+  local slashToFire = _G.SlashCmdList["ADDONLOCALE"]
+  if not slashToFire then
+    frame.localeButton:SetDisabled(true)
+  else
+    frame.localeButton:SetCallback("OnClick", function(widget, callbackName)
+      slashToFire("")
+    end)
+  end
+  frame.settingsFrame:AddChild(frame.localeButton)
+
+  frame.localeLabel = AceGUI:Create("Label")
+  if not slashToFire then
+    frame.localeLabel:SetText("|cff808080" .. L["localeButtonTooltip1"] .. "|r")
+  else
+    frame.localeLabel:SetText(L["localeButtonTooltip2"] )
+  end
+  frame.settingsFrame:AddChild(frame.localeLabel)
 
   frame.settingsFrame:Hide()
 end
@@ -3605,12 +3667,12 @@ function MDT:UpdatePullButtonNPCData(idx)
     oldPullForces = MDT:CountForces(idx - 1, false)
   end
   local oldPercent = oldPullForces / totalForcesMax
-  frame.newPullButtons[idx]:ShowReapingIcon(false, currentPercent, oldPercent)
+  frame.newPullButtons[idx]:ShowReapingIcon(false, pullForces, oldPullForces, totalForcesMax)
   --prideful icon
   if (math.floor(currentPercent / 0.2) > math.floor(oldPercent / 0.2)) and oldPercent < 1 and db.currentSeason == 5 then
-    frame.newPullButtons[idx]:ShowPridefulIcon(true, currentPercent, oldPercent)
+    frame.newPullButtons[idx]:ShowPridefulIcon(true, pullForces, oldPullForces, totalForcesMax)
   else
-    frame.newPullButtons[idx]:ShowPridefulIcon(false, currentPercent, oldPercent)
+    frame.newPullButtons[idx]:ShowPridefulIcon(false, pullForces, oldPullForces, totalForcesMax)
   end
   --shrouded icon
   --count amount of shrouded in this pull
@@ -3804,6 +3866,7 @@ function MDT:DeletePull(index)
   if #pulls == 1 then return end
   self:PresetsDeletePull(index)
   self:ReloadPullButtons()
+  self:UpdateProgressbar()
   local pullCount = 0
   for k, v in pairs(pulls) do
     pullCount = pullCount + 1
@@ -3851,6 +3914,7 @@ function MDT:MakeRenameFrame(frame)
   frame.RenameFrame:SetCallback("OnClose", function(widget)
 
   end)
+  frame.RenameFrame.statustext:GetParent():Hide()
   frame.RenameFrame:Hide()
 
   local renameText
@@ -3871,6 +3935,11 @@ function MDT:MakeRenameFrame(frame)
       renameText = nil
     end
     frame.RenameFrame:DoLayout()
+  end)
+  frame.RenameFrame.Editbox:SetCallback("OnEnterPressed", function(widget, event, text)
+    if MDT:SanitizePresetName(renameText) then
+      MDT:RenamePreset(renameText)
+    end
   end)
   frame.RenameFrame.Editbox:DisableButton(true)
 
@@ -3898,7 +3967,7 @@ function MDT:MakeExportFrame(frame)
   frame.ExportFrame:EnableResize(false)
   frame.ExportFrame:SetLayout("Flow")
   frame.ExportFrame:SetCallback("OnClose", function(widget)
-
+    frame.ExportFrame.statustext:GetParent():Hide()
   end)
   frame.ExportFrameEditbox = AceGUI:Create("MultiLineEditBox")
   frame.ExportFrameEditbox:SetWidth(600)
@@ -3954,6 +4023,7 @@ function MDT:MakeDeleteConfirmationFrame(frame)
   frame.DeleteConfirmationFrame:SetCallback("OnClose", function(widget)
 
   end)
+  frame.DeleteConfirmationFrame.statustext:GetParent():Hide()
 
   frame.DeleteConfirmationFrame.label = AceGUI:Create("Label")
   frame.DeleteConfirmationFrame.label:SetWidth(390)
@@ -3991,6 +4061,7 @@ function MDT:MakeClearConfirmationFrame(frame)
   frame.ClearConfirmationFrame:SetCallback("OnClose", function(widget)
 
   end)
+  frame.ClearConfirmationFrame.statustext:GetParent():Hide()
 
   frame.ClearConfirmationFrame.label = AceGUI:Create("Label")
   frame.ClearConfirmationFrame.label:SetWidth(390)
@@ -4022,7 +4093,7 @@ function MDT:MakeClearConfirmationFrame(frame)
 end
 
 ---Creates a generic dialog that pops up when a user wants needs confirmation for an action
-function MDT:OpenConfirmationFrame(width, height, title, buttonText, prompt, callback, buttonText2, callback2)
+function MDT:OpenConfirmationFrame(width, height, title, buttonText, prompt, callback, buttonText2, callback2, fireCancelOnClose)
   local f
   if MDT.main_frame then
     f = MDT.main_frame.ConfirmationFrame
@@ -4041,6 +4112,7 @@ function MDT:OpenConfirmationFrame(width, height, title, buttonText, prompt, cal
     f:SetLayout("Flow")
     f:SetCallback("OnClose", function(widget)
     end)
+    f.statustext:GetParent():Hide()
 
     f.label = AceGUI:Create("Label")
     f.label:SetWidth(390)
@@ -4080,6 +4152,14 @@ function MDT:OpenConfirmationFrame(width, height, title, buttonText, prompt, cal
   else
     f.CancelButton:SetCallback("OnClick", function()
       if MDT.main_frame then MDT:HideAllDialogs() else f:Hide() end
+    end)
+  end
+  if fireCancelOnClose and callback2 then
+    f:SetCallback("OnClose", function(widget)
+      callback2()
+    end)
+  else
+    f:SetCallback("OnClose", function(widget)
     end)
   end
   if MDT.main_frame then MDT:HideAllDialogs() end
@@ -4662,6 +4742,23 @@ function MDT:CancelAsync(name)
   MDT.asyncHandler:CancelAsync(name)
 end
 
+function MDT:ShowSpinner(timeout)
+  if not MDT.initSpinner then return end
+  MDT.initSpinner:Show()
+  MDT.initSpinner.Anim:Play()
+  if timeout then
+    C_Timer.After(timeout, function()
+      MDT:HideSpinner()
+    end)
+  end
+end
+
+function MDT:HideSpinner()
+  if not MDT.initSpinner then return end
+  MDT.initSpinner:Hide()
+  MDT.initSpinner.Anim:Stop()
+end
+
 local initStarted
 function initFrames()
   if initStarted then return end
@@ -4677,6 +4774,7 @@ function initFrames()
   initSpinner.BackgroundFrame.Background:SetVertexColor(0, 1, 0, 1)
   initSpinner.AnimFrame.Circle:SetVertexColor(0, 1, 0, 1)
   initSpinner:SetPoint("CENTER", UIParent, "CENTER", 0, 150)
+  initSpinner:SetFrameStrata("DIALOG")
   initSpinner:SetSize(60, 60)
   initSpinner:Show()
   initSpinner.Anim:Play()
@@ -4721,6 +4819,7 @@ function initFrames()
   main_frame.mainFrametex:SetDrawLayer(canvasDrawLayer, -5)
   main_frame.mainFrametex:SetColorTexture(unpack(MDT.BackdropColor))
 
+  ---@diagnostic disable-next-line: redundant-parameter
   local version = GetAddOnMetadata(AddonName, "Version"):gsub("%.", "")
   db.version = tonumber(version)
   -- Set frame position

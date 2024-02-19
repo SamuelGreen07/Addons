@@ -1,4 +1,4 @@
-if not (GetLocale() == "esES") then
+if not ((GAME_LOCALE or GetLocale()) == "esES") then
   return
 end
 local addonName, MDT = ...
@@ -318,10 +318,14 @@ L["Chamber Sentinel"] = "Centinela de la cámara"
 L["ChamberOfFlames"] = "Chamber of Flames"
 L["Champion Druna"] = "Campeona Druna"
 L["Champion of Hodir"] = "Campeón de Hodir"
+--[[Translation missing --]]
+L["Change Language"] = "Change Language"
 L["Channeler Varisz"] = "Canalizadora Varisz"
 L["Chaotic Rift"] = "Falla caótica"
 L["Chargath, Bane of Scales"] = "Chargath, Perdición de las Escamas"
 L["Charged Dust Devil"] = "Diablesa de polvo cargado"
+--[[Translation missing --]]
+L["chatNoninteractiveWarning"] = "Chat frame is currently set to noninteractive, you will not be able to click on MDT routes."
 L["Choose Enemy Forces Format"] = "Elige el Formato de Fuerzas Enemigas"
 L["Choose Enemy Style. Requires Reload"] = "Elige el Estilo de Enemigos. Requiere recargar"
 L["Choose NPC tooltip position"] = "Elige una posición para la descripción emergente del PNJ"
@@ -671,6 +675,8 @@ L["Emissary of the Tides"] = "Emisaria de las mareas"
 --[[Translation missing --]]
 L["Empty"] = "Empty"
 L["Empyrean Assassin"] = "Asesino empíreo"
+--[[Translation missing --]]
+L["Enable Compartment Button"] = "Enable Compartment Button"
 L["Enable Minimap Button"] = "Activar Botón del Minimapa"
 L["Enchanted Broodling"] = "Cría encantada"
 L["Enchanted Emissary"] = "Emisaria encantada"
@@ -709,7 +715,7 @@ L["Error Message:"] = "Error Message:"
 --[[Translation missing --]]
 L["errorLabel1"] = "MDT has encountered errors."
 --[[Translation missing --]]
-L["errorLabel2"] = "Please visist either GitHub or Discord and report the error message below."
+L["errorLabel2"] = "Please visit either GitHub or Discord and report the error message below."
 --[[Translation missing --]]
 L["errorLabel3"] = "Press CTRL + C to copy!"
 L["Erudite Slayer"] = "Asesina erudita"
@@ -1239,6 +1245,10 @@ L["Living Rot"] = "Putrefacción viva"
 L["Living Waste"] = "Residuo viviente"
 L["Loatheb"] = "Loatheb"
 L["Local color blind mode"] = "Modo daltónicos local"
+--[[Translation missing --]]
+L["localeButtonTooltip1"] = "Requires the \"AddonLocale\" AddOn"
+--[[Translation missing --]]
+L["localeButtonTooltip2"] = "Click to start settings dialog in chat"
 L["Locked"] = "Bloqueada"
 L["Loken"] = "Loken"
 L["Lord Chamberlain"] = "Lord chambelán"
@@ -1481,7 +1491,7 @@ L["Olmyr the Enlightened"] = "Olmyr el Iluminado"
 L["Omega Buster"] = "Destrozador omega"
 L["Oozing Leftovers"] = "Sobras rezumantes"
 --[[Translation missing --]]
-L["Open an issue on GitHub"] = ""
+L["Open an issue on GitHub"] = "Open an issue on GitHub"
 L["Open MDI override options"] = "Abrir las opciones de anulación de MDI"
 --[[Translation missing --]]
 L["openSettingsTooltip"] = "Click to open settings"
@@ -1594,7 +1604,7 @@ L["Prison Gate"] = "Puerta de la prisión"
 L["Proto-Drake Handler"] = "Cuidador de protodracos"
 L["Proto-Drake Rider"] = "Jinete de protodracos"
 --[[Translation missing --]]
-L["Provide feedback in Discord"] = ""
+L["Provide feedback in Discord"] = "Provide feedback in Discord"
 L["Pull Drop Clear Pull"] = "Limpiar Pull"
 L["Pull Drop Close"] = "Cerrar"
 L["Pull Drop Color"] = "Color"
@@ -2253,6 +2263,8 @@ L["Titanium Vanguard"] = "Vanguardia de titanio"
 L["T'lonja"] = "T'lonja"
 L["To share a different preset while the live session is active simply navigate to the preferred preset and click the new 'Set to Live' Button next to the preset-dropdown"] = "Para compartir una ruta diferente mientras la Sesión en vivo está activa, simplemente navegé a la ruta preferida y haga click en el nuevo botón 'Establecer en Directo' junto al menú desplegable de rutas"
 L["tocNotes"] = "Herramienta para planificar y optimizar las rutas de mazmorras de Piedras Angulares"
+--[[Translation missing --]]
+L["Toggle MDT"] = "Toggle MDT"
 L["Toggle Window"] = "Activar Ventana"
 L["Toiling Groundskeeper"] = "Guardés esforzado"
 L["Tol Dagor"] = "Tol Dagor"
@@ -2358,6 +2370,8 @@ L["Urg'roth, Breaker of Heroes"] = "Urg'roth, Quebrador de Héroes"
 L["Urh Relic"] = "Reliquia Urh"
 L["Use /mdt reset to restore the default position and scale of MDT."] = "Haga '/mdt reset' para restaurar la posición y escala predeterminadas de MDT."
 L["Use as a starting point:"] = "Usar como punto de referencia:"
+--[[Translation missing --]]
+L["Use forces count"] = "Use forces count in Sidebar"
 --[[Translation missing --]]
 L["Utgarde Keep"] = "Utgarde Keep"
 --[[Translation missing --]]

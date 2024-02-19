@@ -4,7 +4,10 @@
 
 local mod, CL = BigWigs:NewBoss("Yalnu", 1279, 1210)
 if not mod then return end
-mod:RegisterEnableMob(83846) -- Yalnu
+mod:RegisterEnableMob(
+	85496, -- Undermage Kesalon
+	83846  -- Yalnu
+)
 mod:SetEncounterID(1756)
 --mod:SetRespawnTime(0) -- wiping teleports you out, then you can retry immediately
 
@@ -21,7 +24,7 @@ local verdantEruptionCount = 1
 
 local L = mod:GetLocale()
 if L then
-	L.warmup_trigger = "The portal is lost! We must stop this beast before it can escape!"
+	L.warmup_icon = "inv_enchant_shaperessence"
 end
 
 --------------------------------------------------------------------------------
@@ -38,7 +41,7 @@ function mod:GetOptions()
 		flourishingAncientMarker,
 		{169613, "CASTBAR"}, -- Genesis
 		-- Flourishing Ancient
-		169929, -- Lumbering Swipe
+		{169929, "OFF"}, -- Lumbering Swipe
 	}, {
 		[169179] = self.displayName, -- Yalnu
 		[169929] = -10537, -- Flourishing Ancient
@@ -46,9 +49,6 @@ function mod:GetOptions()
 end
 
 function mod:OnBossEnable()
-	-- Warmup
-	self:RegisterEvent("CHAT_MSG_MONSTER_YELL", "Warmup")
-
 	-- Yalnu
 	self:Log("SPELL_CAST_START", "ColossalBlow", 169179)
 	self:Log("SPELL_CAST_START", "VerdantEruption", 428823)
@@ -62,6 +62,7 @@ end
 function mod:OnEngage()
 	colossalBlowCount = 1
 	verdantEruptionCount = 1
+	self:StopBar(CL.active) -- Warmup
 	self:CDBar(169179, 2.4, CL.count:format(self:SpellName(169179), colossalBlowCount)) -- Colossal Blow
 	self:CDBar(428823, 23.0, CL.count:format(self:SpellName(428823), verdantEruptionCount)) -- Verdant Eruption
 	self:CDBar(169613, 40.1) -- Genesis
@@ -73,12 +74,8 @@ end
 
 -- Warmup
 
-function mod:Warmup(event, msg)
-	-- [CHAT_MSG_MONSTER_YELL] The portal is lost! We must stop this beast before it can escape!#Lady Baihu
-	if msg == L.warmup_trigger then
-		self:Bar("warmup", 8.0, CL.active, "inv_enchant_shaperessence")
-		self:UnregisterEvent(event)
-	end
+function mod:Warmup() -- called from trash module
+	self:Bar("warmup", 8.0, CL.active, L.warmup_icon)
 end
 
 -- Yalnu

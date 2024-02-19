@@ -1756,6 +1756,21 @@
     GRM_L["In-combat. Hiding all GRM windows"] = true
     GRM_L["Auto-Hide all GRM windows when entering combat."] = true
     
+    -- R1.9902
+    GRM_L["Unable to kick or promote or demote players within the guild at current rank."] = true
+    GRM_L["Unable to kick or demote players within the guild at current rank."] = true
+    GRM_L["Unable to kick or promote players within the guild at current rank."] = true
+    GRM_L["Unable to kick players within the guild at current rank."] = true
+    GRM_L["{name}'s Main Rank Sync Rule {num}"] = true
+    GRM_L["{name}'s Repeated Inactivity Rule {num}"] = true
+    GRM_L["Please Select Special Macro Rule"] = true
+    GRM_L["Alt Group Rank Sync"] = true
+    GRM_L["Repeated Inactivity Monitor"] = true
+    
+    -- R1.9904
+    GRM_L["If disabled, a one time scan is still done at login or reload."] = true
+
+    
 end
     
     -- THANK YOU @Nehry for this full translation up to R1.20

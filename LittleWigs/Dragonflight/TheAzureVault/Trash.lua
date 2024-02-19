@@ -39,6 +39,7 @@ if L then
 	L.book_of_translocation = "Book of Translocation"
 	L.custom_on_book_autotalk = "Autotalk"
 	L.custom_on_book_autotalk_desc = "Instantly proceed to the next area when talking to Books of Translocation."
+	L.custom_on_book_autotalk_icon = "ui_chat"
 
 	L.shrieking_whelp = "Shrieking Whelp"
 	L.conjured_lasher = "Conjured Lasher"
@@ -218,7 +219,7 @@ function mod:ErraticGrowthApplied(args)
 		self:TargetMessage(375596, "orange", args.destName)
 		self:PlaySound(375596, "alarm", nil, args.destName)
 		if onMe then
-			self:Say(375596)
+			self:Say(375596, nil, nil, "Erratic Growth")
 		end
 	end
 end

@@ -7,6 +7,7 @@ if not mod then return end
 mod.displayName = CL.trash
 mod:RegisterEnableMob(
 	194675, -- Decaying Cauldron
+	186766, -- Captive Tuskarr
 	186191, -- Decay Speaker
 	185508, -- Claw Fighter
 	185534, -- Bonebolt Hunter
@@ -41,8 +42,13 @@ local L = mod:GetLocale()
 if L then
 	L.custom_on_cauldron_autotalk = "Autotalk"
 	L.custom_on_cauldron_autotalk_desc = "[Alchemy] Instantly detoxify Decaying Cauldrons for a disease dispel buff."
+	L.custom_on_cauldron_autotalk_icon = "ui_chat"
+	L.captive_tuskarr_freed = "Captive Tuskarr Freed"
+	L.captive_tuskarr_freed_desc = "Show an alert when a Captive Tuskarr has been freed."
+	L.captive_tuskarr_freed_icon = "inv_10_dungeonjewelry_primitive_trinket_tuskarrplushie_color1"
 
 	L.decaying_cauldron = "Decaying Cauldron"
+	L.captive_tuskarr = "Captive Tuskarr"
 	L.decay_speaker = "Decay Speaker"
 	L.claw_fighter = "Claw Fighter"
 	L.bonebolt_hunter = "Bonebolt Hunter"
@@ -76,6 +82,8 @@ function mod:GetOptions()
 	return {
 		-- Decaying Cauldron
 		"custom_on_cauldron_autotalk",
+		-- Captive Tuskarr
+		"captive_tuskarr_freed",
 		-- Decay Speaker
 		382435, -- Rotchanting Totem
 		rotchantingTotemMarker,
@@ -128,6 +136,7 @@ function mod:GetOptions()
 		{383087, "SAY"}, -- Withering Contagion
 	}, {
 		["custom_on_cauldron_autotalk"] = L.decaying_cauldron,
+		["captive_tuskarr_freed"] = L.captive_tuskarr,
 		[382435] = L.decay_speaker,
 		[367484] = L.claw_fighter,
 		[368287] = L.bonebolt_hunter,
@@ -158,8 +167,8 @@ function mod:OnBossEnable()
 	-- Decaying Cauldron
 	self:RegisterEvent("GOSSIP_SHOW")
 
-	-- TODO Captive Tuskarr?
-	-- [UPDATE_UI_WIDGET] widgetID:4267, widgetType:8, widgetSetID:1, scriptedAnimationEffectID:0, modelSceneLayer:0, widgetScale:0, tooltipLoc:0, fontType:1, shownState:1, widgetSizeSetting:0, bottomPadding:0, enabledState:1, textSizeType:4, text:Tuskarr Freed: 4/5, orderIndex:0, layoutDirection:0, inAnimType:0, widgetTag:, hasTimer:false, outAnimType:0, tooltip:Free Tuskarr to goad Hackclaw's War-Band out into the open., hAlign:1
+	-- Captive Tuskarr
+	self:RegisterWidgetEvent(4267, "CaptiveTuskarrFreed", true)
 
 	-- Decay Speaker
 	self:Log("SPELL_SUMMON", "RotchantingTotemSummon", 382435)
@@ -258,6 +267,14 @@ function mod:GOSSIP_SHOW(event)
 	end
 end
 
+-- Captive Tuskarr
+
+function mod:CaptiveTuskarrFreed(_, text)
+	-- [UPDATE_UI_WIDGET] widgetID:4267, widgetType:8, text:Tuskarr Freed: 1/5
+	self:Message("captive_tuskarr_freed", "green", text, L.captive_tuskarr_freed_icon)
+	self:PlaySound("captive_tuskarr_freed", "info")
+end
+
 -- Decay Speaker
 
 do
@@ -287,7 +304,7 @@ do
 		self:TargetMessage(367503, "orange", name)
 		self:PlaySound(367503, "alarm", nil, name)
 		if self:Me(guid) then
-			self:Say(367503)
+			self:Say(367503, nil, nil, "Withering Burst")
 		end
 	end
 
@@ -482,7 +499,7 @@ do
 		self:TargetMessage(374544, "red", name)
 		self:PlaySound(374544, "alarm", nil, name)
 		if self:Me(guid) then
-			self:Say(374544)
+			self:Say(374544, nil, nil, "Burst of Decay")
 		end
 	end
 
@@ -532,7 +549,7 @@ do
 		self:TargetMessage(388060, "red", name)
 		self:PlaySound(388060, "alarm", nil, name)
 		if self:Me(guid) then
-			self:Say(388060)
+			self:Say(388060, nil, nil, "Stink Breath")
 		end
 	end
 
@@ -572,7 +589,7 @@ do
 		self:TargetMessage(385832, "red", name)
 		self:PlaySound(385832, "alert", nil, name)
 		if self:Me(guid) then
-			self:Say(385832)
+			self:Say(385832, nil, nil, "Bloodthirsty Charge")
 		end
 	end
 
@@ -648,7 +665,7 @@ function mod:WitheringContagion(args)
 	self:TargetMessage(args.spellId, "orange", args.destName, CL.casting:format(args.spellName))
 	self:PlaySound(args.spellId, "alarm", nil, args.destName)
 	if self:Me(args.destGUID) then
-		self:Say(args.spellId)
+		self:Say(args.spellId, nil, nil, "Withering Contagion")
 	end
 end
 

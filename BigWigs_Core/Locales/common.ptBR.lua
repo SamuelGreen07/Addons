@@ -5,10 +5,13 @@ if not L then return end
 L.you = "%s em VOCÊ"
 L.you_icon = "%s em |T13700%d:0|tVOCÊ"
 L.underyou = "%s debaixo de VOCÊ"
+L.aboveyou = "%s acima de VOCÊ"
 L.other = "%s: %s"
 L.onboss = "%s no CHEFE"
 L.buff_boss = "Buff no CHEFE: %s"
 L.buff_other = "Buff no %s: %s"
+--L.magic_buff_boss = "Magic buff on BOSS: %s" -- Magic buff on BOSS: SPELL_NAME
+--L.magic_buff_other = "Magic buff on %s: %s" -- Magic buff on NPC_NAME: SPELL_NAME
 L.on = "%s em %s"
 L.stack = "%dx %s em %s"
 L.stackyou = "%dx %s em VOCÊ"
@@ -22,7 +25,8 @@ L.count_rticon = "%s (%d{rt%d})"
 L.rticon = "%s ({rt%d})"
 L.near = "%s perto de VOCÊ"
 L.on_group = "%s no GRUPO" -- spell on group
---L.boss = "BOSS"
+L.boss = "CHEFE"
+L.plus = "%s + %s" -- Spell 1 + Spell 2
 
 L.phase = "Fase %d"
 L.stage = "Estágio %d"
@@ -32,7 +36,10 @@ L.mythic = "Modo mítico"
 L.hard = "Modo difícil"
 L.active = "Ativo" -- When a boss becomes active, after speech finishes
 L.general = "Geral" -- General settings, i.e. things that apply to normal, heroic and mythic mode.
-L.absorb = "Absorver" -- Used for shield-like abilities that absorb damage or healing
+--L.health = "Health" -- The health of an NPC
+--L.health_percent = "%d%% Health" -- "10% Health" The health percentage of an NPC
+--L.door_open = "Door open" -- When a door is open, usually after a speech from an NPC
+--L.gate_open = "Gate open" -- When a gate is open, usually after a speech from an NPC
 
 L.duration = "%s durante %s seg" -- Spell for 10 seconds
 L.over = "%s Acabou" -- Spell Over
@@ -40,16 +47,20 @@ L.removed = "%s Removido" -- Spell Removed
 L.removed_from = "%s Removido %s" -- Spell removed from Player
 L.removed_by = "%s Removido por %s" -- Spell removed by Player
 L.removed_after = "%s removido depois de %.1fs" -- "Spell removed after 1.1s" (s = seconds)
-L.incoming = "%s Chegando" -- Spell Incoming
+L.incoming = "%s a Caminho" -- Spell Incoming
 L.interrupted = "%s Interrompido" -- Spell Interrupted
 L.interrupted_by = "%s interrompido por %s" -- Spell interrupted by Player
 L.no = "Sem %s" -- No Spell
 L.intermission = "Intervalo"
 L.percent = "%d%% - %s" -- 20% - Spell
 L.cancelled = "%s Cancelado" -- Spell Cancelled
+L.you_die = "Você morrerá"
+L.you_die_sec = "Você morrerá em %d seg" -- "You die in 15 sec" (sec = seconds)
+--L.next_ability = "Next ability" -- We don't know what ability will be next, we only know when it will happen (showing a bar)
 
 -- Add related
 L.add_spawned = "Add surgiu"
+--L.adds_spawned = "Adds surgiu"
 L.spawned = "%s surgiu"
 L.spawning = "%s Chegando"
 L.next_add = "Próximo add"
@@ -63,6 +74,7 @@ L.small_add = "Add Pequeno" -- singular
 L.small_adds = "Adds Pequenos" -- plural
 
 -- Mob related
+L.killed = "%s morto"
 L.mob_killed = "%s morto (%d/%d)"
 L.mob_remaining = "%s morto, %d restando"
 
@@ -98,23 +110,26 @@ L.amount_three = "%dK" -- Thousands 1,000
 L.seconds = "%.1fs" -- 1.1 seconds
 
 -- Directions
---L.top = "Top"
---L.up = "Up"
---L.middle = "Middle"
---L.down = "Down"
---L.bottom = "Bottom"
---L.left = "Left"
---L.right = "Right"
+L.top = "Topo"
+L.up = "Cima"
+L.middle = "Meio"
+L.down = "Baixo"
+L.bottom = "Fundo"
+L.left = "Esquerda"
+L.right = "Direita"
 L.north = "Norte"
---L.north_east = "North-East"
---L.east = "East"
---L.south_east = "South-East"
+L.north_east = "Nordeste"
+L.east = "Leste"
+L.south_east = "Sudeste"
 L.south = "Sul"
---L.south_west = "South-West"
---L.west = "West"
---L.north_west = "North-West"
+L.south_west = "Sudoeste"
+L.west = "Oeste"
+L.north_west = "Noroeste"
 
 -- Common ability name replacements
+L.absorb = "Absorver" -- Used for shield-like abilities that absorb damage or healing
+L.heal_absorb = "Absorção de Cura" -- Used for shield-like abilities that absorb healing only
+L.heal_absorbs = "Absorção de Cura" -- Plural of L.heal_absorb
 L.tank_combo = "Combo de Tanque" -- Used for tank swap mechanics where the boss casts a sequence of tank buster attacks
 L.laser = "Laser" -- Used for abilities that act like a laser. Usually from the boss to a player, or, from the boss to a specific area
 L.lasers = "Lasers" -- Plural of L.lasers
@@ -134,14 +149,33 @@ L.fear = "Medo" -- For abilities that cause you to flee in fear
 L.breath = "Sopro" -- When a boss breathes fire/frost/etc on to a player or the raid e.g. a Dragon breathing fire on everyone
 L.roar = "Rugido" -- When a boss opens their mouth to let out a loud roar, sometimes used to inflict damage on the raid
 L.leap = "Salto" -- When a boss leaps through the air from one location to another location, or from a location to a player, etc
+L.charge = "Investida" -- When a boss select a new target and charges at it quickly, in the same way someone playing a warrior can charge at a target
 L.full_energy = "Energia Cheia" -- When a boss reaches full/maximum energy, usually the boss will cast something big and powerful when this happens
+L.weakened = "Enfraquecido" -- When a boss becomes weakened and sometimes takes extra damage, usually the "hit all your cooldowns" part of the fight
+L.immune = "Imune" -- When a boss becomes immune to all damage and you can no longer hurt it
 L.pool = "Poça" -- A pool or puddle on the ground, usually something bad that you should avoid standing in
 L.pools = "Poças" -- Plural of L.pool
---L.totem = "Totem" -- A totem, usually summoned by a boss, the same thing that shamans summon
---L.totems = "Totems" -- Plural of L.totem
---L.portal = "Portal" -- A portal somewhere, usually leading to a different location
+L.totem = "Totem" -- A totem, usually summoned by a boss, the same thing that shamans summon
+L.totems = "Totems" -- Plural of L.totem
+L.portal = "Portal" -- A portal somewhere, usually leading to a different location
 L.portals = "Portais" -- Plural of L.portal
 L.rift = "Fenda" -- Can be used in a similar way as a portal e.g. "Time Rift" but can also be used as a debuff/pool underneath you that you need to run through to remove/despawn it e.g. "Dread Rift"
 L.rifts = "Fendas" -- Plural of L.rift
 L.orb = "Orbe" -- A ball/sphere object usually moving and you need to avoid it
 L.orbs = "Orbes" -- Plural for L.orb
+L.curse = "Maldição" -- Any curse-type dispellable debuff, or debuffs called "Curse of XYZ", etc.
+L.curses = "Maldições" -- Plural of L.curse
+L.disease = "Doença" -- Any disease-type dispellable debuff, or debuffs called "Disease of XYZ", etc.
+L.spirit = "Espírito" -- Sometimes a boss will summon spirits, similar to ghosts, but not exactly, although you might have the same word for both. e.g. "Spirits of X" or "Wild Spirits"
+L.spirits = "Espíritos" -- Plural of L.spirit
+L.tornado = "Tornado" -- 'A tornado is a violently rotating column of air that is in contact with both the surface of the Earth and a cloud' - Wikipedia
+L.tornadoes = "Tornados" -- Plural of L.tornado
+L.frontal_cone = "Cônica à Frente" -- Usually a bad Area-of-Effect ability cast by the boss in a cone/triangle/pizza shape in front of them, don't stand in front of the boss!
+L.fear = "Medo" -- Similar to a warlock or priest ability, when a boss casts a fear on a player or multiple players, that makes them run around out of control
+L.mark = "Marca" -- Short name for abilites with "Mark" in the name, for example "Mark of Death" or "Toxic Mark" or "Mark of Frost" etc.
+L.marks = "Marcas" -- Plural of L.marks
+L.mind_control = "Controle Mental" -- Any kind of Mind Control ability, where a player loses control of their character
+L.mind_control_short = "CM" -- Short version of Mind Control, mainly for bars
+L.soak = "Soak" -- Abilities you have to stand in on purpose to soak the damage, like a sponge soaks water. Commonly for abilities that split damage between everyone standing in them.
+L.soaks = "Soaks" -- Plural of L.soak
+L.spell_reflection = "Reflexão de Feitiço" -- Any ability that reflects spells

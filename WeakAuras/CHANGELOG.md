@@ -1,20 +1,28 @@
-# [5.8.5](https://github.com/WeakAuras/WeakAuras2/tree/5.8.5) (2023-11-12)
+# [5.10.1](https://github.com/WeakAuras/WeakAuras2/tree/5.10.1) (2024-02-09)
 
-[Full Changelog](https://github.com/WeakAuras/WeakAuras2/compare/5.8.4...5.8.5)
+[Full Changelog](https://github.com/WeakAuras/WeakAuras2/compare/5.10.0...5.10.1)
 
 ## Highlights
 
- - More template updates and bug fixes 
+ - Bug Fixes 
 
 ## Commits
 
-InfusOnWoW (2):
+Putro (1):
 
-- More Template Updates
-- Combat Log Trigger: Fix various condition checks for !=
+- Localize the title in AuraWarnings
 
-mrbuds (2):
+Stanzilla (3):
 
-- Alternate Power trigger: make power field a multiEntry
-- Dynamic group: flatten background level of all regions
+- Add more types to Types
+- A few type and spelling fixes
+- Add workaround for actions/checkout#290
+
+dependabot[bot] (1):
+
+- Bump peter-evans/create-pull-request from 5 to 6
+
+emptyrivers (1):
+
+- move type checking code for WeakAurasArchive
 

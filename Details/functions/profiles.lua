@@ -495,6 +495,14 @@ function Details:ApplyProfile(profileName, bNoSave, bIsCopy)
 		Details.time_type = 2
 	end
 
+	--enable all captures, this is a fix for the old performance profiles which doesn't exiss anymore
+	Details.capture_real["damage"] = true
+	Details.capture_real["heal"] = true
+	Details.capture_real["energy"] = true
+	Details.capture_real["miscdata"] = true
+	Details.capture_real["aura"] = true
+	Details.capture_real["spellcast"] = true
+
 	return true
 end
 
@@ -1193,6 +1201,7 @@ local default_player_data = {
 		ocd_tracker = {
 			enabled = false,
 			cooldowns = {},
+			ignored_cooldowns = {},
 			frames = {
 				["defensive-raid"] = {},
 				["defensive-target"] = {},
@@ -1346,6 +1355,7 @@ local default_global_data = {
 		custom = {},
 		savedStyles = {},
 		savedCustomSpells = {},
+		userCustomSpells = {}, --spells modified by the user
 		savedTimeCaptures = {},
 		lastUpdateWarning = 0,
 		update_warning_timeout = 10,
@@ -1371,7 +1381,10 @@ local default_global_data = {
 			["14"] = false,
 		},
 		current_exp_raid_encounters = {},
+		encounter_journal_cache = {}, --store a dump of the encounter journal
 		installed_skins_cache = {},
+
+		user_is_patreon_supporter = false,
 
 		show_aug_predicted_spell_damage = false,
 
@@ -1387,7 +1400,7 @@ local default_global_data = {
 		merge_player_abilities = false,
 
 		played_class_time = true,
-		check_stuttering = true,
+		check_stuttering = false,
 
 		--[bossname] = texture
 		boss_icon_cache = {},
@@ -1412,6 +1425,12 @@ local default_global_data = {
 
 	--keystone window
 		keystone_frame = {
+			scale = 1,
+			position = {},
+		},
+
+	--ask to erase data frame
+		ask_to_erase_frame = {
 			scale = 1,
 			position = {},
 		},
@@ -1515,7 +1534,7 @@ local default_global_data = {
 			ctrl_click_close_tutorial = false,
 		},
 
-		performance_profiles = {
+		performance_profiles = { --deprecated
 			["RaidFinder"] = {enabled = false, update_speed = 1, use_row_animations = false, damage = true, heal = true, aura = true, energy = false, miscdata = true},
 			["Raid15"] = {enabled = false, update_speed = 1, use_row_animations = false, damage = true, heal = true, aura = true, energy = false, miscdata = true},
 			["Raid30"] = {enabled = false, update_speed = 1, use_row_animations = false, damage = true, heal = true, aura = true, energy = false, miscdata = true},
@@ -1593,8 +1612,10 @@ local default_global_data = {
 			last_mythicrun_chart = {},
 			mythicrun_chart_frame = {},
 			mythicrun_chart_frame_minimized = {},
-			mythicrun_chart_frame_ready = {},
-		},
+			finished_run_frame = {}, --end of mythic+ panel
+
+			mythicrun_time_type = 1, --1: combat time (the amount of time the player is in combat) 2: run time (the amount of time it took to finish the mythic+ run)
+		}, --implementar esse time_type quando estiver dando refresh na janela
 
 	--plugin window positions
 		plugin_window_pos = {},
@@ -1988,7 +2009,7 @@ function Details:ImportProfile (profileString, newProfileName, bImportAutoRunCod
 		mythicPlusSettings.last_mythicrun_chart = {}
 		mythicPlusSettings.mythicrun_chart_frame = {}
 		mythicPlusSettings.mythicrun_chart_frame_minimized = {}
-		mythicPlusSettings.mythicrun_chart_frame_ready = {}
+		mythicPlusSettings.finished_run_frame = {}
 
 		--make the max amount of segments be 30
 		Details.segments_amount = 40

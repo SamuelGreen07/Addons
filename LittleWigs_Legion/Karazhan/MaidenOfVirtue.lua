@@ -22,7 +22,7 @@ function mod:GetOptions()
 	return {
 		227823, -- Holy Wrath
 		227800, -- Holy Shock
-		{227809, "PROXIMITY"}, -- Holy Bolt
+		227809, -- Holy Bolt
 		227508, -- Mass Repentance
 		{227789, "SAY", "FLASH"}, -- Sacred Ground
 	}
@@ -42,7 +42,6 @@ end
 
 function mod:OnEngage()
 	sacredGroundOnMe = false
-	self:OpenProximity(227809, 6) -- Holy Bolt
 	self:Bar(227809, 8.5) -- Holy Bolt
 	self:Bar(227789, 10) -- Sacred Ground
 	self:Bar(227800, 14.9) -- Holy Shock
@@ -58,7 +57,7 @@ do
 		self:TargetMessage(227789, "red", player)
 		self:PlaySound(227789, "alarm", nil, player)
 		if self:Me(guid) then
-			self:Say(227789)
+			self:Say(227789, nil, nil, "Sacred Ground")
 			self:Flash(227789)
 		end
 	end

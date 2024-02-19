@@ -11,9 +11,11 @@ local RSConstants = private.ImportLib("RareScannerConstants")
 
 -- RareScanner database libraries
 local RSConfigDB = private.ImportLib("RareScannerConfigDB")
+local RSNpcDB = private.ImportLib("RareScannerNpcDB")
 
 -- RareScanner service libraries
 local RSMinimap = private.ImportLib("RareScannerMinimap")
+local RSUtils = private.ImportLib("RareScannerUtils")
 
 -- Locales
 local AL = LibStub("AceLocale-3.0"):GetLocale("RareScanner");
@@ -24,6 +26,7 @@ local LibDD = LibStub:GetLibrary("LibUIDropDownMenu-4.0")
 -- Constants
 local SHOW_RARE_NPC_ICONS = "rsHideRareNpcs"
 local SHOW_NOT_DISCOVERED_RARE_NPC_ICONS = "rsHideNotDiscoveredRareNpcs"
+local SHOW_CUSTOM_GROUP_NPC_ICONS = "rsHideCustomGroup"
 local SHOW_ACHIEVEMENT_NPC_ICONS = "rsHideAchievementRareNpcs"
 local SHOW_OTHER_NPC_ICONS = "rsHideOtherRareNpcs"
 local DISABLE_LAST_SEEN_FILTER = "rsDisableLastSeenFilter"
@@ -40,7 +43,8 @@ RSWorldMapButtonMixin = { }
 local rareNPCsID = 1
 local containersID = 2
 
-local function WorldMapButtonDropDownMenu_Initialize(dropDown)
+local function WorldMapButtonDropDownMenu_Initialize(dropDown, mapID)
+	local groups = RSNpcDB.GetCustomGroupsByMapID(mapID)
 	local OnSelection = function(self, value)
 	
 		-- Rare NPCs (general)
@@ -50,21 +54,19 @@ local function WorldMapButtonDropDownMenu_Initialize(dropDown)
 			else
 				RSConfigDB.SetShowingNpcs(true)
 			end
-			RSMinimap.RefreshAllData(true)
+			LibDD:UIDropDownMenu_Initialize(dropDown)
 		elseif (value == DISABLE_LAST_SEEN_FILTER) then
 			if (RSConfigDB.IsMaxSeenTimeFilterEnabled()) then
 				RSConfigDB.DisableMaxSeenTimeFilter()
 			else
 				RSConfigDB.EnableMaxSeenTimeFilter()
 			end
-			RSMinimap.RefreshAllData(true)
 		elseif (value == SHOW_NOT_DISCOVERED_RARE_NPC_ICONS) then
 			if (RSConfigDB.IsShowingNotDiscoveredNpcs()) then
 				RSConfigDB.SetShowingNotDiscoveredNpcs(false)
 			else
 				RSConfigDB.SetShowingNotDiscoveredNpcs(true)
 			end
-			RSMinimap.RefreshAllData(true)
 		
 		-- Rare NPCs (types)
 		elseif (value == SHOW_ACHIEVEMENT_NPC_ICONS) then
@@ -73,14 +75,12 @@ local function WorldMapButtonDropDownMenu_Initialize(dropDown)
 			else
 				RSConfigDB.SetShowingAchievementRareNPCs(true)
 			end
-			RSMinimap.RefreshAllData(true)
 		elseif (value == SHOW_OTHER_NPC_ICONS) then
 			if (RSConfigDB.IsShowingOtherRareNPCs()) then
 				RSConfigDB.SetShowingOtherRareNPCs(false)
 			else
 				RSConfigDB.SetShowingOtherRareNPCs(true)
 			end
-			RSMinimap.RefreshAllData(true)
 			
 		-- Containers (general)
 		elseif (value == SHOW_CONTAINER_ICONS) then
@@ -89,21 +89,19 @@ local function WorldMapButtonDropDownMenu_Initialize(dropDown)
 			else
 				RSConfigDB.SetShowingContainers(true)
 			end
-			RSMinimap.RefreshAllData(true)
+			LibDD:UIDropDownMenu_Initialize(dropDown)
 		elseif (value == DISABLE_LAST_SEEN_CONTAINER_FILTER) then
 			if (RSConfigDB.IsMaxSeenTimeContainerFilterEnabled()) then
 				RSConfigDB.DisableMaxSeenContainerTimeFilter()
 			else
 				RSConfigDB.EnableMaxSeenContainerTimeFilter()
 			end
-			RSMinimap.RefreshAllData(true)
 		elseif (value == SHOW_NOT_DISCOVERED_CONTAINER_ICONS) then
 			if (RSConfigDB.IsShowingNotDiscoveredContainers()) then
 				RSConfigDB.SetShowingNotDiscoveredContainers(false)
 			else
 				RSConfigDB.SetShowingNotDiscoveredContainers(true)
 			end
-			RSMinimap.RefreshAllData(true)
 			
 		-- Containers (types)
 		elseif (value == SHOW_ACHIEVEMENT_CONTAINER_ICONS) then
@@ -112,16 +110,28 @@ local function WorldMapButtonDropDownMenu_Initialize(dropDown)
 			else
 				RSConfigDB.SetShowingAchievementContainers(true)
 			end
-			RSMinimap.RefreshAllData(true)
 		elseif (value == SHOW_OTHER_CONTAINER_ICONS) then
 			if (RSConfigDB.IsShowingOtherContainers()) then
 				RSConfigDB.SetShowingOtherContainers(false)
 			else
 				RSConfigDB.SetShowingOtherContainers(true)
 			end
-			RSMinimap.RefreshAllData(true)
+		end
+
+		-- Custom NPCs
+		if (RSUtils.GetTableLength(groups) > 0) then
+			for _, group in ipairs(groups) do
+				if (value == SHOW_CUSTOM_GROUP_NPC_ICONS .. group) then
+					if (RSConfigDB.IsCustomNpcGroupFiltered(group)) then
+						RSConfigDB.SetCustomNpcGroupFiltered(group, false)
+					else
+						RSConfigDB.SetCustomNpcGroupFiltered(group, true)
+					end
+				end
+			end
 		end
 		
+		RSMinimap.RefreshAllData(true)
 		WorldMapFrame:RefreshAllDataProviders();
 	end
 		
@@ -143,7 +153,7 @@ local function WorldMapButtonDropDownMenu_Initialize(dropDown)
 			
 			local info = LibDD:UIDropDownMenu_CreateInfo();
 			info.isNotRadio = true;
-			info.keepShownOnClick = false;
+			info.keepShownOnClick = true;
 			info.func = OnSelection;
 		
 			info.text = AL["MAP_MENU_SHOW_NOT_DISCOVERED_OLD"];
@@ -153,7 +163,7 @@ local function WorldMapButtonDropDownMenu_Initialize(dropDown)
 		else
 			local info = LibDD:UIDropDownMenu_CreateInfo();
 			info.isNotRadio = true;
-			info.keepShownOnClick = false;
+			info.keepShownOnClick = true;
 			info.func = OnSelection;
 				
 			if (menuList == rareNPCsID) then
@@ -173,6 +183,17 @@ local function WorldMapButtonDropDownMenu_Initialize(dropDown)
 				info.checked = RSConfigDB.IsShowingNotDiscoveredNpcs()
 				info.disabled = not RSConfigDB.IsShowingNpcs()
 				LibDD:UIDropDownMenu_AddButton(info, level);
+  			
+				-- Custom NPCs
+				if (RSUtils.GetTableLength(groups) > 0) then
+					for _, group in ipairs(groups) do
+						info.text = "|T"..RSConstants.PURPLE_NPC_TEXTURE..":18:18:::::0:32:0:32|t "..string.format(AL["MAP_MENU_SHOW_CUSTOM_NPC_GROUP"], RSNpcDB.GetCustomNpcGroupByKey(group))
+						info.arg1 = SHOW_CUSTOM_GROUP_NPC_ICONS .. group;
+						info.checked = not RSConfigDB.IsCustomNpcGroupFiltered(group)
+						info.disabled = not RSConfigDB.IsShowingNpcs()
+						LibDD:UIDropDownMenu_AddButton(info, level);
+					end
+				end
 				
 				LibDD:UIDropDownMenu_AddSeparator(level)
 			
@@ -247,6 +268,9 @@ function RSWorldMapButtonMixin:OnEnter()
     GameTooltip:Show()
 end
 
-function RSWorldMapButtonMixin:Refresh()
-	-- Needed even if not used
+function RSWorldMapButtonMixin:Refresh()	
+	if (not self.mapID or self.mapID ~= WorldMapFrame:GetMapID()) then
+		self.mapID = WorldMapFrame:GetMapID()
+		WorldMapButtonDropDownMenu_Initialize(self.DropDown, self.mapID)
+	end
 end

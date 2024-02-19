@@ -112,7 +112,7 @@ function MapIconTooltip:Show()
             local entry = {}
             entry.color = { icon.texture.r, icon.texture.g, icon.texture.b, icon.texture.a };
             entry.icon = icon;
-            if Questie.db.global.questObjectiveColors then
+            if Questie.db.profile.questObjectiveColors then
                 icon.texture:SetVertexColor(1, 1, 1, 1);   -- If different colors are active simply change it to the regular icon color
             else
                 icon.texture:SetVertexColor(0.6, 1, 1, 1); -- Without colors make it blueish
@@ -217,7 +217,7 @@ function MapIconTooltip:Show()
                     local quest = QuestieDB.GetQuest(questData.questId)
                     local rewardString = ""
                     if (quest and shift) then
-                        local xpReward = QuestXP:GetQuestLogRewardXP(questData.questId, Questie.db.global.showQuestXpAtMaxLevel)
+                        local xpReward = QuestXP:GetQuestLogRewardXP(questData.questId, Questie.db.profile.showQuestXpAtMaxLevel)
                         if xpReward > 0 then
                             rewardString = QuestieLib:PrintDifficultyColor(quest.level, "(" .. FormatLargeNumber(xpReward) .. xpString .. ") ", QuestieDB.IsRepeatable(questData.questId), QuestieDB.IsActiveEventQuest(questData.questId), QuestieDB.IsPvPQuest(questData.questId))
                         end
@@ -255,50 +255,50 @@ function MapIconTooltip:Show()
                             self:AddLine(line, 0.86, 0.86, 0.86);
                         end
                     end
+                end
 
-                    if reputationReward and next(reputationReward) then
-                        local rewardTable = {}
-                        local factionId, factionName
-                        local rewardValue
-                        local aldorPenalty, scryersPenalty
-                        for _, rewardPair in pairs(reputationReward) do
-                            factionId = rewardPair[1]
+                if shift and reputationReward and next(reputationReward) then
+                    local rewardTable = {}
+                    local factionId, factionName
+                    local rewardValue
+                    local aldorPenalty, scryersPenalty
+                    for _, rewardPair in pairs(reputationReward) do
+                        factionId = rewardPair[1]
 
-                            if factionId == 935 and playerIsHonoredWithShaTar and (scryersPenalty or aldorPenalty) then
-                                -- Quests for Aldor and Scryers gives reputation to the Sha'tar but only before being Honored
-                                -- with the Sha'tar
-                                break
-                            end
-
-                            factionName = select(1, GetFactionInfoByID(factionId))
-                            if factionName then
-                                rewardValue = rewardPair[2]
-
-                                if playerIsHuman and rewardValue > 0 then
-                                    -- Humans get 10% more reputation
-                                    rewardValue = math.floor(rewardValue * 1.1)
-                                end
-
-                                if factionId == 932 then     -- Aldor
-                                    scryersPenalty = 0 - math.floor(rewardValue * 1.1)
-                                elseif factionId == 934 then -- Scryers
-                                    aldorPenalty = 0 - math.floor(rewardValue * 1.1)
-                                end
-
-                                rewardTable[#rewardTable + 1] = (rewardValue > 0 and "+" or "") .. rewardValue .. " " .. factionName
-                            end
+                        if factionId == 935 and playerIsHonoredWithShaTar and (scryersPenalty or aldorPenalty) then
+                            -- Quests for Aldor and Scryers gives reputation to the Sha'tar but only before being Honored
+                            -- with the Sha'tar
+                            break
                         end
 
-                        if aldorPenalty then
-                            factionName = select(1, GetFactionInfoByID(932))
-                            rewardTable[#rewardTable + 1] = aldorPenalty .. " " .. factionName
-                        elseif scryersPenalty then
-                            factionName = select(1, GetFactionInfoByID(934))
-                            rewardTable[#rewardTable + 1] = scryersPenalty .. " " .. factionName
-                        end
+                        factionName = select(1, GetFactionInfoByID(factionId))
+                        if factionName then
+                            rewardValue = rewardPair[2]
 
-                        self:AddLine(REPUTATION_ICON_TEXTURE .. " " .. Questie:Colorize(table.concat(rewardTable, " / "), "reputationBlue"), 1, 1, 1, 1, 1, 0)
+                            if playerIsHuman and rewardValue > 0 then
+                                -- Humans get 10% more reputation
+                                rewardValue = math.floor(rewardValue * 1.1)
+                            end
+
+                            if factionId == 932 then     -- Aldor
+                                scryersPenalty = 0 - math.floor(rewardValue * 1.1)
+                            elseif factionId == 934 then -- Scryers
+                                aldorPenalty = 0 - math.floor(rewardValue * 1.1)
+                            end
+
+                            rewardTable[#rewardTable + 1] = (rewardValue > 0 and "+" or "") .. rewardValue .. " " .. factionName
+                        end
                     end
+
+                    if aldorPenalty then
+                        factionName = select(1, GetFactionInfoByID(932))
+                        rewardTable[#rewardTable + 1] = aldorPenalty .. " " .. factionName
+                    elseif scryersPenalty then
+                        factionName = select(1, GetFactionInfoByID(934))
+                        rewardTable[#rewardTable + 1] = scryersPenalty .. " " .. factionName
+                    end
+
+                    self:AddLine(REPUTATION_ICON_TEXTURE .. " " .. Questie:Colorize(table.concat(rewardTable, " / "), "reputationBlue"), 1, 1, 1, 1, 1, 0)
                 end
             end
         end
@@ -306,8 +306,8 @@ function MapIconTooltip:Show()
         for questId, textList in pairs(self.questOrder) do -- this logic really needs to be improved
             ---@type Quest
             local quest = QuestieDB.GetQuest(questId);
-            local questTitle = QuestieLib:GetColoredQuestName(questId, Questie.db.global.enableTooltipsQuestLevel, true, true);
-            local xpReward = QuestXP:GetQuestLogRewardXP(questId, Questie.db.global.showQuestXpAtMaxLevel);
+            local questTitle = QuestieLib:GetColoredQuestName(questId, Questie.db.profile.enableTooltipsQuestLevel, true, true);
+            local xpReward = QuestXP:GetQuestLogRewardXP(questId, Questie.db.profile.showQuestXpAtMaxLevel);
             r, g, b = QuestieLib:GetDifficultyColorPercent(quest.level);
             if haveGiver then
                 if shift and xpReward then
@@ -457,11 +457,13 @@ function _MapIconTooltip:GetAvailableOrCompleteTooltip(icon)
         elseif (questType == 81 or questType == 83 or questType == 62 or questType == 1) then
             -- Dungeon or Legendary or Raid or Group(Elite)
             tip.type = "(" .. questTag .. ")";
+        elseif (Questie.IsSoD and QuestieDB.IsSoDRuneQuest(icon.data.Id)) then
+            tip.type = "(" .. l10n("Rune") .. ")";
         else
             tip.type = "(" .. l10n("Available") .. ")";
         end
     end
-    tip.title = QuestieLib:GetColoredQuestName(icon.data.Id, Questie.db.global.enableTooltipsQuestLevel, false, true)
+    tip.title = QuestieLib:GetColoredQuestName(icon.data.Id, Questie.db.profile.enableTooltipsQuestLevel, false, true)
     tip.subData = icon.data.QuestData.Description
     tip.questId = icon.data.Id;
 
@@ -484,7 +486,11 @@ function _MapIconTooltip:GetObjectiveTooltip(icon)
     local text = iconData.ObjectiveData.Description
     local color = QuestieLib:GetRGBForObjective(iconData.ObjectiveData)
     if iconData.ObjectiveData.Needed then
-        text = color .. tostring(iconData.ObjectiveData.Collected) .. "/" .. tostring(iconData.ObjectiveData.Needed) .. " " .. text
+        if iconData.ObjectiveData.Type == "spell" and iconData.ObjectiveData.spawnList[iconData.ObjectiveTargetId].ItemId then
+            text = color .. tostring(QuestieDB.QueryItemSingle(iconData.ObjectiveData.spawnList[iconData.ObjectiveTargetId].ItemId, "name"))
+        else
+            text = color .. tostring(iconData.ObjectiveData.Collected) .. "/" .. tostring(iconData.ObjectiveData.Needed) .. " " .. text
+        end
     end
     if QuestieComms then
         local anotherPlayer = false;

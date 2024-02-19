@@ -9,11 +9,15 @@ L.altpower_desc = "Показывать окно с альтернативной
 L.infobox = "Информационный блок"
 L.infobox_desc = "Показать блок с информацией, связанной с текущим боем."
 L.stages = "Фазы"
-L.stages_desc = "Включение различных функций, связанных с этапами/фазами босса: радар, полосы и прочее"
+L.stages_desc = "Включает функционал, связанный с различными фазами боя, такие как уведомление о смене фазы, полоска длительности фазы, и т.д."
 L.warmup = "Подготовка"
 L.warmup_desc = "Время, когда начнется схватка с боссом."
 L.proximity = "Отображение близости"
 L.proximity_desc = "Показывать окно близости при соответствующей схватке, выводя список игроков, которые стоят слишком близко к вам."
+L.adds = "Адды"
+L.adds_desc = "Включает функционал связанный с различными помощниками во время боя с боссом."
+--L.health = "Health"
+--L.health_desc = "Enable functions for displaying various health information during the boss encounter."
 
 L.already_registered = "|cffff0000ВНИМАНИЕ:|r |cff00ff00%s|r (|cffffff00%s|r) уже загружен как модуль BigWigs, но что-то пытается зарегистрировать его ещё раз. Обычно, это означает, что у вас две копии этого модуля в папке с модификациями (возможно, из-за ошибки программы для обновления модификаций). Мы рекомендуем вам удалить все папки BigWigs и установить его с нуля."
 L.testNameplate = "Цель обнаружена, создаю тестовую полосу неймплейта на неймплейте цели. |cFF33FF99Это редко используемая вещь, всего одна полоса, необходимая для отслеживания перезарядки при сражении с несколькими боссами / аддами, использующих одно и то же заклинание.|r"
@@ -43,18 +47,19 @@ L.disabledAddOn = "У вас выключена модификация |cFF436EE
 L.removeAddOn = "Пожалуйста, удалите '|cFF436EEE%s|r', ему на смену пришло '|cFF436EEE%s|r'."
 L.alternativeName = "%s (|cFF436EEE%s|r)"
 
---L.expansionNames = {
---	"Classic", -- Classic
---	"The Burning Crusade", -- The Burning Crusade
---	"Wrath of the Lich King", -- Wrath of the Lich King
---	"Cataclysm", -- Cataclysm
---	"Mists of Pandaria", -- Mists of Pandaria
---	"Warlords of Draenor", -- Warlords of Draenor
---	"Legion", -- Legion
---	"Battle for Azeroth", -- Battle for Azeroth
---	"Темные Земли", -- Shadowlands
---	"Dragonflight", -- Dragonflight
---}
+L.expansionNames = {
+	"Классика", -- Classic
+	"The Burning Crusade", -- The Burning Crusade -- would rather leave untranslated
+	"Гнев Короля Лича", -- Wrath of the Lich King
+	"Катаклизм", -- Cataclysm
+	"Туманы Пандарии", -- Mists of Pandaria
+	"Воеводы Дренора", -- Warlords of Draenor
+	"Легион", -- Legion
+	"Битва за Азерот", -- Battle for Azeroth
+	"Темные Земли", -- Shadowlands
+	"Dragonflight", -- Dragonflight -- Can't figure a out a good way to translate this
+}
+L.currentSeason = "Текущий сезон"
 
 -- Media.lua (These are the names of the sounds in the dropdown list in the "sounds" section)
 L.Beware = "Берегитесь (Алгалон)"
@@ -66,7 +71,7 @@ L.spell_under_you = "BigWigs: Заклинание под тобой"
 
 -- Options.lua
 L.options = "Настройки"
-L.optionsKey = "ID заклинания: %s" -- The key that messages/bars/options use -- "Key" sounds incredibly stupid for what's basically an id.
+L.optionsKey = "ID заклинания: %s" -- The ID that messages/bars/options use
 L.raidBosses = "Рейдовые боссы"
 L.dungeonBosses = "Боссы подземелий"
 L.introduction = "Добро пожаловать в BigWigs, где бродят боссы. Пожалуйста, пристегните ремни безопасности, запаситесь печеньками и наслаждайтесь поездкой. Он не cъест ваших детей, но поможет подготовиться к встречи с новыми боссами, словно для обеда из 7-ми блюд вашего рейда."
@@ -94,6 +99,8 @@ L.dbmFaker = "Маскировка под DBM"
 L.dbmFakerDesc = "Если пользователь DBM делает проверку версий, чтобы увидеть у кого стоит аддон, он обнаружит вас в этом списке. Полезно для гильдий, которые заставляют использовать DBM."
 L.zoneMessages = "Показывать сообщения для игровой зоны"
 L.zoneMessagesDesc = "Отключив, вы перестанете получать сообщения при входе в зону, для которой нет таймеров BigWigs. Мы рекомендуем оставить включенной, чтобы в случае создания таймеров для новой зоны, вы могли сразу узнать об этом."
+L.englishSayMessages = "Сообщения в чат только на Английском"
+L.englishSayMessagesDesc = "Все сообщения типа 'сказать' и 'крикруть' во время босса будут всегда отправленны исключительно на английском языке. Потенциально полезно, если в группе игроки с разными родными языками."
 
 L.slashDescTitle = "|cFFFED000Быстрые команды:|r"
 L.slashDescPull = "|cFFFED000/pull:|r Отправляет отсчет атаки в рейд."

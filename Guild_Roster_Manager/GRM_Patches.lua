@@ -4,7 +4,7 @@
 GRM_Patch = {};
 local patchNeeded = false;
 local DBGuildNames = {};
-local totalPatches = 122;
+local totalPatches = 125;
 local startTime = 0;
 local FID = 0;
 local PID = 0;
@@ -1502,6 +1502,41 @@ GRM_Patch.SettingsCheck = function ( numericV , count , patch )
         end
     end
 
+    -- 123
+    patchNum = patchNum + 1
+    if numericV < 1.9902 and baseValue < 1.9902 then
+        
+        GRM_Patch.EditSetting ( "levelFilters" , GRM_Patch.UpdateLevelFilterSOD );
+
+        GRM_AddonSettings_Save.VERSION = "R1.9902";
+        if loopCheck ( 1.9902 ) then
+            return;
+        end
+    end
+
+    -- 124
+    patchNum = patchNum + 1
+    if numericV < 1.9903 and baseValue < 1.9903 then
+        
+        GRM_Patch.EditSetting ( "GIModule" , GRM_Patch.CleanUpGroupInfo );
+
+        GRM_AddonSettings_Save.VERSION = "R1.9903";
+        if loopCheck ( 1.9903 ) then
+            return;
+        end
+    end
+
+    -- 125
+    if numericV < 1.9904 and baseValue < 1.9904 then
+        
+        GRM_Patch.ModifyMemberSpecificData ( GRM_Patch.FixWrathClassicEvokerBug , false , true , false , nil );
+
+        GRM_AddonSettings_Save.VERSION = "R1.9904";
+        if loopCheck ( 1.9904 ) then
+            return;
+        end
+    end
+
     GRM_Patch.FinalizeReportPatches( patchNeeded , numActions );
 end
 
@@ -1680,9 +1715,7 @@ GRM_Patch.EditSetting = function ( setting , valueOrLogic , additionalSetting )
                         GRM_AddoSnettings_Save[p][setting][additionalSetting] = valueOrLogic ( GRM_AddonSettings_Save[p][setting] );
                     end
                 else
-                    if not GRM_AddonSettings_Save[p][setting] then
-                        print(p);
-                    end
+
                     GRM_AddonSettings_Save[p][setting] = valueOrLogic ( GRM_AddonSettings_Save[p][setting] );
                 end
             else
@@ -7898,8 +7931,11 @@ GRM_Patch.ConvertSettingsToNewFormat = function()
                 end
 
                 if not listOfGuilds[name].done then
-
                     toonsInGuild = GRM.GetAddOnUserGuildAlts(name);
+                        print("test: " .. name)
+                    if not toonsInGuild then
+                        GRM_PlayerListOfAlts_Save[name] = {}
+                    end
 
                     if GRM.TableLength(toonsInGuild) > 0 then
                         -- Add all the alts of that account to the guild
@@ -8109,10 +8145,15 @@ GRM_Patch.ModifyJoinAndPromoteDates = function ( player )
 
     if player.joinDateHist then
         for i = 1 , #player.joinDateHist do
-            if player.joinDateHist[i][1] == 0 then
-                player.joinDateHist[i][4] = "0";
+
+            if player.joinDateHist[i][1] == nil or player.joinDateHist[i][2] == nil or player.joinDateHist[i][3] == nil then
+                player.joinDateHist[i] = { 0 , 0 , 0 , "0" , 0 , false , 1 };
             else
-                player.joinDateHist[i][4] = GRM.ConvertToStandardFormatDate ( player.joinDateHist[i][1] , player.joinDateHist[i][2] , player.joinDateHist[i][3] );
+                if player.joinDateHist[i][1] == 0 then
+                    player.joinDateHist[i][4] = "0";
+                else
+                    player.joinDateHist[i][4] = GRM.ConvertToStandardFormatDate ( player.joinDateHist[i][1] , player.joinDateHist[i][2] , player.joinDateHist[i][3] );
+                end
             end
         end
     else
@@ -8121,10 +8162,14 @@ GRM_Patch.ModifyJoinAndPromoteDates = function ( player )
 
     if player.rankHist then
         for i = 1 , #player.rankHist do
-            if player.rankHist[i][2] == 0 then
-                player.rankHist[i][5] = "0";
+            if player.rankHist[i][2] == nil or player.rankHist[i][3] == nil or player.rankHist[i][4] == nil then
+                player.joinDateHist[i] = { player.rankName , 0 , 0 , 0 , "0" , 0 , false , 1 };
             else
-                player.rankHist[i][5] = GRM.ConvertToStandardFormatDate ( player.rankHist[i][2] , player.rankHist[i][3] , player.rankHist[i][4] );
+                if player.rankHist[i][2] == 0 then
+                    player.rankHist[i][5] = "0";
+                else
+                    player.rankHist[i][5] = GRM.ConvertToStandardFormatDate ( player.rankHist[i][2] , player.rankHist[i][3] , player.rankHist[i][4] );
+                end
             end
         end
     else
@@ -8534,3 +8579,40 @@ GRM_Patch.FixHCModeData = function ( player )
     return player
 end
 
+-- R1.9902
+-- Method:          GRM_Patch.UpdateLevelFilterSOD ( table )
+-- What it Does:    Adds a new level filter option at index 9, which is for SOD
+-- Purpose:         All the control and syncing of the macro rules.
+GRM_Patch.UpdateLevelFilterSOD = function ( rules )
+
+    if #rules == 8 then
+        table.insert ( rules , true )
+    end
+
+    return rules;
+end
+
+-- R1.9904
+-- Method:          GRM_Patch.CleanUpGroupInfo ( table )
+-- What it Does:    Purges redundant settings
+-- Purpose:         Cleanup player settings from features due to Blizz restricting interact distance API
+GRM_Patch.CleanUpGroupInfo = function( setting )
+    
+    setting.InteractDistanceIndicator = nil;
+    setting.tradeIndicatorColorAny = nil;
+    setting.tradeIndicatorColorConnectedRealm = nil;
+
+    return setting;
+end
+
+-- Method:          GRM_Patch.FixWrathClassicEvokerBug ( playerTable )
+-- What it Does:    Checks if a player class is inccorect from some weird bug in classic and wrath that the GUID
+--                  was false-positive stating the player class was Evoker. Clears up old bug
+GRM_Patch.FixWrathClassicEvokerBug = function ( player )
+
+    if player.class == "EVOKER" then
+        player.class = "HUNTER";
+    end
+
+    return player;
+end

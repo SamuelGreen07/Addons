@@ -4817,13 +4817,13 @@ local northrendLocales = {
     ["Ahn'kahet"] = {
         ["ptBR"] = false,
         ["ruRU"] = "Ан'кахет",
-        ["deDE"] = false,
-        ["koKR"] = false,
+        ["deDE"] = true,
+        ["koKR"] = "안카헤트: 고대 왕국",
         ["esMX"] = false,
         ["enUS"] = true,
         ["frFR"] = false,
         ["esES"] = false,
-        ["zhTW"] = false,
+        ["zhTW"] = "安卡罕特",
         ["zhCN"] = false,
     },
     ["Fjorn's Anvil"] = {

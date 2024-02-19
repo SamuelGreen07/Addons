@@ -106,7 +106,7 @@ function QuestieLib:GetRGBForObjective(objective)
     end
 
     local float = objective.Collected / objective.Needed
-    local trackerColor = Questie.db.global.trackerColorObjectives
+    local trackerColor = Questie.db.profile.trackerColorObjectives
     if not trackerColor or trackerColor == "white" or trackerColor == "minimal" then
         -- White
         return "|cFFEEEEEE"
@@ -136,7 +136,7 @@ function QuestieLib:GetColoredQuestName(questId, showLevel, showState, blizzLike
         name = QuestieLib:GetQuestString(questId, name, level, blizzLike)
     end
 
-    if Questie.db.global.enableTooltipsQuestID then
+    if Questie.db.profile.enableTooltipsQuestID then
         name = name .. " (" .. questId .. ")"
     end
 
@@ -725,4 +725,15 @@ function QuestieLib:TextWrap(line, prefix, combineTrailing, desiredWidth)
         useLine = prefix .. line
         return { useLine }
     end
+end
+
+function QuestieLib.GetSpawnDistance(spawnA, spawnB)
+    local x1, y1 = spawnA[1], spawnA[2]
+    local x2, y2 = spawnB[1], spawnB[2]
+
+    -- Adjust the x-coordinate to account the map scale
+    local distanceX = (x1 - x2) * 1.5
+    local distanceY = y1 - y2
+
+    return math_sqrt(distanceX * distanceX + distanceY * distanceY)
 end

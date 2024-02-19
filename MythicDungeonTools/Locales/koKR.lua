@@ -1,4 +1,4 @@
-if not (GetLocale() == "koKR") then
+if not ((GAME_LOCALE or GetLocale()) == "koKR") then
   return
 end
 local addonName, MDT = ...
@@ -329,10 +329,14 @@ L["Chamber Sentinel"] = "묘실의 파수병"
 L["ChamberOfFlames"] = "Chamber of Flames"
 L["Champion Druna"] = "용사 드루나"
 L["Champion of Hodir"] = "호디르의 용사"
+--[[Translation missing --]]
+L["Change Language"] = "Change Language"
 L["Channeler Varisz"] = "역술사 바리즈"
 L["Chaotic Rift"] = "혼돈의 균열"
 L["Chargath, Bane of Scales"] = "비늘의 파멸 차르가스"
 L["Charged Dust Devil"] = "충전된 먼지 악마"
+--[[Translation missing --]]
+L["chatNoninteractiveWarning"] = "Chat frame is currently set to noninteractive, you will not be able to click on MDT routes."
 --[[Translation missing --]]
 L["Choose Enemy Forces Format"] = "Choose Enemy Forces Format"
 --[[Translation missing --]]
@@ -701,6 +705,8 @@ L["Emissary of the Tides"] = "파도의 사절"
 --[[Translation missing --]]
 L["Empty"] = "Empty"
 L["Empyrean Assassin"] = "창공의 암살자"
+--[[Translation missing --]]
+L["Enable Compartment Button"] = "Enable Compartment Button"
 L["Enable Minimap Button"] = "미니맵 아이콘을 켜기"
 L["Enchanted Broodling"] = "마력 깃든 무리거미"
 L["Enchanted Emissary"] = "마력에 빠진 사절"
@@ -739,7 +745,7 @@ L["Error Message:"] = "Error Message:"
 --[[Translation missing --]]
 L["errorLabel1"] = "MDT has encountered errors."
 --[[Translation missing --]]
-L["errorLabel2"] = "Please visist either GitHub or Discord and report the error message below."
+L["errorLabel2"] = "Please visit either GitHub or Discord and report the error message below."
 --[[Translation missing --]]
 L["errorLabel3"] = "Press CTRL + C to copy!"
 L["Erudite Slayer"] = "똘똘한 학살자"
@@ -1285,6 +1291,10 @@ L["Living Rot"] = "살아있는 부패물"
 L["Living Waste"] = "살아 있는 폐기물"
 L["Loatheb"] = "로데브"
 L["Local color blind mode"] = "현재 색각 보정 필터"
+--[[Translation missing --]]
+L["localeButtonTooltip1"] = "Requires the \"AddonLocale\" AddOn"
+--[[Translation missing --]]
+L["localeButtonTooltip2"] = "Click to start settings dialog in chat"
 L["Locked"] = "잠김"
 L["Loken"] = "로켄"
 L["Lord Chamberlain"] = "시종장"
@@ -1531,7 +1541,7 @@ L["Olmyr the Enlightened"] = "깨달은 자 올미르"
 L["Omega Buster"] = "오메가 섬멸로봇"
 L["Oozing Leftovers"] = "진물 찌꺼기"
 --[[Translation missing --]]
-L["Open an issue on GitHub"] = ""
+L["Open an issue on GitHub"] = "Open an issue on GitHub"
 L["Open MDI override options"] = "MDI 옵션을 재정의 열기"
 L["openSettingsTooltip"] = "클릭하여 설정 열기"
 L["Opera Hall Balcony"] = "오페라 극장 발코니"
@@ -1643,7 +1653,7 @@ L["Prison Gate"] = "감옥 문"
 L["Proto-Drake Handler"] = "원시비룡 조련사"
 L["Proto-Drake Rider"] = "원시비룡 기수"
 --[[Translation missing --]]
-L["Provide feedback in Discord"] = ""
+L["Provide feedback in Discord"] = "Provide feedback in Discord"
 L["Pull Drop Clear Pull"] = "초기화"
 L["Pull Drop Close"] = "닫기"
 L["Pull Drop Color"] = "색깔"
@@ -2295,6 +2305,8 @@ L["T'lonja"] = "트론자"
 --[[Translation missing --]]
 L["To share a different preset while the live session is active simply navigate to the preferred preset and click the new 'Set to Live' Button next to the preset-dropdown"] = "To share a different route while the live session is active simply navigate to the preferred route and click the new 'Set to Live' Button next to the route-dropdown"
 L["tocNotes"] = "신화 쐐기돌 던전을 계획하고 최적화하기를 위한 도구입니다"
+--[[Translation missing --]]
+L["Toggle MDT"] = "Toggle MDT"
 L["Toggle Window"] = "창을 열기/닫기"
 L["Toiling Groundskeeper"] = "느릿느릿한 관리인"
 L["Tol Dagor"] = "톨 다고르"
@@ -2405,6 +2417,8 @@ L["Urg'roth, Breaker of Heroes"] = "영웅학살자 우르그로스"
 L["Urh Relic"] = "우르 유물"
 L["Use /mdt reset to restore the default position and scale of MDT."] = "MDT의 위치와 규모가 기본으로 리싯하도록 '/mdt reset' 하시면 됩니다"
 L["Use as a starting point:"] = "출발점으로 사용하기"
+--[[Translation missing --]]
+L["Use forces count"] = "Use forces count in Sidebar"
 --[[Translation missing --]]
 L["Utgarde Keep"] = "Utgarde Keep"
 --[[Translation missing --]]
