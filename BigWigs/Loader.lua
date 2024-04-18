@@ -12,7 +12,7 @@ local strfind = string.find
 -- Generate our version variables
 --
 
-local BIGWIGS_VERSION = 322
+local BIGWIGS_VERSION = 326
 local BIGWIGS_RELEASE_STRING, BIGWIGS_VERSION_STRING
 local versionQueryString, versionResponseString = "Q^%d^%s^%d^%s", "V^%d^%s^%d^%s"
 local customGuildName = false
@@ -29,14 +29,14 @@ do
 	public.isVanilla = tbl.isVanilla
 	public.isTBC = tbl.isTBC
 	public.isWrath = tbl.isWrath
-	public.dbmPrefix = tbl.dbmPrefix
+	public.dbmPrefix = "D5"
 
 	-- START: MAGIC PACKAGER VOODOO VERSION STUFF
 	local REPO = "REPO"
 	local ALPHA = "ALPHA"
 
 	local releaseType
-	local myGitHash = "ddc4299" -- The ZIP packager will replace this with the Git hash.
+	local myGitHash = "6808000" -- The ZIP packager will replace this with the Git hash.
 	local releaseString
 	--[=[@alpha@
 	-- The following code will only be present in alpha ZIPs.
@@ -165,6 +165,7 @@ do
 	local lw_s = "LittleWigs_Shadowlands"
 	local lw_df = "LittleWigs_Dragonflight"
 	local lw_cs = "LittleWigs_CurrentSeason"
+	local cap = "Capping"
 
 	if public.isVanilla then
 		public.currentExpansion = {
@@ -209,6 +210,7 @@ do
 		--[[ BigWigs: Classic ]]--
 		[48] = c, -- Blackfathom Deeps [Classic Season of Discovery Only]
 		[90] = c, -- Gnomeregan [Classic Season of Discovery Only]
+		[109] = c, -- Sunken Temple [Classic Season of Discovery Only]
 		[309] = c, -- Zul'Gurub [Classic Only]
 		[409] = c, -- Molten Core
 		[469] = c, -- Blackwing Lair
@@ -410,6 +412,24 @@ do
 		[2526] = lw_df, -- Algeth'ar Academy
 		[2527] = lw_df, -- Halls of Infusion
 		[2579] = {lw_df, lw_cs}, -- Dawn of the Infinite
+
+		--[[ Capping ]]--
+		[30] = cap, -- Alterac Valley
+		[2197] = cap, -- Alterac Valley (Korrak's Revenge)
+		[2107] = cap, -- Arathi Basin
+		[1681] = cap, -- Arathi Basin (Snowy PvP Brawl)
+		[2177] = cap, -- Arathi Basin (Players vs AI Brawl)
+		[529] = cap, -- Arathi Basin (Classic)
+		[1191] = cap, -- Ashran
+		[2245] = cap, -- Deepwind Gorge
+		[566] = cap, -- Eye of the Storm
+		[968] = cap, -- Eye of the Storm (Rated BG)
+		[761] = cap, -- Gilneas
+		[628] = cap, -- Isle of Conquest
+		[726] = cap, -- Twin Peaks
+		[2106] = cap, -- Warsong Gulch
+		[489] = cap, -- Warsong Gulch (Classic)
+		[2118] = cap, -- Wintergrasp
 	}
 
 	public.zoneTblWorld = {
@@ -846,7 +866,10 @@ function mod:ADDON_LOADED(addon)
 	bwFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
 
 	bwFrame:RegisterEvent("CHAT_MSG_ADDON")
-	RegisterAddonMessagePrefix("BigWigs")
+	local success = RegisterAddonMessagePrefix("BigWigs")
+	if not success then
+		sysprint("Failed to register the BigWigs addon message prefix.")
+	end
 	RegisterAddonMessagePrefix(dbmPrefix) -- DBM
 
 	-- LibDBIcon setup
@@ -1269,13 +1292,12 @@ end
 --
 
 do
-	local _, tbl = ...
-	local DBMdotRevision = tbl.dbmRevision -- The changing version of the local client, changes with every new zip using the project-date-integer packager replacement.
-	local DBMdotDisplayVersion = tbl.dbmDisplayVersion -- "N.N.N" for a release and "N.N.N alpha" for the alpha duration.
-	local DBMdotReleaseRevision = tbl.dbmReleaseRevision -- Hardcoded time, manually changed every release, they use it to track the highest release version, a new DBM release is the only time it will change.
-	local protocol = 2
+	local DBMdotRevision = "20240402112844" -- The changing version of the local client, changes with every new zip using the project-date-integer packager replacement.
+	local DBMdotDisplayVersion = "10.2.32" -- "N.N.N" for a release and "N.N.N alpha" for the alpha duration.
+	local DBMdotReleaseRevision = "20240402000000" -- Hardcoded time, manually changed every release, they use it to track the highest release version, a new DBM release is the only time it will change.
+	local protocol = 3
 	local versionPrefix = "V"
-	local PForceDisable = tbl.dbmPForceDisable
+	local PForceDisable = 10
 
 	local timer = nil
 	local function sendMsg()

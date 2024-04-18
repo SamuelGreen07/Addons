@@ -27,14 +27,19 @@ L.near = "%s vicino A TE"
 L.on_group = "%s sul GRUPPO" -- spell on group
 L.boss = "BOSS"
 L.plus = "%s + %s" -- Spell 1 + Spell 2
+L.extra = "%s (%s)" -- SPELL_NAME (short spell name or extra information)
 
 L.phase = "Fase %d"
 L.stage = "Fase %d"
+--L.wave = "Wave %d" -- e.g. "Wave 1" (Waves of adds)
+--L.wave_count = "Wave %d of %d" -- Wave 1 of 3 (Usually waves of adds)
 L.normal = "Modalità Normale"
 L.heroic = "Modalità Eroica"
 L.mythic = "Modalità Mitica"
 L.hard = "Modalità Difficile"
 L.active = "Attivo" -- When a boss becomes active, after speech finishes
+L.ready = "Pronto" -- When a player is ready to do something
+L.dead = "Morto" -- When a player is dead
 L.general = "Generali" -- General settings, i.e. things that apply to normal, heroic and mythic mode.
 --L.health = "Health" -- The health of an NPC
 --L.health_percent = "%d%% Health" -- "10% Health" The health percentage of an NPC
@@ -50,11 +55,12 @@ L.removed_after = "%s rimosso dopo %.1fs" -- "Spell removed after 1.1s" (s = sec
 L.incoming = "%s Tra Poco" -- Spell Incoming
 L.interrupted = "%s Interrotto" -- Spell Interrupted
 L.interrupted_by = "%s interrotto da %s" -- Spell interrupted by Player
+--L.interruptible = "Interruptible" -- when a spell is interruptible
 L.no = "Nessun %s" -- No Spell
 L.intermission = "Intermezzo"
 L.percent = "%d%% - %s" -- 20% - Spell
 L.cancelled = "%s Cancellata" -- Spell Cancelled
-L.you_die = "Tu muori"
+L.you_die = "Tu muori" -- You will die
 L.you_die_sec = "Morirai in %d sec" -- "You die in 15 sec" (sec = seconds)
 --L.next_ability = "Next ability" -- We don't know what ability will be next, we only know when it will happen (showing a bar)
 
@@ -92,8 +98,9 @@ L.affixes = "Modificatori" -- Seasonal affixes for raids and mythic+ dungeons
 
 -- Common raid marking locale
 L.marker = "Icona bersaglio %s"
-L.marker_player_desc = "Marchia i giocatori affetti da %s con %s, necessario ruolo assistente o capo."
-L.marker_npc_desc = "Marchia %s con %s, necessario ruolo assistente o capo."
+L.marker_player_desc = "Marchia i giocatori affetti da %s con %s, necessario ruolo assistente o capo." -- Mark players affected by 'SPELL_NAME' with SKULL_ICON
+L.marker_npc_desc = "Marchia %s con %s, necessario ruolo assistente o capo." -- Mark NPC_NAME with SKULL_ICON
+--L.marker_npc_aura_desc = "Mark NPCs affected by '%s' with %s, requires promoted or leader." -- Mark NPCs affected by 'SPELL_NAME' with SKULL_ICON
 
 -- Ability where two players have to move close to each other
 L.link = "Vincolo"

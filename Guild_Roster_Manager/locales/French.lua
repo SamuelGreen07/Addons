@@ -387,9 +387,6 @@ GRML.French = function()
 
     -- ERROR MESSAGES
     GRM_L["Notification Has Already Been Arranged..."] = "La notification a déjà été planifiée..."
-    GRM_L["Failed to add alt for unknown reason. Try closing Roster window and retrying!"] = "Échec de l'enregistrement pour une raison inconnue. Merci de fermer la fenêtre et réessayer !"
-    GRM_L["{name} is Already Listed as an Alt."] = "{name} est déjà enregistré comme Alt."
-    GRM_L["{name} cannot become their own alt!"] = "{name} ne peut pas être son propre Alt !"
     GRM_L["Player Cannot Add Themselves as an Alt"] = "Le joueur ne peut pas s'ajouter lui-même comme Alt"
     GRM_L["Player Not Found"] = "Joueur introuvable"
     GRM_L["Please try again momentarily... Updating the Guild Event Log as we speak!"] = "Veuillez de réessayer dans un moment... Mise à jour du journal des événements de la guilde au moment où nous parlons !"
@@ -1062,7 +1059,7 @@ GRML.French = function()
     GRM_L["!note"] = true               -- !note in English will always work. This gives you the option of creating your own key to register a public note.
     GRM_L["No officer online to set {name}'s note"] = true
     GRM_L["No officer is currently online to update your note"] = true
-    GRM_L["Allow Guild Members to Type \"!note\" to Set Their Own Public Note"] = true
+    GRM_L["Allow Guild Members to Type \"!note notehere\" to Set Their Own Public Note"] = true
     GRM_L["Enabled"] = true         -- As in, the opposite of Disabled
     GRM_L["'!note' trigger has been globally ENABLED"] = true
     GRM_L["'!note' trigger has been globally DISABLED"] = true
@@ -1222,13 +1219,12 @@ GRML.French = function()
     GRM_L["Ranks:"] = true
     GRM_L["All Ranks"] = true
     GRM_L["Note Match:"] = true
-    GRM_L["Please Set a Name for this Rule. It can be 1 to 25 characters in length."] = true
+    GRM_L["Please Set a Name for this Rule. It can be 1 to 30 characters in length."] = true
     GRM_L["This will also clear all of your saved rules."] = true
     GRM_L["Within Level Range: {num} - {custom1}"] = true               -- Qued macro tool tooltip
     GRM_L["Note match: {name}"] = true                                  -- Same
     GRM_L["Matching Rank"] = true                                       -- ''
     GRM_L["Right-Click|r to Edit or Remove custom rule"] = true         -- Please keep the '|r' immediately after the click info - as it indicates a text color change point
-    GRM_L["|CFFE6CC7FClick|r to Change"] = true
     GRM_L["(Applies Only to Classic)"] = true           -- For the Options... rather than removing them all
     
     -- R1.88
@@ -1438,16 +1434,12 @@ GRML.French = function()
 
     -- 1.93
     GRM_L["Customize Color"] = true
-    GRM_L["GRM has detected that FGI is blocking system messages and cannot function properly without them. Do you want to enable them?"] = true        -- FGI is in reference to the "Fast Guild Invite" addon...
-    GRM_L["GRM has detected that System Messages are disabled and cannot function properly without them. Do you want to enable them?"] = true
-    GRM_L["System Messages have been enabled and GRM should now function properly."] = true
     GRM_L["Officer Only Access"] = true   -- Tooltip on the advanced join date tool button
     GRM_L["Player no longer has officer access. Advanced Join Date Tool has been closed."] = true
     GRM_L["{custom1} to open Player Window"] = true
     GRM_L["{custom1} for Additional Options"] = "{custom1} pour plus d'options"
 
     --1.93
-    GRM_L["Please Note: To permanently enable system messages, you must manually re-enable them in your chat window general settings"] = true
     GRM_L["Unable to notify yourself if you go offline."] = true
     GRM_L["{custom1} to sync join date among all alts in grouping."] = true
     GRM_L["Total Patch Time:"] = true
@@ -1604,7 +1596,7 @@ GRML.French = function()
     GRM_L["Transfer Tool Guide"] = true
     GRM_L["Step-by-Step guide on how to use transfer tool"] = true
     GRM_L["Step {num}:"] = true  -- Step 1: , Step 2: etc...
-    GRM_L["Click \"Set Restore Point\" to the guild you are currently in (remove the old if necessary)."] = true
+    GRM_L["Click \"Set Restore Point\" to the guild you are currently in (remove save first if one already exists)."] = true
     GRM_L["Initiate the guild transfer process."] = true
     GRM_L["Log into the new guild on the new server."] = true
     GRM_L["Open the Restore Tab again and click \"Transfer Data\" from your old guild. Confirm YES."] = true
@@ -1667,7 +1659,7 @@ GRML.French = function()
     
     -- R1.990
     GRM_L["M+ Score" ] = true
-    GRM_L["Search Public and Officer Notes"] = true
+    GRM_L["Search Public, Officer, and Custom Notes"] = true
     GRM_L["Note Search"] = true
     GRM_L["Tips"] = true    -- Options > Help tab - "Tips" as in helpful info.
     GRM_L["Hold the CONTROL key down to scroll 3x the speed"] = true
@@ -1753,8 +1745,6 @@ GRML.French = function()
     GRM_L["Unable to kick or demote players within the guild at current rank."] = true
     GRM_L["Unable to kick or promote players within the guild at current rank."] = true
     GRM_L["Unable to kick players within the guild at current rank."] = true
-    GRM_L["{name}'s Main Rank Sync Rule {num}"] = true
-    GRM_L["{name}'s Repeated Inactivity Rule {num}"] = true
     GRM_L["Please Select Special Macro Rule"] = true
     GRM_L["Alt Group Rank Sync"] = true
     GRM_L["Repeated Inactivity Monitor"] = true
@@ -1762,5 +1752,49 @@ GRML.French = function()
     -- R1.9904
     GRM_L["If disabled, a one time scan is still done at login or reload."] = true
 
+    -- R1.9906
+    GRM_L["To access the color wheel, due to a compatibility issue that began in 10.2.5, you will need to reload the UI. Do you wish to reload now?"] = true
+    
+    -- R1.9907
+    GRM_L["Alt Group Rule {num}"] = true
+    GRM_L["Promote/Demote Alts to Same Rank as Main"] = true
+    GRM_L["Promote/Demote Alts to Rank:"] = true
+    GRM_L["Promote Alts to Same Rank as Main"] = true
+    GRM_L["Promote Alts to Rank:"] = true
+    GRM_L["Please Choose a Destination Rank for Alts."] = true
+    GRM_L["Apply to Mains at:"] = true
+    GRM_L["Only Selected Ranks"] = true
+    GRM_L["Ignore if Offline for:"] = true
+    GRM_L["{custom1} to Change."] = true        -- "Click to change"
+    GRM_L["Sync Alts to Main:"] = true
+    GRM_L["Main's Rank: {name}"] = true      -- Example: "Main's Rank: Guild Leader"
+    GRM_L["Alt's Rank: {name}"] = true
+    GRM_L["Destination Rank: {name}"] = true
+    GRM_L["Up 1 Rank"] = true
+    GRM_L["Up {num} Ranks"] = true
+    GRM_L["Down 1 Rank"] = true
+    GRM_L["Down {num} Ranks"] = true
+    GRM_L["Ignore Alt Promotion if Offline for {num} {name}"] = true
+    GRM_L["No Restrictions"] = true
+    GRM_L["Special Rule"] = true
+    GRM_L["{num} Players are Ready for {name}."] = true
+    GRM_L["1 Player is Ready for {name}."] = true
+    GRM_L["Promotion"] = true
+    GRM_L["Demotion"] = true
+    GRM_L["Disable Demote Option. Only Promote Players"] = true
+    GRM_L["Unable to Move Alts to this Rank"] = true;
+
+    -- R1.9909
+    GRM_L["When you are ready to Move the player, press the Hot-Key {name} 1 time to complete all actions"] = true
+    GRM_L["When you are ready to move the players, press the Hot-Key {name} {num} times to complete all actions"] = true
+    
+    -- R1.99094
+    GRM_L["For GRM to log guild member deaths, you will need to join the \"{name}\" channel. Do you wish to join?"] = true
+    GRM_L["You will not be asked this again."] = true
+    GRM_L["Please note, GRM will now track the deaths behind the scenes. If you wish to see the full server message, you will need to manually enable in the General Chat Settings."] = true
+    GRM_L["Joined \"{name}\" Channel to Track Deaths"] = true
+    GRM_L["HardcoreDeaths"] = true      -- Default Placeholder
+    GRM_L["Joined \"{name}\" Channel to Track Deaths"] = true
+    GRM_L["Configuring channel... one moment."] = true
     
 end

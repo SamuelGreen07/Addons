@@ -254,11 +254,23 @@ function SeasonOfDiscovery:LoadObjects()
                 [zoneIDs.WESTFALL] = {{37.4, 50.7}},
             },
         },
+        [419741] = { -- Sacrificial Altar
+            [objectKeys.zoneID] = zoneIDs.DESOLACE,
+            [objectKeys.spawns] = {
+                [zoneIDs.DESOLACE] = {{81.4,79.8}},
+            },
+        },
         [420055] = { -- Rowboat
             [objectKeys.zoneID] = zoneIDs.ARATHI_HIGHLANDS,
             [objectKeys.spawns] = {
                 [zoneIDs.ARATHI_HIGHLANDS] = {{53.7,91.9}},
                 [zoneIDs.WETLANDS] = {{58.31,6.94}},
+            },
+        },
+        [422895] = {
+            [objectKeys.zoneID] = zoneIDs.DESOLACE,
+            [objectKeys.spawns] = {
+                [zoneIDs.DESOLACE] = {{39,57}},
             },
         },
         [423898] = { -- Mysterious Book
@@ -268,9 +280,9 @@ function SeasonOfDiscovery:LoadObjects()
             },
         },
         [424074] = { -- Quadrangulation Beacon 001
-            [objectKeys.zoneID] = zoneIDs.TANARIS,
+            [objectKeys.zoneID] = zoneIDs.DUSTWALLOW_MARSH,
             [objectKeys.spawns] = {
-                [zoneIDs.TANARIS] = {{37.8, 27.3}},
+                [zoneIDs.DUSTWALLOW_MARSH] = {{58.6, 13.0}},
             },
         },
         [424075] = { -- Quadrangulation Beacon 002
@@ -280,15 +292,23 @@ function SeasonOfDiscovery:LoadObjects()
             },
         },
         [424076] = { -- Quadrangulation Beacon 003
+            [objectKeys.zoneID] = zoneIDs.TANARIS,
+            [objectKeys.spawns] = {
+                [zoneIDs.TANARIS] = {{37.8, 27.3}},
+            },
+        },
+        [424077] = { -- Quadrangulation Beacon 004
             [objectKeys.zoneID] = zoneIDs.FERALAS,
             [objectKeys.spawns] = {
                 [zoneIDs.FERALAS] = {{29.3, 93.8}},
             },
         },
-        [424077] = { -- Quadrangulation Beacon 004
-            [objectKeys.zoneID] = zoneIDs.DUSTWALLOW_MARSH,
+        [424082] = {
+            [objectKeys.spawns] = {},
+        },
+        [424264] = { -- Grave
             [objectKeys.spawns] = {
-                [zoneIDs.DUSTWALLOW_MARSH] = {{58.6, 13.0}},
+                [zoneIDs.DUSTWALLOW_MARSH] = {{63.7, 42.4}},
             },
         },
         [424265] = { -- Grave
@@ -307,6 +327,12 @@ function SeasonOfDiscovery:LoadObjects()
             [objectKeys.zoneID] = zoneIDs.ARATHI_HIGHLANDS,
             [objectKeys.spawns] = {
                 [zoneIDs.ARATHI_HIGHLANDS] = {{62,54}},
+            },
+        },
+        [441848] = { -- Small Burrow
+            [objectKeys.zoneID] = zoneIDs.STRANGLETHORN_VALE,
+            [objectKeys.spawns] = {
+                [zoneIDs.STRANGLETHORN_VALE] = {{40.75,85.72}},
             },
         },
 
@@ -421,6 +447,27 @@ function SeasonOfDiscovery:LoadObjects()
             [objectKeys.zoneID] = zoneIDs.DESOLACE,
             [objectKeys.spawns] = {
                 [zoneIDs.DESOLACE] = {{70.0, 70.0}},
+            },
+        },
+        [450016] = {
+            [objectKeys.name] = "Strahnbrad Bellows",
+            [objectKeys.zoneID] = zoneIDs.ALTERAC_MOUNTAINS,
+            [objectKeys.spawns] = {
+                [zoneIDs.ALTERAC_MOUNTAINS] = {{60.0, 46.4}},
+            },
+        },
+        [450017] = {
+            [objectKeys.name] = "Crate",
+            [objectKeys.zoneID] = zoneIDs.MOONGLADE,
+            [objectKeys.spawns] = {
+                [zoneIDs.MOONGLADE] = {{55.6,66.5}},
+            },
+        },
+        [450018] = {
+            [objectKeys.name] = "Soft Soil",
+            [objectKeys.zoneID] = zoneIDs.ARATHI_HIGHLANDS,
+            [objectKeys.spawns] = {
+                [zoneIDs.ARATHI_HIGHLANDS] = {{34,44}},
             },
         },
     }

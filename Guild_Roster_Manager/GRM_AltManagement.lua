@@ -391,7 +391,6 @@ GRM.AddAlt = function ( playerName , altName , isSync , syncTimeStamp )
     else
         local player = GRM.GetPlayer ( playerName );
         local alt = GRM.GetPlayer ( altName );
-        local classMain , classAlt = "" , "";
         local timeOfChange = syncTimeStamp or time();
         
         -- Method:          Adding alt to the player grouping
@@ -435,11 +434,7 @@ GRM.AddAlt = function ( playerName , altName , isSync , syncTimeStamp )
         -- END FUNCTION
 
         -- Error Protection check
-        if alt and player then
-            classMain = player.class;
-            classAlt = alt.class;
-
-        else
+        if not alt or not player then
             if not isSync then
                 GRM.Report ( GRM.L ( "GRM:" ) .. " " .. GRM.L ( "Failed to add alt for unknown reason. Try closing Roster window and retrying!" ) );
             end
@@ -861,7 +856,7 @@ end
 -- Purpose:         Birthday is universal of an alt grouping... keeps them together.
 -- Note:            It does leave a timstamp of the change so that you will not resync the player data again from other players, if you wanted to remove the bday.
 --                  This is a unique removal to just yourself.
-GRM.ResetBirthdayForAltGroup = function ( name , isLiveSync , num , sender , isUnknown )
+GRM.ResetBirthdayForAltGroup = function ( name , isLiveSync , num , isUnknown )
 
     local player = GRM.GetPlayer ( name );
 
@@ -1079,7 +1074,6 @@ GRM.DemoteFromMain = function ( mainName , timestamp )
     end
 
     local player = GRM.GetPlayer ( mainName );
-    local timeS = timestamp or time();
     
     if player then
 
@@ -1359,7 +1353,6 @@ GRM.PopulateAltFrames = function ( playerName )
             if button == "RightButton" then
                 
                 -- Parse the button number, so the alt position can be identified...
-                local altNum = tonumber ( string.match ( self:GetName() , "%d" ) );
                 local isMain = false;
 
                 -- Ok, populate the buttons properly...
@@ -1503,7 +1496,6 @@ GRM.GetSortedAltNamesWithDetails = function ( playerName )
 
     if player and GRM.PlayerHasAlts ( player ) then
         local alts = GRM.GetListOfAlts ( player );
-        local numAlts = #alts - 1;
 
         -- Build the list of alts.
         for r = 1 , #alts do
@@ -1806,7 +1798,6 @@ end
 GRM.GetAltWithOldestJoinDate = function ( playerName )
     local player = GRM.GetPlayer ( playerName );
     local oldestPlayer = { playerName , 0 };
-    local day , nonth, year = 0 , 0 , 0;
     local oldestDate = "";
     
     if player then
@@ -1903,5 +1894,40 @@ GRM.PlayerOrAltHasJD = function ( playerName )
             end
         end
     end
+    return result;
+end
+
+-- Method:          GRM.GetFullDatabaseAltsWithMain()
+-- What it Does:    Returns a table with the names of all mains, with all their alts underneath
+-- Purpose:         Useful when checking special rules for syncing alt to main rank or designated.
+GRM.GetFullDatabaseAltsWithMain = function()
+    local altGroups = GRM.GetGuildAlts();
+    local result = {};
+    local player = {};
+
+    for id in pairs ( altGroups ) do
+        local group = altGroups[id];
+        if #group > 1 and group.main ~= "" then     -- Group size of 1 is just a main with no alts.
+            player = GRM.GetPlayer ( group.main );
+
+            if player then
+                result[group.main] = {};
+                result[group.main].rankIndex = player.rankIndex;
+
+                for i = 1 , #group do
+                    player = GRM.GetPlayer ( group[i].name );
+                    if player and player.name ~= group.main then
+                        result[group.main][group[i].name] = {};
+                        result[group.main][group[i].name].name = player.name;
+                        result[group.main][group[i].name].class = player.class;
+                        result[group.main][group[i].name].rankIndex = player.rankIndex;
+                        result[group.main][group[i].name].lastOnline = player.lastOnline;
+                        result[group.main][group[i].name].level = player.level;
+                    end
+                end
+            end
+        end
+    end
+
     return result;
 end

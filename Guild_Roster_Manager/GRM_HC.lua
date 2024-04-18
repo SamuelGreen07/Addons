@@ -4,24 +4,55 @@
 -- Live collection of when someone has died
 
 local GRM_HC = {};
-local deathEvent = "GUILD_MEMBER_DIED" ;
 
 GRM_HC.deathEvent = CreateFrame ( "Frame" );
 
 GRM_HC.HardCoreInitialize = function()
 
+    local region = {
+        ["enUS"] = "HardcoreDeaths",
+        ["ptBR"] = "MortesHardcore",
+        ["esMX"] = "MuertesEnExtremo",
+        ["esES"] = "MuertesHardcore",
+        ["deDE"] = "HardcoreTode",
+        ["frFR"] = "Morts",
+        ["ruRU"] = "ГероическиеСмерти",
+        ["koKR"] = "하드코어",
+        ["zhCN"] = "专家死亡",
+        ["zhTW"] = "專家模式玩家死亡",
+    }
+
+    GRM_G.HardCoreDeaths = region[GRM_G.Region];
+    
     if C_GameRules and C_GameRules.IsHardcoreActive() then
         GRM_G.HardcoreActive = true;
 
-        GRM_HC.deathEvent:RegisterEvent ( deathEvent );
-        GRM_HC.deathEvent:SetScript ( "OnEvent" , function ( _ , event , name ) 
+        GRM_HC.deathEvent:RegisterEvent ( "CHAT_MSG_CHANNEL" );
+        GRM_HC.deathEvent:SetScript ( "OnEvent" , function ( _ , _ , text , playerName , _ , _ ,  _ , _ , _ , _ , channel )
 
-            if event == deathEvent then
-                GRM_HC.LogDeath ( name );
+            if GRM_G.HardCoreDeaths == channel then
+                local name = GRM_HC.ParseOutPlayerName ( text );
+
+                if name then
+                    local player = GRM.GetPlayer ( name , true );
+                    if player then
+                        print("GUILD MEMBER DEATH: " .. name)
+                        GRM_HC.LogDeath ( player.name );
+                    end
+                end
+                
+                print("DEATH1: " .. text)
             end
 
         end);
 
+        -- Method:          GRM.GetParsedJoinPlayerName ( string )
+        -- What it Does:    Parses out the player name from the death report all 11 clients
+        -- Purpose:         To live determine the name of the player that died
+        GRM_HC.ParseOutPlayerName = function ( text )
+            return text:match ( "%[([^%]]+)%]" );
+        end
+        
         -- Method:          GRM_HC.LogDeath ( string )
         -- What it Does:    Logs the death of the player
         -- Purpose:         Ensure accurate time reporting of a player's death.
@@ -55,7 +86,7 @@ GRM_HC.HardCoreInitialize = function()
         -- Purpose:         Report on when a player dies... Useful since there is not UI Interface
         GRM_HC.ExportDeathTag = function ( player , dateArray )
             for i = 1 , GRM.GetNumGuildies() do
-                local memberName , _ , _ , _ , _ , _ , memberNote , officerNote = GetGuildRosterInfo ( i );
+                local memberName , _ , _ , _ , _ , _ , memberNote = GetGuildRosterInfo ( i );
                 
                 if memberName == player.name then
                     if not memberNote:find ( "%[" .. GRM.L ( "D" ) .. "%]" ) then
@@ -138,7 +169,7 @@ GRM_HC.HardCoreInitialize = function()
         -- Purpose:         Death reporting feature.
         GRM_HC.ReportDeathToLog = function ( name , class , level , dateArray )
             
-            local logReportWithTime , logReport = GRM.GetDeathString ( name , class , level , dateArray );
+            local logReportWithTime = GRM.GetDeathString ( name , class , level , dateArray );
 
             -- No need to report to chat since the chat already notifies everyone in guild.
             GRM.AddLog ( { 24 , logReportWithTime , name , class , level , dateArray } );
@@ -173,7 +204,7 @@ GRM_HC.HardCoreInitialize = function()
                 return deathReport;
             end
 
-            for name , player in pairs ( guild ) do
+            for _ , player in pairs ( guild ) do
                 if type (player) == "table" then
                     if player.HC.isDead then
                         if not levelRange or ( levelRange and ( player.level >= levelRange[1] and player.level <= levelRange[2] ) ) then
@@ -183,7 +214,7 @@ GRM_HC.HardCoreInitialize = function()
                 end
             end
 
-            for name , player in pairs ( formerGuild ) do
+            for _ , player in pairs ( formerGuild ) do
                 if type (player) == "table" then
                     if player.HC.isDead then
                         if not levelRange or ( levelRange and ( player.level >= levelRange[1] and player.level <= levelRange[2] ) ) then
@@ -253,6 +284,7 @@ GRM_HC.HardCoreInitialize = function()
             local delimiter = "";
             local playerDetails = "";
             local isMergedRealm = GRM.IsMergedRealmServer();
+            local name = "";
 
             if GRM.S().exportDelimiter[1] then
                 delimiter = GRM.S().exportDelimiter[2];
@@ -326,8 +358,48 @@ GRM_HC.HardCoreInitialize = function()
             end
         end
 
-    end
+        -- Method:          GRM_UI.VerifyIfHCChannelsEnabled()
+        -- What it Does:    Verifies the hardcore death channel is enabled, due to the event listening change in 1.15.2, and if not, an option to enable it.
+        -- Purpose:         This entire feature can only work if this is enabled.
+        GRM_UI.VerifyIfHCChannelsEnabled = function()
+            if GRM_UI.ChannelEnabled ( GRM_G.HardCoreDeaths ) then
+                return;
+            end
 
+            if not GRM.S().ignoreDeathChannel then
+                -- Enable or Disable the text
+                local IsDeathChatEnabled = function()
+                    local list = FCF_GetCurrentChatFrame().channelList;
+                    for i = 1 , #list do
+                        if list[i] == GRM_G.HardCoreDeaths then
+                            return true;
+                        end
+                    end
+
+                    return false;
+                end
+
+                local EnabledChannel = function()
+                    JoinChannelByName ( GRM_G.HardCoreDeaths );
+                    GRM.S().ignoreDeathChannel = true;
+                    GRM.Report ( GRM.L ( "Please note, GRM will now track the deaths behind the scenes. If you wish to see the full server message, you will need to manually enable in the General Chat Settings." ) );
+
+                    if GRM_UI.GRM_RosterChangeLogFrame.GRM_OptionsFrame.GRM_HardcoreFrame:IsVisible() then
+                        GRM_UI.ConfigureHCOptions();
+                    end
+                end
+
+                local IgnoreDeathChannel = function()
+                    GRM.S().ignoreDeathChannel = true;
+                end
+
+                local msg = GRM.L("You will not be asked this again.")
+                GRM.InitiateConfirmFrame ( GRM.L ( "For GRM to log guild member deaths, you will need to join the \"{name}\" channel. Do you wish to join?" , GRM_G.HardCoreDeaths ) .. "\n\n" .. msg , EnabledChannel , nil , nil , IgnoreDeathChannel , false , 375 , 140 );
+            end
+
+            return false;            
+        end
+    end
 end
 
 GRM_HC.HardCoreInitialize();

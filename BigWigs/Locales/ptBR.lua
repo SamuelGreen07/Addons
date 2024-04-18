@@ -16,10 +16,10 @@ L.proximity = "Exibição de proximidade"
 L.proximity_desc = "Mostra a janela de proximidade quando for apropriada para este encontro, listando os jogadores que estão muito pertos de você."
 L.adds = "Adds"
 L.adds_desc = "Ativar funções relacionadas aos vários adds que aparecerão durante o encontro com o chefe."
---L.health = "Health"
---L.health_desc = "Enable functions for displaying various health information during the boss encounter."
+L.health = "Vida"
+L.health_desc = "Ativa funções para exibir várias informações de vida durante o encontro com o chefe."
 
-L.already_registered = "|cffff0000ATENÇÃO:|r |cff00ff00%s|r (|cffffff00%s|r) já existe como um módulo do BigWigs, mas as vezes ele tenta registra-lo novamente. Isso normalmente significa que você tem duas cópias deste módulo na sua pasta de addOns devido a alguma falha ao atualizar um addOn. É recomendado que você delete todas as pastas do BigWigs existentes e reinstale-o novamente."
+L.already_registered = "|cffff0000ATENÇÃO:|r |cff00ff00%s|r (|cffffff00%s|r) já existe como um módulo do BigWigs, mas as vezes ele tenta registra-lo novamente. Isso normalmente significa que você tem duas cópias deste módulo na sua pasta de addons devido a alguma falha ao atualizar um addon. É recomendado que você delete todas as pastas do BigWigs existentes e reinstale-o novamente."
 L.testNameplate = "Alvo detectado, criando uma barra de identificação teste sobre a barra de identificação do alvo. |cFF33FF99Essa função é raramente usada, normalmente é somente 1 barra, e é necessária para manter o rastreio de recargas quando lutando com múltiplos chefes/adds que conjuram a mesma magia.|r"
 
 -- Loader / Options.lua
@@ -47,18 +47,18 @@ L.disabledAddOn = "Você desabilitou o addOn |cFF436EEE%s|r, contadores não ser
 L.removeAddOn = "Por favor remova '|cFF436EEE%s|r' porque este foi substituído por '|cFF436EEE%s|r'."
 L.alternativeName = "%s (|cFF436EEE%s|r)"
 
---L.expansionNames = {
---	"Classic", -- Classic
---	"The Burning Crusade", -- The Burning Crusade
---	"Wrath of the Lich King", -- Wrath of the Lich King
---	"Cataclysm", -- Cataclysm
---	"Mists of Pandaria", -- Mists of Pandaria
---	"Warlords of Draenor", -- Warlords of Draenor
---	"Legion", -- Legion
---	"Battle for Azeroth", -- Battle for Azeroth
---	"Shadowlands", -- Shadowlands
---	"Dragonflight", -- Dragonflight
---}
+L.expansionNames = {
+	"Classic", -- Classic
+	"The Burning Crusade", -- The Burning Crusade
+	"Wrath of the Lich King", -- Wrath of the Lich King
+	"Cataclysm", -- Cataclysm
+	"Mists of Pandaria", -- Mists of Pandaria
+	"Warlords of Draenor", -- Warlords of Draenor
+	"Legion", -- Legion
+	"Battle for Azeroth", -- Battle for Azeroth
+	"Shadowlands", -- Shadowlands
+	"Dragonflight", -- Dragonflight
+}
 L.currentSeason = "Temporada Atual"
 
 -- Media.lua (These are the names of the sounds in the dropdown list in the "sounds" section)
@@ -82,8 +82,6 @@ L.toggleAnchorsBtnHide_desc = "Esconde todas as âncoras de movimentação, trav
 L.testBarsBtn = "Criar Barra de Teste"
 L.testBarsBtn_desc = "Criar uma barra para você testar suas configurações de exibição atuais"
 L.sound = "Som"
-L.flashScreen = "Piscar a tela"
-L.flashScreenDesc = "Certas habilidades são importantes o suficiente para precisar de atenção total. Quando essas habilidades afetam você, BigWigs pode piscar a tela."
 L.minimapIcon = "Ícone do minimapa"
 L.minimapToggle = "Altera mostrar/ocultar o ícone do minimapa."
 L.compartmentMenu = "Sem icone de compartimento"

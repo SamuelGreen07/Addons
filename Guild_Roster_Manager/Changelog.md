@@ -1,3 +1,154 @@
+## **VERSION 1.99094 RELEASE - April 11th 2024**
+
+***BUG FIXES***
+
+* Classic Hardcore should now be working again, as well as be compatible with the new way of tracking Hardcore deaths by way of the global hardcore death channel.
+
+* Fixed an issue where there would be a mouseover error on certain players and would cause the audit log to fail to load
+
+* The "Cancel" button should once again work on the Custom Note when editing it. It seems you either had to hit ESC or Confirm the note to get off focus. The cancel button is now working properly.
+
+## **VERSION 1.99093 RELEASE - April 6th 2024**
+
+* Compatibility release for Season of Discovery Season 3
+
+* When using the Special macro tool in any language but English, you should no longer receive a "Missing Key" message.
+
+## **VERSION 1.99092 RELEASE - March 23rd 2024**
+
+* Fixed a bug if a player is using certain macro rule filters that could trigger an error and crash the scan for changes and prevent new updates from being saved.
+
+## **VERSION 1.9909 RELEASE - March 21st 2024**
+
+***BUG FIXES***
+
+* The Special macro rule should now properly display the message indicating how many times you need to hit the macro in total to complete all actions, just like the other rules.
+
+* A lua error was occurring that could cause the frame to lock up momentarily and "run too long" should now be resolved.
+
+***QUALITY OF LIFE***
+
+* Fixed some spacing issues for the Russian translation in the options which text were not wrapping at end of frame.
+
+* Fixed the wording in the GRM options > Officer tab for the '!note notehere` instructions as previously it was maybe not clear.
+
+* Fixed the wording of the restore/transfer tool instructions so as not to be confusing as the previous wording made it somewhat sound as if a 2nd restore point could be made, but there cannot be.
+
+
+## **VERSION 1.9908 RELEASE - March 20th 2024**
+
+**COMPATIBILITY RELEASE FOR 10.2.6**
+
+***QUALITY OF LIFE***
+
+* Modified the scanning for guild chances process to be a little bit more memory efficient, and for mega guilds, remove possible instances of stutter.
+
+
+## **VERSION 1.9907 RELEASE - March 17th 2024**
+
+***NEW FEATURE - MACRO TOOL UPDATE - SPECIAL RULES***
+
+> 2 Options:
+> * Sync Alts to the same rank as Main
+> * Sync Alts in a group to a destination rank, depending on the rank of the Main.
+
+
+Please note the limitation - you cannot sync alts to the same rank as the guild leader, so the option is not available. However, on choosing a specific rank, this CAN be set for the guild leader.
+
+![Special Rule](https://i.imgur.com/5d1dHlX.png)
+
+Built Macro example - Promotion and Demotion in same macro build
+
+![Built Macro](https://i.imgur.com/0NWhJkz.png)
+
+When you first click the "Add Custom Rule" button to create a special rule, a special selection window appears first. This is ONLY because I have future plans to add additional "special" rules to it. For now, there is just one.
+
+![Special Rule Selection](https://i.imgur.com/ALSzNct.jpeg)
+
+***QUALITY OF LIFE***
+
+* It was reported that players with custom notes that use a lot of line breaks can have REALLY long log entries when someone rejoins, or is kicked/leaves, and it is reported to the log. Rather than show all the line breaks, I now wrap the line breaks into a single line to make it clearer to read. To cleanup your log of this mess you will need to reprocess the text. You can do this easily in 2 ways:
+
+  - Go to /grm > Options Tab > General > Change language to something else, then change it back. This reprocesses all the strings in the log.
+
+  - Or, you can copy this into chat: `/run GRM.ReprocessAllLogEntriesToCurrentLanguage()`
+
+* ReadMe has been updated with updated pictures - and the Curseforge page has been updated, as well as the Github.
+
+* The Macro tool had some minor annoyances I noticed that needed to be cleaned up. For example, it would tell you that you couldn't promote someone to a certain rank if that rank was same rank or higher than you, clearly, but it still let you select that rank. I mean, most people would understand not to, but I just cleaned up some UI stuff so you couldn't select ranks like that, not just be warned.
+
+
+***BUG FIXES***
+
+* On the custom GRM /roster - if you right-clicked to whisper someone, it was erroring. This has been fixed.
+
+* The Shift-clicking names was not working to put the names into chat. This should now work properly.
+
+* The /grm guid was not working properly. It also should now work. Most probably don't use this, but I have had some ask me how to get your GUID easily, so I just added a simple slash command.
+
+* In the macro tool, if you deleted a rank from your guild and reopened the macro tool to edit or create a rank, then that rank was still showing until the next session. This now will properly and dynamically address rank changes like this without needing to reload.
+
+* Fixed a bug where if you selected the demote rule first, then the promote rule, the option to promote regardless of activity was missing. This should now worked. This ONLY happened if you configured a demote rule first.
+
+* Fixed an issue with the macro tool recommendations reporting to the log where it would report someone as a match right after login, but then the next check it would not. This was due to the fact that certain queries of data from the server after login were not producing accurate results until sufficient time to load after loggging in had been given. The scan now validates the data before offering suggestions to the log. This would annoyingly pop open your log every single session if say, you had a match to kick a toon, but they were the same rank or higher than you so you couldn't. Every session you'd get an identical log entry. This will no longer happen.
+
+* Fixed a lua error that could occur during sync if syncing a very old ban list with player names prior to the date I started storing GUID info (like 4 or 5 years ago maybe)
+
+* Fixed an issue in WOTLK classic where it was tagging the max level cap as 40. This is from a recent update with Season of Discovery and has been resolved.
+
+* Fixed an issue where if a player rejoins the guild, after having already left and rejoined, your note was getting left with an additional "Re" tag in the note, and it would keep adding it over and over and over if someone left and rejoined and so on. This should no longer happen.
+
+
+## **VERSION 1.9906 RELEASE - March 3rd 2024**
+
+***QUALITY OF LIFE***
+
+* A minor change to the scanning, as per request. Whilst the actually processing is extremely minimal, some people use a lot of addons whilst raiding, or group activities, so to keep GRM's signature fairly low in the background, the scanning for changes will only occur when not in combat. The sync process already will not occur when grouped, but now the scan for the changes will only process when not actually in combat. This will probably go unnoticed as it's an under-the-hood change.
+
+***BUG FIXES***
+
+* Fixed an issue where the Message of the Day on the minmap mouseover was not appearing if your message was less than 65 characters long.
+
+* Should no longer spam you to update GroupInfo each session. Forgot to update the version internally so it was thinking it was updated. Just download the latest updates of both and you'll be fine.
+
+* Fixed an error that was occurring if the scanning for changes triggered whilst player was on a loading screen and if they logged in whilst in combat as it was trying to hide the GRM frames and checking a setting that had not yet been loaded.
+
+* Fixed an issue with the  Color Wheel selection. It seems that there were some recent changes to the whole colorWheel selection that added some compatibility issues with GRM's settings, where if you first selected say, a change to the color of the chat channel text, then, you selected to change something in GRM, them it would overwrite indefinitely for the session. This has now been resolved.
+
+
+## **VERSION 1.9905 RELEASE - February 26th 2024**
+
+***QUALITY OF LIFE***
+
+* Compatibility with Season of Discovery Season 2 for Classic Era
+
+* The CustomNote has been added to the custom GRM roster (/roster). It is also searchable with the note search above.
+
+* I added the option to choose your color by RGB on the 255 scale. Previously it was only  available by manually selecting the color on the wheel, or by entering the hexcode. I once had this added but due to some frame changes it's been missing for a long time, so I re-added it since I was working on fixing the color frame.
+
+* The guild message of the day text will now "wrap" cleaner on the mouseover for the GRM minimap button. I guess I never noticed how bad it looked since I never utilized the full 250+ character limit. When I was debugging some issues in another person's guild it stretched across like 75% of my screen! lol. So, I wrote a function that can wrap any line to a given length (ish), so I might implement this other places if anyone has any suggestions on mouseovers that could use some nice text wrapping.
+
+* Added support for the ClassColors addon.
+
+* The addon will no longer bug you over system messages being disabled if you use an addon like Fast Guild invite. This is handled more efficient and smarter now, and you can enable/disable system messages at will.
+
+* The Custom GRM roster should now properly update on the fly when adding, removing, or editing notes from the public, officer, or custom notes through the mouseover window.
+
+***BUG FIXES***
+
+* Fixed an issue where the additional filtering to kick a player regardless if they are active or inactive, if they haven't moved from a rank after X amount of time should now properly be clickable. In some cases it could be, but on making a new rule it would be greyed out improperly in certain circumstances.
+
+* In addition, the demote rule was showing this filter option, which didn't make sense. This option has been removed from the demote macro rule window as an option, as well as the settings index to ensure data consistency here of a deprecated variable.
+
+* Fixed an issue when kicking players with the macro tool, if you had checked the box to disable chat spam when using the tool, it was only working on promote/demote spam, but it was still showing the kick system message spam. This is now resolved.
+
+* Fixed an issue where you were unable to select and change the main/alt tag color or the chat log colors. I guess there was a recent change around this I didn't notice, on the back end. This is now resolved.
+
+* Fixed an issue where a Lua error would throw when changing colors on the log as it was checking for the "Hardcore Mode" death announce. even in retail, yet I never loaded those frames in non-hardcore modes. This should now work without any pesky error!
+
+* On leaving a guild, if you had the GRM window open, it would throw some errors as it auto-hid. This should no longer happen.
+
+
 ## **VERSION 1.9904 RELEASE - January 16th, 2024**
 
 ***Patch 10.2.5 compatibility Release***

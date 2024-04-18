@@ -1,35 +1,39 @@
 
 BigWigs:AddSounds("Patchwerk", {
-	[28131] = {"alarm","long"},
+	[28131] = "long",
 })
 
 BigWigs:AddSounds("Grobbulus", {
-	[28157] = "alert",
 	[28169] = "warning",
+	[28240] = "info",
+	["adds"] = "long",
 })
 
 BigWigs:AddSounds("Gluth", {
 	[28371] = "alert",
-	[28374] = {"alarm","long"},
-	[54378] = "warning",
+	[28375] = "warning",
+	[54378] = "info",
 })
 
 BigWigs:AddSounds("Thaddius", {
-	[28089] = {"info","long","warning"},
-	["stages"] = {"alarm","info","long"},
+	[28059] = "warning",
+	[28084] = "warning",
+	[28089] = "long",
+	[28338] = "alert",
+	["stages"] = {"info","long"},
 })
 
 BigWigs:AddSounds("Noth the Plaguebringer", {
-	[29210] = {"alarm","warning"},
-	[29212] = "alarm",
-	[29213] = "alert",
-	["teleport"] = {"alarm","long"},
-	["wave"] = "info",
+	[29208] = "alert",
+	[29213] = "warning",
+	[29214] = "alarm",
+	["adds"] = "info",
+	["stages"] = "long",
 })
 
 BigWigs:AddSounds("Heigan the Unclean", {
 	[29998] = "alert",
-	["teleport"] = {"info","long"},
+	["stages"] = {"info","long"},
 })
 
 BigWigs:AddSounds("Loatheb", {

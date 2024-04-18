@@ -1,40 +1,42 @@
 
 BigWigs:AddColors("Patchwerk", {
-	[28131] = {"orange","red"},
+	[28131] = "orange",
 })
 
 BigWigs:AddColors("Grobbulus", {
-	[28137] = "orange",
-	[28157] = "purple",
 	[28169] = {"blue","red"},
 	[28240] = "yellow",
+	["adds"] = "orange",
 })
 
 BigWigs:AddColors("Gluth", {
-	[1604] = {"blue","orange"},
-	[28371] = {"green","red"},
-	[28374] = {"orange","yellow"},
+	[28371] = {"green","orange"},
+	[28375] = "red",
+	[29306] = "blue",
 	[54378] = {"blue","purple"},
 })
 
 BigWigs:AddColors("Thaddius", {
-	[28089] = {"blue","orange","red","yellow"},
+	[28059] = "blue",
+	[28084] = "blue",
+	[28089] = "orange",
 	[28134] = "red",
-	["stages"] = {"green","yellow"},
-	["throw"] = "orange",
+	[28338] = "red",
+	["stages"] = {"cyan","green"},
 })
 
 BigWigs:AddColors("Noth the Plaguebringer", {
-	[29210] = {"orange","purple"},
+	[29208] = "yellow",
 	[29212] = "blue",
-	[29213] = "red",
-	["teleport"] = {"cyan","orange","yellow"},
-	["wave"] = "yellow",
+	[29213] = {"green","red"},
+	[29214] = "red",
+	["adds"] = "orange",
+	["stages"] = "cyan",
 })
 
 BigWigs:AddColors("Heigan the Unclean", {
-	[29998] = "cyan",
-	["teleport"] = {"orange","red","yellow"},
+	[29998] = {"green","yellow"},
+	["stages"] = "cyan",
 })
 
 BigWigs:AddColors("Loatheb", {

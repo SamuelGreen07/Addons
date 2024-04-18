@@ -27,14 +27,19 @@ L.near = "당신 근처에 %s"
 L.on_group = "파티에 %s" -- spell on group
 L.boss = "우두머리"
 L.plus = "%s + %s" -- Spell 1 + Spell 2
+L.extra = "%s (%s)" -- SPELL_NAME (short spell name or extra information)
 
 L.phase = "%d단계"
 L.stage = "%d단계"
+--L.wave = "Wave %d" -- e.g. "Wave 1" (Waves of adds)
+--L.wave_count = "Wave %d of %d" -- Wave 1 of 3 (Usually waves of adds)
 L.normal = "일반 난이도"
 L.heroic = "영웅 난이도"
 L.mythic = "신화 난이도"
 L.hard = "어려움 모드"
 L.active = "활성화" -- When a boss becomes active, after speech finishes
+L.ready = "준비" -- When a player is ready to do something
+L.dead = "죽음" -- When a player is dead
 L.general = "일반" -- General settings, i.e. things that apply to normal, heroic and mythic mode.
 --L.health = "Health" -- The health of an NPC
 --L.health_percent = "%d%% Health" -- "10% Health" The health percentage of an NPC
@@ -50,11 +55,12 @@ L.removed_after = "%s %.1f초 후 제거됨" -- "Spell removed after 1.1s" (s = 
 L.incoming = "곧 %s" -- Spell Incoming
 L.interrupted = "%s 시전 방해됨" -- Spell Interrupted
 L.interrupted_by = "%s 를 %s 가 차단" -- Spell interrupted by Player
+--L.interruptible = "Interruptible" -- when a spell is interruptible
 L.no = "%s 없음" -- No Spell
 L.intermission = "사잇단계"
 L.percent = "%d%% - %s" -- 20% - Spell
 L.cancelled = "%s 취소됨" -- Spell Cancelled
-L.you_die = "당신은 죽습니다"
+L.you_die = "당신은 죽습니다" -- You will die
 L.you_die_sec = "당신은 %d 초 후 죽습니다" -- "You die in 15 sec" (sec = seconds)
 --L.next_ability = "Next ability" -- We don't know what ability will be next, we only know when it will happen (showing a bar)
 
@@ -92,8 +98,9 @@ L.affixes = "어픽스" -- Seasonal affixes for raids and mythic+ dungeons
 
 -- Common raid marking locale
 L.marker = "%s 징표 표시"
-L.marker_player_desc = "%s에 영향받는 플레이어를 %s|1으로;로; 징표 표시합니다, 부공격대장 이상의 권한이 필요합니다."
-L.marker_npc_desc = "%s|1을;를; %s|1으로;로; 징표 표시합니다, 부공격대장 이상의 권한이 필요합니다."
+L.marker_player_desc = "%s에 영향받는 플레이어를 %s|1으로;로; 징표 표시합니다, 부공격대장 이상의 권한이 필요합니다." -- Mark players affected by 'SPELL_NAME' with SKULL_ICON
+L.marker_npc_desc = "%s|1을;를; %s|1으로;로; 징표 표시합니다, 부공격대장 이상의 권한이 필요합니다." -- Mark NPC_NAME with SKULL_ICON
+--L.marker_npc_aura_desc = "Mark NPCs affected by '%s' with %s, requires promoted or leader." -- Mark NPCs affected by 'SPELL_NAME' with SKULL_ICON
 
 -- Ability where two players have to move close to each other
 L.link = "연결"

@@ -38,8 +38,9 @@ L:SetMiscLocalization({
 	ArenaStart30		= "Тридцать секунд до начала боя на Арене!",
 	ArenaStart15		= "Пятнадцать секунд до начала боя на Арене!",
 	ArenaInvite			= "Приглашение на Арену",
-	BasesToWin			= "Базы для победы: %d",
+	BasesToWin			= "Базы, необходимые для победы: %d",
 	WinBarText			= "%s выигрывает",
+	BasesToWinHeader	= "DBM-PvP",
 	ExprFlagPickUp		= "(.+) несет флаг (%w+)!",
 	ExprFlagCaptured	= "(.+) захватывает флаг (%w+)!",
 	ExprFlagReturn		= "(.+) возвращает на базу флаг (%w+)!",
@@ -197,4 +198,7 @@ L = DBM:GetModLocalization("m1434")
 
 L:SetMiscLocalization({
 	ParseTimeFromWidget = "(%d+)",
+	ResTimerSelf = "Показывать таймер воскрешения для Вас.",
+	ResTimerParty = "Показывать таймер воскрешения для членов Вашей группы.",
+	ResTimerPartyClassColors = "Использовать цвета классов для таймеров воскрешения членов группы."
 })

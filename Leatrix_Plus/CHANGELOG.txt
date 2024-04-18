@@ -1,3 +1,41 @@
+﻿3.0.189 - 16th April 2004
+- Updated for Cataclysm Classic Beta.
+- Added a new setting called 'Keep audio synced' ('System').  If checked, when you change the audio output device in your operating system, the game audio output device will change automatically.|n|nFor this to work, the game audio output device will be set to system default.
+- Added flight times.
+- Cataclysm Classic: For 'Enhance dressup' ('Interface'), you can now set the character model zoom speed.
+- Cataclysm Classic: For 'Media', added Cataclysm movies ('Movies' and 'Various' > 'Cinematics').
+
+3.0.188 - 10th April 2004
+- The addon will no longer show 'Wrong version installed' when run on Cataclysm Classic.
+- Added flight times.
+
+3.0.187 - 3rd April 2024
+- Added flight times.
+
+3.0.186 - 27th March 2024
+- Added flight times.
+
+3.0.185 - 20th March 2024
+- Added flight times.
+
+3.0.184 - 13th March 2024
+- For 'Enhance minimap' ('Interface'), the 'Combine addon buttons' setting will now sort addon buttons alphabetically.
+- Added flight times.
+
+3.0.183 - 6th March 2024
+- Added flight times.
+
+3.0.182 - 28th February 2024
+- Added flight times.
+
+3.0.181 - 22nd February 2024
+- Fixed 'Enhance professions' ('Interface').
+
+3.0.180 - 21st February 2024
+- Updated ScrollFrameTemplate for Media.
+- Updated 'Enhance quest log' ('Interface') code.
+- Added flight times.
+
 3.0.179 - 14th February 2024
 - For 'Enhanced quest log' ('Interface'), fixed an issue with showing quest level suffixes for non-English locales.
 - Added flight times.

@@ -1,7 +1,9 @@
 # BigWigs
 
-## [v322.3](https://github.com/BigWigsMods/BigWigs/tree/v322.3) (2024-02-19)
-[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v322.2...v322.3) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
+## [v326](https://github.com/BigWigsMods/BigWigs/tree/v326) (2024-04-05)
+[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v325...v326) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
 
-- Core/BossPrototype: Revert change to `RegisterTargetEvents`  
-- Core/BossPrototype: Remove `GetBossTarget` in favour of `GetUnitTarget`, cleanups.  
+- bump version  
+- bump toc  
+- Loader: Add Sunken Temple  
+- Plugins/Statistics: Add Sunken Temple  

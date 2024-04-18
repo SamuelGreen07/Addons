@@ -142,6 +142,9 @@ GRM.GetAddOnUserGuildAlts = function ( name )
 
 end
 
+-- Method:          GRM.GetGuildAlts ( string )
+-- What it Does:    Returns the database of alts for the given guild or current guild
+-- Purpose:         Call the data easily.
 GRM.GetGuildAlts = function ( name )
     if name then
         return GRM_Alts[name];
@@ -160,6 +163,7 @@ GRM.GetClubMemberInfo = function ( playerName , guildClubID )
     if clubID and clubID ~= "" then
         local members = C_Club.GetClubMembers ( clubID );
         local name = "";
+        local player = {};
 
         for i = 1 , #members do
             player = C_Club.GetMemberInfo ( clubID , members[i] )

@@ -47,18 +47,18 @@ L.disabledAddOn = "Du hast das Addon |cFF436EEE%s|r deaktiviert, Timer werden ni
 L.removeAddOn = "Bitte entferne '|cFF436EEE%s|r', da es durch '|cFF436EEE%s|r' ersetzt wurde."
 L.alternativeName = "%s (|cFF436EEE%s|r)"
 
---L.expansionNames = {
---	"Classic", -- Classic
---	"The Burning Crusade", -- The Burning Crusade
---	"Wrath of the Lich King", -- Wrath of the Lich King
---	"Cataclysm", -- Cataclysm
---	"Mists of Pandaria", -- Mists of Pandaria
---	"Warlords of Draenor", -- Warlords of Draenor
---	"Legion", -- Legion
---	"Battle for Azeroth", -- Battle for Azeroth
---	"Schattenlande", -- Shadowlands
---	"Dragonflight", -- Dragonflight
---}
+L.expansionNames = {
+	"Classic", -- Classic
+	"The Burning Crusade", -- The Burning Crusade
+	"Wrath of the Lich King", -- Wrath of the Lich King
+	"Cataclysm", -- Cataclysm
+	"Mists of Pandaria", -- Mists of Pandaria
+	"Warlords of Draenor", -- Warlords of Draenor
+	"Legion", -- Legion
+	"Battle for Azeroth", -- Battle for Azeroth
+	"Schattenlande", -- Shadowlands
+	"Dragonflight", -- Dragonflight
+}
 L.currentSeason = "Aktuelle Saison"
 
 -- Media.lua (These are the names of the sounds in the dropdown list in the "sounds" section)
@@ -82,8 +82,6 @@ L.toggleAnchorsBtnHide_desc = "Blendet alle Ankerpunkte aus und fixiert alle Anz
 L.testBarsBtn = "Testleiste erstellen"
 L.testBarsBtn_desc = "Erstellt eine Leiste zum Testen der aktuellen Einstellungen an."
 L.sound = "Sound"
-L.flashScreen = "Bildschirm aufleuchten lassen"
-L.flashScreenDesc = "Einige wichtige Fähigkeiten erfordern volle Aufmerksamkeit. Beim Auftreten dieser Fähigkeiten kann BigWigs den Bildschirm aufleuchten lassen."
 L.minimapIcon = "Minikartensymbol"
 L.minimapToggle = "Zeigt oder versteckt das Minikartensymbol."
 L.compartmentMenu = "Kein Addonmenü Icon"

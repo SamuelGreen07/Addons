@@ -9,7 +9,7 @@
 -- GRM_UI.CreateCheckBox
 -- GRM_UI.CreateOptionsSlider
 -- GRM_UI.CreateHybridScrollFrame
-
+-- GRM_UI.CreateDropDownMenu
 
 GRM_UI = {};
 ---------------------------------------
@@ -27,7 +27,7 @@ end
 -- Method:          GRM_UI.CreateCoreFrame ( string , frame , frame , int , int , bool , string , table , bool , string )
 -- What it Does:    Builds a frame for use in the GRM addon.
 -- Purpose:         Reusable tool to build frames easily, and initialize them.
-GRM_UI.CreateCoreFrame = function ( name , parentFrame , globalParent , width , height , templateName , isMovable , points , strata , addCloseButton , inCludeEscapeAction )
+GRM_UI.CreateCoreFrame = function ( name , parentFrame , globalParent , width , height , templateName , isMovable , points , strata , addCloseButton , includeEscapeAction )
 
     if not parentFrame[name] then
         local finalFrame = {};
@@ -42,7 +42,7 @@ GRM_UI.CreateCoreFrame = function ( name , parentFrame , globalParent , width , 
         end
 
         -- By pressing the ESC key the window closes.
-        if inCludeEscapeAction then
+        if includeEscapeAction then
             parentFrame[name]:SetScript ( "OnKeyDown" , function ( self , key )
                 if not GRM_G.inCombat then
                     self:SetPropagateKeyboardInput ( true );      -- Ensures keyboard access will default to the main chat window on / or Enter. UX feature.
@@ -73,7 +73,7 @@ GRM_UI.CreateCoreFrame = function ( name , parentFrame , globalParent , width , 
             finalFrame:SetToplevel ( true );
             finalFrame:SetMovable ( "LeftButton" );
             finalFrame:SetScript ( "OnDragStart" , function()
-                if GetMouseFocus() == self then
+                if GetMouseFocus() == finalFrame then
                     finalFrame:StartMoving();
                 end
             end);
@@ -121,9 +121,17 @@ GRM_UI.CreateString = function ( name , parentFrame , template , text , fontSize
             parentFrame[name]:SetWordWrap ( false );
         end
     end
-        
+       
     parentFrame[name]:SetText ( text );
     parentFrame[name]:SetFont ( GRM_G.FontChoice , GRM_G.FontModifier + fontSize );
+
+    -- For some reason when you do a "SetFont" it doesn't take the first time, maybe too soon after creating the fontstring frame, I am not certain
+    -- Reprocess in 1 second
+    if math.floor ( select ( 2 , parentFrame[name]:GetFont() ) + 0.5 ) ~= math.floor ( ( GRM_G.FontModifier + fontSize ) + 0.5 ) then
+        C_Timer.After ( 1 , function()
+            GRM_UI.CreateString ( name , parentFrame , template , text , fontSize , points , Width , textColor , alignment , wrappable );
+        end);
+    end
 
 end
 
@@ -175,15 +183,15 @@ GRM_UI.CreateButton = function ( name , parentFrame , template , text , width , 
 
             if type ( toolTipScript ) == "function" then
                 parentFrame[name]:SetScript ( "OnEnter" , function( self )
-                    toolTipScript();
+                    toolTipScript( self );
                 end);
             else
                 parentFrame[name]:SetScript ( "OnEnter" , function ( self ) 
-                    GRM_UI.CreateTooltip ( self , toolTipScript )
+                    GRM_UI.CreateTooltipFromTable ( self , toolTipScript )
                 end);
             end
 
-            parentFrame[name]:SetScript ( "OnLeave" , function( self )
+            parentFrame[name]:SetScript ( "OnLeave" , function()
                 if toolTipClearScript then
                     toolTipClearScript();
                 else
@@ -252,16 +260,20 @@ GRM_UI.CreateRadialButtons = function ( name , parentFrame , template , textForE
             parentFrame[buttonName]:SetScript ( "OnClick" , function ( self , button )
             
                 if button == "LeftButton" then
+                    if self:GetChecked() then
 
-                    -- Uncheck the other buttons. This LINKS them together.
-                    for j = 1 , numRadialButtons do
-                        if j ~= i then
-                            parentFrame[name .. "Radial" .. j]:SetChecked ( false );
+                        -- Uncheck the other buttons. This LINKS them together.
+                        for j = 1 , numRadialButtons do
+                            if j ~= i then
+                                parentFrame[name .. "Radial" .. j]:SetChecked ( false );
+                            end
                         end
-                    end
 
-                    if saveVariableLogic then
-                        saveVariableLogic ( i );    -- Includes the number of the button clicked
+                        if saveVariableLogic then
+                            saveVariableLogic ( i );    -- Includes the number of the button clicked
+                        end
+                    else
+                        self:SetChecked ( true );
                     end
                 end
 
@@ -316,10 +328,10 @@ GRM_UI.CreateCheckBox = function ( name , parentFrame , template , size , points
         -- SCRIPTS
         if toolTipScript then
             parentFrame[name]:SetScript ( "OnEnter" , function( self )
-                toolTipScript();
+                toolTipScript( self );
             end);
 
-            parentFrame[name]:SetScript ( "OnLeave" , function( self )
+            parentFrame[name]:SetScript ( "OnLeave" , function()
                 if toolTipClearScript then
                     toolTipClearScript();
                 else
@@ -397,7 +409,7 @@ end
 -- Method:          GRM_UI.CreateEditBox ( string , frameObject, string , int , int , table , string , table , int , bool , function , function , function )
 -- What it Does     Creates and configures the macro tool
 -- Purpose:         Reusable tool to build editBoxes
-GRM_UI.CreateEditBox = function ( name , parentFrame , template , width , height , points , alignment , textColor , maxLetters , numbersOnly , toolTipScript , ToolTipClearLogic , textChangedFunction , createClearButton , trimWhiteSpace )
+GRM_UI.CreateEditBox = function ( name , parentFrame , template , width , height , points , alignment , textColor , maxLetters , numbersOnly , toolTipScript , ToolTipClearLogic , textChangedFunction , createClearButton , trimWhiteSpace , enterPressedLogic )
 
     if not parentFrame[name] then
         parentFrame[name] = CreateFrame( "EditBox" , name , parentFrame , template );
@@ -481,12 +493,16 @@ GRM_UI.CreateEditBox = function ( name , parentFrame , template , width , height
             if self:GetText() == "" and textChangedFunction then
                 textChangedFunction();
             end
+
+            if enterPressedLogic then
+                enterPressedLogic()
+            end
     
             parentFrame[name].tempText = self:GetText();
         end)
     
         if textChangedFunction then
-            parentFrame[name]:SetScript ( "OnTextChanged" , function ( self )
+            parentFrame[name]:SetScript ( "OnTextChanged" , function ()
                 textChangedFunction();
             end);
         end
@@ -574,15 +590,15 @@ GRM_UI.CreateOptionsSlider = function ( name , parentFrame , template , points ,
 
             if type ( toolTipScript ) == "function" then
                 parentFrame[name]:SetScript ( "OnEnter" , function( self )
-                    toolTipScript();
+                    toolTipScript( self );
                 end);
             else
                 parentFrame[name]:SetScript ( "OnEnter" , function ( self ) 
-                    GRM_UI.CreateTooltip ( self , toolTipScript );
+                    GRM_UI.CreateTooltipFromTable ( self , toolTipScript );
                 end);
             end
 
-            parentFrame[name]:SetScript ( "OnLeave" , function( self )
+            parentFrame[name]:SetScript ( "OnLeave" , function()
                 if toolTipClearScript then
                     toolTipClearScript();
                 else
@@ -597,6 +613,188 @@ GRM_UI.CreateOptionsSlider = function ( name , parentFrame , template , points ,
         end
 
     end 
+end
+
+-- Method:          GRM_UI.CreateDropDownMenu ( string , frame , string , array , intArray , stringArray , int , floatArray , function , function , function , function , bool )
+-- What it Does:    It creates a unique, new, dropDownMenu given the variables
+-- Purpose:         To create a generic, reusable dropdown menus
+GRM_UI.CreateDropDownMenu = function ( name , parentFrame , template , point , size , list , fontSize , textColor , toolTipScript , toolTipClearScript , optionalSelectFunction , optionalListUpdateFunction , optionalTextFilteringFunction , includeEscapeAction )
+
+    local selectedFrame = name .. "Selected";
+
+    if not parentFrame[selectedFrame] then
+        local template = template or "BackdropTemplate"
+        local selectedFrameText = selectedFrame .. "Text";
+        local menuFrame = name .. "Menu";
+
+        local fontSize = fontSize or 16;
+        local textColor = textColor or { 1 , 1 , 1 };
+
+        local BuildDropDown = function()
+            GRM_UI.BuildDropDownOptions ( list , parentFrame[menuFrame] , parentFrame[selectedFrame] , parentFrame[selectedFrame][selectedFrameText] , textColor , fontSize , optionalSelectFunction , optionalListUpdateFunction , optionalTextFilteringFunction );
+        end
+
+        -- Delimiter Dropdown for Export
+        parentFrame[selectedFrame] = CreateFrame ( "Frame" , selectedFrame , parentFrame , BackdropTemplateMixin and template );
+        parentFrame[selectedFrame][selectedFrameText] = parentFrame[selectedFrame]:CreateFontString ( nil , "OVERLAY" , "GameFontWhite" );
+        parentFrame[menuFrame] = CreateFrame ( "Frame" , menuFrame , parentFrame[selectedFrame] , template );
+        parentFrame[menuFrame].result = { list[1] , 1 }; -- Default Selection { textName, index }
+
+        -- Point
+        parentFrame[selectedFrame]:SetPoint ( point[1] , point[2] , point[3] , point[4] , point[5] );
+
+        -- Aesthetics
+        if size then
+            parentFrame[selectedFrame]:SetSize ( size[1] , size[2] );
+            parentFrame[menuFrame]:SetWidth ( size[1] );
+        else
+            parentFrame[selectedFrame]:SetSize ( 60 , 30 );
+            parentFrame[menuFrame]:SetWidth ( 60 );
+        end
+
+        parentFrame[selectedFrame]:SetFrameStrata ( "DIALOG" );
+        parentFrame[selectedFrame]:SetBackdrop ( GRM_UI.GetBackdrop(1) );
+        parentFrame[selectedFrame][selectedFrameText]:SetPoint ( "CENTER" , parentFrame[selectedFrame] );
+        parentFrame[selectedFrame][selectedFrameText]:SetFont ( GRM_G.FontChoice , GRM_G.FontModifier + fontSize );
+        parentFrame[selectedFrame][selectedFrameText]:SetTextColor ( textColor[1] , textColor[2] , textColor[3] );
+        parentFrame[menuFrame]:SetFrameStrata ( "DIALOG" );
+        parentFrame[menuFrame]:SetPoint ( "TOP" , parentFrame[selectedFrame] , "BOTTOM" );
+        parentFrame[menuFrame]:SetBackdrop ( GRM_UI.GetBackdrop(1) );
+        
+        -- Function and logic
+        if toolTipScript then
+
+            if type ( toolTipScript ) == "function" then
+                parentFrame[selectedFrame]:SetScript ( "OnEnter" , function( self )
+                    toolTipScript( self );
+                end);
+            else
+                parentFrame[selectedFrame]:SetScript ( "OnEnter" , function ( self ) 
+                    GRM_UI.CreateTooltipFromTable ( self , toolTipScript );
+                end);
+            end
+
+            parentFrame[selectedFrame]:SetScript ( "OnLeave" , function()
+                if toolTipClearScript then
+                    toolTipClearScript();
+                else
+                    GameTooltip:Hide();
+                end
+            end);
+        end
+
+        if includeEscapeAction then
+            parentFrame[menuFrame]:SetScript ( "OnKeyDown" , function ( self , key )
+                if not GRM_G.inCombat then
+                    self:SetPropagateKeyboardInput ( true );      -- Ensures keyboard access will default to the main chat window on / or Enter. UX feature.
+                    if key == "ESCAPE" then
+                        self:SetPropagateKeyboardInput ( false );
+                        self:Hide();
+                        parentFrame[selectedFrame]:Show();
+                    end
+                elseif key == "ESCAPE" then
+                    self:Hide();
+                    parentFrame[selectedFrame]:Show();
+                end
+            end);
+        end
+
+        parentFrame[selectedFrame]:SetScript ( "OnShow" , function() 
+            parentFrame[menuFrame]:Hide();
+        end)
+
+        parentFrame[selectedFrame]:SetScript ( "OnMouseDown" , function( _ , button )
+            if button == "LeftButton" then
+                if parentFrame[menuFrame]:IsVisible() then
+                    parentFrame[menuFrame]:Hide();
+                else
+                    BuildDropDown();
+                    parentFrame[menuFrame]:Show();
+                end
+            end
+        end);
+
+        parentFrame[menuFrame]:SetScript ( "OnShow" , function()
+            if GameTooltip:IsVisible() then
+                if toolTipClearScript then
+                    toolTipClearScript();
+                else
+                    GameTooltip:Hide();
+                end
+            end
+        end);
+        BuildDropDown();
+    end
+end
+
+-- Method:          BuildDropDownOptions ( stringArray , frame , frame , fontstring , RGBArray , int , function , function , function )
+-- What it Does:    Builds the logic and text of the actual popout dropdown menu.
+-- Puropose:        Compartmentalize some of the code. Rather than keep it all in the CreateDropDowm function
+GRM_UI.BuildDropDownOptions = function( list , dropDownMenu , dropDownMenuSelected , dropDownMenuSelectedText , textColor , fontSize , optionalSelectFunction , optionalListUpdateFunction , optionalTextFilteringFunction )
+    local buffer = 6;
+    local height = 0;
+    local name = dropDownMenu:GetName();
+
+    if optionalListUpdateFunction then
+        list = optionalListUpdateFunction();
+    end
+
+    -- Initiate the buttons holder
+    dropDownMenu.Buttons = dropDownMenu.Buttons or {};
+
+    for i = 1 , #dropDownMenu.Buttons do
+        dropDownMenu.Buttons[i][1]:Hide();
+    end
+    
+    for i = 1 , #list do
+        if not dropDownMenu.Buttons[i] then
+            local tempButton = CreateFrame ( "Button" , name .. "Button" .. i , dropDownMenu );
+            dropDownMenu.Buttons[i] = { tempButton , tempButton:CreateFontString ( nil , "OVERLAY" , "GameFontWhite" ) }
+        end
+
+        local button = dropDownMenu.Buttons[i][1];
+        local buttonText = dropDownMenu.Buttons[i][2];
+        button:SetWidth ( dropDownMenu:GetWidth() );
+        button:SetHeight ( fontSize );
+        button:SetHighlightTexture ( "Interface\\PaperDollInfoFrame\\UI-Character-Tab-Highlight" );
+        
+        buttonText:SetText ( list[i] );
+        buttonText:SetTextColor ( textColor[1] , textColor[2] , textColor[3] );
+        buttonText:SetWidth ( dropDownMenu:GetWidth() - 5 );
+        buttonText:SetWordWrap ( false );
+        buttonText:SetFont ( GRM_G.FontChoice , GRM_G.FontModifier + fontSize );
+        buttonText:SetPoint ( "CENTER" , button );
+        buttonText:SetJustifyH ( "CENTER" );
+
+        if i == 1 then
+            button:SetPoint ( "TOP" , dropDownMenu , 0 , -7 );
+            height = height + button:GetHeight();
+        else
+            button:SetPoint ( "TOP" , dropDownMenu.Buttons[i - 1][1] , "BOTTOM" , 0 , -buffer );
+            height = height + button:GetHeight() + buffer;
+        end
+
+        button:SetScript ( "OnClick" , function( _ , button ) 
+            if button == "LeftButton" then
+                local tempResult = GRM.DeepCopyArray ( dropDownMenu.result );   -- Making a copy incase need to restore
+                dropDownMenu.result = { buttonText:GetText() , i };
+                dropDownMenuSelectedText:SetText ( buttonText:GetText() );
+                dropDownMenu:Hide();
+                dropDownMenuSelected:Show();
+                
+                if optionalSelectFunction then
+                    optionalSelectFunction( i , tempResult );    -- Include the selection index
+                end
+            end
+        end);
+
+        button:Show();
+    end
+    dropDownMenu:SetHeight ( height + 15 );
+
+    if optionalTextFilteringFunction then
+        optionalTextFilteringFunction();
+    end
 end
 
 -- Method:          GRM_UI.SaveFramePosition ( frameObject )
@@ -616,13 +814,68 @@ GRM_UI.SaveFramePosition = function ( frame )
     
 end
 
--- Method:          GRM_UI.CreateTooltip ( table )
+-- Method:          GRM_UI.GetBackdrop ( int )
+-- What it Does:    Returns from a list of backdrops
+-- Purpose:         Reusable backdrops for cleaner UI code.
+GRM_UI.GetBackdrop = function ( index )
+
+    -- Formerly called in GRM GRM_UI.noteBackdrop2
+    if index == 1 then
+        return {
+            bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background" ,
+            edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+            tile = true,
+            tileSize = 32,
+            edgeSize = 8,
+            insets = { left = 2 , right = 2 , top = 3 , bottom = 2 }
+        }
+    
+    -- Formerly called in GRM GRM_UI.noteBackdrop3
+    elseif index == 2 then
+        return {
+            bgFile = nil,
+            edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+            tile = true,
+            tileSize = 32,
+            edgeSize = 6,
+            insets = { left = 2 , right = 2 , top = 3 , bottom = 1 }
+        }
+
+    -- Formerly called in GRM GRM_UI.framelessBackdrop
+    elseif index == 3 then
+        return {
+            bgFile = nil,
+            edgeFile = "",
+            tile = true,
+            tileSize = 32,
+            edgeSize = 9,
+            insets = { left = -2 , right = -2 , top = -3 , bottom = -2 }
+        }
+
+    end
+
+    -- Default return if you get here (notebackdrop1)
+    return {
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background" ,
+        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+        tile = true,
+        tileSize = 32,
+        edgeSize = 18,
+        insets = { left = 5 , right = 5 , top = 5 , bottom = 5 }
+    }
+end
+
+-----------------------
+-- SUPPORT FUNCTIONS --
+-----------------------
+
+-- Method:          GRM_UI.CreateTooltipFromTable ( table )
 -- What it Does:    Creates a tooltip either single or double line
 -- Purpose:         Ease of creating tooltips
--- Usage:           GRM_UI.CreateTooltip ( { 1 , "Test" } )
---                  GRM_UI.CreateTooltip ( { 1 , "Test" } , { 1 , Ghost } )
---                  GRM_UI.CreateTooltip ( { 2 , "Double" , "Line" , 1 , 0.8 , 0 , 1 , 0 , 0 } )
-GRM_UI.CreateTooltip = function ( self , ... )
+-- Usage:           GRM_UI.CreateTooltipFromTable ( { 1 , "Test" } )
+--                  GRM_UI.CreateTooltipFromTable ( { 1 , "Test" } , { 1 , Ghost } )
+--                  GRM_UI.CreateTooltipFromTable ( { 2 , "Double" , "Line" , 1 , 0.8 , 0 , 1 , 0 , 0 } )
+GRM_UI.CreateTooltipFromTable = function ( self , ... )
 
     local lines = {...};
                 
@@ -663,4 +916,199 @@ GRM_UI.CreateTooltip = function ( self , ... )
         GameTooltip:Show();
     end
     
+end
+
+-- Method:          GRM_UI.CreateToolTipScript ( int (1 or 2) , bool , stringInputs(unlimited) )
+-- What it Does:    Builds the tooltip script for the given frame based on the input
+-- Purpose:         Make it even easier to use the UI API - just build frames
+-- EXAMPLE:         GRM_UI.CreateToolTipScript ( "Line1" , "Line2" )
+--                  GRM_UI.CreateToolTipScript ( 2 , "Line1" , "Line2" , "Line3" , ... ) -- 2 columns in tooltip
+--                  GRM_UI.CreateToolTipScript (1 , false , "Line1" , "Line2", ... ) -- Single column, no text wrapping.
+-- Notes:           Please note, boolean input accepts all formats "T" or "t" or "TRUE" or "True" or "true" or true. Doesn't matter.
+GRM_UI.CreateToolTipScript = function ( ... )
+
+    local lines = {...};
+    local i = 1;
+    local numC = 1;     -- numberOfColumns
+
+    if tonumber(lines[1]) then
+        numC = tonumber(lines[1]);
+        i = i + 1;
+
+        if numC > 2 then
+            numC = 2;
+        elseif numC < 1 then
+            numC = 1;
+        end
+    end
+
+    if GRM_UI.ToBool (lines[2]) then
+        i = i + 1;
+    end
+
+    local textLines = ( #lines - i + 1 );
+
+    if textLines > 0 then
+        
+        if numC == 2 and textLines % 2 == 1 then
+            table.insert ( lines , " " );   -- Adding a line to make it even 
+            textLines = textLines + 1;
+        end
+
+        local result = function ( self )
+            GameTooltip:SetOwner ( self , "ANCHOR_CURSOR" );
+
+            while i <= #lines do
+                
+                if numC == 1 then
+                    GameTooltip:AddLine( lines[i] );
+                    i = i + 1;
+                else
+                    GameToolTip:AddDoubleLine ( lines[i] , lines[i + 1] );
+                    i = i + 2;
+                end
+            end
+            GameTooltip:Show();
+        end
+
+        return result;
+    else
+        return;
+    end
+end
+
+----------------------------------------
+--- MATHEMATICAL PLACEMENT OF FRAMES ---
+----------------------------------------
+
+-- Method:          GRM_UI.GetCheckboxPinNumber ( int , int )
+-- What it Does:    Returns the bottom left checkbox depending on the number of checkboxes and rows. For example, if there are 9 checkboxes in rows of 3 checkboxes per row, I want to pin to bottom left checkbox, which is the first checkbox on the 3rd row, or checkbox number 7
+-- Purpose:         Be bale to have dynamic access to building checkbox or button grids of any size, for example in GRM use, a guild might have 10 ranks, or it might have 5 ranks. If I build a checkbox grid of all the ranks, I need to know which row to pin my next frame to properly.
+-- Usage:           Useful in grid design of checkboxes
+GRM_UI.GetCheckboxPinNumber = function ( numCheckboxes , numberPerRow )
+            
+    local r = numCheckboxes % numberPerRow;
+    local result = 0;
+
+    if r == 0 then
+        result = numCheckboxes - ( numberPerRow - 1 );
+    else
+        result = numCheckboxes - r  + 1
+    end
+    
+    return result
+end
+
+---------------
+--- UTILITY ---
+---------------
+
+-- Method:          GRM.ToBool ( string )
+-- What it Does:    Returns the boolean true or false depending on input. It can receive the input as a string regardless of case, or if you are just using single char true/false like T/F
+-- Purpose:         Easy check for a boolean input since there isn't exactly a quick check built into Lua.
+GRM_UI.ToBool = function ( value )
+    if value ~= nil then
+        if type(value) == "boolean" then
+            return value;
+        elseif type(value) == "string" then
+            value = value:lower();
+            if value == "true" or value == "t" then
+                return true;
+            elseif value == "false" or value == "f" then
+                return false;
+            end
+        end
+    end
+    return;
+end
+
+-- Method:          GRM_UI.GetFrame ( string or frameTable )
+-- What it Does:    Returns the frame from either string name or frame itself, or nil
+-- Purpose:         Verification that frame is valid.
+GRM_UI.GetFrame = function( frame )
+    if frame == nil then
+        return;
+    end
+
+    -- Input either stringName of frame or the frame itself.
+    if type(frame) == "string" then
+        if _G[frame] then
+            return _G[frame];
+        else
+            return  -- No frame exists with that name
+        end
+    elseif type (frame) ~= "table" then
+        return;
+    else
+        return frame;
+    end
+end
+
+-- Method:          GRM_UI.WrapText ( string , int )
+-- What it Does:    Wraps text based on the given string if it is too long
+-- Purpose:         To control the visual aspect of really long string on mouseovers and so on.
+GRM_UI.WrapText = function ( text , maxLength )
+    local result = "";
+    local maxOverUnder = 25;
+
+    if #text > maxLength then
+        local remainingText = text;
+        local frontSpace = -1;
+        local lastSpace = -1;
+        local breakIndex = maxLength; -- Default unless other factors apply
+
+        while #remainingText > maxLength do
+
+            frontSpace = -1;
+            lastSpace = -1;
+            breakIndex = maxLength; -- Default unless other factors apply
+
+            -- Scan through and find the closes space before and closest after.
+            for i = 1 , #remainingText do
+                if string.sub ( remainingText , i , i ) == " " then
+                    if i <= maxLength then
+                        frontSpace = i;
+                    elseif i > maxLength and lastSpace == -1 then
+                        lastSpace = i;
+                        break;  -- We found the first space AFTER the maxLength, so we can be done.
+                    end
+                end
+            end
+            
+            if frontSpace == -1 or lastSpace == -1 then
+                if frontSpace > -1 and lastSpace == -1 then
+                    if frontSpace >= ( maxLength - maxOverUnder ) then    -- Don't want to
+                        breakIndex = frontSpace;
+                    end
+                elseif frontSpace == -1 and lastSpace > -1 then
+                    if lastSpace <= ( maxLength + maxOverUnder ) then
+                        breakIndex = lastSpace;
+                    end
+                end
+            else
+                -- Both have a value
+                if ( maxLength - frontSpace ) <= ( lastSpace - maxLength ) then
+                    if frontSpace >= ( maxLength - maxOverUnder ) then    -- Don't want to
+                        breakIndex = frontSpace;
+                    end
+                else
+                    if lastSpace <= ( maxLength + maxOverUnder ) then
+                        breakIndex = lastSpace;
+                    end
+                end
+            end
+
+            result = result .. remainingText:sub ( 1 , breakIndex - 1 ) .. "\n";
+            remainingText = remainingText:sub ( breakIndex + 1 );
+
+            if #remainingText <= maxLength then
+                result = result .. remainingText;
+            end                              
+
+        end
+    else
+        result = text;
+    end
+
+    return result;
 end

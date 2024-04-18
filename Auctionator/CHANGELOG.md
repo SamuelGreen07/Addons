@@ -1,7 +1,6 @@
 # Auctionator
 
-## [10.2.25](https://github.com/Auctionator/Auctionator/tree/10.2.25) (2024-02-15)
-[Full Changelog](https://github.com/Auctionator/Auctionator/compare/10.2.24...10.2.25) 
+## [10.2.34](https://github.com/Auctionator/Auctionator/tree/10.2.34) (2024-04-03)
+[Full Changelog](https://github.com/Auctionator/Auctionator/compare/10.2.33...10.2.34) 
 
-- [Fixes #1486] Vanilla: Shift+Click to search for enchant reagents not working  
-- Remove hidden option  
+- Bump toc for 1.15.2 (SoD phase 3)  

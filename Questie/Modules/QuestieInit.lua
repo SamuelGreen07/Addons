@@ -33,6 +33,8 @@ local QuestieDBCompiler = QuestieLoader:ImportModule("DBCompiler")
 local QuestieCorrections = QuestieLoader:ImportModule("QuestieCorrections")
 ---@type QuestieMenu
 local QuestieMenu = QuestieLoader:ImportModule("QuestieMenu")
+---@type Townsfolk
+local Townsfolk = QuestieLoader:ImportModule("Townsfolk")
 ---@type QuestieQuest
 local QuestieQuest = QuestieLoader:ImportModule("QuestieQuest")
 ---@type IsleOfQuelDanas
@@ -94,7 +96,7 @@ local function loadFullDatabase()
 
     print("\124cFF4DDBFF [3/9] " .. l10n("Initializing townfolks") .. "...")
     coYield()
-    QuestieMenu:PopulateTownsfolk()
+    Townsfolk.Initialize()
 
     print("\124cFF4DDBFF [4/9] " .. l10n("Initializing locale") .. "...")
     coYield()
@@ -192,6 +194,11 @@ QuestieInit.Stages[1] = function() -- run as a coroutine
         dbCompiledLang = Questie.db.global.dbCompiledLang
     end
 
+    if Questie.IsSoD then
+        coYield()
+        SeasonOfDiscovery.Initialize()
+    end
+
     -- Check if the DB needs to be recompiled
     if (not dbIsCompiled) or (QuestieLib:GetAddonVersionString() ~= dbCompiledOnVersion) or (l10n:GetUILocale() ~= dbCompiledLang) or (Questie.db.global.dbCompiledExpansion ~= WOW_PROJECT_ID) then
         print("\124cFFAAEEFF" .. l10n("Questie DB has updated!") .. "\124r\124cFFFF6F22 " .. l10n("Data is being processed, this may take a few moments and cause some lag..."))
@@ -212,7 +219,7 @@ QuestieInit.Stages[1] = function() -- run as a coroutine
     if (not Questie.db.char.townsfolk) or (dbCompiledCount ~= Questie.db.char.townsfolkVersion) or (Questie.db.char.townsfolkClass ~= UnitClass("player")) then
         Questie.db.char.townsfolkVersion = dbCompiledCount
         coYield()
-        QuestieMenu:BuildCharacterTownsfolk()
+        Townsfolk:BuildCharacterTownsfolk()
     end
 
     coYield()
@@ -290,7 +297,7 @@ QuestieInit.Stages[3] = function() -- run as a coroutine
     coYield()
     QuestieQuest:GetAllQuestIdsNoObjectives()
     coYield()
-    QuestieMenu:PopulateTownsfolkPostBoot()
+    Townsfolk.PostBoot()
     coYield()
     QuestieQuest:GetAllQuestIds()
 
@@ -335,11 +342,6 @@ QuestieInit.Stages[3] = function() -- run as a coroutine
             Questie.db.global.lastDailyRequestDate = date("%d-%m-%y");
             Questie.db.global.lastDailyRequestResetTime = GetQuestResetTime();
         end
-    end
-
-    if Questie.IsSoD then
-        coYield()
-        SeasonOfDiscovery.Initialize()
     end
 
     -- We do this last because it will run for a while and we don't want to block the rest of the init
