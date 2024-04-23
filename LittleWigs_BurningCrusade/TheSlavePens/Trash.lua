@@ -43,12 +43,14 @@ function mod:GetOptions()
 		33787, -- Cripple
 		--[[ Coilfang Ray ]]--
 		{34984, "SAY"}, -- Psychic Horror
-	}, {
+	},{
 		[15655] = L.defender,
 		[32173] = L.enchantress,
 		[39378] = L.healer,
 		[33787] = L.collaborator,
 		[34984] = L.ray,
+	},{
+		[34984] = CL.fear, -- Psychic Horror (Fear)
 	}
 end
 
@@ -82,7 +84,7 @@ end
 do
 	local prev = 0
 	function mod:SpellReflection(args)
-		local t = GetTime()
+		local t = args.time
 		if t - prev > 1 then
 			prev = t
 			self:TargetMessageOld(args.spellId, args.destName, "yellow", "long", nil, nil, true)
@@ -93,7 +95,7 @@ end
 do
 	local playerList, playersAffected = mod:NewTargetList(), 0
 	function mod:EntanglingRoots(args)
-		if bit.band(args.destFlags, 0x400) == 0 then return end -- COMBATLOG_OBJECT_TYPE_PLAYER = 0x400, filtering out pets
+		if not self:Player(args.destFlags) then return end -- filter out pets
 		playersAffected = playersAffected + 1
 		playerList[#playerList + 1] = args.destName
 		if #playerList == 1 then
@@ -103,7 +105,7 @@ do
 	end
 
 	function mod:EntanglingRootsRemoved(args)
-		if bit.band(args.destFlags, 0x400) == 0 then return end -- COMBATLOG_OBJECT_TYPE_PLAYER = 0x400, filtering out pets
+		if not self:Player(args.destFlags) then return end -- filter out pets
 		playersAffected = playersAffected - 1
 		if playersAffected == 0 then
 			self:StopBar(args.spellName)
@@ -114,7 +116,7 @@ end
 do
 	local prev = 0
 	function mod:Heal(args)
-		local t = GetTime()
+		local t = args.time
 		if t - prev > 1 then
 			prev = t
 			self:MessageOld(39378, "orange", "alarm", CL.casting:format(args.spellName))
@@ -135,12 +137,12 @@ end
 
 function mod:PsychicHorror(args)
 	if self:Me(args.destGUID) then
-		self:Say(args.spellId) -- helps prioritizing dispelling those who are about to run into some pack
+		self:Say(args.spellId, CL.fear, nil, "Fear") -- helps prioritizing dispelling those who are about to run into some pack
 	end
-	self:TargetMessageOld(args.spellId, args.destName, "red", "alert", nil, nil, self:Dispeller("magic"))
-	self:TargetBar(args.spellId, 3, args.destName)
+	self:TargetMessageOld(args.spellId, args.destName, "red", "alert", CL.fear, nil, self:Dispeller("magic"))
+	self:TargetBar(args.spellId, 3, args.destName, CL.fear)
 end
 
 function mod:PsychicHorrorRemoved(args)
-	self:StopBar(args.spellName, args.destName)
+	self:StopBar(CL.fear, args.destName)
 end

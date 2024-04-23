@@ -1,25 +1,28 @@
 local AddOnName = ...
 local _G = _G
-local LibStub = LibStub
+local LibStub = _G.LibStub
 
-local PA = LibStub('AceAddon-3.0'):NewAddon('ProjectAzilroka', 'AceEvent-3.0', 'AceTimer-3.0')
+local PA = LibStub('AceAddon-3.0'):NewAddon('ProjectAzilroka', 'AceConsole-3.0', 'AceEvent-3.0', 'AceTimer-3.0')
 
 _G.ProjectAzilroka = PA
 
+local min, max = min, max
 local select = select
 local pairs = pairs
 local sort = sort
+local gsub = gsub
 local tinsert = tinsert
 local print = print
 local format = format
-local strsplit = strsplit
+local strsplit, strmatch, strlen, strsub = strsplit, strmatch, strlen, strsub
 
-local GetAddOnMetadata = GetAddOnMetadata
+local GetAddOnMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
 local GetAddOnEnableState = GetAddOnEnableState
 local UnitName = UnitName
 local UnitClass = UnitClass
 local GetRealmName = GetRealmName
 local UIParent = UIParent
+local CreateFrame = CreateFrame
 local BNGetFriendInfo = BNGetFriendInfo
 local BNGetGameAccountInfo = BNGetGameAccountInfo
 
@@ -70,8 +73,10 @@ end
 PA.UIScale = UIParent:GetScale()
 PA.MyFaction = UnitFactionGroup('player')
 
-PA.Classic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
-PA.Retail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+PA.Retail = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE
+PA.Classic = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_CLASSIC
+PA.TBC = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+PA.Wrath = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_WRATH_CLASSIC
 
 -- Pixel Perfect
 PA.ScreenWidth, PA.ScreenHeight = GetPhysicalScreenSize()
@@ -83,6 +88,7 @@ function PA:IsAddOnEnabled(addon, character)
 	if (type(character) == 'boolean' and character == true) then
 		character = nil
 	end
+
 	return GetAddOnEnableState(character, addon) == 2
 end
 
@@ -90,6 +96,7 @@ function PA:IsAddOnPartiallyEnabled(addon, character)
 	if (type(character) == 'boolean' and character == true) then
 		character = nil
 	end
+
 	return GetAddOnEnableState(character, addon) == 1
 end
 
@@ -98,25 +105,36 @@ PA.Version = GetAddOnMetadata('ProjectAzilroka', 'Version')
 PA.Authors = GetAddOnMetadata('ProjectAzilroka', 'Author'):gsub(', ', '    ')
 
 PA.AllPoints = { CENTER = 'CENTER', BOTTOM = 'BOTTOM', TOP = 'TOP', LEFT = 'LEFT', RIGHT = 'RIGHT', BOTTOMLEFT = 'BOTTOMLEFT', BOTTOMRIGHT = 'BOTTOMRIGHT', TOPLEFT = 'TOPLEFT', TOPRIGHT = 'TOPRIGHT' }
+PA.GrowthDirection = {
+	DOWN_RIGHT = format(PA.ACL["%s and then %s"], PA.ACL["Down"], PA.ACL["Right"]),
+	DOWN_LEFT = format(PA.ACL["%s and then %s"], PA.ACL["Down"], PA.ACL["Left"]),
+	UP_RIGHT = format(PA.ACL["%s and then %s"], PA.ACL["Up"], PA.ACL["Right"]),
+	UP_LEFT = format(PA.ACL["%s and then %s"], PA.ACL["Up"], PA.ACL["Left"]),
+	RIGHT_DOWN = format(PA.ACL["%s and then %s"], PA.ACL["Right"], PA.ACL["Down"]),
+	RIGHT_UP = format(PA.ACL["%s and then %s"], PA.ACL["Right"], PA.ACL["Up"]),
+	LEFT_DOWN = format(PA.ACL["%s and then %s"], PA.ACL["Left"], PA.ACL["Down"]),
+	LEFT_UP = format(PA.ACL["%s and then %s"], PA.ACL["Left"], PA.ACL["Up"]),
+}
 
 PA.ElvUI = PA:IsAddOnEnabled('ElvUI', PA.MyName)
 PA.SLE = PA:IsAddOnEnabled('ElvUI_SLE', PA.MyName)
-PA.NUI = PA:IsAddOnEnabled('ElvUI_NihilistUI', PA.MyName)
+PA.NUI = PA:IsAddOnEnabled('ElvUI_NihilistzscheUI', PA.MyName)
 PA.Tukui = PA:IsAddOnEnabled('Tukui', PA.MyName)
 PA.AzilUI = PA:IsAddOnEnabled('AzilUI', PA.MyName)
+PA.SpartanUI = PA:IsAddOnEnabled('SpartanUI', PA.MyName)
 PA.AddOnSkins = PA:IsAddOnEnabled('AddOnSkins', PA.MyName)
 
 -- Setup oUF for pbuf
 local function GetoUF()
-	local key = PA.ElvUI and "ElvUI" or PA.Tukui and "Tukui"
+	local key = PA.ElvUI and "ElvUI_Libraries" or PA.Tukui and "Tukui" or PA.SpartanUI and "SpartanUI"
 	if not key then return end
 	return _G[_G.GetAddOnMetadata(key, 'X-oUF')]
 end
 PA.oUF = GetoUF()
 
 PA.Classes = {}
-for k, v in pairs(LOCALIZED_CLASS_NAMES_MALE) do PA.Classes[v] = k end
-for k, v in pairs(LOCALIZED_CLASS_NAMES_FEMALE) do PA.Classes[v] = k end
+for k, v in pairs(_G.LOCALIZED_CLASS_NAMES_MALE) do PA.Classes[v] = k end
+for k, v in pairs(_G.LOCALIZED_CLASS_NAMES_FEMALE) do PA.Classes[v] = k end
 
 function PA:ClassColorCode(class)
 	local color = PA:GetClassColor(PA.Classes[class])
@@ -136,7 +154,7 @@ PA.ScanTooltip:SetOwner(_G.UIParent, "ANCHOR_NONE")
 PA.PetBattleFrameHider = CreateFrame('Frame', 'PA_PetBattleFrameHider', UIParent, 'SecureHandlerStateTemplate')
 PA.PetBattleFrameHider:SetAllPoints()
 PA.PetBattleFrameHider:SetFrameStrata('LOW')
-RegisterStateDriver(PA.PetBattleFrameHider, 'visibility', '[petbattle] hide; show')
+_G.RegisterStateDriver(PA.PetBattleFrameHider, 'visibility', '[petbattle] hide; show')
 
 function PA:GetUIScale()
 	local effectiveScale = _G.UIParent:GetEffectiveScale()
@@ -156,8 +174,7 @@ function PA:GetClassName(class)
 end
 
 function PA:Color(name)
-	local color = '|cFF16C3F2%s|r'
-	return (color):format(name)
+	return format('|cFF16C3F2%s|r', name)
 end
 
 function PA:Print(...)
@@ -237,9 +254,9 @@ function PA:SetTemplate(frame)
 			frame:SetTemplate('Transparent', true)
 		else
 			frame:SetBackdrop({ bgFile = PA.Solid, edgeFile = PA.Solid, edgeSize = 1 })
+			frame:SetBackdropColor(.08, .08, .08, .8)
+			frame:SetBackdropBorderColor(0.2, 0.2, 0.2, 1)
 		end
-		frame:SetBackdropColor(.08, .08, .08, .8)
-		frame:SetBackdropBorderColor(0.2, 0.2, 0.2, 0)
 	end
 end
 
@@ -247,10 +264,20 @@ function PA:CreateBackdrop(frame)
 	if PA.AddOnSkins then
 		_G.AddOnSkins[1]:CreateBackdrop(frame)
 	else
-		frame.Backdrop = CreateFrame('Frame', nil, frame)
-		frame.Backdrop:SetFrameLevel(frame:GetFrameLevel() - 1)
-		frame.Backdrop:SetOutside(frame)
-		PA:SetTemplate(frame.Backdrop)
+		local parent = frame.IsObjectType and frame:IsObjectType('Texture') and frame:GetParent() or frame
+
+		local backdrop = CreateFrame('Frame', nil, parent)
+		if not backdrop.SetBackdrop then _G.Mixin(backdrop, _G.BackdropTemplateMixin) end
+		if (parent:GetFrameLevel() - 1) >= 0 then
+			backdrop:SetFrameLevel(parent:GetFrameLevel() - 1)
+		else
+			backdrop:SetFrameLevel(0)
+		end
+
+		PA:SetOutside(backdrop, frame)
+		PA:SetTemplate(backdrop)
+
+		frame.backdrop = backdrop
 	end
 end
 
@@ -259,131 +286,49 @@ function PA:CreateShadow(frame)
 		_G.AddOnSkins[1]:CreateShadow(frame)
 	elseif frame.CreateShadow then
 		frame:CreateShadow()
-		if not PA.SLE and not PA.NUI then
+		if not PA.SLE then
 			PA.ES:RegisterFrameShadows(frame)
-		elseif PA.NUI then
-			_G.EnhancedShadows:RegisterShadow(frame.shadow)
 		end
 	end
 end
 
-function PA:SetInside(obj, anchor, xOffset, yOffset, anchor2)
-	xOffset = xOffset or 1
-	yOffset = yOffset or 1
-	anchor = anchor or obj:GetParent()
-
-	assert(anchor)
-	if obj:GetPoint() then
-		obj:ClearAllPoints()
+function PA:CopyTable(current, default)
+	if type(current) ~= 'table' then
+		current = {}
 	end
 
+	if type(default) == 'table' then
+		for option, value in pairs(default) do
+			current[option] = (type(value) == 'table' and PA:CopyTable(current[option], value)) or value
+		end
+	end
+
+	return current
+end
+
+function PA:SetInside(obj, anchor, xOffset, yOffset, anchor2)
+	xOffset, yOffset, anchor = xOffset or 1, yOffset or 1, anchor or obj:GetParent()
+
+	if obj:GetPoint() then obj:ClearAllPoints() end
 	obj:SetPoint('TOPLEFT', anchor, 'TOPLEFT', xOffset, -yOffset)
 	obj:SetPoint('BOTTOMRIGHT', anchor2 or anchor, 'BOTTOMRIGHT', -xOffset, yOffset)
 end
 
 function PA:SetOutside(obj, anchor, xOffset, yOffset, anchor2)
-	xOffset = xOffset or 1
-	yOffset = yOffset or 1
-	anchor = anchor or obj:GetParent()
+	xOffset, yOffset, anchor = xOffset or 1, yOffset or 1, anchor or obj:GetParent()
 
-	assert(anchor)
-	if obj:GetPoint() then
-		obj:ClearAllPoints()
-	end
-
+	if obj:GetPoint() then obj:ClearAllPoints() end
 	obj:SetPoint('TOPLEFT', anchor, 'TOPLEFT', -xOffset, yOffset)
 	obj:SetPoint('BOTTOMRIGHT', anchor2 or anchor, 'BOTTOMRIGHT', xOffset, -yOffset)
 end
 
-PA.ClassicServerNameByID = {
-	[4703] = 'Amnennar',
-	[4715] = 'Anathema',
-	[4716] = 'Arcanite Reaper',
-	[4742] = 'Ashbringer',
-	[4387] = 'Ashkandi',
-	[4372] = 'Atiesh',
-	[4669] = 'Arugal',
-	[4441] = 'Auberdine',
-	[4376] = 'Azuresong',
-	[4728] = 'Benediction',
-	[4398] = 'Bigglesworth',
-	[4397] = 'Blaumeux',
-	[4746] = 'Bloodfang',
-	[4648] = 'Bloodsail Buccaneers',
-	[4386] = 'Deviate Delight',
-	[4751] = 'Dragonfang',
-	[4756] = "Dragon's Call",
-	[4755] = 'Dreadmist',
-	[4731] = 'Earthfury',
-	[4749] = 'Earthshaker',
-	[4440] = 'Everlook',
-	[4408] = 'Faerlina',
-	[4396] = 'Fairbanks',
-	[4739] = 'Felstriker',
-	[4744] = 'Finkle',
-	[4467] = 'Firemaw',
-	[4706] = 'Flamelash',
-	[4702] = 'Gandling',
-	[4476] = 'Gehennas',
-	[4465] = 'Golemagg',
-	[4647] = 'Grobbulus',
-	[4732] = 'Heartseeker',
-	[4763] = 'Heartstriker',
-	[4406] = 'Herod',
-	[4678] = 'Hydraxian Waterlords',
-	[4698] = 'Incendius',
-	[4758] = 'Judgement',
-	[4700] = 'Kirtonos',
-	[4699] = 'Kromcrush',
-	[4399] = 'Kurinnaxx',
-	[4442] = 'Lakeshire',
-	[4801] = 'Loatheb',
-	[4463] = 'Lucifron',
-	[4813] = 'Mandokir',
-	[4384] = 'Mankrik',
-	[4454] = 'Mirage Raceway',
-	[4701] = 'Mograine',
-	[4373] = 'Myzrael',
-	[4456] = 'Nethergarde Keep',
-	[4729] = 'Netherwind',
-	[4741] = 'Noggenfogger',
-	[4374] = 'Old Blanchy',
-	[4385] = 'Pagle',
-	[4466] = 'Patchwerk',
-	[4453] = 'Pyrewood Village',
-	[4695] = 'Rattlegore',
-	[4455] = 'Razorfen',
-	[4478] = 'Razorgore',
-	[4667] = 'Remulos',
-	[4475] = 'Shazzrah',
-	[4410] = 'Skeram',
-	[4743] = 'Skullflame',
-	[4696] = 'Smolderweb',
-	[4409] = 'Stalagg',
-	[4705] = 'Stonespine',
-	[4726] = 'Sulfuras',
-	[4464] = 'Sulfuron',
-	[4737] = "Sul'thraze",
-	[4757] = 'Ten Storms',
-	[4407] = 'Thalnos',
-	[4714] = 'Thunderfury',
-	[4745] = 'Transcendence',
-	[4477] = 'Venoxis',
-	[4388] = 'Westfall',
-	[4395] = 'Whitemane',
-	[4727] = 'Windseeker',
-	[4670] = 'Yojamba',
-	[4676] = 'Zandalar Tribe',
-	[4452] = 'Хроми',
-	[4704] = 'Змейталак',
-	[4754] = 'Рок-Делар',
-	[4766] = 'Вестник Рока',
-	[4474] = 'Пламегор',
-}
-
 local accountInfo = { gameAccountInfo = {} }
 function PA:GetBattleNetInfo(friendIndex)
-	if PA.Classic then
+	if not PA.Classic then
+		accountInfo = _G.C_BattleNet.GetFriendAccountInfo(friendIndex)
+
+		return accountInfo
+	else
 		local bnetIDAccount, accountName, battleTag, isBattleTag, _, bnetIDGameAccount, _, isOnline, lastOnline, isBnetAFK, isBnetDND, messageText, noteText, _, messageTime, _, isReferAFriend, canSummonFriend, isFavorite = BNGetFriendInfo(friendIndex)
 
 		if not bnetIDGameAccount then return end
@@ -419,59 +364,39 @@ function PA:GetBattleNetInfo(friendIndex)
 			zoneName, realmName = strsplit("-", gameText)
 		end
 
-		if client == _G.BNET_CLIENT_WOW then
-			accountInfo.gameAccountInfo.characterName = characterName
-			accountInfo.gameAccountInfo.factionName = faction ~= '' and faction or nil
-			accountInfo.gameAccountInfo.playerGuid = guid
-			accountInfo.gameAccountInfo.wowProjectID = wowProjectID
-			accountInfo.gameAccountInfo.realmID = realmID
-			accountInfo.gameAccountInfo.realmDisplayName = realmName
-			accountInfo.gameAccountInfo.realmName = realmName
-			accountInfo.gameAccountInfo.areaName = zoneName
-			accountInfo.gameAccountInfo.className = class
-			accountInfo.gameAccountInfo.characterLevel = level
-			accountInfo.gameAccountInfo.raceName = race
-		else
-			accountInfo.gameAccountInfo.characterName = nil
-			accountInfo.gameAccountInfo.factionName = nil
-			accountInfo.gameAccountInfo.playerGuid = nil
-			accountInfo.gameAccountInfo.wowProjectID = nil
-			accountInfo.gameAccountInfo.realmID = nil
-			accountInfo.gameAccountInfo.realmDisplayName = nil
-			accountInfo.gameAccountInfo.realmName = nil
-			accountInfo.gameAccountInfo.areaName = nil
-			accountInfo.gameAccountInfo.className = nil
-			accountInfo.gameAccountInfo.characterLevel = nil
-			accountInfo.gameAccountInfo.raceName = nil
-		end
+		local isWow = client == _G.BNET_CLIENT_WOW
 
-		return accountInfo
-	else
-		accountInfo = _G.C_BattleNet.GetFriendAccountInfo(friendIndex)
-
-		if accountInfo and accountInfo.gameAccountInfo.wowProjectID == _G.WOW_PROJECT_CLASSIC then
-			accountInfo.gameAccountInfo.realmDisplayName = PA.ClassicServerNameByID[accountInfo.gameAccountInfo.realmID] or accountInfo.gameAccountInfo.realmID
-		end
+		accountInfo.gameAccountInfo.characterName = isWow and characterName
+		accountInfo.gameAccountInfo.factionName = isWow and faction ~= '' and faction
+		accountInfo.gameAccountInfo.playerGuid = isWow and guid
+		accountInfo.gameAccountInfo.wowProjectID = isWow and wowProjectID
+		accountInfo.gameAccountInfo.realmID = isWow and realmID
+		accountInfo.gameAccountInfo.realmDisplayName = isWow and realmName
+		accountInfo.gameAccountInfo.realmName = isWow and realmName
+		accountInfo.gameAccountInfo.areaName = isWow and zoneName
+		accountInfo.gameAccountInfo.className = isWow and class
+		accountInfo.gameAccountInfo.characterLevel = isWow and level
+		accountInfo.gameAccountInfo.raceName = isWow and race
 
 		return accountInfo
 	end
 end
 
-StaticPopupDialogs["PROJECTAZILROKA"] = {
+_G.StaticPopupDialogs["PROJECTAZILROKA"] = {
 	text = PA.ACL["A setting you have changed will change an option for this character only. This setting that you have changed will be uneffected by changing user profiles. Changing this setting requires that you reload your User Interface."],
-	button1 = ACCEPT,
-	button2 = CANCEL,
-	OnAccept = ReloadUI,
+	button1 = _G.ACCEPT,
+	button2 = _G.CANCEL,
+	OnAccept = _G.ReloadUI,
 	timeout = 0,
 	whileDead = 1,
 	hideOnEscape = false,
 }
 
-StaticPopupDialogs["PROJECTAZILROKA_RL"] = {
+_G.StaticPopupDialogs["PROJECTAZILROKA_RL"] = {
 	text = PA.ACL["This setting requires that you reload your User Interface."],
-	button1 = ACCEPT,
-	button2 = CANCEL,
-	OnAccept = ReloadUI,
+	button1 = _G.ACCEPT,
+	button2 = _G.CANCEL,
+	OnAccept = _G.ReloadUI,
 	timeout = 0,
 	whileDead = 1,
 	hideOnEscape = false,
@@ -516,7 +441,9 @@ PA.Defaults = {
 PA.Options = PA.ACH:Group(PA:Color(PA.Title), nil, 6)
 
 function PA:GetOptions()
-	PA.AceOptionsPanel.Options.args.ProjectAzilroka = PA.Options
+	if _G.ElvUI then
+		_G.ElvUI[1].Options.args.ProjectAzilroka = PA.Options
+	end
 end
 
 function PA:BuildProfile()
@@ -551,7 +478,6 @@ function PA:PLAYER_LOGIN()
 
 	PA.AS = _G.AddOnSkins and _G.AddOnSkins[1]
 	PA.EP = LibStub('LibElvUIPlugin-1.0', true)
-	PA.AceOptionsPanel = PA.ElvUI and _G.ElvUI[1] or PA.EC
 
 	PA.Options.childGroups = PA.EC and 'tab' or 'tree'
 
@@ -563,6 +489,9 @@ function PA:PLAYER_LOGIN()
 
 	if PA.EP then
 		PA.EP:RegisterPlugin('ProjectAzilroka', PA.GetOptions)
+	else
+		PA.AC:RegisterOptionsTable('ProjectAzilroka', PA.Options)
+		PA.ACD:AddToBlizOptions('ProjectAzilroka', 'ProjectAzilroka')
 	end
 
 	PA:UpdateCooldownSettings('all')

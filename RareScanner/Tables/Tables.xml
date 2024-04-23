@@ -5,6 +5,13 @@
 	<Script file="ContainerInfoTables.lua"/>
 	<Script file="ContainerLootTables.lua"/>
 	<Script file="EventInfoTables.lua"/>
+	<Script file="OthersInfoTables.lua"/>
 	<Script file="AchievementTables.lua"/>
 	<Script file="LootQuestsTables.lua"/>
+	<Script file="Conduits.lua"/>
+	<Script file="Mounts.lua"/>
+	<Script file="Pets.lua"/>
+	<Script file="DrakewatcherQuests.lua"/>
+	<Script file="DrakewatcherSpells.lua"/>
+	<Script file="MissingSources.lua"/>
 </Ui>

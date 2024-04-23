@@ -15,6 +15,18 @@ self:Wiki([[
 == Silent mode ==
 typing /BFA silent in chat will eliminate every chat message from ChampionCommander
 ]])
+self:RelNotes(1,9,0,[[
+Toc: bump for 1.2.5    
+]])
+self:RelNotes(1,3,5, [[
+Fix: Interface\AddOns\ChampionCommander\cache.lua:911: attempt to compare number with nil
+]])
+self:RelNotes(1,4,0, [[
+Toc: bump for 9.1.0
+]])
+self:RelNotes(1,3,5, [[
+Fix: 44x ChampionCommander\missionlist.lua:994: bad argument #3 to 'SetFormattedText' (string expected, got nil)
+]])
 self:RelNotes(1,3,2, [[
 Fix: 3x ...rfaceChampionCommander\ChampionCommander-1.3.1 90001.lua:14: ChampionCommander: Missing LibInit, please reinstall
 ]])

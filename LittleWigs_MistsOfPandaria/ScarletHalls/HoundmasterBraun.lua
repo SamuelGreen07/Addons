@@ -34,7 +34,7 @@ function mod:OnBossEnable()
 end
 
 function mod:OnEngage()
-	self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", "RageWarn", "boss1")
+	self:RegisterUnitEvent("UNIT_HEALTH", "RageWarn", "boss1")
 	nextCallDogs = 90
 end
 
@@ -51,10 +51,10 @@ function mod:BloodyRage(args)
 	self:MessageOld(-5611, "yellow", "alert", CL.percent:format(50, args.spellName), args.spellId)
 end
 
-function mod:RageWarn(event, unitId)
-	local hp = UnitHealth(unitId) / UnitHealthMax(unitId) * 100
+function mod:RageWarn(event, unit)
+	local hp = self:GetHealth(unit)
 	if hp < 55 then
-		self:UnregisterUnitEvent(event, unitId)
+		self:UnregisterUnitEvent(event, unit)
 		self:MessageOld(-5611, "green", "info", CL["soon"]:format(self:SpellName(116140)), false) -- Bloody Rage
 	end
 end

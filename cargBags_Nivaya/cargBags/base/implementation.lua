@@ -20,8 +20,18 @@
 local addon, ns = ...
 local cargBags = ns.cargBags
 
-local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+local isClassic = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE
 local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+
+local isDF = select(4,GetBuildInfo()) >= 100000
+local NumBagContainer = isDF and 5 or 4
+local BankContainerStartID = NumBagContainer + 1
+local MaxNumContainer = isDF and 12 or 11
+
+local GetContainerNumSlots = GetContainerNumSlots or C_Container.GetContainerNumSlots
+local GetContainerItemLink = GetContainerItemLink or C_Container.GetContainerItemLink
+local GetContainerItemCooldown = GetContainerItemCooldown or C_Container.GetContainerItemCooldown
+local GetContainerItemEquipmentSetInfo = isRetail and (GetContainerItemEquipmentSetInfo or C_Container.GetContainerItemEquipmentSetInfo)
 
 local animaSpells = {
 	[336327] = true,
@@ -32,6 +42,22 @@ local animaSpells = {
 local function IsAnimaItem(itemId)
 	local n,spellId = GetItemSpell(itemId or 0)
 	return spellId and animaSpells[spellId]
+end
+
+local korthianRelictSpells = {
+	[356931] = true,	--currently unused
+	[356933] = true,
+	[356934] = true,
+	[356935] = true,	--currently unused
+	[356936] = true,
+	[356937] = true,	--currently unused
+	[356938] = true,
+	[356939] = true,
+	[356940] = true,
+}
+local function IsKorthianRelictItem(itemId)
+	local n,spellId = GetItemSpell(itemId or 0)
+	return spellId and korthianRelictSpells[spellId]
 end
 
 --[[!
@@ -274,6 +300,7 @@ function Implementation:Init()
 	if isRetail then
 		self:RegisterEvent("PLAYERREAGENTBANKSLOTS_CHANGED", self, self.PLAYERREAGENTBANKSLOTS_CHANGED)
 	end
+	self:RegisterEvent("BANKFRAME_OPENED", self, self.BANKFRAME_OPENED)
 	self:RegisterEvent("UNIT_QUEST_LOG_CHANGED", self, self.UNIT_QUEST_LOG_CHANGED)
 	self:RegisterEvent("BAG_CLOSED", self, self.BAG_CLOSED)
 end
@@ -343,6 +370,7 @@ local function GetContainerItemLevel(link, bagID, slotID)
 	return itemDB[link]
 end]]
 
+
 function Implementation:GetCustomItemInfo(bagID, slotID, i)
 	i = i or defaultItem
 	for k in pairs(i) do i[k] = nil end
@@ -354,13 +382,32 @@ function Implementation:GetCustomItemInfo(bagID, slotID, i)
 	
 	if(clink) then
 		local _
-		i.texture, i.count, i.locked, i.quality, i.readable, _, _, _, _, i.id = GetContainerItemInfo(bagID, slotID)
-		i.cdStart, i.cdFinish, i.cdEnable = GetContainerItemCooldown(bagID, slotID)
+		if GetContainerItemInfo then
+			i.texture, i.count, i.locked, i.quality, i.readable, _, _, _, _, i.id, i.isBound = GetContainerItemInfo(bagID, slotID)
+		--	i.cdStart, i.cdFinish, i.cdEnable = GetContainerItemCooldown(bagID, slotID)
+		else
+			local cInfo = C_Container.GetContainerItemInfo(bagID, slotID)
+			i.texture = cInfo.iconFileID
+			i.count = cInfo.stackCount
+			i.locked = cInfo.isLocked
+			i.quality = cInfo.quality
+			i.readable = cInfo.isReadable
+			i.id = cInfo.itemID
+			i.isBound = cInfo.isBound
+		end
 		if isClassic then
+			i.cdStart, i.cdFinish, i.cdEnable = GetContainerItemCooldown(bagID, slotID)
 			i.isQuestItem, i.questID, i.questActive = nil, nil, nil
 			i.isInSet, i.setName = nil, nil
 		else
-			i.isQuestItem, i.questID, i.questActive = GetContainerItemQuestInfo(bagID, slotID)
+			if GetContainerItemQuestInfo then
+				i.isQuestItem, i.questID, i.questActive = GetContainerItemQuestInfo(bagID, slotID)
+			else
+				local qInfo = C_Container.GetContainerItemQuestInfo(bagID, slotID)
+				i.isQuestItem = qInfo.isQuestItem
+				i.questID = qInfo.questID
+				i.questActive = qInfo.isActive
+			end
 			i.isInSet, i.setName = GetContainerItemEquipmentSetInfo(bagID, slotID)
 		end
 
@@ -385,7 +432,7 @@ function Implementation:GetCustomItemInfo(bagID, slotID, i)
 		end
 		-- get the item spell to determine if the item is an Artifact Power boosting item
 		if isRetail and ns.options.filterArtifactPower and IsAnimaItem(i.id) then	--IsArtifactPowerItem(i.id) then
-			i.type = ANIMA
+			i.type = POWER_TYPE_ANIMA
 		end
 		-- texture
 		i.texture = i.texture or texture
@@ -402,10 +449,12 @@ function Implementation:GetCustomItemInfo(bagID, slotID, i)
 				i.id = tonumber(id) or 0
 				i.name = name
 				i.minLevel = level
-			elseif (clink:find("keystone")) then
+			elseif (clink:find("Hkeystone")) then
 				local data, name = strsplit("[", clink)
 				i.name = strsplit("]", name)
-				if not i.id then i.id = 138019 end
+				if not i.id then
+					i.id = 180653	--138019
+				end
 				_, _, i.rarity, i.level, i.minLevel, i.type, i.subType, i.stackCount, i.equipLoc, texture, i.sellPrice  = GetItemInfo(i.id)
 			end
 		end
@@ -487,7 +536,7 @@ function Implementation:BAG_UPDATE(event, bagID, slotID)
 	elseif(bagID) then
 		self:UpdateBag(bagID)
 	else
-		for bagID = -2, 11 do
+		for bagID = -2, MaxNumContainer do
 			self:UpdateBag(bagID)
 		end
 	end
@@ -518,7 +567,8 @@ function Implementation:BAG_UPDATE_COOLDOWN(event, bagID)
 	else
 		for id, container in pairs(self.contByID) do
 			for i, button in pairs(container.buttons) do
-				local item = self:GetCustomItemInfo(button.bagID, button.slotID)
+				local slotID, bagID = button:GetSlotAndBagID()
+				local item = self:GetCustomItemInfo(bagID, slotID)
 				button:UpdateCooldown(item)
 			end
 		end
@@ -569,13 +619,23 @@ if isRetail then
 	end
 end
 
+function Implementation:BANKFRAME_OPENED(event)
+	if isRetail then
+		local bagID = -3
+
+		self:BAG_UPDATE(event, bagID)
+	end
+end
+
+
 --[[
 	Fired when the quest log of a unit changes
 ]]
 function Implementation:UNIT_QUEST_LOG_CHANGED(event)
 	for id, container in pairs(self.contByID) do
 		for i, button in pairs(container.buttons) do
-			local item = self:GetCustomItemInfo(button.bagID, button.slotID)
+			local slotID, bagID = button:GetSlotAndBagID()
+			local item = self:GetCustomItemInfo(bagID, slotID)
 			button:UpdateQuest(item)
 		end
 	end

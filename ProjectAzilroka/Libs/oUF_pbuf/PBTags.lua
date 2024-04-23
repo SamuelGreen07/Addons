@@ -118,6 +118,16 @@ oUF.Tags.Methods["pbuf:level"] = function()
 	return level
 end
 
+oUF.Tags.Events["pbuf:smartlevel"] = levelEvents
+oUF.Tags.Methods["pbuf:smartlevel"] = function()
+	local petInfo = _FRAME.pbouf_petinfo
+	if not petInfo then
+		return ""
+	end
+	local level = C_PetBattles.GetLevel(petInfo.petOwner, petInfo.petIndex)
+	return level < 25 and level or ""
+end
+
 oUF.Tags.Events["pbuf:power"] = auraEvents
 oUF.Tags.Methods["pbuf:power"] = function()
 	local petInfo = _FRAME.pbouf_petinfo
@@ -196,7 +206,13 @@ oUF.Tags.Methods["pbuf:breed"] = function()
 	if not IsAddOnLoaded("BattlePetBreedID") then
 		return ""
 	end
-	return _G.GetBreedID_Battle({petOwner = petInfo.petOwner, petIndex = petInfo.petIndex})
+
+	local breedInfo = petInfo.breedInfo
+	if not breedInfo then
+		_VARS.GetBreedInfo(petInfo)
+		breedInfo = petInfo.breedInfo
+	end
+	return breedInfo.text
 end
 
 oUF.Tags.Events["pbuf:breedicon"] = openingEvents
@@ -206,20 +222,16 @@ oUF.Tags.Methods["pbuf:breedicon"] = function()
 		return ""
 	end
 
-	if not _G.PetTracker then
+	if not IsAddOnLoaded("BattlePetBreedID") then
 		return ""
 	end
 
-	local level, maxHP, speciesID, power, speed, rarity =
-		C_PetBattles.GetLevel(petInfo.petOwner, petInfo.petIndex),
-		C_PetBattles.GetMaxHealth(petInfo.petOwner, petInfo.petIndex),
-		C_PetBattles.GetPetSpeciesID(petInfo.petOwner, petInfo.petIndex),
-		C_PetBattles.GetPower(petInfo.petOwner, petInfo.petIndex),
-		C_PetBattles.GetSpeed(petInfo.petOwner, petInfo.petIndex),
-		C_PetBattles.GetBreedQuality(petInfo.petOwner, petInfo.petIndex)
-	local breed = _G.PetTracker.Predict:Breed(speciesID, level, rarity, maxHP, power, speed)
-
-	return _G.PetTracker:GetBreedIcon(breed, .9)
+	local breedInfo = petInfo.breedInfo
+	if not breedInfo or not breedInfo.icon then
+		_VARS.GetBreedInfo(petInfo)
+		breedInfo = petInfo.breedInfo
+	end
+	return breedInfo.icon or ""
 end
 
 for textFormat in pairs(styles) do
@@ -254,7 +266,7 @@ for textFormat in pairs(styles) do
 	oUF.Tags.Events[format("pbuf:xp:%s", tagTextFormat)] = xpEvents
 	oUF.Tags.Methods[format("pbuf:xp:%s", tagTextFormat)] = function()
 		local petInfo = _FRAME.pbouf_petinfo
-		if not petInfo or petInfo.petOwner == LE_BATTLE_PET_ENEMY then
+		if not petInfo or petInfo.petOwner == Enum.BattlePetOwner.Enemy then
 			return ""
 		end
 		local xp, maxXP = C_PetBattles.GetXP(petInfo.petOwner, petInfo.petIndex)
@@ -269,7 +281,7 @@ for textFormat in pairs(styles) do
 	oUF.Tags.Events[format("pbuf:xp:%s-nostatus", tagTextFormat)] = xpEvents
 	oUF.Tags.Methods[format("pbuf:xp:%s-nostatus", tagTextFormat)] = function()
 		local petInfo = _FRAME.pbouf_petinfo
-		if not petInfo or petInfo.petOwner == LE_BATTLE_PET_ENEMY then
+		if not petInfo or petInfo.petOwner == Enum.BattlePetOwner.Enemy then
 			return ""
 		end
 		local xp, maxXP = C_PetBattles.GetXP(petInfo.petOwner, petInfo.petIndex)
@@ -287,6 +299,7 @@ if ElvUI then
 	E:AddTagInfo("pbuf:qualitycolor", 'ProjectAzilroka', nil, nil)
 	E:AddTagInfo("pbuf:name", 'ProjectAzilroka', nil, nil)
 	E:AddTagInfo("pbuf:level", 'ProjectAzilroka', nil, nil)
+	E:AddTagInfo("pbuf:smartlevel", 'ProjectAzilroka', nil, nil)
 	E:AddTagInfo("pbuf:power", 'ProjectAzilroka', nil, nil)
 	E:AddTagInfo("pbuf:power:comparecolor", 'ProjectAzilroka', nil, nil)
 	E:AddTagInfo("pbuf:speed", 'ProjectAzilroka', nil, nil)

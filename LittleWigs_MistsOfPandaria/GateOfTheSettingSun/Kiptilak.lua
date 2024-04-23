@@ -30,7 +30,7 @@ function mod:OnBossEnable()
 	self:Log("SPELL_AURA_APPLIED", "Sabotage", 107268)
 	self:Log("SPELL_AURA_REMOVED", "SabotageRemoved", 107268)
 
-	self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", nil, "boss1")
+	self:RegisterUnitEvent("UNIT_HEALTH", nil, "boss1")
 end
 
 function mod:OnEngage()
@@ -48,7 +48,7 @@ function mod:Sabotage(args)
 	self:CDBar(args.spellId, 13.4)
 	self:PrimaryIcon(args.spellId, args.destName)
 	if self:Me(args.destGUID) then
-		self:Say(args.spellId)
+		self:Say(args.spellId, nil, nil, "Sabotage")
 		self:SayCountdown(args.spellId, 5)
 	end
 end
@@ -61,8 +61,8 @@ function mod:SabotageRemoved(args)
 	end
 end
 
-function mod:UNIT_HEALTH_FREQUENT(event, unit)
-	local hp = UnitHealth(unit) / UnitHealthMax(unit) * 100
+function mod:UNIT_HEALTH(event, unit)
+	local hp = self:GetHealth(unit)
 	if hp < nextExplosionWarning then
 		nextExplosionWarning = nextExplosionWarning - 40
 		self:MessageOld(-5394, "yellow", nil, CL.soon:format(self:SpellName(-5394)))

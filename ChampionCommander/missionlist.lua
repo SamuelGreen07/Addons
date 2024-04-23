@@ -28,7 +28,7 @@ local empty=addon:Wrap("Empty")
 local todefault=addon:Wrap("todefault")
 
 local tonumber=tonumber
-local type=type
+local type=type --as
 local OHF=BFAMissionFrame
 local OHFMissionTab=BFAMissionFrame.MissionTab --Container for mission list and single mission
 local OHFMissions=BFAMissionFrame.MissionTab.MissionList -- same as BFAMissionFrameMissions Call Update on this to refresh Mission Listing
@@ -45,16 +45,16 @@ local OHFTOPLEFT=OHF.GarrCorners.TopLeftGarrCorner
 local OHFTOPRIGHT=OHF.GarrCorners.TopRightGarrCorner
 local OHFBOTTOMLEFT=OHF.GarrCorners.BottomTopLeftGarrCorner
 local OHFBOTTOMRIGHT=OHF.GarrCorners.BottomRightGarrCorner
-local LE_FOLLOWER_TYPE_GARRISON_6_0=Enum.GarrisonFollowerType.FollowerType_6_0
-local LE_FOLLOWER_TYPE_SHIPYARD_6_2=Enum.GarrisonFollowerType.FollowerType_6_2
-local LE_FOLLOWER_TYPE_GARRISON_7_0=Enum.GarrisonFollowerType.FollowerType_7_0
-local LE_FOLLOWER_TYPE_GARRISON_8_0=Enum.GarrisonFollowerType.FollowerType_8_0
-local LE_GARRISON_TYPE_6_0=Enum.GarrisonType.Type_6_0
-local LE_GARRISON_TYPE_6_2=Enum.GarrisonType.Type_6_2
-local LE_GARRISON_TYPE_7_0=Enum.GarrisonType.Type_7_0
-local LE_GARRISON_TYPE_8_0=Enum.GarrisonType.Type_8_0
-local followerType=Enum.GarrisonFollowerType.FollowerType_8_0
-local garrisonType=Enum.GarrisonType.Type_8_0
+local LE_FOLLOWER_TYPE_GARRISON_6_0=Enum.GarrisonFollowerType.FollowerType_6_0_GarrisonFollower
+local LE_FOLLOWER_TYPE_SHIPYARD_6_2=Enum.GarrisonFollowerType.FollowerType_6_0_Boat
+local LE_FOLLOWER_TYPE_GARRISON_7_0=Enum.GarrisonFollowerType.FollowerType_7_0_GarrisonFollower
+local LE_FOLLOWER_TYPE_GARRISON_8_0=Enum.GarrisonFollowerType.FollowerType_8_0_GarrisonFollower
+local LE_GARRISON_TYPE_6_0=Enum.GarrisonType.Type_6_0_Garrison
+local LE_GARRISON_TYPE_6_2=Enum.GarrisonType.Type_6_2_Garrison
+local LE_GARRISON_TYPE_7_0=Enum.GarrisonType.Type_7_0_Garrison
+local LE_GARRISON_TYPE_8_0=Enum.GarrisonType.Type_8_0_Garrison
+local followerType=Enum.GarrisonFollowerType.FollowerType_8_0_GarrisonFollower
+local garrisonType=Enum.GarrisonType.Type_8_0_Garrison
 local FAKE_FOLLOWERID="0x0000000000000000"
 local MAX_LEVEL=110
 
@@ -64,9 +64,9 @@ local HideTT=ChampionCommanderMixin.HideTT
 local dprint=print
 local ddump
 --[===[@debug@
-LoadAddOn("Blizzard_DebugTools")
+C_AddOns.LoadAddOn("Blizzard_DebugTools")
 ddump=DevTools_Dump
-LoadAddOn("LibDebug")
+C_AddOns.LoadAddOn("LibDebug")
 
 if LibDebug then LibDebug() dprint=print end
 local safeG=addon.safeG
@@ -82,6 +82,7 @@ local GARRISON_FOLLOWER_ON_MISSION=GARRISON_FOLLOWER_ON_MISSION
 local GARRISON_FOLLOWER_INACTIVE=GARRISON_FOLLOWER_INACTIVE
 local GARRISON_FOLLOWER_IN_PARTY=GARRISON_FOLLOWER_IN_PARTY
 local GARRISON_FOLLOWER_AVAILABLE=AVAILABLE
+---@diagnostic disable-next-line: undefined-field
 local ViragDevTool_AddData=_G.ViragDevTool_AddData
 if not ViragDevTool_AddData then ViragDevTool_AddData=function() end end
 local KEY_BUTTON1 = "\124TInterface\\TutorialFrame\\UI-Tutorial-Frame:12:12:0:0:512:512:10:65:228:283\124t" -- left mouse button
@@ -140,7 +141,7 @@ local Current_Sorter
 local Second_Sorter
 local sortKeys={}
 local MAX=999999999
-local OHFButtons=OHFMissions.listScroll.buttons
+local OHFButtons=OHFMissions.ScrollBox
 local clean
 local displayClean
 local function factionLevelColor(level)
@@ -292,9 +293,7 @@ function module:Events()
 	addon:RegisterEvent("SHIPMENT_CRAFTER_CLOSED","SetDirtyFlags")
 end
 function module:LoadButtons(...)
-	local buttonlist=OHFMissions.listScroll.buttons
-	for i=1,#buttonlist do
-		local b=buttonlist[i]
+	for _,b in OHFButtons:EnumerateFrames() do
 		self:SecureHookScript(b,"OnEnter","AdjustMissionTooltip")
 		self:SecureHookScript(b,"OnLeave","SafeAddMembers")
 		self:RawHookScript(b,"OnClick","RawMissionClick")
@@ -644,8 +643,7 @@ end
 function addon:RedrawMissions()
   addon:RunRefreshers()
   addon:SortTroop()
-  for i=1,#OHFButtons do
-    local frame=OHFButtons[i]
+  for _,frame in OHFButtons:EnumerateFrames() do
     module:OnSingleUpdate(frame)
   end
   return module:CheckShadow()
@@ -762,7 +760,7 @@ function addon:UpdateStop(n)
 	stopper:RawHookScript(OHFMissionFrameMissions,"OnUpdate",GarrisonMissionListMixin.OnUpdate)
 end
 function module:OptionsButton()
-  local level=OHFMissionScroll:GetFrameLevel()+5
+  local level=OHFButtons:GetFrameLevel()+5
   local h=-27
   local option1=addon:GetFactory():Button(OHFMissionScroll,
   L["Quick start first mission"],
@@ -991,7 +989,10 @@ function module:AdjustMissionButton(frame)
 		stats:SetPoint("LEFT",48,14)
 		stats.Expire:Hide()
 	else
-		stats.Expire:SetFormattedText("%s\n%s",GARRISON_MISSION_AVAILABILITY or "Mission Expires",mission.offerTimeRemaining)
+		stats.Expire:SetFormattedText(
+		  "%s\n%s",
+		  GARRISON_MISSION_AVAILABILITY or L["Expiration Time"],
+		  mission.offerTimeRemaining or _G.UNKNOWN)
 		stats.Expire:SetTextColor(addon:GetAgeColor(mission.offerEndTime))
 		stats:SetPoint("LEFT",48,0)
 		stats.Expire:Show()

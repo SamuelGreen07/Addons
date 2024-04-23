@@ -4,14 +4,13 @@ function AuctionatorConfigFrameMixin:OnLoad()
   Auctionator.Debug.Message("AuctionatorConfigFrameMixin:OnLoad()")
 
   self.name = "Auctionator"
+  self:SetParent(SettingsPanel or InterfaceOptionsFrame)
 
   self:SetupPanel()
 end
 
 function AuctionatorConfigFrameMixin:Show()
-  InterfaceOptionsFrame_OpenToCategory(AuctionatorConfigBasicOptionsFrame)
-  -- For some reason OnShow doesn't fire?
-  AuctionatorConfigBasicOptionsFrame:OnShow()
+
 end
 
 function AuctionatorConfigFrameMixin:Save()

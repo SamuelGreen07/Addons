@@ -1007,6 +1007,7 @@ ImportHelper.expac_data = {
 	["LEGION"] = L["Legion"],
 	["BFA"] = L["Battle for Azeroth"],
 	["SL"] = L["Shadowlands"],
+	["DF"] = L["Dragonflight"],
 }
 imported["GatherMate2_Data"] = false
 importOptions.args.GatherMateData = {
@@ -1018,7 +1019,7 @@ importOptions.args.GatherMateData = {
 		local enabled = GetAddOnEnableState(UnitName("player"), "GatherMate2_Data") > 0
 		-- disable if the addon is not enabled, or
 		-- disable if there is a reason why it can't be loaded ("MISSING" or "DISABLED")
-		return not enabled or (reason ~= nil and reason ~= "DEMAND_LOADED")
+		return not enabled or (reason ~= nil and reason ~= "" and reason ~= "DEMAND_LOADED")
 	end,
 	args = {
 		desc = {
@@ -1156,10 +1157,13 @@ function Config:OnInitialize()
 
 	acr:RegisterOptionsTable("GatherMate 2", generalOptions)
 	local options = acd:AddToBlizOptions("GatherMate 2", "GatherMate 2")
-	options:HookScript("OnShow", function()
-		local p = findPanel("GatherMate 2")
-		if p and p.element.collapsed then OptionsListButtonToggle_OnClick(p.toggle) end
-	end)
+
+	if InterfaceOptionsFrameAddOns then
+		options:HookScript("OnShow", function()
+			local p = findPanel("GatherMate 2")
+			if p and p.element.collapsed then OptionsListButtonToggle_OnClick(p.toggle) end
+		end)
+	end
 
 	acr:RegisterOptionsTable("GM2/Minimap", minimapOptions)
 	acd:AddToBlizOptions("GM2/Minimap", "Minimap", "GatherMate 2")

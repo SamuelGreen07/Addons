@@ -20,7 +20,7 @@ local nextChainsWarning = 71
 
 function mod:GetOptions()
 	return {
-		75543, -- The Skullcracker
+		{75543, "CASTBAR"}, -- The Skullcracker
 		75272, -- Quake
 		75539, -- Chains of Woe
 	}
@@ -33,7 +33,7 @@ function mod:OnBossEnable()
 	self:Log("SPELL_PERIODIC_DAMAGE", "QuakeDamage", 75272)
 	self:Log("SPELL_PERIODIC_MISSED", "QuakeDamage", 75272)
 
-	self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", nil, "boss1")
+	self:RegisterUnitEvent("UNIT_HEALTH", nil, "boss1")
 	self:Log("SPELL_CAST_START", "ChainsOfWoe", 75539)
 	self:Log("SPELL_CAST_START", "TheSkullcracker", 75543)
 end
@@ -62,8 +62,8 @@ do
 	end
 end
 
-function mod:UNIT_HEALTH_FREQUENT(event, unit)
-	local hp = UnitHealth(unit) / UnitHealthMax(unit) * 100
+function mod:UNIT_HEALTH(event, unit)
+	local hp = self:GetHealth(unit)
 	if hp < nextChainsWarning then
 		self:MessageOld(75539, "yellow", nil, CL.soon:format(self:SpellName(75539))) -- Chains of Woe
 		nextChainsWarning = nextChainsWarning - 33

@@ -1,17 +1,20 @@
 --- Main methods directly available in your addon
 -- @module lib
 -- @author Alar of Runetotem
--- @release 62
+-- @release 73
 -- @set sort=true
 -- @usage
 -- -- Create a new addon this way:
 -- local me,ns=... -- Wow engine passes you your addon name and a private table to use
 -- addon=LibStub("LibInit"):newAddon(ns,me)
 -- -- Since now, all LibInit methods are available on self
+--@debug@
+-- Check
+--@end-debug@
 local me, ns = ...
 local __FILE__=tostring(debugstack(1,2,0):match("(.*):12:")) -- Always check line number in regexp and file
 local MAJOR_VERSION = "LibInit"
-local MINOR_VERSION = 62
+local MINOR_VERSION = 73
 local LibStub=LibStub
 local dprint=function() end
 local encapsulate  = function ()
@@ -75,8 +78,10 @@ local GetTime = GetTime
 local gcinfo = gcinfo
 local unpack = unpack
 local geterrorhandler = geterrorhandler
-local GetContainerNumSlots=GetContainerNumSlots
-local GetContainerItemID=GetContainerItemID
+local GetContainerNumSlots=C_Container.GetContainerNumSlots
+local GetContainerItemID=C_Container.GetContainerItemID
+local GetContainerItemLink=C_Container.GetContainerItemLink
+local GetContainerNumFreeSlots=C_Container.GetContainerNumFreeSlots
 local GetItemInfo=GetItemInfo
 local UnitHealth=UnitHealth
 local UnitHealthMax=UnitHealthMax
@@ -98,6 +103,7 @@ local select=select
 local coroutine=coroutine
 local cachedGetItemInfo
 local toc=select(4,GetBuildInfo())
+local ISCLASSIC=toc < 90000
 
 --]]
 -- Help sections
@@ -114,6 +120,7 @@ local AceConfigDialog=LibStub("AceConfigDialog-3.0",true)
 local AceGUI=LibStub("AceGUI-3.0",true)
 local Ace=LibStub("AceAddon-3.0")
 local AceLocale=LibStub("AceLocale-3.0",true)
+local AceConsole=LibStub("AceConsole-3.0",true)
 local AceDB  = LibStub("AceDB-3.0",true)
 
 
@@ -134,6 +141,18 @@ lib.pool=lib.pool or setmetatable({},{__mode="k",__tostring=function(t) return "
 --
 lib.mixins=lib.mixins or {}
 wipe(lib.mixins)
+local function ParseDebugStack(stack)
+  -- debugstack seems to truncate long file names, so if we don't get a match, we'll try removing some of the bits we're trying to match with.
+  --if not file then file, line = stack:match("AddOns[\\//]([/\\%w_]*%.[Ll][Uu][Aa]):(%d-):") end -- First Interface/
+  --if not file then file, line = stack:match("[\\//]([/\\%w_]*%.[Ll][Uu][Aa]):(%d-):") end  -- Then Interface/AddOns/
+  --file=nil
+  -- local regexp="@Interface[\\/]AddOns[\\/]([%w_]*)[\\/]([%w_\\/]*)\"%]:(%d-):"
+  local regexp="@Interface[\\/]AddOns[\\/]([^\\/]*)[\\/]([%w_\\/]*)[^:]+:(%d-):"
+  local addon,file, line = stack:match(regexp)
+  addon=addon or 'unknown'
+  return file or '*',line or 0
+end
+
 -- Recycling function from ACE3
 
 --- Table Recycling System.
@@ -230,7 +249,7 @@ end
 -- Other tables are left intact
 -- -- Preferred usage is assigning to a local via wrap function
 -- @tparam table tbl table to be recycled
--- @tparam[opt=true] boolean recursive If true, embedded tables added cia new table will be wiped and recycled
+-- @tparam[opt=true] boolean recursive If true, embedded tables added via new table will be wiped and recycled
 --
 function lib:DelTable(tbl,recursive)
 	if type(recursive)=="nil" then recursive=true end
@@ -432,6 +451,15 @@ function lib:GetAddon(name)
 end
 function lib:GetLocale()
 	return AceLocale:GetLocale(self.name)
+end
+function lib:Notice(...)
+  if self.db and not self.db.silent then AceConsole:Print("|cff909090"..tostring( self ).."|r:",...) end
+end
+function lib:Debug(...)
+  if self.debug then
+    local header=format("|cffff9900%s|r|cffc0c0c0[%s:%d]|r",tostring(self),ParseDebugStack(debugstack(2,1,0)))
+    AceConsole:Print(header,...)
+  end
 end
 
 --- Generic.
@@ -979,10 +1007,11 @@ function lib:OnInitialize(...)
 	end
 	if (type(self.LoadHelp)=="function") then self:LoadHelp() end
 	local main=options.name
+  local _
 	BuildHelp(self)
 	if AceConfig and not options.nogui then
 		AceConfig:RegisterOptionsTable(main,self.OptionsTable,{main,strlower(options.ID)})
-		self.CfgDlg=AceConfigDialog:AddToBlizOptions(main,main )
+		_,self.CfgDlg=AceConfigDialog:AddToBlizOptions(main,main )
 		if (not ignoreProfile and not options.noswitch) then
 			if (AceDBOptions) then
 				local profileOpts=AceDBOptions:GetOptionsTable(self.db)
@@ -1011,7 +1040,7 @@ function lib:OnInitialize(...)
 		self.OptionsTable.args.gui=nil
 	end
 	if (self.help[RELNOTES]~='') then
-		self.CfgRel=AceConfigDialog:AddToBlizOptions(main..RELNOTES,titles.RELNOTES,main)
+		_,self.CfgRel=AceConfigDialog:AddToBlizOptions(main..RELNOTES,titles.RELNOTES,main)
 	end
 	if AceDB then
 		self:UpdateVersion()
@@ -1761,27 +1790,26 @@ local function _GetMethod(target,prefix,func)
 			return "_" .. prefix
 	end
 end
-
-local neveropened=true
+local neveropened=false
 function lib:Gui(info)
 	if (AceConfigDialog and AceGUI) then
-		if (neveropened) then
-			InterfaceAddOnsList_Update()
-			neveropened=false
-		end
-		InterfaceOptionsFrame_OpenToCategory(self.CfgDlg)
+		Settings.OpenToCategory(self.CfgDlg)
+    if neveropened then
+      Settings.OpenToCategory(self.CfgDlg)
+      neveropened=false
+    end
 	else
 		self:Print("No GUI available")
 	end
 end
-
 function lib:Help(info)
 	if (AceConfigDialog and AceGUI) then
-		if (neveropened) then
-			InterfaceAddOnsList_Update()
-			neveropened=false
-		end
-		InterfaceOptionsFrame_OpenToCategory(self.CfgRel)
+    self:Print("Opening help")
+		Settings.OpenToCategory(self.CfgRel)
+    if neveropened then
+      Settings.OpenToCategory(self.CfgRel)
+      neveropened=false
+    end
 	else
 		self:Print("No GUI available")
 	end
@@ -1847,7 +1875,7 @@ end
 -- Anything I define here is immediately available to newAddon method and in addon right after creation
 function lib:Embed(target)
 	-- All methods are pulled in via metatable in order to not pollute addon table
-	local mt=getmetatable(target)
+	local mt=getmetatable(target)  
 	if not mt then mt={__tostring=function(me) return me.name end} end
 	mt.__index=lib.mixins
 	setmetatable(target,mt)
@@ -1994,7 +2022,7 @@ local StaticPopup_Show=StaticPopup_Show
 -- @tparam string msg Message to be shown
 -- @tparam[opt=60] number timeout In seconds, if omitted assumes 60
 -- @tparam[opt] func OnAccept Executed when clicked on Accept
--- @tparam[opt] func OnCancel Executed when clicked on Cancel (if nill, Cancel button is not shown)
+-- @tparam[opt] func OnCancel Executed when clicked on Cancel (if nil, Cancel button is not shown)
 -- @tparam[opt] mixed data Passed to the callback function
 -- @tparam[opt] bool StopCasting If true, when the popup appear will stop any running casting.
 -- Useful to ask confirmation before performing a programmatic initiated spellcasting

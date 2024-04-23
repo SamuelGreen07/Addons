@@ -21,19 +21,32 @@ local RSTooltip = private.ImportLib("RareScannerTooltip")
 local RSGuidePOI = private.ImportLib("RareScannerGuidePOI")
 local RSTomtom = private.ImportLib("RareScannerTomtom")
 local RSWaypoints = private.ImportLib("RareScannerWaypoints")
+local RSEntityStateHandler = private.ImportLib("RareScannerEntityStateHandler")
+
+-- RareScanner general libraries
+local RSUtils = private.ImportLib("RareScannerUtils")
+local RSConstants = private.ImportLib("RareScannerConstants")
 
 RSEntityPinMixin = CreateFromMixins(MapCanvasPinMixin);
+
+RSEntityPinMixin.SetPassThroughButtons = function() end
 
 function RSEntityPinMixin:OnLoad()
 	self:SetScalingLimits(1, 0.75, 1.0);
 end
 
-function RSEntityPinMixin:OnAcquired(POI)
+function RSEntityPinMixin:OnAcquired(POI, dataProvider)
 	self:UseFrameLevelType("PIN_FRAME_LEVEL_VIGNETTE", self:GetMap():GetNumActivePinsByTemplate("RSEntityPinTemplate"));
 	self.POI = POI
+	self.dataProvider = dataProvider
 	self.Texture:SetTexture(POI.Texture)
 	self.Texture:SetScale(RSConfigDB.GetIconsWorldMapScale())
-	self:SetPosition(POI.x, POI.y);
+	self.IconTexture:SetAtlas(POI.iconAtlas)
+	self:SetPosition(RSUtils.FixCoord(POI.x), RSUtils.FixCoord(POI.y));
+	if (self.SetPassThroughButtons) then
+		self:SetPassThroughButtons("MiddleButton");
+	end
+	MapPinHighlight_CheckHighlightPin(self:GetHighlightType(), self, self.Texture, AREAPOI_HIGHLIGHT_PARAMS);
 end
 
 function RSEntityPinMixin:OnMouseEnter()
@@ -51,74 +64,74 @@ function RSEntityPinMixin:OnMouseDown(button)
 		--Toggle state
 		if (IsShiftKeyDown() and IsAltKeyDown()) then
 			if (self.POI.isNpc) then
-				if (self.POI.isDead) then
-					RSNpcDB.DeleteNpcKilled(self.POI.entityID)
+				if (RSConfigDB.GetDefaultNpcFilter() == RSConstants.ENTITY_FILTER_ALERTS) then
+					RSConfigDB.SetNpcFiltered(self.POI.entityID, RSConstants.ENTITY_FILTER_ALL)
 				else
-					RareScanner:ProcessKill(self.POI.entityID, true)
-					self:Hide();
+					RSConfigDB.SetNpcFiltered(self.POI.entityID)
 				end
+				self:Hide();
 			elseif (self.POI.isContainer) then
-				if (self.POI.isOpened) then
-					RSContainerDB.DeleteContainerOpened(self.POI.entityID)
+				if (RSConfigDB.GetDefaultContainerFilter() == RSConstants.ENTITY_FILTER_ALERTS) then
+					RSConfigDB.SetContainerFiltered(self.POI.entityID, RSConstants.ENTITY_FILTER_ALL)
 				else
-					RareScanner:ProcessOpenContainer(self.POI.entityID, true)
-					self:Hide();
+					RSConfigDB.SetContainerFiltered(self.POI.entityID)
 				end
+				self:Hide();
 			elseif (self.POI.isEvent) then
-				if (self.POI.isCompleted) then
-					RSEventDB.DeleteEventCompleted(self.POI.entityID)
+				if (RSConfigDB.GetDefaultEventFilter() == RSConstants.ENTITY_FILTER_ALERTS) then
+					RSConfigDB.SetEventFiltered(self.POI.entityID, RSConstants.ENTITY_FILTER_ALL)
 				else
-					RareScanner:ProcessCompletedEvent(self.POI.entityID, true)
-					self:Hide();
+					RSConfigDB.SetEventFiltered(self.POI.entityID)
 				end
+				self:Hide();
 			end
 			self:GetMap():RefreshAllDataProviders();
+			RSMinimap.RefreshEntityState(self.POI.entityID)
+		-- Toggle overlay
+		elseif (not IsShiftKeyDown() and not IsAltKeyDown() and not IsControlKeyDown()) then
+			-- If overlay showing then hide it
+			local overlayInfo = RSGeneralDB.GetOverlayActive(self.POI.entityID)
+			if (overlayInfo) then
+				for pin in self:GetMap():EnumeratePinsByTemplate("RSOverlayTemplate") do
+					if (pin:GetEntityID() == self.POI.entityID) then
+						self:GetMap():RemovePin(pin)
+					end
+				end
+				RSGeneralDB.RemoveOverlayActive(self.POI.entityID)
+				RSMinimap.RemoveOverlay(self.POI.entityID)
+			else
+				self:ShowOverlay()
+			end
+		end
+	elseif (button == "RightButton") then
 		-- Add waypoint
-		elseif (IsShiftKeyDown()) then
+		if (IsShiftKeyDown()) then
 			if (RSConfigDB.IsAddingWorldMapTomtomWaypoints()) then
 				RSTomtom.AddWorldMapTomtomWaypoint(self.POI.mapID, self.POI.x, self.POI.y, self.POI.name)
 			end
 			if (RSConfigDB.IsAddingWorldMapIngameWaypoints()) then
 				RSWaypoints.AddWorldMapWaypoint(self.POI.mapID, self.POI.x, self.POI.y)
 			end
-		-- Toggle overlay
-		elseif (not IsShiftKeyDown() and not IsAltKeyDown()) then
-			-- If overlay showing then hide it
-			local overlayEntityID = RSGeneralDB.GetOverlayActive()
-			if (overlayEntityID) then
-				self:GetMap():RemoveAllPinsByTemplate("RSOverlayTemplate");
-				if (overlayEntityID ~= self.POI.entityID) then
-					self:ShowOverlay()
+		-- Toggle guide
+		elseif (not IsShiftKeyDown() and not IsAltKeyDown() and not IsControlKeyDown()) then
+			-- If guide showing then hide it
+			local guideEntityID = RSGeneralDB.GetGuideActive()
+			if (guideEntityID) then
+				self:GetMap():RemoveAllPinsByTemplate("RSGuideTemplate");
+				if (guideEntityID ~= self.POI.entityID) then
+					self:ShowGuide(self.POI.mapID)
 				else
-					RSGeneralDB.RemoveOverlayActive()
+					RSGeneralDB.RemoveGuideActive()
+					RSMinimap.RemoveGuide(self.POI.entityID)
 				end
 			else
-				self:ShowOverlay()
+				self:ShowGuide(self.POI.mapID)
 			end
-		end
-
-		-- Refresh minimap
-		RSMinimap.RefreshAllData(true)
-	elseif (button == "RightButton") then
-		-- If guide showing then hide it
-		local guideEntityID = RSGeneralDB.GetGuideActive()
-		if (guideEntityID) then
-			self:GetMap():RemoveAllPinsByTemplate("RSGuideTemplate");
-			if (guideEntityID ~= self.POI.entityID) then
-				self:ShowGuide(true)
-			else
-				RSGeneralDB.RemoveGuideActive()
+			
+			-- Hide the tooltip
+			if (RSTooltip.HideTooltip(self.tooltip)) then
+				self.tooltip = nil
 			end
-		else
-			self:ShowGuide(true)
-		end
-
-		-- Refresh minimap
-		RSMinimap.RefreshAllData(true)
-		
-		-- Hide the tooltip
-		if (RSTooltip.HideTooltip(self.tooltip)) then
-			self.tooltip = nil
 		end
 	end
 end
@@ -133,25 +146,53 @@ function RSEntityPinMixin:ShowOverlay()
 	end
 
 	if (overlay) then
+		-- Checks if the overlay is already shown, in which case is already active in the minimap
+		local hasOverlayActive = RSGeneralDB.HasOverlayActive(self.POI.entityID);
+		
+		-- In the worldmap we always have to add it
+		local r, g, b, replacedEntityID = RSGeneralDB.AddOverlayActive(self.POI.entityID)
+
+		-- Cleans the replaced overlay
+		if (replacedEntityID) then
+			for pin in self:GetMap():EnumeratePinsByTemplate("RSOverlayTemplate") do
+				if (pin:GetEntityID() == replacedEntityID) then
+					self:GetMap():RemovePin(pin)
+				end
+			end
+			
+			-- Cleans the replaced overly in the minimap
+			RSMinimap.RemoveOverlay(replacedEntityID)
+		-- Checks if they are already shown
+		else
+			for pin in self:GetMap():EnumeratePinsByTemplate("RSOverlayTemplate") do
+				if (pin:GetEntityID() == self.POI.entityID) then
+					return
+				end
+			end
+		end
+		
+		-- Adds the new one
 		for _, coordinates in ipairs (overlay) do
 			local x, y = strsplit("-", coordinates)
-			self:GetMap():AcquirePin("RSOverlayTemplate", tonumber(x), tonumber(y), self);
+			self:GetMap():AcquirePin("RSOverlayTemplate", RSUtils.FixCoord(x), RSUtils.FixCoord(y), r, g, b, self);
 		end
-		RSGeneralDB.SetOverlayActive(self.POI.entityID)
-	else
-		RSGeneralDB.RemoveOverlayActive()
+		
+		-- Adds the new one to the minimap
+		if (not hasOverlayActive) then
+			RSMinimap.AddOverlay(self.POI.entityID)
+		end
 	end
 end
 
-function RSEntityPinMixin:ShowGuide(onclick)
+function RSEntityPinMixin:ShowGuide(mapID)
 	-- Guide
 	local guide = nil
 	if (self.POI.isNpc) then
-		guide = RSGuideDB.GetNpcGuide(self.POI.entityID)
+		guide = RSGuideDB.GetNpcGuide(self.POI.entityID, mapID)
 	elseif (self.POI.isContainer) then
-		guide = RSGuideDB.GetContainerGuide(self.POI.entityID)
+		guide = RSGuideDB.GetContainerGuide(self.POI.entityID, mapID)
 	else
-		guide = RSGuideDB.GetEventGuide(self.POI.entityID)
+		guide = RSGuideDB.GetEventGuide(self.POI.entityID, mapID)
 	end
 
 	if (guide) then
@@ -160,19 +201,28 @@ function RSEntityPinMixin:ShowGuide(onclick)
 			if (not info.questID or not C_QuestLog.IsQuestFlaggedCompleted(info.questID)) then
 				local POI = RSGuidePOI.GetGuidePOI(self.POI.entityID, pinType, info)
 				local pin = self:GetMap():AcquirePin("RSGuideTemplate", POI, self);
-
-				if (onclick) then
-					pin.ShowPingAnim:Play()
-				end
+				pin.ShowPingAnim:Play()
 			end
 		end
 		RSGeneralDB.SetGuideActive(self.POI.entityID)
-	else
-		RSGeneralDB.RemoveGuideActive()
+		RSMinimap.AddGuide(self.POI.entityID)
 	end
 end
 
 function RSEntityPinMixin:OnReleased()
 	RSTooltip.ReleaseTooltip(self.tooltip)
 	self.tooltip = nil
+end
+
+function RSEntityPinMixin:GetHighlightType()
+	if (RSConfigDB.IsHighlightingReputation()) then
+		local _, bountyFactionID, bountyFrameType = self.dataProvider:GetBountyInfo();
+		if (bountyFrameType == BountyFrameType.ActivityTracker) then
+			if (self.POI.factionID and RSUtils.Contains(self.POI.factionID, bountyFactionID)) then
+				return MapPinHighlightType.SupertrackedHighlight;
+			end
+		end
+	end
+
+	return MapPinHighlightType.None;
 end

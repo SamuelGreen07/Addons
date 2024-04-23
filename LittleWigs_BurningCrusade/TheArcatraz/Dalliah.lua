@@ -16,7 +16,7 @@ mod.engageId = 1913
 function mod:GetOptions()
 	return {
 		39013, -- Heal
-		36175, -- Whirlwind
+		{36175, "CASTBAR"}, -- Whirlwind
 		39009, -- Gift of the Doomsayer
 	}
 end
@@ -49,7 +49,7 @@ do
 	local prev = 0
 	function mod:WhirlwindDamage(args)
 		if self:Me(args.destGUID) then
-			local t = GetTime()
+			local t = args.time
 			if t - prev > (self:Melee() and 6 or 1.5) then
 				prev = t
 				self:MessageOld(36175, "blue", "alert", CL.you:format(args.spellName))

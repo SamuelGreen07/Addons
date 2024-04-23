@@ -3,11 +3,11 @@ if PA.Classic then
 	return
 end
 
-local EPB = PA:NewModule("EnhancedPetBattleUI", "AceEvent-3.0")
+local EPB = PA:NewModule('EnhancedPetBattleUI', "AceEvent-3.0")
 
-EPB.Title = "|cFF16C3F2Enhanced|r |cFFFFFFFFPet Battle UI|r"
-EPB.Description = ""
-EPB.Authors = "Azilroka    NihilisticPandemonium"
+EPB.Title = PA.ACL['|cFF16C3F2Enhanced|r |cFFFFFFFFPet Battle UI|r']
+EPB.Description = PA.ACL['An enhanced UI for pet battles']
+EPB.Authors = 'Azilroka'
 EPB.isEnabled = false
 
 _G.EPB = EPB
@@ -18,8 +18,8 @@ local floor, min, max = _G.floor, _G.min, _G.max
 local ceil, round = _G.format, EPB.round
 
 local CreateAtlasMarkup = _G.CreateAtlasMarkup
-local LE_BATTLE_PET_ALLY = _G.LE_BATTLE_PET_ALLY
-local LE_BATTLE_PET_ENEMY = _G.LE_BATTLE_PET_ENEMY
+local Enum_BattlePetOwner_Ally = _G.Enum.BattlePetOwner.Ally
+local Enum_BattlePetOwner_Enemy = _G.Enum.BattlePetOwner.Enemy
 
 local UIParent = _G.UIParent
 local CreateFrame = _G.CreateFrame
@@ -58,6 +58,8 @@ EPB["TooltipHealthIcon"] = "|TInterface\\PetBattles\\PetBattle-StatIcons:16:16:0
 EPB["TooltipPowerIcon"] = "|TInterface\\PetBattles\\PetBattle-StatIcons:16:16:0:0:32:32:0:16:0:16|t"
 EPB["TooltipSpeedIcon"] = "|TInterface\\PetBattles\\PetBattle-StatIcons:16:16:0:0:32:32:0:16:16:32|t"
 EPB.Events = { "PLAYER_ENTERING_WORLD", "PET_BATTLE_MAX_HEALTH_CHANGED", "PET_BATTLE_HEALTH_CHANGED", "PET_BATTLE_AURA_APPLIED", "PET_BATTLE_AURA_CANCELED", "PET_BATTLE_AURA_CHANGED", "PET_BATTLE_XP_CHANGED", "PET_BATTLE_OPENING_START", "PET_BATTLE_OPENING_DONE", "PET_BATTLE_CLOSE", "BATTLE_PET_CURSOR_CLEAR", "PET_JOURNAL_LIST_UPDATE" }
+
+local E = PA.ElvUI and ElvUI[1]
 
 function EPB:ChangePetBattlePetSelectionFrameState(state)
 	if state and self.lastState then
@@ -187,7 +189,7 @@ function EPB:InitPetFrameAPI()
 					frame:SetFrameStrata("BACKGROUND")
 					frame:SetFrameLevel(0)
 
-					frame.petOwner = petType == "Ally" and LE_BATTLE_PET_ALLY or LE_BATTLE_PET_ENEMY
+					frame.petOwner = petType == "Ally" and Enum_BattlePetOwner_Ally or Enum_BattlePetOwner_Enemy
 					frame:SetPoint(unpack(petType == "Ally" and {"RIGHT", UIParent, "BOTTOM", -200, 400} or {"LEFT", UIParent, "BOTTOM", 200, 400}))
 					frame.Pets = {}
 
@@ -228,6 +230,7 @@ function EPB:InitPetFrameAPI()
 				local petOwner = ActivePetOwner
 				local petIndex = ActivePetIndex
 				frame.pbouf_petinfo = {petOwner = petOwner, petIndex = petIndex}
+				frame.unit = unit
 				frame.PBAuras = {}
 				frame.PBBuffs = self:ConstructBuffs(frame, petOwner, petIndex)
 				frame.PBDebuffs = self:ConstructDebuffs(frame, petOwner, petIndex)
@@ -238,11 +241,14 @@ function EPB:InitPetFrameAPI()
 				frame.RaisedElementParent = CreateFrame("Frame", nil, frame)
 				frame.RaisedElementParent:SetFrameLevel(10000)
 				PA:SetInside(frame.RaisedElementParent)
+
 				frame.Name = self:ConstructTagString(frame)
 				frame.PBHealth = self:ConstructHealth(frame, petOwner, petIndex)
 				frame.PBExperience = self:ConstructExperience(frame, petOwner, petIndex)
 				frame.PBPortrait = self:ConstructPotrait(frame, petOwner, petIndex)
-				frame.PBCutaway = self:ConstructCutaway(frame, petOwner, petIndex)
+				if PA.ElvUI then
+					frame.PBCutaway = self:ConstructCutaway(frame, petOwner, petIndex)
+				end
 				frame.PBFamilyIcon = self:ConstructFamilyIcon(frame, petOwner, petIndex)
 				frame.PBDeadIndicator = self:ConstructDeadIndicator(frame, petOwner, petIndex)
 				frame.PBPower = self:ConstructPower(frame, petOwner, petIndex)
@@ -266,7 +272,7 @@ function EPB:InitPetFrameAPI()
 					if _G.Rematch and not self.InSwitchMode then
 						_G.Rematch:LockPetCard(frame, C_PetBattles.GetPetSpeciesID(petInfo.petOwner, petInfo.petIndex))
 					elseif
-						self.InSwitchMode and petInfo.petOwner == LE_BATTLE_PET_ALLY and C_PetBattles.CanPetSwapIn(petInfo.petIndex)
+						self.InSwitchMode and petInfo.petOwner == Enum_BattlePetOwner_Ally and C_PetBattles.CanPetSwapIn(petInfo.petIndex)
 					then
 						C_PetBattles.ChangePet(petInfo.petIndex)
 						EPB:ChangePetBattlePetSelectionFrameState(false)
@@ -291,13 +297,68 @@ function EPB:InitPetFrameAPI()
 				else
 					PA:CreateBackdrop(health)
 				end
+				health.colorClass = PA.ElvUI and E.db.unitframe.colors.healthclass
+				health.colorSmooth = PA.ElvUI and E.db.unitframe.colors.colorhealthbyvalue or true
+				health.isEnemy = petOwner == Enum_BattlePetOwner_Enemy
 
-				health.colorSmooth = true
+				local clipFrame = CreateFrame('Frame', nil, health)
+				clipFrame:SetClipsChildren(true)
+				clipFrame:SetAllPoints()
+				clipFrame:EnableMouse(false)
+				health.ClipFrame = clipFrame
 
 				health:SetFrameLevel(frame:GetFrameLevel() + 5)
-				health:SetReverseFill(petOwner == LE_BATTLE_PET_ENEMY)
+				health:SetReverseFill(petOwner == Enum_BattlePetOwner_Enemy)
 				health.value = self:ConstructTagString(frame)
+				if PA.ElvUI then
+					health.PostUpdateColor = EPB.PostUpdateHealthColor
+				end
 				return health
+			end
+
+
+			function EPB:PostUpdateHealthColor(_, r, g, b)
+				local parent = self:GetParent()
+				local colors = E.db.unitframe.colors
+				local newr, newg, newb -- fallback for bg if custom settings arent used
+				if not b then r, g, b = colors.health.r, colors.health.g, colors.health.b end
+				if (((colors.healthclass and colors.colorhealthbyvalue))) then
+					local capColor = PA.MyClass == "PRIEST"
+					if (colors.healthclass and self.isEnemy) then
+						r = capColor and math.max(1-r,0.35) or 1-r
+						g = capColor and math.max(1-g,0.35) or 1-g
+						b = capColor and math.max(1-b,0.35) or 1-b
+					end
+					newr, newg, newb = oUF:ColorGradient(self.cur or 1, self.max or 1, 1, 0, 0, 1, 1, 0, r, g, b)
+					self:SetStatusBarColor(newr, newg, newb)
+				elseif self.isEnemy then
+					local color = parent.colors.reaction[HOSTILE_REACTION]
+					if color then self:SetStatusBarColor(color[1], color[2], color[3]) end
+				end
+				if self.bg then
+					self.bg.multiplier = (colors.healthMultiplier > 0 and colors.healthMultiplier) or 0.35
+
+					if colors.useDeadBackdrop and (self.cur or 1) == 0 then
+						self.bg:SetVertexColor(colors.health_backdrop_dead.r, colors.health_backdrop_dead.g, colors.health_backdrop_dead.b)
+					elseif colors.customhealthbackdrop then
+						self.bg:SetVertexColor(colors.health_backdrop.r, colors.health_backdrop.g, colors.health_backdrop.b)
+					elseif colors.classbackdrop then
+						local _, Class = UnitClass("player")
+						color = parent.colors.class[Class]
+						if color and self.invertClassColor then
+							for i = 1,3 do
+								color[i] = math.max(1-color[i],0.15)
+							end
+						end
+						if color then
+							self.bg:SetVertexColor(color[1] * self.bg.multiplier, color[2] * self.bg.multiplier, color[3] * self.bg.multiplier)
+						end
+					elseif newb then
+						self.bg:SetVertexColor(newr * self.bg.multiplier, newg * self.bg.multiplier, newb * self.bg.multiplier)
+					else
+						self.bg:SetVertexColor(r * self.bg.multiplier, g * self.bg.multiplier, b * self.bg.multiplier)
+					end
+				end
 			end
 
 			function EPB:ConstructExperience(frame, petOwner, petIndex)
@@ -324,10 +385,12 @@ function EPB:InitPetFrameAPI()
 				return deadIndicator
 			end
 
-			function EPB:ConstructCutaway(frame, petOwner, petIndex)
-				local chealth = frame.PBHealth:CreateTexture(nil, "ARTWORK")
+			if PA.ElvUI then
+				function EPB:ConstructCutaway(frame, petOwner, petIndex)
+					local chealth = frame.PBHealth.ClipFrame:CreateTexture(nil, "ARTWORK")
 
-				return { Health = chealth }
+					return { Health = chealth }
+				end
 			end
 
 			function EPB:ConstructFamilyIcon(frame, petOwner, petIndex)
@@ -385,7 +448,7 @@ function EPB:InitPetFrameAPI()
 				local petInfo = self.__owner.pbouf_petinfo
 				local activePet = C_PetBattles.GetActivePet(petInfo.petOwner)
 				if activePet == petInfo.petIndex then
-					local otherPetOwner = petInfo.petOwner == LE_BATTLE_PET_ALLY and LE_BATTLE_PET_ENEMY or LE_BATTLE_PET_ALLY
+					local otherPetOwner = petInfo.petOwner == Enum_BattlePetOwner_Ally and Enum_BattlePetOwner_Enemy or Enum_BattlePetOwner_Ally
 					local theirActivePet = C_PetBattles.GetActivePet(otherPetOwner)
 					local mySpeed = C_PetBattles.GetSpeed(petInfo.petOwner, petInfo.petIndex)
 					local theirSpeed = C_PetBattles.GetSpeed(otherPetOwner, theirActivePet)
@@ -409,9 +472,9 @@ function EPB:InitPetFrameAPI()
 				buffs.num = 12
 				buffs.numRow = 9
 				buffs.spacing = 2
-				buffs.initialAnchor = petOwner == LE_BATTLE_PET_ALLY and "TOPLEFT" or "TOPRIGHT"
+				buffs.initialAnchor = petOwner == Enum_BattlePetOwner_Ally and "TOPLEFT" or "TOPRIGHT"
 				buffs["growth-y"] = "DOWN"
-				buffs["growth-x"] = petOwner == LE_BATTLE_PET_ALLY and "RIGHT" or "LEFT"
+				buffs["growth-x"] = petOwner == Enum_BattlePetOwner_Ally and "RIGHT" or "LEFT"
 				buffs.PostCreateIcon = self.PostCreateAura
 				return buffs
 			end
@@ -421,9 +484,9 @@ function EPB:InitPetFrameAPI()
 				debuffs.size = 26
 				debuffs.num = 12
 				debuffs.spacing = 2
-				debuffs.initialAnchor = petOwner == LE_BATTLE_PET_ALLY and "TOPRIGHT" or "TOPLEFT"
+				debuffs.initialAnchor = petOwner == Enum_BattlePetOwner_Ally and "TOPRIGHT" or "TOPLEFT"
 				debuffs["growth-y"] = "DOWN"
-				debuffs["growth-x"] = petOwner == LE_BATTLE_PET_ALLY and "LEFT" or "RIGHT"
+				debuffs["growth-x"] = petOwner == Enum_BattlePetOwner_Ally and "LEFT" or "RIGHT"
 				debuffs.isDebuff = true
 				debuffs.PostCreateIcon = self.PostCreateAura
 				return debuffs
@@ -460,7 +523,7 @@ function EPB:InitPetFrameAPI()
 				local petInfo = frame.pbouf_petinfo
 				if (petInfo.petIndex == 0) then
 					local BuffPoint, DebuffPoint
-					if petInfo.petOwner == LE_BATTLE_PET_ALLY then
+					if petInfo.petOwner == Enum_BattlePetOwner_Ally then
 						BuffPoint, DebuffPoint = "TOPLEFT", "TOPRIGHT"
 					else
 						BuffPoint, DebuffPoint = "TOPRIGHT", "TOPLEFT"
@@ -475,7 +538,7 @@ function EPB:InitPetFrameAPI()
 				end
 				frame:Size(278, 80)
 				frame.PBHealth:Size(270, 52)
-				if petInfo.petOwner == LE_BATTLE_PET_ALLY then
+				if petInfo.petOwner == Enum_BattlePetOwner_Ally then
 					frame.PBHealth:SetPoint("TOPLEFT", frame, "TOPLEFT", 4, -4)
 				else
 					frame.PBHealth:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -4, -4)
@@ -489,7 +552,7 @@ function EPB:InitPetFrameAPI()
 				local texture = frame.PBHealth:GetStatusBarTexture()
 				local ch = frame.PBCutaway.Health
 				ch:ClearAllPoints()
-				if petInfo.petOwner == LE_BATTLE_PET_ALLY then
+				if petInfo.petOwner == Enum_BattlePetOwner_Ally then
 					ch:SetPoint("TOPLEFT", texture, "TOPRIGHT")
 					ch:SetPoint("BOTTOMLEFT", texture, "BOTTOMRIGHT")
 				else
@@ -513,32 +576,32 @@ function EPB:InitPetFrameAPI()
 				frame.Name:SetJustifyH("CENTER")
 				frame.Name:SetJustifyH("TOP")
 				local PositioningSettings = {
-					[LE_BATTLE_PET_ALLY] = {
+					[Enum_BattlePetOwner_Ally] = {
 						familyIconPoint = "TOPLEFT",
 						buffsInitialPoint = "BOTTOMLEFT",
 						buffsRelativePoint = "TOPLEFT",
 						buffsOffsetX = 7,
-						buffsOffsetY = 28,
+						buffsOffsetY = 1,
 						debuffsInitialPoint = "BOTTOMRIGHT",
 						debuffsRelativePoint = "TOPRIGHT",
 						debuffsOffsetX = -7,
-						debuffsOffsetY = 1,
+						debuffsOffsetY = 28,
 						breedIDPoint = "TOPRIGHT",
 						statInitialPoint = "RIGHT",
 						statRelativePoint = "LEFT",
 						statOffsetX = -2,
 						statJustifyH = "RIGHT",
 					},
-					[LE_BATTLE_PET_ENEMY] = {
+					[Enum_BattlePetOwner_Enemy] = {
 						familyIconPoint = "TOPRIGHT",
 						buffsInitialPoint = "BOTTOMRIGHT",
 						buffsRelativePoint = "TOPRIGHT",
 						buffsOffsetX = -7,
-						buffsOffsetY = 28,
+						buffsOffsetY = 1,
 						debuffsInitialPoint = "BOTTOMLEFT",
 						debuffsRelativePoint = "TOPLEFT",
 						debuffsOffsetX = 7,
-						debuffsOffsetY = 1,
+						debuffsOffsetY = 28,
 						breedIDPoint = "TOPLEFT",
 						statInitialPoint = "LEFT",
 						statRelativePoint = "RIGHT",
@@ -564,14 +627,14 @@ function EPB:InitPetFrameAPI()
 				frame.PBSpeed:SetPoint("TOP", frame.PBPower, "BOTTOM", 0, -3)
 				frame.PBSpeed.value:SetPoint(ps.statInitialPoint, frame.PBSpeed, ps.statRelativePoint, ps.statOffsetX, 0)
 				frame.PBSpeed.value:SetJustifyH(ps.statJustifyH)
-				frame:Tag(frame.Name, "[pbuf:qualitycolor][pbuf:level] [pbuf:name]")
-				frame:Tag(frame.PBHealth.value, "[pbuf:health:current-percent]")
-				if petInfo.petOwner == LE_BATTLE_PET_ALLY then
-					frame:Tag(frame.PBExperience.value, "[pbuf:xp:current-max-percent]")
+				frame:Tag(frame.Name, EPB.db.nameFormat)
+				frame:Tag(frame.PBHealth.value, EPB.db.healthFormat)
+				if petInfo.petOwner == Enum_BattlePetOwner_Ally then
+					frame:Tag(frame.PBExperience.value, EPB.db.xpFormat)
 				end
-				frame:Tag(frame.PBPower.value, "[pbuf:power:comparecolor][pbuf:power]")
-				frame:Tag(frame.PBSpeed.value, "[pbuf:speed:comparecolor][pbuf:speed]")
-				frame:Tag(frame.BreedID, "[pbuf:breedicon]")
+				frame:Tag(frame.PBPower.value, EPB.db.powerFormat)
+				frame:Tag(frame.PBSpeed.value, EPB.db.speedFormat)
+				frame:Tag(frame.BreedID, EPB.db.breedFormat)
 			end
 
 			function EPB:UpdatePetFrame(frame)
@@ -605,13 +668,13 @@ function EPB:InitPetFrameAPI()
 
 					pet.PBFamilyIcon:SetDesaturated(hp == 0)
 
-					if (self.petOwner == LE_BATTLE_PET_ENEMY) then
+					if (self.petOwner == Enum_BattlePetOwner_Enemy) then
 						pet.PBExperience:SetMinMaxValues(0, 1)
 						pet.PBExperience:SetValue(0)
 						pet.PBExperience.value:Hide()
 					end
 
-					if self.petOwner == LE_BATTLE_PET_ENEMY and wildBattle then
+					if self.petOwner == Enum_BattlePetOwner_Enemy and wildBattle then
 						local adjustedLevel = level
 						if (adjustedLevel > 20) then
 							adjustedLevel = adjustedLevel - 2
@@ -641,7 +704,7 @@ function EPB:InitPetFrameAPI()
 						pet:SetBackdropBorderColor(unpack(EPB.Colors.Black))
 					end
 
-					if EPB.InSwitchMode and (self.petOwner == LE_BATTLE_PET_ALLY) and hp > 0 then
+					if EPB.InSwitchMode and (self.petOwner == Enum_BattlePetOwner_Ally) and hp > 0 then
 						local _, class = _G.UnitClass("player")
 						local c = _G.RAID_CLASS_COLORS[class]
 						PA.LCG.PixelGlow_Start(pet.RaisedElementParent, {c.r, c.g, c.b, 1}, 8, -0.25, nil, 1)
@@ -688,7 +751,7 @@ function EPB:InitPetFrameAPI()
 					frame:SetFrameStrata("BACKGROUND")
 					frame:SetFrameLevel(0)
 
-					frame.petOwner = petType == "Ally" and LE_BATTLE_PET_ALLY or LE_BATTLE_PET_ENEMY
+					frame.petOwner = petType == "Ally" and Enum_BattlePetOwner_Ally or Enum_BattlePetOwner_Enemy
 					frame:SetPoint(unpack(petType == "Ally" and {"RIGHT", UIParent, "BOTTOM", -200, 200} or {"LEFT", UIParent, "BOTTOM", 200, 200}))
 					frame.Pets = {}
 
@@ -813,7 +876,7 @@ function EPB:InitPetFrameAPI()
 
 			function EPB:BuildAuras(frame, petOwner, petIndex)
 				local point, relativePoint, xcoord
-				if petOwner == LE_BATTLE_PET_ALLY then
+				if petOwner == Enum_BattlePetOwner_Ally then
 					point, relativePoint, xcoord = "LEFT", "RIGHT", 3
 				else
 					point, relativePoint, xcoord = "RIGHT", "LEFT", -3
@@ -836,7 +899,7 @@ function EPB:InitPetFrameAPI()
 					if (event == "PET_BATTLE_OPENING_START") then
 						local numPets
 						local point, relativePoint, xcoord, ycoord
-						if _self.petOwner == LE_BATTLE_PET_ALLY then
+						if _self.petOwner == Enum_BattlePetOwner_Ally then
 							numPets = self.db["TeamAurasOnBottom"] and C_PetBattles.GetNumPets(1) or 1
 						else
 							numPets = self.db["TeamAurasOnBottom"] and C_PetBattles.GetNumPets(2) or 1
@@ -867,7 +930,7 @@ function EPB:InitPetFrameAPI()
 				EPB:BuildAuras(frame, petOwner, 0)
 
 				local BuffPoint, DebuffPoint
-				if petOwner == LE_BATTLE_PET_ALLY then
+				if petOwner == Enum_BattlePetOwner_Ally then
 					BuffPoint, DebuffPoint = "TOPLEFT", "TOPRIGHT"
 				else
 					BuffPoint, DebuffPoint = "TOPRIGHT", "TOPLEFT"
@@ -993,7 +1056,7 @@ function EPB:InitPetFrameAPI()
 				frame:SetScript("OnMouseDown", function()
 					if _G.Rematch and not self.InSwitchMode then
 						_G.Rematch:LockPetCard(frame, C_PetBattles.GetPetSpeciesID(frame.petOwner, frame.petIndex))
-					elseif self.InSwitchMode and frame.petOwner == LE_BATTLE_PET_ALLY and C_PetBattles.CanPetSwapIn(frame.petIndex) then
+					elseif self.InSwitchMode and frame.petOwner == Enum_BattlePetOwner_Ally and C_PetBattles.CanPetSwapIn(frame.petIndex) then
 						C_PetBattles.ChangePet(frame.petIndex)
 						EPB:ChangePetBattlePetSelectionFrameState(false)
 					end
@@ -1120,7 +1183,7 @@ function EPB:InitPetFrameAPI()
 					end
 
 					pet.Icon.PetType:SetTexture(EPB.TexturePath .. _G.PET_TYPE_SUFFIX[petType])
-					if (level == 25 or self.petOwner == LE_BATTLE_PET_ENEMY) then
+					if (level == 25 or self.petOwner == Enum_BattlePetOwner_Enemy) then
 						pet.Experience:SetMinMaxValues(0, 1)
 						pet.Experience:SetValue(0)
 						pet.Experience.Text:Hide()
@@ -1153,7 +1216,7 @@ function EPB:InitPetFrameAPI()
 
 					EPB:SetupAuras(pet, self.petOwner, i)
 
-					if self.petOwner == LE_BATTLE_PET_ENEMY and wildBattle then
+					if self.petOwner == Enum_BattlePetOwner_Enemy and wildBattle then
 						local adjustedLevel = level
 						if (adjustedLevel > 20) then
 							adjustedLevel = adjustedLevel - 2
@@ -1183,7 +1246,7 @@ function EPB:InitPetFrameAPI()
 						pet:SetBackdropBorderColor(unpack(EPB.Colors.Black))
 					end
 
-					if EPB.InSwitchMode and (pet.petOwner == LE_BATTLE_PET_ALLY) and hp > 0 then
+					if EPB.InSwitchMode and (pet.petOwner == Enum_BattlePetOwner_Ally) and hp > 0 then
 						local _, class = _G.UnitClass("player")
 						local c = _G.RAID_CLASS_COLORS[class]
 						PA.LCG.PixelGlow_Start(pet, {c.r, c.g, c.b, 1}, 8, -0.25, nil, 1)
@@ -1194,10 +1257,10 @@ function EPB:InitPetFrameAPI()
 					pet:Show()
 				end
 
-				local activeAlly = C_PetBattles.GetActivePet(LE_BATTLE_PET_ALLY)
-				local activeEnemy = C_PetBattles.GetActivePet(LE_BATTLE_PET_ENEMY)
-				local allySpeed = C_PetBattles.GetSpeed(LE_BATTLE_PET_ALLY, activeAlly)
-				local enemySpeed = C_PetBattles.GetSpeed(LE_BATTLE_PET_ENEMY, activeEnemy)
+				local activeAlly = C_PetBattles.GetActivePet(Enum_BattlePetOwner_Ally)
+				local activeEnemy = C_PetBattles.GetActivePet(Enum_BattlePetOwner_Enemy)
+				local allySpeed = C_PetBattles.GetSpeed(Enum_BattlePetOwner_Ally, activeAlly)
+				local enemySpeed = C_PetBattles.GetSpeed(Enum_BattlePetOwner_Enemy, activeEnemy)
 
 				EPB.Ally.Pets[activeAlly].Icon.Speed:SetVertexColor(unpack(allySpeed > enemySpeed and EPB.Colors.Green or EPB.Colors.Red))
 				EPB.Enemy.Pets[activeEnemy].Icon.Speed:SetVertexColor(unpack(allySpeed < enemySpeed and EPB.Colors.Green or EPB.Colors.Red))
@@ -1257,32 +1320,32 @@ function EPB:GetOptions()
 			General = {
 				order = 2,
 				type = "group",
-				name = "General",
+				name = PA.ACL["General"],
 				inline = true,
 				args = {
 					HideBlizzard = {
 						order = 1,
 						type = "toggle",
-						name = "Hide Blizzard",
-						desc = "Hide the Blizzard Pet Frames during battles"
+						name = PA.ACL["Hide Blizzard"],
+						desc = PA.ACL["Hide the Blizzard Pet Frames during battles"]
 					},
 					GrowUp = {
 						order = 2,
 						type = "toggle",
-						name = "Grow the frames upwards",
-						desc = "Grow the frames from bottom for first pet upwards"
+						name = PA.ACL["Grow the frames upwards"],
+						desc = PA.ACL["Grow the frames from bottom for first pet upwards"]
 					},
 					TeamAurasOnBottom = {
 						order = 3,
 						type = "toggle",
-						name = "Team Aura On Bottom",
-						desc = "Place team auras on the bottom of the last pet shown (or top if Grow upwards is selected)"
+						name = PA.ACL["Team Aura On Bottom"],
+						desc = PA.ACL["Place team auras on the bottom of the last pet shown (or top if Grow upwards is selected)"]
 					},
 					PetTrackerIcon = {
 						order = 4,
 						type = "toggle",
-						name = "Use PetTracker Icon",
-						desc = "Use PetTracker Icon instead of Breed ID",
+						name = PA.ACL["Use PetTracker Icon"],
+						desc = PA.ACL["Use PetTracker Icon instead of Breed ID"],
 						disabled = function()
 							return not IsAddOnLoaded("PetTracker")
 						end
@@ -1290,8 +1353,8 @@ function EPB:GetOptions()
 					EnhanceTooltip = {
 						order = 5,
 						type = "toggle",
-						name = "Enhance Tooltip",
-						desc = "Add More Detailed Info if BreedInfo is available.",
+						name = PA.ACL["Enhance Tooltip"],
+						desc = PA.ACL["Add More Detailed Info if BreedInfo is available."],
 						disabled = function()
 							return not BattlePetBreedID
 						end
@@ -1299,8 +1362,8 @@ function EPB:GetOptions()
 					LevelBreakdown = {
 						order = 6,
 						type = "toggle",
-						name = "Level Breakdown",
-						desc = "Add Pet Level Breakdown if BreedInfo is available.",
+						name = PA.ACL["Level Breakdown"],
+						desc = PA.ACL["Add Pet Level Breakdown if BreedInfo is available."],
 						disabled = function()
 							return not (EPB.db["EnhanceTooltip"] and BattlePetBreedID)
 						end
@@ -1308,8 +1371,8 @@ function EPB:GetOptions()
 					UseoUF = {
 						order = 7,
 						type = "toggle",
-						name = "Use oUF for the pet frames",
-						desc = "Use the new PBUF library by NihilisticPandemonium included with ProjectAzilroka to create new pet frames using the oUF unitframe template system.",
+						name = PA.ACL["Use oUF for the pet frames"],
+						desc = PA.ACL["Use the new PBUF library by Nihilistzsche included with ProjectAzilroka to create new pet frames using the oUF unitframe template system."],
 						disabled = function()
 							return not PA.oUF
 						end,
@@ -1321,29 +1384,45 @@ function EPB:GetOptions()
 					["3DPortrait"] = {
 						order = 8,
 						type = "toggle",
-						name = "3D Portraits",
-						desc = "Use the 3D pet model instead of a texture for the pet icons",
+						name = PA.ACL["3D Portraits"],
+						desc = PA.ACL["Use the 3D pet model instead of a texture for the pet icons"],
 						disabled = function()
 							return EPB.db.UseoUF
 						end
+					},
+					healthThreshold = {
+						order = 9,
+						type = 'range',
+						name = PA.ACL["Health Threshold"],
+						desc = PA.ACL["When the current health of any pet in your journal is under this percentage after a trainer battle, show the revive bar."],
+						isPercent = true,
+						min = 0, max = 1, step = 0.01,
+					},
+					wildHealthThreshold = {
+						order = 10,
+						type = 'range',
+						name = PA.ACL["Wild Health Threshold"],
+						desc = PA.ACL["When the current health of any pet in your journal is under this percentage after a wild pet battle, show the revive bar."],
+						isPercent = true,
+						min = 0, max = 1, step = 0.01,
 					},
 					StatusBarTexture = {
 						type = "select",
 						dialogControl = "LSM30_Statusbar",
 						order = 13,
-						name = "StatusBar Texture",
+						name = PA.ACL["StatusBar Texture"],
 						values = PA.LSM:HashTable("statusbar")
 					},
 					Font = {
 						type = "select",
 						dialogControl = "LSM30_Font",
 						order = 14,
-						name = "Font",
+						name = PA.ACL["Font"],
 						values = PA.LSM:HashTable("font")
 					},
 					FontSize = {
 						order = 15,
-						name = "Font Size",
+						name = PA.ACL["Font Size"],
 						type = "range",
 						min = 8,
 						max = 24,
@@ -1352,12 +1431,54 @@ function EPB:GetOptions()
 					FontFlag = PA.ACH:FontFlags(PA.ACL["Font Flag"], nil, 16),
 					TextOffset = {
 						order = 17,
-						name = "Health/Experience Text Offset",
+						name = PA.ACL["Health/Experience Text Offset"],
 						type = "range",
 						min = -10,
 						max = 10,
 						step = 1
-					}
+					},
+					nameFormat = {
+						type = "input",
+						width = "full",
+						name = PA.ACL["Name Format"],
+						order = 18,
+						disabled = function() return not EPB.db.UseoUF end
+					},
+					healthFormat = {
+						type = "input",
+						width = "full",
+						name = PA.ACL["Health Format"],
+						order = 19,
+						disabled = function() return not EPB.db.UseoUF end
+					},
+					xpFormat = {
+						type = "input",
+						width = "full",
+						name = PA.ACL["Experience Format"],
+						order = 20,
+						disabled = function() return not EPB.db.UseoUF end
+					},
+					powerFormat = {
+						type = "input",
+						width = "full",
+						name = PA.ACL["Power Format"],
+						order = 21,
+						disabled = function() return not EPB.db.UseoUF end
+					},
+					speedFormat = {
+						type = "input",
+						width = "full",
+						name = PA.ACL["Speed Format"],
+						order = 22,
+						disabled = function() return not EPB.db.UseoUF end
+					},
+					breedFormat = {
+						type = "input",
+						width = "full",
+						name = PA.ACL["Breed Format"],
+						order = 23,
+						disabled = function() return not EPB.db.UseoUF end
+					},
 				}
 			}
 		}
@@ -1382,7 +1503,15 @@ function EPB:BuildProfile()
 		ShowNameplates = true,
 		BreedIDOnNameplate = true,
 		["3DPortrait"] = true,
-		["UseoUF"] = PA.oUF ~= nil
+		["UseoUF"] = PA.oUF ~= nil,
+		nameFormat = "[pbuf:qualitycolor][pbuf:smartlevel] [pbuf:name]",
+		healthFormat = "[pbuf:health:current-percent]",
+		xpFormat = "[pbuf:xp:current-max-percent]",
+		powerFormat = "[pbuf:power:comparecolor][pbuf:power]",
+		speedFormat = "[pbuf:speed:comparecolor][pbuf:speed]",
+		breedFormat = "[pbuf:breedicon]",
+		healthThreshold = 0.85,
+		wildHealthThreshold = 0.65,
 	}
 
 	if PA.Tukui then
@@ -1435,8 +1564,9 @@ function EPB:Initialize()
 	EPB:UpdateReviveBar()
 	EPB:RegisterEvent("BAG_UPDATE", "UpdateReviveBar")
 	EPB:RegisterEvent("PET_JOURNAL_LIST_UPDATE", "UpdateReviveBar")
+	EPB:RegisterEvent("PET_BATTLE_CLOSE", "UpdateReviveBar")
 
-	if GetAddOnEnableState(UnitName("player"), "PetTracker_Switcher") ~= 2 then
+	if not _G.PetTracker_Sets or _G.PetTracker_Sets.switcher == false then
 		_G.PetBattlePetSelectionFrame_Show = function()
 			_G.PetBattleFrame_UpdateActionBarLayout(_G.PetBattleFrame)
 			EPB:ChangePetBattlePetSelectionFrameState(true)
@@ -1462,8 +1592,32 @@ function EPB:IsHealingForbidden()
 	return AuraUtil_FindAuraByName(EPB.BattlePetChallengeDebuffName, "player", "HARMFUL") ~= nil
 end
 
+function EPB:SetOverrideHealthThreshold(value)
+	self.overrideHealthThreshold = value
+end
+
+function EPB:ClearOverrideHealthThreshold()
+	self.overrideHealthThreshold = nil
+end
+
+function EPB:GetOverrideHealthThreshold()
+	return self.overrideHealthThreshold
+end
+
+function EPB:BlockHealing()
+	self.healingBlocked = true
+end
+
+function EPB:UnblockHealing()
+	self.healingBlocked = nil
+end
+
+function EPB:IsHealingBlocked()
+	return self.healingBlocked
+end
+
 function EPB:CheckReviveBarVisibility()
-	if EPB:IsHealingForbidden() or UnitHealth("player") == 0 then
+	if EPB:IsHealingBlocked() or EPB:IsHealingForbidden() or UnitHealth("player") == 0 then
 		if (UnitHealth("player") == 0) then
 			EPB:RegisterEvent("UNIT_HEALTH")
 		end
@@ -1471,9 +1625,9 @@ function EPB:CheckReviveBarVisibility()
 	end
 
 	local health, maxHealth, show, checkPercentage
-	checkPercentage = 0.85
+	checkPercentage = EPB:GetOverrideHealthThreshold() or EPB.db.healthThreshold
 	if (EPB.lastBattleWasWild) then
-		checkPercentage = 0.6
+		checkPercentage = EPB.db.wildHealthThreshold
 	end
 	for i = 1, C_PetJournal.GetNumPets() do
 		local petID = C_PetJournal.GetPetInfoByIndex(i)
@@ -1513,7 +1667,7 @@ end
 
 function EPB:UNIT_HEALTH()
 	if (UnitHealth("player") > 0) then
-		self:CheckReviveBarVisibility()
+		self:UpdateReviveBar()
 		self:UnregisterEvent("UNIT_HEALTH")
 	end
 end
@@ -1531,6 +1685,7 @@ function EPB:CreateExtraActionButton(name)
 	local Color = _G.RAID_CLASS_COLORS[select(2, _G.UnitClass("player"))]
 
 	local Button = CreateFrame("Button", "EPB" .. name .. "Button", self.holder, "SecureActionButtonTemplate, ActionButtonTemplate")
+	Button:RegisterForClicks('AnyUp', 'AnyDown')
 	Button:SetSize(50, 50)
 	PA:SetTemplate(Button)
 	Button.BorderColor = {Button:GetBackdropBorderColor()}
@@ -1568,17 +1723,8 @@ function EPB:CreateExtraActionButton(name)
 		_self:SetBackdropBorderColor(unpack(_self.BorderColor))
 		GameTooltip:Hide()
 	end)
-	Button:RegisterEvent("PLAYER_ENTERING_WORLD")
-	Button:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
-	Button:RegisterEvent("BAG_UPDATE")
-	Button:SetScript("OnEvent", function(_self)
-		if InCombatLockdown() then
-			_self:RegisterEvent("PLAYER_REGEN_ENABLED")
-			return
-		end
-		_self:SetShown(self:CheckReviveBarVisibility())
-		_self:UnregisterEvent("PLAYER_REGEN_ENABLED")
-	end)
+
+	Button:Show()
 
 	return Button
 end
@@ -1740,27 +1886,20 @@ end
 function EPB:UpdateTDBattlePetScriptAutoButton()
 	_G.tdBattlePetScriptAutoButton:SetParent(self.Ally)
 	_G.tdBattlePetScriptAutoButton:ClearAllPoints()
-	if PA.ElvUI then
-		_G.tdBattlePetScriptAutoButton:SetPoint("CENTER", _G.ElvUI[1].UIParent, "CENTER", 0, 0)
-	else
-		_G.tdBattlePetScriptAutoButton:SetPoint("TOP", self.Ally, "BOTTOM", 0, -40)
-	end
+	_G.tdBattlePetScriptAutoButton:SetPoint("TOP", self.Ally, "BOTTOM", 0, -40)
 	_G.tdBattlePetScriptAutoButton:Hide()
 	_G.tdBattlePetScriptAutoButton:Show()
 
-	if (PA.AS and not _G.tdBattlePetScriptAutoButton.skinned) then
-		PA.AS:SkinButton(_G.tdBattlePetScriptAutoButton)
-		_G.tdBattlePetScriptAutoButton.skinned = true
-	end
-
 	if PA.ElvUI then
-		_G.ElvUI[1]:CreateMover(_G.tdBattlePetScriptAutoButton, "tdBattleScriptAutoButtonMover", "tdBattleScript Auto Button", nil, nil, nil, "ALL,SOLO")
+		_G.ElvUI[1]:CreateMover(_G.tdBattlePetScriptAutoButton, "tdBattlePetScriptAutoButtonMover", "tdBattlePetScript Auto Button", nil, nil, nil, "ALL,GENERAL,SOLO")
+	elseif PA.Tukui then
+		_G.Tukui[1]["Movers"]:RegisterFrame(_G.tdBattlePetScriptAutoButton)
 	end
 end
 
 function EPB:EnableMover(frame, petOwner)
 	if PA.ElvUI then
-		local isFriend = petOwner == LE_BATTLE_PET_ALLY
+		local isFriend = petOwner == Enum_BattlePetOwner_Ally
 		_G.ElvUI[1]:CreateMover(frame, isFriend and "BattlePetMover" or "EnemyBattlePetMover", isFriend and "Battle Pet Frames" or "Enemy Battle Pet Frames", nil, nil, nil, "ALL,SOLO")
 	elseif PA.Tukui then
 		_G.Tukui[1]["Movers"]:RegisterFrame(frame)

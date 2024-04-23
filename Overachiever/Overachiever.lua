@@ -215,9 +215,9 @@ do
     local id, ret, anyFound
     for i=1,GetCategoryNumAchievements(category) do
       id, ret = get_arg1_argN(argnum, GetAchievementInfo(category, i))
-	  if (not id) then
+	    if (not id) then
         -- Absurdly, GetCategoryNumAchievements now seems to be giving the WRONG NUMBER for at least some categories. (Confirmed in WoW 6.2.2. Might have started earlier.)
-		-- Consequently, we need to watch for nil IDs and skip them.
+		    -- Consequently, we need to watch for nil IDs and skip them.
       else
         if (anyCase) then
           if (not ret) then
@@ -236,7 +236,7 @@ do
             return id;
           end
         end
-	  end
+	    end
     end
     if (anyFound) then
       return found;
@@ -1091,6 +1091,9 @@ do
       else
         GameTooltip:AddLine("|cff7eff00ID:|r "..id, 0.741, 1, 0.467)
       end
+      if (Overachiever_Debug) then
+        GameTooltip:AddDoubleLine(" ", "|cff7eff00Category:|r "..tostring(GetAchievementCategory(id)), 0.741, 1, 0.467)
+      end
       tipset = 1 --tipset + 1
     end
 
@@ -1192,17 +1195,27 @@ local function OverachieverAlertFrame_SetUp(frame, achievementID, alreadyEarned,
 	else
 		frame:SetScript("OnLeave", AlertFrame_ResumeOutAnimation)
 	end
+  -- See function AchievementAlertFrame_SetUp in AlertFrameSystems.lua -- https://www.townlong-yak.com/framexml/39229/AlertFrameSystems.lua/diff
 	if (icon) then
 		--HEY = HEY or { frame.Icon.Texture:GetTexCoord() }
 		frame.Icon.Texture:SetTexture(icon)
 		frame.Icon.Texture:SetTexCoord(0.0, 0.7109375, 0.0, 0.7109375)
-		frame.Background:SetTexture(TexAlert)
+    local background = frame.Background
+    background:SetTexture(TexAlert)
+    background:SetTexCoord(0, 0.605, 0, 0.703)
+		background:SetPoint("TOPLEFT", 0, 0)
+		background:SetPoint("BOTTOMRIGHT", 0, 0)
 		frame.OldAchievement:SetTexture(TexAlertBorders)
+    frame.OldAchievement:Show()
 	else
 		frame.Icon.Texture:SetTexCoord(0, 0, 0, 1, 1, 0, 1, 1)
 		frame.Background:SetTexture("Interface\\AchievementFrame\\UI-Achievement-Alert-Background")
-		frame.OldAchievement:SetTexture("Interface\\AchievementFrame\\UI-Achievement-Borders")
+		--frame.OldAchievement:SetTexture("Interface\\AchievementFrame\\UI-Achievement-Borders")
+    frame.OldAchievement:Hide()
 	end
+  --local shieldIcon = frame.Shield.Icon
+  --shieldIcon:Show()
+  --shieldIcon:SetAtlas("UI-Achievement-Shield-NoPoints", TextureKitConstants.UseAtlasSize)
 end
 -- /run Overachiever.ToastFakeAchievement("test")
 -- /run Overachiever.ToastForEvents(true, true, true, true)

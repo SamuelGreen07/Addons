@@ -18,7 +18,8 @@ local labels = {}
 local colorModule = nil
 
 local normalMessageAnchor, normalMessageFrame = nil, nil
-local emphMessageAnchor, emphMessageFrame, emphMessageText = nil, nil, nil
+local emphMessageAnchor, emphMessageText = nil, nil
+local emphMessageFrame
 
 local labelsPrimaryPoint, labelsSecondaryPoint = nil, nil
 
@@ -27,17 +28,11 @@ local db = nil
 local L = BigWigsAPI:GetLocale("BigWigs: Plugins")
 plugin.displayName = L.messages
 
-local fakePluginForEmphasizedMessages = {}
-
-sink:Embed(plugin)
-sink:Embed(fakePluginForEmphasizedMessages)
-
 --------------------------------------------------------------------------------
 -- Profile
 --
 
 plugin.defaultDB = {
-	sink20OutputSink = "BigWigs",
 	fontName = plugin:GetDefaultFont(),
 	emphFontName = plugin:GetDefaultFont(),
 	monochrome = false,
@@ -49,14 +44,13 @@ plugin.defaultDB = {
 	emphFontSize = 48,
 	chat = false,
 	useicons = true,
-	classcolor = true, -- XXX non-functional
+	classcolor = true,
 	growUpwards = true,
-	emphasizedMessages = {
-		sink20OutputSink = "BigWigsEmphasized",
-	},
 	displaytime = 3,
 	fadetime = 2,
 	emphUppercase = true,
+	disabled = false,
+	emphDisabled = false,
 	-- Designed by default to grow up into the errors frame (which should be disabled in the BossBlock plugin in 99% of situations)
 	-- Should not enter the RaidWarningFrame by default (since we grow upwards), which we don't want to block view of
 	-- By order from top to bottom:
@@ -73,8 +67,36 @@ plugin.defaultDB = {
 local function updateProfile()
 	db = plugin.db.profile
 
-	plugin:SetSinkStorage(db)
-	fakePluginForEmphasizedMessages:SetSinkStorage(db.emphasizedMessages)
+	for k, v in next, db do
+		local defaultType = type(plugin.defaultDB[k])
+		if defaultType == "nil" then
+			db[k] = nil
+		elseif type(v) ~= defaultType then
+			db[k] = plugin.defaultDB[k]
+		end
+	end
+
+	if db.outline ~= "NONE" and db.outline ~= "OUTLINE" and db.outline ~= "THICKOUTLINE" then
+		db.outline = plugin.defaultDB.outline
+	end
+	if db.emphOutline ~= "NONE" and db.emphOutline ~= "OUTLINE" and db.emphOutline ~= "THICKOUTLINE" then
+		db.emphOutline = plugin.defaultDB.emphOutline
+	end
+	if db.align ~= "LEFT" and db.align ~= "CENTER" and db.align ~= "RIGHT" then
+		db.align = plugin.defaultDB.align
+	end
+	if db.fontSize < 10 or db.fontSize > 200 then
+		db.fontSize = plugin.defaultDB.fontSize
+	end
+	if db.emphFontSize < 20 or db.emphFontSize > 200 then
+		db.emphFontSize = plugin.defaultDB.emphFontSize
+	end
+	if db.displaytime < 1 or db.displaytime > 10 then
+		db.displaytime = plugin.defaultDB.displaytime
+	end
+	if db.fadetime < 1 or db.fadetime > 10 then
+		db.fadetime = plugin.defaultDB.fadetime
+	end
 
 	local emphFlags = nil
 	if db.emphMonochrome and db.emphOutline ~= "NONE" then
@@ -85,16 +107,6 @@ local function updateProfile()
 		emphFlags = db.emphOutline
 	end
 	emphMessageText:SetFont(media:Fetch(FONT, db.emphFontName), db.emphFontSize, emphFlags)
-
-	-- Kill chat outputs
-	if db.sink20OutputSink == "Channel" or db.sink20OutputSink == "ChatFrame" then
-		db.sink20OutputSink = "BigWigs"
-		db.sink20ScrollArea = nil
-	end
-	if db.emphasizedMessages.sink20OutputSink == "Channel" or db.emphasizedMessages.sink20OutputSink == "ChatFrame" then
-		db.emphasizedMessages.sink20OutputSink = "BigWigsEmphasized"
-		db.emphasizedMessages.sink20ScrollArea = nil
-	end
 
 	normalMessageAnchor:RefixPosition()
 	emphMessageAnchor:RefixPosition()
@@ -125,14 +137,6 @@ local function updateProfile()
 		font:SetHeight(db.fontSize)
 		font:SetFont(media:Fetch(FONT, db.fontName), db.fontSize, flags)
 	end
-
-	-- XXX temp 9.0.2
-	db.BWEmphasizeMessageAnchor_y = nil
-	db.BWEmphasizeMessageAnchor_x = nil
-	db.BWMessageAnchor_y = nil
-	db.BWMessageAnchor_x = nil
-	db.BWEmphasizeCountdownMessageAnchor_y = nil
-	db.BWEmphasizeCountdownMessageAnchor_x = nil
 end
 
 --------------------------------------------------------------------------------
@@ -211,7 +215,7 @@ do
 	normalMessageFrame:SetHeight(80)
 	normalMessageFrame:SetFrameStrata("FULLSCREEN_DIALOG")
 	normalMessageFrame:SetFixedFrameStrata(true)
-	normalMessageFrame:SetFrameLevel(20) -- Behind GUI (level 100)
+	normalMessageFrame:SetFrameLevel(20) -- Behind GUI (level 100) & behind emphasized messages (level 30)
 	normalMessageFrame:SetFixedFrameLevel(true)
 
 	local function FontFinish(self)
@@ -259,18 +263,58 @@ end
 
 plugin.pluginOptions = {
 	type = "group",
-	name = L.messages,
+	name = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\Menus\\Messages:20|t ".. L.messages,
 	childGroups = "tab",
+	get = function(info) return plugin.db.profile[info[#info]] end,
+	set = function(info, value)
+		plugin.db.profile[info[#info]] = value
+		updateProfile()
+	end,
+	order = 2,
 	args = {
-		general = {
-			type = "group",
-			name = L.general,
-			order = 1,
-			get = function(info) return plugin.db.profile[info[#info]] end,
-			set = function(info, value)
-				plugin.db.profile[info[#info]] = value
-				updateProfile()
+		anchorsButton = {
+			type = "execute",
+			name = function()
+				local BL = BigWigsAPI:GetLocale("BigWigs")
+				if BigWigsOptions:InConfigureMode() then
+					return BL.toggleAnchorsBtnHide
+				else
+					return BL.toggleAnchorsBtnShow
+				end
 			end,
+			desc = function()
+				local BL = BigWigsAPI:GetLocale("BigWigs")
+				if BigWigsOptions:InConfigureMode() then
+					return BL.toggleAnchorsBtnHide_desc
+				else
+					return BL.toggleAnchorsBtnShow_desc
+				end
+			end,
+			func = function()
+				if not BigWigs:IsEnabled() then BigWigs:Enable() end
+				if BigWigsOptions:InConfigureMode() then
+					plugin:SendMessage("BigWigs_StopConfigureMode")
+				else
+					plugin:SendMessage("BigWigs_StartConfigureMode")
+				end
+			end,
+			width = 1.5,
+			order = 0.2,
+		},
+		testButton = {
+			type = "execute",
+			name = BigWigsAPI:GetLocale("BigWigs").testBarsBtn,
+			desc = BigWigsAPI:GetLocale("BigWigs").testBarsBtn_desc,
+			func = function()
+				BigWigs:Test()
+			end,
+			width = 1.5,
+			order = 0.4,
+		},
+		normal = {
+			type = "group",
+			name = L.messages,
+			order = 1,
 			args = {
 				fontName = {
 					type = "select",
@@ -288,6 +332,7 @@ plugin.pluginOptions = {
 						plugin.db.profile.fontName = list[value]
 						updateProfile()
 					end,
+					width = 2,
 				},
 				outline = {
 					type = "select",
@@ -299,25 +344,37 @@ plugin.pluginOptions = {
 						THICKOUTLINE = L.thick,
 					},
 				},
+				fontSize = {
+					type = "range",
+					name = L.fontSize,
+					desc = L.fontSizeDesc,
+					order = 3,
+					max = 200, softMax = 72,
+					min = 10,
+					step = 1,
+					width = 2,
+				},
+				monochrome = {
+					type = "toggle",
+					name = L.monochrome,
+					desc = L.monochromeDesc,
+					order = 4,
+				},
 				align = {
 					type = "select",
 					name = L.align,
 					values = {
-						LEFT = L.left,
-						CENTER = L.center,
-						RIGHT = L.right,
+						L.left,
+						L.center,
+						L.right,
 					},
 					style = "radio",
-					order = 3,
-				},
-				fontSize = {
-					type = "range",
-					name = L.fontSize,
-					order = 4,
-					max = 200, softMax = 72,
-					min = 1,
-					step = 1,
-					width = "full",
+					order = 5,
+					get = function() return plugin.db.profile.align == "LEFT" and 1 or plugin.db.profile.align == "RIGHT" and 3 or 2 end,
+					set = function(_, value)
+						plugin.db.profile.align = value == 1 and "LEFT" or value == 3 and "RIGHT" or "CENTER"
+						updateProfile()
+					end,
 				},
 				useicons = {
 					type = "toggle",
@@ -325,77 +382,79 @@ plugin.pluginOptions = {
 					desc = L.useIconsDesc,
 					order = 6,
 				},
+				classcolor = {
+					type = "toggle",
+					name = L.classColors,
+					desc = L.classColorsDesc,
+					order = 7,
+				},
 				growUpwards = {
 					type = "toggle",
 					name = L.growingUpwards,
 					desc = L.growingUpwardsDesc,
-					order = 7,
-				},
-				monochrome = {
-					type = "toggle",
-					name = L.monochrome,
-					desc = L.monochromeDesc,
 					order = 8,
-				},
-				chat = {
-					type = "toggle",
-					name = L.chatMessages,
-					desc = L.chatMessagesDesc,
-					order = 9,
-					width = "full",
-				},
-			--	classcolor = {
-			--		type = "toggle",
-			--		name = L.classColors,
-			--		desc = L.classColorsDesc,
-			--		order = 9,
-			--	},
-				newline1 = {
-					type = "description",
-					name = "\n",
-					order = 10,
 				},
 				displaytime = {
 					type = "range",
 					name = L.displayTime,
 					desc = L.displayTimeDesc,
 					min = 1,
-					max = 30,
+					max = 10,
 					step = 0.5,
-					order = 11,
+					order = 9,
+					width = 1.5,
 				},
 				fadetime = {
 					type = "range",
 					name = L.fadeTime,
 					desc = L.fadeTimeDesc,
 					min = 1,
-					max = 30,
+					max = 10,
 					step = 0.5,
+					order = 10,
+					width = 1.5,
+				},
+				newline1 = {
+					type = "description",
+					name = "\n",
+					order = 11,
+				},
+				chat = {
+					type = "toggle",
+					name = L.chatFrameMessages,
+					desc = L.chatFrameMessagesDesc,
 					order = 12,
+					width = 2,
+				},
+				disabled = {
+					type = "toggle",
+					name = L.disabled,
+					--desc = "XXX",
+					order = 13,
+					confirm = function(_, value)
+						if value then
+							return L.disableDesc:format(L.messages)
+						end
+					end,
 				},
 				header1 = {
 					type = "header",
 					name = "",
-					order = 13,
+					order = 14,
 				},
 				reset = {
 					type = "execute",
 					name = L.resetAll,
 					desc = L.resetMessagesDesc,
 					func = function() plugin.db:ResetProfile() end,
-					order = 14,
+					order = 15,
 				},
 			},
 		},
-		emphasize = {
+		emphasized = {
 			type = "group",
 			name = L.emphasizedMessages,
 			order = 2,
-			get = function(info) return plugin.db.profile[info[#info]] end,
-			set = function(info, value)
-				plugin.db.profile[info[#info]] = value
-				updateProfile()
-			end,
 			args = {
 				heading = {
 					type = "description",
@@ -434,8 +493,9 @@ plugin.pluginOptions = {
 				emphFontSize = {
 					type = "range",
 					name = L.fontSize,
+					desc = L.fontSizeDesc,
 					order = 4,
-					softMax = 100, max = 200, min = 1, step = 1,
+					softMax = 100, max = 200, min = 20, step = 1,
 				},
 				emphMonochrome = {
 					type = "toggle",
@@ -453,6 +513,17 @@ plugin.pluginOptions = {
 						local loc = GetLocale()
 						if loc == "zhCN" or loc == "zhTW" or loc == "koKR" then
 							return true
+						end
+					end,
+				},
+				emphDisabled = {
+					type = "toggle",
+					name = L.disabled,
+					--desc = "XXX",
+					order = 7,
+					confirm = function(_, value)
+						if value then
+							return L.disableDesc:format(L.emphasizedMessages)
 						end
 					end,
 				},
@@ -550,37 +621,16 @@ plugin.pluginOptions = {
 				},
 			},
 		},
-		output = {
-			type = "group",
-			name = L.output,
-			order = 4,
-			childGroups = "tab",
-			args = {
-				normal = plugin:GetSinkAce3OptionsDataTable(),
-				emphasized = fakePluginForEmphasizedMessages:GetSinkAce3OptionsDataTable(),
-			},
-		},
 	},
 }
-plugin.pluginOptions.args.output.args.normal.name = L.normalMessages
-plugin.pluginOptions.args.output.args.normal.order = 1
-plugin.pluginOptions.args.output.args.normal.disabled = nil
-plugin.pluginOptions.args.output.args.emphasized.name = L.emphasizedMessages
-plugin.pluginOptions.args.output.args.emphasized.order = 2
-plugin.pluginOptions.args.output.args.emphasized.disabled = nil
--- Kill chat outputs
-plugin.pluginOptions.args.output.args.normal.args.Channel = nil
-plugin.pluginOptions.args.output.args.emphasized.args.Channel = nil
-plugin.pluginOptions.args.output.args.normal.args.ChatFrame = nil
-plugin.pluginOptions.args.output.args.emphasized.args.ChatFrame = nil
 
 -------------------------------------------------------------------------------
 -- Initialization
 --
 
 function plugin:OnRegister()
-	self:RegisterSink("BigWigsEmphasized", L.bwEmphasized, L.emphasizedSinkDescription, "EmphasizedPrint")
-	self:RegisterSink("BigWigs", "BigWigs", L.sinkDescription, "Print")
+	sink.RegisterSink(self, "BigWigsEmphasized", L.bwEmphasized, L.emphasizedSinkDescription, "EmphasizedPrint")
+	sink.RegisterSink(self, "BigWigs", "BigWigs", L.sinkDescription, "Print")
 end
 
 function plugin:OnPluginEnable()
@@ -684,7 +734,7 @@ do
 	emphMessageFrame = CreateFrame("Frame", nil, UIParent)
 	emphMessageFrame:SetFrameStrata("FULLSCREEN_DIALOG")
 	emphMessageFrame:SetFixedFrameStrata(true)
-	emphMessageFrame:SetFrameLevel(20) -- Behind GUI (level 100)
+	emphMessageFrame:SetFrameLevel(30) -- Behind GUI (level 100)
 	emphMessageFrame:SetFixedFrameLevel(true)
 	emphMessageFrame:SetPoint("CENTER", emphMessageAnchor, "CENTER")
 	emphMessageFrame:SetWidth(2000)
@@ -703,8 +753,8 @@ do
 	local anim = updater:CreateAnimation("Alpha")
 	anim:SetFromAlpha(1)
 	anim:SetToAlpha(0)
-	anim:SetDuration(2)
-	anim:SetStartDelay(1.1)
+	anim:SetDuration(1.2)
+	anim:SetStartDelay(1)
 
 	function plugin:EmphasizedPrint(_, text, r, g, b)
 		emphMessageAnchor.header:Hide() -- Hide the header, for config mode
@@ -716,35 +766,41 @@ do
 	end
 end
 
-function plugin:BigWigs_Message(event, module, key, text, color, icon, emphasized)
-	if not text then return end
+do
+	local unpack, type = unpack, type
+	local format, upper, gsub = string.format, string.upper, string.gsub
+	function plugin:BigWigs_Message(event, module, key, text, color, icon, emphasized)
+		if not text then return end
 
-	local r, g, b = 1, 1, 1 -- Default to white.
-	if type(color) == "table" then
-		if color.r and color.g and color.b then
-			r, g, b = color.r, color.g, color.b
-		else
-			r, g, b = unpack(color)
+		local r, g, b = 1, 1, 1 -- Default to white.
+		if type(color) == "table" then
+			if color.r and color.g and color.b then
+				r, g, b = color.r, color.g, color.b
+			else
+				r, g, b = unpack(color)
+			end
+		elseif colorModule then
+			r, g, b = colorModule:GetColor(color, module, key)
 		end
-	elseif colorModule then
-		r, g, b = colorModule:GetColor(color, module, key)
-	end
 
-	if not db.useicons then icon = nil end
+		if not db.useicons then icon = nil end
 
-	if emphasized then
-		if db.emphUppercase then
-			text = text:upper()
-			text = text:gsub("(:%d+|)T", "%1t") -- Fix texture paths that need to end in lowercase |t
+		if emphasized and not db.emphDisabled then
+			if db.emphUppercase then
+				text = upper(text)
+				text = gsub(text, "(:%d+|)T", "%1t") -- Fix texture paths that need to end in lowercase |t
+			end
+			self:EmphasizedPrint(nil, text, r, g, b)
+		elseif not db.disabled then
+			self:Print(nil, text, r, g, b, nil, nil, nil, nil, nil, icon)
 		end
-		fakePluginForEmphasizedMessages:Pour(text, r, g, b)
-	else
-		self:Pour(text, r, g, b, nil, nil, nil, nil, nil, icon)
-	end
-	if db.chat then
-		-- http://www.wowpedia.org/UI_escape_sequences
-		-- |TTexturePath:size1:size2:xoffset:yoffset:dimx:dimy:coordx1:coordx2:coordy1:coordy2:red:green:blue|t
-		if icon then text = "|T"..icon..":15:15:0:0:64:64:4:60:4:60|t"..text end
-		DEFAULT_CHAT_FRAME:AddMessage(text, r, g, b)
+		if db.chat then
+			-- http://www.wowpedia.org/UI_escape_sequences
+			-- |TTexturePath:size1:size2:xoffset:yoffset:dimx:dimy:coordx1:coordx2:coordy1:coordy2:red:green:blue|t
+			if icon then
+				text = format("|T%s:15:15:0:0:64:64:4:60:4:60|t%s", icon, text)
+			end
+			DEFAULT_CHAT_FRAME:AddMessage(text, r, g, b)
+		end
 	end
 end

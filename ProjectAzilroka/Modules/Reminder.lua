@@ -3,9 +3,9 @@ local AR = PA:NewModule('AuraReminder', 'AceEvent-3.0', 'AceTimer-3.0')
 
 PA.AR = AR
 
-AR.Title = '|cFF16C3F2Aura|r |cFFFFFFFFReminder|r'
-AR.Description = 'Reminder for Buffs / Debuffs'
-AR.Authors = 'Azilroka    NihilisticPandemonium'
+AR.Title = PA.ACL['|cFF16C3F2Aura|r |cFFFFFFFFReminder|r']
+AR.Description = PA.ACL['Reminder for Buffs / Debuffs']
+AR.Authors = 'Azilroka'
 AR.isEnabled = false
 
 local _G = _G
@@ -22,11 +22,13 @@ local wipe = wipe
 
 local GetSpellCooldown = GetSpellCooldown
 local GetSpellInfo = GetSpellInfo
+local IsSpellKnownOrOverridesKnown = IsSpellKnownOrOverridesKnown
 local IsUsableSpell = IsUsableSpell
 local IsInInstance = IsInInstance
 local UnitAffectingCombat = UnitAffectingCombat
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local UnitLevel = UnitLevel
+local UnitInVehicle = UnitInVehicle
 local GetInventoryItemID = GetInventoryItemID
 local GetWeaponEnchantInfo = GetWeaponEnchantInfo
 local GetInventoryItemTexture = GetInventoryItemTexture
@@ -58,9 +60,11 @@ do
 end
 
 function AR:FindPlayerAura(db, checkPersonal, filter)
-	for spellID, value in pairs(db) do
-		if value == true then
-			return AR:FindAuraBySpellID(spellID, 'player', filter, checkPersonal and 'player')
+	if db then
+		for spellID, value in pairs(db) do
+			if value == true then
+				return AR:FindAuraBySpellID(spellID, 'player', filter, checkPersonal and 'player')
+			end
 		end
 	end
 end
@@ -136,7 +140,7 @@ function AR:FilterCheck(db, isReverse)
 end
 
 function AR:Reminder_Update()
-	if UnitIsDeadOrGhost('player') then return end
+	if UnitIsDeadOrGhost('player') or UnitInVehicle('player') then return end
 
 	for _, button in ipairs(AR.CreatedReminders) do
 		button:Hide()
@@ -177,11 +181,15 @@ function AR:Reminder_Update()
 						if db.filterType == 'SPELL' then
 							local hasBuff, hasDebuff = AR:FindPlayerAura(db.spellGroup, db.personal), AR:FindPlayerAura(db.spellGroup, nil, 'HARMFUL')
 							local negate = AR:FindPlayerAura(db.negateGroup, db.personal)
-
+							local skip = false
 							if not (negate or hasBuff or hasDebuff) then
 								for buff, value in pairs(db.spellGroup) do
 									if value then
 										local usable = IsUsableSpell(buff);
+										if db.strictFilter then
+											usable = usable and IsSpellKnownOrOverridesKnown(buff);
+											skip = not usable;
+										end
 										if usable and AR:IsSpellOnCooldown(buff) then
 											break
 										end
@@ -194,7 +202,7 @@ function AR:Reminder_Update()
 									end
 								end
 
-								Button:SetShown((((not hasBuff) and (not hasDebuff)) and not db.reverseCheck) or (reverseCheck and db.reverseCheck and ((hasBuff or hasDebuff) or ((not hasBuff) and (not hasDebuff)))))
+								Button:SetShown(not skip and (((not hasBuff) and (not hasDebuff)) and not db.reverseCheck) or (reverseCheck and db.reverseCheck and ((hasBuff or hasDebuff) or ((not hasBuff) and (not hasDebuff)))))
 							end
 						end
 
@@ -283,8 +291,8 @@ function AR:UpdateFilterGroup(group)
 				end
 
 				optionName.name = function() return format('%s (%s)', GetSpellInfo(spell), spell) end
-				optionName.get = function(info) return spell and AR.db.Filters[selectedGroup][selectedFilter][group][spell] end
-				optionName.set = function(info, value) AR.db.Filters[selectedGroup][selectedFilter][group][spell] = value end
+				optionName.get = function() return spell and AR.db.Filters[selectedGroup][selectedFilter][group][spell] end
+				optionName.set = function(_, value) AR.db.Filters[selectedGroup][selectedFilter][group][spell] = value end
 				optionName.hidden = false
 
 				i = i + 1
@@ -315,12 +323,10 @@ end
 local addGroupTemplate = { name = '', template = ''}
 
 function AR:GetOptions()
-	PA.Options.args.AuraReminder = {
-		type = 'group',
-		name = AR.Title,
-		get = function(info) return AR.db[info[#info]] end,
-		set = function(info, value) AR.db[info[#info]] = value end,
-		args = {
+	local AuraReminder = PA.ACH:Group(AR.Title, nil, nil, 'tree', function(info) return AR.db[info[#info]] end, function(info, value) AR.db[info[#info]] = value end)
+	PA.Options.args.AuraReminder = AuraReminder
+
+	AuraReminder.args = {
 			Description = {
 				order = 0,
 				type = 'description',
@@ -350,14 +356,14 @@ function AR:GetOptions()
 				order = 3,
 				type = 'select',
 				name = PA.ACL['Select Group'],
-				get = function(info)
+				get = function()
 					if selectedGroup == 'Global' then
 						return selectedGroup
 					else
 						return 'Class'
 					end
 				end,
-				set = function(info, value)
+				set = function(_, value)
 					selectedFilter = nil
 					if value == 'Class' then
 						selectedGroup = PA.MyClass
@@ -371,8 +377,8 @@ function AR:GetOptions()
 				order = 4,
 				type = 'select',
 				name = PA.ACL['Select Filter'],
-				get = function(info) return selectedFilter ~= '' and selectedFilter or '' end,
-				set = function(info, value)
+				get = function() return selectedFilter ~= '' and selectedFilter or '' end,
+				set = function(_, value)
 					selectedFilter = value ~= '' and value or nil
 					AR:UpdateFilterGroup('spellGroup')
 					AR:UpdateFilterGroup('negateGroup')
@@ -398,11 +404,9 @@ function AR:GetOptions()
 						order = 1,
 						type = 'input',
 						name = PA.ACL['New Filter Name'],
-						get = function(info) return addGroupTemplate.name end,
-						set = function(info, value)
-							if AR.db.Filters[selectedGroup][value] then
-								return
-							end
+						get = function() return addGroupTemplate.name end,
+						set = function(_, value)
+							if AR.db.Filters[selectedGroup][value] then return end
 							addGroupTemplate.name = value
 						end,
 					},
@@ -410,8 +414,8 @@ function AR:GetOptions()
 						order = 2,
 						type = 'select',
 						name = PA.ACL['New Filter Type'],
-						get = function(info) return addGroupTemplate.template end,
-						set = function(info, value)
+						get = function() return addGroupTemplate.template end,
+						set = function(_, value)
 							if AR.db.Filters[selectedGroup][value] then
 								return
 							end
@@ -431,14 +435,12 @@ function AR:GetOptions()
 						type = 'execute',
 						order = 3,
 						name = PA.ACL['Add Filter'],
-						hidden = function(info)
-							return addGroupTemplate.name == '' or addGroupTemplate.template == ''
-						end,
-						func = function(info)
+						hidden = function() return addGroupTemplate.name == '' or addGroupTemplate.template == '' end,
+						func = function()
 							AR.db.Filters[selectedGroup][addGroupTemplate.name] = { enable = true, size = 50, filterType = addGroupTemplate.template }
 							if addGroupTemplate.template == 'COOLDOWN' then
 								AR.db.Filters[selectedGroup][addGroupTemplate.name].cooldownAlpha = .5
-							elseif addGroupTemplate.template == 'WEAPON' then
+							--elseif addGroupTemplate.template == 'WEAPON' then
 							else
 								AR.db.Filters[selectedGroup][addGroupTemplate.name].spellGroup = {}
 								AR.db.Filters[selectedGroup][addGroupTemplate.name].negateGroup = {}
@@ -454,9 +456,9 @@ function AR:GetOptions()
 						order = 5,
 						type = 'select',
 						name = PA.ACL['Remove Filter'],
-						get = function(info) return '' end,
-						confirm = function(info, value) return PA.ACL['Remove Filter']..' - '..value end,
-						set = function(info, value)
+						get = function() return '' end,
+						confirm = function(_, value) return PA.ACL['Remove Filter']..' - '..value end,
+						set = function(_, value)
 							selectedFilter = nil
 							if DefaultFilters[selectedGroup][value] then
 								AR.db.Filters[selectedGroup][value].enable = false;
@@ -627,17 +629,14 @@ function AR:GetOptions()
 						type = 'group',
 						name = PA.ACL['Spells'],
 						inline = true,
-						get = function(info)
-							AR:UpdateFilterGroup('spellGroup')
-							return ''
-						end,
+						get = function() AR:UpdateFilterGroup('spellGroup') return '' end,
 						hidden = function() return AR.db.Filters[selectedGroup][selectedFilter].filterType ~= 'SPELL' end,
 						args = {
 							AddSpell = {
 								order = 0,
 								type = 'input',
 								name = PA.ACL['New ID'],
-								set = function(info, value)
+								set = function(_, value)
 									value = tonumber(value)
 									if not value then return end
 
@@ -651,7 +650,7 @@ function AR:GetOptions()
 								type = 'select',
 								name = PA.ACL['Remove ID'],
 								get = function() return '' end,
-								set = function(info, value)
+								set = function(_, value)
 									AR.db.Filters[selectedGroup][selectedFilter].spellGroup[value] = nil;
 									AR:UpdateFilterGroup('spellGroup')
 								end,
@@ -674,17 +673,14 @@ function AR:GetOptions()
 						type = 'group',
 						name = PA.ACL['Negate Spells'],
 						inline = true,
-						get = function(info)
-							AR:UpdateFilterGroup('negateGroup')
-							return ''
-						end,
+						get = function() AR:UpdateFilterGroup('negateGroup') return '' end,
 						hidden = function() return AR.db.Filters[selectedGroup][selectedFilter].filterType ~= 'SPELL' end,
 						args = {
 							AddSpell = {
 								order = 0,
 								type = 'input',
 								name = PA.ACL['New ID'],
-								set = function(info, value)
+								set = function(_, value)
 									value = tonumber(value)
 									if not value then return end
 
@@ -698,7 +694,7 @@ function AR:GetOptions()
 								type = 'select',
 								name = PA.ACL['Remove ID'],
 								get = function() return '' end,
-								set = function(info, value)
+								set = function(_, value)
 									AR.db.Filters[selectedGroup][selectedFilter].negateGroup[value] = nil;
 									AR:UpdateFilterGroup('negateGroup')
 								end,
@@ -710,6 +706,9 @@ function AR:GetOptions()
 											spellList[spellID] = name and format('%s (%s)', name, spellID) or spellID
 										end
 									end
+									if not next(spellList) then
+										spellList[''] = PA.ACL['None']
+									end
 									return spellList
 								end,
 							},
@@ -718,8 +717,7 @@ function AR:GetOptions()
 					},
 				},
 			},
-		},
-	}
+		}
 
 	PA.Options.args.AuraReminder.args.AuthorHeader = PA.ACH:Header(PA.ACL['Authors:'], -2)
 	PA.Options.args.AuraReminder.args.Authors = PA.ACH:Description(AR.Authors, -1, 'large')

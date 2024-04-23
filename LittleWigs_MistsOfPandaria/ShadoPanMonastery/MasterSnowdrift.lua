@@ -31,7 +31,7 @@ end
 
 function mod:GetOptions()
 	return {
-		106434, -- Tornado Kick
+		{106434, "CASTBAR"}, -- Tornado Kick
 		118961, -- Chase Down
 		106747, -- Shado-pan Mirror Image
 		"stages"
@@ -39,7 +39,7 @@ function mod:GetOptions()
 end
 
 function mod:VerifyEnable(unit)
-	local hp = UnitHealth(unit) / UnitHealthMax(unit) * 100
+	local hp = self:GetHealth(unit)
 	if hp > 15 then
 		return true
 	end
@@ -56,7 +56,7 @@ end
 
 function mod:OnEngage()
 	stage = 1
-	self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", "StageWarn", "boss1")
+	self:RegisterUnitEvent("UNIT_HEALTH", "StageWarn", "boss1")
 	self:CDBar(106434, 15) -- Tornado Kick
 end
 
@@ -91,7 +91,7 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(_, _, _, spellId)
 			stage = 2
 			local mirror = mod:SpellName(106747) -- Shado-pan Mirror Image
 			self:MessageOld("stages", "green", "info", (CL.stage:format(2))..": "..mirror, 106747)
-			self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", "StageWarn", "boss1")
+			self:RegisterUnitEvent("UNIT_HEALTH", "StageWarn", "boss1")
 		else
 			self:MessageOld(106747, "green")
 		end
@@ -99,7 +99,7 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(_, _, _, spellId)
 end
 
 function mod:StageWarn(event, unit)
-	local hp = UnitHealth(unit) / UnitHealthMax(unit) * 100
+	local hp = self:GetHealth(unit)
 	if hp < 65 and stage == 1 then
 		self:UnregisterUnitEvent(event, unit)
 		self:MessageOld("stages", "green", nil, CL.soon:format(CL.stage:format(2)), false)

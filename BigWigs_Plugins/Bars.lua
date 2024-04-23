@@ -15,7 +15,7 @@ if not plugin then return end
 -- Locals
 --
 
-local colorize = nil
+local colorize
 do
 	local r, g, b
 	colorize = setmetatable({}, { __index =
@@ -42,15 +42,13 @@ local tremove = tremove
 local db = nil
 local normalAnchor, emphasizeAnchor = nil, nil
 local nameplateBars = {}
-local empUpdate = nil -- emphasize updater frame
-local nameplateEmpUpdate = nil
 local rearrangeBars
 local rearrangeNameplateBars
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 local clickHandlers = {}
 
-local findUnitByGUID = nil
+local findUnitByGUID
 do
 	local unitTable = {
 		"nameplate1", "nameplate2", "nameplate3", "nameplate4", "nameplate5", "nameplate6", "nameplate7", "nameplate8", "nameplate9", "nameplate10",
@@ -137,7 +135,7 @@ do
 		bd:SetPoint("BOTTOMRIGHT", bar, "BOTTOMRIGHT", 1, -1)
 		bd:Show()
 
-		local borders = nil
+		local borders
 		if #freeBorderSets > 0 then
 			borders = tremove(freeBorderSets)
 			for i, border in next, borders do
@@ -338,7 +336,6 @@ do
 				border:SetPoint("TOPLEFT", bd, "TOPLEFT", 1, -1)
 				border:SetPoint("BOTTOMRIGHT", bd, "BOTTOMRIGHT", -1, 1)
 			end
-			border:SetFrameLevel(3)
 			border:SetBackdrop(borderBackdrop)
 			border:SetBackdropBorderColor(0, 0, 0)
 			bd.tukiborder = border
@@ -354,7 +351,6 @@ do
 				border:SetPoint("TOPLEFT", bd, "TOPLEFT", -1, 1)
 				border:SetPoint("BOTTOMRIGHT", bd, "BOTTOMRIGHT", 1, -1)
 			end
-			border:SetFrameLevel(3)
 			border:SetBackdrop(borderBackdrop)
 			border:SetBackdropBorderColor(0, 0, 0)
 			bd.tukoborder = border
@@ -508,9 +504,10 @@ plugin.defaultDB = {
 	BigWigsAnchor_height = 16,
 	BigWigsEmphasizeAnchor_width = 320,
 	BigWigsEmphasizeAnchor_height = 22,
-	nameplateWidth = 150,
+	nameplateWidth = 100,
 	nameplateAutoWidth = true,
-	nameplateHeight = 16,
+	nameplateHeight = 12,
+	nameplateAlpha = 0.7,
 	nameplateOffsetY = 30,
 	nameplateGrowUp = true,
 	spacing = 1,
@@ -586,12 +583,10 @@ do
 		end
 		local f = media:Fetch(FONT, db.fontName)
 		for bar in next, normalAnchor.bars do
-			bar.candyBarLabel:SetFont(f, db.fontSize, flags)
-			bar.candyBarDuration:SetFont(f, db.fontSize, flags)
+			bar:SetFont(f, db.fontSize, flags)
 		end
 		for bar in next, emphasizeAnchor.bars do
-			bar.candyBarLabel:SetFont(f, db.fontSizeEmph, flags)
-			bar.candyBarDuration:SetFont(f, db.fontSizeEmph, flags)
+			bar:SetFont(f, db.fontSizeEmph, flags)
 		end
 	end
 
@@ -603,7 +598,7 @@ do
 
 	plugin.pluginOptions = {
 		type = "group",
-		name = L.bars,
+		name = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\Menus\\Bars:20|t ".. L.bars,
 		childGroups = "tab",
 		get = function(info)
 			return db[info[#info]]
@@ -615,7 +610,47 @@ do
 				BigWigsEmphasizeAnchor:RefixPosition()
 			end
 		end,
+		order = 1,
 		args = {
+			anchorsButton = {
+				type = "execute",
+				name = function()
+					local BL = BigWigsAPI:GetLocale("BigWigs")
+					if BigWigsOptions:InConfigureMode() then
+						return BL.toggleAnchorsBtnHide
+					else
+						return BL.toggleAnchorsBtnShow
+					end
+				end,
+				desc = function()
+					local BL = BigWigsAPI:GetLocale("BigWigs")
+					if BigWigsOptions:InConfigureMode() then
+						return BL.toggleAnchorsBtnHide_desc
+					else
+						return BL.toggleAnchorsBtnShow_desc
+					end
+				end,
+				func = function()
+					if not BigWigs:IsEnabled() then BigWigs:Enable() end
+					if BigWigsOptions:InConfigureMode() then
+						plugin:SendMessage("BigWigs_StopConfigureMode")
+					else
+						plugin:SendMessage("BigWigs_StartConfigureMode")
+					end
+				end,
+				width = 1.5,
+				order = 0.2,
+			},
+			testButton = {
+				type = "execute",
+				name = BigWigsAPI:GetLocale("BigWigs").testBarsBtn,
+				desc = BigWigsAPI:GetLocale("BigWigs").testBarsBtn_desc,
+				func = function()
+					BigWigs:Test()
+				end,
+				width = 1.5,
+				order = 0.4,
+			},
 			custom = {
 				type = "group",
 				name = L.general,
@@ -943,7 +978,7 @@ do
 			},
 			normal = {
 				type = "group",
-				name = L.regularBars,
+				name = L.bars,
 				order = 2,
 				args = {
 					growup = {
@@ -966,6 +1001,7 @@ do
 					fontSize = {
 						type = "range",
 						name = L.fontSize,
+						desc = L.fontSizeDesc,
 						width = 2,
 						order = 3,
 						max = 200, softMax = 72,
@@ -1084,12 +1120,13 @@ do
 						name = L.emphasizeAt,
 						order = 6,
 						min = 6,
-						max = 20,
+						max = 60, softMax = 30, -- Don't encourage bars longer than 30s in the GUI
 						step = 1,
 					},
 					fontSizeEmph = {
 						type = "range",
 						name = L.fontSize,
+						desc = L.fontSizeDesc,
 						order = 7,
 						max = 200, softMax = 72,
 						min = 1,
@@ -1160,13 +1197,20 @@ do
 				name = L.nameplateBars,
 				type = "group",
 				order = 4,
+				set = function(info, value)
+					db[info[#info]] = value
+					if plugin:UnitGUID("target") then
+						plugin:NAME_PLATE_UNIT_REMOVED(nil, "target")
+						plugin:NAME_PLATE_UNIT_ADDED(nil, "target")
+					end
+				end,
 				args = {
 					nameplateWidth = {
 						type = "range",
 						name = L.width,
 						order = 1,
-						min = 100,
-						softMax = 500,
+						min = 75,
+						softMax = 200,
 						step = 1,
 						width = 1.6,
 						disabled = function() return db.nameplateAutoWidth end,
@@ -1194,6 +1238,7 @@ do
 						order = 4,
 						min = 0,
 						max = 400,
+						step = 1,
 						width = 1.6,
 					},
 					nameplateGrowUp = {
@@ -1206,10 +1251,21 @@ do
 					fontSizeNameplate = {
 						type = "range",
 						name = L.fontSize,
+						desc = L.fontSizeDesc,
 						order = 6,
 						max = 200, softMax = 72,
 						min = 1,
 						step = 1,
+						width = 1.6,
+					},
+					nameplateAlpha = {
+						type = "range",
+						name = L.transparency,
+						desc = L.nameplateAlphaDesc,
+						order = 7,
+						max = 1,
+						min = 0.4,
+						step = 0.1,
 						width = 1.6,
 					},
 				},
@@ -1301,19 +1357,10 @@ do
 	local function barSorter(a, b)
 		return a.remaining < b.remaining and true or false
 	end
-	local tmp = {}
 	rearrangeBars = function(anchor)
-		if not anchor then return end
-		if anchor == normalAnchor then -- only show the empupdater when there are bars on the normal anchor running
-			if next(anchor.bars) and db.emphasize then
-				empUpdate:Play()
-			else
-				empUpdate:Stop()
-			end
-		end
-		if not next(anchor.bars) then return end
+		if not anchor or not next(anchor.bars) then return end
 
-		wipe(tmp)
+		local tmp = {}
 		for bar in next, anchor.bars do
 			tmp[#tmp + 1] = bar
 		end
@@ -1397,9 +1444,6 @@ local function nameplateCascadeDelete(guid, text)
 	nameplateBars[guid][text] = nil
 	if not next(nameplateBars[guid]) then
 		nameplateBars[guid] = nil
-		if not next(nameplateBars) then
-			nameplateEmpUpdate:Stop()
-		end
 	end
 end
 
@@ -1497,8 +1541,11 @@ do
 		display:SetMovable(true)
 		display:SetResizable(true)
 		display:RegisterForDrag("LeftButton")
-		display:SetMinResize(80, 8)
-		display:SetFrameLevel(20)
+		display:SetResizeBounds(80, 8)
+		display:SetFrameStrata("HIGH")
+		display:SetFixedFrameStrata(true)
+		display:SetFrameLevel(title == "BigWigsAnchor" and 10 or 15)
+		display:SetFixedFrameLevel(true)
 		local bg = display:CreateTexture(nil, "BACKGROUND")
 		bg:SetAllPoints(display)
 		bg:SetColorTexture(0, 0, 0, 0.3)
@@ -1512,16 +1559,14 @@ do
 		header:SetJustifyH("CENTER")
 		header:SetJustifyV("MIDDLE")
 		local drag = CreateFrame("Frame", nil, display)
-		drag:SetFrameLevel(display:GetFrameLevel() + 10)
 		drag:SetWidth(16)
 		drag:SetHeight(16)
 		drag:SetPoint("BOTTOMRIGHT", display, -1, 1)
 		drag:EnableMouse(true)
 		drag:SetScript("OnMouseDown", onDragHandleMouseDown)
 		drag:SetScript("OnMouseUp", onDragHandleMouseUp)
-		drag:SetAlpha(0.5)
 		local tex = drag:CreateTexture(nil, "OVERLAY")
-		tex:SetTexture("Interface\\AddOns\\BigWigs\\Media\\Textures\\draghandle")
+		tex:SetTexture("Interface\\AddOns\\BigWigs\\Media\\Icons\\draghandle")
 		tex:SetWidth(16)
 		tex:SetHeight(16)
 		tex:SetBlendMode("ADD")
@@ -1596,13 +1641,11 @@ function plugin:OnPluginEnable()
 	updateProfile()
 
 	self:RegisterMessage("BigWigs_StartBar")
-	self:RegisterMessage("BigWigs_StartNameplateBar")
+	self:RegisterMessage("BigWigs_StartNameplateTimer", "StartNameplateBar")
 	self:RegisterMessage("BigWigs_PauseBar", "PauseBar")
-	self:RegisterMessage("BigWigs_PauseNameplateBar", "PauseNameplateBar")
 	self:RegisterMessage("BigWigs_ResumeBar", "ResumeBar")
-	self:RegisterMessage("BigWigs_ResumeNameplateBar", "ResumeNameplateBar")
 	self:RegisterMessage("BigWigs_StopBar", "StopSpecificBar")
-	self:RegisterMessage("BigWigs_StopNameplateBar", "StopNameplateBar")
+	self:RegisterMessage("BigWigs_StopNameplateTimer", "StopNameplateBar")
 	self:RegisterMessage("BigWigs_StopBars", "StopModuleBars")
 	self:RegisterMessage("BigWigs_OnBossDisable", "StopModuleBars")
 	self:RegisterMessage("BigWigs_OnBossWipe", "StopModuleBars")
@@ -1637,25 +1680,20 @@ function plugin:OnPluginEnable()
 	end
 end
 
+function plugin:OnPluginDisable()
+	for k in next, normalAnchor.bars do
+		k:Stop()
+	end
+	for k in next, emphasizeAnchor.bars do
+		k:Stop()
+	end
+end
+
 --------------------------------------------------------------------------------
 -- Bar styles API
 --
 
 do
-	local errorDeprecated = "An addon registered the bar style '%s' using the old method. Visit github.com/BigWigsMods/BigWigs/wiki/Custom-Bar-Styles to learn how to do it correctly."
-	function plugin:RegisterBarStyle(key, styleData)
-		BigWigs:Print(errorDeprecated:format(key))
-		BigWigsAPI:RegisterBarStyle(key, styleData)
-	end
-end
-
-do
-	function plugin:SetBarStyle(styleName)
-		-- Ask users to select your bar styles. Forcing a selection is deprecated.
-		-- This is to allow users to install multiple styles gracefully, and to encourage authors to use new style entry APIs like `.barHeight` or `.fontSizeNormal`
-		-- Want more style API entries? We're open to suggestions!
-		BigWigs:Print(("SetBarStyle is deprecated, bar style '%s' was not set automatically, you may need to set it yourself."):format(styleName))
-	end
 	local errorNoStyle = "No style with the ID %q has been registered. Reverting to default style."
 	function SetBarStyle(styleName)
 		local style = BigWigsAPI:GetBarStyle(styleName)
@@ -1713,19 +1751,6 @@ function plugin:PauseBar(_, module, text)
 	end
 end
 
-function plugin:PauseNameplateBar(_, module, text, unitGUID)
-	local barInfo = nameplateBars[unitGUID] and nameplateBars[unitGUID][text]
-	if barInfo and not barInfo.paused then
-		barInfo.paused = true
-		if barInfo.bar then
-			barInfo.bar:Pause()
-		else
-			barInfo.deletionTimer:Cancel()
-		end
-		barInfo.remaining = barInfo.exp - GetTime()
-	end
-end
-
 function plugin:ResumeBar(_, module, text)
 	if not normalAnchor then return end
 	for k in next, normalAnchor.bars do
@@ -1739,20 +1764,6 @@ function plugin:ResumeBar(_, module, text)
 			k:Resume()
 			return
 		end
-	end
-end
-
-function plugin:ResumeNameplateBar(_, module, text, unitGUID)
-	local barInfo = nameplateBars[unitGUID] and nameplateBars[unitGUID][text]
-	if barInfo and barInfo.paused then
-		barInfo.paused = false
-		barInfo.exp = GetTime() + barInfo.remaining
-		if barInfo.bar then
-			barInfo.bar:Resume()
-		else
-			barInfo.deletionTimer = createDeletionTimer(barInfo)
-		end
-		barInfo.remaining = nil
 	end
 end
 
@@ -1817,6 +1828,16 @@ end
 -- Bar utility functions
 --
 
+function plugin:HasActiveBars()
+	if next(normalAnchor.bars) then
+		return true
+	end
+	if next(emphasizeAnchor.bars) then
+		return true
+	end
+	return false
+end
+
 function plugin:GetBarTimeLeft(module, text)
 	if normalAnchor then
 		for k in next, normalAnchor.bars do
@@ -1828,19 +1849,6 @@ function plugin:GetBarTimeLeft(module, text)
 			if k:Get("bigwigs:module") == module and k:GetLabel() == text then
 				return k.remaining
 			end
-		end
-	end
-	return 0
-end
-
-function plugin:GetNameplateBarTimeLeft(module, text, guid)
-	if nameplateBars[guid] then
-		local barInfo = nameplateBars[guid][text]
-		local bar = barInfo and barInfo.bar
-		if bar and bar:Get("bigwigs:module") == module then
-			return bar.remaining
-		else
-			return barInfo.paused and barInfo.remaining or barInfo.exp - GetTime()
 		end
 	end
 	return 0
@@ -1858,12 +1866,12 @@ local function barClicked(bar, button)
 end
 
 local function barOnEnter(bar)
-	bar.candyBarBackground:SetVertexColor(1, 1, 1, 0.8)
+	bar:SetBackgroundColor(1, 1, 1, 0.8)
 end
 local function barOnLeave(bar)
 	local module = bar:Get("bigwigs:module")
 	local key = bar:Get("bigwigs:option")
-	bar.candyBarBackground:SetVertexColor(colors:GetColor("barBackground", module, key))
+	bar:SetBackgroundColor(colors:GetColor("barBackground", module, key))
 end
 
 local function refixClickOnBar(intercept, bar)
@@ -1975,14 +1983,18 @@ function plugin:CreateBar(module, key, text, time, icon, isApprox, unitGUID)
 			local unit = findUnitByGUID(unitGUID)
 			if unit then
 				local nameplate = GetNamePlateForUnit(unit)
-				width = nameplate:GetWidth()
+				local npWidth = nameplate and nameplate:GetWidth() or 110
+				if npWidth < 111 then
+					width = npWidth
+				else
+					width = 110
+				end
 			end
 		end
 	else
 		width, height = db.BigWigsAnchor_width, db.BigWigsAnchor_height
 	end
 	local bar = candy:New(media:Fetch(STATUSBAR, db.texture), width, height)
-	bar.candyBarBackground:SetVertexColor(colors:GetColor("barBackground", module, key))
 	bar:Set("bigwigs:module", module)
 	bar:Set("bigwigs:option", key)
 	if unitGUID then
@@ -1995,6 +2007,7 @@ function plugin:CreateBar(module, key, text, time, icon, isApprox, unitGUID)
 	bar:SetLabel(text)
 	bar:SetDuration(time, isApprox)
 	bar:SetColor(colors:GetColor("barColor", module, key))
+	bar:SetBackgroundColor(colors:GetColor("barBackground", module, key))
 	bar:SetTextColor(colors:GetColor("barText", module, key))
 	bar:SetShadowColor(colors:GetColor("barTextShadow", module, key))
 	bar.candyBarLabel:SetJustifyH(db.alignText)
@@ -2009,11 +2022,10 @@ function plugin:CreateBar(module, key, text, time, icon, isApprox, unitGUID)
 	end
 	local f = media:Fetch(FONT, db.fontName)
 	if unitGUID then
-		bar.candyBarLabel:SetFont(f, db.fontSizeNameplate, flags)
-		bar.candyBarDuration:SetFont(f, db.fontSizeNameplate, flags)
+		bar:SetFont(f, db.fontSizeNameplate, flags)
+		bar:SetAlpha(db.nameplateAlpha)
 	else
-		bar.candyBarLabel:SetFont(f, db.fontSize, flags)
-		bar.candyBarDuration:SetFont(f, db.fontSize, flags)
+		bar:SetFont(f, db.fontSize, flags)
 	end
 
 	bar:SetTimeVisibility(db.time)
@@ -2028,28 +2040,41 @@ function plugin:CreateBar(module, key, text, time, icon, isApprox, unitGUID)
 	return bar
 end
 
-function plugin:BigWigs_StartBar(_, module, key, text, time, icon, isApprox)
-	if not text then text = "" end
-	self:StopSpecificBar(nil, module, text)
-
-	local bar = self:CreateBar(module, key, text, time, icon, isApprox)
-	bar:Start()
-	if db.emphasize and time < db.emphasizeTime then
-		self:EmphasizeBar(bar, true)
-	else
-		currentBarStyler.ApplyStyle(bar)
+do
+	local function moveBar(bar)
+		plugin:EmphasizeBar(bar)
+		plugin:SendMessage("BigWigs_BarEmphasized", plugin, bar)
+		rearrangeBars(normalAnchor)
+		rearrangeBars(emphasizeAnchor)
 	end
-	rearrangeBars(bar:Get("bigwigs:anchor"))
 
-	self:SendMessage("BigWigs_BarCreated", self, bar, module, key, text, time, icon, isApprox)
-	-- Check if :EmphasizeBar(bar) was run and trigger the callback.
-	-- Bit of a roundabout method to approaching this so that we purposely keep callbacks firing last.
-	if bar:Get("bigwigs:emphasized") then
-		self:SendMessage("BigWigs_BarEmphasized", self, bar)
+	function plugin:BigWigs_StartBar(_, module, key, text, time, icon, isApprox, maxTime)
+		if not text then text = "" end
+		self:StopSpecificBar(nil, module, text)
+		local bar = self:CreateBar(module, key, text, time, icon, isApprox)
+		if isApprox then
+			bar:SetPauseWhenDone(true)
+		end
+		bar:Start(maxTime)
+		if db.emphasize and time < db.emphasizeTime then
+			self:EmphasizeBar(bar, true)
+		else
+			currentBarStyler.ApplyStyle(bar)
+			if db.emphasize then
+				bar:SetTimeCallback(moveBar, db.emphasizeTime)
+			end
+		end
+		rearrangeBars(bar:Get("bigwigs:anchor"))
+		self:SendMessage("BigWigs_BarCreated", self, bar, module, key, text, time, icon, isApprox)
+		-- Check if :EmphasizeBar(bar) was run and trigger the callback.
+		-- Bit of a roundabout method to approaching this so that we purposely keep callbacks firing last.
+		if bar:Get("bigwigs:emphasized") then
+			self:SendMessage("BigWigs_BarEmphasized", self, bar)
+		end
 	end
 end
 
-function plugin:BigWigs_StartNameplateBar(_, module, key, text, time, icon, isApprox, unitGUID)
+function plugin:StartNameplateBar(_, module, key, text, time, icon, isApprox, unitGUID)
 	if not text then text = "" end
 	self:StopNameplateBar(nil, module, text, unitGUID)
 
@@ -2071,20 +2096,7 @@ function plugin:BigWigs_StartNameplateBar(_, module, key, text, time, icon, isAp
 		local bar = self:CreateBar(module, key, text, time, icon, isApprox, unitGUID)
 		barInfo.bar = bar
 		bar:Start()
-		if db.emphasize and time < db.emphasizeTime then
-			self:EmphasizeBar(bar, true)
-		else
-			currentBarStyler.ApplyStyle(bar)
-		end
 		rearrangeNameplateBars(unitGUID)
-		self:SendMessage("BigWigs_NameplateBarCreated", self, bar, module, key, text, time, icon, isApprox, unitGUID)
-		-- Check if :EmphasizeBar(bar) was run and trigger the callback.
-		-- Bit of a roundabout method to approaching this so that we purposely keep callbacks firing last.
-		if bar:Get("bigwigs:emphasized") then
-			self:SendMessage("BigWigs_BarEmphasized", self, bar)
-		else
-			nameplateEmpUpdate:Play()
-		end
 	else
 		barInfo.deletionTimer = createDeletionTimer(barInfo)
 	end
@@ -2094,54 +2106,17 @@ end
 -- Emphasize
 --
 
-do
-	local dirty = nil
-	local frame = CreateFrame("Frame")
-	empUpdate = frame:CreateAnimationGroup()
-	nameplateEmpUpdate = frame:CreateAnimationGroup()
-	empUpdate:SetScript("OnLoop", function()
-		for k in next, normalAnchor.bars do
-			if k.remaining < db.emphasizeTime and not k:Get("bigwigs:emphasized") then
-				dirty = true
-				plugin:EmphasizeBar(k)
-				plugin:SendMessage("BigWigs_BarEmphasized", plugin, k)
-			end
-		end
-		if dirty then
-			rearrangeBars(normalAnchor)
-			rearrangeBars(emphasizeAnchor)
-			dirty = nil
-		end
-	end)
-	nameplateEmpUpdate:SetScript("OnLoop", function()
-		for guid, bars in next, nameplateBars do
-			for _, barInfo in next, bars do
-				local bar = barInfo.bar
-				if bar and bar.remaining < db.emphasizeTime and not bar:Get("bigwigs:emphasized") and not bar:Get("bigwigs:unitGUID") then
-					plugin:EmphasizeBar(bar)
-					plugin:SendMessage("BigWigs_BarEmphasized", plugin, bar)
-				end
-			end
-		end
-	end)
-	empUpdate:SetLooping("REPEAT")
-	nameplateEmpUpdate:SetLooping("REPEAT")
-
-	local anim = empUpdate:CreateAnimation()
-	anim:SetDuration(0.2)
-	anim = nameplateEmpUpdate:CreateAnimation()
-	anim:SetDuration(0.2)
-end
-
-function plugin:EmphasizeBar(bar, start)
+function plugin:EmphasizeBar(bar, freshBar)
 	if db.emphasizeMove then
 		normalAnchor.bars[bar] = nil
 		emphasizeAnchor.bars[bar] = true
 		bar:Set("bigwigs:anchor", emphasizeAnchor)
 	end
-	currentBarStyler.BarStopped(bar)
-	if not start and db.emphasizeRestart then
-		bar:Start() -- restart the bar -> remaining time is a full length bar again after moving it to the emphasize anchor
+	if not freshBar then
+		currentBarStyler.BarStopped(bar) -- Only call BarStopped on bars that have already started (ApplyStyle was called on them first)
+		if db.emphasizeRestart then
+			bar:Start() -- restart the bar -> remaining time is a full length bar again after moving it to the emphasize anchor
+		end
 	end
 	local module = bar:Get("bigwigs:module")
 	local key = bar:Get("bigwigs:option")
@@ -2155,12 +2130,12 @@ function plugin:EmphasizeBar(bar, start)
 		flags = db.outline
 	end
 	local f = media:Fetch(FONT, db.fontName)
-	bar.candyBarLabel:SetFont(f, db.fontSizeEmph, flags)
-	bar.candyBarDuration:SetFont(f, db.fontSizeEmph, flags)
+	bar:SetFont(f, db.fontSizeEmph, flags)
 
 	bar:SetColor(colors:GetColor("barEmphasized", module, key))
 	bar:SetHeight(db.BigWigsEmphasizeAnchor_height)
 	bar:SetWidth(db.BigWigsEmphasizeAnchor_width)
+	bar:SetFrameLevel(105) -- Put emphasized bars just above normal bars (LibCandyBar 100)
 	currentBarStyler.ApplyStyle(bar)
 	bar:Set("bigwigs:emphasized", true)
 end
@@ -2254,14 +2229,20 @@ do
 
 		BigWigs:Print(L.breakStarted:format(isDBM and "DBM" or "BigWigs", nick))
 
-		timerTbl = {
-			plugin:ScheduleTimer("SendMessage", seconds - 30, "BigWigs_Message", plugin, nil, L.breakSeconds:format(30), "orange", 134062), -- 134062 = "Interface\\Icons\\inv_misc_fork&knife"
-			plugin:ScheduleTimer("SendMessage", seconds - 10, "BigWigs_Message", plugin, nil, L.breakSeconds:format(10), "orange", 134062),
-			plugin:ScheduleTimer("SendMessage", seconds - 5, "BigWigs_Message", plugin, nil, L.breakSeconds:format(5), "orange", 134062),
-			plugin:ScheduleTimer("SendMessage", seconds, "BigWigs_Message", plugin, nil, L.breakFinished, "red", 134062),
-			plugin:ScheduleTimer("SendMessage", seconds, "BigWigs_Sound", plugin, nil, "Long"),
-			plugin:ScheduleTimer(function() BigWigs3DB.breakTime = nil timerTbl = nil end, seconds)
-		}
+		timerTbl = {}
+		if seconds > 30 then
+			timerTbl[#timerTbl+1] = plugin:ScheduleTimer("SendMessage", seconds - 30, "BigWigs_Message", plugin, nil, L.breakSeconds:format(30), "orange", 134062) -- 134062 = "Interface\\Icons\\inv_misc_fork&knife"
+		end
+		if seconds > 10 then
+			timerTbl[#timerTbl+1] = plugin:ScheduleTimer("SendMessage", seconds - 10, "BigWigs_Message", plugin, nil, L.breakSeconds:format(10), "orange", 134062)
+		end
+		if seconds > 5 then
+			timerTbl[#timerTbl+1] = plugin:ScheduleTimer("SendMessage", seconds - 5, "BigWigs_Message", plugin, nil, L.breakSeconds:format(5), "orange", 134062)
+		end
+		timerTbl[#timerTbl+1] = plugin:ScheduleTimer("SendMessage", seconds, "BigWigs_Message", plugin, nil, L.breakFinished, "red", 134062)
+		timerTbl[#timerTbl+1] = plugin:ScheduleTimer("SendMessage", seconds, "BigWigs_Sound", plugin, nil, "Long")
+		timerTbl[#timerTbl+1] = plugin:ScheduleTimer(function() BigWigs3DB.breakTime = nil timerTbl = nil end, seconds)
+
 		if seconds > 119 then -- 2min
 			timerTbl[#timerTbl+1] = plugin:ScheduleTimer("SendMessage", seconds - 60, "BigWigs_Message", plugin, nil, L.breakMinutes:format(1), "yellow", 134062)
 		end
@@ -2272,8 +2253,10 @@ do
 			timerTbl[#timerTbl+1] = plugin:ScheduleTimer("SendMessage", half + m, "BigWigs_Message", plugin, nil, L.breakMinutes:format(halfMin), "yellow", 134062)
 		end
 
-		plugin:SendMessage("BigWigs_Message", plugin, nil, L.breakMinutes:format(seconds/60), "green", 134062)
-		plugin:SendMessage("BigWigs_Sound", plugin, nil, "Long")
+		plugin:SendMessage("BigWigs_Message", plugin, nil, seconds < 61 and L.breakSeconds:format(seconds) or L.breakMinutes:format(seconds/60), "green", 134062)
+		if not reboot then
+			plugin:SendMessage("BigWigs_Sound", plugin, nil, "Long")
+		end
 		plugin:SendMessage("BigWigs_StartBar", plugin, nil, L.breakBar, seconds, 134062)
 		plugin:SendMessage("BigWigs_StartBreak", plugin, seconds, nick, isDBM, reboot)
 	end
@@ -2306,11 +2289,6 @@ function plugin:NAME_PLATE_UNIT_ADDED(_, unit)
 	local unitBars = nameplateBars[guid]
 	if not unitBars then return end
 	for _, barInfo in next, unitBars do
-		local width, height = db.nameplateWidth, db.nameplateHeight
-		if db.nameplateAutoWidth then
-			local nameplate = GetNamePlateForUnit(unit)
-			width = nameplate:GetWidth()
-		end
 		local time = barInfo.paused and barInfo.remaining or barInfo.exp - GetTime()
 		local bar = plugin:CreateBar(
 			barInfo.module,
@@ -2321,7 +2299,6 @@ function plugin:NAME_PLATE_UNIT_ADDED(_, unit)
 			barInfo.isApprox,
 			barInfo.unitGUID
 		)
-		bar:SetSize(width, height)
 		barInfo.bar = bar
 		barInfo.deletionTimer:Cancel()
 		barInfo.deletionTimer = nil
@@ -2352,6 +2329,7 @@ end
 --
 
 local SendAddonMessage = BigWigsLoader.SendAddonMessage
+local dbmPrefix = BigWigsLoader.dbmPrefix
 do
 	local times
 	SlashCmdList.BIGWIGSRAIDBAR = function(input)
@@ -2371,7 +2349,10 @@ do
 			times[input] = t
 			BigWigs:Print(L.sendCustomBar:format(barText))
 			plugin:Sync("CBar", input)
-			SendAddonMessage("D4", ("U\t%d\t%s"):format(seconds, barText), IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- DBM message
+			local name = plugin:UnitName("player")
+			local realm = GetRealmName()
+			local normalizedPlayerRealm = realm:gsub("[%s-]+", "") -- Has to mimic DBM code
+			SendAddonMessage(dbmPrefix, ("%s-%s\t1\tU\t%d\t%s"):format(name, normalizedPlayerRealm, seconds, barText), IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- DBM message
 		end
 	end
 	SLASH_BIGWIGSRAIDBAR1 = "/raidbar"
@@ -2404,7 +2385,10 @@ SlashCmdList.BIGWIGSBREAK = function(input)
 		plugin:Sync("Break", seconds)
 
 		if IsInGroup() then
-			SendAddonMessage("D4", ("BT\t%d"):format(seconds), IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- DBM message
+			local name = plugin:UnitName("player")
+			local realm = GetRealmName()
+			local normalizedPlayerRealm = realm:gsub("[%s-]+", "") -- Has to mimic DBM code
+			SendAddonMessage(dbmPrefix, ("%s-%s\t1\tBT\t%d"):format(name, normalizedPlayerRealm, seconds), IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- DBM message
 		end
 	else
 		BigWigs:Print(L.requiresLeadOrAssist)

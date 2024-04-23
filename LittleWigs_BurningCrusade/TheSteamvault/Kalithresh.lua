@@ -16,7 +16,7 @@ function mod:GetOptions()
 	return {
 		16172, -- Head Crack
 		-6003, -- Spell Reflection
-		36453, -- Warlord's Rage
+		{36453, "CASTBAR"}, -- Warlord's Rage
 	}
 end
 
@@ -53,7 +53,7 @@ function mod:SpellReflection()
 end
 
 function mod:WarlordsRage(args)
-	self:StackMessage(args.spellId, args.destName, args.amount, "orange")
+	self:StackMessageOld(args.spellId, args.destName, args.amount, "orange")
 end
 
 function mod:WarlordsRageCast(args)

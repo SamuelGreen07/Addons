@@ -1,5 +1,8 @@
-if not WeakAuras.IsCorrectVersion() then return end
-local AddonName, OptionsPrivate = ...
+if not WeakAuras.IsLibsOK() then return end
+---@type string
+local AddonName = ...
+---@class OptionsPrivate
+local OptionsPrivate = select(2, ...)
 
 local L = WeakAuras.L
 
@@ -16,8 +19,6 @@ local executeAll = OptionsPrivate.commonOptions.CreateExecuteAll("trigger")
 local flattenRegionOptions = OptionsPrivate.commonOptions.flattenRegionOptions
 local fixMetaOrders = OptionsPrivate.commonOptions.fixMetaOrders
 
-local spellCache = WeakAuras.spellCache
-
 local function union(table1, table2)
   local meta = {};
   for i,v in pairs(table1) do
@@ -31,7 +32,6 @@ end
 
 local function GetGlobalOptions(data)
 
-  local triggerCount = 0
   local globalTriggerOptions = {
     __title = L["Trigger Combination"],
     __order = 1,
@@ -80,7 +80,6 @@ local function GetGlobalOptions(data)
         data.triggers.activeTriggerMode = v;
         WeakAuras.Add(data);
         WeakAuras.UpdateThumbnail(data);
-        WeakAuras.UpdateDisplayButton(data);
       end,
       hidden = function() return #data.triggers <= 1 end
     }
@@ -109,6 +108,7 @@ local function AddOptions(allOptions, data)
     if (triggerSystemOptionsFunction) then
       triggerOptions = union(triggerOptions, triggerSystemOptionsFunction(data, index))
     else
+      -- Unknown trigger system, empty options
       local options = {};
       OptionsPrivate.commonOptions.AddCommonTriggerOptions(options, data, index)
       OptionsPrivate.AddTriggerMetaFunctions(options, data, index)
@@ -152,13 +152,8 @@ end
 
 function OptionsPrivate.GetTriggerOptions(data)
   local allOptions = {}
-  if data.controlledChildren then
-    for index, childId in pairs(data.controlledChildren) do
-      local childData = WeakAuras.GetData(childId)
-      allOptions = AddOptions(allOptions, childData)
-    end
-  else
-    allOptions = AddOptions(allOptions, data)
+  for child in OptionsPrivate.Private.TraverseLeafsOrAura(data) do
+    allOptions = AddOptions(allOptions, child)
   end
 
   fixMetaOrders(allOptions)
@@ -207,8 +202,8 @@ local function DeleteConditionsForTriggerHandleSubChecks(checks, triggernum)
       check.trigger = check.trigger - 1;
     end
 
-    if (checks.checks) then
-      DeleteConditionsForTriggerHandleSubChecks(checks.checks, triggernum);
+    if (check.checks) then
+      DeleteConditionsForTriggerHandleSubChecks(check.checks, triggernum);
     end
   end
 end
@@ -261,8 +256,30 @@ function OptionsPrivate.ClearTriggerExpandState()
   maxTriggerNumForExpand = 0
 end
 
+function OptionsPrivate.GetTriggerTitle(data, triggernum)
+  if data.triggers[triggernum] then
+    local trigger = data.triggers[triggernum].trigger
+    if trigger then
+      local event_prototype = OptionsPrivate.Private.event_prototypes[trigger.event]
+      local triggerType = trigger.type
+      local name
+      if triggerType == "aura2" then
+        name = L["Aura"]
+      elseif triggerType == "custom" then
+        name = L["Custom"]
+      else
+        name = event_prototype.name
+      end
+      return L["Trigger %i: %s"]:format(triggernum, name)
+    end
+  end
+  return L["Trigger %i"]:format(triggernum)
+end
+
+local triggerDeleteDialogOpen = false
+
 function OptionsPrivate.AddTriggerMetaFunctions(options, data, triggernum)
-  options.__title = L["Trigger %s"]:format(triggernum)
+  options.__title = OptionsPrivate.GetTriggerTitle(data, triggernum)
   options.__order = triggernum * 10
   options.__collapsed = #data.triggers > 1
   options.__isCollapsed = function()
@@ -311,34 +328,58 @@ function OptionsPrivate.AddTriggerMetaFunctions(options, data, triggernum)
     disabled = function()
       return #data.triggers == 1
     end,
-    func = function()
-      if #data.triggers > 1 then
+    func = function(...)
+      if triggerDeleteDialogOpen then
+        -- This function is called multiple times if multiple auras are selected
+        return
+      end
+
+      local canDelete = false
+      -- Since we want to handle all selected auras in one dialog, we have to iterate over GetPickedDisplay
+      local picked = OptionsPrivate.GetPickedDisplay()
+      for child in OptionsPrivate.Private.TraverseLeafsOrAura(picked) do
+        if #child.triggers > 1 and #child.triggers >= triggernum then
+          canDelete = true
+          break;
+        end
+      end
+
+      if canDelete then
         StaticPopupDialogs["WEAKAURAS_CONFIRM_TRIGGER_DELETE"] = {
           text = L["You are about to delete a trigger. |cFFFF0000This cannot be undone!|r Would you like to continue?"],
           button1 = L["Delete"],
           button2 = L["Cancel"],
           OnAccept = function()
-            tremove(data.triggers, triggernum)
-            DeleteConditionsForTrigger(data, triggernum)
-            WeakAuras.Add(data)
-            OptionsPrivate.RemoveCollapsed(collapsedId, "trigger", {triggernum})
-            WeakAuras.ClearAndUpdateOptions(data.id)
+            for child in OptionsPrivate.Private.TraverseLeafsOrAura(picked) do
+              if #child.triggers > 1 and #child.triggers >= triggernum then
+                tremove(child.triggers, triggernum)
+                DeleteConditionsForTrigger(child, triggernum)
+                WeakAuras.Add(child)
+                OptionsPrivate.RemoveCollapsed(collapsedId, "trigger", {triggernum})
+                OptionsPrivate.ClearOptions(child.id)
+              end
+            end
+
             WeakAuras.FillOptions()
+            triggerDeleteDialogOpen = false
           end,
           OnCancel = function()
-            -- no-op
+            triggerDeleteDialogOpen = false
           end,
           showAlert = true,
           whileDead = true,
           preferredindex = STATICPOPUP_NUMDIALOGS,
         }
+        triggerDeleteDialogOpen = true
         StaticPopup_Show("WEAKAURAS_CONFIRM_TRIGGER_DELETE")
       end
     end
   }
   if (GetAddOnEnableState(UnitName("player"), "WeakAurasTemplates") ~= 0) then
     options.__applyTemplate = function()
-      WeakAuras.OpenTriggerTemplate(data)
+      -- If we have more than a single aura selected,
+      -- we want to open the template view with the group/multi selection
+      OptionsPrivate.OpenTriggerTemplate(OptionsPrivate.GetPickedDisplay())
     end
   end
 end

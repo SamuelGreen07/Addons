@@ -20,7 +20,11 @@ function mod:GetOptions()
 end
 
 function mod:OnBossEnable()
-	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", nil, "boss1")
+	if self:Classic() then
+		self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+	else
+		self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", nil, "boss1")
+	end
 end
 
 --------------------------------------------------------------------------------
@@ -30,15 +34,17 @@ end
 do
 	local function announce(self, target, guid)
 		if self:Me(guid) then
-			self:Say(-5894)
+			self:Say(-5894, nil, nil, "Beatdown")
 			self:Flash(-5894)
 		end
 		self:TargetMessageOld(-5894, target, "yellow", "warning", nil, nil, true)
 	end
 
-	function mod:UNIT_SPELLCAST_SUCCEEDED(_, unit, _, spellId)
-		if spellId == 30618 then -- Beatdown
-			self:GetBossTarget(announce, 0.4, self:UnitGUID(unit))
+	local prev
+	function mod:UNIT_SPELLCAST_SUCCEEDED(_, unit, castId, spellId)
+		if spellId == 30618 and castId ~= prev then -- Beatdown
+			prev = castId
+			self:GetUnitTarget(announce, 0.4, self:UnitGUID(unit))
 		end
 	end
 end

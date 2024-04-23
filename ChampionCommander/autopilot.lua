@@ -28,7 +28,7 @@ local empty=addon:Wrap("Empty")
 local todefault=addon:Wrap("todefault")
 
 local tonumber=tonumber
-local type=type
+local type=type --as
 local OHF=BFAMissionFrame
 local OHFMissionTab=BFAMissionFrame.MissionTab --Container for mission list and single mission
 local OHFMissions=BFAMissionFrame.MissionTab.MissionList -- same as BFAMissionFrameMissions Call Update on this to refresh Mission Listing
@@ -45,16 +45,16 @@ local OHFTOPLEFT=OHF.GarrCorners.TopLeftGarrCorner
 local OHFTOPRIGHT=OHF.GarrCorners.TopRightGarrCorner
 local OHFBOTTOMLEFT=OHF.GarrCorners.BottomTopLeftGarrCorner
 local OHFBOTTOMRIGHT=OHF.GarrCorners.BottomRightGarrCorner
-local LE_FOLLOWER_TYPE_GARRISON_6_0=Enum.GarrisonFollowerType.FollowerType_6_0
-local LE_FOLLOWER_TYPE_SHIPYARD_6_2=Enum.GarrisonFollowerType.FollowerType_6_2
-local LE_FOLLOWER_TYPE_GARRISON_7_0=Enum.GarrisonFollowerType.FollowerType_7_0
-local LE_FOLLOWER_TYPE_GARRISON_8_0=Enum.GarrisonFollowerType.FollowerType_8_0
-local LE_GARRISON_TYPE_6_0=Enum.GarrisonType.Type_6_0
-local LE_GARRISON_TYPE_6_2=Enum.GarrisonType.Type_6_2
-local LE_GARRISON_TYPE_7_0=Enum.GarrisonType.Type_7_0
-local LE_GARRISON_TYPE_8_0=Enum.GarrisonType.Type_8_0
-local followerType=Enum.GarrisonFollowerType.FollowerType_8_0
-local garrisonType=Enum.GarrisonType.Type_8_0
+local LE_FOLLOWER_TYPE_GARRISON_6_0=Enum.GarrisonFollowerType.FollowerType_6_0_GarrisonFollower
+local LE_FOLLOWER_TYPE_SHIPYARD_6_2=Enum.GarrisonFollowerType.FollowerType_6_0_Boat
+local LE_FOLLOWER_TYPE_GARRISON_7_0=Enum.GarrisonFollowerType.FollowerType_7_0_GarrisonFollower
+local LE_FOLLOWER_TYPE_GARRISON_8_0=Enum.GarrisonFollowerType.FollowerType_8_0_GarrisonFollower
+local LE_GARRISON_TYPE_6_0=Enum.GarrisonType.Type_6_0_Garrison
+local LE_GARRISON_TYPE_6_2=Enum.GarrisonType.Type_6_2_Garrison
+local LE_GARRISON_TYPE_7_0=Enum.GarrisonType.Type_7_0_Garrison
+local LE_GARRISON_TYPE_8_0=Enum.GarrisonType.Type_8_0_Garrison
+local followerType=Enum.GarrisonFollowerType.FollowerType_8_0_GarrisonFollower
+local garrisonType=Enum.GarrisonType.Type_8_0_Garrison
 local FAKE_FOLLOWERID="0x0000000000000000"
 local MAX_LEVEL=110
 
@@ -64,9 +64,9 @@ local HideTT=ChampionCommanderMixin.HideTT
 local dprint=print
 local ddump
 --[===[@debug@
-LoadAddOn("Blizzard_DebugTools")
+C_AddOns.LoadAddOn("Blizzard_DebugTools")
 ddump=DevTools_Dump
-LoadAddOn("LibDebug")
+C_AddOns.LoadAddOn("LibDebug")
 
 if LibDebug then LibDebug() dprint=print end
 local safeG=addon.safeG
@@ -82,6 +82,7 @@ local GARRISON_FOLLOWER_ON_MISSION=GARRISON_FOLLOWER_ON_MISSION
 local GARRISON_FOLLOWER_INACTIVE=GARRISON_FOLLOWER_INACTIVE
 local GARRISON_FOLLOWER_IN_PARTY=GARRISON_FOLLOWER_IN_PARTY
 local GARRISON_FOLLOWER_AVAILABLE=AVAILABLE
+---@diagnostic disable-next-line: undefined-field
 local ViragDevTool_AddData=_G.ViragDevTool_AddData
 if not ViragDevTool_AddData then ViragDevTool_AddData=function() end end
 local KEY_BUTTON1 = "\124TInterface\\TutorialFrame\\UI-Tutorial-Frame:12:12:0:0:512:512:10:65:228:283\124t" -- left mouse button
@@ -108,7 +109,7 @@ end
 --*BEGIN
 local wipe,pcall,pairs,IsShiftKeyDown,IsControlKeyDown=wipe,pcall,pairs,IsShiftKeyDown,IsControlKeyDown
 local PlaySound,SOUNDKIT=PlaySound,SOUNDKIT
-local OHFButtons=OHFMissions.listScroll.buttons
+local OHFButtons=OHFMissions.ScrollBox
 
 local safeguard={}
 function module:Cleanup()
@@ -126,7 +127,7 @@ function module:GARRISON_MISSION_STARTED(event,missionType,missionID)
 		self:UnregisterEvent("GARRISON_MISSION_STARTED")
 		local mission=G.GetBasicMissionInfo(missionID)
 		addon:UnReserveMission(missionID)
-		-- Remove used followers from safeguad
+		-- Remove used followers from safeguard
 		for i=1,#mission.followers do
 			safeguard[mission.followers[i]]=nil
 		end
@@ -146,8 +147,7 @@ function module:DoRunMissions()
 	local baseChance=addon:GetNumber('BASECHANCE')
 	wipe(safeguard)
 	local nothing=true
-	for i=1,#OHFButtons do
-		local frame=OHFButtons[i]
+	for _,frame in OHFButtons:Enumerateframes() do
 		local mission=frame.info
 		local missionID=mission and mission.missionID
 		if missionID then

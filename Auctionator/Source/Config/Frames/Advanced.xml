@@ -1,5 +1,5 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
-  <Frame name="AuctionatorConfigAdvancedFrame" mixin="AuctionatorConfigAdvancedFrameMixin" parent="InterfaceOptionsFrame">
+  <Frame name="AuctionatorConfigAdvancedFrameTemplate" mixin="AuctionatorConfigAdvancedFrameMixin" virtual="true">
     <Scripts>
       <OnLoad method="OnLoad"/>
       <OnShow method="OnShow"/>
@@ -13,12 +13,23 @@
         </KeyValues>
       </Frame>
 
+      <Frame inherits="AuctionatorConfigurationCheckbox" parentKey="ReplicateScan">
+        <KeyValues>
+          <KeyValue key="labelText" value="AUCTIONATOR_L_CONFIG_ALTERNATE_SCAN" type="global" />
+          <KeyValue key="tooltipTitleText" value="AUCTIONATOR_L_CONFIG_ALTERNATE_SCAN_HEADER" type="global" />
+          <KeyValue key="tooltipText" value="AUCTIONATOR_L_CONFIG_ALTERNATE_SCAN_TEXT" type="global"/>
+        </KeyValues>
+        <Anchors>
+          <Anchor point="TOPLEFT" relativeKey="$parent.TitleArea" relativePoint="BOTTOMLEFT" />
+        </Anchors>
+      </Frame>
+
       <Frame inherits="AuctionatorConfigurationHeadingFrame" parentKey="DebugHeading">
         <KeyValues>
           <KeyValue key="headingText" value="AUCTIONATOR_L_CONFIG_DEVELOPER" type="global"/>
         </KeyValues>
         <Anchors>
-          <Anchor point="TOPLEFT" relativeKey="$parent.TitleArea" relativePoint="BOTTOMLEFT"/>
+          <Anchor point="TOPLEFT" relativeKey="$parent.ReplicateScan" relativePoint="BOTTOMLEFT"/>
         </Anchors>
       </Frame>
 

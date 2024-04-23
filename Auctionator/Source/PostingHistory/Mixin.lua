@@ -7,14 +7,20 @@ function Auctionator.PostingHistoryMixin:Init(db)
   })
 end
 
-function Auctionator.PostingHistoryMixin:AddEntry(key, price, quantity)
+function Auctionator.PostingHistoryMixin:AddEntry(key, price, quantity, bidPrice)
   Auctionator.Debug.Message("Auctionator.PostingHistoryMixin:AddEntry", key, price, quantity)
   if not self.db[key] then
     self.db[key] = {}
   end
 
+  -- Remove bid price because the wrong value is reported for multiple stacks
+  -- posted
+  if Auctionator.Constants.IsClassic then
+    bidPrice = nil
+  end
+
   table.insert(self.db[key], {
-    price = price, quantity = quantity, time = time()
+    price = price, quantity = quantity, bidPrice = bidPrice, time = time()
   })
 
   self:PruneKey(key)
@@ -50,26 +56,27 @@ end
 
 function Auctionator.PostingHistoryMixin:ReceiveEvent(eventName, eventData)
   if eventName == Auctionator.Selling.Events.AuctionCreated then
-    self:AddEntry(
-      Auctionator.Utilities.ItemKeyFromLink(eventData.itemLink),
-      eventData.buyoutAmount,
-      eventData.quantity
-    )
+    Auctionator.Utilities.DBKeyFromLink(eventData.itemLink, function(keys)
+      for _, key in ipairs(keys) do
+        self:AddEntry(key, eventData.buyoutAmount, eventData.quantity, eventData.bidAmount)
+      end
+    end)
   end
 end
 
-function Auctionator.PostingHistoryMixin:GetPriceHistory(itemKey)
-  if self.db[itemKey] == nil then
+function Auctionator.PostingHistoryMixin:GetPriceHistory(dbKey)
+  if self.db[dbKey] == nil then
     return {}
   end
 
   local results = {}
 
-  for _, entry in ipairs(self.db[itemKey]) do
+  for _, entry in ipairs(self.db[dbKey]) do
     table.insert(results, {
      date = Auctionator.Utilities.PrettyDate(entry.time),
      rawDay = entry.time,
      price = entry.price,
+     bidPrice = entry.bidPrice,
      quantity = entry.quantity
    })
  end

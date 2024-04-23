@@ -6,28 +6,18 @@ local soundAlertsArea		= extraFeaturesPanel:CreateArea(L.Area_SoundAlerts)
 soundAlertsArea:CreateCheckButton(L.LFDEnhance, true, nil, "LFDEnhance")
 soundAlertsArea:CreateCheckButton(L.WorldBossNearAlert, true, nil, "WorldBossNearAlert")
 soundAlertsArea:CreateCheckButton(L.RLReadyCheckSound, true, nil, "RLReadyCheckSound")
-soundAlertsArea:CreateCheckButton(L.AFKHealthWarning, true, nil, "AFKHealthWarning")
+soundAlertsArea:CreateCheckButton(L.AFKHealthWarning, true, nil, "AFKHealthWarning2")
 soundAlertsArea:CreateCheckButton(L.AutoReplySound, true, nil, "AutoReplySound")
 
 local generaltimeroptions	= extraFeaturesPanel:CreateArea(L.TimerGeneral)
 generaltimeroptions:CreateCheckButton(L.SKT_Enabled, true, nil, "AlwaysShowSpeedKillTimer2")
 generaltimeroptions:CreateCheckButton(L.ShowRespawn, true, nil, "ShowRespawn")
 generaltimeroptions:CreateCheckButton(L.ShowQueuePop, true, nil, "ShowQueuePop")
+generaltimeroptions:CreateCheckButton(L.ShowBerserkWarnings, true, nil, "ShowBerserkWarnings")
 
-local bossLoggingArea		= extraFeaturesPanel:CreateArea(L.Area_AutoLogging)
-bossLoggingArea:CreateCheckButton(L.AutologBosses, true, nil, "AutologBosses")
-if _G["Transcriptor"] then
-	bossLoggingArea:CreateCheckButton(L.AdvancedAutologBosses, true, nil, "AdvancedAutologBosses")
-end
-bossLoggingArea:CreateCheckButton(L.RecordOnlyBosses, true, nil, "RecordOnlyBosses")
-bossLoggingArea:CreateCheckButton(L.LogOnlyNonTrivial, true, nil, "LogOnlyNonTrivial")
-
-local thirdPartyArea
-local bigBrother = _G["BigBrother"]
-if bigBrother and type(bigBrother.ConsumableCheck) == "function" then
-	thirdPartyArea			= extraFeaturesPanel:CreateArea(L.Area_3rdParty)
-	thirdPartyArea:CreateCheckButton(L.ShowBBOnCombatStart, true, nil, "ShowBigBrotherOnCombatStart")
-	thirdPartyArea:CreateCheckButton(L.BigBrotherAnnounceToRaid, true, nil, "BigBrotherAnnounceToRaid")
+if _G["oRA3Frame"] then
+	local thirdPartyArea = extraFeaturesPanel:CreateArea(L.Area_3rdParty)
+	thirdPartyArea:CreateCheckButton(L.oRA3AnnounceConsumables, true, nil, "oRA3AnnounceConsumables")
 end
 
 local inviteArea			= extraFeaturesPanel:CreateArea(L.Area_Invite)

@@ -60,8 +60,22 @@ function RSNavigationMixin:EnablePreviousButton()
 	return false
 end
 
-function RSNavigationMixin:AddNext(vignetteInfo)
-	table.insert(navigationCache, vignetteInfo)
+function RSNavigationMixin:AddNext(mapID, x, y, name, atlasName, objectGUID)
+	-- Skip if already in the pool in the last position
+	local lastVignetteInfo = navigationCache[#navigationCache]
+	
+	local vignetteInfo = {}
+	vignetteInfo.mapID = mapID
+	vignetteInfo.x = x
+	vignetteInfo.y = y
+	vignetteInfo.name = name
+	vignetteInfo.atlasName = atlasName
+	vignetteInfo.objectGUID = objectGUID
+	
+	if (not lastVignetteInfo or lastVignetteInfo.objectGUID ~= objectGUID) then
+		table.insert(navigationCache, vignetteInfo)
+	end
+	
 	self.ShowAnim:Play();
 
 	-- If its not locking then we have to keep moving the index to the last position
@@ -69,12 +83,12 @@ function RSNavigationMixin:AddNext(vignetteInfo)
 		currentIndex = table.getn(navigationCache)
 
 		-- Refresh waypoint
-		RSTomtom.AddTomtomWaypointFromVignette(vignetteInfo)
-		RSWaypoints.AddWaypointFromVignette(vignetteInfo)
-		-- If the navigation cache only contains one item, adds waypoint
+		RSTomtom.AddTomtomAutomaticWaypoint(mapID, x, y, name)
+		RSWaypoints.AddAutomaticWaypoint(mapID, x, y)
+	-- If the navigation cache only contains one item, adds waypoint
 	elseif (table.getn(navigationCache) == 1) then
-		RSTomtom.AddTomtomWaypointFromVignette(vignetteInfo)
-		RSWaypoints.AddWaypointFromVignette(vignetteInfo)
+		RSTomtom.AddTomtomAutomaticWaypoint(mapID, x, y, name)
+		RSWaypoints.AddAutomaticWaypoint(mapID, x, y)
 	end
 end
 
@@ -102,8 +116,8 @@ function RSNavigationMixin:Navigate()
 	self:GetParent():DetectedNewVignette(self:GetParent(), vignetteInfo, true)
 
 	-- Adds waypoint
-	RSTomtom.AddTomtomWaypointFromVignette(vignetteInfo)
-	RSWaypoints.AddWaypointFromVignette(vignetteInfo)
+	RSTomtom.AddTomtomAutomaticWaypoint(vignetteInfo.mapID, vignetteInfo.x, vignetteInfo.y, vignetteInfo.name)
+	RSWaypoints.AddAutomaticWaypoint(vignetteInfo.mapID, vignetteInfo.x, vignetteInfo.y)
 end
 
 function RSNavigationMixin:Reset()

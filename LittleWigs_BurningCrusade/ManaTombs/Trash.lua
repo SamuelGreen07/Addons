@@ -40,11 +40,13 @@ function mod:GetOptions()
 		34925, -- Curse of Impotence
 		--[[ Ethereal Theurgist ]]--
 		13323, -- Polymorph
-	}, {
+	},{
 		[33871] = L.scavenger,
 		[22883] = L.priest,
 		[34322] = L.nexus_terror,
 		[13323] = L.theurgist,
+	},{
+		[34322] = CL.fear, -- Psychic Scream (Fear)
 	}
 end
 
@@ -76,7 +78,7 @@ end
 do
 	local prev = 0
 	function mod:Heal(args)
-		local t = GetTime()
+		local t = args.time
 		if t - prev > 1 then
 			prev = t
 			self:MessageOld(22883, "orange", "long", CL.casting:format(args.spellName))
@@ -89,11 +91,11 @@ do
 
 	function mod:PsychicScream(args)
 		if self:Me(args.destGUID) then
-			self:Say(args.spellId) -- helps prioritizing dispelling those who are about to run into some pack
+			self:Say(args.spellId, CL.fear, nil, "Fear") -- helps prioritizing dispelling those who are about to run into some pack
 		end
 		playerList[#playerList+1] = args.destName
 		if #playerList == 1 then
-			self:ScheduleTimer("TargetMessageOld", 0.3, args.spellId, playerList, "red", "alert", nil, nil, self:Dispeller("magic"))
+			self:ScheduleTimer("TargetMessageOld", 0.3, args.spellId, playerList, "red", "alert", CL.fear, nil, self:Dispeller("magic"))
 		end
 	end
 end

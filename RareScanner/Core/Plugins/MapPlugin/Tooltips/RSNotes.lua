@@ -17,7 +17,7 @@ local RSUtils = private.ImportLib("RareScannerUtils")
 -- NPCs notes
 ---============================================================================
 
-function RSNotes.GetNote(entityID, mapID)
+function RSNotes.GetNote(entityID, mapID, minieventID)
 	-- Crafting rare NPCs event
 	if (RSUtils.Contains(RSConstants.CRAFTING_NPCS, entityID)) then
 		return string.format(AL["NOTE_CRAFTING_NPCS"], AL[string.format("NOTE_%s", entityID)])
@@ -44,6 +44,11 @@ function RSNotes.GetNote(entityID, mapID)
 	-- Individual note by entityID and mapID
 	elseif (AL[string.format("NOTE_%s_%s", entityID, mapID)] ~= string.format("NOTE_%s_%s", entityID, mapID)) then
 		return AL[string.format("NOTE_%s_%s", entityID, mapID)]
+	end
+	
+	-- Notes for dragon glyphs
+	if (AL[string.format("NOTE_GLYPH_%s", entityID)] ~= string.format("NOTE_GLYPH_%s", entityID)) then
+		return AL[string.format("NOTE_GLYPH_%s", entityID)]
 	end
 	
 	-- Orator Kloe NPCs
@@ -74,7 +79,41 @@ function RSNotes.GetNote(entityID, mapID)
 	-- Requires 4 people to summon NPCs
 	elseif (RSUtils.Contains(RSConstants.FOUR_PEOPLE_NPCS, entityID)) then
 		return AL["NOTE_FOUR_PEOPLE_NPCS"]
-	end
+	-- Requires entering the rift
+	elseif (RSUtils.Contains(RSConstants.RIFT_NPCS, entityID)) then
+		return AL["NOTE_RIFT_NPCS"]
+	-- Requires entering the rift in the maw
+	elseif (RSUtils.Contains(RSConstants.RIFT_NPCS_MAW, entityID)) then
+		return AL["NOTE_RIFT_NPCS_MAW"]
+	-- Requires air storm invasion in Dragon Isles
+	elseif (minieventID and minieventID == RSConstants.DRAGONFLIGHT_STORM_INVASTION_AIR_MINIEVENT) then
+		return AL["NOTE_AIR_STORM_EVENTS"]
+	-- Requires fire storm invasion in Dragon Isles
+	elseif (minieventID and minieventID == RSConstants.DRAGONFLIGHT_STORM_INVASTION_FIRE_MINIEVENT) then
+    	return AL["NOTE_FIRE_STORM_EVENTS"]
+  	-- Requires earth storm invasion in Dragon Isles
+  	elseif (minieventID and minieventID == RSConstants.DRAGONFLIGHT_STORM_INVASTION_EARTH_MINIEVENT) then
+    	return AL["NOTE_EARTH_STORM_EVENTS"]
+  	-- Requires water storm invasion in Dragon Isles
+  	elseif (minieventID and minieventID == RSConstants.DRAGONFLIGHT_STORM_INVASTION_WATER_MINIEVENT) then
+    	return AL["NOTE_WATER_STORM_EVENTS"]
+	-- Grand hunting party bosses
+	elseif (minieventID and minieventID == RSConstants.DRAGONFLIGHT_HUNTING_PARTY_MINIEVENT) then
+		return AL["NOTE_HUNTING_PARTY_NPCS"]
+	-- Omnious conchs
+	elseif (RSUtils.Contains(RSConstants.OMINOUS_CONCHS_NPCS, entityID)) then
+		return AL["NOTE_OMINOUS_CONCHS_NPCS"]
+	-- Fyrakk assaults
+	elseif (minieventID and minieventID == RSConstants.DRAGONFLIGHT_FYRAKK_MINIEVENT) then
+		return AL["NOTE_FYRAKK_ASSAULTS_NPCS"]
+	-- Elusive NPCs in Dragon Isles
+	elseif (RSUtils.Contains(RSConstants.ELUSIVE_NPCS, entityID)) then
+		return AL["NOTE_ELUSIVE_NPCS"]
+	-- Requires dreamsurge investigation in Dragon Isles
+  	elseif (minieventID and minieventID == RSConstants.DRAGONFLIGHT_DREAMSURGE_MINIEVENT) then
+    	return AL["NOTE_DREAMSURGE_EVENTS"]
+  	end
+	
 	-- Rune of constructs Containers
 	if (RSUtils.Contains(RSConstants.RUNE_CONSTRUCTS_CONTAINERS, entityID)) then
 		return AL["NOTE_RUNE_CONSTRUCTS_CONTAINERS"]
@@ -93,6 +132,32 @@ function RSNotes.GetNote(entityID, mapID)
 	-- Ripe purian Containers
 	elseif (RSUtils.Contains(RSConstants.RIPE_PURIAN_CONTAINERS, entityID)) then
 		return AL["NOTE_RIPE_PURIAN_CONTAINERS"]
+	-- Rift hidden containers
+	elseif (RSUtils.Contains(RSConstants.RIFT_HIDDEN_ENTITIES, entityID)) then
+		return AL["NOTE_RIFT_HIDDEN_CONTAINERS"]
+	-- Korthia caches found by Swagsnout gromit
+	elseif (RSUtils.Contains(RSConstants.CACHES_SWAGSNOUT_GROMIT, entityID)) then
+		return AL["NOTE_CACHEs_SWAGSNOUT_GROMIT"]
+	-- The maw stolen anima vessels
+	elseif (RSUtils.Contains(RSConstants.STOLEN_ANIMA_VESSEL, entityID)) then
+		return AL["NOTE_STOLEN_ANIMA_VESSEL"]
+	-- The maw stolen anima vessels (in the rift)
+	elseif (RSUtils.Contains(RSConstants.STOLEN_ANIMA_VESSEL_RIFT, entityID)) then
+		return AL["NOTE_STOLEN_ANIMA_VESSEL_RIFT"]
+	-- Disturbed dirt
+	elseif (RSUtils.Contains(RSConstants.DISTURBED_DIRT, entityID)) then
+		return AL["NOTE_DISTURBED_DIRT"]
+	-- Magic-Bound Chest
+	elseif (RSUtils.Contains(RSConstants.MAGIC_BOUND_CHEST, entityID)) then
+		return AL["NOTE_MAGIC_BOUND_CHEST"]
+	-- Not trackable containers
+	elseif (RSUtils.Contains(RSConstants.CONTAINERS_WITHOUT_VIGNETTE, entityID)) then
+		return AL["NOTE_CONTAINERS_WITHOUT_VIGNETTE"]
+	-- Forbidden Reach containers
+	elseif (RSUtils.Contains(RSConstants.CONTAINERS_FORBIDDEN_REACH, entityID)) then
+		return AL["NOTE_CONTAINERS_FORBIDDEN_REACH"]
+	-- Unwaking echo containers
+	elseif (RSUtils.Contains(RSConstants.CONTAINERS_UNWAKING_ECHO, entityID)) then
+		return AL["NOTE_UNWAKING_ECHO"]
 	end
-	
 end

@@ -12,6 +12,9 @@ mod:RegisterEnableMob(
 	-- Alliance NPCs
 	35569, 35570, 35571, 35572, 35617
 )
+-- Buggy, can trigger _START sometimes during the mounted phase.
+-- Can also trigger _END as a wipe, when actually it was a win. The bosses will respawn and you'll also get loot..
+-- Leaving it enabled since the alternative (counting kills) isn't perfect either.
 mod.engageId = 2022
 mod.respawnTime = 30
 
@@ -23,7 +26,7 @@ function mod:GetOptions()
 	return {
 		-7534,  -- Poison Bottle
 		67534, -- Hex of Mending
-		67528, -- Healing Wave
+		{67528, "CASTBAR"}, -- Healing Wave
 		66043, -- Polymorph
 	}
 end
@@ -70,7 +73,7 @@ do
 	local prev = 0
 	function mod:PoisonBottle(args)
 		if self:Me(args.destGUID) then
-			local t = GetTime()
+			local t = args.time
 			if t - prev > 2 then
 				prev = t
 				self:MessageOld(-7534, "blue", "alarm", CL.underyou:format(args.spellName))

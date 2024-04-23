@@ -29,7 +29,7 @@ function mod:OnBossEnable()
 	self:Log("SPELL_AURA_APPLIED", "BlackIronCyclone", 155721)
 	self:Log("SPELL_AURA_REMOVED", "BlackIronCycloneOver", 155721)
 
-	self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", nil, "boss1")
+	self:RegisterUnitEvent("UNIT_HEALTH", nil, "boss1")
 	self:RegisterUnitEvent("UNIT_TARGETABLE_CHANGED", nil, "boss1")
 end
 
@@ -50,7 +50,7 @@ do
 		end
 	end
 	function mod:BlackIronCycloneCast(args)
-		self:GetBossTarget(bossTarget, 0.3, args.sourceGUID)
+		self:GetUnitTarget(bossTarget, 0.3, args.sourceGUID)
 		self:CDBar(args.spellId, 19) -- 18-21
 	end
 end
@@ -63,8 +63,8 @@ function mod:BlackIronCycloneOver(args)
 	self:PrimaryIcon(args.spellId)
 end
 
-function mod:UNIT_HEALTH_FREQUENT(event, unit)
-	local hp = UnitHealth(unit) / UnitHealthMax(unit) * 100
+function mod:UNIT_HEALTH(event, unit)
+	local hp = self:GetHealth(unit)
 	if hp < 65 then
 		self:UnregisterUnitEvent(event, unit)
 		self:MessageOld("stages", "green", nil, CL.soon:format(CL.intermission), false)

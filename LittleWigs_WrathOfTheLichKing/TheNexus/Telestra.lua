@@ -1,12 +1,11 @@
-
 --------------------------------------------------------------------------------
--- Module declaration
+-- Module Declaration
 --
 
 local mod, CL = BigWigs:NewBoss("Grand Magus Telestra", 576, 618)
 if not mod then return end
 mod:RegisterEnableMob(26731)
-mod.engageId = 2010
+mod:SetEncounterID(mod:Classic() and 520 or 2010)
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -31,21 +30,22 @@ end
 
 function mod:OnEngage()
 	splitPhase = 0
-	self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", nil, "boss1")
+	self:RegisterUnitEvent("UNIT_HEALTH", nil, "boss1")
 end
 
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
 
-function mod:UNIT_HEALTH_FREQUENT(event, unit)
-	local hp = UnitHealth(unit) / UnitHealthMax(unit) * 100
+function mod:UNIT_HEALTH(event, unit)
+	if self:MobId(self:UnitGUID(unit)) ~= 26731 then return end
+	local hp = self:GetHealth(unit)
 	if (hp < 56 and splitPhase == 0) or (hp < 16 and splitPhase == 1) then
 		splitPhase = splitPhase + 1
 		if splitPhase > 1 or self:Normal() then -- No 2nd split on Normal mode
 			self:UnregisterUnitEvent(event, unit)
 		end
-		self:MessageOld(-7395, "green", nil, CL.soon:format(self:SpellName(-7395)), false)
+		self:Message(-7395, "green", CL.soon:format(self:SpellName(-7395)), false)
 	end
 end
 

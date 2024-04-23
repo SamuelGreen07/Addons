@@ -1,5 +1,8 @@
-if not WeakAuras.IsCorrectVersion() then return end
-local AddonName, OptionsPrivate = ...
+if not WeakAuras.IsLibsOK() then return end
+---@type string
+local AddonName = ...
+---@class OptionsPrivate
+local OptionsPrivate = select(2, ...)
 
 local SharedMedia = LibStub("LibSharedMedia-3.0");
 local L = WeakAuras.L;
@@ -92,25 +95,46 @@ local function createOptions(id, data)
       name = L["Bar Color Settings"],
       order = 39
     },
+    enableGradient = {
+      type = "toggle",
+      width = WeakAuras.normalWidth,
+      name = L["Enable Gradient"],
+      order = 39.1
+    },
+    gradientOrientation = {
+      type = "select",
+      width = WeakAuras.normalWidth,
+      values = OptionsPrivate.Private.gradient_orientations,
+      name = L["Gradient Orientation"],
+      order = 39.2
+    },
     barColor = {
       type = "color",
       width = WeakAuras.normalWidth,
-      name = L["Bar Color"],
+      name = L["Bar Color/Gradient Start"],
       hasAlpha = true,
-      order = 39.1
+      order = 39.3
+    },
+    barColor2 = {
+      type = "color",
+      width = WeakAuras.normalWidth,
+      name = L["Gradient End"],
+      hasAlpha = true,
+      order = 39.4
     },
     backgroundColor = {
       type = "color",
       width = WeakAuras.normalWidth,
       name = L["Background Color"],
       hasAlpha = true,
-      order = 39.2
+      order = 39.5
     },
     alpha = {
       type = "range",
+      control = "WeakAurasSpinBox",
       width = WeakAuras.normalWidth,
       name = L["Bar Alpha"],
-      order = 39.3,
+      order = 39.6,
       min = 0,
       max = 1,
       bigStep = 0.01,
@@ -162,7 +186,7 @@ local function createOptions(id, data)
     displayIcon = {
       type = "input",
       width = WeakAuras.normalWidth - 0.15,
-      name = L["Fallback"],
+      name = L["Manual"],
       disabled = function() return not data.icon end,
       order = 40.5,
       get = function()
@@ -184,12 +208,8 @@ local function createOptions(id, data)
       func = function()
         local path = {"displayIcon"}
         local paths = {}
-        if data.controlledChildren then
-          for i, childId in pairs(data.controlledChildren) do
-            paths[childId] = path
-          end
-        else
-          paths[data.id] = path
+        for child in OptionsPrivate.Private.TraverseLeafsOrAura(data) do
+          paths[child.id] = path
         end
         OptionsPrivate.OpenIconPicker(data, paths)
       end,
@@ -216,6 +236,7 @@ local function createOptions(id, data)
     },
     zoom = {
       type = "range",
+      control = "WeakAurasSpinBox",
       width = WeakAuras.normalWidth,
       name = L["Zoom"],
       order = 40.91,
@@ -250,7 +271,12 @@ local function createOptions(id, data)
       width = 0.15,
       order = 44.1,
       func = function()
-        OptionsPrivate.OpenTexturePicker(data, {}, {
+        local path = {}
+        local paths = {}
+        for child in OptionsPrivate.Private.TraverseLeafsOrAura(data) do
+          paths[child.id] = path
+        end
+        OptionsPrivate.OpenTexturePicker(data, paths, {
           texture = "sparkTexture",
           color = "sparkColor",
           rotation = "sparkRotation",
@@ -302,6 +328,7 @@ local function createOptions(id, data)
     },
     sparkWidth = {
       type = "range",
+      control = "WeakAurasSpinBox",
       width = WeakAuras.normalWidth,
       name = L["Width"],
       order = 44.6,
@@ -313,6 +340,7 @@ local function createOptions(id, data)
     },
     sparkHeight = {
       type = "range",
+      control = "WeakAurasSpinBox",
       width = WeakAuras.normalWidth,
       name = L["Height"],
       order = 44.7,
@@ -324,6 +352,7 @@ local function createOptions(id, data)
     },
     sparkOffsetX = {
       type = "range",
+      control = "WeakAurasSpinBox",
       width = WeakAuras.normalWidth,
       name = L["X Offset"],
       order = 44.8,
@@ -335,6 +364,7 @@ local function createOptions(id, data)
     },
     sparkOffsetY = {
       type = "range",
+      control = "WeakAurasSpinBox",
       width = WeakAuras.normalWidth,
       name = L["Y Offset"],
       order = 44.9,
@@ -355,6 +385,7 @@ local function createOptions(id, data)
     },
     sparkRotation = {
       type = "range",
+      control = "WeakAurasSpinBox",
       width = WeakAuras.normalWidth,
       name = L["Rotation"],
       min = 0,
@@ -388,8 +419,6 @@ local function createOptions(id, data)
     },
   };
 
-  options = WeakAuras.regionPrototype.AddAdjustedDurationOptions(options, data, 36.5);
-
   local overlayInfo = OptionsPrivate.Private.GetOverlayInfo(data);
   if (overlayInfo and next(overlayInfo)) then
     options["overlayheader"] = {
@@ -399,12 +428,32 @@ local function createOptions(id, data)
     }
     local index = 0.01
     for id, display in ipairs(overlayInfo) do
+      options["overlaytexture" .. id] = {
+        type = "select",
+        dialogControl = "LSM30_Statusbar",
+        width = WeakAuras.doubleWidth,
+        name = string.format(L["%s Texture"], display),
+        values = AceGUIWidgetLSMlists.statusbar,
+        order = 58.1 + index,
+        set = function(info, texture)
+          if (not data.overlaysTexture) then
+            data.overlaysTexture = {};
+          end
+          data.overlaysTexture[id] = texture;
+          WeakAuras.Add(data);
+        end,
+        get = function()
+          if data.overlaysTexture and data.overlaysTexture[id] then
+            return data.overlaysTexture[id]
+          end
+        end
+      }
       options["overlaycolor" .. id] = {
         type = "color",
         width = WeakAuras.normalWidth,
         name = string.format(L["%s Color"], display),
         hasAlpha = true,
-        order = 58 + index,
+        order = 58.2 + index,
         get = function()
           if (data.overlays and data.overlays[id]) then
             return unpack(data.overlays[id]);
@@ -426,13 +475,14 @@ local function createOptions(id, data)
       type = "toggle",
       width = WeakAuras.normalWidth,
       name = L["Clip Overlays"],
-      order = 58 + index;
+      order = 58.3 + index;
     }
 
   end
 
   return {
     aurabar = options,
+    progressOptions = OptionsPrivate.commonOptions.ProgressOptions(data),
     position = OptionsPrivate.commonOptions.PositionOptions(id, data),
   };
 end
@@ -440,7 +490,7 @@ end
 -- Create preview thumbnail
 local function createThumbnail()
   -- Preview frame
-  local borderframe = CreateFrame("FRAME", nil, UIParent);
+  local borderframe = CreateFrame("Frame", nil, UIParent);
   borderframe:SetWidth(32);
   borderframe:SetHeight(32);
 
@@ -451,13 +501,13 @@ local function createThumbnail()
   border:SetTexCoord(0.2, 0.8, 0.2, 0.8);
 
   -- Main region
-  local region = CreateFrame("FRAME", nil, borderframe);
+  local region = CreateFrame("Frame", nil, borderframe);
   borderframe.region = region;
   region:SetWidth(32);
   region:SetHeight(32);
 
   -- Status-bar frame
-  local bar = CreateFrame("FRAME", nil, region);
+  local bar = CreateFrame("Frame", nil, region);
   borderframe.bar = bar;
 
   -- Fake status-bar
@@ -585,16 +635,20 @@ local function modifyThumbnail(parent, borderframe, data, fullModify, width, hei
     function borderframe:SetIcon(path)
       local iconPath
       if data.iconSource == 0 then
-        iconPath = data.displayIcon or "Interface\\Icons\\INV_Misc_QuestionMark"
+        iconPath = data.displayIcon
       else
-        iconPath = path or data.displayIcon or "Interface\\Icons\\INV_Misc_QuestionMark"
+        iconPath = path or data.displayIcon
       end
-      local success = icon:SetTexture(data.auto and path or data.displayIcon) and (data.auto and path or data.displayIcon);
-      icon:SetTexture(iconPath)
+
+      if iconPath and iconPath ~= "" then
+        OptionsPrivate.Private.SetTextureOrAtlas(self.icon, iconPath)
+      else
+        OptionsPrivate.Private.SetTextureOrAtlas(self.icon, "Interface\\Icons\\INV_Misc_QuestionMark")
+      end
     end
 
-    if data and data.iconSource ~= 0 then
-      local name, icon = WeakAuras.GetNameAndIcon(data)
+    if data then
+      local _, icon = WeakAuras.GetNameAndIcon(data)
       borderframe:SetIcon(icon)
     end
 
@@ -613,11 +667,12 @@ local function createIcon()
     texture = "Runes",
     orientation = "HORIZONTAL",
     alpha = 1.0,
-    barColor = {1, 0, 0, 1}
+    barColor = {1, 0, 0, 1},
+    triggers = {}
   };
 
   -- Create and configure thumbnail
-  local thumbnail = createThumbnail(UIParent);
+  local thumbnail = createThumbnail();
   modifyThumbnail(UIParent, thumbnail, data, nil, 32, 18);
   thumbnail:SetIcon("Interface\\Icons\\INV_Sword_62");
 
@@ -776,27 +831,8 @@ local function GetAnchors(data)
   return anchorPoints;
 end
 
-local function subCreateOptions(parentData, data, index, subIndex)
-  local order = 9
-  local options = {
-    __title = L["Foreground"],
-    __order = 1,
-    __up = function()
-      if (OptionsPrivate.Private.ApplyToDataOrChildData(parentData, OptionsPrivate.MoveSubRegionUp, index, "aurabar_bar")) then
-        WeakAuras.ClearAndUpdateOptions(parentData.id)
-      end
-    end,
-    __down = function()
-      if (OptionsPrivate.Private.ApplyToDataOrChildData(parentData, OptionsPrivate.MoveSubRegionDown, index, "aurabar_bar")) then
-        WeakAuras.ClearAndUpdateOptions(parentData.id)
-      end
-    end,
-    __notcollapsable = true
-  }
-  return options
-end
-
 -- Register new region type options with WeakAuras
-WeakAuras.RegisterRegionOptions("aurabar", createOptions, createIcon, L["Progress Bar"], createThumbnail, modifyThumbnail, L["Shows a progress bar with name, timer, and icon"], templates, GetAnchors);
-
-WeakAuras.RegisterSubRegionOptions("aurabar_bar", subCreateOptions, L["Foreground"]);
+OptionsPrivate.registerRegions = OptionsPrivate.registerRegions or {}
+table.insert(OptionsPrivate.registerRegions, function()
+  OptionsPrivate.Private.RegisterRegionOptions("aurabar", createOptions, createIcon, L["Progress Bar"], createThumbnail, modifyThumbnail, L["Shows a progress bar with name, timer, and icon"], templates, GetAnchors);
+end)

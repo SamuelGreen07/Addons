@@ -32,7 +32,7 @@ function mod:OnBossEnable()
 
 	self:Log("SPELL_AURA_APPLIED", "CrepuscularVeil", 76189)
 
-	self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", nil, "boss1")
+	self:RegisterUnitEvent("UNIT_HEALTH", nil, "boss1")
 	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", nil, "boss1")
 end
 
@@ -60,8 +60,8 @@ function mod:CrepuscularVeil(args)
 	end
 end
 
-function mod:UNIT_HEALTH_FREQUENT(event, unit)
-	local hp = UnitHealth(unit) / UnitHealthMax(unit) * 100
+function mod:UNIT_HEALTH(event, unit)
+	local hp = self:GetHealth(unit)
 	if hp < nextTransformationWarning then
 		self:MessageOld(-2385, "yellow", nil, CL.soon:format(self:SpellName(-2385))) -- Transformation
 		nextTransformationWarning = nextTransformationWarning - 35

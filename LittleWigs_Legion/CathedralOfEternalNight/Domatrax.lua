@@ -1,4 +1,3 @@
-
 --------------------------------------------------------------------------------
 -- TODO List:
 -- - Do we need warnings for the add spells?
@@ -24,6 +23,7 @@ local L = mod:GetLocale()
 if L then
 	L.custom_on_autotalk = "Autotalk"
 	L.custom_on_autotalk_desc = "Instantly selects the Aegis of Aggramar's gossip option to start the Domatrax encounter."
+	L.custom_on_autotalk_icon = "ui_chat"
 
 	L.missing_aegis = "You're not standing in Aegis" -- Aegis is a short name for Aegis of Aggramar
 	L.aegis_healing = "Aegis: Reduced Healing Done"
@@ -47,7 +47,7 @@ function mod:GetOptions()
 		"custom_on_autotalk", -- Aegis of Aggramar
 		238410, -- Aegis of Aggramar
 		236543, -- Felsoul Cleave
-		234107, -- Chaotic Energy
+		{234107, "CASTBAR"}, -- Chaotic Energy
 		-15076, -- Fel Portal Guardian
 		241622, -- Approaching Doom
 	},{
@@ -70,13 +70,13 @@ end
 
 function mod:OnEngage()
 	isCastingChaoticEnergy = false
+	if self:Mythic() then
+		felPortalGuardiansCounter = 1
+		felPortalGuardianCollector = {}
+		self:RegisterEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT")
+	end
 	self:CDBar(236543, 8.3) -- Felsoul Cleave
 	self:CDBar(234107, 32.5) -- Chaotic Energy
-	if self:Mythic() then
-		self:RegisterEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT")
-		felPortalGuardiansCounter = 1
-		wipe(felPortalGuardianCollector)
-	end
 end
 
 --------------------------------------------------------------------------------

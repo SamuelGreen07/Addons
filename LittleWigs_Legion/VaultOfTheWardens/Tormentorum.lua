@@ -23,7 +23,7 @@ function mod:GetOptions()
 	return {
 		200898, -- Teleport
 		202455, -- Void Shield
-		212564, -- Inquisitive Stare
+		{212564, "CASTBAR"}, -- Inquisitive Stare
 		{200904, "FLASH"}, -- Sapped Soul
 		196208, -- Seed of Corruption
 		201488, -- Frightening Shout
@@ -42,7 +42,7 @@ function mod:OnBossEnable()
 	self:Log("SPELL_CAST_SUCCESS", "SapSoulInterruptible", 200905) -- Normal, Heroic
 	self:Log("SPELL_AURA_APPLIED", "SappedSoul", 200904)
 	self:Log("SPELL_AURA_REFRESH", "SappedSoul", 200904)
-	self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", nil, "boss1")
+	self:RegisterUnitEvent("UNIT_HEALTH", nil, "boss1")
 	self:Log("SPELL_CAST_START", "SeedofCorruption", 196208)
 	self:Log("SPELL_CAST_START", "FrighteningShout", 201488)
 	self:Log("SPELL_AURA_APPLIED", "ShadowCrashDamage", 199918) -- Shadow Crash
@@ -113,8 +113,8 @@ do
 	end
 end
 
-function mod:UNIT_HEALTH_FREQUENT(event, unit)
-	local hp = UnitHealth(unit) / UnitHealthMax(unit) * 100
+function mod:UNIT_HEALTH(event, unit)
+	local hp = self:GetHealth(unit)
 	if hp < nextTeleportSoonWarning then
 		self:MessageOld(200898, "yellow", nil, CL.soon:format(self:SpellName(200898)))
 		nextTeleportSoonWarning = nextTeleportSoonWarning - 30 -- Teleport at 40%
@@ -158,7 +158,7 @@ function mod:FleshToStoneAppliedDose(args)
 	self:SetInfoByTable(args.spellId, fleshToStoneList)
 
 	if self:Me(args.destGUID) and args.amount > 6 then
-		self:StackMessage(args.spellId, args.destName, args.amount, "orange")
+		self:StackMessageOld(args.spellId, args.destName, args.amount, "orange")
 		if args.amount < 9 then
 			self:PlaySound(args.spellId, "alarm")
 		else

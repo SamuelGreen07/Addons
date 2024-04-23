@@ -36,7 +36,14 @@ local addon, ns = ...
 local cargBags = ns.cargBags
 local Implementation = cargBags.classes.Implementation
 
-local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+local isClassic = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE
+
+local isDF = select(4,GetBuildInfo()) >= 100000
+local NumBagContainer = isDF and 5 or 4
+local BankContainerStartID = NumBagContainer + 1
+local MaxNumContainer = isDF and 12 or 11
+
+local ContainerIDToInventoryID = ContainerIDToInventoryID or C_Container.ContainerIDToInventoryID
 
 local BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate" or nil
 
@@ -65,17 +72,17 @@ function BagButton:Create(bagID)
 
     local invID = ContainerIDToInventoryID(bagID)
     button.invID = invID
-    button.bagID = bagID
+    button._bagID = bagID
     button.isBag = 1
-    if button.bagID <= 4 then
+    if button._bagID <= NumBagContainer then
         -- Inventory
         button:SetID(invID)
-        button.UpdateTooltip = BagSlotButton_OnEnter
-    elseif button.bagID >= 5 then
+        --button.UpdateTooltip = BagSlotButton_OnEnter
+    elseif button._bagID >= BankContainerStartID then
         -- Bank
         button:SetID(buttonNum) -- bank IDs don't use the actual invID
         button.GetInventorySlot = ButtonInventorySlot
-        button.UpdateTooltip = BankFrameItemButton_OnEnter
+        --button.UpdateTooltip = BankFrameItemButton_OnEnter
     end
 
     button:RegisterForDrag("LeftButton", "RightButton")
@@ -117,7 +124,7 @@ function BagButton:Create(bagID)
 end
 
 function BagButton:GetBagID()
-    return self.bagID
+    return self._bagID
 end
 
 function BagButton:Update()
@@ -125,8 +132,8 @@ function BagButton:Update()
 	self.Icon:SetTexture(icon or self.bgTex)
 	self.Icon:SetDesaturated(IsInventoryItemLocked(self.invID))
 
-	if(self.bagID > NUM_BAG_SLOTS) then
-		if(self.bagID-NUM_BAG_SLOTS <= GetNumBankSlots()) then
+	if(self._bagID > NumBagContainer) then	--if(self._bagID > NUM_BAG_SLOTS) then
+		if(self._bagID-NumBagContainer <= GetNumBankSlots()) then	--if(self._bagID-NUM_BAG_SLOTS <= GetNumBankSlots()) then
 			self.Icon:SetVertexColor(1, 1, 1)
 			self.notBought = false
 			self.tooltipText = BANK_BAG
@@ -143,7 +150,19 @@ function BagButton:Update()
 end
 
 local function highlight(button, func, bagID)
-	func(button, not bagID or button.bagID == bagID)
+	func(button, not bagID or button._bagID == bagID)
+end
+
+local function CalculateItemTooltipAnchors(self, mainTooltip)
+	local x = self:GetRight();
+	local anchorFromLeft = x < GetScreenWidth() / 2;
+	if ( anchorFromLeft ) then
+		mainTooltip:SetAnchorType("ANCHOR_BOTTOMRIGHT", 0, 0);
+		mainTooltip:SetPoint("TOPLEFT", self, "BOTTOMRIGHT");
+	else
+		mainTooltip:SetAnchorType("ANCHOR_BOTTOMLEFT", 0, 0);
+		mainTooltip:SetPoint("TOPRIGHT", self, "BOTTOMLEFT");
+	end
 end
 
 function BagButton:OnEnter()
@@ -152,14 +171,21 @@ function BagButton:OnEnter()
 	if(hlFunction) then
 		if(self.bar.isGlobal) then
 			for i, container in pairs(self.implementation.contByID) do
-				container:ApplyToButtons(highlight, hlFunction, self.bagID)
+				container:ApplyToButtons(highlight, hlFunction, self._bagID)
 			end
 		else
-			self.bar.container:ApplyToButtons(highlight, hlFunction, self.bagID)
+			self.bar.container:ApplyToButtons(highlight, hlFunction, self._bagID)
 		end
 	end
 
-	self:UpdateTooltip()
+	if self.UpdateTooltip then 
+		self:UpdateTooltip()
+	else
+		GameTooltip:SetOwner(self, "ANCHOR_NONE")
+		CalculateItemTooltipAnchors(self, GameTooltip)
+		GameTooltip:SetInventoryItem("player", self.invID)
+		GameTooltip:Show()
+	end
 end
 
 function BagButton:OnLeave()
@@ -191,7 +217,7 @@ function BagButton:OnClick()
 	local container = self.bar.container
 	if(container and container.SetFilter) then
 		if(not self.filter) then
-			local bagID = self.bagID
+			local bagID = self._bagID
 			self.filter = function(i) return i.bagID ~= bagID end
 		end
 		self.hidden = not self.hidden
@@ -199,11 +225,11 @@ function BagButton:OnClick()
 		if(self.bar.isGlobal) then
 			for i, container in pairs(container.implementation.contByID) do
 				container:SetFilter(self.filter, self.hidden)
-				container.implementation:OnEvent("BAG_UPDATE", self.bagID)
+				container.implementation:OnEvent("BAG_UPDATE", self._bagID)
 			end
 		else
 			container:SetFilter(self.filter, self.hidden)
-			container.implementation:OnEvent("BAG_UPDATE", self.bagID)
+			container.implementation:OnEvent("BAG_UPDATE", self._bagID)
 		end
 	end
 end
@@ -240,7 +266,10 @@ local disabled = {
 	[0] = true,
 }
 if isClassic then
-	disabled[11] = true
+	if GetClassicExpansionLevel() == 0 then	--is Vanilla WoW
+		disabled[11] = true
+	end
+	disabled[12] = true
 end
 
 -- Register the plugin

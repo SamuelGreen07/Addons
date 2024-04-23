@@ -1,4 +1,3 @@
-
 --------------------------------------------------------------------------------
 -- Module declaration
 --
@@ -15,15 +14,19 @@ mod.engageId = 1915
 
 function mod:GetOptions()
 	return {
-		{-5293, "SAY"}, -- Felfire
+		{-5293, "SAY", "CASTBAR"}, -- Felfire
 		35759, -- Felfire Shock
 	}
 end
 
 function mod:OnBossEnable()
-	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", nil, "boss1")
-	self:Log("SPELL_CAST_SUCCESS", "FelfireKnockback", 36512) -- Knockback before the charge that leaves a trail of fire
+	if self:Classic() then
+		self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+	else
+		self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", nil, "boss1")
+	end
 
+	self:Log("SPELL_CAST_SUCCESS", "FelfireKnockback", 36512) -- Knockback before the charge that leaves a trail of fire
 	self:Log("SPELL_AURA_APPLIED", "FelfireShock", 35759, 39006) -- normal, heroic
 	self:Log("SPELL_AURA_REMOVED", "FelfireShockRemoved", 35759, 39006)
 end
@@ -40,14 +43,16 @@ end
 do
 	local function printTarget(self, player, guid)
 		if self:Me(guid) then
-			self:Say(-5293, 100) -- 100 = Charge
+			self:Say(-5293, CL.charge, nil, "Charge")
 		end
-		self:TargetMessageOld(-5293, player, "orange", nil, 100, -5293)
+		self:TargetMessageOld(-5293, player, "orange", nil, CL.charge, -5293)
 	end
 
-	function mod:UNIT_SPELLCAST_SUCCEEDED(_, unit, _, spellId)
-		if spellId == 36038 then -- Charge Targeting
-			self:GetBossTarget(printTarget, 0.4, self:UnitGUID(unit))
+	local prev
+	function mod:UNIT_SPELLCAST_SUCCEEDED(_, unit, castId, spellId)
+		if spellId == 36038 and castId ~= prev then -- Charge Targeting
+			prev = castId
+			self:GetUnitTarget(printTarget, 0.4, self:UnitGUID(unit))
 		end
 	end
 end

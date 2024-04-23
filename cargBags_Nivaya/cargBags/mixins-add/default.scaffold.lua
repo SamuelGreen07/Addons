@@ -33,9 +33,12 @@ local unpack = unpack
 local math = math
 local string = string
 
+local GetContainerItemDurability = GetContainerItemDurability or C_Container.GetContainerItemDurability
+
 local BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate" or nil
 
-local function noop() end
+local showOverlayTextures = true
+local onlyShowCraftingQualityOverlay = true
 
 --[[
 local S_UPGRADE_LEVEL = "^" .. gsub(ITEM_UPGRADE_TOOLTIP_FORMAT, "%%d", "(%%d+)")	-- Search pattern
@@ -104,7 +107,7 @@ local borderSize
 local function GetBorderSizeFromScreenSize()
 	if borderSize then return borderSize end
 	local width, height = GetPhysicalScreenSize()
-	local uiScale = GetCVar("uiScale")
+	local uiScale = UIParent:GetScale()	--GetCVar("uiScale")
 	
 	borderSize = 768/height/(uiScale*cBnivCfg.scale)
 	return borderSize
@@ -166,12 +169,27 @@ local function ItemButton_Update(self, item)
 		end
 	end
 	if(item.count and item.count > 1) then
-		self.Count:SetText(item.count >= 1e3 and "*" or item.count)
+		self.Count:SetText(item.count >= 1000 and "*" or item.count)
 		self.Count:Show()
 	else
 		self.Count:Hide()
 	end
 	self.count = item.count -- Thank you Blizz for not using local variables >.> (BankFrame.lua @ 234 )
+	
+	if showOverlayTextures and SetItemButtonOverlay then
+		if onlyShowCraftingQualityOverlay then
+			ClearItemButtonOverlay(self)
+			SetItemCraftingQualityOverlay(self, item.link)	--creates the CraftingQuality overlay only
+		else
+			SetItemButtonOverlay(self, item.link, item.quality)	--creates overlays for AzeriteEmpowered, Corrupted, Cosmetic, Conduit and CraftingQuality items
+		end
+		--update ProfessionQualityOverlay position
+		local ovl = self.ProfessionQualityOverlay
+		if ovl then
+			ovl:ClearAllPoints()
+			ovl:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 2)	--default: ("TOPLEFT", self, "TOPLEFT", -3, 2)
+		end
+	end
 
 	-- Durability
 	local dCur, dMax = GetContainerItemDurability(item.bagID, item.slotID)
@@ -188,7 +206,8 @@ local function ItemButton_Update(self, item)
 	if item.link then
 		if (item.type and (ilvlTypes[item.type] or item.subType and ilvlSubTypes[item.subType])) and item.level > 0 then
 			self.BottomString:SetText(item.level)
-			self.BottomString:SetTextColor(GetItemQualityColor(item.rarity))
+			local r,g,b = GetItemQualityColor(item.rarity)
+			self.BottomString:SetTextColor(r,g,b)
 		else
 			self.BottomString:SetText("")
 		end
@@ -200,7 +219,10 @@ local function ItemButton_Update(self, item)
 	self:UpdateLock(item)
 	self:UpdateQuest(item)
 
-	if(self.OnUpdate) then self:OnUpdate(item) end
+	--check for frame:GetRight() as of Patch 10 (Dragonflight) to ensure ContainerFrameItemButton_CalculateItemTooltipAnchors is not throwing errors
+	--DISABLED due to lag on opening bags
+	--not sure this is required any longer anyways
+	--if (self.OnUpdate) and self:GetRight() then self:OnUpdate(item) end
 end
 
 --[[!

@@ -1,0 +1,14 @@
+------------------------------------------------------------------------
+r125 | humfras | 2023-05-20 13:28:31 +0000 (Sat, 20 May 2023) | 3 lines
+Changed paths:
+   M /trunk/cargBags/mixins-add/default.scaffold.lua
+   M /trunk/cargBags_Nivaya.toc
+   M /trunk/cargBags_Nivaya_TBC.toc
+   M /trunk/cargBags_Nivaya_Vanilla.toc
+   M /trunk/cargBags_Nivaya_Wrath.toc
+
+* update toc
+* update icon border scaling
+* add icon texture for addon menu
+------------------------------------------------------------------------
+

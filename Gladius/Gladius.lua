@@ -24,17 +24,21 @@ local IsInInstance = IsInInstance
 local IsLoggedIn = IsLoggedIn
 local UnitAura = UnitAura
 local UnitCastingInfo = UnitCastingInfo
+local UnitClass = UnitClass
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 
 local UIParent = UIParent
+
+local IsWrathClassic = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
 
 Gladius = { }
 Gladius.eventHandler = CreateFrame("Frame")
 Gladius.eventHandler.events = { }
 
 Gladius.eventHandler:RegisterEvent("PLAYER_LOGIN")
-Gladius.eventHandler:RegisterEvent("ADDON_LOADED")
-Gladius.eventHandler:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
+if not IsWrathClassic then
+	Gladius.eventHandler:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
+end
 
 Gladius.eventHandler:SetScript("OnEvent", function(self, event, ...)
 	if event == "PLAYER_LOGIN" then
@@ -265,7 +269,7 @@ function Gladius:OnInitialize()
 		["arena1"] = {health = 400000, maxHealth = 400000, power = 300000, maxPower = 300000, powerType = 0, unitClass = "MAGE", unitRace = "Draenei", unitSpec = "Frost", unitSpecId = 64},
 		["arena2"] = {health = 380000, maxHealth = 400000, power = 100, maxPower = 120, powerType = 2, unitClass = "HUNTER", unitRace = "Night Elf", unitSpec = "Survival", unitSpecId = 255},
 		["arena3"] = {health = 240000, maxHealth = 400000, power = 90, maxPower = 130, powerType = 3, unitClass = "ROGUE", unitRace = "Human", unitSpec = "Combat", unitSpecId = 260},
-		["arena4"] = {health = 200000, maxHealth = 400000, power = 60, maxPower = 100, powerType = 6, unitClass = "DEATHKNIGHT", unitRace = "Dwarf", unitSpec = "Unholy", unitSpecId = 252},
+		["arena4"] = {health = 200000, maxHealth = 400000, power = 60, maxPower = 300000, powerType = 0, unitClass = "PRIEST", unitRace = "Dwarf", unitSpec = "Discipline", unitSpecId = 256},
 		["arena5"] = {health = 150000, maxHealth = 400000, power = 30, maxPower = 100, powerType = 1, unitClass = "WARRIOR", unitRace = "Gnome", unitSpec = "Arms", unitSpecId = 71},
 	},
 	{
@@ -273,16 +277,81 @@ function Gladius:OnInitialize()
 			return t["arena1"]
 		end
 	})
-
 	-- buttons
 	self.buttons = { }
+	if IsWrathClassic then
+		if not IsAddOnLoaded("Blizzard_ArenaUI") then
+			EnableAddOn("Blizzard_ArenaUI")
+			LoadAddOn("Blizzard_ArenaUI")
+		end
+		if ArenaEnemyFrame_UpdatePlayer then
+			hooksecurefunc("ArenaEnemyFrame_UpdatePlayer", function(self)
+				local unit = self.unit
+				if not Gladius.buttons[unit] then
+					return
+				end
+				local _, unitClass = UnitClass(unit)
+				if Gladius.buttons[unit] and unitClass then
+					Gladius.buttons[unit].class = unitClass
+					Gladius.buttons[unit].specIcon = unitClass
+					Gladius:UpdateUnit(unit)
+					Gladius:ShowUnit(unit)
+				end
+			end)
+		end
+
+		if UnitFrameHealthBar_OnUpdate then
+			hooksecurefunc("UnitFrameHealthBar_OnUpdate", function(self, unit)
+				if not Gladius.buttons[unit] then
+					return
+				end
+				local _, unitClass = UnitClass(unit)
+				if Gladius.buttons[unit] and unitClass then
+					Gladius.buttons[unit].class = unitClass
+					Gladius.buttons[unit].specIcon = unitClass
+					Gladius:UpdateUnit(unit)
+					Gladius:ShowUnit(unit)
+				end
+			end)
+		end
+
+		if UnitFrameHealthBar_OnValueChanged then
+			hooksecurefunc("UnitFrameHealthBar_OnValueChanged", function(self)
+				local unit = self.unit
+				if not Gladius.buttons[unit] then
+					return
+				end
+				local _, unitClass = UnitClass(unit)
+				if Gladius.buttons[unit] and unitClass then
+					Gladius.buttons[unit].class = unitClass
+					Gladius.buttons[unit].specIcon = unitClass
+					Gladius:UpdateUnit(unit)
+					Gladius:ShowUnit(unit)
+				end
+			end)
+		end
+
+		--[[if ArenaEnemyFrame_SetMysteryPlayer then
+			hooksecurefunc("ArenaEnemyFrame_SetMysteryPlayer", function(self)
+				local unit = self.unit
+				if not Gladius.buttons[unit] then
+					Gladius:CreateButton(unit)
+				end
+				Gladius.buttons[unit].class = "UNKNOWN"
+				Gladius:UpdateUnit(unit)
+				Gladius:ShowUnit(unit)
+			end)
+		end--]]
+	end
 end
 
 function Gladius:OnEnable()
 	-- register the appropriate events that fires when you enter an arena
 	self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "ZONE_CHANGED_NEW_AREA")
-	self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
+	if not IsWrathClassic then
+		self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
+	end
 	-- enable modules
 	for moduleName, module in pairs(self.modules) do
 		if self.db.modules[moduleName] then
@@ -342,7 +411,9 @@ function Gladius:JoinedArena()
 	-- special arena event
 	self:RegisterEvent("UNIT_NAME_UPDATE")
 	self:RegisterEvent("ARENA_OPPONENT_UPDATE")
-	self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
+	if not IsWrathClassic then
+		self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
+	end
 	--self:RegisterEvent("UNIT_HEALTH")
 	--self:RegisterEvent("UNIT_MAXHEALTH", "UNIT_HEALTH")
 	--self:RegisterEvent("UNIT_AURA")
@@ -373,8 +444,8 @@ function Gladius:JoinedArena()
 		end
 	end
 
-	local numOpps = GetNumArenaOpponentSpecs()
-	if (numOpps and numOpps > 0) then
+	local numOpps = GetNumArenaOpponentSpecs and GetNumArenaOpponentSpecs() or 0
+	if (not IsWrathClassic and numOpps and numOpps > 0) then
 		self:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
 	end
 end
@@ -408,18 +479,28 @@ function Gladius:UNIT_NAME_UPDATE(event, unit)
 end
 
 function Gladius:ARENA_OPPONENT_UPDATE(event, unit, type)
+	if not IsActiveBattlefieldArena() then
+		return
+	end
+
 	if not self:IsValidUnit(unit) then
 		return
 	end
+
 	if not self.buttons[unit] then
 		self:CreateButton(unit)
 	end
+
 	local id = string.match(unit, "arena(%d)")
-	local specID = GetArenaOpponentSpec(id)
+	local specID = GetArenaOpponentSpec and GetArenaOpponentSpec(id)
 	if specID and specID > 0 then
 		local id, name, description, icon, role, class = GetSpecializationInfoByID(specID)
 		self.buttons[unit].spec = name
 		self.buttons[unit].specIcon = icon
+		self.buttons[unit].class = class
+	else
+		local _, class = UnitClass(unit)
+		self.buttons[unit].specIcon = class
 		self.buttons[unit].class = class
 	end
 	self:UpdateUnit(unit)
@@ -441,9 +522,9 @@ end
 
 function Gladius:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
 	-- Update spec from API
-	for i = 1, GetNumArenaOpponentSpecs() do
+	for i = 1, GetNumArenaOpponentSpecs and GetNumArenaOpponentSpecs() or 0 do
 		local unit = "arena"..i
-		local specID = GetArenaOpponentSpec(i)
+		local specID = GetArenaOpponentSpec and GetArenaOpponentSpec(i)
 		if specID and specID > 0 then
 			local id, name, description, icon, role, class = GetSpecializationInfoByID(specID)
 			if not self.buttons[unit] then
@@ -801,7 +882,7 @@ function Gladius:CreateButton(unit)
 	local secure = CreateFrame("Button", "GladiusButton"..unit, button, "SecureActionButtonTemplate")
 	secure:EnableMouse(true)
 	secure:EnableKeyboard(true)
-	secure:RegisterForClicks("AnyUp")
+	secure:RegisterForClicks("AnyDown", "AnyUp")
 	button.secure = secure
 	-- clique
 	ClickCastFrames = ClickCastFrames or {}

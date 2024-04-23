@@ -39,7 +39,7 @@ function mod:OnBossEnable()
 	self:Log("SPELL_AURA_REMOVED", "FixateRemoved", 111723)
 	self:Log("SPELL_CAST_START", "Stomp", 111728)
 
-	self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", nil, "boss2")
+	self:RegisterUnitEvent("UNIT_HEALTH", nil, "boss2")
 end
 
 function mod:OnEngage()
@@ -60,7 +60,7 @@ function mod:BrokenCarapace(args)
 	self:MessageOld("stages", "green", "info", CL.other:format(CL.stage:format(2), args.spellName), false)
 	self:CDBar(111723, 3) -- Fixate
 
-	self:UnregisterUnitEvent("UNIT_HEALTH_FREQUENT", "boss2") -- in case Weak Spot died too fast
+	self:UnregisterUnitEvent("UNIT_HEALTH", "boss2") -- in case Weak Spot died too fast
 end
 
 function mod:Fixate(args)
@@ -77,8 +77,8 @@ function mod:Stomp(args)
 	self:MessageOld(args.spellId, "yellow", "alert", CL.count:format(args.spellName, stompCount))
 end
 
-function mod:UNIT_HEALTH_FREQUENT(event, unit)
-	local hp = UnitHealth(unit) / UnitHealthMax(unit) * 100
+function mod:UNIT_HEALTH(event, unit)
+	local hp = self:GetHealth(unit)
 	if hp < 15 then
 		self:UnregisterUnitEvent(event, unit)
 		self:MessageOld("stages", "green", nil, CL.soon:format(CL.stage:format(2)), false)

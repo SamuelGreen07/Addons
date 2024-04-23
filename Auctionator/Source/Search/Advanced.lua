@@ -1,18 +1,25 @@
-function Auctionator.Search.IsAdvancedSearch(searchString)
-  return Auctionator.Utilities.StringContains(searchString, Auctionator.Constants.AdvancedSearchDivider);
-end
-
--- Extract components of an advanced search string. Assumes searchString is an
--- advanced search.
-function Auctionator.Search.SplitAdvancedSearch(searchString)
+-- Extract components of an advanced search string.
+-- Assumes searchParametersString is an advanced search.
+function Auctionator.Search.SplitAdvancedSearch(searchParametersString)
   local queryString, categoryKey, minItemLevel, maxItemLevel, minLevel, maxLevel,
-    minCraftedLevel, maxCraftedLevel, minPrice, maxPrice =
-    strsplit( Auctionator.Constants.AdvancedSearchDivider, searchString )
+    minCraftedLevel, maxCraftedLevel, minPrice, maxPrice, quality, tier,
+    expansion, quantity =
+    strsplit( Auctionator.Constants.AdvancedSearchDivider, searchParametersString )
 
   -- A nil queryString causes a disconnect if searched for, but an empty one
-  -- doesn't
+  -- doesn't, this ensures searchString ~= nil.
   if queryString == nil then
     queryString = ""
+  end
+
+  -- Remove "" that are used in exact searches as it causes some searches to
+  -- fail when they would otherwise work, example "Steak a la Mode"
+  local searchString = string.gsub(queryString, "^\"(.*)\"$", "%1")
+
+  local isExact = string.match(queryString, "^\"(.*)\"$") ~= nil
+
+  if categoryKey == nil then
+    categoryKey = ""
   end
 
   minLevel = tonumber( minLevel )
@@ -25,6 +32,12 @@ function Auctionator.Search.SplitAdvancedSearch(searchString)
 
   minPrice = (tonumber(minPrice) or 0) * 10000
   maxPrice = (tonumber(maxPrice) or 0) * 10000
+
+  quality = tonumber( quality )
+  tier = tonumber( tier )
+  expansion = tonumber( expansion )
+
+  quantity = tonumber( quantity )
 
   if minLevel == 0 then
     minLevel = nil
@@ -58,8 +71,13 @@ function Auctionator.Search.SplitAdvancedSearch(searchString)
     maxPrice = nil
   end
 
+  if quantity == 0 then
+    quantity = nil
+  end
+
   return {
-    queryString = queryString,
+    searchString = searchString,
+    isExact = isExact,
     categoryKey = categoryKey,
     minLevel = minLevel,
     maxLevel = maxLevel,
@@ -69,6 +87,10 @@ function Auctionator.Search.SplitAdvancedSearch(searchString)
     maxItemLevel = maxItemLevel,
     minCraftedLevel = minCraftedLevel,
     maxCraftedLevel = maxCraftedLevel,
+    quality = quality,
+    tier = tier,
+    expansion = expansion,
+    quantity = quantity,
   }
 end
 
@@ -100,10 +122,58 @@ local function TooltipRangeString(min, max)
   end
 end
 
+local function QuantityString(quantity)
+  if quantity ~= nil then
+    return LIGHTBLUE_FONT_COLOR:WrapTextInColorCode("x" .. quantity)
+  else
+    return ""
+  end
+end
+
+local function QualityString(quality)
+  if quality ~= nil and ITEM_QUALITY_COLORS[quality] ~= nil then
+    return Auctionator.Utilities.CreateColoredQuality(quality)
+  else
+    return ""
+  end
+end
+
+local function TierString(tier)
+  if not Auctionator.Constants.IsClassic and tier ~= nil then
+    return C_Texture.GetCraftingReagentQualityChatIcon(tier)
+  else
+    return ""
+  end
+end
+
+local function ExpansionString(expansion)
+  if expansion ~= nil then
+    return _G["EXPANSION_NAME" .. expansion] or ""
+  else
+    return ""
+  end
+end
+
 local separator = ", "
 
 local function CategoryKey(splitSearch)
   return splitSearch.categoryKey .. separator
+end
+
+local function Quality(splitSearch)
+  return QualityString(splitSearch.quality) .. separator
+end
+
+local function Quantity(splitSearch)
+  return QuantityString(splitSearch.quantity) .. separator
+end
+
+local function Tier(splitSearch)
+  return TierString(splitSearch.tier) .. separator
+end
+
+local function Expansion(splitSearch)
+  return ExpansionString(splitSearch.expansion) .. separator
 end
 
 local function ItemLevelRange(splitSearch)
@@ -134,12 +204,12 @@ local function ConvertMoneyStrings(splitSearch)
   -- Some padding " " is necessary
   local min = splitSearch.minPrice
   if min ~= nil then
-    min = Auctionator.Utilities.CreateMoneyString(min) .. " "
+    min = GetMoneyString(min, true) .. " "
   end
 
   local max = splitSearch.maxPrice
   if max ~= nil then
-    max = Auctionator.Utilities.CreateMoneyString(splitSearch.maxPrice) .. " "
+    max = GetMoneyString(splitSearch.maxPrice, true) .. " "
   end
 
   return min, max
@@ -155,30 +225,38 @@ local function PriceRange(splitSearch)
   ) .. separator
 end
 
-function Auctionator.Search.PrettifySearchString(searchString)
-  if Auctionator.Search.IsAdvancedSearch(searchString) then
-    local splitSearch = Auctionator.Search.SplitAdvancedSearch(searchString)
-
-    local result = splitSearch.queryString
-      .. " ["
-      .. CategoryKey(splitSearch)
-      .. PriceRange(splitSearch)
-      .. LevelRange(splitSearch)
-      .. ItemLevelRange(splitSearch)
-      .. CraftedLevelRange(splitSearch)
-      .. "]"
-
-    -- Clean up string removing empty stuff
-    result = string.gsub(result ," ,", "")
-    result = string.gsub(result ,"%[, ", "[")
-    result = string.gsub(result ,"^ %[", "[")
-    result = string.gsub(result ,", %]", "]")
-    result = string.gsub(result ," %[%]$", "")
-
-    return result
+local function WrapExactSearch(splitSearch)
+  if splitSearch.isExact then
+    return "\"" .. splitSearch.searchString .. "\""
   else
-    return searchString
+    return splitSearch.searchString
   end
+end
+
+function Auctionator.Search.PrettifySearchString(searchString)
+  local splitSearch = Auctionator.Search.SplitAdvancedSearch(searchString)
+
+  local result = WrapExactSearch(splitSearch)
+    .. " ["
+    .. CategoryKey(splitSearch)
+    .. PriceRange(splitSearch)
+    .. LevelRange(splitSearch)
+    .. ItemLevelRange(splitSearch)
+    .. Quantity(splitSearch)
+    .. CraftedLevelRange(splitSearch)
+    .. Expansion(splitSearch)
+    .. Quality(splitSearch)
+    .. Tier(splitSearch)
+    .. "]"
+
+  -- Clean up string removing empty stuff
+  result = string.gsub(result ," ,", "")
+  result = string.gsub(result ,"%[, ", "[")
+  result = string.gsub(result ,"^ %[", "[")
+  result = string.gsub(result ,", %]", "]")
+  result = string.gsub(result ," %[%]$", "")
+
+  return result
 end
 
 local function TooltipCategory(splitSearch)
@@ -190,6 +268,64 @@ local function TooltipCategory(splitSearch)
 
   return {
     AUCTIONATOR_L_ITEM_CLASS,
+    key
+  }
+end
+
+local function TooltipExpansion(splitSearch)
+  local key
+
+  if splitSearch.expansion == nil then
+    key = AUCTIONATOR_L_ANY_LOWER
+  else
+    key = _G["EXPANSION_NAME" .. splitSearch.expansion] or AUCTIONATOR_L_UNKNOWN
+  end
+
+  return {
+    AUCTIONATOR_L_EXPANSION,
+    key
+  }
+end
+
+local function TooltipQuality(splitSearch)
+  local key
+
+  if splitSearch.quality == nil or ITEM_QUALITY_COLORS[splitSearch.quality] == nil then
+    key = AUCTIONATOR_L_ANY_LOWER
+  else
+    key = Auctionator.Utilities.CreateColoredQuality(splitSearch.quality)
+  end
+
+  return {
+    QUALITY,
+    key
+  }
+end
+
+local function TooltipQuantity(splitSearch)
+  local key = splitSearch.quantity
+
+  if splitSearch.quantity == nil then
+    key = AUCTIONATOR_L_ANY_LOWER
+  end
+
+  return {
+    AUCTIONATOR_L_QUANTITY,
+    key
+  }
+end
+
+local function TooltipTier(splitSearch)
+  local key
+
+  if Auctionator.Constants.IsClassic or splitSearch.tier == nil then
+    key = AUCTIONATOR_L_ANY_LOWER
+  else
+    key = C_Texture.GetCraftingReagentQualityChatIcon(splitSearch.tier)
+  end
+
+  return {
+    AUCTIONATOR_L_TIER,
     key
   }
 end
@@ -233,14 +369,46 @@ function Auctionator.Search.ComposeTooltip(searchString)
   table.insert(lines, TooltipPriceRange(splitSearch))
   table.insert(lines, TooltipLevelRange(splitSearch))
   table.insert(lines, TooltipItemLevelRange(splitSearch))
+  table.insert(lines, TooltipQuantity(splitSearch))
   table.insert(lines, TooltipCraftedLevelRange(splitSearch))
+  table.insert(lines, TooltipQuality(splitSearch))
+  if not Auctionator.Constants.IsClassic then
+    table.insert(lines, TooltipExpansion(splitSearch))
+    table.insert(lines, TooltipTier(splitSearch))
+  end
 
-  if splitSearch.queryString == "" then
-    splitSearch.queryString = " "
+  if splitSearch.searchString == "" then
+    splitSearch.searchString = " "
   end
 
   return {
-    title = splitSearch.queryString,
+    title = splitSearch.searchString,
     lines = lines
   }
+end
+
+local function GetQueryString(search)
+  if search.isExact then
+    return "\"" .. search.searchString .. "\""
+  else
+    return search.searchString
+  end
+end
+function Auctionator.Search.ReconstituteAdvancedSearch(search)
+  return strjoin(";",
+    GetQueryString(search),
+    search.categoryKey or "",
+    tostring(search.minItemLevel or ""),
+    tostring(search.maxItemLevel or ""),
+    tostring(search.minLevel or ""),
+    tostring(search.maxLevel or ""),
+    tostring(search.minCraftedLevel or ""),
+    tostring(search.maxCraftedLevel or ""),
+    tostring(((search.minPrice and search.minPrice / 10000) or "")),
+    tostring(((search.maxPrice and search.maxPrice / 10000) or "")),
+    tostring(search.quality or ""),
+    tostring(search.tier or "#"),
+    tostring(search.expansion or ""),
+    tostring(search.quantity ~= 0 and search.quantity or "")
+  )
 end

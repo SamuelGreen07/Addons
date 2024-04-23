@@ -32,7 +32,7 @@ local GetAddOnDependencies = GetAddOnDependencies
 local GetAddOnOptionalDependencies = GetAddOnOptionalDependencies
 local DisableAddOn = DisableAddOn
 local EnableAddOn = EnableAddOn
-local GetAddOnMetadata = GetAddOnMetadata
+local GetAddOnMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
 local DisableAllAddOns = DisableAllAddOns
 local EnableAllAddOns = EnableAllAddOns
 
@@ -41,6 +41,7 @@ local UIParent = UIParent
 local GameTooltip = GameTooltip
 
 local IsShiftKeyDown = IsShiftKeyDown
+local MAX_BUTTONS = 50
 
 _G.StaticPopupDialogs.STADDONMANAGER_OVERWRITEPROFILE = {
 	button1 = PA.ACL['Overwrite'],
@@ -89,7 +90,7 @@ end
 function stAM:BuildFrame()
 	local Frame = CreateFrame('Frame', 'stAMFrame', UIParent)
 	local Close = CreateFrame('Button', 'stAMCloseButton', Frame)
-	local Search = CreateFrame('EditBox', 'stAMSearchBox', Frame)
+	local Search = CreateFrame('EditBox', 'stAMSearchBox', Frame, 'SearchBoxTemplate')
 
 	local Profiles = CreateFrame('Button', 'stAMProfiles', Frame)
 	local AddOns = CreateFrame('Frame', 'stAMAddOns', Frame)
@@ -158,26 +159,16 @@ function stAM:BuildFrame()
 	Search:SetPoint('TOPLEFT', Title, 'BOTTOMLEFT', 10, -10)
 	Search:SetPoint('BOTTOMRIGHT', Profiles, 'BOTTOMLEFT', -5, 0)
 	Search:SetSize(1, 20)
+	Search.Left:SetTexture()
+	Search.Middle:SetTexture()
+	Search.Right:SetTexture()
 	PA:SetTemplate(Search)
-	Search:SetAutoFocus(false)
-	Search:SetTextInsets(5, 5, 0, 0)
-	Search:SetTextColor(1, 1, 1)
-	Search:SetFont(font, 12, fontFlag)
-	Search:SetShadowOffset(0,0)
-	Search:SetText(PA.ACL['Search'])
 	Search.AddOns = {}
-	Search:HookScript('OnEscapePressed', function() stAM:UpdateAddonList() Search:SetText('Search') Search:ClearFocus()end)
+	Search:HookScript('OnEscapePressed', function() stAM:UpdateAddonList() end)
 	Search:HookScript('OnTextChanged', function(_, userInput) stAM.scrollOffset = 0 stAM.searchQuery = userInput stAM:UpdateAddonList() end)
 	Search:HookScript('OnEditFocusGained', function() Search:SetBackdropBorderColor(unpack(stAM.db.CheckColor)) Search:HighlightText() end)
-	Search:HookScript('OnEditFocusLost', function() PA:SetTemplate(Search) Search:HighlightText(0, 0) end)
-	Search:HookScript('OnEnterPressed', function()
-		if strlen(strtrim(Search:GetText())) == 0 then
-			stAM:UpdateAddonList()
-			Search:SetText('Search')
-			stAM.searchQuery = false
-		end
-		Search:ClearFocus()
-	end)
+	Search:HookScript('OnEditFocusLost', function() PA:SetTemplate(Search) Search:HighlightText(0, 0) PA:SetTemplate(Search) end)
+	Search.clearButton:HookScript('OnClick', stAM.UpdateAddonList)
 
 	PA:SetTemplate(Reload)
 	Reload:SetSize(70, 20)
@@ -305,7 +296,7 @@ function stAM:BuildFrame()
 		OnScroll()
 	end)
 
-	for i = 1, 30 do
+	for i = 1, MAX_BUTTONS do
 		local CheckButton = CreateFrame('CheckButton', 'stAMCheckButton_'..i, AddOns)
 		CheckButton:Hide()
 		PA:SetTemplate(CheckButton)
@@ -331,6 +322,7 @@ function stAM:BuildFrame()
 			GameTooltip:ClearLines()
 			GameTooltip:AddDoubleLine('AddOn:', CheckButton.title, 1, 1, 1, 1, 1, 1)
 			GameTooltip:AddDoubleLine(PA.ACL['Authors:'], CheckButton.authors, 1, 1, 1, 1, 1, 1)
+			GameTooltip:AddDoubleLine(PA.ACL['Version:'], CheckButton.version, 1, 1, 1, 1, 1, 1)
 			if CheckButton.notes ~= nil then
 				GameTooltip:AddDoubleLine('Notes:', CheckButton.notes, 1, 1, 1, 1, 1, 1)
 			end
@@ -434,6 +426,18 @@ function stAM:NewAddOnProfile(name, overwrite)
 	stAM:UpdateProfiles()
 end
 
+function stAM:LoadProfile(name)
+	if not IsShiftKeyDown() then
+		DisableAllAddOns(stAM.SelectedCharacter)
+	end
+
+	for _, AddOn in pairs(_G.stAddonManagerProfilesDB[name]) do
+		EnableAddOn(AddOn, stAM.SelectedCharacter)
+	end
+
+	stAM:UpdateAddonList()
+end
+
 function stAM:InitProfiles()
 	local ProfileMenu = CreateFrame('Frame', 'stAMProfileMenu', stAM.Frame)
 	ProfileMenu:SetPoint('TOPLEFT', stAM.Frame, 'TOPRIGHT', 3, 0)
@@ -473,7 +477,7 @@ function stAM:InitProfiles()
 
 	ProfileMenu.Buttons = {}
 
-	for i = 1, 10 do
+	for i = 1, MAX_BUTTONS do
 		local Pullout = CreateFrame('Frame', nil, ProfileMenu)
 		Pullout:SetWidth(210)
 		Pullout:SetHeight(stAM.db.ButtonHeight)
@@ -500,27 +504,20 @@ function stAM:InitProfiles()
 		Pullout.Load:SetScript('OnClick', function(_, btn)
 			if btn == 'RightButton' then
 				local Dialog = _G.StaticPopupDialogs.STADDONMANAGER_RENAMEPROFILE
-				Dialog.OnAccept = function()
+				Dialog.OnAccept = function(dialog)
 					_G.stAddonManagerProfilesDB[Pullout.Name] = nil
-					stAM:NewAddOnProfile(Dialog.editBox:GetText())
+					stAM:NewAddOnProfile(dialog.editBox:GetText())
 					stAM:UpdateProfiles()
 				end
-				Dialog.EditBoxOnEnterPressed = function()
+				Dialog.EditBoxOnEnterPressed = function(editBox)
 					_G.stAddonManagerProfilesDB[Pullout.Name] = nil
-					stAM:NewAddOnProfile(Dialog:GetText())
+					stAM:NewAddOnProfile(editBox:GetText())
 					stAM:UpdateProfiles()
-					Dialog:GetParent():Hide()
+					editBox:GetParent():Hide()
 				end
 				_G.StaticPopup_Show('STADDONMANAGER_RENAMEPROFILE')
 			else
-				if not IsShiftKeyDown() then
-					DisableAllAddOns(stAM.SelectedCharacter)
-				end
-				for _, AddOn in pairs(_G.stAddonManagerProfilesDB[Pullout.Name]) do
-					EnableAddOn(AddOn, stAM.SelectedCharacter)
-				end
-
-				stAM:UpdateAddonList()
+				stAM:LoadProfile(Pullout.Name)
 			end
 		end)
 
@@ -554,7 +551,7 @@ function stAM:UpdateProfiles()
 
 	local PreviousButton
 	for i, Button in ipairs(ProfileMenu.Buttons) do
-		local isShown = i <= #stAM.Profiles
+		local isShown = i <= min(#stAM.Profiles, MAX_BUTTONS)
 		if isShown then
 			Button.Load.Text:SetText(stAM.Profiles[i])
 		end
@@ -571,7 +568,7 @@ function stAM:UpdateProfiles()
 		PreviousButton = Button
 	end
 
-	ProfileMenu:SetHeight((#stAM.Profiles + 2) * (stAM.db.ButtonHeight + 5) + 15)
+	ProfileMenu:SetHeight((min(#stAM.Profiles, MAX_BUTTONS) + 2) * (stAM.db.ButtonHeight + 5) + 15)
 end
 
 function stAM:ToggleProfiles()
@@ -592,7 +589,7 @@ function stAM:UpdateAddonList()
 		for i, AddOn in ipairs(stAM.AddOnInfo) do
 			local name, title, authors = AddOn.Name, AddOn.Title, AddOn.Authors
 
-			if strfind(strlower(name), query) or strfind(strlower(title), query) or (authors and strfind(strlower(authors), query)) then
+			if strfind(strlower(name), query, nil, true) or strfind(strlower(title), query, nil, true) or (authors and strfind(strlower(authors), query, nil, true)) then
 				tinsert(stAM.Frame.Search.AddOns, i)
 			end
 		end
@@ -603,7 +600,7 @@ function stAM:UpdateAddonList()
 		local info = stAM.AddOnInfo[addonIndex]
 
 		if addonIndex and addonIndex <= #stAM.AddOnInfo then
-			button.name, button.title, button.authors, button.notes, button.required, button.optional = info.Name, info.Title, info.Authors, info.Notes, info.Required, info.Optional
+			button.name, button.title, button.authors, button.version, button.notes, button.required, button.optional = info.Name, info.Title, info.Authors, info.Version, info.Notes, info.Required, info.Optional
 			button.Text:SetText(button.title)
 			button.Icon:SetShown(info.Missing or info.Disabled)
 			button.StatusText:SetShown(info.Missing or info.Disabled)
@@ -678,30 +675,32 @@ function stAM:Update()
 end
 
 function stAM:GetOptions()
-	PA.Options.args.stAM = PA.ACH:Group(stAM.Title, stAM.Description, nil, nil, function(info) return stAM.db[info[#info]] end, function(info, value) stAM.db[info[#info]] = value stAM:Update() end)
-	PA.Options.args.stAM.args.Description = PA.ACH:Description(stAM.Description, 0)
-	PA.Options.args.stAM.args.Enable = PA.ACH:Toggle(PA.ACL['Enable'], nil, 1, nil, nil, nil, nil, function(info, value) stAM.db[info[#info]] = value if not stAM.isEnabled then stAM:Initialize() else _G.StaticPopup_Show('PROJECTAZILROKA_RL') end end)
+	local stAddonManager = PA.ACH:Group(stAM.Title, stAM.Description, nil, nil, function(info) return stAM.db[info[#info]] end, function(info, value) stAM.db[info[#info]] = value stAM:Update() end)
+	PA.Options.args.stAddonManager = stAddonManager
 
-	PA.Options.args.stAM.args.General = PA.ACH:Group(PA.ACL['General'], nil, 2)
-	PA.Options.args.stAM.args.General.inline = true
+	stAddonManager.args.Description = PA.ACH:Description(stAM.Description, 0)
+	stAddonManager.args.Enable = PA.ACH:Toggle(PA.ACL['Enable'], nil, 1, nil, nil, nil, nil, function(info, value) stAM.db[info[#info]] = value if not stAM.isEnabled then stAM:Initialize() else _G.StaticPopup_Show('PROJECTAZILROKA_RL') end end)
 
-	PA.Options.args.stAM.args.General.args.NumAddOns = PA.ACH:Range(PA.ACL['# Shown AddOns'], nil, 1, { min = 3, max = 30, step = 1 })
-	PA.Options.args.stAM.args.General.args.FrameWidth = PA.ACH:Range(PA.ACL['Frame Width'], nil, 2, { min = 250, max = 2048, step = 2 })
-	PA.Options.args.stAM.args.General.args.ButtonHeight = PA.ACH:Range(PA.ACL['Button Height'], nil, 3, { min = 3, max = 30, step = 1 })
-	PA.Options.args.stAM.args.General.args.ButtonWidth = PA.ACH:Range(PA.ACL['Button Width'], nil, 4, { min = 3, max = 30, step = 1 })
-	PA.Options.args.stAM.args.General.args.EnableRequiredAddons = PA.ACH:Toggle(PA.ACL['Enable Required AddOns'], PA.ACL['This will attempt to enable all the "Required" AddOns for the selected AddOn.'], 5)
-	PA.Options.args.stAM.args.General.args.CheckTexture = PA.ACH:SharedMediaStatusbar(PA.ACL['Texture'], nil, 6)
-	PA.Options.args.stAM.args.General.args.CheckColor = PA.ACH:Color(COLOR_PICKER, nil, 2, true, nil, function(info) return unpack(stAM.db[info[#info]]) end, function(info, r, g, b, a) stAM.db[info[#info]] = { r, g, b, a} stAM:Update() end, function() return stAM.db.ClassColor end)
-	PA.Options.args.stAM.args.General.args.ClassColor = PA.ACH:Toggle(PA.ACL['Class Color Check Texture'], nil, 8)
+	stAddonManager.args.General = PA.ACH:Group(PA.ACL['General'], nil, 2)
+	stAddonManager.args.General.inline = true
 
-	PA.Options.args.stAM.args.General.args.FontSettings = PA.ACH:Group(PA.ACL['Font Settings'], nil, -1)
-	PA.Options.args.stAM.args.General.args.FontSettings.inline = true
-	PA.Options.args.stAM.args.General.args.FontSettings.args.Font = PA.ACH:SharedMediaFont(PA.ACL['Font'], nil, 1)
-	PA.Options.args.stAM.args.General.args.FontSettings.args.FontSize = PA.ACH:Range(FONT_SIZE, nil, 2, { min = 6, max = 22, step = 1 })
-	PA.Options.args.stAM.args.General.args.FontSettings.args.FontFlag = PA.ACH:FontFlags(PA.ACL['Font Outline'], nil, 3)
+	stAddonManager.args.General.args.NumAddOns = PA.ACH:Range(PA.ACL['# Shown AddOns'], nil, 1, { min = 3, max = MAX_BUTTONS, step = 1 })
+	stAddonManager.args.General.args.FrameWidth = PA.ACH:Range(PA.ACL['Frame Width'], nil, 2, { min = 250, max = 2048, step = 2 })
+	stAddonManager.args.General.args.ButtonHeight = PA.ACH:Range(PA.ACL['Button Height'], nil, 3, { min = 3, max = 30, step = 1 })
+	stAddonManager.args.General.args.ButtonWidth = PA.ACH:Range(PA.ACL['Button Width'], nil, 4, { min = 3, max = 30, step = 1 })
+	stAddonManager.args.General.args.EnableRequiredAddons = PA.ACH:Toggle(PA.ACL['Enable Required AddOns'], PA.ACL['This will attempt to enable all the "Required" AddOns for the selected AddOn.'], 5)
+	stAddonManager.args.General.args.CheckTexture = PA.ACH:SharedMediaStatusbar(PA.ACL['Texture'], nil, 6)
+	stAddonManager.args.General.args.CheckColor = PA.ACH:Color(COLOR_PICKER, nil, 2, true, nil, function(info) return unpack(stAM.db[info[#info]]) end, function(info, r, g, b, a) stAM.db[info[#info]] = { r, g, b, a} stAM:Update() end, function() return stAM.db.ClassColor end)
+	stAddonManager.args.General.args.ClassColor = PA.ACH:Toggle(PA.ACL['Class Color Check Texture'], nil, 8)
 
-	PA.Options.args.stAM.args.AuthorHeader = PA.ACH:Header(PA.ACL['Authors:'], -2)
-	PA.Options.args.stAM.args.Authors = PA.ACH:Description(stAM.Authors, -1, 'large')
+	stAddonManager.args.General.args.FontSettings = PA.ACH:Group(PA.ACL['Font Settings'], nil, -1)
+	stAddonManager.args.General.args.FontSettings.inline = true
+	stAddonManager.args.General.args.FontSettings.args.Font = PA.ACH:SharedMediaFont(PA.ACL['Font'], nil, 1)
+	stAddonManager.args.General.args.FontSettings.args.FontSize = PA.ACH:Range(FONT_SIZE, nil, 2, { min = 6, max = 22, step = 1 })
+	stAddonManager.args.General.args.FontSettings.args.FontFlag = PA.ACH:FontFlags(PA.ACL['Font Outline'], nil, 3)
+
+	stAddonManager.args.AuthorHeader = PA.ACH:Header(PA.ACL['Authors:'], -2)
+	stAddonManager.args.Authors = PA.ACH:Description(stAM.Authors, -1, 'large')
 end
 
 function stAM:BuildProfile()
@@ -764,8 +763,9 @@ function stAM:Initialize()
 		end
 
 		local Authors = GetAddOnMetadata(i, 'Author')
+		local Version = GetAddOnMetadata(i, 'Version')
 
-		stAM.AddOnInfo[i] = { Name = Name, Title = Title, Authors = Authors, Notes = Notes, Required = Required, Optional = Optional, Missing = MissingAddons, Disabled = DisabledAddons }
+		stAM.AddOnInfo[i] = { Name = Name, Title = Title, Authors = Authors, Version = Version, Notes = Notes, Required = Required, Optional = Optional, Missing = MissingAddons, Disabled = DisabledAddons }
 	end
 
 	stAM.SelectedCharacter = PA.MyName

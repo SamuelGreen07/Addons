@@ -1,15 +1,27 @@
 local L = DBM_GUI_L
 
+local isRetail = WOW_PROJECT_ID == (WOW_PROJECT_MAINLINE or 1)
+
 local coreoptions = DBM_GUI.Cat_General:CreateNewPanel(L.Core_GUI, "option")
 
 local generaloptions = coreoptions:CreateArea(L.General)
 
-local MiniMapIcon = generaloptions:CreateCheckButton(L.EnableMiniMapIcon, true)
-MiniMapIcon:SetScript("OnClick", function(self)
+local miniMapIcon = generaloptions:CreateCheckButton(L.EnableMiniMapIcon, true)
+miniMapIcon:SetScript("OnClick", function(self)
 	DBM:ToggleMinimapButton()
 	self:SetChecked(not DBM_MinimapIcon.hide)
 end)
-MiniMapIcon:SetChecked(not DBM_MinimapIcon.hide)
+miniMapIcon:SetChecked(not DBM_MinimapIcon.hide)
+
+if isRetail then
+	local compartmentIcon = generaloptions:CreateCheckButton(L.EnableCompartmentIcon)
+	compartmentIcon:SetScript("OnClick", function(self)
+		DBM:ToggleCompartmentButton()
+		self:SetChecked(DBM_MinimapIcon.showInCompartment)
+	end)
+	compartmentIcon:SetChecked(DBM_MinimapIcon.showInCompartment)
+	compartmentIcon:SetPoint("LEFT", miniMapIcon, "RIGHT", 200, 0)
+end
 
 local soundChannelsList = {
 	{
@@ -42,7 +54,7 @@ end)
 
 local bminfo = generaloptions:CreateButton(L.Button_InfoFrame, 120, 30)
 bminfo.myheight = 0
-bminfo:SetPoint("LEFT", bmrange, "RIGHT", 2, 0)
+bminfo:SetPoint("TOPLEFT", bmrange, "BOTTOMLEFT", 0, -2)
 bminfo:SetScript("OnClick", function()
 	if DBM.InfoFrame:IsShown() then
 		DBM.InfoFrame:Hide()
@@ -53,19 +65,19 @@ end)
 
 local bmtestmode = generaloptions:CreateButton(L.Button_TestBars, 120, 30)
 bmtestmode.myheight = 0
-bmtestmode:SetPoint("TOP", bmrange, "BOTTOM", 2, 0)
+bmtestmode:SetPoint("LEFT", bmrange, "RIGHT", 6, 0)
 bmtestmode:SetScript("OnClick", function()
 	DBM:DemoMode()
 end)
 
 local moveme = generaloptions:CreateButton(L.Button_MoveBars, 120, 30)
-moveme:SetPoint("LEFT", bmtestmode, "RIGHT", 2, 0)
+moveme:SetPoint("TOPLEFT", bmtestmode, "BOTTOMLEFT", 0, -2)
 moveme:SetScript("OnClick", function()
-	DBM.Bars:ShowMovableBar()
+	DBT:ShowMovableBar()
 end)
 
 local latencySlider = generaloptions:CreateSlider(L.Latency_Text, 50, 750, 5, 210)
-latencySlider:SetPoint("BOTTOMLEFT", bmrange, "BOTTOMLEFT", 10, -70)
+latencySlider:SetPoint("TOPLEFT", bminfo, "BOTTOMLEFT", 4, -20)
 latencySlider:SetValue(DBM.Options.LatencyThreshold)
 latencySlider:HookScript("OnValueChanged", function(self)
 	DBM.Options.LatencyThreshold = self:GetValue()
@@ -128,7 +140,7 @@ resetbutton2:SetScript("OnClick", function()
 	optionsFrame:SetSize(DBM.Options.GUIWidth, DBM.Options.GUIHeight)
 end)
 
-local minWidth, minHeight = optionsFrame:GetMinResize()
+local minWidth, minHeight, maxWidth, maxHeight = optionsFrame:GetResizeBounds()
 
 local resizeWidth = resizeOptions:CreateEditBox(L.Editbox_WindowWidth, math.floor(DBM.Options.GUIWidth * 10 ^ 2 + 0.5) / 10 ^ 2)
 resizeWidth:SetPoint("TOPLEFT", 20, -40)
@@ -141,8 +153,8 @@ resizeWidth:SetScript("OnEnterPressed", function(self)
 		self:SetText(minWidth)
 		return
 	end
-	if value > UIParent:GetWidth() then
-		self:SetText(UIParent:GetWidth())
+	if value > maxWidth then
+		self:SetText(maxWidth)
 	end
 	DBM.Options.GUIWidth = value
 	optionsFrame:SetSize(DBM.Options.GUIWidth, DBM.Options.GUIHeight)
@@ -160,14 +172,20 @@ resizeHeight:SetScript("OnEnterPressed", function(self)
 		self:SetText(minHeight)
 		return
 	end
-	if value > UIParent:GetHeight() then
-		self:SetText(UIParent:GetHeight())
+	if value > maxHeight then
+		self:SetText(maxHeight)
 	end
 	DBM.Options.GUIHeight = value
 	optionsFrame:SetSize(DBM.Options.GUIWidth, DBM.Options.GUIHeight)
 end)
 
 optionsFrame:HookScript("OnSizeChanged", function(self)
-	resizeWidth:SetText(math.floor(self:GetWidth() * 10 ^ 2 + 0.5) / 10 ^ 2)
-	resizeHeight:SetText(math.floor(self:GetHeight() * 10 ^ 2 + 0.5) / 10 ^ 2)
+	resizeWidth:SetText(tostring(math.floor(self:GetWidth() * 10 ^ 2 + 0.5) / 10 ^ 2))
+	resizeHeight:SetText(tostring(math.floor(self:GetHeight() * 10 ^ 2 + 0.5) / 10 ^ 2))
 end)
+
+local UIGroupingOptions = coreoptions:CreateArea(L.UIGroupingOptions)
+UIGroupingOptions:CreateCheckButton(L.GroupOptionsExcludeIcon, true, nil, "GroupOptionsExcludeIcon")
+UIGroupingOptions:CreateCheckButton(L.AutoExpandSpellGroups, true, nil, "AutoExpandSpellGroups")
+UIGroupingOptions:CreateCheckButton(L.ShowWAKeys, true, nil, "ShowWAKeys")
+--UIGroupingOptions:CreateCheckButton(L.ShowSpellDescWhenExpanded, true, nil, "ShowSpellDescWhenExpanded")

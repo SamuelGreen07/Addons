@@ -1,50 +1,123 @@
-local _, T = ...
+local COMPAT, _, T = select(4,GetBuildInfo()), ...
 if T.SkipLocalActionBook then return end
-local MODERN = select(4,GetBuildInfo()) >= 8e4
-local AB, mark = assert(T.ActionBook:compatible(2, 21), "A compatible version of ActionBook is required"), {}
-local RW = assert(T.ActionBook:compatible("Rewire", 1, 10), "A compatible version of Rewire is required")
-local L = AB:locale()
+local MODERN = COMPAT >= 8e4
+local CF_WRATH, CI_ERA = not MODERN and COMPAT >= 3e4, COMPAT <= 2e4
+local AB = T.ActionBook:compatible(2,21)
+local RW = T.ActionBook:compatible("Rewire", 1,27)
+assert(AB and RW and 1, "Incompatible library bundle")
+local L = T.ActionBook.L
+local mark = {}
 
 local function icmp(a,b)
-	return strcmputf8i(a,b) < 1
+	return strcmputf8i(a,b) < 0
 end
 
 do -- spellbook
-	local function addEntry(add, at, _ok, st, sid)
-		if st == "SPELL" and not IsPassiveSpell(sid) and not mark[sid] then
-			mark[sid] = 1
-			add(at, sid)
+	local function procSpellBookEntry(add, at, knownFilter, sourceKnown, _ok, st, sid)
+		if (st == "SPELL" or st == "FUTURESPELL") and not IsPassiveSpell(sid) and not mark[sid] then
+			if (not knownFilter) == (st == "FUTURESPELL" or not sourceKnown) then
+				mark[sid] = 1
+				add(at, sid)
+			end
 		elseif st == "FLYOUT" then
 			for j=1,select(3,GetFlyoutInfo(sid)) do
 				local asid, _osid, ik = GetFlyoutSlotInfo(sid, j)
-				if ik then
-					addEntry(add, at, true, "SPELL", asid)
+				if (not ik) == (not knownFilter) then
+					procSpellBookEntry(add, at, knownFilter, sourceKnown, true, ik and "SPELL" or "FUTURESPELL", asid)
 				end
 			end
 		end
 	end
-	AB:AugmentCategory(L"Abilities", function(_, add)
-		wipe(mark)
-		if UnitLevel("player") >= 90 and GetExpansionLevel() >= 5 then
-			add("spell", 161691)
-		end
-		for i=1,GetNumSpellTabs()+12 do
-			local _, _, ofs, c, _, sid = GetSpellTabInfo(i)
-			for j=ofs+1,sid == 0 and (ofs+c) or 0 do
-				addEntry(add, "spell", pcall(GetSpellBookItemInfo, j, "spell"))
+	local function procRuneBookEntry(add, _ok, st, sid)
+		if st == "SPELL" and sid then
+			local n1 = GetSpellInfo(sid)
+			local n2, _, _, _, _, _, sid2 = GetSpellInfo(n1 or "")
+			if n2 ~= n1 and sid2 and not IsPassiveSpell(sid2) and not mark[sid2] then
+				mark[sid2] = 1
+				add("spell", sid2)
 			end
 		end
-		wipe(mark)
-		for i=1,MODERN and 4 or 0 do
-			local id = C_SpecializationInfo.GetPvpTalentSlotInfo(i)
-			id = id and id.selectedTalentID
-			if id then
-				local sid = select(6, GetPvpTalentInfoByID(id))
-				if sid and not IsPassiveSpell(sid) then
+	end
+	local function addModernPvpTalents(add, knownFilter)
+		local getSlot = C_SpecializationInfo.GetPvpTalentSlotInfo
+		local s1, s2, s3 = getSlot(1), getSlot(2), getSlot(3)
+		local i1, i2, i3 = s1 and s1.selectedTalentID, s2 and s2.selectedTalentID, s3 and s3.selectedTalentID
+		for i=1,3 do
+			local sid = knownFilter and i1 and select(6, GetPvpTalentInfoByID(i1))
+			if sid and not IsPassiveSpell(sid) and not mark[sid] then
+				mark[sid] = 1
+				add("spell", sid)
+			end
+			for j=1, not knownFilter and s1 and s1.availableTalentIDs and #s1.availableTalentIDs or 0 do
+				local tid = s1.availableTalentIDs[j]
+				local sid = select(6, GetPvpTalentInfoByID(tid))
+				if sid and not IsPassiveSpell(sid) and not mark[sid] and (tid ~= i1 and tid ~= i2 and tid ~= i3) then
+					mark[sid] = 1
 					add("spell", sid)
 				end
 			end
+			i1, i2, i3, s1, s2, s3 = i2, i3, i1, s2, s3, s1
 		end
+	end
+	local function addModernTalents(add, knownFilter)
+		knownFilter = not not knownFilter
+		local cid = C_ClassTalents.GetActiveConfigID()
+		if not cid then
+			local spec = GetSpecializationInfo(GetSpecialization())
+			local cc = C_ClassTalents.GetConfigIDsBySpecID(spec)
+			cid = cc and cc[1]
+		end
+		local conf = cid and C_Traits.GetConfigInfo(cid)
+		local tree = conf and conf.treeIDs and conf.treeIDs[1]
+		local nodes = tree and C_Traits.GetTreeNodes(tree)
+		for i=1,nodes and #nodes or 0 do
+			local node = C_Traits.GetNodeInfo(cid, nodes[i])
+			local activeEID = node.activeEntry and node.activeEntry.entryID
+			for i=1, #node.entryIDs do
+				local eid = node.entryIDs[i]
+				if knownFilter == (eid == activeEID) then
+					local entry = C_Traits.GetEntryInfo(cid, eid)
+					local def = entry and C_Traits.GetDefinitionInfo(entry.definitionID)
+					local sid = def and def.spellID and not IsPassiveSpell(def.spellID) and def.spellID
+					if sid and not mark[sid] then
+						mark[sid] = 1
+						add("spell", sid)
+					end
+				end
+			end
+		end
+	end
+	local function addSpells(add, knownFilter)
+		local asv = not MODERN and GetCVar("showAllSpellRanks")
+		if asv and asv ~= "1" then
+			SetCVar("showAllSpellRanks", "1")
+		end
+		for i=1,GetNumSpellTabs()+12 do
+			local _, ico, ofs, c, _, otherSpecID = GetSpellTabInfo(i)
+			local isNotOffspec = otherSpecID == 0
+			for j=ofs+1, knownFilter and CI_ERA and ico == 134419 and ofs+c or 0 do
+				procRuneBookEntry(add, pcall(GetSpellBookItemInfo, j, "spell"))
+			end
+			for j=ofs+1,(isNotOffspec or not knownFilter) and (ofs+c) or 0 do
+				procSpellBookEntry(add, "spell", knownFilter, isNotOffspec, pcall(GetSpellBookItemInfo, j, "spell"))
+			end
+		end
+		if MODERN then
+			addModernTalents(add, knownFilter)
+			addModernPvpTalents(add, knownFilter)
+		end
+		if asv and asv ~= "1" and not MODERN then
+			SetCVar("showAllSpellRanks", asv)
+		end
+	end
+	AB:AugmentCategory(L"Abilities", function(_, add)
+		wipe(mark)
+		addSpells(add, true)
+		if MODERN and UnitLevel("player") >= 10 and not mark[161691] then
+			add("spell", 161691)
+		end
+		addSpells(add, false)
+		wipe(mark)
 	end)
 	local _, cl = UnitClass("player")
 	if cl == "HUNTER" or cl == "WARLOCK" or MODERN and cl == "MAGE" then
@@ -53,7 +126,7 @@ do -- spellbook
 		wipe(mark)
 		for i=1,HasPetSpells() or 0 do
 			if MODERN then
-				addEntry(add, "petspell", pcall(GetSpellBookItemInfo, i, "pet"))
+				procSpellBookEntry(add, "petspell", true, true, pcall(GetSpellBookItemInfo, i, "pet"))
 			else
 				local sid = select(7, GetSpellInfo(i, "pet"))
 				if sid and not IsPassiveSpell(sid) then
@@ -72,11 +145,12 @@ do -- spellbook
 end
 AB:AugmentCategory(L"Items", function(_, add)
 	wipe(mark)
+	local ns, giid = C_Container.GetContainerNumSlots, C_Container.GetContainerItemID
 	for t=0,1 do
 		t = t == 0 and GetItemSpell or IsEquippableItem
 		for bag=0,4 do
-			for slot=1,GetContainerNumSlots(bag) do
-				local iid = GetContainerItemID(bag, slot)
+			for slot=1, ns(bag) do
+				local iid = giid(bag, slot)
 				if iid and not mark[iid] and t(iid) then
 					add("item", iid)
 					mark[iid] = 1
@@ -96,6 +170,13 @@ if MODERN then -- Battle pets
 	local running, sourceFilters, typeFilters, flagFilters, search = false, {}, {}, {[LE_PET_JOURNAL_FILTER_COLLECTED]=1, [LE_PET_JOURNAL_FILTER_NOT_COLLECTED]=1}, ""
 	hooksecurefunc(C_PetJournal, "SetSearchFilter", function(filter) search = filter end)
 	hooksecurefunc(C_PetJournal, "ClearSearchFilter", function() if not running then search = "" end end)
+	local function FilterPetInfo(...)
+		local petID, spID = ...
+		if spID and not select(15, ...) then -- can't battle
+			return petID, spID
+		end
+		return petID
+	end
 	AB:AugmentCategory(L"Battle pets", function(_, add)
 		assert(not running, "Battle pets enumerator is not reentrant")
 		running = true
@@ -122,7 +203,7 @@ if MODERN then -- Battle pets
 		
 		add("battlepet", "fave")
 		for i=1,C_PetJournal.GetNumPets() do
-			add("battlepet", (C_PetJournal.GetPetInfoByIndex(i)))
+			add("battlepet", FilterPetInfo(C_PetJournal.GetPetInfoByIndex(i)))
 		end
 		
 		for k, v in pairs(flagFilters) do
@@ -139,8 +220,15 @@ if MODERN then -- Battle pets
 		
 		running = false
 	end)
+elseif CF_WRATH then
+	AB:AugmentCategory(COMPANIONS, function(_, add)
+		for i=1, GetNumCompanions("CRITTER") do
+			local _, _, sid = GetCompanionInfo("CRITTER", i)
+			add("spell", sid)
+		end
+	end)
 end
-if MODERN then -- Mounts
+if COMPAT >= 3e4 then -- Mounts
 	AB:AugmentCategory(L"Mounts", function(_, add)
 		if GetSpellInfo(150544) then add("spell", 150544) end
 		local myFactionId = UnitFactionGroup("player") == "Horde" and 0 or 1
@@ -148,21 +236,18 @@ if MODERN then -- Mounts
 		for i=1, #idm do
 			local mid = idm[i]
 			local name, sid, _3, _4, _5, _6, _7, factionLocked, factionId, hide, have = C_MountJournal.GetMountInfoByID(mid)
-			if have and not hide
-			   and (not factionLocked or factionId == myFactionId)
-			   and RW:IsSpellCastable(sid)
-			   then
+			if have and not hide and (not factionLocked or factionId == myFactionId) and RW:IsSpellCastable(sid, 2) then
 				i2[#i2+1], i2n[mid] = mid, name
 			end
 		end
-		table.sort(i2, function(a,b) return i2n[a] < i2n[b] end)
+		table.sort(i2, function(a,b) return icmp(i2n[a], i2n[b]) end)
 		for i=1,#i2 do
 			add("mount", i2[i])
 		end
 	end)
 end
 AB:AugmentCategory(L"Macros", function(_, add)
-	add("macrotext", "")
+	add("imptext", "")
 	local n, ni = {}, 1
 	for name in RW:GetNamedMacros() do
 		n[ni], ni = name, ni + 1
@@ -172,7 +257,7 @@ AB:AugmentCategory(L"Macros", function(_, add)
 		add("macro", n[i])
 	end
 end)
-if MODERN then -- equipmentset
+if COMPAT >= 3e4 then -- equipmentset
 	AB:AugmentCategory(L"Equipment sets", function(_, add)
 		for _,id in pairs(C_EquipmentSet.GetEquipmentSetIDs()) do
 			add("equipmentset", (C_EquipmentSet.GetEquipmentSetInfo(id)))
@@ -187,48 +272,66 @@ AB:AugmentCategory(L"Raid markers", function(_, add)
 		end
 	end
 end)
-if MODERN then -- toys
-	local tx, search, push, pop = C_ToyBox
-	hooksecurefunc(C_ToyBox, "SetFilterString", function(s) search = s end) -- No corresponding Get
-	local fs, fc, fu, fsearch = {}
-	function push()
-		local ns = C_PetJournal.GetNumPetSources()
-		fsearch = search, tx.SetFilterString("")
-		fc = tx.GetCollectedShown(), tx.SetCollectedShown(true)
-		fu = tx.GetUncollectedShown(), tx.SetUncollectedShown(false)
-		for i=1,ns do
-			fs[i] = tx.IsSourceTypeFilterChecked(i)
-		end
-		tx.SetAllSourceTypeFilters(true)
-		tx.ForceToyRefilter()
-	end
-	function pop()
-		local ns = C_PetJournal.GetNumPetSources()
-		tx.SetFilterString(fsearch or "")
-		tx.SetCollectedShown(fc)
-		tx.SetUncollectedShown(fu)
-		for i=1,ns do
-			tx.SetSourceTypeFilter(i, not fs[i])
-		end
-		tx.ForceToyRefilter()
-	end
-	AB:AugmentCategory(L"Toys", function(_, add)
-		push()
+if MODERN or CF_WRATH then -- toys
+	local tx, fs, fx, tfs = C_ToyBox, {}, {}
+	hooksecurefunc(C_ToyBox, "SetFilterString", function(s) tfs = s end) -- No corresponding Get
+	local function doAddToys(add)
 		for i=1,C_ToyBox.GetNumFilteredToys() do
 			local iid = C_ToyBox.GetToyFromIndex(i)
 			if iid > 0 and PlayerHasToy(iid) then
 				add("toy", iid)
 			end
 		end
-		pop()
+	end
+	AB:AugmentCategory(L"Toys", function(_, add)
+		local ff = tfs
+		local fc = tx.GetCollectedShown()
+		local fu = tx.GetUncollectedShown()
+		for i=1,C_PetJournal.GetNumPetSources() do
+			fs[i] = tx.IsSourceTypeFilterChecked(i)
+		end
+		for i=1,GetNumExpansions() do
+			fx[i] = tx.IsExpansionTypeFilterChecked(i)
+		end
+		tx.SetFilterString("")
+		tx.SetCollectedShown(true)
+		tx.SetUncollectedShown(false)
+		tx.SetAllSourceTypeFilters(true)
+		tx.SetAllExpansionTypeFilters(true)
+		tx.ForceToyRefilter()
+
+		securecall(doAddToys, add)
+
+		tx.SetFilterString(ff or "")
+		tx.SetCollectedShown(fc)
+		tx.SetUncollectedShown(fu)
+		for i=1,C_PetJournal.GetNumPetSources() do
+			tx.SetSourceTypeFilter(i, fs[i])
+		end
+		for i=1,GetNumExpansions() do
+			tx.SetExpansionTypeFilter(i, fx[i])
+		end
+		tx.ForceToyRefilter()
 	end)
 end
 do -- misc
 	if MODERN then
 		AB:AddActionToCategory(L"Miscellaneous", "extrabutton", 1)
+		AB:AddActionToCategory(L"Miscellaneous", "zoneability", 0)
 	end
-	AB:AddActionToCategory(L"Miscellaneous", "macrotext", "")
+	AB:AddActionToCategory(L"Miscellaneous", "imptext", "")
 end
 do -- aliases
 	AB:AddCategoryAlias("Miscellaneous", L"Miscellaneous")
+end
+do
+	local panels = {"character", "reputation", "currency", "spellbook", "talents", "achievements", "quests", "groupfinder", "collections", "adventureguide", "guild", "map", "social", "calendar", "macro", "options", "gamemenu"}
+	AB:AugmentCategory(L"UI panels", function(_, add)
+		for i=1,#panels do
+			i = panels[i]
+			if select(2, AB:GetActionListDescription("uipanel", i)) then
+				add("uipanel", i)
+			end
+		end
+	end)
 end

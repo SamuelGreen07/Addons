@@ -27,8 +27,9 @@ local parent, ns = ...
 local cargBags = ns.cargBags
 
 local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
-
 if isClassic then return end
+
+if not C_EquipmentSet then return end
 
 local ItemKeys = cargBags.itemKeys
 

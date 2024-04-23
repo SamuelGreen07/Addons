@@ -5,8 +5,8 @@
 local mod, CL = BigWigs:NewBoss("Tribunal of Ages", 599, 606)
 if not mod then return end
 mod:RegisterEnableMob(28070) -- Brann Bronzebeard
--- mod.engageId = 0 -- not a real encounter, apparently
-mod.respawnTime = 30
+--mod:SetEncounterID(mod:Classic() and 567 or 1995) -- not a real encounter, apparently
+mod:SetRespawnTime(30)
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -87,13 +87,13 @@ function mod:CHAT_MSG_MONSTER_YELL(_, msg)
 end
 
 do
-	local isOnMe, playerList = false, mod:NewTargetList()
+	local isOnMe, playerList = false, {}
 
 	local function announce(self)
 		if isOnMe or self:Dispeller("magic") then
-			self:TargetMessageOld(59868, playerList, "orange", "alarm", nil, nil, true)
+			self:TargetMessageOld(59868, self:ColorName(playerList), "orange", "alarm", nil, nil, true)
 		else
-			wipe(playerList) -- :TargetMessage calls wipe() on its 2nd argument
+			playerList = {} -- :TargetMessage calls wipe() on its 2nd argument
 		end
 
 		isOnMe = false
@@ -118,7 +118,7 @@ do
 	local prev = 0
 	function mod:SearingGaze(args)
 		if self:Me(args.destGUID) then
-			local t = GetTime()
+			local t = args.time
 			if t-prev > 2 then
 				prev = t
 				self:MessageOld(59866, "blue", "alert", CL.underyou:format(args.spellName))

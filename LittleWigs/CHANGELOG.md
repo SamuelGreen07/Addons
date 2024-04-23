@@ -1,11 +1,6 @@
 # LittleWigs
 
-## [v9.0.20](https://github.com/BigWigsMods/LittleWigs/tree/v9.0.20) (2021-01-05)
-[Full Changelog](https://github.com/BigWigsMods/LittleWigs/compare/v9.0.19...v9.0.20) [Previous Releases](https://github.com/BigWigsMods/LittleWigs/releases)
+## [v10.2.43](https://github.com/BigWigsMods/LittleWigs/tree/v10.2.43) (2024-04-05)
+[Full Changelog](https://github.com/BigWigsMods/LittleWigs/compare/v10.2.42...v10.2.43) [Previous Releases](https://github.com/BigWigsMods/LittleWigs/releases)
 
-- Update deDE (#560)  
-- Update ptBR (#557)  
-- WotLK/TheVioletHold: Add boss modules (#558)  
-- Legion/CourtOfStars/Trash: Remove a UnitName call  
-- Update marking implementations  
-- Update UnitGUID usage  
+- bump toc  

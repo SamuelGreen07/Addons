@@ -45,14 +45,14 @@ do
 	end
 	plugin.pluginOptions = {
 		type = "group",
-		name = L.icons,
+		name = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\Menus\\Markers:20|t ".. L.icons,
+		order = 11,
 		get = get,
 		set = set,
 		args = {
 			disabled = {
 				type = "toggle",
 				name = L.disabled,
-				desc = L.raidIconsDesc,
 				order = 1,
 			},
 			description = {
@@ -91,29 +91,53 @@ end
 -- Initialization
 --
 
-function plugin:OnPluginEnable()
-	self:RegisterMessage("BigWigs_SetRaidIcon")
-	self:RegisterMessage("BigWigs_RemoveRaidIcon")
-	self:RegisterMessage("BigWigs_OnBossDisable")
-	self:RegisterMessage("BigWigs_OnBossWipe", "BigWigs_OnBossDisable")
+do
+	local function updateProfile()
+		local db = plugin.db.profile
+
+		for k, v in next, db do
+			local defaultType = type(plugin.defaultDB[k])
+			if defaultType == "nil" then
+				db[k] = nil
+			elseif type(v) ~= defaultType then
+				db[k] = plugin.defaultDB[k]
+			end
+		end
+
+		if db.icon < 1 or db.icon > 8 then
+			db.icon = plugin.defaultDB.icon
+		end
+		if db.secondIcon < 1 or db.secondIcon > 8 then
+			db.secondIcon = plugin.defaultDB.secondIcon
+		end
+	end
+
+	function plugin:OnPluginEnable()
+		self:RegisterMessage("BigWigs_SetRaidIcon")
+		self:RegisterMessage("BigWigs_RemoveRaidIcon")
+		self:RegisterMessage("BigWigs_OnBossDisable")
+		self:RegisterMessage("BigWigs_OnBossWipe", "BigWigs_OnBossDisable")
+
+		self:RegisterMessage("BigWigs_ProfileUpdate", updateProfile)
+		updateProfile()
+	end
 end
 
 function plugin:BigWigs_OnBossDisable()
 	if lastplayer[1] then
 		SetRaidTarget(lastplayer[1], 0)
-		lastplayer[1] = nil
 	end
 	if lastplayer[2] then
 		SetRaidTarget(lastplayer[2], 0)
-		lastplayer[2] = nil
 	end
+	lastplayer = {}
 end
 
 -------------------------------------------------------------------------------
 -- Event Handlers
 --
 
-function plugin:BigWigs_SetRaidIcon(_, player, icon)
+function plugin:BigWigs_SetRaidIcon(_, _, player, icon)
 	if not player or self.db.profile.disabled then return end
 	local index = (not icon or icon == 1) and self.db.profile.icon or self.db.profile.secondIcon
 	if not index then return end
@@ -125,9 +149,8 @@ function plugin:BigWigs_SetRaidIcon(_, player, icon)
 	end
 end
 
-function plugin:BigWigs_RemoveRaidIcon(_, icon)
+function plugin:BigWigs_RemoveRaidIcon(_, _, icon)
 	if not lastplayer[icon or 1] or self.db.profile.disabled then return end
 	SetRaidTarget(lastplayer[icon or 1], 0)
 	lastplayer[icon or 1] = nil
 end
-

@@ -7,19 +7,36 @@ L.comma = ", "
 L.positionX = "Position X"
 L.positionY = "Position Y"
 L.positionExact = "Positionnement exact"
+L.positionDesc = "Tapez dans la saisie ou déplacez le curseur si vous avez besoin d'un positionnement exact par rapport à l'ancre."
 L.width = "Largeur"
 L.height = "Hauteur"
 L.sizeDesc = "Normalement, la taille peut être définie en tirant sur l'ancre. Si vous avez besoin d'une taille bien précise, vous pouvez utiliser ce slider ou taper la valeur dans la boîte de saisie, qui n'a pas de limite."
+L.fontSizeDesc = "Ajustez la taille de la police à l'aide de ce curseur, ou tapez la valeur dans la saisie ce qui permet d'aller jusqu'à 200."
+L.disableDesc = "Vous allez désactiver la fonctionnalité '%s', ce qui n'est |cffff4411pas recommandé|r.\n\nÊtes-vous sûr de vouloir faire cela ?"
+L.transparency = "Transparence"
 
 -----------------------------------------------------------------------
 -- AltPower.lua
 --
 
 L.altPowerTitle = "Ressource alternative"
+L.altPowerDesc = "L'affichage de la Ressource alternative ne s'effectuera que sur les boss qui ajoutent une ressource alternative aux joueurs, ce qui est très rare. L'affichage indique la quantité de 'Ressource alternative' que vous et votre groupe possédez, sous forme de liste. Pour déplacer l'affichage, veuillez utiliser le bouton de test ci-dessous."
 L.toggleDisplayPrint = "L'affichage sera présent la prochaine fois. Pour le désactiver complètement pour cette rencontre, vous devez le décocher dans les options de la rencontre."
 L.disabled = "Désactivé"
 L.disabledDisplayDesc = "Désactive l'affichage pour tous les modules qui l'utilisent."
 L.resetAltPowerDesc = "Réinitialise toutes les options relatives à la ressource alternative, y compris la position de l'ancre."
+L.test = "Test"
+L.altPowerTestDesc = "Affiche la fenêtre de 'Ressource alternative', vous permettant de la déplacer, et de simuler les changements de ressource que vous verrez dans une rencontre de boss."
+L.yourPowerBar = "Votre barre de puissance"
+L.barColor = "Couleur de la barre"
+L.barTextColor = "Couleur du texte de la barre"
+L.additionalWidth = "Longeur additionnelle"
+L.additionalHeight = "Hauteur additionnelle"
+L.additionalSizeDesc = "Ajoutez de la taille à l'affichage standard à l'aide de ce curseur, ou tapez la valeur dans la saisie ce qui permet d'aller jusqu'à 100."
+L.yourPowerTest = "Votre ressource : %d" -- Your Power: 42
+L.yourAltPower = "Votre %s : %d" -- e.g. Your Corruption: 42
+L.player = "Joueur %d" -- Player 7
+L.disableAltPowerDesc = "Désactive l'affichage de la ressource alternative de manière globale ; elle ne sera jamais affichée sur les rencontres de boss."
 
 -----------------------------------------------------------------------
 -- AutoReply.lua
@@ -57,6 +74,7 @@ L.nameplateAutoWidth = "Même largeur que la barre d'info"
 L.nameplateAutoWidthDesc = "Force la largeur des barres d'info à être de la même largeur que la barre parente."
 L.nameplateOffsetY = "Décalage Y"
 L.nameplateOffsetYDesc = "Décalage à partir du haut de la barre d'info pour les barres allant vers le haut, à partir du bas de la barre d'info pour les barres allant vers le bas."
+L.nameplateAlphaDesc = "Contrôle à quel point les barres d'info des unités sont transparentes."
 
 L.clickableBars = "Barres cliquables"
 L.clickableBarsDesc = "Par défaut, les barres de BigWigs ignorent la souris. Vous pouvez ainsi cibler ou lancer des sorts de zone derrière elles, changer l'angle de la caméra, ... tandis que votre curseur survole les barres. |cffff4411Si vous activez ceci, tout cela ne sera plus d'application.|r Les barres intercepteront tout clic que vous effectuez sur elles.\n"
@@ -85,7 +103,6 @@ L.emphasizeMultiplierDesc = "Si vous désactivez le déplacement des barres vers
 L.enable = "Activer"
 L.move = "Déplacer"
 L.moveDesc = "Déplace les barres mises en évidence vers l'ancre de mise en évidence. Si cette option est désactivée, les barres mises en évidence changeront simplement d'échelle et de couleur."
-L.regularBars = "Barres normales"
 L.emphasizedBars = "Barres en évidence"
 L.align = "Alignement"
 L.alignText = "Alignement du texte"
@@ -134,7 +151,8 @@ L.breakFinished = "Le temps de pause est terminé !"
 --
 
 L.bossBlock = "Bloquages"
-L.bossBlockDesc = "Configure les divers éléments que vous pouvez bloquer durant une rencontre de boss."
+L.bossBlockDesc = "Configure les divers éléments que vous pouvez bloquer durant une rencontre de boss.\n\n"
+L.bossBlockAudioDesc = "Configure l'audio à couper lors d'une rencontre de boss.\n\nAny option here that is |cff808080greyed out|r has been disabled in WoW's sound options.\n\n"
 L.movieBlocked = "Vous avez déjà vu cette cinématique, elle ne sera pas affichée."
 L.blockEmotes = "Bloquer les émotes du centre de l'écran"
 L.blockEmotesDesc = "Certains boss affichent des émotes pour certaines techniques, des messages qui sont bien trop longs et descriptifs. Nous essayons de produire des messages plus courts et appropriés qui n'interfèrent pas avec votre expérience de jeu et qui ne vous disent pas spécifiquement ce qu'il faut faire.\n\nVeuillez noter que les émotes des boss seront toujours visibles dans la fenêtre de discussion au cas où vous désireriez les lire."
@@ -146,22 +164,46 @@ L.blockGuildChallenge = "Bloquer les popups de défi de guilde"
 L.blockGuildChallengeDesc = "Les popups de défi de guilde s'affichent de temps en temps, principalement quand un groupe de votre guilde termine un donjon héroïque ou un donjon en mode défi.\n\nCes popups pouvant cacher des éléments critiques de votre interface pendant les rencontres de boss, nous vous recommandons de les bloquer."
 L.blockSpellErrors = "Bloquer les messages de sorts échoués"
 L.blockSpellErrorsDesc = "Les messages tels que \"Le sort n'est pas encore utilisable\" qui s'affichent en haut de l'écran seront bloqués."
+L.blockZoneChanges = "Bloquer les messages de changement de zone"
+L.blockZoneChangesDesc = "Les messages qui s'affichent au milieu-centre de votre écran quand vous changez de zone tels que '|cFF33FF99Stormwind|r' ou '|cFF33FF99Orgrimmar|r' seront bloqués."
 L.audio = "Audio"
 L.music = "Musique"
 L.ambience = "Ambiance"
 L.sfx = "Effets sonores"
+L.errorSpeech = "Mess. vocaux d'erreur"
 L.disableMusic = "Couper la musique (recommandé)"
 L.disableAmbience = "Couper les sons ambiants (recommandé)"
 L.disableSfx = "Couper les effets sonores (non recommandé)"
+L.disableErrorSpeech = "Couper les messages vocaux d'erreur (recommandé)"
 L.disableAudioDesc = "L'option '%s' des options de Son de WoW sera désactivé, et ensuite réactivé une fois que la rencontre de boss est terminée. Cela peut vous aider à vous concentrer sur les sons d'alerte de BigWigs."
 L.blockTooltipQuests = "Bloquer les objectifs de quête dans la bulle d'aide"
 L.blockTooltipQuestsDesc = "Quand vous devez tuer un boss pour une quête, cela sera affiché sous la forme '0/1 terminé' dans la bulle d'aide quand vous survolez le boss avec votre souris. Cela sera caché lors du combat face à ce boss pour éviter que sa bulle d'aide ne devienne trop grande."
 L.blockObjectiveTracker = "Cacher le suivi des quêtes"
 L.blockObjectiveTrackerDesc = "Le suivi des objectifs de quêtes sera caché durant les rencontres de boss pour libérer de la place sur l'écran.\n\nCela ne sera PAS le cas dans les donjons Mythique+ ou si vous suivez un haut fait."
 
+L.blockTalkingHead = "Cacher la boîte de dialogue PNJ 'Talking Head'"
+L.blockTalkingHeadDesc = "Le 'Talking Head' est une boîte de dialogue contenant une tête de PNJ et du dialogue au milieu-bas de votre écran qui |cffff4411parfois|r s'affiche quand un PNJ parle.\n\nVous pouvez choisir dans quels types d'instances cette boîte ne sera pas affichée.\n\n|cFF33FF99Attention :|r\n 1) Cette fonctionnalité permet toujours à la voix du PNJ d'être jouée afin que vous puissiez l'entendre.\n 2) Par sécurité, seules certaines boîtes de dialogue seront bloquées. Les boîtes de dialogue spéciales ou uniques, comme celles des quêtes non répétables, ne seront pas bloquées."
+L.blockTalkingHeadDungeons = "Donjons normaux & héroïques"
+L.blockTalkingHeadMythics = "Donjons mythiques & mythiques+"
+L.blockTalkingHeadRaids = "Raids"
+L.blockTalkingHeadTimewalking = "Marcheurs du temps (donjons & raids)"
+L.blockTalkingHeadScenarios = "Scénarios"
+
+L.redirectPopups = "Redirige les popups vers les messages BigWigs"
+L.redirectPopupsDesc = "Les popups qui s'affichent au milieu de votre écran telle que la bannière de '|cFF33FF99emplacement de la grande chambre-forte débloqué|r' ou les popups que vous voyez en entrant dans un donjon Mythique+ seront bloqués et seront convertis en messages BigWigs. Ces popups sont parfois larges, restent affichés longtemps et vous empêchent de cliquer à travers."
+L.redirectPopupsColor = "Couleur du message redirigé"
+L.blockDungeonPopups = "Bloque les popups de donjons"
+L.blockDungeonPopupsDesc = "Les popups qui s'affichent lorsque vous entrez dans un donjon contiennent parfois beaucoup de texte. Activer cette option désactivera complètement ces messages au lieu de les convertir en message BigWigs."
+L.itemLevel = "Niveau d'objet %d"
+
+L.userNotifySfx = "Les effets sonores étaient désactivés par BossBlock, la réactivation a été forcée."
+L.userNotifyMusic = "La musique était désactivée par BossBlock, la réactivation a été forcée."
+L.userNotifyAmbience = "Les sons d'ambiance étaient désactivés par BossBlock, la réactivation a été forcée."
+L.userNotifyErrorSpeech = "Les messsages d'erreur vocaux étaient désactivés par BossBlock, la réactivation a été forcée."
+
 L.subzone_grand_bazaar = "Le Grand bazar" -- Battle of Dazar'alor raid (Battle for Azeroth)
 L.subzone_port_of_zandalar = "Port de Zandalar" -- Battle of Dazar'alor raid (Battle for Azeroth)
---L.subzone_eastern_transept = "Eastern Transept" -- Auchindoun dungeon (Warlords of Draenor)
+L.subzone_eastern_transept = "Transept est" -- Auchindoun dungeon (Warlords of Draenor)
 
 -----------------------------------------------------------------------
 -- Colors.lua
@@ -171,7 +213,6 @@ L.colors = "Couleurs"
 
 L.text = "Texte"
 L.textShadow = "Ombre du texte"
-L.flash = "Flash"
 L.normal = "Normal"
 L.emphasized = "En évidence"
 
@@ -227,19 +268,17 @@ L.resetMessagesDesc = "Réinitialise toutes les options relatives aux messages, 
 
 L.bwEmphasized = "BigWigs en évidence"
 L.messages = "Messages"
-L.normalMessages = "Messages normaux"
 L.emphasizedMessages = "Messages en évidence"
 L.emphasizedDesc = "Le principe d'un message en évidence est d'attirer votre attention en affichant un large message au milieu de votre écran. Il est rarement activé par défaut, mais vous pouvez l'activer pour n'importe quelle technique de boss en vous rendant dans les paramètres spécifiques de la rencontre de boss."
-L.output = "Sortie"
 L.uppercase = "MAJUSCULE"
 L.uppercaseDesc = "Tous les messages mis en évidence seront convertis en MAJUSCULES."
 
 L.useIcons = "Utiliser les icônes"
 L.useIconsDesc = "Affiche les icônes à côté des messages."
 L.classColors = "Couleurs de classe"
-L.classColorsDesc = "Colore les noms des joueurs selon leur classe."
-L.chatMessages = "Messages de la fenêtre de discussion"
-L.chatMessagesDesc = "Affiche tous les messages de BigWigs dans la fenêtre de discussion par défaut, en plus de son affichage normal."
+L.classColorsDesc = "Les messages comportent parfois des noms de joueurs. L'activation de cette option colorera ces noms selon la classe."
+L.chatFrameMessages = "Messages de la fenêtre de discussion"
+L.chatFrameMessagesDesc = "Affiche tous les messages de BigWigs dans la fenêtre de discussion par défaut, en plus de son affichage normal."
 
 L.fontSize = "Taille de la police"
 L.none = "Aucun"
@@ -265,8 +304,6 @@ L.proximity_name = "Proximité"
 L.soundDelay = "Délai du son"
 L.soundDelayDesc = "Spécifie combien de temps BigWigs doit attendre entre chaque répétition du son indiquant qu'au moins une personne est trop proche de vous."
 
-L.proximity = "Affichage de proximité"
-L.proximity_desc = "Affiche la fenêtre de proximité quand cela est approprié pour cette rencontre, indiquant la liste des joueurs qui se trouvent trop près de vous."
 L.resetProximityDesc = "Réinitialise toutes les options relatives à la portée, y compris la position de l'ancre."
 
 L.close = "Fermer"
@@ -307,13 +344,14 @@ L.pullStoppedCombat = "Délai de pull annulé car vous êtes entré en combat."
 L.pullIn = "Pull dans %d sec."
 L.sendPull = "Envoi d'un délai de pull aux utilisateurs de BigWigs et DBM."
 L.wrongPullFormat = "Doit être compris entre 1 et 60 secondes. Un exemple correct est le suivant : /pull 5"
+L.countdownBegins = "Début du compte à rebours"
+L.countdownBegins_desc = "Choisissez combien de temps il doit rester sur le délai de pull (en secondes) pour que le compte à rebours commence."
 
 -----------------------------------------------------------------------
 -- RaidIcon.lua
 --
 
 L.icons = "Icônes"
-L.raidIconsDesc = "Certains scripts de rencontre utilisent des icônes pour marquer les joueurs affectés par des techniques précises. Par exemple, les effets de type 'bombe' et les contrôles mentaux. Si vous décochez ceci, vous ne marquerez personne.\n\n|cffff4411Ne fonctionne que si vous êtes soit le chef du groupe (de raid), soit un de ses assistants !|r"
 L.raidIconsDescription = "Certaines rencontres peuvent comporter des éléments tels que les techniques de type 'bombe' qui affectent un joueur spécifique, un joueur poursuivi ou bien encore un joueur spécifique important pour d'autres raisons. Vous pouvez personnaliser ici les icônes de raid qui seront utilisées pour marquer ces joueurs.\n\nSi une rencontre ne comporte qu'une technique qui requiert de marquer quelqu'un, seule l'icône primaire sera utilisée. Une icône ne sera jamais utilisée pour deux techniques différentes de la même rencontre, et chaque technique utilisera toujours la même icône la prochaine fois qu'elle se produira.\n\n|cffff4411Notez que si un joueur a déjà été marqué manuellement, BigWigs ne changera jamais son icône.|r"
 L.primary = "Primaire"
 L.primaryDesc = "La première icône de cible de raid qu'un script de rencontre doit utiliser."
@@ -325,6 +363,7 @@ L.secondaryDesc = "La seconde icône de cible de raid qu'un script de rencontre 
 --
 
 L.Sounds = "Sons"
+L.soundsDesc = "BigWigs utilise le canal son 'Principal' pour jouer ses sons. Si vous trouvez que ces sons sont trop discrets ou trop bruyants, ouvrez les paramètres de son de WoW et ajustez le curseur 'Principal' selon vos préférences.\n\nCi-dessous, vous pouvez configurer globalement les différents sons joués lors d'actions spécifiques, ou les mettre à 'Aucun' pour les désactiver. Si vous souhaitez changer uniquement le son d'une technique de boss spécifique, rendez-vous dans les paramètres de cette rencontre de boss.\n\n"
 L.oldSounds = "Anciens sons"
 
 L.Alarm = "Alarme"
@@ -336,7 +375,6 @@ L.onyou = "Un sort, amélioration ou affaiblissement est sur vous"
 L.underyou = "Vous devez bouger hors d'un sort qui se trouve en dessous de vous"
 
 L.sound = "Son"
-L.soundDesc = "Les messages sont le plus souvent accompagnés de sons. Certaines personnes trouvent plus faciles d'entendre ces sons pour réagir une fois qu'elles ont appris quels sons sont liés à quels messages, plutôt que de lire les messages à chaque fois."
 
 L.customSoundDesc = "Joue le son personnalisé sélectionné au lieu de celui fourni par le module."
 L.resetSoundDesc = "Réinitialise les sons ci-dessous à leurs valeurs par défaut."

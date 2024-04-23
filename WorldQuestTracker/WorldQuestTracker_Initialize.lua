@@ -4,51 +4,52 @@
 do
 	WQT_VERSION = 414
 
-	--> update quest type max when a new type of world quest is added to the filtering
-	WQT_QUESTTYPE_MAX = 		10			--[[global]]
+	--update quest type max when a new type of world quest is added to the filtering
+	WQT_QUESTTYPE_MAX = 		11			--[[global]]
 
-	--> all quest types current available
+	--all quest types current available
 	WQT_QUESTTYPE_GOLD = 		"gold"			--[[global]]
 	WQT_QUESTTYPE_RESOURCE = 	"resource"		--[[global]]
-	WQT_QUESTTYPE_APOWER = 	"apower"		--[[global]]
-	WQT_QUESTTYPE_EQUIPMENT = 	"equipment"	--[[global]]
-	WQT_QUESTTYPE_TRADE = 		"trade"		--[[global]]
+	WQT_QUESTTYPE_APOWER = 		"apower"		--[[global]]
+	WQT_QUESTTYPE_EQUIPMENT = 	"equipment"		--[[global]]
+	WQT_QUESTTYPE_TRADE = 		"trade"			--[[global]]
 	WQT_QUESTTYPE_DUNGEON = 	"dungeon"		--[[global]]
 	WQT_QUESTTYPE_PROFESSION =	 "profession"	--[[global]]
 	WQT_QUESTTYPE_PVP = 		"pvp"			--[[global]]
 	WQT_QUESTTYPE_PETBATTLE = 	"petbattle"		--[[global]]
 	WQT_QUESTTYPE_REPUTATION = 	"reputation"	--[[global]]
+	WQT_QUESTTYPE_RACING = 		"racing"		--[[global]]
 
-	WQT_QUERYTYPE_REWARD = 	"reward"		--[[global]]
-	WQT_QUERYTYPE_QUEST = 		"quest"		--[[global]]
+	WQT_QUERYTYPE_REWARD = 		"reward"		--[[global]]
+	WQT_QUERYTYPE_QUEST = 		"quest"			--[[global]]
 	WQT_QUERYTYPE_PERIOD = 		"period"		--[[global]]
 	WQT_QUERYDB_ACCOUNT = 		"global"		--[[global]]
 	WQT_QUERYDB_LOCAL = 		"character"		--[[global]]
 	WQT_REWARD_RESOURCE = 		"resource"		--[[global]]
 	WQT_REWARD_GOLD = 			"gold"			--[[global]]
 	WQT_REWARD_APOWER = 		"artifact"		--[[global]]
-	WQT_QUESTS_TOTAL = 		"total"		--[[global]]
-	WQT_QUESTS_PERIOD = 		"quest"		--[[global]]
-	WQT_DATE_TODAY = 			1			--[[global]]
-	WQT_DATE_YESTERDAY = 		2			--[[global]]
-	WQT_DATE_1WEEK = 			3			--[[global]]
-	WQT_DATE_2WEEK = 			4			--[[global]]
-	WQT_DATE_MONTH = 			5			--[[global]]
-	
+	WQT_QUESTS_TOTAL = 			"total"			--[[global]]
+	WQT_QUESTS_PERIOD = 		"quest"			--[[global]]
+	WQT_DATE_TODAY = 			1				--[[global]]
+	WQT_DATE_YESTERDAY = 		2				--[[global]]
+	WQT_DATE_1WEEK = 			3				--[[global]]
+	WQT_DATE_2WEEK = 			4				--[[global]]
+	WQT_DATE_MONTH = 			5				--[[global]]
+
 	--helps blend the icons within the map texture
-	WQT_ZONEWIDGET_ALPHA =		0.83
-	WQT_WORLDWIDGET_ALPHA =	0.845
-	WQT_WORLDWIDGET_BLENDED =	ALPHA_BLEND_AMOUNT - 0.11
-	
+	WQT_ZONEWIDGET_ALPHA =		0.97
+	WQT_WORLDWIDGET_ALPHA =		0.975
+	WQT_WORLDWIDGET_BLENDED =	ALPHA_BLEND_AMOUNT
+
 	WQT_ANIMATION_SPEED = 0.05
-	
+
 	--where these came from
 	QUESTTYPE_GOLD = 0x1
 	QUESTTYPE_RESOURCE = 0x2
 	QUESTTYPE_ITEM = 0x4
 	QUESTTYPE_ARTIFACTPOWER = 0x8
 	QUESTTYPE_PET = 0x16
-	
+
 	--todo: rename or put these into a table
 	FILTER_TYPE_PET_BATTLES = "pet_battles"
 	FILTER_TYPE_PVP = "pvp"
@@ -60,6 +61,7 @@ do
 	FILTER_TYPE_REPUTATION_TOKEN = "reputation_token"
 	FILTER_TYPE_EQUIPMENT = "equipment"
 	FILTER_TYPE_TRADESKILL = "trade_skill"
+	FILTER_TYPE_RACING = "racing"
 
 	--9.0.1 re-filling the French globals
 	local questTagType = _G.Enum.QuestTagType
@@ -70,7 +72,7 @@ do
 	LE_QUEST_TAG_TYPE_INVASION = questTagType.Invasion
 	LE_QUEST_TAG_TYPE_FACTION_ASSAULT = questTagType.FactionAssault
 	LE_QUEST_TAG_TYPE_PVP = questTagType.PvP
---
+
 	local questQualityType = _G.Enum.WorldQuestQuality --former known as rarity
 	LE_WORLD_QUEST_QUALITY_COMMON = questQualityType.Common
 	LE_WORLD_QUEST_QUALITY_RARE = questQualityType.Rare
@@ -78,6 +80,9 @@ do
 
 	local default_config = {
 		profile = {
+			ignore_maps = {
+				[1978] = false, --dragon isles
+			},
 			filters = {
 				pet_battles = true,
 				pvp = true,
@@ -89,21 +94,29 @@ do
 				equipment = true,
 				trade_skill = true,
 				reputation_token = true,
+				racing = true,
 			},
-			
+
+			dragon_racing = {
+				minimap_enabled = true,
+				minimap_scale = 1,
+				minimap_track_color = {1, 1, 1},
+			},
+
 			sort_order = {
-				[WQT_QUESTTYPE_REPUTATION] = 8,
+				[WQT_QUESTTYPE_REPUTATION] = 7,
 				[WQT_QUESTTYPE_TRADE] = 5,
-				[WQT_QUESTTYPE_APOWER] = 10,
-				[WQT_QUESTTYPE_GOLD] = 7,
+				[WQT_QUESTTYPE_APOWER] = 11,
+				[WQT_QUESTTYPE_GOLD] = 8,
 				[WQT_QUESTTYPE_RESOURCE] = 5,
-				[WQT_QUESTTYPE_EQUIPMENT] = 9,
+				[WQT_QUESTTYPE_EQUIPMENT] = 10,
 				[WQT_QUESTTYPE_DUNGEON] = 4,
 				[WQT_QUESTTYPE_PROFESSION] = 3,
 				[WQT_QUESTTYPE_PVP] = 2,
 				[WQT_QUESTTYPE_PETBATTLE] = 6,
+				[WQT_QUESTTYPE_RACING] = 9,
 			},
-			
+
 			groupfinder = {
 				enabled = true,
 				invasion_points = false, --deprecated
@@ -123,6 +136,16 @@ do
 				ignored_quests = {},
 				send_whispers = false,
 				dont_open_in_group = true,
+
+				kfilter = { --anti spam on pre-made dungeons
+					enabled = true,
+					ignore_leaders_enabled = true,
+					leaders_ignored = {},
+					ignore_by_time = 30,
+					show_button = true,
+					dont_show_ignored_leaders = true,
+					wipe_counter = 0,
+				},
 			},
 
 			rarescan = {
@@ -148,34 +171,42 @@ do
 
 			world_map_config = {
 				onmap_show = true,
-				onmap_scale_offset = 0,
+				onmap_scale_offset = 0.6,
 				summary_show = true,
-				summary_scale = 1,
-				summary_showbyzone = false,
+				summary_scale = 0.95,
+				summary_showby = "bytype", --"bytype" or "byzone"
 				summary_anchor = "left",
-				summary_widgets_per_row = 10,
+				summary_widgets_per_row = 8,
 			},
-			
-			disable_world_map_widgets = false,
-			
+
+			disable_world_map_widgets = false, --a
+			show_filter_button = false, --a
+			show_sort_button = false, --a
+			show_timeleft_button = true, --a
+
 			show_emissary_info = true,
-			
+
 			worldmap_widgets = {
 				textsize = 9,
 				scale = 1,
 				quest_icons_scale_offset = 0,
 			},
-			
-			accessibility = {
-				extra_tracking_indicator = false,
-				use_bounty_ring = false,
-			},
-			
+
+			accessibility = {--a
+				extra_tracking_indicator = false,--a
+				use_bounty_ring = false,--a
+			},--a
+
+			show_world_shortcuts = false,
+
 			last_news_time = 0,
+
+			world_summary_alpha = 0.843, --parei fazendo a substituição dos valores hardcoded to these values, parei na criação da opção de mudar o alpha, parei procurando as funções que atualiza of frames com o novo alpha
+			worldmap_widget_alpha = 0.843,
 
 			hoverover_animations = true, --hover and shown slider animations
 			anchor_options = {}, --store the anchor options of each anchor
-			
+
 			filter_always_show_faction_objectives = true,
 			filter_force_show_brokenshore = true, --deprecated at this point, but won't be removed since further expantion might need this back
 			sort_time_priority = 0,
@@ -198,39 +229,49 @@ do
 			taxy_tracked_scale = 3,
 			arrow_update_frequence = 0.016,
 			map_lock = false,
-			sound_enabled = true,
+			sound_enabled = true,--a
 			use_tracker = true,
-			tracker_is_movable = false,
+			tracker_attach_to_questlog = true,
 			tracker_is_locked = false,
 			tracker_only_currentmap = false,
 			tracker_scale = 1,
 			tracker_show_time = false,
 			tracker_textsize = 12,
-			
-			show_faction_frame = true,
-			
-			map_frame_anchor = "center",
-			
-			map_frame_scale_enabled = false,
-			map_frame_scale_mod = 1,
-			
+
+			talking_heads_heard = {},--a
+			talking_heads_torgast = false,--a
+			talking_heads_dungeon = false,--a
+			talking_heads_raid = false,--a
+			talking_heads_openworld = false,--a
+
+			flymaster_tracker_frame_pos = {},--a
+			flymaster_tracker_enabled = true,--a
+
+			show_faction_frame = true,--a
+
+			map_frame_anchor = "left",--a
+
+			map_frame_scale_enabled = false,--a
+			map_frame_scale_mod = 1,--a
+
 			use_quest_summary = true,
 			quest_summary_minimized = false,
 			show_summary_minimize_button = true,
-			
+
 			zone_map_config = {
+				summary_show = true,
 				quest_summary_scale = 1,
 				show_widgets = true,
 				scale = 1,
 			},
-			
+
 			is_BFA_version = false, --if is false, reset the tutorial
-			
+
 			zone_only_tracked = false,
-			low_level_tutorial = false, --
+			low_level_tutorial = false,
 			bar_anchor = "bottom",
-			bar_visible = true,
-			use_old_icons = false,
+			bar_visible = true,--a
+			use_old_icons = false,--a
 			history = {
 				reward = {
 					global = {},
@@ -252,9 +293,17 @@ do
 				uids = {},
 				persistent = true,
 			},
+
+			path = {
+				enabled = true,
+				ColorSRGB = {1, 1, 1, 1},
+				DotSize = 5,
+				DotAmount = 20,
+				DotTexture = [[Interface\CHARACTERFRAME\TempPortraitAlphaMaskSmall]],
+				LineSize = 500,
+			},
 		},
 	}
-	
 
 	--details! framework
 	local DF = _G ["DetailsFramework"]
@@ -262,7 +311,7 @@ do
 		print ("|cFFFFAA00World Quest Tracker: framework not found, if you just installed or updated the addon, please restart your client.|r")
 		return
 	end
-	
+
 	--create the addon object
 	local WorldQuestTracker = DF:CreateAddOn("WorldQuestTrackerAddon", "WQTrackerDB", default_config)
 	WorldQuestTracker.__debug = false
@@ -273,7 +322,7 @@ do
 
 	--create world quest tracker pin
 	WorldQuestTrackerPinMixin = CreateFromMixins(MapCanvasPinMixin)
-	
+
 	--data providers are stored inside .dataProviders folder
 	--catch the blizzard quest provider
 	function WorldQuestTrackerAddon.CatchMapProvider (fromMapOpened)
@@ -286,17 +335,18 @@ do
 					end
 				end
 			end
-			
+
 			if (not WorldQuestTrackerAddon.DataProvider and fromMapOpened) then
 				WorldQuestTracker:Msg ("Failed to initialize or get Data Provider.")
 			end
 		end
 	end
-	
+
 	WorldQuestTrackerAddon.CatchMapProvider()
 
 	--store zone widgets
 	WorldQuestTracker.ZoneWidgetPool = {}
+	WorldQuestTracker.VignettePool = {}
 	--default world quest pins
 	WorldQuestTracker.DefaultWorldQuestPin = {}
 	WorldQuestTracker.ShowDefaultWorldQuestPin = {}
@@ -306,7 +356,7 @@ do
 	WorldQuestTracker.DefaultFrameLevel = 5000
 	--the client has all the data for the quest
 	WorldQuestTracker.HasQuestData = {}
-	
+
 	--color pallete
 	WorldQuestTracker.ColorPalette = {
 		orange = {1, .8, .22},
@@ -315,10 +365,10 @@ do
 		green = {.22, .9, .22},
 		blue = {.22, .22, .9},
 	}
-	
+
 	--store the available resources from each quest and map
 	WorldQuestTracker.ResourceData = {}
-	
+
 	--comms
 	WorldQuestTracker.CommFunctions = {}
 	function WorldQuestTracker.HandleComm (validData)
@@ -327,7 +377,7 @@ do
 			WorldQuestTracker.CommFunctions [prefix] (validData)
 		end
 	end
-	
+
 	--register things we'll use
 	local color = OBJECTIVE_TRACKER_COLOR ["Header"]
 	DF:NewColor ("WQT_QUESTTITLE_INMAP", color.r, color.g, color.b, .8)
@@ -337,14 +387,14 @@ do
 	DF:NewColor ("WQT_ORANGE_ON_ENTER", 1, 0.847059, 0, 1)
 	DF:NewColor ("WQT_ORANGE_RESOURCES_AVAILABLE", 1, .7, .2, .85)
 	DF:NewColor ("WQT_ORANGE_YELLOW_RARE_TITTLE", 1, 0.677059, 0.05, 1)
-	
+
 	DF:InstallTemplate ("font", "WQT_SUMMARY_TITLE", {color = "orange", size = 12, font = "Friz Quadrata TT"})
 	DF:InstallTemplate ("font", "WQT_RESOURCES_AVAILABLE", {color = {1, .7, .2, .85}, size = 10, font = "Friz Quadrata TT"})
 	DF:InstallTemplate ("font", "WQT_GROUPFINDER_BIG", {color = {1, .7, .2, .85}, size = 11, font = "Friz Quadrata TT"})
 	DF:InstallTemplate ("font", "WQT_GROUPFINDER_SMALL", {color = {1, .9, .1, .85}, size = 10, font = "Friz Quadrata TT"})
 	DF:InstallTemplate ("font", "WQT_GROUPFINDER_TRANSPARENT", {color = {1, 1, 1, .2}, size = 10, font = "Friz Quadrata TT"})
 	DF:InstallTemplate ("font", "WQT_TOGGLEQUEST_TEXT", {color = {0.811, 0.626, .109}, size = 10, font = "Friz Quadrata TT"})
-	
+
 	DF:InstallTemplate ("button", "WQT_GROUPFINDER_BUTTON", {
 		backdrop = {edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = 1, bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], tileSize = 64, tile = true},
 		backdropcolor = {.2, .2, .2, 1},
@@ -355,7 +405,7 @@ do
 		disabled_backdropcolor = {.2, .2, .2, 1},
 		onenterbordercolor = {0, 0, 0, 1},
 	})
-	
+
 	DF:InstallTemplate ("button", "WQT_NEWS_BUTTON", {
 		backdrop = {edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = 1, bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], tileSize = 64, tile = true},
 		backdropcolor = {.2, .2, .2, .8},
@@ -365,31 +415,15 @@ do
 		onenterbordercolor = {0, 0, 0, 1},
 		onentercolor = {.4, .4, .4, 1},
 	}, "WQT_GROUPFINDER_BUTTON")
-	
+
 	--settings
 	--WorldQuestTracker.Constants.
 	WorldQuestTrackerAddon.Constants = {
 		WorldMapSquareSize = 24,
 		TimeBlipSize = 14,
 	}
-	
-	WorldQuestTrackerAddon.WorldWidgetAlpha = .75
-	WorldQuestTrackerAddon.WorldWidgetSmallAlpha = .75
-	
-	local L = LibStub ("AceLocale-3.0"):GetLocale ("WorldQuestTrackerAddon", true)
-	WorldQuestTracker.ChangeLogTable = {
-		{1544645786, "Anchor Changes", "December 13, 2018", "Hover over the zone name in the quest summary for a zone to show options for that anchor."},
-		{1544477110, "World Map Changes", "December 13, 2018", "World map is now aligned in the center of the screen. " .. L["S_MAPBAR_OPTIONS"] .. " > '" .. L["S_OPTIONS_MAPFRAME_ALIGN"] .. "' to disable this."},
-		{1544477110, "World Map Changes", "December 13, 2018", "Quest list is now default to quest type, click '" .. L["S_WORLDBUTTONS_SHOW_ZONE"] .. "' to swap."},
-		{1544477110, "World Map Changes", "December 13, 2018", "Added an arrow button in the quest list to start tracking all quests in that list."},
-		{1544477110, "World Map Changes", "December 13, 2018", "Added faction indicators, SHIFT + Left Click to track all quests for that faction."},
-		{1544477110, "Zone Map Changes", "December 13, 2018", "The fullscreen quest summary is now available in windowed mode."},
-		{1544477110, "General Settings", "December 13, 2018", "Added quest blacklist, access it throught the options menu."},
-		{1544477110, "General Settings", "December 13, 2018", "Added Map Window Scale settings in the options menu."},
-		{1544477110, "General Settings", "December 13, 2018", "Several options added to World Map and Zone Map at the options menu."},
-		--{1544477110, "", "December 13, 2018", ""},
-	}	
-	
+
+	WorldQuestTracker.ChangeLogTable = {}
 end
 
 

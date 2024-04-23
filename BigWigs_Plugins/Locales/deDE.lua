@@ -11,16 +11,32 @@ L.positionDesc = "Zur exakten Positionierung vom Ankerpunkt einen Wert in der Bo
 L.width = "Breite"
 L.height = "Höhe"
 L.sizeDesc = "Normalerweise wird die Größe festgelegt, indem Du den Anker bewegst. Falls Du eine exakte Größe benötigst, bewege diesen Schieber oder trage den Wert in das Feld ein. Diese Zahl kann beliebig groß sein."
+L.fontSizeDesc = "Schriftgröße über den Schieberegler oder durch Eingabe eines Wertes in der Box (maximal 200) festlegen."
+L.disableDesc = "Du bist dabei, das Feature '%s' zu deaktivieren, was |cffff4411nicht empfohlen|r wird.\n\nBist Du sicher, dass Du das tun willst?"
+L.transparency = "Transparenz"
 
 -----------------------------------------------------------------------
 -- AltPower.lua
 --
 
 L.altPowerTitle = "Alternative Energien"
+L.altPowerDesc = "Die Anzeige alternativer Energien wird nur bei Bossen aktiv, welche Spieler mit alternativen Energien belegen, was selten der Fall ist. Die Anzeige informiert in einer Liste über die 'Alternativen Energien', welche Deine Gruppe und Du habt. Nutze den folgenden Testbutton um die Anzeige zu verschieben."
 L.toggleDisplayPrint = "Die Anzeige wird das nächste Mal wieder erscheinen. Um sie für diesen Bosskampf komplett zu deaktivieren, musst Du sie in den Bosskampf-Optionen ausschalten."
 L.disabled = "Deaktivieren"
 L.disabledDisplayDesc = "Deaktiviert die Anzeige für alle Module, die sie benutzen."
 L.resetAltPowerDesc = "Setzt alle Optionen im Zusammenhang mit Alternative Energie zurück, inklusive der Position des Ankers für Alternative Energie."
+L.test = "Test"
+L.altPowerTestDesc = "Zeigt die Anzeige der 'Alternative Energien' und ermöglicht das Verschieben. Gleichzeitig wird eine Vorschau der Energieänderung wie in einem Bosskampf gegeben."
+L.yourPowerBar = "Deine Energie Leiste"
+L.barColor = "Farbe der Leiste"
+L.barTextColor = "Textfarbe der Leiste"
+L.additionalWidth = "Zusätzliche Breite"
+L.additionalHeight = "Zusätzliche Höhe"
+L.additionalSizeDesc = "Vergrößert die Standardanzeige über den Schieberegler oder durch Eingabe eines Wertes in der Box (maximal 100)."
+L.yourPowerTest = "Deine Energie: %d" -- Your Power: 42
+L.yourAltPower = "Dein(e) %s: %d" -- e.g. Your Corruption: 42
+L.player = "Spieler %d" -- Player 7
+L.disableAltPowerDesc = "Die Anzeige alternativer Energien komplett deaktivieren, sodass sie bei keiner Bossbegegnung angezeigt wird."
 
 -----------------------------------------------------------------------
 -- AutoReply.lua
@@ -58,6 +74,7 @@ L.nameplateAutoWidth = "Breite der Namensplaketten verwenden"
 L.nameplateAutoWidthDesc = "Legt die Breite der Leisten auf die Breite der zugehörigen Namensplaketten fest."
 L.nameplateOffsetY = "Y Versatz"
 L.nameplateOffsetYDesc = "Versatz von der Oberkante der Namensplakette bei darüber angezeigten Leisten und von der Unterkante der Namensplakette bei darunter angezeigten Leisten."
+L.nameplateAlphaDesc = "Legt die Transparenz der Namensplaketten-Leisten fest."
 
 L.clickableBars = "Interaktive Leisten"
 L.clickableBarsDesc = "BigWigs-Leisten sind standardmäßig nicht anklickbar. Dies ermöglicht es, das Ziel zu wechseln, AoE-Zauber zu setzen und die Kameraperspektive zu ändern, während sich die Maus über den Leisten befindet. |cffff4411Die Aktivierung der Interaktiven Leisten verhindert dieses Verhalten.|r Die Leisten werden jeden Mausklick abfangen.\n"
@@ -86,7 +103,6 @@ L.emphasizeMultiplierDesc = "Wenn das Bewegen der Leisten zu den hervorgehobenen
 L.enable = "Aktiviert"
 L.move = "Bewegen"
 L.moveDesc = "Bewegt hervorgehobene Leisten zum hervorgehobenen Anker. Ist diese Option nicht aktiv, werden hervorgehobene Leisten lediglich in Größe und Farbe geändert."
-L.regularBars = "Normale Leisten"
 L.emphasizedBars = "Hervorgehobene Leisten"
 L.align = "Ausrichtung"
 L.alignText = "Textausrichtung"
@@ -135,7 +151,8 @@ L.breakFinished = "Die Pause ist vorbei!"
 --
 
 L.bossBlock = "Boss Block"
-L.bossBlockDesc = "Legt fest, was während einer Bossbegegnung blockiert wird."
+L.bossBlockDesc = "Legt fest, was während einer Bossbegegnung blockiert wird.\n\n"
+L.bossBlockAudioDesc = "Konfiguriert, welche Sounds während Bossbegegnungen stummgeschaltet werden.\n\nJede hier |cff808080ausgegraute|r Option wurde in den WoW Soundeinstellungen deaktiviert.\n\n"
 L.movieBlocked = "Da Du diese Zwischensequenz bereits gesehen hast, wird sie übersprungen."
 L.blockEmotes = "Hinweise in der Bildschirmmitte blockieren"
 L.blockEmotesDesc = "Einige Bosse zeigen sehr lange und ungenaue Hinweise für spezielle Fähigkeiten an. BigWigs versucht kürzere und passendere Mitteilungen zu erstellen, die den Spielfluss weniger beeinflussen.\n\nHinweis: Bossmitteilungen werden weiterhin im Chat sichtbar sein und können dort gelesen werden."
@@ -147,18 +164,42 @@ L.blockGuildChallenge = "Popups von Gildenherausforderungen blockieren"
 L.blockGuildChallengeDesc = "Popups von Gildenherausforderungen zeigen hauptsächlich den Abschluss eines heroischen Dungeons oder des Herausforderungsmodus an.\n\nDa diese Popups während des Bosskampfes ablenken und das Interface überdecken können, sollten sie blockiert werden."
 L.blockSpellErrors = "Hinweise zu fehlgeschlagenen Zaubern blockieren"
 L.blockSpellErrorsDesc = "Nachrichten wie \"Fähigkeit noch nicht bereit\", welche normalerweise oben auf dem Bildschirm auftauchen, werden blockiert."
+--L.blockZoneChanges = "Block zone changed messages"
+--L.blockZoneChangesDesc = "The messages that show in the middle-top of the screen when you move into a new zone such as '|cFF33FF99Stormwind|r' or '|cFF33FF99Orgrimmar|r' will be blocked."
 L.audio = "Audio"
 L.music = "Musik"
 L.ambience = "Umgebungsgeräusche"
 L.sfx = "Soundeffekte"
+L.errorSpeech = "Audiofehlermeldungen"
 L.disableMusic = "Musik stummschalten (empfohlen)"
 L.disableAmbience = "Umgebungsgeräusche stummschalten (empfohlen)"
 L.disableSfx = "Soundeffekte stummschalten (nicht empfohlen)"
+L.disableErrorSpeech = "Audiofehlermeldungen stummschalten (empfohlen)"
 L.disableAudioDesc = "Die Option '%s' im WoW Soundmenü wird deaktiviert und erst nach dem Bosskampf wieder aktiviert. Dies kann helfen sich auf die BigWigs Sounds zu konzentrieren."
 L.blockTooltipQuests = "Questziele im Tooltip blockieren"
 L.blockTooltipQuestsDesc = "Wenn zum Abschluss einer Quest ein Boss getötet werden muss, wird der Fortschritt normalerweise im MouseOver-Tooltip mit '0/1 abgeschlossen' angezeigt. Dieser Fortschritt wird im Kampf versteckt, damit der Tooltip nicht zu groß wird."
 L.blockObjectiveTracker = "Questverfolgung ausblenden"
 L.blockObjectiveTrackerDesc = "Die Liste mit verfolgten Quests wird im Bosskampf ausgeblendet um Anzeigeplatz zu sparen.\n\nDies passiert NICHT in Mythic+ oder beim Verfolgen eines Erfolges."
+
+L.blockTalkingHead = "'Sprechende Dialoge' NPC Popup verstecken"
+L.blockTalkingHeadDesc = "Die 'Sprechenden Dialoge' sind Popup Dialogboxen, welche |cffff4411manchmal|r mit dem Kopf des NPCs und einem Chattext in der unteren Mitte des Bildschirms angezeigt werden, während ein NPC spricht.\n\nEs kann festgelegt werden, in welchen Instanztypen diese Dialoge blockiert werden.\n\n|cFF33FF99Bitte beachten:|r\n 1) Diese Funktion behält die NPC Stimme bei, sodass diese gehört werden kann.\n 2) Sicherheitshalber werden nur spezifische Dialoge blockiert. Spezielle oder einmalige Dialoge wie Einmal-Quests werden nicht blockiert."
+L.blockTalkingHeadDungeons = "Normale & Heroische Dungeons"
+L.blockTalkingHeadMythics = "Mythische & Mythisch+ Dungeons"
+L.blockTalkingHeadRaids = "Schlachtzüge"
+L.blockTalkingHeadTimewalking = "Zeitwanderung (Dungeons & Schlachtzüge)"
+L.blockTalkingHeadScenarios = "Szenarien"
+
+L.redirectPopups = "Popup Banner als BigWigs Nachrichten ausgeben"
+L.redirectPopupsDesc = "Popup Banner in der Mitte des Bildschirms wie das '|cFF33FF99Platz für Schatzkammer aufgewertet|r' Banner oder das Banner beim Betreten einer Mythisch+ Instanz werden blockiert und stattdessen als BigWigs Nachrichten angezeigt. Diese Banner können recht groß und lange Zeit angezeigt werden, was Fähigkeiten daran hindert durch diese hindurch zu Klicken."
+L.redirectPopupsColor = "Farbe der ausgegebenen Nachricht"
+L.blockDungeonPopups = "Popup Banner in Instanzen blockieren"
+L.blockDungeonPopupsDesc = "Die Popup Banner beim Betreten einer Instanz können sehr lange Texte enthalten. Die Aktivierung dieser Option blockiert diese komplett, statt diese als BigWigs Nachrichten auszugeben."
+L.itemLevel = "Gegenstandsstufe %d"
+
+L.userNotifySfx = "Soundeffekte wurden von BossBlock deaktiviert, Aktivierung wird erzwungen."
+L.userNotifyMusic = "Musik wurde von BossBlock deaktiviert, Aktivierung wird erzwungen."
+L.userNotifyAmbience = "Umgebungsgeräusche wurden von BossBlock deaktiviert, Aktivierung wird erzwungen."
+L.userNotifyErrorSpeech = "Audiofehlermeldungen wurden von BossBlock deaktiviert, Aktivierung wird erzwungen."
 
 L.subzone_grand_bazaar = "Der Große Basar" -- Battle of Dazar'alor raid (Battle for Azeroth)
 L.subzone_port_of_zandalar = "Der Hafen von Zandalar" -- Battle of Dazar'alor raid (Battle for Azeroth)
@@ -172,7 +213,6 @@ L.colors = "Farben"
 
 L.text = "Text"
 L.textShadow = "Textschatten"
-L.flash = "Aufleuchten"
 L.normal = "Normal"
 L.emphasized = "Hervorgehoben"
 
@@ -228,19 +268,17 @@ L.resetMessagesDesc = "Setzt alle Optionen im Zusammenhang mit Nachrichten zurü
 
 L.bwEmphasized = "BigWigs Hervorgehoben"
 L.messages = "Nachrichten"
-L.normalMessages = "Normale Nachrichten"
 L.emphasizedMessages = "Hervorgehobene Nachrichten"
 L.emphasizedDesc = "Hervorgehobene Nachrichten dienen dazu die Aufmerksamkeit zu erregen, indem eine große Nachricht in der Bildschirmmitte angezeigt wird. Diese sind selten standardmäßig aktiviert, aber können für jegliche Bossfähigkeiten in den Einstellungen des jeweiligen Bosses aktiviert werden."
-L.output = "Ausgabe"
 L.uppercase = "GROSSBUCHSTABEN"
 L.uppercaseDesc = "Alle hervorgehobenen Nachrichten werden in GROSSBUCHSTABEN konvertiert."
 
 L.useIcons = "Symbole verwenden"
 L.useIconsDesc = "Zeigt Symbole neben Nachrichten an."
 L.classColors = "Klassenfarben"
-L.classColorsDesc = "Färbt Spielernamen nach deren Klasse ein."
-L.chatMessages = "Chatfenster-Nachrichten"
-L.chatMessagesDesc = "Gibt alle BigWigs-Nachrichten im Standard-Chatfenster aus, zusätzlich zu der Einstellung unter 'Ausgabe'."
+L.classColorsDesc = "Teilweise enthalten Nachrichten Spielernamen. Durch Aktivierung dieser Option werden die Namen in Ihrer Klassenfarbe angezeigt."
+L.chatFrameMessages = "Chatfenster-Nachrichten"
+L.chatFrameMessagesDesc = "Gibt alle BigWigs-Nachrichten im Standard-Chatfenster aus, zusätzlich zu der Einstellung unter 'Ausgabe'."
 
 L.fontSize = "Schriftgröße"
 L.none = "Nichts"
@@ -266,8 +304,6 @@ L.proximity_name = "Nähe"
 L.soundDelay = "Soundverzögerung"
 L.soundDelayDesc = "Gibt an, wie lange BigWigs zwischen den Soundwiederholungen wartet, wenn jemand zu nahe steht."
 
-L.proximity = "Näherungsanzeige"
-L.proximity_desc = "Zeigt, falls für diese Begegnung relevant, das Näherungsfenster an. Es listet alle Spieler auf, die Dir zu nahe stehen."
 L.resetProximityDesc = "Setzt alle Optionen im Zusammenhang mit Nähe zurück, inklusive der Position des Ankers für Nähe."
 
 L.close = "Schließen"
@@ -308,13 +344,14 @@ L.pullStoppedCombat = "Pull-Timer wurde abgebrochen, weil Du einen Kampf begonne
 L.pullIn = "Pull in %d Sek."
 L.sendPull = "Sende Pull-Timer an BigWigs- und DBM-Nutzer."
 L.wrongPullFormat = "Muss zwischen 1 und 60 Sekunden liegen. Beispiel: /pull 5"
+L.countdownBegins = "Countdown starten"
+L.countdownBegins_desc = "Verbleibende Zeit des Pulltimers (in Sekunden) wählen, wenn der Countdown beginnt."
 
 -----------------------------------------------------------------------
 -- RaidIcon.lua
 --
 
 L.icons = "Symbole"
-L.raidIconsDesc = "Einige Bossmodule benutzen Schlachtzugssymbole, um Spieler zu markieren, die von speziellem Interesse für Deine Gruppe sind. Beispielsweise Bombeneffekte und Gedankenkontrolle. Wenn Du diese Option ausschaltest, markierst Du niemanden mehr.n\n|cffff4411Trifft nur zu, sofern Du Schlachtzugsleiter oder Assistent bist!|r"
 L.raidIconsDescription = "Einige Begegnungen schließen Elemente wie 'Bombenfähigkeiten' ein, die einen bestimmten Spieler zum Ziel haben, ihn verfolgen oder er ist in sonst einer Art und Weise interessant. Hier kannst du bestimmen, welche Schlachtzugs-Symbole benutzt werden sollen, um die Spieler zu markieren.\n\nFalls nur ein Symbol benötigt wird, wird nur das erste benutzt. Ein Symbol wird niemals für zwei verschiedene Fähigkeiten innerhalb einer Begegnung benutzt.\n\n|cffff4411Beachte, dass ein manuell markierter Spieler von BigWigs nicht ummarkiert wird.|r"
 L.primary = "Erstes Symbol"
 L.primaryDesc = "Das erste Schlachtzugssymbol, das verwendet wird."
@@ -326,18 +363,18 @@ L.secondaryDesc = "Das zweite Schlachtzugssymbol, das verwendet wird."
 --
 
 L.Sounds = "Sounds"
+L.soundsDesc = "BigWigs nutzt den 'Haupt'-Soundkanal um die Sounds wiederzugeben. Wenn die Sounds zu leise oder zu laut sind, kann dies in den WoW Soundoptionen mit dem Schieberegler 'Gesamtlautstärke' angepasst werden.\n\nFolgend können global die verschiedenen Sounds für spezifische Aktionen konfiguriert, oder zum Deaktivieren auf 'None' gesetzt werden. Wenn der Sound einer spezifischen Bossfähigkeit geändert werden soll, kann dies in den Einstellungen der Bossbegegnung eingestellt werden.\n\n"
 L.oldSounds = "Alte Sounds"
 
 L.Alarm = "Alarm"
 L.Info = "Info"
-L.Alert = "Warnung"
+L.Alert = "Alarmruf"
 L.Long = "Lang"
 L.Warning = "Warnung"
 L.onyou = "Ein Zauber, Stärkungs- oder Schwächungszauber ist auf Dir"
 L.underyou = "Du musst aus einem Zauber unter Dir herauslaufen"
 
 L.sound = "Sound"
-L.soundDesc = "Nachrichten können zusammen mit Sounds erscheinen. Manche Leute finden es einfacher, darauf zu hören, welcher Sound mit welcher Nachricht einher geht, anstatt die Nachricht zu lesen."
 
 L.customSoundDesc = "Den speziell gewählten Sound anstatt des vom Modul bereitgestellten abspielen."
 L.resetSoundDesc = "Setzt die obigen Sounds auf ihren Standard zurück."

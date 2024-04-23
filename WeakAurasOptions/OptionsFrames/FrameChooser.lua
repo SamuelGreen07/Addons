@@ -1,5 +1,8 @@
-if not WeakAuras.IsCorrectVersion() then return end
-local AddonName, OptionsPrivate = ...
+if not WeakAuras.IsLibsOK() then return end
+---@type string
+local AddonName = ...
+---@class OptionsPrivate
+local OptionsPrivate = select(2, ...)
 
 -- Lua APIs
 local pairs = pairs
@@ -8,8 +11,7 @@ local pairs = pairs
 local CreateFrame, IsMouseButtonDown, SetCursor, GetMouseFocus, MouseIsOver, ResetCursor
   = CreateFrame, IsMouseButtonDown, SetCursor, GetMouseFocus, MouseIsOver, ResetCursor
 
-local AceConfigDialog = LibStub("AceConfigDialog-3.0")
-
+---@class WeakAuras
 local WeakAuras = WeakAuras
 local L = WeakAuras.L
 
@@ -19,10 +21,10 @@ local frameChooserBox
 local oldFocus
 local oldFocusName
 function OptionsPrivate.StartFrameChooser(data, path)
-  local frame = WeakAuras.OptionsFrame();
+  local frame = OptionsPrivate.Private.OptionsFrame();
   if not(frameChooserFrame) then
-    frameChooserFrame = CreateFrame("frame");
-    frameChooserBox = CreateFrame("frame", nil, frameChooserFrame, BackdropTemplateMixin and "BackdropTemplate");
+    frameChooserFrame = CreateFrame("Frame");
+    frameChooserBox = CreateFrame("Frame", nil, frameChooserFrame, "BackdropTemplate");
     frameChooserBox:SetFrameStrata("TOOLTIP");
     frameChooserBox:SetBackdrop({
       edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
@@ -52,8 +54,8 @@ function OptionsPrivate.StartFrameChooser(data, path)
         if(focusName == "WorldFrame" or not focusName) then
           focusName = nil;
           local focusIsGroup = false;
-          for id, regionData in pairs(WeakAuras.regions) do
-            if(regionData.region:IsVisible() and MouseIsOver(regionData.region)) then
+          for id, regionData in pairs(OptionsPrivate.Private.regions) do
+            if(regionData.region and regionData.region:IsVisible() and MouseIsOver(regionData.region)) then
               local isGroup = regionData.regionType == "group" or regionData.regionType == "dynamicgroup";
               if (not focusName or (not isGroup and focusIsGroup)) then
                 focus = regionData.region;

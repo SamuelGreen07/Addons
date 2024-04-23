@@ -2,8 +2,8 @@ local PA = _G.ProjectAzilroka
 local OzCD = PA:NewModule('OzCooldowns', 'AceEvent-3.0', 'AceTimer-3.0')
 PA.OzCD = OzCD
 
-OzCD.Title = '|cFF16C3F2Oz|r|cFFFFFFFFCooldowns|r'
-OzCD.Description = 'Minimalistic Cooldowns'
+OzCD.Title = PA.ACL['|cFF16C3F2Oz|r|cFFFFFFFFCooldowns|r']
+OzCD.Description = PA.ACL['Minimalistic Cooldowns']
 OzCD.Authors = 'Azilroka    Nimaear'
 OzCD.isEnabled = false
 
@@ -50,11 +50,11 @@ end
 OzCD.Cooldowns = {}
 OzCD.ActiveCooldowns = {}
 OzCD.DelayCooldowns = {}
-OzCD.IsChargeCooldown = {}
 OzCD.SpellList = {}
 
 local GLOBAL_COOLDOWN_TIME = 1.5
 local COOLDOWN_MIN_DURATION = .1
+local SpellOptions = {}
 
 -- Simpy Magic
 local t = {}
@@ -114,7 +114,6 @@ function OzCD:ScanSpellBook(bookType, numSpells, offset)
 					end
 				end
 			end
-		elseif skillType == 'FUTURESPELL' then
 		elseif not skillType then
 			break
 		end
@@ -152,10 +151,14 @@ function OzCD:UpdateActiveCooldowns()
 
 			local Start, Duration, CurrentDuration, Charges
 
-			if OzCD.IsChargeCooldown[SpellID] then
-				Charges, _, Start, Duration = GetSpellCharges(SpellID)
-			else
-				Start, Duration = GetSpellCooldown(SpellID)
+			do
+				local start, duration = GetSpellCooldown(SpellID)
+				local charges, maxCharges, chargeStart, chargeDuration = GetSpellCharges(SpellID)
+				if ( charges and maxCharges and maxCharges > 1 and charges < maxCharges ) then
+					Charges, Start, Duration = charges, chargeStart, chargeDuration
+				else
+					Start, Duration = start, duration
+				end
 			end
 
 			CurrentDuration = (Start + Duration - GetTime())
@@ -186,19 +189,18 @@ function OzCD:UpdateActiveCooldowns()
 end
 
 function OzCD:UpdateDelayedCooldowns()
-	local Start, Duration, Enable, CurrentDuration, Charges, _
-
 	for SpellID in pairs(OzCD.DelayCooldowns) do
-		Start, Duration, Enable = GetSpellCooldown(SpellID)
+		local Start, Duration, Enable
 
-		if OzCD.IsChargeCooldown[SpellID] then
-			Charges, _, Start, Duration = GetSpellCharges(SpellID)
-			if Charges then
-				Start, Duration = Start, Duration
+		do
+			Start, Duration, Enable = GetSpellCooldown(SpellID)
+			local charges, maxCharges, chargeStart, chargeDuration = GetSpellCharges(SpellID)
+			if ( charges and maxCharges and maxCharges > 1 and charges < maxCharges ) then
+				Start, Duration = chargeStart, chargeDuration
 			end
 		end
 
-		CurrentDuration = (Start + Duration - GetTime())
+		local CurrentDuration = (Start + Duration - GetTime())
 
 		if Enable and CurrentDuration then
 			if (CurrentDuration < OzCD.db.SuppressDuration) and (CurrentDuration > GLOBAL_COOLDOWN_TIME) then
@@ -240,10 +242,15 @@ function OzCD:CreateCooldown(index)
 	Frame.StatusBar:SetSize(OzCD.db.Size, 4)
 	Frame.StatusBar:SetScript('OnUpdate', function(s)
 		if (Frame.CurrentDuration and Frame.CurrentDuration > 0) then
-			local Normalized = Frame.CurrentDuration / Frame.Duration
-			s:SetValue(Normalized)
+			local normalized = Frame.CurrentDuration / Frame.Duration
+			if normalized == 0 then
+				normalized = 0
+			elseif normalized == 1 then
+				normalized = 1
+			end
+			s:SetValue(normalized)
 			if OzCD.db.StatusBarGradient then
-				s:SetStatusBarColor(1 - Normalized, Normalized, 0)
+				s:SetStatusBarColor(1 - normalized, normalized, 0)
 			end
 		end
 	end)
@@ -252,11 +259,12 @@ function OzCD:CreateCooldown(index)
 
 	if PA.Masque and OzCD.db.Masque then
 		OzCD.MasqueGroup:AddButton(Frame)
+		OzCD.MasqueGroup:ReSkin()
 	else
 		PA:CreateBackdrop(Frame)
-		PA:CreateShadow(Frame.Backdrop)
+		PA:CreateShadow(Frame.backdrop)
 		PA:CreateBackdrop(Frame.StatusBar, 'Default')
-		PA:CreateShadow(Frame.StatusBar.Backdrop)
+		PA:CreateShadow(Frame.StatusBar.backdrop)
 	end
 
 	if not (PA.ElvUI or PA.Tukui) then
@@ -377,24 +385,15 @@ function OzCD:UNIT_SPELLCAST_SUCCEEDED(_, unit, _, SpellID)
 end
 
 function OzCD:SPELL_UPDATE_COOLDOWN()
-	local Start, Duration, Enable, Charges, _, ChargeStart, ChargeDuration, CurrentDuration
-
 	for SpellID in pairs(OzCD.Cooldowns) do
-		Start, Duration, Enable = GetSpellCooldown(SpellID)
+		local Charges, MaxCharges, ChargeStart, ChargeDuration = GetSpellCharges(SpellID)
+		local Start, Duration, Enable = GetSpellCooldown(SpellID)
 
-		if OzCD.IsChargeCooldown[SpellID] ~= false then
-			Charges, _, ChargeStart, ChargeDuration = GetSpellCharges(SpellID)
-
-			if OzCD.IsChargeCooldown[SpellID] == nil then
-				OzCD.IsChargeCooldown[SpellID] = Charges and true or false
-			end
-
-			if Charges then
-				Start, Duration = ChargeStart, ChargeDuration
-			end
+		if ( Charges and MaxCharges and MaxCharges > 1 and Charges < MaxCharges ) then
+			Start, Duration = ChargeStart, ChargeDuration
 		end
 
-		CurrentDuration = (Start + Duration - GetTime())
+		local CurrentDuration = (Start + Duration - GetTime())
 
 		if Enable and CurrentDuration and (CurrentDuration < OzCD.db.IgnoreDuration) then
 			if (CurrentDuration >= OzCD.db.SuppressDuration) or OzCD.HasCDDelay[SpellID] then
@@ -418,18 +417,18 @@ function OzCD:SPELLS_CHANGED()
 		OzCD:ScanSpellBook(_G.BOOKTYPE_PET, numPetSpells)
 
 		PA:AddKeysToTable(OzCD.db.SpellCDs, OzCD.SpellList)
-
-		PA.Options.args.OzCooldowns.args.General.args.Spells.args = OzCD:GenerateSpellOptions()
 	end
+
+	PA.Options.args.OzCooldowns.args.General.args.Spells.args = OzCD:GenerateSpellOptions()
 end
 
 function OzCD:GenerateSpellOptions()
-	local SpellOptions = {}
-
 	for SpellID, SpellName in pairs(OzCD.db.SpellCDs) do
 		local Name, _, Icon = GetSpellInfo(SpellID)
-		if Name then
-			SpellOptions[tostring(SpellID)] = {
+		local tblID = tostring(SpellID)
+
+		if Name and not SpellOptions[tblID] then
+			SpellOptions[tblID] = {
 				type = 'toggle',
 				image = Icon,
 				imageCoords = PA.TexCoords,
@@ -445,45 +444,47 @@ end
 function OzCD:GetOptions()
 	OzCD:UpdateSettings()
 
-	PA.Options.args.OzCooldowns = PA.ACH:Group(OzCD.Title, OzCD.Description, nil, nil, function(info) return OzCD.db[info[#info]] end, function(info, value) OzCD.db[info[#info]] = value end)
-	PA.Options.args.OzCooldowns.args.Description = PA.ACH:Description(OzCD.Description, 0)
-	PA.Options.args.OzCooldowns.args.Enable = PA.ACH:Toggle(PA.ACL['Enable'], nil, 1, nil, nil, nil, nil, function(info, value) OzCD.db[info[#info]] = value if (not OzCD.isEnabled) then OzCD:Initialize() else _G.StaticPopup_Show('PROJECTAZILROKA_RL') end end)
+	local OzCooldowns = PA.ACH:Group(OzCD.Title, OzCD.Description, nil, nil, function(info) return OzCD.db[info[#info]] end, function(info, value) OzCD.db[info[#info]] = value end)
+	PA.Options.args.OzCooldowns = OzCooldowns
 
-	PA.Options.args.OzCooldowns.args.General = PA.ACH:Group(PA.ACL['General'], nil, 2)
-	PA.Options.args.OzCooldowns.args.General.inline = true
+	OzCooldowns.args.Description = PA.ACH:Description(OzCD.Description, 0)
+	OzCooldowns.args.Enable = PA.ACH:Toggle(PA.ACL['Enable'], nil, 1, nil, nil, nil, nil, function(info, value) OzCD.db[info[#info]] = value if (not OzCD.isEnabled) then OzCD:Initialize() else _G.StaticPopup_Show('PROJECTAZILROKA_RL') end end)
 
-	PA.Options.args.OzCooldowns.args.General.args.Masque = PA.ACH:Toggle(PA.ACL['Masque Support'], nil, 1)
-	PA.Options.args.OzCooldowns.args.General.args.SortByDuration = PA.ACH:Toggle(PA.ACL['Sort by Current Duration'], nil, 2)
-	PA.Options.args.OzCooldowns.args.General.args.SuppressDuration = PA.ACH:Range(PA.ACL['Suppress Duration Threshold'], PA.ACL['Duration in Seconds'], 3, { min = 2, max = 600, step = 1 })
-	PA.Options.args.OzCooldowns.args.General.args.IgnoreDuration = PA.ACH:Range(PA.ACL['Ignore Duration Threshold'], PA.ACL['Duration in Seconds'], 4, { min = 2, max = 600, step = 1 })
-	PA.Options.args.OzCooldowns.args.General.args.UpdateSpeed = PA.ACH:Range(PA.ACL['Update Speed'], nil, 5, { min = .1, max = .5, step = .1 })
+	OzCooldowns.args.General = PA.ACH:Group(PA.ACL['General'], nil, 2)
+	OzCooldowns.args.General.inline = true
 
-	PA.Options.args.OzCooldowns.args.General.args.Icons = PA.ACH:Group(PA.ACL['Icons'], nil, 5)
-	PA.Options.args.OzCooldowns.args.General.args.Icons.inline = true
+	OzCooldowns.args.General.args.Masque = PA.ACH:Toggle(PA.ACL['Masque Support'], nil, 1)
+	OzCooldowns.args.General.args.SortByDuration = PA.ACH:Toggle(PA.ACL['Sort by Current Duration'], nil, 2)
+	OzCooldowns.args.General.args.SuppressDuration = PA.ACH:Range(PA.ACL['Suppress Duration Threshold'], PA.ACL['Duration in Seconds'], 3, { min = 2, max = 600, step = 1 })
+	OzCooldowns.args.General.args.IgnoreDuration = PA.ACH:Range(PA.ACL['Ignore Duration Threshold'], PA.ACL['Duration in Seconds'], 4, { min = 2, max = 600, step = 1 })
+	OzCooldowns.args.General.args.UpdateSpeed = PA.ACH:Range(PA.ACL['Update Speed'], nil, 5, { min = .1, max = .5, step = .1 })
 
-	PA.Options.args.OzCooldowns.args.General.args.Icons.args.Vertical = PA.ACH:Toggle(PA.ACL['Vertical'], nil, 1)
-	PA.Options.args.OzCooldowns.args.General.args.Icons.args.Tooltips = PA.ACH:Toggle(PA.ACL['Tooltips'], nil, 2)
-	PA.Options.args.OzCooldowns.args.General.args.Icons.args.Announce = PA.ACH:Toggle(PA.ACL['Announce on Click'], nil, 3)
-	PA.Options.args.OzCooldowns.args.General.args.Icons.args.Size = PA.ACH:Range(PA.ACL['Size'], nil, 4, { min = 24, max = 60, step = 1 })
-	PA.Options.args.OzCooldowns.args.General.args.Icons.args.Spacing = PA.ACH:Range(PA.ACL['Spacing'], nil, 5, { min = 0, max = 20, step = 1 })
+	OzCooldowns.args.General.args.Icons = PA.ACH:Group(PA.ACL['Icons'], nil, 5)
+	OzCooldowns.args.General.args.Icons.inline = true
 
-	PA.Options.args.OzCooldowns.args.General.args.Icons.args.StackFont = PA.ACH:SharedMediaFont(PA.ACL['Stacks/Charges Font'], nil, 7)
-	PA.Options.args.OzCooldowns.args.General.args.Icons.args.StackFontSize = PA.ACH:Range(PA.ACL['Stacks/Charges Font Size'], nil, 5, { min = 8, max = 20, step = 1 })
-	PA.Options.args.OzCooldowns.args.General.args.Icons.args.StackFontFlag = PA.ACH:FontFlags(PA.ACL['Stacks/Charges Font Flag'], nil, 9)
+	OzCooldowns.args.General.args.Icons.args.Vertical = PA.ACH:Toggle(PA.ACL['Vertical'], nil, 1)
+	OzCooldowns.args.General.args.Icons.args.Tooltips = PA.ACH:Toggle(PA.ACL['Tooltips'], nil, 2)
+	OzCooldowns.args.General.args.Icons.args.Announce = PA.ACH:Toggle(PA.ACL['Announce on Click'], nil, 3)
+	OzCooldowns.args.General.args.Icons.args.Size = PA.ACH:Range(PA.ACL['Size'], nil, 4, { min = 24, max = 60, step = 1 })
+	OzCooldowns.args.General.args.Icons.args.Spacing = PA.ACH:Range(PA.ACL['Spacing'], nil, 5, { min = 0, max = 20, step = 1 })
 
-	PA.Options.args.OzCooldowns.args.General.args.StatusBars = PA.ACH:Group(PA.ACL['Status Bar'], nil, 7, nil, nil, nil, function() return not OzCD.db.StatusBar end)
-	PA.Options.args.OzCooldowns.args.General.args.StatusBars.inline = true
-	PA.Options.args.OzCooldowns.args.General.args.StatusBars.args.StatusBar = PA.ACH:Toggle(PA.ACL['Enabled'], nil, 1, nil, nil, nil, nil, nil, false)
-	PA.Options.args.OzCooldowns.args.General.args.StatusBars.args.StatusBarTexture = PA.ACH:SharedMediaStatusbar(PA.ACL['Texture'], nil, 2)
-	PA.Options.args.OzCooldowns.args.General.args.StatusBars.args.StatusBarGradient = PA.ACH:Toggle(PA.ACL['Gradient'], nil, 3)
-	PA.Options.args.OzCooldowns.args.General.args.StatusBars.args.StatusBarTextureColor = PA.ACH:Color(PA.ACL['Texture Color'], nil, 4, nil, nil, function(info) return unpack(OzCD.db[info[#info]]) end, function(info, r, g, b, a) OzCD.db[info[#info]] = { r, g, b, a } OzCD:UpdateSettings() end, function() return not OzCD.db.StatusBar or OzCD.db.StatusBarGradient end)
+	OzCooldowns.args.General.args.Icons.args.StackFont = PA.ACH:SharedMediaFont(PA.ACL['Stacks/Charges Font'], nil, 7)
+	OzCooldowns.args.General.args.Icons.args.StackFontSize = PA.ACH:Range(PA.ACL['Stacks/Charges Font Size'], nil, 5, { min = 8, max = 20, step = 1 })
+	OzCooldowns.args.General.args.Icons.args.StackFontFlag = PA.ACH:FontFlags(PA.ACL['Stacks/Charges Font Flag'], nil, 9)
 
-	PA.Options.args.OzCooldowns.args.General.args.Spells = PA.ACH:Group(_G.SPELLS, nil, 8, nil, function(info) return OzCD.db.SpellCDs[tonumber(info[#info])] end, function(info, value) OzCD.db.SpellCDs[tonumber(info[#info])] = value end)
-	PA.Options.args.OzCooldowns.args.General.args.Spells.inline = true
-	PA.Options.args.OzCooldowns.args.General.args.Spells.args = OzCD:GenerateSpellOptions()
+	OzCooldowns.args.General.args.StatusBars = PA.ACH:Group(PA.ACL['Status Bar'], nil, 7, nil, nil, nil, function() return not OzCD.db.StatusBar end)
+	OzCooldowns.args.General.args.StatusBars.inline = true
+	OzCooldowns.args.General.args.StatusBars.args.StatusBar = PA.ACH:Toggle(PA.ACL['Enabled'], nil, 1, nil, nil, nil, nil, nil, false)
+	OzCooldowns.args.General.args.StatusBars.args.StatusBarTexture = PA.ACH:SharedMediaStatusbar(PA.ACL['Texture'], nil, 2)
+	OzCooldowns.args.General.args.StatusBars.args.StatusBarGradient = PA.ACH:Toggle(PA.ACL['Gradient'], nil, 3)
+	OzCooldowns.args.General.args.StatusBars.args.StatusBarTextureColor = PA.ACH:Color(PA.ACL['Texture Color'], nil, 4, nil, nil, function(info) return unpack(OzCD.db[info[#info]]) end, function(info, r, g, b, a) OzCD.db[info[#info]] = { r, g, b, a } OzCD:UpdateSettings() end, function() return not OzCD.db.StatusBar or OzCD.db.StatusBarGradient end)
 
-	PA.Options.args.OzCooldowns.args.AuthorHeader = PA.ACH:Header(PA.ACL['Authors:'], -2)
-	PA.Options.args.OzCooldowns.args.Authors = PA.ACH:Description(OzCD.Authors, -1, 'large')
+	OzCooldowns.args.General.args.Spells = PA.ACH:Group(_G.SPELLS, nil, 8, nil, function(info) return OzCD.db.SpellCDs[tonumber(info[#info])] end, function(info, value) OzCD.db.SpellCDs[tonumber(info[#info])] = value end)
+	OzCooldowns.args.General.args.Spells.inline = true
+	OzCooldowns.args.General.args.Spells.args = OzCD:GenerateSpellOptions()
+
+	OzCooldowns.args.AuthorHeader = PA.ACH:Header(PA.ACL['Authors:'], -2)
+	OzCooldowns.args.Authors = PA.ACH:Description(OzCD.Authors, -1, 'large')
 end
 
 function OzCD:BuildProfile()

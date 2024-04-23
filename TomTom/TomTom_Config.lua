@@ -1,3 +1,5 @@
+local addonName, addon = ...
+
 local L = TomTomLocals
 
 local function createconfig()
@@ -36,8 +38,8 @@ local function createconfig()
 			TomTom:ShowHideWorldCoords()
 		elseif ns == "arrow" then
 			TomTom:ShowHideCrazyArrow()
-        elseif ns == "poi" and (not TomTom.CLASSIC) then
-            TomTom:EnableDisablePOIIntegration()
+		elseif ns == "poi" and TomTom.WOW_MAINLINE then
+			TomTom:EnableDisablePOIIntegration()
 		elseif opt == "otherzone" then
 			TomTom:ReloadWaypoints()
 		elseif info.arg == "minimap.enable" or info.arg == "worldmap.enable" then
@@ -896,7 +898,7 @@ local function createBlizzOptions()
 	dialog:AddToBlizOptions("TomTom-Feeds", options.args.feeds.name, "TomTom")
 
 	-- POI Options
-	if not TomTom.CLASSIC then
+	if TomTom.WOW_MAINLINE then
 		config:RegisterOptionsTable("TomTom-POI", options.args.poi)
 		dialog:AddToBlizOptions("TomTom-POI", options.args.poi.name, "TomTom")
 	end
@@ -911,24 +913,42 @@ local function createBlizzOptions()
 	return blizzPanel
 end
 
-SLASH_TOMTOM1 = "/tomtom"
+local aboutOptions = {
+	type = "group",
+	args = {
+		version = {
+			order = 1,
+			type = "description",
+			name = function() return "Version: TomTom-".. addon.version end,
+
+		}
+	},
+}
+
 local blizzPanel
-SlashCmdList["TOMTOM"] = function(msg)
+function addon:CreateConfigPanels()
+	config:RegisterOptionsTable("TomTom", aboutOptions)
+	local aboutFrame = dialog:AddToBlizOptions("TomTom", "TomTom")
 	if not registered then
 		blizzPanel = createBlizzOptions()
 		registered = true
 	end
-
-	InterfaceOptionsFrame_OpenToCategory("TomTom")
-	InterfaceOptionsFrame_OpenToCategory("TomTom")
 end
 
-local hijackFrame = CreateFrame("Frame", nil, InterfaceOptionsFrame)
-hijackFrame:SetScript("OnShow", function(self)
-	if not registered then
-		blizzPanel = createBlizzOptions()
-		registered = true
+SLASH_TOMTOM1 = "/tomtom"
+SlashCmdList["TOMTOM"] = function(msg)
+	local tokens = {}
+	for token in msg:gmatch("%S+") do table.insert(tokens, token) end
+
+	if tokens[1] and tokens[1]:lower() == "help" then
+		TomTom.slashCommandUsage()
+		return
 	end
 
-	self:SetScript("OnShow", nil)
-end)
+	if Settings then
+		Settings.OpenToCategory("TomTom")
+	elseif InterfaceOptionsFrame_OpenToCategory then
+		InterfaceOptionsFrame_OpenToCategory("TomTom")
+		InterfaceOptionsFrame_OpenToCategory("TomTom")
+	end
+end

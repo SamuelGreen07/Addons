@@ -30,9 +30,9 @@ local sorts = ns.cargBags.classes.Container.sorts
 	Sorts the buttons depending on their bagSlot
 ]]
 function sorts.bagSlot(a, b)
-	if(a.bagID == b.bagID) then
-		return a.slotID < b.slotID
+	if(a._bagID == b._bagID) then
+		return a._slotID < b._slotID
 	else
-		return a.bagID < b.bagID
+		return a._bagID < b._bagID
 	end
 end

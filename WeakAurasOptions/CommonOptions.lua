@@ -1,8 +1,10 @@
-if not WeakAuras.IsCorrectVersion() then return end
-local AddonName, OptionsPrivate = ...
+if not WeakAuras.IsLibsOK() then return end
+---@type string
+local AddonName = ...
+---@class OptionsPrivate
+local OptionsPrivate = select(2, ...)
 
 local L = WeakAuras.L
-local regionOptions = WeakAuras.regionOptions
 
 local commonOptionsCache = {}
 OptionsPrivate.commonOptionsCache = commonOptionsCache
@@ -38,6 +40,18 @@ commonOptionsCache.GetSameAll = function(self, info)
   local base = self:GetData(info)
   if base then
     return base.sameAll
+  end
+end
+
+commonOptionsCache.SetNameAll = function(self, info, value)
+  local base = self:GetOrCreateData(info)
+  base.nameAll = value
+end
+
+commonOptionsCache.GetNameAll = function(self, info)
+  local base = self:GetData(info)
+  if base then
+    return base.nameAll
   end
 end
 
@@ -132,7 +146,9 @@ local function addCollapsibleHeader(options, key, input, order, isGroupTab)
         if notcollapsable then
           return "Interface\\AddOns\\WeakAuras\\Media\\Textures\\bullet1", 18, 18
         else
-          return isCollapsed() and "Interface\\AddOns\\WeakAuras\\Media\\Textures\\expand" or "Interface\\AddOns\\WeakAuras\\Media\\Textures\\collapse", 18, 18
+          return isCollapsed() and "Interface\\AddOns\\WeakAuras\\Media\\Textures\\expand"
+                                    or "Interface\\AddOns\\WeakAuras\\Media\\Textures\\collapse",
+                                    18, 18
         end
       end,
       control = "WeakAurasExpand",
@@ -342,7 +358,6 @@ local function getChildOption(options, info)
         end
       end
     end
-
   end
   return options
 end
@@ -362,29 +377,46 @@ end
 
 local function CreateHiddenAll(subOption)
   return function(data, info)
-    if(#data.controlledChildren == 0) then
-      return true;
+    local mainOptions = OptionsPrivate.EnsureOptions(data, subOption)
+    for i=1,#info do
+      mainOptions = mainOptions.args[info[i]];
     end
 
-    for index, childId in ipairs(data.controlledChildren) do
-      local childData = WeakAuras.GetData(childId);
-      if(childData) then
-        local childOptions = OptionsPrivate.EnsureOptions(childData, subOption)
-        local childOption = childOptions;
-        local childOptionTable = {[0] = childOption};
-        for i=1,#info do
-          childOption = childOption.args[info[i]];
-          childOptionTable[i] = childOption;
-        end
-        if (childOption) then
-          if (not hiddenChild(childOptionTable, info)) then
-            return false;
+    if(#data.controlledChildren == 0) then
+      if mainOptions.hiddenAllIfAnyHidden then
+        return false
+      else
+        return true
+      end
+    end
+
+    for child in  OptionsPrivate.Private.TraverseLeafs(data) do
+      local childOptions = OptionsPrivate.EnsureOptions(child, subOption)
+      local childOption = childOptions;
+      local childOptionTable = {[0] = childOption};
+      for i=1,#info do
+        childOption = childOption.args[info[i]];
+        childOptionTable[i] = childOption;
+      end
+      if (childOption) then
+        local childHidden = hiddenChild(childOptionTable, info)
+        if mainOptions.hiddenAllIfAnyHidden then
+          if childHidden then
+            return true
+          end
+        else
+          if not childHidden then
+            return false
           end
         end
       end
     end
 
-    return true;
+    if mainOptions.hiddenAllIfAnyHidden then
+      return false
+    else
+      return true
+    end
   end
 end
 
@@ -403,20 +435,17 @@ end
 
 local function CreateDisabledAll(subOption)
   return function(data, info)
-    for index, childId in ipairs(data.controlledChildren) do
-      local childData = WeakAuras.GetData(childId);
-      if(childData) then
-        local childOptions = OptionsPrivate.EnsureOptions(childData, subOption);
-        local childOption = childOptions;
-        local childOptionTable = {[0] = childOption};
-        for i=1,#info do
-          childOption = childOption.args[info[i]];
-          childOptionTable[i] = childOption;
-        end
-        if (childOption) then
-          if (not disabledChild(childOptionTable, info)) then
-            return false;
-          end
+    for child in OptionsPrivate.Private.TraverseLeafs(data) do
+      local childOptions = OptionsPrivate.EnsureOptions(child, subOption);
+      local childOption = childOptions;
+      local childOptionTable = {[0] = childOption};
+      for i=1,#info do
+        childOption = childOption.args[info[i]];
+        childOptionTable[i] = childOption;
+      end
+      if (childOption) then
+        if (not disabledChild(childOptionTable, info)) then
+          return false;
         end
       end
     end
@@ -474,19 +503,16 @@ local function replaceNameDescFuncs(intable, data, subOption)
 
   local function combineKeys(info)
     local combinedKeys = nil;
-    for index, childId in ipairs(data.controlledChildren) do
-      local childData = WeakAuras.GetData(childId);
-      if(childData) then
-        local values = getValueFor(OptionsPrivate.EnsureOptions(childData, subOption), info, "values");
-        if (values) then
-          if (type(values) == "function") then
-            values = values(info);
-          end
-          if (type(values) == "table") then
-            combinedKeys = combinedKeys or {};
-            for k, v in pairs(values) do
-              combinedKeys[k] = v;
-            end
+    for child in OptionsPrivate.Private.TraverseLeafs(data) do
+      local values = getValueFor(OptionsPrivate.EnsureOptions(child, subOption), info, "values");
+      if (values) then
+        if (type(values) == "function") then
+          values = values(info);
+        end
+        if (type(values) == "table") then
+          combinedKeys = combinedKeys or {};
+          for k, v in pairs(values) do
+            combinedKeys[k] = v;
           end
         end
       end
@@ -498,7 +524,7 @@ local function replaceNameDescFuncs(intable, data, subOption)
     local index = string.find(input, ".", 1, true);
     if (index) then
       local regionType = string.sub(input, 1, index - 1);
-      return regionOptions[regionType] and regionType;
+      return OptionsPrivate.Private.regionOptions[regionType] and regionType;
     end
     return nil;
   end
@@ -515,18 +541,15 @@ local function replaceNameDescFuncs(intable, data, subOption)
 
     local isToggle = nil
 
-    for index, childId in ipairs(data.controlledChildren) do
+    for child in OptionsPrivate.Private.TraverseLeafs(data) do
       if isToggle == nil then
-        local childData = WeakAuras.GetData(childId)
-        local childOption = getChildOption(OptionsPrivate.EnsureOptions(childData, subOption), info)
+        local childOption = getChildOption(OptionsPrivate.EnsureOptions(child, subOption), info)
         isToggle = childOption and childOption.type == "toggle"
       end
 
-      local childData = WeakAuras.GetData(childId);
-
       local regionType = regionPrefix(info[#info]);
-      if(childData and (not regionType or childData.regionType == regionType or regionType == "sub")) then
-        local childOptions = OptionsPrivate.EnsureOptions(childData, subOption)
+      if(child and (not regionType or child.regionType == regionType or regionType == "sub")) then
+        local childOptions = OptionsPrivate.EnsureOptions(child, subOption)
         local get = getValueFor(childOptions, info, "get");
         if (combinedKeys) then
           for key, _ in pairs(combinedKeys) do
@@ -547,7 +570,6 @@ local function replaceNameDescFuncs(intable, data, subOption)
           local values = {};
           if (get) then
             values = { get(info) };
-            local childOption = getChildOption(childOptions, info)
             if isToggle and values[1] == nil then
               values[1] = false
             end
@@ -570,64 +592,69 @@ local function replaceNameDescFuncs(intable, data, subOption)
   end
 
   local function nameAll(info)
+    local cached = commonOptionsCache:GetNameAll(info)
+    if (cached ~= nil) then
+      return cached
+    end
+
     local combinedName;
     local first = true;
     local foundNames = {};
-    for index, childId in ipairs(data.controlledChildren) do
-      local childData = WeakAuras.GetData(childId);
-      if(childData) then
-        local childOption = getChildOption(OptionsPrivate.EnsureOptions(childData, subOption), info);
-        if (childOption) then
-          local name;
-          if(type(childOption.name) == "function") then
-            name = childOption.name(info);
-          else
-            name = childOption.name;
+    for child in OptionsPrivate.Private.TraverseLeafs(data) do
+      local childOption = getChildOption(OptionsPrivate.EnsureOptions(child, subOption), info);
+      if (childOption) then
+        local name;
+        if(type(childOption.name) == "function") then
+          name = childOption.name(info);
+        else
+          name = childOption.name;
+          commonOptionsCache:SetNameAll(info, name)
+          return name
+        end
+        if (not name) then
+        -- Do nothing
+        elseif(first) then
+          if (name ~= "") then
+            combinedName = name;
+            first = false;
           end
-          if (not name) then
-          -- Do nothing
-          elseif(first) then
-            if (combinedName ~= "") then
-              combinedName = name;
-              first = false;
+          foundNames[name] = true;
+        elseif not(foundNames[name]) then
+          if (name ~= "") then
+            if (childOption.type == "description") then
+              combinedName = combinedName .. "\n\n" .. name;
+            else
+              combinedName = combinedName .. " / " .. name;
             end
-            foundNames[name] = true;
-          elseif not(foundNames[name]) then
-            if (name ~= "") then
-              if (childOption.type == "description") then
-                combinedName = combinedName .. "\n\n" .. name;
-              else
-                combinedName = combinedName .. " / " .. name;
-              end
-            end
-            foundNames[name] = true;
           end
+          foundNames[name] = true;
         end
       end
     end
-    return combinedName;
+    if combinedName then
+      commonOptionsCache:SetNameAll(info, combinedName)
+    end
+
+    return combinedName or ""
   end
 
   local function descAll(info)
     local combinedDesc;
     local first = true;
-    for index, childId in ipairs(data.controlledChildren) do
-      local childData = WeakAuras.GetData(childId);
-      if(childData) then
-        local childOption = getChildOption(OptionsPrivate.EnsureOptions(childData, subOption), info);
-        if (childOption) then
-          local desc;
-          if(type(childOption.desc) == "function") then
-            desc = childOption.desc(info);
-          else
-            desc = childOption.desc;
-          end
-          if(first) then
-            combinedDesc = desc;
-            first = false;
-          elseif not(combinedDesc == desc) then
-            return L["Not all children have the same value for this option"];
-          end
+    for child in OptionsPrivate.Private.TraverseLeafs(data) do
+      local childOption = getChildOption(OptionsPrivate.EnsureOptions(child, subOption), info);
+      if (childOption) then
+        local desc;
+        if(type(childOption.desc) == "function") then
+          desc = childOption.desc(info);
+        else
+          desc = childOption.desc;
+        end
+        if(first) then
+          combinedDesc = desc;
+          first = false;
+        elseif not(combinedDesc == desc) then
+          return L["Not all children have the same value for this option"];
         end
       end
     end
@@ -645,7 +672,7 @@ local function replaceNameDescFuncs(intable, data, subOption)
             if(name == "") then
               return name;
             else
-              return "|cFF4080FF"..(name or "error");
+              return "|cFF4080FF"..(name or "error").."|r";
             end
           end
         end
@@ -659,70 +686,76 @@ local function replaceNameDescFuncs(intable, data, subOption)
             end
 
             local values = {};
-            for index, childId in ipairs(data.controlledChildren) do
-              local childData = WeakAuras.GetData(childId);
-              if(childData) then
-                local childOptions = OptionsPrivate.EnsureOptions(childData, subOption)
-                local childOption = childOptions;
-                local childOptionTable = {[0] = childOption};
-                for i=1,#info do
-                  childOption = childOption.args[info[i]];
-                  childOptionTable[i] = childOption;
-                end
-                if (childOption and not hiddenChild(childOptionTable, info)) then
-                  for i=#childOptionTable,0,-1 do
-                    if(childOptionTable[i].get) then
-                      if(intable.type == "toggle") then
-                        local name, tri;
-                        if(type(childOption.name) == "function") then
-                          name = childOption.name(info);
-                          tri = true;
-                        else
-                          name = childOption.name;
-                        end
-                        if(tri and childOptionTable[i].get(info)) then
-                          tinsert(values, "|cFFE0E000"..childId..": |r"..name);
-                        elseif(tri) then
-                          tinsert(values, "|cFFE0E000"..childId..": |r"..L["Ignored"]);
-                        elseif(childOptionTable[i].get(info)) then
-                          tinsert(values, "|cFFE0E000"..childId..": |r|cFF00FF00"..L["Enabled"]);
-                        else
-                          tinsert(values, "|cFFE0E000"..childId..": |r|cFFFF0000"..L["Disabled"]);
-                        end
-                      elseif(intable.type == "color") then
-                        local r, g, b = childOptionTable[i].get(info);
-                        r, g, b = r or 1, g or 1, b or 1;
-                        tinsert(values, ("|cFF%2x%2x%2x%s"):format(r * 220 + 35, g * 220 + 35, b * 220 + 35, childId));
-                      elseif(intable.type == "select") then
-                        local selectValues = type(intable.values) == "table" and intable.values or intable.values(info);
-                        local key = childOptionTable[i].get(info);
-                        local display = key and selectValues[key] or L["None"];
-                        if intable.dialogControl == "LSM30_Font" then
-                          tinsert(values, "|cFFE0E000"..childId..": |r" .. key);
-                        else
-                          tinsert(values, "|cFFE0E000"..childId..": |r"..display);
-                        end
-                      elseif(intable.type == "multiselect") then
-                        local selectedValues = {};
-                        for k, v in pairs(combinedKeys) do
-                          if (childOptionTable[i].get(info, k)) then
-                            tinsert(selectedValues, tostring(v))
-                          end
-                        end
-                        tinsert(values, "|cFFE0E000"..childId..": |r"..table.concat(selectedValues, ","));
+            for child in OptionsPrivate.Private.TraverseLeafs(data) do
+              local childOptions = OptionsPrivate.EnsureOptions(child, subOption)
+              local childOption = childOptions;
+              local childOptionTable = {[0] = childOption};
+              for i=1,#info do
+                childOption = childOption.args[info[i]];
+                childOptionTable[i] = childOption;
+              end
+              if (childOption and not hiddenChild(childOptionTable, info)) then
+                for i=#childOptionTable,0,-1 do
+                  if(childOptionTable[i].get) then
+                    if(intable.type == "toggle") then
+                      local name, tri;
+                      if(type(childOption.name) == "function") then
+                        name = childOption.name(info);
+                        tri = true;
                       else
-                        local display = childOptionTable[i].get(info) or L["None"];
-                        if(type(display) == "number") then
-                          display = math.floor(display * 100) / 100;
-                        else
-                          if #display > 50 then
-                            display = display:sub(1, 50) .. "..."
-                          end
-                        end
-                        tinsert(values, "|cFFE0E000"..childId..": |r"..display);
+                        name = childOption.name;
                       end
-                      break;
+                      if(tri and childOptionTable[i].get(info)) then
+                        tinsert(values, "|cFFE0E000"..child.id..": |r"..name);
+                      elseif(tri) then
+                        tinsert(values, "|cFFE0E000"..child.id..": |r"..L["Ignored"]);
+                      elseif(childOptionTable[i].get(info)) then
+                        tinsert(values, "|cFFE0E000"..child.id..": |r|cFF00FF00"..L["Enabled"].."|r");
+                      else
+                        tinsert(values, "|cFFE0E000"..child.id..": |r|cFFFF0000"..L["Disabled"].."|r");
+                      end
+                    elseif(intable.type == "color") then
+                      local r, g, b = childOptionTable[i].get(info);
+                      r, g, b = r or 1, g or 1, b or 1;
+                      tinsert(values, ("|cFF%2x%2x%2x%s|r"):format(r * 220 + 35, g * 220 + 35, b * 220 + 35, child.id));
+                    elseif(intable.type == "select") then
+                      local selectValues = type(intable.values) == "table" and intable.values or intable.values(info);
+                      local key = childOptionTable[i].get(info);
+                      local display = key and selectValues[key] or L["None"];
+                      if intable.dialogControl == "LSM30_Font" then
+                        tinsert(values, "|cFFE0E000"..child.id..": |r" .. key);
+                      else
+                        if type(display) == "string" then
+                          tinsert(values, "|cFFE0E000"..child.id..": |r"..display);
+                        elseif type(display) == "table" then
+                          tinsert(values, "|cFFE0E000"..child.id..": |r"..display[1].."/"..display[2] );
+                        end
+                      end
+                    elseif(intable.type == "multiselect") then
+                      local selectedValues = {};
+                      for k, v in pairs(combinedKeys) do
+                        if (childOptionTable[i].get(info, k)) then
+                          tinsert(selectedValues, tostring(v))
+                        end
+                      end
+                      tinsert(values, "|cFFE0E000"..child.id..": |r"..table.concat(selectedValues, ","));
+                    else
+                      local display = childOptionTable[i].get(info) or L["None"];
+                      if(type(display) == "number") then
+                        display = math.floor(display * 100) / 100;
+                      else
+                        local nullBytePos = display:find("\0", nil, true)
+                        if nullBytePos then
+                          display = display:sub(1, nullBytePos - 1)
+                        end
+
+                        if #display > 50 then
+                          display = display:sub(1, 50) .. "..."
+                        end
+                      end
+                      tinsert(values, "|cFFE0E000"..child.id..": |r"..display);
                     end
+                    break;
                   end
                 end
               end
@@ -742,23 +775,20 @@ local function replaceImageFuncs(intable, data, subOption)
   local function imageAll(info)
     local combinedImage = {};
     local first = true;
-    for index, childId in ipairs(data.controlledChildren) do
-      local childData = WeakAuras.GetData(childId);
-      if(childData) then
-        local childOption = OptionsPrivate.EnsureOptions(childData, subOption)
-        if not(childOption) then
-          return "error"
-        end
-        childOption = getChildOption(childOption, info);
-        if childOption and childOption.image then
-          local image = {childOption.image(info)};
-          if(first) then
-            combinedImage = image;
-            first = false;
-          else
-            if not(combinedImage[1] == image[1]) then
-              return "", 0, 0;
-            end
+    for child in OptionsPrivate.Private.TraverseLeafs(data) do
+      local childOption = OptionsPrivate.EnsureOptions(child, subOption)
+      if not(childOption) then
+        return "error"
+      end
+      childOption = getChildOption(childOption, info);
+      if childOption and childOption.image then
+        local image = {childOption.image(info)};
+        if(first) then
+          combinedImage = image;
+          first = false;
+        else
+          if not(combinedImage[1] == image[1]) then
+            return "", 0, 0;
           end
         end
       end
@@ -779,45 +809,51 @@ local function replaceImageFuncs(intable, data, subOption)
   recurse(intable);
 end
 
+local concatenableTypes = {
+  string = true,
+  number = true
+}
+local function isConcatenableValue(value)
+  return value and concatenableTypes[type(value)]
+end
 local function replaceValuesFuncs(intable, data, subOption)
   local function valuesAll(info)
     local combinedValues = {};
     local handledValues = {};
     local first = true;
-    for index, childId in ipairs(data.controlledChildren) do
-      local childData = WeakAuras.GetData(childId);
-      if(childData) then
-        local childOption = OptionsPrivate.EnsureOptions(childData, subOption)
-        if not(childOption) then
-          return "error"
-        end
+    for child in OptionsPrivate.Private.TraverseLeafs(data) do
+      local childOption = OptionsPrivate.EnsureOptions(child, subOption)
+      if not(childOption) then
+        return "error"
+      end
 
-        childOption = getChildOption(childOption, info);
-        if (childOption) then
-          local values = childOption.values;
-          if (type(values) == "function") then
-            values = values(info);
+      childOption = getChildOption(childOption, info);
+      if (childOption) then
+        local values = childOption.values;
+        if (type(values) == "function") then
+          values = values(info);
+        end
+        if(first) then
+          for k, v in pairs(values) do
+            handledValues[k] = handledValues[k] or {};
+            handledValues[k][v] = true;
+            combinedValues[k] = v;
           end
-          if(first) then
-            for k, v in pairs(values) do
+          first = false;
+        else
+          for k, v in pairs(values) do
+            if (handledValues[k] and handledValues[k][v]) then
+            -- Already known key/value pair
+            else
+              if (combinedValues[k]) then
+                if isConcatenableValue(k) and isConcatenableValue(v) then
+                  combinedValues[k] = combinedValues[k] .. "/" .. v;
+                end
+              else
+                combinedValues[k] = v;
+              end
               handledValues[k] = handledValues[k] or {};
               handledValues[k][v] = true;
-              combinedValues[k] = v;
-            end
-            first = false;
-          else
-            for k, v in pairs(values) do
-              if (handledValues[k] and handledValues[k][v]) then
-              -- Already known key/value pair
-              else
-                if (combinedValues[k]) then
-                  combinedValues[k] = combinedValues[k] .. "/" .. v;
-                else
-                  combinedValues[k] = v;
-                end
-                handledValues[k] = handledValues[k] or {};
-                handledValues[k][v] = true;
-              end
             end
           end
         end
@@ -887,46 +923,45 @@ local getHelper = {
 local function CreateGetAll(subOption)
   return function(data, info, ...)
     local isToggle = nil
+    local isColor = nil
 
     local allChildren = CopyTable(getHelper)
     local enabledChildren = CopyTable(getHelper)
-
-    for index, childId in ipairs(data.controlledChildren) do
-      if isToggle == nil then
-        local childData = WeakAuras.GetData(childId)
-        local childOptions = getChildOption(OptionsPrivate.EnsureOptions(childData, subOption), info)
+    for child in OptionsPrivate.Private.TraverseLeafs(data) do
+      if isToggle == nil or isColor == nil then
+        local childOptions = getChildOption(OptionsPrivate.EnsureOptions(child, subOption), info)
         isToggle = childOptions and childOptions.type == "toggle"
+        isColor = childOptions and childOptions.type == "color"
       end
 
-      local childData = WeakAuras.GetData(childId);
 
-      if(childData) then
-        local childOptions = OptionsPrivate.EnsureOptions(childData, subOption)
-        local childOption = childOptions;
-        local childOptionTable = {[0] = childOption};
-        for i=1,#info do
-          childOption = childOption.args[info[i]];
-          childOptionTable[i] = childOption;
-        end
-
-        if (childOption) then
-          for i=#childOptionTable,0,-1 do
-            if(childOptionTable[i].get) then
-              local values = {childOptionTable[i].get(info, ...)};
-              if isToggle and values[1] == nil then
-                values[1] = false
-              end
-
-              allChildren:Set(values)
-              if not disabledOrHiddenChild(childOptionTable, info) then
-                 enabledChildren:Set(values)
-              end
-
-              if not allChildren:GetSame() and not enabledChildren:GetSame() then
-                return nil;
-              end
-              break;
+      local childOptions = OptionsPrivate.EnsureOptions(child, subOption)
+      local childOption = childOptions;
+      local childOptionTable = {[0] = childOption};
+      for i=1,#info do
+        childOption = childOption.args[info[i]];
+        childOptionTable[i] = childOption;
+      end
+      if (childOption) then
+        for i=#childOptionTable,0,-1 do
+          if(childOptionTable[i].get) then
+            local values = {childOptionTable[i].get(info, ...)};
+            if isToggle and values[1] == nil then
+              values[1] = false
             end
+
+            allChildren:Set(values)
+            if not disabledOrHiddenChild(childOptionTable, info) then
+                enabledChildren:Set(values)
+            end
+
+            if not allChildren:GetSame() and not enabledChildren:GetSame() then
+              if isColor then
+                return 0, 0, 0, 1
+              end
+              return nil;
+            end
+            break;
           end
         end
       end
@@ -944,38 +979,48 @@ end
 local function CreateSetAll(subOption, getAll)
   return function(data, info, ...)
     OptionsPrivate.Private.pauseOptionsProcessing(true);
-    OptionsPrivate.Private.PauseAllDynamicGroups()
+    local suspended = OptionsPrivate.Private.PauseAllDynamicGroups()
     local before = getAll(data, info, ...)
-    for index, childId in ipairs(data.controlledChildren) do
-      local childData = WeakAuras.GetData(childId);
-      if(childData) then
-        local childOptions = OptionsPrivate.EnsureOptions(childData, subOption)
-        local childOption = childOptions;
-        local childOptionTable = {[0] = childOption};
-        for i=1,#info do
-          childOption = childOption.args[info[i]];
-          childOptionTable[i] = childOption;
-        end
+    for child in OptionsPrivate.Private.TraverseLeafs(data) do
+      local childOptions = OptionsPrivate.EnsureOptions(child, subOption)
+      local childOption = childOptions;
+      local childOptionTable = {[0] = childOption};
+      for i=1,#info do
+        childOption = childOption.args[info[i]];
+        childOptionTable[i] = childOption;
+      end
 
-        if (childOption and not disabledOrHiddenChild(childOptionTable, info)) then
-          for i=#childOptionTable,0,-1 do
-            if(childOptionTable[i].set) then
-              if (childOptionTable[i].type == "multiselect") then
-                childOptionTable[i].set(info, ..., not before);
+      if (childOption and not disabledOrHiddenChild(childOptionTable, info)) then
+        for i=#childOptionTable,0,-1 do
+          local optionTable = childOptionTable[i]
+          if(optionTable.set) then
+            if (optionTable.type == "multiselect") then
+              local newValue
+              if optionTable.multiTristate then
+                if before == true then
+                  newValue = false
+                elseif before == false then
+                  newValue = nil
+                elseif before == nil then
+                  newValue = true
+                end
               else
-                childOptionTable[i].set(info, ...);
+                newValue = not before
               end
-              break;
+              optionTable.set(info, ..., newValue)
+            else
+              optionTable.set(info, ...);
             end
+            break;
           end
         end
       end
     end
 
-    OptionsPrivate.Private.ResumeAllDynamicGroups()
+    OptionsPrivate.Private.ResumeAllDynamicGroups(suspended)
     OptionsPrivate.Private.pauseOptionsProcessing(false);
     OptionsPrivate.Private.ScanForLoads();
-    WeakAuras.SortDisplayButtons();
+    OptionsPrivate.SortDisplayButtons(nil, true);
     OptionsPrivate.UpdateOptions()
   end
 end
@@ -983,28 +1028,172 @@ end
 local function CreateExecuteAll(subOption)
   return function(data, info, button)
     local secondCall = nil
-    for index, childId in ipairs(data.controlledChildren) do
-      local childData = WeakAuras.GetData(childId);
-      if(childData) then
-        local childOptions = OptionsPrivate.EnsureOptions(childData, subOption)
-        local childOption = childOptions;
-        local childOptionTable = {[0] = childOption};
-        for i=1,#info do
-          childOption = childOption.args[info[i]];
-          childOptionTable[i] = childOption;
-        end
+    for child in OptionsPrivate.Private.TraverseLeafs(data) do
+      local childOptions = OptionsPrivate.EnsureOptions(child, subOption)
+      local childOption = childOptions;
+      local childOptionTable = {[0] = childOption};
+      for i=1,#info do
+        childOption = childOption.args[info[i]];
+        childOptionTable[i] = childOption;
+      end
 
-        if (childOption and not disabledOrHiddenChild(childOptionTable, info)) then
-          -- Some functions, that is the expand/collapse functions need to be
-          -- effectively called only once. Passing in the secondCall parameter allows
-          -- them to distinguish between the first and every other call
-          childOption.func(info, button, secondCall)
-          secondCall = true
-        end
+      if (childOption and not disabledOrHiddenChild(childOptionTable, info)) then
+        -- Some functions, that is the expand/collapse functions need to be
+        -- effectively called only once. Passing in the secondCall parameter allows
+        -- them to distinguish between the first and every other call
+        childOption.func(info, button, secondCall)
+        secondCall = true
       end
     end
     WeakAuras.ClearAndUpdateOptions(data.id)
   end
+end
+
+local function ProgressOptions(data)
+  local order = 1
+  local options = {
+    __title = L["Progress Settings"],
+    __order = 98,
+  }
+
+  options.progressSource = {
+    type = "select",
+    width = WeakAuras.doubleWidth,
+    name = L["Progress Source"],
+    order = order,
+    control = "WeakAurasTwoColumnDropdown",
+    values = OptionsPrivate.Private.GetProgressSourcesForUi(data),
+    get = function(info)
+      return OptionsPrivate.Private.GetProgressValueConstant(data.progressSource)
+    end,
+    set = function(info, value)
+      if value then
+        data.progressSource = data.progressSource or {}
+        -- Copy only trigger + property
+        data.progressSource[1] = value[1]
+        data.progressSource[2] = value[2]
+      else
+        data.progressSource = nil
+      end
+      WeakAuras.Add(data)
+    end
+  }
+
+  options.progressSourceWarning = {
+    type = "description",
+    width = WeakAuras.doubleWidth,
+    name = L["Note: This progress source does not provide a total value/duration. A total value/duration must be set via \"Set Maximum Progress\""],
+    order = order + 0.5,
+    hidden = function()
+      local progressSource = OptionsPrivate.Private.AddProgressSourceMetaData(data, data.progressSource)
+      -- Auto progress, Manual Progress or the progress source has a total property
+      if not progressSource or progressSource[2] == "auto" or progressSource[1] == 0 or progressSource[4] ~= nil then
+        return true
+      end
+      return false
+    end
+  }
+
+  local function hiddenManual()
+    if data.progressSource and data.progressSource[1] == 0 then
+      return false
+    end
+    return true
+  end
+
+  options.progressSourceManualValue = {
+    type = "range",
+    control = "WeakAurasSpinBox",
+    width = WeakAuras.normalWidth,
+    name = L["Value"],
+    order = order + 0.7,
+    min = 0,
+    softMax = 100,
+    bigStep = 1,
+    hidden = hiddenManual,
+    get = function(info)
+      return data.progressSource and data.progressSource[3] or 0
+    end,
+    set = function(info, value)
+      data.progressSource = data.progressSource or {}
+      data.progressSource[3] = value
+      WeakAuras.Add(data)
+    end
+  }
+
+  options.progressSourceManualTotal = {
+    type = "range",
+    control = "WeakAurasSpinBox",
+    width = WeakAuras.normalWidth,
+    name = L["Total"],
+    order = order + 0.8,
+    min = 0,
+    softMax = 100,
+    bigStep = 1,
+    hidden = hiddenManual,
+    get = function(info)
+      return data.progressSource and data.progressSource[4] or 100
+    end,
+    set = function(info, value)
+      data.progressSource = data.progressSource or {}
+      data.progressSource[4] = value
+      WeakAuras.Add(data)
+    end
+  }
+
+  options.useAdjustededMin = {
+    type = "toggle",
+    width = WeakAuras.normalWidth,
+    name = L["Set Minimum Progress"],
+    desc = L["Values/Remaining Time below this value are displayed as zero progress."],
+    order = order + 1
+  };
+
+  options.adjustedMin = {
+    type = "input",
+    validate = WeakAuras.ValidateNumericOrPercent,
+    width = WeakAuras.normalWidth,
+    order = order + 2,
+    name = L["Minimum"],
+    hidden = function() return not data.useAdjustededMin end,
+    desc = L["Enter static or relative values with %"]
+  };
+
+  options.useAdjustedMinSpacer = {
+    type = "description",
+    width = WeakAuras.normalWidth,
+    name = "",
+    order = order + 3,
+    hidden = function() return not (not data.useAdjustededMin and data.useAdjustededMax) end,
+  }
+
+  options.useAdjustededMax = {
+    type = "toggle",
+    width = WeakAuras.normalWidth,
+    name = L["Set Maximum Progress"],
+    desc = L["Values/Remaining Time above this value are displayed as full progress."],
+    order = order + 4
+  }
+
+  options.adjustedMax = {
+    type = "input",
+    width = WeakAuras.normalWidth,
+    validate = WeakAuras.ValidateNumericOrPercent,
+    order = order + 5,
+    name = L["Maximum"],
+    hidden = function() return not data.useAdjustededMax end,
+    desc = L["Enter static or relative values with %"]
+  }
+
+  options.useAdjustedMaxSpacer = {
+    type = "description",
+    width = WeakAuras.normalWidth,
+    name = "",
+    order = order + 6,
+    hidden = function() return not (data.useAdjustededMin and not data.useAdjustededMax) end,
+  }
+
+  return options
 end
 
 local function PositionOptions(id, data, _, hideWidthHeight, disableSelfPoint, group)
@@ -1016,12 +1205,17 @@ local function PositionOptions(id, data, _, hideWidthHeight, disableSelfPoint, g
     end
   end
 
+  local function IsGroupByFrame()
+    return data.regionType == "dynamicgroup" and data.useAnchorPerUnit
+  end
+
   local screenWidth, screenHeight = math.ceil(GetScreenWidth() / 20) * 20, math.ceil(GetScreenHeight() / 20) * 20;
   local positionOptions = {
     __title = L["Position Settings"],
     __order = metaOrder,
     width = {
       type = "range",
+      control = "WeakAurasSpinBox",
       width = WeakAuras.normalWidth,
       name = L["Width"],
       order = 60,
@@ -1033,6 +1227,7 @@ local function PositionOptions(id, data, _, hideWidthHeight, disableSelfPoint, g
     },
     height = {
       type = "range",
+      control = "WeakAurasSpinBox",
       width = WeakAuras.normalWidth,
       name = L["Height"],
       order = 61,
@@ -1042,11 +1237,151 @@ local function PositionOptions(id, data, _, hideWidthHeight, disableSelfPoint, g
       bigStep = 1,
       hidden = hideWidthHeight,
     },
+    anchorFrameType = {
+      type = "select",
+      width = WeakAuras.normalWidth,
+      name = L["Anchored To"],
+      order = 70,
+      hidden = function()
+        return IsParentDynamicGroup() or IsGroupByFrame()
+      end,
+      values = (data.regionType == "group" or data.regionType == "dynamicgroup")
+                and OptionsPrivate.Private.anchor_frame_types_group
+                or OptionsPrivate.Private.anchor_frame_types,
+      sorting = OptionsPrivate.Private.SortOrderForValues(
+                (data.regionType == "group" or data.regionType == "dynamicgroup")
+                and OptionsPrivate.Private.anchor_frame_types_group
+                or OptionsPrivate.Private.anchor_frame_types),
+    },
+    anchorFrameParent = {
+      type = "toggle",
+      width = WeakAuras.normalWidth,
+      name = L["Set Parent to Anchor"],
+      desc = L["Sets the anchored frame as the aura's parent, causing the aura to inherit attributes such as visibility and scale."],
+      order = 71,
+      get = function()
+        return data.anchorFrameParent or data.anchorFrameParent == nil;
+      end,
+      hidden = function()
+        return not IsGroupByFrame() and (data.anchorFrameType == "SCREEN" or data.anchorFrameType == "UIPARENT" or data.anchorFrameType == "MOUSE" or IsParentDynamicGroup());
+      end,
+    },
+    anchorFrameSpaceOne = {
+      type = "execute",
+      width = WeakAuras.normalWidth,
+      name = "",
+      order = 72,
+      image = function() return "", 0, 0 end,
+      hidden = function()
+        return IsParentDynamicGroup() or not (data.anchorFrameType == "SCREEN" or data.anchorFrameType == "UIPARENT" or data.anchorFrameType == "MOUSE" or IsGroupByFrame())
+      end,
+    },
+    -- Input field to select frame to anchor on
+    anchorFrameFrame = {
+      type = "input",
+      width = WeakAuras.normalWidth,
+      name = L["Frame"],
+      order = 73,
+      hidden = function()
+        if (IsParentDynamicGroup() or IsGroupByFrame()) then
+          return true;
+        end
+        return not (data.anchorFrameType == "SELECTFRAME")
+      end
+    },
+    -- Button to select frame to anchor on
+    chooseAnchorFrameFrame = {
+      type = "execute",
+      width = WeakAuras.normalWidth,
+      name = L["Choose"],
+      order = 74,
+      hidden = function()
+        if (IsParentDynamicGroup() or IsGroupByFrame()) then
+          return true;
+        end
+        return not (data.anchorFrameType == "SELECTFRAME")
+      end,
+      func = function()
+        OptionsPrivate.StartFrameChooser(data, {"anchorFrameFrame"});
+      end
+    },
+    selfPoint = {
+      type = "select",
+      width = WeakAuras.normalWidth,
+      name = L["Anchor"],
+      order = 75,
+      hidden = IsParentDynamicGroup,
+      values = OptionsPrivate.Private.point_types,
+      disabled = disableSelfPoint,
+      control = "WeakAurasAnchorButtons",
+    },
+    anchorPoint = {
+      type = "select",
+      width = WeakAuras.normalWidth,
+      name = function()
+        if (data.anchorFrameType == "SCREEN" or data.anchorFrameType == "UIPARENT") then
+          return L["To Screen's"]
+        elseif (data.anchorFrameType == "PRD") then
+          return L["To Personal Ressource Display's"];
+        else
+          return L["To Frame's"];
+        end
+      end,
+      order = 76,
+      hidden = function()
+        if (data.parent) then
+          if IsGroupByFrame() then
+            return false
+          end
+          if IsParentDynamicGroup() then
+            return true
+          end
+          return data.anchorFrameType == "SCREEN" or data.anchorFrameType == "MOUSE";
+        else
+          return data.anchorFrameType == "MOUSE";
+        end
+      end,
+      values = OptionsPrivate.Private.point_types,
+      control = "WeakAurasAnchorButtons",
+    },
+    anchorPointGroup = {
+      type = "select",
+      width = WeakAuras.normalWidth,
+      name = L["To Group's"],
+      order = 77,
+      hidden = function()
+        if IsGroupByFrame() then
+          return true
+        end
+        if (data.anchorFrameType ~= "SCREEN") then
+          return true;
+        end
+        if (data.parent) then
+          return IsParentDynamicGroup();
+        end
+        return true;
+      end,
+      disabled = true,
+      values = {["CENTER"] = L["Anchor Point"]},
+      get = function() return "CENTER"; end,
+      control = "WeakAurasAnchorButtons",
+    },
+    anchorFramePoints = {
+      type = "execute",
+      width = WeakAuras.normalWidth,
+      name = "",
+      order = 78,
+      image = function() return "", 0, 0 end,
+      hidden = function()
+        return not (data.anchorFrameType == "MOUSE") or IsParentDynamicGroup();
+      end
+    },
     xOffset = {
       type = "range",
-      width = WeakAuras.normalWidth,
+      control = "WeakAurasSpinBox",
       name = L["X Offset"],
-      order = 62,
+      order = 79,
+      width = WeakAuras.normalWidth,
       softMin = (-1 * screenWidth),
       min = (-4 * screenWidth),
       softMax = screenWidth,
@@ -1058,19 +1393,15 @@ local function PositionOptions(id, data, _, hideWidthHeight, disableSelfPoint, g
         WeakAuras.Add(data);
         WeakAuras.UpdateThumbnail(data);
         OptionsPrivate.ResetMoverSizer();
-        if(data.parent) then
-          local parentData = WeakAuras.GetData(data.parent);
-          if(parentData) then
-            WeakAuras.Add(parentData);
-          end
-        end
+        OptionsPrivate.Private.AddParents(data)
       end
     },
     yOffset = {
       type = "range",
-      width = WeakAuras.normalWidth,
+      control = "WeakAurasSpinBox",
       name = L["Y Offset"],
-      order = 63,
+      order = 80,
+      width = WeakAuras.normalWidth,
       softMin = (-1 * screenHeight),
       min = (-4 * screenHeight),
       softMax = screenHeight,
@@ -1082,137 +1413,32 @@ local function PositionOptions(id, data, _, hideWidthHeight, disableSelfPoint, g
         WeakAuras.Add(data);
         WeakAuras.UpdateThumbnail(data);
         OptionsPrivate.ResetMoverSizer();
-        if(data.parent) then
-          local parentData = WeakAuras.GetData(data.parent);
-          if(parentData) then
-            WeakAuras.Add(parentData);
-          end
-        end
+        OptionsPrivate.Private.AddParents(data)
       end
-    },
-    selfPoint = {
-      type = "select",
-      width = WeakAuras.normalWidth,
-      name = L["Anchor"],
-      order = 70,
-      hidden = IsParentDynamicGroup,
-      values = OptionsPrivate.Private.point_types,
-      disabled = disableSelfPoint,
-    },
-    anchorFrameType = {
-      type = "select",
-      width = WeakAuras.normalWidth,
-      name = L["Anchored To"],
-      order = 72,
-      hidden = IsParentDynamicGroup,
-      values = (data.regionType == "group" or data.regionType == "dynamicgroup") and OptionsPrivate.Private.anchor_frame_types_group or OptionsPrivate.Private.anchor_frame_types,
-    },
-    -- Input field to select frame to anchor on
-    anchorFrameFrame = {
-      type = "input",
-      width = WeakAuras.normalWidth,
-      name = L["Frame"],
-      order = 72.2,
-      hidden = function()
-        if (IsParentDynamicGroup()) then
-          return true;
-        end
-        return not (data.anchorFrameType == "SELECTFRAME")
-      end
-    },
-    -- Button to select frame to anchor on
-    chooseAnchorFrameFrame = {
-      type = "execute",
-      width = WeakAuras.normalWidth,
-      name = L["Choose"],
-      order = 72.4,
-      hidden = function()
-        if (IsParentDynamicGroup()) then
-          return true;
-        end
-        return not (data.anchorFrameType == "SELECTFRAME")
-      end,
-      func = function()
-        OptionsPrivate.StartFrameChooser(data, {"anchorFrameFrame"});
-      end
-    },
-    anchorPoint = {
-      type = "select",
-      width = WeakAuras.normalWidth,
-      name = function()
-        if (data.anchorFrameType == "SCREEN") then
-          return L["To Screen's"]
-        elseif (data.anchorFrameType == "PRD") then
-          return L["To Personal Ressource Display's"];
-        else
-          return L["To Frame's"];
-        end
-      end,
-      order = 75,
-      hidden = function()
-        if (data.parent) then
-          --if (IsParentDynamicGroup()) then
-          --  return true;
-          --end
-          return data.anchorFrameType == "SCREEN" or data.anchorFrameType == "MOUSE";
-        else
-          return data.anchorFrameType == "MOUSE";
-        end
-      end,
-      values = OptionsPrivate.Private.point_types
-    },
-    anchorPointGroup = {
-      type = "select",
-      width = WeakAuras.normalWidth,
-      name = L["To Group's"],
-      order = 76,
-      hidden = function()
-        if (data.anchorFrameType ~= "SCREEN") then
-          return true;
-        end
-        if (data.parent) then
-          return IsParentDynamicGroup();
-        end
-        return true;
-      end,
-      disabled = true,
-      values = {["CENTER"] = L["Anchor Point"]},
-      get = function() return "CENTER"; end
-    },
-    anchorFrameParent = {
-      type = "toggle",
-      width = WeakAuras.normalWidth,
-      name = L["Set Parent to Anchor"],
-      desc = L["Sets the anchored frame as the aura's parent, causing the aura to inherit attributes such as visibility and scale."],
-      order = 77,
-      get = function()
-        return data.anchorFrameParent or data.anchorFrameParent == nil;
-      end,
-      hidden = function()
-        return (data.anchorFrameType == "SCREEN" or data.anchorFrameType == "MOUSE" or IsParentDynamicGroup());
-      end,
     },
     frameStrata = {
       type = "select",
       width = WeakAuras.normalWidth,
       name = L["Frame Strata"],
-      order = 78,
+      order = 81,
       values = OptionsPrivate.Private.frame_strata_types
     },
     anchorFrameSpace = {
       type = "execute",
       width = WeakAuras.normalWidth,
       name = "",
-      order = 79,
+      order = 82,
       image = function() return "", 0, 0 end,
       hidden = function()
-        return not (data.anchorFrameType ~= "SCREEN" or IsParentDynamicGroup());
+        return not (data.anchorFrameType ~= "SCREEN" or data.anchorFrameType ~= "UIPARENT" or IsParentDynamicGroup());
       end
     },
   };
 
-  OptionsPrivate.commonOptions.AddCodeOption(positionOptions, data, L["Custom Anchor"], "custom_anchor", "https://github.com/WeakAuras/WeakAuras2/wiki/Custom-Code-Blocks#custom-anchor-function",
-                          72.1, function() return not(data.anchorFrameType == "CUSTOM" and not IsParentDynamicGroup()) end, {"customAnchor"}, false, { setOnParent = group })
+  OptionsPrivate.commonOptions.AddCodeOption(positionOptions, data, L["Custom Anchor"], "custom_anchor",
+                      "https://github.com/WeakAuras/WeakAuras2/wiki/Custom-Code-Blocks#custom-anchor-function",
+                      71.5, function() return not(data.anchorFrameType == "CUSTOM" and not IsParentDynamicGroup() and not IsGroupByFrame()) end,
+                      {"customAnchor"}, false, { setOnParent = group })
   return positionOptions;
 end
 
@@ -1251,6 +1477,7 @@ local function BorderOptions(id, data, showBackDropOptions, hiddenFunc, order)
     },
     borderOffset = {
       type = "range",
+      control = "WeakAurasSpinBox",
       width = WeakAuras.normalWidth,
       name = L["Border Offset"],
       order = order + 0.3,
@@ -1261,6 +1488,7 @@ local function BorderOptions(id, data, showBackDropOptions, hiddenFunc, order)
     },
     borderSize = {
       type = "range",
+      control = "WeakAurasSpinBox",
       width = WeakAuras.normalWidth,
       name = L["Border Size"],
       order = order + 0.4,
@@ -1271,6 +1499,7 @@ local function BorderOptions(id, data, showBackDropOptions, hiddenFunc, order)
     },
     borderInset = {
       type = "range",
+      control = "WeakAurasSpinBox",
       width = WeakAuras.normalWidth,
       name = L["Border Inset"],
       order = order + 0.5,
@@ -1339,8 +1568,9 @@ local function AddCodeOption(args, data, name, prefix, url, order, hiddenFunc, p
   options.extraFunctions = options.extraFunctions or {};
   tinsert(options.extraFunctions, 1, {
     buttonLabel = L["Expand"],
-    func = function(info)
-      OptionsPrivate.OpenTextEditor(OptionsPrivate.GetPickedDisplay(), path, encloseInFunction, options.multipath, options.reloadOptions, options.setOnParent, url, options.validator)
+    func = function()
+      OptionsPrivate.OpenTextEditor(OptionsPrivate.GetPickedDisplay(), path, encloseInFunction, options.multipath,
+                                    options.reloadOptions, options.setOnParent, url, options.validator)
     end
   });
 
@@ -1443,7 +1673,7 @@ local function AddCodeOption(args, data, name, prefix, url, order, hiddenFunc, p
   };
 end
 
-local function AddCommonTriggerOptions(options, data, triggernum)
+local function AddCommonTriggerOptions(options, data, triggernum, doubleWidth)
   local trigger = data.triggers[triggernum].trigger
 
   local trigger_types = {};
@@ -1451,37 +1681,29 @@ local function AddCommonTriggerOptions(options, data, triggernum)
     trigger_types[type] = triggerSystem.GetName(type);
   end
 
-  options.typedesc = {
-    type = "description",
-    width = WeakAuras.normalWidth,
-    name = L["Type"],
-    order = 1,
-    disabled = true,
-    get = function() return true end
-  }
   options.type = {
     type = "select",
-    width = WeakAuras.normalWidth,
+    width = doubleWidth and WeakAuras.doubleWidth or WeakAuras.normalWidth,
     name = L["Type"],
     desc = L["The type of trigger"],
     order = 1.1,
     values = trigger_types,
-    get = function(info)
+    sorting = OptionsPrivate.Private.SortOrderForValues(trigger_types),
+    get = function()
       return trigger.type
     end,
     set = function(info, v)
       trigger.type = v;
       local prototype = trigger.event and OptionsPrivate.Private.event_prototypes[trigger.event];
-      if v == "status" and (not prototype or prototype.type == "event") then
-        trigger.event = "Cooldown Progress (Spell)"
-      elseif v == "event" and (not prototype or prototype.type == "status") then
-        trigger.event = "Combat Log"
+      if OptionsPrivate.Private.event_categories[v] and OptionsPrivate.Private.event_categories[v].default then
+        if not prototype or prototype.type ~= v then
+          trigger.event = OptionsPrivate.Private.event_categories[v].default
+        end
       end
       WeakAuras.Add(data);
       WeakAuras.UpdateThumbnail(data);
-      WeakAuras.UpdateDisplayButton(data);
       WeakAuras.ClearAndUpdateOptions(data.id);
-    end
+    end,
   }
 end
 
@@ -1554,8 +1776,10 @@ OptionsPrivate.commonOptions.CreateSetAll = CreateSetAll
 OptionsPrivate.commonOptions.CreateExecuteAll = CreateExecuteAll
 
 OptionsPrivate.commonOptions.PositionOptions = PositionOptions
+OptionsPrivate.commonOptions.ProgressOptions = ProgressOptions
 OptionsPrivate.commonOptions.BorderOptions = BorderOptions
 OptionsPrivate.commonOptions.AddCodeOption = AddCodeOption
 
 OptionsPrivate.commonOptions.AddCommonTriggerOptions = AddCommonTriggerOptions
 OptionsPrivate.commonOptions.AddTriggerGetterSetter = AddTriggerGetterSetter
+

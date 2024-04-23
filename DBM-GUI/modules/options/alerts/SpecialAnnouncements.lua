@@ -1,3 +1,7 @@
+local isRetail = WOW_PROJECT_ID == (WOW_PROJECT_MAINLINE or 1)
+local isWrath = WOW_PROJECT_ID == (WOW_PROJECT_WRATH_CLASSIC or 11)
+local isClassic = WOW_PROJECT_ID == (WOW_PROJECT_CLASSIC or 2)
+
 local L = DBM_GUI_L
 
 local specPanel = DBM_GUI.Cat_Alerts:CreateNewPanel(L.Panel_SpecWarnFrame, "option")
@@ -53,18 +57,18 @@ local Fonts = DBM_GUI:MixinSharedMedia3("font", {
 	},
 	{
 		text	= "Skurri",
-		value	= "Fonts\\skurri.ttf"
+		value	= "Fonts\\SKURRI_CYR.ttf"
 	},
 	{
 		text	= "Morpheus",
-		value	= "Fonts\\MORPHEUS.ttf"
+		value	= "Fonts\\MORPHEUS_CYR.ttf"
 	}
 })
 
 local FontDropDown = specArea:CreateDropdown(L.FontType, Fonts, "DBM", "SpecialWarningFont", function(value)
 	DBM.Options.SpecialWarningFont = value
 	DBM:UpdateSpecialWarningOptions()
-	DBM:ShowTestSpecialWarning(nil, 1)
+	DBM:ShowTestSpecialWarning(nil, 1, nil, true)
 end)
 FontDropDown:SetPoint("TOPLEFT", specArea.frame, "TOPLEFT", 95, -198)
 FontDropDown.myheight = 0
@@ -130,25 +134,56 @@ durationSlider:HookScript("OnValueChanged", function(self)
 end)
 durationSlider.myheight = 0
 
-local Sounds = DBM_GUI:MixinSharedMedia3("sound", {
-	{ text = L.NoSound, value = "" },
-	{ text = "Algalon: Beware!", value = 15391 },
-	{ text = "BB Wolf: Run Away", value = 9278 },
-	{ text = "Blizzard Raid Emote", value = 37666 },
-	{ text = "C'Thun: You Will Die!", value = 8585 },
-	{ text = "Headless Horseman: Laugh", value = 11965 },
-	{ text = "Illidan: Not Prepared", value = 12506 },
-	{ text = "Illidan: Not Prepared2", value = 68563 },
-	{ text = "Kaz'rogal: Marked", value = 11052 },
-	{ text = "Kil'Jaeden: Destruction", value = 12506 },
-	{ text = "Loatheb: I see you", value = 128466 },
-	{ text = "Lady Malande: Flee", value = 11482 },
-	{ text = "Milhouse: Light You Up", value = 49764 },
-	{ text = "Night Elf Bell", value = 11742 },
-	{ text = "PvP Flag", value = 8174 },
-	{ text = "Void Reaver: Marked", value = 11213 },
-	{ text = "Yogg Saron: Laugh", value = 15757 },
-})
+local sounds
+if isRetail then
+	sounds = DBM_GUI:MixinSharedMedia3("sound", {
+		{ text = "Algalon: Beware!", value = isRetail and 543587 or "Interface\\AddOns\\DBM-Core\\sounds\\ClassicSupport\\UR_Algalon_BHole01.ogg" },
+		{ text = "BB Wolf: Run Away", value = not isClassic and 552035 or "Interface\\AddOns\\DBM-Core\\sounds\\ClassicSupport\\HoodWolfTransformPlayer01.ogg" },
+		{ text = "Blizzard Raid Emote", value = 876098 },
+		{ text = "C'Thun: You Will Die!", value = 546633 },
+		{ text = "Headless Horseman: Laugh", value = 551703 },
+		{ text = "Illidan: Not Prepared", value = not isClassic and 552503 or "Interface\\AddOns\\DBM-Core\\sounds\\ClassicSupport\\BLACK_Illidan_04.ogg" },
+		{ text = "Illidan: Not Prepared2", value = isRetail and 1412178 or "Interface\\AddOns\\DBM-Core\\sounds\\ClassicSupport\\VO_703_Illidan_Stormrage_03.ogg" },
+		{ text = "Kaz'rogal: Marked", value = 553050 },
+		{ text = "Kil'Jaeden: Destruction", value = not isClassic and 553193 or "Interface\\AddOns\\DBM-Core\\sounds\\ClassicSupport\\KILJAEDEN02.ogg" },
+		{ text = "Lady Malande: Flee", value = 553566 },
+		{ text = "Loatheb: I see you", value = 554236 },
+		{ text = "Milhouse: Light You Up", value = 555337 },
+		{ text = "Night Elf Bell", value = 566558 },
+		{ text = "PvP Flag", value = 569200 },
+		{ text = "Void Reaver: Marked", value = 563787 },
+		{ text = "Yogg Saron: Laugh", value = 564859 },
+	})
+elseif isWrath then--Basically all but Blizzard Raid Emote which was added in MoP
+	sounds = DBM_GUI:MixinSharedMedia3("sound", {
+		{ text = "Algalon: Beware!", value = isRetail and 543587 or "Interface\\AddOns\\DBM-Core\\sounds\\ClassicSupport\\UR_Algalon_BHole01.ogg" },
+		{ text = "BB Wolf: Run Away", value = not isClassic and 552035 or "Interface\\AddOns\\DBM-Core\\sounds\\ClassicSupport\\HoodWolfTransformPlayer01.ogg" },
+		{ text = "C'Thun: You Will Die!", value = 546633 },
+		{ text = "Headless Horseman: Laugh", value = 551703 },
+		{ text = "Illidan: Not Prepared", value = not isClassic and 552503 or "Interface\\AddOns\\DBM-Core\\sounds\\ClassicSupport\\BLACK_Illidan_04.ogg" },
+		{ text = "Illidan: Not Prepared2", value = isRetail and 1412178 or "Interface\\AddOns\\DBM-Core\\sounds\\ClassicSupport\\VO_703_Illidan_Stormrage_03.ogg" },
+		{ text = "Kaz'rogal: Marked", value = 553050 },
+		{ text = "Kil'Jaeden: Destruction", value = not isClassic and 553193 or "Interface\\AddOns\\DBM-Core\\sounds\\ClassicSupport\\KILJAEDEN02.ogg" },
+		{ text = "Lady Malande: Flee", value = 553566 },
+		{ text = "Loatheb: I see you", value = 554236 },
+		{ text = "Milhouse: Light You Up", value = 555337 },
+		{ text = "Night Elf Bell", value = 566558 },
+		{ text = "PvP Flag", value = 569200 },
+		{ text = "Void Reaver: Marked", value = 563787 },
+		{ text = "Yogg Saron: Laugh", value = 564859 },
+	})
+else--Vanilla
+	sounds = DBM_GUI:MixinSharedMedia3("sound", {
+		{ text = "Algalon: Beware!", value = isRetail and 543587 or "Interface\\AddOns\\DBM-Core\\sounds\\ClassicSupport\\UR_Algalon_BHole01.ogg" },
+		{ text = "BB Wolf: Run Away", value = not isClassic and 552035 or "Interface\\AddOns\\DBM-Core\\sounds\\ClassicSupport\\HoodWolfTransformPlayer01.ogg" },
+		{ text = "Illidan: Not Prepared", value = not isClassic and 552503 or "Interface\\AddOns\\DBM-Core\\sounds\\ClassicSupport\\BLACK_Illidan_04.ogg" },
+		{ text = "Illidan: Not Prepared2", value = isRetail and 1412178 or "Interface\\AddOns\\DBM-Core\\sounds\\ClassicSupport\\VO_703_Illidan_Stormrage_03.ogg" },
+		{ text = "Kil'Jaeden: Destruction", value = not isClassic and 553193 or "Interface\\AddOns\\DBM-Core\\sounds\\ClassicSupport\\KILJAEDEN02.ogg" },
+		{ text = "Loatheb: I see you", value = 554236 },
+		{ text = "Night Elf Bell", value = 566558 },
+		{ text = "PvP Flag", value = 569200 },
+	})
+end
 
 local specWarnOne = specPanel:CreateArea(L.SpecialWarnHeader1)
 
@@ -183,14 +218,16 @@ color1:SetScript("OnColorSelect", function(self)
 end)
 color1.myheight = 104
 
-local SpecialWarnSoundDropDown = specWarnOne:CreateDropdown(L.SpecialWarnSoundOption, Sounds, "DBM", "SpecialWarningSound", function(value)
+local SpecialWarnSoundDropDown = specWarnOne:CreateDropdown(L.SpecialWarnSoundOption, sounds, "DBM", "SpecialWarningSound", function(value)
 	DBM.Options.SpecialWarningSound = value
 end)
 SpecialWarnSoundDropDown:SetPoint("TOPLEFT", specWarnOne.frame, "TOPLEFT", 95, -28)
 SpecialWarnSoundDropDown.myheight = 0
 
 local flashCheck1 = specWarnOne:CreateCheckButton(L.SpecWarn_Flash, nil, nil, "SpecialWarningFlash1")
-flashCheck1:SetPoint("BOTTOMLEFT", SpecialWarnSoundDropDown, "BOTTOMLEFT", 220, 4)
+flashCheck1:SetPoint("BOTTOMLEFT", SpecialWarnSoundDropDown, "BOTTOMLEFT", 220, 20)
+local vibrateCheck1 = specWarnOne:CreateCheckButton(L.SpecWarn_Vibrate, nil, nil, "SpecialWarningVibrate1")
+vibrateCheck1:SetPoint("TOPLEFT", flashCheck1, "TOPLEFT", 0, -20)
 
 local flashdurSlider = specWarnOne:CreateSlider(L.SpecWarn_FlashDur, 0.2, 2, 0.2, 120)
 flashdurSlider:SetPoint("TOPLEFT", SpecialWarnSoundDropDown, "TOPLEFT", 20, -45)
@@ -249,14 +286,16 @@ color2:SetScript("OnColorSelect", function(self)
 end)
 color2.myheight = 104
 
-local SpecialWarnSoundDropDown2 = specWarnTwo:CreateDropdown(L.SpecialWarnSoundOption, Sounds, "DBM", "SpecialWarningSound2", function(value)
+local SpecialWarnSoundDropDown2 = specWarnTwo:CreateDropdown(L.SpecialWarnSoundOption, sounds, "DBM", "SpecialWarningSound2", function(value)
 	DBM.Options.SpecialWarningSound2 = value
 end)
 SpecialWarnSoundDropDown2:SetPoint("TOPLEFT", specWarnTwo.frame, "TOPLEFT", 95, -28)
 SpecialWarnSoundDropDown2.myheight = 0
 
 local flashCheck2 = specWarnTwo:CreateCheckButton(L.SpecWarn_Flash, nil, nil, "SpecialWarningFlash2")
-flashCheck2:SetPoint("BOTTOMLEFT", SpecialWarnSoundDropDown2, "BOTTOMLEFT", 220, 4)
+flashCheck2:SetPoint("BOTTOMLEFT", SpecialWarnSoundDropDown2, "BOTTOMLEFT", 220, 20)
+local vibrateCheck2 = specWarnTwo:CreateCheckButton(L.SpecWarn_Vibrate, nil, nil, "SpecialWarningVibrate2")
+vibrateCheck2:SetPoint("TOPLEFT", flashCheck2, "TOPLEFT", 0, -20)
 
 local flashdurSlider2 = specWarnTwo:CreateSlider(L.SpecWarn_FlashDur, 0.2, 2, 0.2, 120)
 flashdurSlider2:SetPoint("TOPLEFT", SpecialWarnSoundDropDown2, "TOPLEFT", 20, -45)
@@ -319,14 +358,16 @@ color3:SetScript("OnColorSelect", function(self)
 end)
 color3.myheight = 104
 
-local SpecialWarnSoundDropDown3 = specWarnThree:CreateDropdown(L.SpecialWarnSoundOption, Sounds, "DBM", "SpecialWarningSound3", function(value)
+local SpecialWarnSoundDropDown3 = specWarnThree:CreateDropdown(L.SpecialWarnSoundOption, sounds, "DBM", "SpecialWarningSound3", function(value)
 	DBM.Options.SpecialWarningSound3 = value
 end)
 SpecialWarnSoundDropDown3:SetPoint("TOPLEFT", specWarnThree.frame, "TOPLEFT", 95, -28)
 SpecialWarnSoundDropDown3.myheight = 0
 
 local flashCheck3 = specWarnThree:CreateCheckButton(L.SpecWarn_Flash, nil, nil, "SpecialWarningFlash3")
-flashCheck3:SetPoint("BOTTOMLEFT", SpecialWarnSoundDropDown3, "BOTTOMLEFT", 220, 4)
+flashCheck3:SetPoint("BOTTOMLEFT", SpecialWarnSoundDropDown3, "BOTTOMLEFT", 220, 20)
+local vibrateCheck3 = specWarnThree:CreateCheckButton(L.SpecWarn_Vibrate, nil, nil, "SpecialWarningVibrate3")
+vibrateCheck3:SetPoint("TOPLEFT", flashCheck3, "TOPLEFT", 0, -20)
 
 local flashdurSlider3 = specWarnThree:CreateSlider(L.SpecWarn_FlashDur, 0.2, 2, 0.2, 120)
 flashdurSlider3:SetPoint("TOPLEFT", SpecialWarnSoundDropDown3, "TOPLEFT", 20, -45)
@@ -388,14 +429,16 @@ color4:SetScript("OnColorSelect", function(self)
 end)
 color4.myheight = 104
 
-local SpecialWarnSoundDropDown4 = specWarnFour:CreateDropdown(L.SpecialWarnSoundOption, Sounds, "DBM", "SpecialWarningSound4", function(value)
+local SpecialWarnSoundDropDown4 = specWarnFour:CreateDropdown(L.SpecialWarnSoundOption, sounds, "DBM", "SpecialWarningSound4", function(value)
 	DBM.Options.SpecialWarningSound4 = value
 end)
 SpecialWarnSoundDropDown4:SetPoint("TOPLEFT", specWarnFour.frame, "TOPLEFT", 95, -28)
 SpecialWarnSoundDropDown4.myheight = 0
 
 local flashCheck4 = specWarnFour:CreateCheckButton(L.SpecWarn_Flash, nil, nil, "SpecialWarningFlash4")
-flashCheck4:SetPoint("BOTTOMLEFT", SpecialWarnSoundDropDown4, "BOTTOMLEFT", 220, 4)
+flashCheck4:SetPoint("BOTTOMLEFT", SpecialWarnSoundDropDown4, "BOTTOMLEFT", 220, 20)
+local vibrateCheck4 = specWarnFour:CreateCheckButton(L.SpecWarn_Vibrate, nil, nil, "SpecialWarningVibrate4")
+vibrateCheck4:SetPoint("TOPLEFT", flashCheck4, "TOPLEFT", 0, -20)
 
 local flashdurSlider4 = specWarnFour:CreateSlider(L.SpecWarn_FlashDur, 0.2, 2, 0.2, 120)
 flashdurSlider4:SetPoint("TOPLEFT", SpecialWarnSoundDropDown4, "TOPLEFT", 20, -45)
@@ -455,14 +498,16 @@ color5:SetScript("OnColorSelect", function(self)
 end)
 color5.myheight = 104
 
-local SpecialWarnSoundDropDown5 = specWarnFive:CreateDropdown(L.SpecialWarnSoundOption, Sounds, "DBM", "SpecialWarningSound5", function(value)
+local SpecialWarnSoundDropDown5 = specWarnFive:CreateDropdown(L.SpecialWarnSoundOption, sounds, "DBM", "SpecialWarningSound5", function(value)
 	DBM.Options.SpecialWarningSound5 = value
 end)
 SpecialWarnSoundDropDown5:SetPoint("TOPLEFT", specWarnFive.frame, "TOPLEFT", 95, -28)
 SpecialWarnSoundDropDown5.myheight = 0
 
 local flashCheck5 = specWarnFive:CreateCheckButton(L.SpecWarn_Flash, nil, nil, "SpecialWarningFlash5")
-flashCheck5:SetPoint("BOTTOMLEFT", SpecialWarnSoundDropDown5, "BOTTOMLEFT", 220, 4)
+flashCheck5:SetPoint("BOTTOMLEFT", SpecialWarnSoundDropDown5, "BOTTOMLEFT", 220, 20)
+local vibrateCheck5 = specWarnFive:CreateCheckButton(L.SpecWarn_Vibrate, nil, nil, "SpecialWarningVibrate5")
+vibrateCheck5:SetPoint("TOPLEFT", flashCheck5, "TOPLEFT", 0, -20)
 
 local flashdurSlider5 = specWarnFive:CreateSlider(L.SpecWarn_FlashDur, 0.2, 2, 0.2, 120)
 flashdurSlider5:SetPoint("TOPLEFT", SpecialWarnSoundDropDown5, "TOPLEFT", 20, -45)

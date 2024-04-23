@@ -19,11 +19,11 @@ if select(4, GetBuildInfo()) < 90000 then
     GetLogIndexForQuestID = GetQuestLogIndexByID
     function IsQuestComplete(questLogIndex)
         local complete = select(6, GetQuestLogTitle(questLogIndex))
-        return complete and compelte > 0
+        return complete and complete > 0
     end
     function IsQuestFailed(questLogIndex)
         local complete = select(6, GetQuestLogTitle(questLogIndex))
-        return complete and compelte < 0
+        return complete and complete < 0
     end
 end
 
@@ -307,6 +307,7 @@ end
 
 BtWQuestsChainViewMixin = {}
 function BtWQuestsChainViewMixin:OnLoad()
+    self.noScrollBar = true
     ScrollFrame_OnLoad(self)
     self.itemPool = CreateFramePool("BUTTON", self.Child, "BtWQuestsChainViewItemTemplate", BtWQuestsChainItemPool_HideAndClearAnchors);
     self:RegisterForDrag("LeftButton")
@@ -419,7 +420,7 @@ function BtWQuestsChainViewMixin:SetChain(chainID, scrollTo, zoom)
             local hShift = -(rect.left) * CHAIN_GRID_HORIZONTAL_SIZE;
             local vShift = rect.top * CHAIN_GRID_VERTICAL_SIZE;
             for itemButton in self.itemPool:EnumerateActive() do
-                local x, y = select(4, itemButton:GetPoint("CENTER"));
+                local x, y = select(4, itemButton:GetPoint(1)); -- CENTER - Can no longer look up point by name
                 itemButton:SetPoint(
                     "CENTER", itemButton:GetParent(), "TOPLEFT",
                     x + hShift,
@@ -454,7 +455,7 @@ function BtWQuestsChainViewMixin:SetChain(chainID, scrollTo, zoom)
 
         if self.scrollToButton then
             local scale = self:GetZoom()
-            local x, y = select(4, self.scrollToButton:GetPoint("CENTER"))
+            local x, y = select(4, self.scrollToButton:GetPoint(1)); -- CENTER - Can no longer look up point by name
 
             -- self:SetHorizontalScroll(x - (self:GetWidth() / scale) / 2)
             self:SetVerticalScroll(-y - (self:GetHeight() / scale) / 2)
@@ -806,7 +807,6 @@ function BtWQuestsExpansionMixin:Set(item, character)
         self.Load:Show()
         self.ViewAll:Hide()
     end
-
 end
 
 -- [[ Navbar ]]
@@ -1374,7 +1374,7 @@ function BtWQuestsDropDownMenuMixin:AddButton(info)
 
 	button.minWidth = info.minWidth;
 
-	width = max(self:GetButtonWidth(button), info.minWidth or 0);
+	local width = max(self:GetButtonWidth(button), info.minWidth or 0);
 	--Set maximum button width
 	if ( width > listFrame.maxWidth ) then
 		listFrame.maxWidth = width;
@@ -1501,6 +1501,31 @@ function BtWQuestsDropDownMenuMixin:Open(anchorName, xOffset, yOffset)
     end
 
     list:Show()
+
+    local offLeft = list:GetLeft()/uiScale;
+    local offRight = (GetScreenWidth() - list:GetRight())/uiScale;
+    local offTop = (GetScreenHeight() - list:GetTop())/uiScale;
+    local offBottom = list:GetBottom()/uiScale;
+
+    local xAddOffset, yAddOffset = 0, 0;
+    if ( offLeft < 0 ) then
+        xAddOffset = -offLeft;
+    elseif ( offRight < 0 ) then
+        xAddOffset = offRight;
+    end
+
+    if ( offTop < 0 ) then
+        yAddOffset = offTop;
+    elseif ( offBottom < 0 ) then
+        yAddOffset = -offBottom;
+    end
+
+    list:ClearAllPoints();
+    if ( anchorName == "cursor" ) then
+        list:SetPoint(point, relativeTo, relativePoint, xOffset + xAddOffset, yOffset + yAddOffset);
+    else
+        list:SetPoint(point, relativeTo, relativePoint, xOffset + xAddOffset, yOffset + yAddOffset);
+    end
 end
 function BtWQuestsDropDownMenuMixin:Close()
     self:GetListFrame():Hide()
@@ -1613,7 +1638,9 @@ end
 BtWQuestsTooltipMixin = {}
 function BtWQuestsTooltipMixin:OnLoad()
     GameTooltip_OnLoad(self)
-    self:SetScript("OnTooltipSetQuest", self.OnSetQuest)
+    if not TooltipDataProcessor or not TooltipDataProcessor.AddTooltipPostCall then
+        self:SetScript("OnTooltipSetQuest", self.OnSetQuest)
+    end
 end
 function BtWQuestsTooltipMixin:OnSetQuest()
     local quest = BtWQuestsDatabase:GetQuestByID(self.questID)
@@ -1681,6 +1708,28 @@ function BtWQuestsTooltipMixin:SetChain(chainID, character)
 
     self:AddRewards(chain, character)
 
+    if IsModifiedClick("SHIFT") then
+        local restrictions = chain:GetRestrictions()
+        if restrictions then
+            local addedRestrictions
+            for _,restriction in ipairs(restrictions) do
+                restriction = restriction:GetVariation(character) or restriction;
+
+                if not addedRestrictions then
+                    self:AddLine(" ")
+                    self:AddLine(L["BTWQUESTS_TOOLTIP_RESTRICTIONS"])
+                    addedRestrictions = true
+                end
+
+                if restriction:IsCompleted(character) then
+                    self:AddLine(" - " .. restriction:GetName(character, "restriction"), 0.5, 0.5, 0.5)
+                else
+                    self:AddLine(" - " .. restriction:GetName(character, "restriction"), 1, 1, 1)
+                end
+            end
+        end
+    end
+
     self:Show();
 end
 local IsUnitOnQuest = C_QuestLog.IsUnitOnQuest
@@ -1706,9 +1755,9 @@ function BtWQuestsTooltipMixin:SetActiveQuest(id, character)
     self:SetText(quest:GetName())
 
     if character:IsQuestActive(id) then
-        if character:IsPlayer() and C_QuestLog.IsQuestReplayable(id) then
+        if character:IsPlayer() and C_QuestLog.IsQuestReplayable and C_QuestLog.IsQuestReplayable(id) then
             GameTooltip_AddInstructionLine(self, QuestUtils_GetReplayQuestDecoration(id)..QUEST_SESSION_QUEST_TOOLTIP_IS_REPLAY, false);
-        elseif character:IsPlayer() and C_QuestLog.IsQuestDisabledForSession(id) then
+        elseif character:IsPlayer() and C_QuestLog.IsQuestDisabledForSession and C_QuestLog.IsQuestDisabledForSession(id) then
             GameTooltip_AddColoredLine(self, QuestUtils_GetDisabledQuestDecoration(id)..QUEST_SESSION_ON_HOLD_TOOLTIP_TITLE, DISABLED_FONT_COLOR, false);
         else
             self:AddLine(GREEN_FONT_COLOR_CODE..QUEST_TOOLTIP_ACTIVE..FONT_COLOR_CODE_CLOSE)
@@ -1767,12 +1816,70 @@ function BtWQuestsTooltipMixin:SetActiveQuest(id, character)
     self:OnSetQuest()
     self:Show()
 end
+-- Custom function for displaying quests not in the log, used for bcc and before SetHyperlink
+function BtWQuestsTooltipMixin:SetQuest(id, character)
+    local id = tonumber(id)
+
+    self.character = character
+    self.questID = id
+
+    local quest = BtWQuestsDatabase:GetQuestByID(id)
+
+    self:ClearLines()
+    self:SetText(quest:GetName())
+
+    -- if objectiveText then
+    --     self:AddLine(" ")
+    --     self:AddLine(objectiveText, 1, 1, 1, true)
+    -- end
+
+    local objectives = C_QuestLog.GetQuestObjectives(id);
+    if objectives then
+        local addedTitle
+        for _,objective in ipairs(objectives) do
+            if objective then
+                if not addedTitle then
+                    self:AddLine(" ")
+                    self:AddLine(QUEST_TOOLTIP_REQUIREMENTS)
+                    addedTitle = true
+                end
+
+                self:AddLine(" - " .. objective.text, 1, 1, 1)
+            end
+        end
+    end
+
+    for i=1, GetNumSubgroupMembers() do
+        if IsUnitOnQuest("party"..i, i) then
+			-- Found at least one party member who is also on the quest, set it up!
+			self:AddLine(" ");
+			self:AddLine(PARTY_QUEST_STATUS_ON);
+
+			local omitTitle = true;
+			local ignoreActivePlayer = true;
+			self:SetQuestPartyProgress(id, omitTitle, ignoreActivePlayer);
+
+			break;
+		end
+	end
+
+    self:OnSetQuest()
+    self:Show()
+end
+
+if TooltipDataProcessor and TooltipDataProcessor.AddTooltipPostCall then
+    TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Quest, function (self, data)
+        if self.OnSetQuest then
+            self:OnSetQuest();
+        end
+    end)
+end
 
 -- Doing this because TSM and Auctioneer tainted GameTooltip.SetHyperlink without checking if their variables exist
 local dummpGameTooltip = CreateFrame("GameTooltip", "BtWQuestsDummyTooltip", UIParent, "GameTooltipTemplate")
 dummpGameTooltip:Hide()
 function BtWQuestsTooltipMixin:SetHyperlink(link, character)
-    local _, _, color, linkstring, name = string.find(link, "|cff(%x%x%x%x%x%x)|H([^|]+)|h%[([^%[%]]*)]|h|r")
+    local _, _, color, linkstring, name = string.find(link, "^|cff(%x%x%x%x%x%x)|H([^|]+)|h%[(.*)%]|h|r$")
     linkstring = linkstring or link
 
     local _, _, type, text = string.find(linkstring, "([^:]+):([^|]+)")
@@ -1786,7 +1893,14 @@ function BtWQuestsTooltipMixin:SetHyperlink(link, character)
             self.character = character
             self.questID = id
 
-            dummpGameTooltip.SetHyperlink(self, link)
+            self:SetQuest(id, character)
+            if QuestEventListener then
+                QuestEventListener:AddCallback(id, function()
+                    if self.questID == id then
+                        dummpGameTooltip.SetHyperlink(self, link)
+                    end
+                end)
+            end
         end
     elseif type == "btwquests" then
         local _, _, subtype, id = string.find(text, "^([^:]*):(%d+)")

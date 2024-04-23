@@ -1,5 +1,11 @@
+-- luacheck: no max line length
+-- luacheck: globals LibStub IndentationLib CreateFrame UIParent BackdropTemplateMixin Spell hooksecurefunc GameFontHighlightSmall unpack GetBuildInfo CLOSE GetSpellTexture ColorPickerFrame
+-- luacheck: globals OpacitySliderFrame ChatFontNormal ACCEPT INFO
+
+local wowBuild = select(4, GetBuildInfo());
+
 local LIB_NAME = "LibRedDropdown-1.0";
-local lib = LibStub:NewLibrary(LIB_NAME, 12);
+local lib = LibStub:NewLibrary(LIB_NAME, 20);
 if (not lib) then return; end -- No upgrade needed
 
 local table_insert, string_find, string_format, max = table.insert, string.find, string.format, math.max;
@@ -39,6 +45,7 @@ function lib.CreateDropdownMenu()
 	selectorEx:SetBackdropColor(0.1, 0.1, 0.2, 1);
 	selectorEx:SetBackdropBorderColor(0.8, 0.8, 0.9, 0.4);
 
+	selectorEx.customSearchHandler = nil;
 	selectorEx.searchBox = CreateFrame("EditBox", nil, selectorEx, "InputBoxTemplate");
 	selectorEx.searchBox:SetAutoFocus(false);
 	selectorEx.searchBox:SetFontObject(GameFontHighlightSmall);
@@ -55,11 +62,16 @@ function lib.CreateDropdownMenu()
 			selectorEx:SetList(selectorEx.list);
 		else
 			local t = { };
-			for _, value in pairs(selectorEx.list) do
-				if (string_find(value.text:lower(), text:lower())) then
-					table_insert(t, value);
+			if (selectorEx.customSearchHandler == nil) then
+				for _, value in pairs(selectorEx.list) do
+					if (string_find(value.text:lower(), text:lower())) then
+						table_insert(t, value);
+					end
 				end
+			else
+				t = selectorEx.customSearchHandler(text);
 			end
+
 			selectorEx:SetList(t, true);
 			selectorEx.scrollArea:SetVerticalScroll(0);
 		end
@@ -68,22 +80,35 @@ function lib.CreateDropdownMenu()
 	searchBoxText:SetPoint("LEFT", 0, 0);
 	searchBoxText:SetText("Click to search...");
 	selectorEx.searchBox:SetScript("OnEditFocusGained", function() searchBoxText:Hide(); end);
-	selectorEx.searchBox:SetScript("OnEditFocusLost", function() searchBoxText:Show(); end);
-		
+	selectorEx.searchBox:SetScript("OnEditFocusLost", function()
+		local text = selectorEx.searchBox:GetText();
+		if (text == nil or text == "") then
+			searchBoxText:Show();
+		end
+	end);
+	selectorEx.searchBox.hint = CreateFrame("Frame", nil, selectorEx.searchBox);
+	selectorEx.searchBox.hint:SetWidth(selectorEx.searchBox:GetHeight());
+	selectorEx.searchBox.hint:SetHeight(selectorEx.searchBox:GetHeight());
+	selectorEx.searchBox.hint:SetPoint("RIGHT", selectorEx.searchBox, "RIGHT", -4, 0);
+	selectorEx.searchBox.hint.texture = selectorEx.searchBox.hint:CreateTexture(nil, "OVERLAY");
+	selectorEx.searchBox.hint.texture:SetTexture("Interface\\common\\help-i");
+	selectorEx.searchBox.hint.texture:SetAllPoints(selectorEx.searchBox.hint);
+	selectorEx.searchBox.hint:Hide();
+
 	selectorEx.scrollArea = CreateFrame("ScrollFrame", nil, selectorEx, "UIPanelScrollFrameTemplate");
 	selectorEx.scrollArea:SetPoint("TOPLEFT", selectorEx, "TOPLEFT", 5, SCROLL_AREA_Y_OFFSET);
 	selectorEx.scrollArea:SetPoint("BOTTOMRIGHT", selectorEx, "BOTTOMRIGHT", -30, 5);
 	selectorEx.scrollArea:Show();
-	
+
 	selectorEx.scrollAreaChildFrame = CreateFrame("Frame", nil, selectorEx.scrollArea);
 	selectorEx.scrollArea:SetScrollChild(selectorEx.scrollAreaChildFrame);
 	selectorEx.scrollAreaChildFrame:SetWidth(selectorEx.scrollArea:GetWidth() - 10);
 	selectorEx.scrollAreaChildFrame:SetHeight(288);
-	
+
 	selectorEx.buttons = { };
 	selectorEx.list = { };
 	selectorEx.currentPosition = -1;
-	
+
 	local function GetButton(s, counter)
 		if (s.buttons[counter] == nil) then
 			local line = CreateFrame("frame", nil, s.scrollAreaChildFrame);
@@ -123,8 +148,8 @@ function lib.CreateDropdownMenu()
 			return s.buttons[counter];
 		end
 	end
-	
-	-- value.text, value.font, value.icon, value.func, value.onEnter, value.onLeave, value.disabled, value.dontCloseOnClick, value.checkBoxEnabled, 
+
+	-- value.text, value.font, value.icon, value.func, value.onEnter, value.onLeave, value.disabled, value.dontCloseOnClick, value.checkBoxEnabled,
 	--value.onCheckBoxClick, value.checkBoxState, onCloseButtonClick, buttonColor
 	selectorEx.SetList = function(s, t, dontUpdateInternalList)
 		for _, button in pairs(s.buttons) do
@@ -191,7 +216,7 @@ function lib.CreateDropdownMenu()
 			s.list = t;
 		end
 	end
-	
+
 	selectorEx.GetButtonByText = function(s, text)
 		for _, button in pairs(s.buttons) do
 			if (button.Text:GetText() == text) then
@@ -200,14 +225,31 @@ function lib.CreateDropdownMenu()
 		end
 		return nil;
 	end
-	
+
+	selectorEx.SetCustomSearchHandler = function(_self, _handler)
+		_self.customSearchHandler = _handler;
+	end
+
+	selectorEx.SetSearchBoxHint = function(_self, _hint)
+		if (_hint ~= nil and _hint ~= "") then
+			_self.searchBox.hint:Show();
+			lib.SetTooltip(_self.searchBox.hint, _hint, "LEFT");
+		else
+			_self.searchBox.hint:Hide();
+		end
+	end
+
+	selectorEx.GetList = function(_self)
+		return _self.list;
+	end
+
 	selectorEx:SetList({});
 	selectorEx:Hide();
 	selectorEx:HookScript("OnShow", function(self)
 		self:SetFrameStrata("TOOLTIP");
 
 		if (self.autoAdjustHeight and #self.buttons > 0) then
-			local point, parent, pointParent, xOffset, yOffset = self.buttons[#self.buttons]:GetPoint();
+			local _, _, _, _, yOffset = self.buttons[#self.buttons]:GetPoint();
 			self:SetHeight(-SCROLL_AREA_Y_OFFSET + -yOffset + self.buttons[#self.buttons]:GetHeight() + 10);
 		end
 
@@ -219,7 +261,7 @@ function lib.CreateDropdownMenu()
 		self.searchBox:SetText("");
 		self.currentPosition = self.scrollArea:GetVerticalScroll();
 	end);
-	
+
 	return selectorEx;
 end
 
@@ -287,7 +329,7 @@ function lib.CreateTooltip()
 			self:SetText(string_format("%s\n\n%s\n%s", spellName, spellDesc, ColorizeText("Spell ID: " .. spellID, 91/255, 165/255, 249/255)), spellTexture);
 		end);
 	end
-	
+
 	return frame;
 end
 
@@ -296,14 +338,14 @@ function lib.SetTooltip(frame, text, justify)
 		frame.LRDTooltip = lib.CreateTooltip();
 		frame.LRDTooltipText = text;
 		frame.LRDTooltipJustify = justify or "CENTER";
-		frame:HookScript("OnEnter", function(self, ...)
+		frame:HookScript("OnEnter", function()
 			frame.LRDTooltip:ClearAllPoints();
 			frame.LRDTooltip:SetPoint("BOTTOM", frame, "TOP", 0, 0);
 			frame.LRDTooltip:GetTextObject():SetJustifyH(frame.LRDTooltipJustify);
 			frame.LRDTooltip:SetText(frame.LRDTooltipText);
 			frame.LRDTooltip:Show();
 		end);
-		frame:HookScript("OnLeave", function(self, ...)
+		frame:HookScript("OnLeave", function()
 			frame.LRDTooltip:Hide();
 		end);
 	else
@@ -323,11 +365,11 @@ function lib.CreateCheckBox()
 	checkBox.textFrame = CreateFrame("frame", nil, checkBox);
 	checkBox.textFrame:SetPoint("LEFT", checkBox, "RIGHT", 0, 0);
 	checkBox.textFrame:EnableMouse(true);
-	checkBox.textFrame:HookScript("OnEnter", function(self, ...) checkBox:LockHighlight(); end);
-	checkBox.textFrame:HookScript("OnLeave", function(self, ...) checkBox:UnlockHighlight(); end);
+	checkBox.textFrame:HookScript("OnEnter", function() checkBox:LockHighlight(); end);
+	checkBox.textFrame:HookScript("OnLeave", function() checkBox:UnlockHighlight(); end);
 	checkBox.textFrame:Show();
-	checkBox.textFrame:HookScript("OnMouseDown", function(self) checkBox:SetButtonState("PUSHED"); end);
-	checkBox.textFrame:HookScript("OnMouseUp", function(self) checkBox:SetButtonState("NORMAL"); checkBox:Click(); end);
+	checkBox.textFrame:HookScript("OnMouseDown", function() checkBox:SetButtonState("PUSHED"); end);
+	checkBox.textFrame:HookScript("OnMouseUp", function() checkBox:SetButtonState("NORMAL"); checkBox:Click(); end);
 	checkBox.Text = checkBox.textFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal");
 	checkBox.Text:SetPoint("LEFT", 0, 0);
 	checkBox.SetText = function(self, _text)
@@ -345,8 +387,8 @@ function lib.CreateCheckBox()
 		self:SetScript("OnClick", func);
 	end
 	local handlersToBeCopied = { "OnEnter", "OnLeave" };
-	hooksecurefunc(checkBox, "HookScript", function(self, script, proc) if (table_contains_value(handlersToBeCopied, script)) then checkBox.textFrame:HookScript(script, proc); end end);
-	hooksecurefunc(checkBox, "SetScript",  function(self, script, proc) if (table_contains_value(handlersToBeCopied, script)) then checkBox.textFrame:SetScript(script, proc); end end);
+	hooksecurefunc(checkBox, "HookScript", function(_, script, proc) if (table_contains_value(handlersToBeCopied, script)) then checkBox.textFrame:HookScript(script, proc); end end);
+	hooksecurefunc(checkBox, "SetScript",  function(_, script, proc) if (table_contains_value(handlersToBeCopied, script)) then checkBox.textFrame:SetScript(script, proc); end end);
 	checkBox:EnableMouse(true);
 	checkBox:Hide();
 	return checkBox;
@@ -431,25 +473,61 @@ function lib.CreateColorPicker()
 
 	colorButton:SetScript("OnClick", function(self)
 		ColorPickerFrame:Hide();
-		local function callback(restore)
-			local r, g, b, a;
-			if (restore) then
-				r, g, b, a = unpack(restore);
-			else
-				a, r, g, b = 1-OpacitySliderFrame:GetValue(), ColorPickerFrame:GetColorRGB();
+
+		if (ColorPickerFrame.SetupColorPickerAndShow ~= nil) then -- wow 10.2.5+
+			local colorR, colorG, colorB, colorA = self:GetColor();
+
+			local function changeColorCallback()
+				local a, r, g, b = ColorPickerFrame:GetColorAlpha(), ColorPickerFrame:GetColorRGB();
+
+				self:SetColor(r, g, b, a);
+				if (self.func ~= nil) then
+					self:func(r, g, b, a);
+				end
 			end
-			self:SetColor(r, g, b, a);
-			if (self.func ~= nil) then
-				self:func(r, g, b, a);
+
+			local function cancelCallback()
+				local a, r, g, b = colorA, colorR, colorG, colorB;
+
+				self:SetColor(r, g, b, a);
+				if (self.func ~= nil) then
+					self:func(r, g, b, a);
+				end
 			end
+
+			local info = {
+				swatchFunc = changeColorCallback,
+				opacityFunc = changeColorCallback,
+				cancelFunc = cancelCallback,
+				hasOpacity = true,
+				opacity = colorA,
+				r = colorR,
+				g = colorG,
+				b = colorB
+			};
+
+			ColorPickerFrame:SetupColorPickerAndShow(info);
+		else
+			local function callback(restore)
+				local r, g, b, a;
+				if (restore) then
+					r, g, b, a = unpack(restore);
+				else
+					a, r, g, b = 1-OpacitySliderFrame:GetValue(), ColorPickerFrame:GetColorRGB();
+				end
+				self:SetColor(r, g, b, a);
+				if (self.func ~= nil) then
+					self:func(r, g, b, a);
+				end
+			end
+			ColorPickerFrame.func, ColorPickerFrame.opacityFunc, ColorPickerFrame.cancelFunc = callback, callback, callback;
+			local colorR, colorG, colorB, colorA = self:GetColor();
+			ColorPickerFrame:SetColorRGB(colorR, colorG, colorB);
+			ColorPickerFrame.hasOpacity = true;
+			ColorPickerFrame.opacity = 1-colorA;
+			ColorPickerFrame.previousValues = { colorR, colorG, colorB, colorA };
+			ColorPickerFrame:Show();
 		end
-		ColorPickerFrame.func, ColorPickerFrame.opacityFunc, ColorPickerFrame.cancelFunc = callback, callback, callback;
-		local colorR, colorG, colorB, colorA = self:GetColor();
-		ColorPickerFrame:SetColorRGB(colorR, colorG, colorB);
-		ColorPickerFrame.hasOpacity = true;
-		ColorPickerFrame.opacity = 1-colorA;
-		ColorPickerFrame.previousValues = { colorR, colorG, colorB, colorA };
-		ColorPickerFrame:Show();
 	end);
 
 	return colorButton;
@@ -510,13 +588,13 @@ function lib.CreateSlider()
 	frame.editbox:SetBackdropBorderColor(0.3, 0.3, 0.30, 0.80)
 	frame.editbox:SetScript("OnEscapePressed", function() frame.editbox:ClearFocus(); end)
 	frame:Hide();
-	
+
 	frame.GetTextObject = function(self) return self.label; end
 	frame.GetBaseSliderObject = function(self) return self.slider; end
 	frame.GetEditboxObject = function(self) return self.editbox; end
 	frame.GetLowTextObject = function(self) return self.lowtext; end
 	frame.GetHighTextObject = function(self) return self.hightext; end
-	
+
 	return frame;
 end
 
@@ -557,26 +635,26 @@ function lib.CreateButton()
 	button.CheckBox:SetParent(button);
 	button.CheckBox:SetText("");
 	button.CheckBox:SetPoint("LEFT", button, "LEFT", 5, 0);
-	
+
 	-- basic methods
 	button.SetGray = function(self, gray)
 		self.Normal:SetColorTexture(unpack(gray and {0, 0, 0, 1} or BUTTON_COLOR_NORMAL));
 		self.grayed = gray;
 	end
-	
+
 	button.IsGrayed = function(self)
 		return self.grayed == true;
 	end
-	
+
 	-- text object methods
 	button.SetText = function(self, text)
 		self.Text:SetText(text);
 	end
-	
+
 	button.GetText = function(self)
 		return self.Text:GetText();
 	end
-	
+
 	button.GetTextObject = function(self)
 		return self.Text;
 	end
@@ -599,13 +677,13 @@ function lib.CreateButton()
 	end
 
 	button.GetCheckBoxVisible = function(self)
-		return button.CheckBox:IsVisible();
+		return self.CheckBox:IsVisible();
 	end
 
 	button.SetCheckBoxOnClickHandler = function(self, func)
 		self.CheckBox:SetOnClickHandler(func);
 	end
-	
+
 	return button;
 end
 
@@ -619,20 +697,20 @@ function lib.CreateDebugWindow()
 	popup:Hide();
 	popup.orig_Hide = popup.Hide;
 	popup.orig_Show = popup.Show;
-	
+
 	popup.Hide = function(self)
 		self:SetText("");
 		self.ScrollFrame:Hide();
 		self.Background:Hide();
 		self:orig_Hide();
 	end
-	
+
 	popup.Show = function(self)
 		self.ScrollFrame:Show();
 		self.Background:Show();
 		self:orig_Show();
 	end
-	
+
 	popup.AddText = function(self, v)
 		if not v then return end
 		local m = self:GetText();
@@ -676,7 +754,7 @@ function lib.CreateDebugWindow()
 
 	popup.ScrollFrame = s;
 	popup.Background = bg;
-		
+
 	return popup;
 end
 
@@ -691,7 +769,7 @@ local function GetLuaEditorTheme()
     theme["Comment"] = "|c0066747B";
     theme["Number"] = "|c00FFCD22";
 	theme["String"] = "|c00EC7600";
-	
+
 	local color_scheme = { };
 	color_scheme[IndentationLib.tokens.TOKEN_SPECIAL] = theme["Special"]
 	color_scheme[IndentationLib.tokens.TOKEN_KEYWORD] = theme["Keyword"]
@@ -744,7 +822,13 @@ function lib.CreateLuaEditor()
 		insets = { left = 4, right = 4, top = 4, bottom = 4 }
 	});
 	frame:SetBackdropColor(0, 0, 0, 1);
-	frame:SetMinResize(400, 200);
+	if (wowBuild < 20000) then
+		frame:SetResizeBounds(400, 200);
+	elseif (wowBuild < 30401) then
+		frame:SetMinResize(400, 200);
+	else
+		frame:SetResizeBounds(400, 200);
+	end
 	frame:SetToplevel(true);
 
 	-- header
@@ -791,7 +875,7 @@ function lib.CreateLuaEditor()
 		frame.ApplyButton:Disable();
 
 		frame.InfoButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate");
-		frame.InfoButton:SetScript("OnClick", function(self)
+		frame.InfoButton:SetScript("OnClick", function(_)
 			if (frame.OnInfoButtonClick ~= nil) then frame:OnInfoButtonClick(); end
 		end);
 		frame.InfoButton:SetPoint("RIGHT", frame.ApplyButton, "LEFT", -5, 0);
@@ -818,7 +902,7 @@ function lib.CreateLuaEditor()
 				tooltip:Show();
 			end
 		end);
-		frame.StatusTextFrame:SetScript("OnLeave", function(self)
+		frame.StatusTextFrame:SetScript("OnLeave", function(_)
 			tooltip:Hide();
 		end);
 
@@ -845,16 +929,16 @@ function lib.CreateLuaEditor()
 		line1:SetHeight(14)
 		line1:SetPoint("BOTTOMRIGHT", -8, 8)
 		line1:SetTexture("Interface\\Tooltips\\UI-Tooltip-Border")
-		local x = 0.1 * 14/17
-		line1:SetTexCoord(0.05 - x, 0.5, 0.05, 0.5 + x, 0.05, 0.5 - x, 0.5 + x, 0.5)
+		local x1 = 0.1 * 14/17
+		line1:SetTexCoord(0.05 - x1, 0.5, 0.05, 0.5 + x1, 0.05, 0.5 - x1, 0.5 + x1, 0.5)
 
 		local line2 = sizer_se:CreateTexture(nil, "BACKGROUND")
 		line2:SetWidth(8)
 		line2:SetHeight(8)
 		line2:SetPoint("BOTTOMRIGHT", -8, 8)
 		line2:SetTexture("Interface\\Tooltips\\UI-Tooltip-Border")
-		local x = 0.1 * 8/17
-		line2:SetTexCoord(0.05 - x, 0.5, 0.05, 0.5 + x, 0.05, 0.5 - x, 0.5 + x, 0.5)
+		local x2 = 0.1 * 8/17
+		line2:SetTexCoord(0.05 - x2, 0.5, 0.05, 0.5 + x2, 0.05, 0.5 - x2, 0.5 + x2, 0.5)
 
 		local sizer_s = CreateFrame("Frame", nil, frame)
 		sizer_s:SetPoint("BOTTOMRIGHT", -25, 0)
@@ -899,12 +983,12 @@ function lib.CreateLuaEditor()
 		scrollFrame:SetPoint("TOPLEFT", scrollBG, "TOPLEFT", 5, -6)
 		scrollFrame:SetPoint("BOTTOMRIGHT", scrollBG, "BOTTOMRIGHT", -4, 4)
 
-		local function OnMouseUp(self)
+		local function OnMouseUp(_)
 			frame.EditBox:SetFocus();
 			frame.EditBox:SetCursorPosition(frame.EditBox:GetNumLetters());
 		end
 
-		local function OnSizeChanged(self, width, height)
+		local function OnSizeChanged(_, width, _)
 			frame.EditBox:SetWidth(width);
 		end
 
@@ -912,15 +996,15 @@ function lib.CreateLuaEditor()
 			frame.EditBox:SetHitRectInsets(0, 0, offset, frame.EditBox:GetHeight() - offset - self:GetHeight())
 		end
 
-		local function OnCursorChanged(self, _, y, _, cursorHeight)
-			self, y = scrollFrame, -y
-			local offset = self:GetVerticalScroll()
+		local function OnCursorChanged(_, _, y, _, cursorHeight)
+			y = -y
+			local offset = scrollFrame:GetVerticalScroll()
 			if y < offset then
-				self:SetVerticalScroll(y)
+				scrollFrame:SetVerticalScroll(y)
 			else
-				y = y + cursorHeight - self:GetHeight()
+				y = y + cursorHeight - scrollFrame:GetHeight()
 				if y > offset then
-					self:SetVerticalScroll(y)
+					scrollFrame:SetVerticalScroll(y)
 				end
 			end
 		end
@@ -929,7 +1013,7 @@ function lib.CreateLuaEditor()
 			self:HighlightText(0, 0)
 		end
 
-		local function OnTextChanged(self, userInput)
+		local function OnTextChanged(_, userInput)
 			if (userInput) then
 				frame.ApplyButton:Enable();
 				if (frame.OnTextChangedFunc ~= nil) then frame:OnTextChangedFunc(); end
@@ -958,7 +1042,7 @@ function lib.CreateLuaEditor()
 		frame.EditBox:SetScript("OnEscapePressed", frame.EditBox.ClearFocus);
 		frame.EditBox:SetScript("OnTextChanged", OnTextChanged)
 		frame.EditBox:SetScript("OnTextSet", OnTextSet)
-		frame.EditBox:SetScript("OnEditFocusGained", OnEditFocusGained)
+		-- frame.EditBox:SetScript("OnEditFocusGained", OnEditFocusGained)
 
 		scrollFrame:SetScrollChild(frame.EditBox);
 	end
@@ -993,7 +1077,7 @@ function lib.CreateLuaEditor()
 		self.Header.text:SetText(text);
 	end
 
-	frame.SetHeaderText = function(self)
+	frame.GetHeaderText = function(self)
 		return self.Header.text:GetText();
 	end
 
@@ -1012,6 +1096,15 @@ function lib.CreateLuaEditor()
 			self.InfoButton:Hide();
 			self.StatusTextFrame:ClearAllPoints();
 			self.StatusTextFrame:SetPoint("RIGHT", frame.ApplyButton, "LEFT", -5, 0);
+		end
+	end
+
+	frame.SetAcceptButton = function(self, enabled, func)
+		self.OnAcceptFunc = func;
+		if (enabled) then
+			self.ApplyButton:Show();
+		else
+			self.ApplyButton:Hide();
 		end
 	end
 
@@ -1039,8 +1132,8 @@ function lib.CreateDropdown()
 			local oldFunc = value.func;
 			value.func = function(clickedValue, ...)
 				if (oldFunc ~= nil) then oldFunc(clickedValue, ...); end
-				for _, value in pairs(button.list) do
-					value.selected = nil;
+				for _, _value in pairs(button.list) do
+					_value.selected = nil;
 				end
 				clickedValue.selected = true;
 				button:SetText(clickedValue.text);
@@ -1061,8 +1154,8 @@ function lib.CreateDropdown()
 			button:Click();
 		end
 	end
-	
-	button:SetScript("OnClick", function(self, ...)
+
+	button:SetScript("OnClick", function(self)
 		if (self.menu:IsVisible()) then
 			self.menu:Hide();
 		else

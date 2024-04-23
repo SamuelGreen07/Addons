@@ -12,8 +12,10 @@ if not plugin then return end
 local L = BigWigsAPI:GetLocale("BigWigs: Plugins")
 local GetInstanceInfo = BigWigsLoader.GetInstanceInfo
 local SendAddonMessage = BigWigsLoader.SendAddonMessage
+local dbmPrefix = BigWigsLoader.dbmPrefix
+local zoneTable = BigWigsLoader.zoneTbl
 local isLogging = false
-local IsEncounterInProgress, PlaySoundFile = IsEncounterInProgress, PlaySoundFile
+local IsEncounterInProgress = IsEncounterInProgress
 local media = LibStub("LibSharedMedia-3.0")
 local SOUND = media.MediaType and media.MediaType.SOUND or "sound"
 
@@ -23,19 +25,20 @@ local SOUND = media.MediaType and media.MediaType.SOUND or "sound"
 
 do
 	local voiceMap = {
-		deDE = "Deutsch: Heroes of the Storm",
-		esES = "Español: Heroes of the Storm",
-		esMX = "Español: Heroes of the Storm",
-		frFR = "Français: Heroes of the Storm",
-		ruRU = "Русский: Heroes of the Storm",
-		koKR = "한국어: Heroes of the Storm",
-		itIT = "Italiano: Heroes of the Storm",
-		ptBR = "Português: Heroes of the Storm",
-		zhCN = "简体中文: Heroes of the Storm",
-		zhTW = "繁體中文: Heroes of the Storm",
+		deDE = "deDE: Default (Female)",
+		esES = "esES: Default (Female)",
+		esMX = "esMX: Default (Female)",
+		frFR = "frFR: Default (Female)",
+		itIT = "itIT: Default (Female)",
+		koKR = "koKR: Default (Female)",
+		ptBR = "ptBR: Default (Female)",
+		ruRU = "ruRU: Default (Female)",
+		zhCN = "zhCN: Default (Female)",
+		zhTW = "zhTW: Default (Female)",
 	}
 	plugin.defaultDB = {
 		countType = "emphasized",
+		countBegin = 5,
 		combatLog = false,
 		engageSound = "None",
 		startPullSound = "BigWigs: Long",
@@ -56,12 +59,26 @@ do
 		plugin.db.profile[info[#info]] = media:List(SOUND)[value]
 	end
 
+	local function voiceSorting()
+		local list = BigWigsAPI:GetCountdownList()
+		local sorted = {}
+		for k in next, list do
+			if k ~= L.none then
+				sorted[#sorted + 1] = k
+			end
+		end
+		sort(sorted, function(a, b) return list[a] < list[b] end)
+		tinsert(sorted, 1, L.none)
+		return sorted
+	end
+
 	plugin.pluginOptions = {
-		name = L.pull,
+		name = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\Menus\\Pull:20|t ".. L.pull,
 		type = "group",
 		childGroups = "tab",
 		get = function(i) return plugin.db.profile[i[#i]] end,
 		set = function(i, value) plugin.db.profile[i[#i]] = value end,
+		order = 6,
 		args = {
 			countType = {
 				type = "select",
@@ -72,66 +89,74 @@ do
 					emphasized = L.emphasized,
 				},
 			},
+			countBegin = {
+				name = L.countdownBegins,
+				desc = L.countdownBegins_desc,
+				type = "range", min = 5, max = 10, step = 1,
+				order = 2,
+				width = 1.5
+			},
 			spacer1 = {
 				type = "description",
 				name = "\n",
-				order = 1.1,
+				order = 3,
 				width = "full",
 			},
 			engageSound = {
 				type = "select",
 				name = L.engageSoundTitle,
-				order = 2,
+				order = 4,
 				get = soundGet,
 				set = soundSet,
 				values = media:List(SOUND),
-				width = 2,
+				width = 2.5,
 				itemControl = "DDI-Sound",
 			},
 			spacer2 = {
 				type = "description",
 				name = "\n",
-				order = 2.1,
+				order = 5,
 				width = "full",
 			},
 			startPullSound = {
 				type = "select",
 				name = L.pullStartedSoundTitle,
-				order = 3,
+				order = 6,
 				get = soundGet,
 				set = soundSet,
 				values = media:List(SOUND),
-				width = 2,
+				width = 2.5,
 				itemControl = "DDI-Sound",
 			},
 			endPullSound = {
 				type = "select",
 				name = L.pullFinishedSoundTitle,
-				order = 4,
+				order = 7,
 				get = soundGet,
 				set = soundSet,
 				values = media:List(SOUND),
-				width = 2,
+				width = 2.5,
 				itemControl = "DDI-Sound",
 			},
 			voice = {
 				name = L.countdownVoice,
 				type = "select",
-				values = function() return BigWigsAPI:GetCountdownList() end,
-				order = 5,
-				width = 2,
+				values = BigWigsAPI.GetCountdownList,
+				sorting = voiceSorting,
+				order = 8,
+				width = 2.5,
 			},
 			spacer3 = {
 				type = "description",
 				name = "\n",
-				order = 5.1,
+				order = 9,
 				width = "full",
 			},
 			combatLog = {
 				type = "toggle",
 				name = L.combatLog,
 				desc = L.combatLogDesc,
-				order = 6,
+				order = 10,
 				width = "full",
 			},
 		},
@@ -142,14 +167,46 @@ end
 -- Initialization
 --
 
-function plugin:OnPluginEnable()
-	self:RegisterMessage("BigWigs_PluginComm")
-	self:RegisterMessage("DBM_AddonMessage")
+do
+	local function updateProfile()
+		local db = plugin.db.profile
 
-	self:RegisterMessage("BigWigs_OnBossWin")
-	self:RegisterMessage("BigWigs_OnBossWipe", "BigWigs_OnBossWin")
+		for k, v in next, db do
+			local defaultType = type(plugin.defaultDB[k])
+			if defaultType == "nil" then
+				db[k] = nil
+			elseif type(v) ~= defaultType then
+				db[k] = plugin.defaultDB[k]
+			end
+		end
 
-	self:RegisterMessage("BigWigs_OnBossEngage")
+		if db.countType ~= "normal" and db.countType ~= "emphasized" then
+			db.countType = plugin.defaultDB.countType
+		end
+		if db.countBegin < 5 or db.countBegin > 10 then
+			db.countBegin = plugin.defaultDB.countBegin
+		end
+	end
+
+	function plugin:OnPluginEnable()
+		self:RegisterMessage("BigWigs_PluginComm")
+		self:RegisterMessage("DBM_AddonMessage")
+
+		self:RegisterMessage("BigWigs_OnBossWin")
+		self:RegisterMessage("BigWigs_OnBossWipe", "BigWigs_OnBossWin")
+
+		self:RegisterMessage("BigWigs_OnBossEngage")
+
+		self:RegisterMessage("BigWigs_ProfileUpdate", updateProfile)
+		updateProfile()
+	end
+end
+
+function plugin:OnPluginDisable()
+	if isLogging then
+		isLogging = false
+		LoggingCombat(isLogging)
+	end
 end
 
 -------------------------------------------------------------------------------
@@ -170,20 +227,18 @@ do
 			if soundName ~= "None" then
 				local sound = media:Fetch(SOUND, soundName, true)
 				if sound then
-					PlaySoundFile(sound, "Master")
+					self:PlaySoundFile(sound)
 				end
 			end
-		elseif timeLeft > 2 and IsEncounterInProgress() then -- Cancel the pull timer if we ninja pulled
+		elseif timeLeft > 1 and IsEncounterInProgress() then -- Cancel the pull timer if we ninja pulled
 			self:CancelTimer(timer)
 			timeLeft = 0
 			BigWigs:Print(L.pullStoppedCombat)
 			self:SendMessage("BigWigs_StopBar", self, L.pull)
 			self:SendMessage("BigWigs_StopPull", self, "COMBAT")
 			self:SendMessage("BigWigs_StopCountdown", self, "pulling time")
-		elseif timeLeft < 11 then
-			if self.db.profile.countType ~= "emphasized" then
-				self:SendMessage("BigWigs_Message", self, nil, L.pullIn:format(timeLeft), "yellow")
-			end
+		elseif timeLeft <= self.db.profile.countBegin and self.db.profile.countType ~= "emphasized" then
+			self:SendMessage("BigWigs_Message", self, nil, L.pullIn:format(timeLeft), "yellow")
 		end
 	end
 	function plugin:StartPull(seconds, nick, isDBM)
@@ -191,8 +246,11 @@ do
 		if not IsInGroup() or ((IsInGroup(2) or not IsInRaid()) and UnitGroupRolesAssigned(nick) == "TANK") or UnitIsGroupLeader(nick) or UnitIsGroupAssistant(nick) then
 			local _, _, _, instanceId = UnitPosition("player")
 			local _, _, _, tarInstanceId = UnitPosition(nick)
-			if instanceId ~= tarInstanceId then -- Don't fire pull timers from people in different zones
-				return
+			if instanceId ~= tarInstanceId then -- Don't fire pull timers from people in different zones...
+				local _, instanceType = GetInstanceInfo() -- ...unless you're in a raid instance and the sender isn't, to allow raid leaders outside to send you pull timers
+				if not (instanceType == "raid" and not zoneTable[tarInstanceId]) then
+					return
+				end
 			end
 
 			seconds = tonumber(seconds)
@@ -220,7 +278,7 @@ do
 				LoggingCombat(isLogging)
 			end
 
-			self:SendMessage("BigWigs_StartCountdown", self, nil, "pulling time", timeLeft, self.db.profile.voice, self.db.profile.countType ~= "emphasized")
+			self:SendMessage("BigWigs_StartCountdown", self, nil, "pulling time", timeLeft, self.db.profile.voice, self.db.profile.countBegin, self.db.profile.countType ~= "emphasized")
 			self:SendMessage("BigWigs_Message", self, nil, L.pullIn:format(timeLeft), "yellow")
 			self:SendMessage("BigWigs_StartBar", self, nil, L.pull, seconds, 132337) -- 132337 = "Interface\\Icons\\ability_warrior_charge"
 			self:SendMessage("BigWigs_StartPull", self, seconds, nick, isDBM)
@@ -228,7 +286,7 @@ do
 			if soundName ~= "None" then
 				local sound = media:Fetch(SOUND, soundName, true)
 				if sound then
-					PlaySoundFile(sound, "Master")
+					self:PlaySoundFile(sound)
 				end
 			end
 		end
@@ -255,12 +313,12 @@ function plugin:BigWigs_OnBossWin()
 end
 
 function plugin:BigWigs_OnBossEngage(_, module)
-	if module and module.journalId then
+	if module and module:GetJournalID() then
 		local soundName = self.db.profile.engageSound
 		if soundName ~= "None" then
 			local sound = media:Fetch(SOUND, soundName, true)
 			if sound then
-				PlaySoundFile(sound, "Master")
+				self:PlaySoundFile(sound)
 			end
 		end
 	end
@@ -289,7 +347,10 @@ SlashCmdList.BIGWIGSPULL = function(input)
 		if IsInGroup() then
 			local _, _, _, _, _, _, _, id = GetInstanceInfo()
 			local instanceId = tonumber(id) or 0
-			SendAddonMessage("D4", ("PT\t%s\t%d"):format(input, instanceId), IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- DBM message
+			local name = plugin:UnitName("player")
+			local realm = GetRealmName()
+			local normalizedPlayerRealm = realm:gsub("[%s-]+", "") -- Has to mimic DBM code
+			SendAddonMessage(dbmPrefix, ("%s-%s\t1\tPT\t%s\t%d"):format(name, normalizedPlayerRealm, input, instanceId), IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- DBM message
 		end
 	else
 		BigWigs:Print(L.requiresLeadOrAssist)

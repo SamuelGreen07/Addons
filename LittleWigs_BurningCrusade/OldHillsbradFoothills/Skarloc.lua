@@ -31,7 +31,7 @@ function mod:GetOptions()
 		"warmup",
 		38385, -- Consecration
 		13005, -- Hammer of Justice
-		29427, -- Holy Light
+		{29427, "CASTBAR"}, -- Holy Light
 	}
 end
 
@@ -50,9 +50,11 @@ function mod:VerifyEnable(_, mobId)
 	if mobId == 17862 then return true end
 
 	-- Durnholde Veteran and Durnholde Warden are trash mobs
-	local _, _, completedFirst = C_Scenario.GetCriteriaInfo(1)
-	local _, _, completedSecond = C_Scenario.GetCriteriaInfo(2)
-	return completedFirst and not completedSecond
+	if not self:Classic() then
+		local _, _, completedFirst = C_Scenario.GetCriteriaInfo(1)
+		local _, _, completedSecond = C_Scenario.GetCriteriaInfo(2)
+		return completedFirst and not completedSecond
+	end
 end
 
 -------------------------------------------------------------------------------

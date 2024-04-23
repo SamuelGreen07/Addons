@@ -7,6 +7,7 @@ local _chkAutoGear
 local _chkJunk
 local _chkAh
 local _chkEm
+local _chkTal
 local _txtScale
 
 local function onTextboxEnter(widget)
@@ -115,9 +116,12 @@ function Amr:RenderTabOptions(container)
 	
 	_chkEm, desc = createCheck(container, "disableEm", L.OptionsDisableEmName, L.OptionsDisableEmDesc)
 	_chkEm:SetPoint("TOPLEFT", desc2.frame, "BOTTOMLEFT", -24, -20)
-	
-	_txtScale, desc2 = createSmallTextbox(container, "uiScale", L.OptionsUiScaleName, L.OptionsUiScaleDesc)
-	_txtScale:SetPoint("TOPLEFT", desc.frame, "BOTTOMLEFT", -43, -20)
+
+	_chkTal, desc2 = createCheck(container, "disableTal", L.OptionsDisableTalName, L.OptionsDisableTalDesc)
+	_chkTal:SetPoint("TOPLEFT", desc.frame, "BOTTOMLEFT", -24, -20)
+
+	_txtScale, desc = createSmallTextbox(container, "uiScale", L.OptionsUiScaleName, L.OptionsUiScaleDesc)
+	_txtScale:SetPoint("TOPLEFT", desc2.frame, "BOTTOMLEFT", -43, -20)
 	
 	-- initialize state of controls
 	Amr:RefreshOptionsUi()
@@ -129,6 +133,7 @@ function Amr:ReleaseTabOptions()
 	_chkJunk = nil
 	_chkAh = nil
 	_chkEm = nil
+	_chkTal = nil
 	_txtScale = nil
 end
 
@@ -166,6 +171,10 @@ function Amr:RefreshOptionsUi()
 		_chkEm:SetChecked(self.db.profile.options.disableEm)
 	end
 	
+	if _chkTal then
+		--setCheckboxChecked(_chkTal, self.db.profile.options.disableEm)
+		_chkTal:SetChecked(self.db.profile.options.disableTal)
+	end	
 	if _txtScale then
 		_txtScale:SetText(self.db.profile.options.uiScale)
 		_txtScale:ClearFocus()

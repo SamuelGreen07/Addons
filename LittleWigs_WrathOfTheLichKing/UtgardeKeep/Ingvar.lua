@@ -1,28 +1,28 @@
 -------------------------------------------------------------------------------
---  Module Declaration
+-- Module Declaration
 --
 
 local mod, CL = BigWigs:NewBoss("Ingvar the Plunderer", 574, 640)
 if not mod then return end
 mod:RegisterEnableMob(23954)
---mod.engageId = 2025 -- no ENCOUNTER_END on a successful kill
---mod.respawnTime = 30
+--mod:SetEncounterID(mod:Classic() and 575 or 2025) -- no ENCOUNTER_END on a successful kill
+--mod:SetRespawnTime(30)
 
 -------------------------------------------------------------------------------
---  Locals
+-- Locals
 --
 
 local deaths = 0
 
 -------------------------------------------------------------------------------
---  Initialization
+-- Initialization
 --
 
 function mod:GetOptions()
 	return {
 		"stages",
-		42669, -- Smash
-		42708, -- Staggering Roar
+		{42669, "CASTBAR"}, -- Smash
+		{42708, "CASTBAR"}, -- Staggering Roar
 		42730, -- Woe Strike
 	}, {
 		[42669] = "general",
@@ -31,7 +31,12 @@ function mod:GetOptions()
 end
 
 function mod:OnBossEnable()
-	self:RegisterEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT", "CheckBossStatus")
+	if self:Classic() then
+		self:RegisterEvent("PLAYER_REGEN_DISABLED", "CheckForEngage")
+		self:RegisterEvent("PLAYER_REGEN_ENABLED", "CheckForWipe")
+	else
+		self:RegisterEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT", "CheckBossStatus")
+	end
 
 	self:Log("SPELL_CAST_START", "Smash", 42723, 42669, 59706) -- Dark Smash; normal / heroic Smash
 	self:Log("SPELL_CAST_START", "Roar", 42708, 42729, 59708, 59734) -- Staggering Roar, Dreadful Roar on normal / heroic
@@ -47,7 +52,7 @@ function mod:OnEngage()
 end
 
 -------------------------------------------------------------------------------
---  Event Handlers
+-- Event Handlers
 --
 
 function mod:Smash(args)

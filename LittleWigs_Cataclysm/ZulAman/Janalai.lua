@@ -21,7 +21,7 @@ function mod:GetOptions()
 end
 
 function mod:OnBossEnable()
-	self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", nil, "boss1")
+	self:RegisterUnitEvent("UNIT_HEALTH", nil, "boss1")
 	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", nil, "boss1")
 
 	self:Log("SPELL_CAST_START", "FlameBreath", 43140) -- This is the actual cast spellid
@@ -42,7 +42,7 @@ do
 		self:PrimaryIcon(97497, player)
 	end
 	function mod:FlameBreath(args)
-		self:GetBossTarget(printTarget, 0.4, args.sourceGUID)
+		self:GetUnitTarget(printTarget, 0.4, args.sourceGUID)
 	end
 	function mod:FlameBreathSuccess()
 		self:PrimaryIcon(97497)
@@ -59,8 +59,8 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(_, _, _, spellId)
 	end
 end
 
-function mod:UNIT_HEALTH_FREQUENT(event, unit)
-	local hp = UnitHealth(unit) / UnitHealthMax(unit) * 100
+function mod:UNIT_HEALTH(event, unit)
+	local hp = self:GetHealth(unit)
 	if hp < 40 then
 		self:UnregisterUnitEvent(event, unit)
 		self:MessageOld(-2625, "yellow", nil, CL.soon:format(self:SpellName(-2628)), false) -- Hatch All Eggs Soon

@@ -11,16 +11,32 @@ L.positionDesc = "고정기로부터 정확한 위치를 원한다면 상자에 
 L.width = "너비"
 L.height = "높이"
 L.sizeDesc = "보통 고정기를 끌어서 크기를 조정합니다. 정확한 크기를 지정하고 싶다면 슬라이더를 사용하거나 직접 수치를 입력 상자안에 써넣으세요(최대값 제한 없음)."
+L.fontSizeDesc = "글씨 크기를 슬라이더를 이용해 조정하거나 직접 수치를 입력 상자안에 써넣으세요 (최대 200)."
+L.disableDesc = "'%s' 기능을 비활성화 하려고 하지만 |cffff4411권장하지 않습니다|r.\n\n비활성화 하시겠습니까?"
+L.transparency = "투명도"
 
 -----------------------------------------------------------------------
 -- AltPower.lua
 --
 
 L.altPowerTitle = "보조 자원"
+L.altPowerDesc = "보조 자원 항목은 보스가 플레이어에게 보조 자원을 제공하는 매우 드문 보스에서만 발동합니다. 이 디스플레이는 당신과 당신의 파티가 얼만큼의 '보조 자원'이 있는지 리스트로 표시합니다. 이 디스플레이를 옮기려면, 아래의 테스트 버튼을 사용하십시오."
 L.toggleDisplayPrint = "디스플레이가 다음에 표시됩니다. 이 우두머리 전투에서 완전히 비활성하려면 우두머리 전투 옵션에서 끄도록 전환해야 합니다."
 L.disabled = "비활성"
 L.disabledDisplayDesc = "디스플레이를 사용하는 모든 모듈에서 디스플레이를 비활성화합니다."
 L.resetAltPowerDesc = "위치를 비롯한 모든 보조 자원 관련 설정을 초기화합니다."
+L.test = "시험용"
+L.altPowerTestDesc = "보조 자원 디스플레이를 표시해서 움직일수 있게 하고, 보스 전투에서 주로 어떻게 변화하는지를 보여줍니다."
+L.yourPowerBar = "나의 자원 바"
+L.barColor = "바 색"
+L.barTextColor = "바 이름표 색깔"
+L.additionalWidth = "추가 너비"
+L.additionalHeight = "추가 높이"
+L.additionalSizeDesc = "원래의 디스플레이에서 이 슬라이더로 크기를 추가하거나, 박스에 최대 100까지의 숫자를 입력해서 사이즈를 조절할 수 있습니다."
+L.yourPowerTest = "나의 자원: %d" -- Your Power: 42
+L.yourAltPower = "나의 %s: %d" -- e.g. Your Corruption: 42
+L.player = "플레이어 %d" -- Player 7
+L.disableAltPowerDesc = "전역 옵션으로 보조 자원 디스플레이를 비활성화하여, 어떠한 보스 전투에서도 보이지 않게 합니다."
 
 -----------------------------------------------------------------------
 -- AutoReply.lua
@@ -58,6 +74,7 @@ L.nameplateAutoWidth = "이름표 너비와 맞추기"
 L.nameplateAutoWidthDesc = "이름표 바의 너비를 해당 이름표의 너비와 맞춥니다."
 L.nameplateOffsetY = "세로 위치 조정"
 L.nameplateOffsetYDesc = "위로 확장을 사용할 경우 이름표의 상단으로부터, 그렇지 않은 경우 이름표의 하단으로부터의 거리입니다."
+L.nameplateAlphaDesc = "네임플레이트 바의 투명도를 조정합니다."
 
 L.clickableBars = "클릭 가능한 바"
 L.clickableBarsDesc = "BigWigs 바는 기본적으로 클릭을 무시합니다. 이 방법으로 커서가 바 위에 있을 때도 바 뒤의 물건을 대상 지정할 수 있고 바 뒤에 있는 대상에게 광역 주문을 사용할 수 있으며, 카메라 각도를 변경하는 등의 동작을 가능하게 합니다. |cffff4411클릭 가능한 바를 활성화하면 이런 동작들이 더이상 작동하지 않습니다.|r 당신이 바를 마우스 클릭하면 바가 클릭을 차단합니다.\n"
@@ -82,10 +99,10 @@ L.texture = "텍스쳐"
 L.emphasize = "강조"
 L.emphasizeMultiplier = "배율"
 L.emphasizeMultiplierDesc = "강조 고정기로 이동하는 바가 활성화되지 않았을때, 이 옵션은 해당 바를 강조 바로 이동하지 않고 바의 크기를 주어진 배율만큼 확대시킵니다."
+
 L.enable = "활성화"
 L.move = "이동"
 L.moveDesc = "강조된 바를 강조 고정기로 이동시킵니다. 이 옵션을 끄면 강조된 바는 단순히 크기 비율과 색상을 변경합니다."
-L.regularBars = "보통 바"
 L.emphasizedBars = "강조된 바"
 L.align = "정렬"
 L.alignText = "문자 정렬"
@@ -134,30 +151,55 @@ L.breakFinished = "휴식 시간이 끝났습니다!"
 --
 
 L.bossBlock = "우두머리 기능 차단"
-L.bossBlockDesc = "우두머리 전투 중 차단할 수 있는 다양한 기능들을 설정합니다."
+L.bossBlockDesc = "우두머리 전투 중 차단할 수 있는 다양한 기능들을 설정합니다.\n\n"
+L.bossBlockAudioDesc = "우두머리 전투 중 음소거할 음향을 설정합니다. \n\n|cff808080회색|r으로 표시된 옵션들은 WoW의 소리 설정에서 꺼져있습니다.\n\n"
 L.movieBlocked = "이 동영상을 본적이 있으므로 건너뜁니다."
 L.blockEmotes = "화면 중앙의 감정표현 차단"
 L.blockEmotesDesc = "몇몇 우두머리는 특정 능력에 감정표현을 표시합니다, 이 메시지는 너무 길고 설명적입니다. 우리는 게임 플레이를 방해하지 않으면서 당신이 특별한 행동을 하지 않아도 되는, 작고 더 알맞은 메시지를 만들려고 노력합니다.\n\n참고하세요: 우두머리 감정표현를 읽고 싶다면 여전히 대화에서 확인할 수 있습니다."
 L.blockMovies = "반복되는 동영상 차단"
 L.blockMoviesDesc = "우두머리 전투 동영상이 한번만 재생되도록 허용합니다 (각 한번씩 볼수 있도록) 그 후엔 차단됩니다."
-L.blockFollowerMission = "모험 알림 차단" -- Rename to follower mission
-L.blockFollowerMissionDesc = "모험 알림은 여러가지를 표시하지만 주로 모험이 완료되었을 때 표시합니다.\n\n이 알림들은 우두머리 전투 중 UI를 치명적으로 가릴 수 있습니다, 따라서 차단을 권장합니다."
+L.blockFollowerMission = "추종자 임무 알림 차단" -- Rename to follower mission
+L.blockFollowerMissionDesc = "추종자 임무 알림은 여러가지를 표시하지만 주로 모험이 완료되었을 때 표시합니다.\n\n이 알림들은 우두머리 전투 중 UI를 치명적으로 가릴 수 있습니다, 따라서 차단을 권장합니다."
 L.blockGuildChallenge = "길드 도전 알림 차단"
 L.blockGuildChallengeDesc = "길드 도전 알림은 여러가지를 표시하지만 주로 당신의 길드 파티의 영웅 던전이나 도전 모드 던전 완료를 표시합니다.\n\n이 알림들은 우두머리 전투 중 UI를 치명적으로 가릴 수 있습니다, 따라서 차단을 권장합니다."
 L.blockSpellErrors = "주문 실패 메시지 차단"
 L.blockSpellErrorsDesc = "일반적으로 화면 상단에 표시되는 \"마법이 아직 준비되지 않았습니다\" 같은 메시지를 차단합니다."
+L.blockZoneChanges = "지역 변경 메시지 차단"
+L.blockZoneChangesDesc = "'|cFF33FF99스톰윈드|r' 또는 '|cFF33FF99오그리마|r'와 같이, 새로운 지역으로 이동할 경우 화면의 중상단에 나타나는 메시지를 차단합니다."
 L.audio = "음성"
 L.music = "배경음악"
 L.ambience = "환경 소리"
 L.sfx = "효과음"
+L.errorSpeech = "오류 음성"
 L.disableMusic = "배경음악 끄기 (권장)"
 L.disableAmbience = "환경 소리 끄기 (권장)"
 L.disableSfx = "효과음 끄기 (권장하지 않음)"
+L.disableErrorSpeech = "오류 음성 음소거(권장)"
 L.disableAudioDesc = "WoW의 소리 설정에서 '%s' 설정이 꺼지고 교전이 끝난 후에 다시 켜집니다. BigWigs의 알림 소리에 더 집중하는데 도움이 됩니다."
 L.blockTooltipQuests = "툴팁에서 퀘스트 목표 표시를 숨깁니다."
 L.blockTooltipQuestsDesc = "우두머리를 처치하는 퀘스트를 진행 중인 경우 해당 우두머리에 마우스를 올렸을 때 보통 '0/1 완료' 같은 문구가 툴팁에 표시됩니다. 전투 중에 이 문구들을 숨김으로써 툴팁의 크기가 너무 크게 확장되는 것을 방지합니다."
 L.blockObjectiveTracker = "퀘스트 추적기 숨김"
 L.blockObjectiveTrackerDesc = "보스 전투 중에 퀘스트 추적기를 숨겨서 화면의 여유 공간을 넓힙니다.\n\n신화 쐐기돌이나 업적을 추적 중일 때는 숨기지 않습니다."
+
+L.blockTalkingHead = "'말하는 머리' NPC 대사 팝업 숨기기"
+L.blockTalkingHeadDesc = "'말하는 머리' 는 npc머리를 가지고있는 팝업 대화 박스입니다. |cffff4411가끔|r NPC가 대사를 할때 화면 중앙 하단쪽에 표시됩니다.\n\n어떤 경우에 이 기능의 표시 기능을 숨길지 상황을 선택할수 있습니다.\n\n|cFF33FF99주의점:|r\n 1) 이 기능은 npc의 목소리는 끊기지 않고 재생할 것입니다.\n 2) 안전하게 특정 머리들만 안보이게 될 것입니다. 일회성 퀘스트같이 특별한 머리들은 계속 보일 것입니다."
+L.blockTalkingHeadDungeons = "일반 및 명웅 던전"
+L.blockTalkingHeadMythics = "신화 및 쐐기돌 던전"
+L.blockTalkingHeadRaids = "레이드"
+L.blockTalkingHeadTimewalking = "시간여행 (던전 및 레이드)"
+L.blockTalkingHeadScenarios = "시나리오"
+
+L.redirectPopups = "BigWigs 메시지에 표시되는 팝업 배너"
+L.redirectPopupsDesc = "'|cFF33FF99금고 슬롯 잠금 해제됨|r' 배너 또는 신화 쐐기돌 던전에 입장할 때 표시되는 배너와 같이 화면 중앙에 있는 팝업 배너는 차단되고 대신 BigWigs 메시지로 표시됩니다. 이러한 배너는 상당히 클 수 있으며 오래 지속될 수 있습니다. 시간이 오래 걸리고 클릭 연결 기능이 차단됩니다."
+L.redirectPopupsColor = "표시되는 팝업 배너의 색상"
+L.blockDungeonPopups = "던전 팝업 배너 차단"
+L.blockDungeonPopupsDesc = "던전 입장 시 표시되는 팝업 배너에 텍스트가 매우 긴 경우가 있습니다. 이 기능을 활성화하면 BigWigs 메시지로 표시되는 대신 완전히 차단됩니다."
+L.itemLevel = "아이템 레벨: %d"
+
+L.userNotifySfx = "우두머리 기능 차단으로 비활성화된 음향 효과를 강제로 다시 활성화합니다."
+L.userNotifyMusic = "우두머리 기능 차단으로 비활성화된 배경음악를 강제로 다시 활성화합니다."
+L.userNotifyAmbience = "우두머리 기능 차단으로 비활성화된 환경 소리를 강제로 다시 활성화합니다."
+L.userNotifyErrorSpeech = "우두머리 기능 차단으로 비활성화된 오류 음성을 강제로 다시 활성화합니다."
 
 L.subzone_grand_bazaar = "대시장" -- Battle of Dazar'alor raid (Battle for Azeroth)
 L.subzone_port_of_zandalar = "잔달라 항구" -- Battle of Dazar'alor raid (Battle for Azeroth)
@@ -171,7 +213,6 @@ L.colors = "색상"
 
 L.text = "문자"
 L.textShadow = "문자 그림자"
-L.flash = "깜빡임"
 L.normal = "일반"
 L.emphasized = "강조"
 
@@ -227,19 +268,17 @@ L.resetMessagesDesc = "위치를 비롯한 메시지에 관련된 모든 설정�
 
 L.bwEmphasized = "BigWigs 강조"
 L.messages = "메시지"
-L.normalMessages = "일반 메시지"
 L.emphasizedMessages = "강조 메시지"
 L.emphasizedDesc = "강조 메시지는 화면의 중앙에 보다 큰 크기의 메시지를 띄움으로써 당신의 주의를 끌게 됩니다. 기본값으로 강조 메시지 기능이 켜져 있는 경우는 드물지만 우두머리 별 설정에서 아무 우두머리 별 능력에 대한 강조 메시지를 켤 수 있습니다."
-L.output = "출력"
 L.uppercase = "대문자"
 L.uppercaseDesc = "모든 강조 메시지들이 대문자로 표시됩니다."
 
 L.useIcons = "아이콘 사용"
 L.useIconsDesc = "메시지 옆에 아이콘을 표시합니다."
 L.classColors = "직업 색상"
-L.classColorsDesc = "플레이어의 이름에 직업 색상을 입힙니다."
-L.chatMessages = "대화 창 메시지"
-L.chatMessagesDesc = "모든 BigWigs 메시지를 표시 설정과 더불어 기본 대화 창에도 출력합니다."
+L.classColorsDesc = "메세지에 플레이어 이름이 포함될때가 있습니다. 이 옵션을 활성화하면 그 플레이어들의 이름을 직업 색상으로 표시합니다."
+L.chatFrameMessages = "대화 창 메시지"
+L.chatFrameMessagesDesc = "모든 BigWigs 메시지를 표시 설정과 더불어 기본 대화 창에도 출력합니다."
 
 L.fontSize = "글꼴 크기"
 L.none = "안함"
@@ -265,8 +304,6 @@ L.proximity_name = "근접"
 L.soundDelay = "소리 지연"
 L.soundDelayDesc = "누군가 당신과 가까이 있을 때 BigWigs에 지정된 소리의 반복 재생 간격을 지정합니다."
 
-L.proximity = "근접 디스플레이"
-L.proximity_desc = "이 우두머리 전투에 적절할 때 근접 창을 표시합니다, 자신과 너무 가깝게 서있는 플레이어를 보여줍니다."
 L.resetProximityDesc = "위치를 비롯한 근접에 관련된 모든 설정을 기본값으로 초기화합니다."
 
 L.close = "닫기"
@@ -307,13 +344,14 @@ L.pullStoppedCombat = "전투가 이미 시작되었기 때문에 전투 예정 
 L.pullIn = "%d초 후 전투 시작"
 L.sendPull = "BigWigs와 DBM 사용자에게 전투 예정 타이머를 보냅니다."
 L.wrongPullFormat = "1초에서 60초 사이여야 합니다. 올바른 예제: /pull 5"
+L.countdownBegins = "초읽기 시작"
+L.countdownBegins_desc = "전투 시작 초읽기가 몇 초 전부터 시작될 지 선택하세요."
 
 -----------------------------------------------------------------------
 -- RaidIcon.lua
 --
 
 L.icons = "아이콘"
-L.raidIconsDesc = "몇몇 우두머리 전투 스크립트는 당신의 파티에서 특별히 관심이 가는 플레이어에게 공격대 아이콘을 표시합니다. 예를 들어 '폭탄'-유형 효과와 정신 지배. 이 옵션을 끄면 누구도 표시할 수 없습니다.\n\n|cffff4411공격대장이나 부공격대장 권한이 있어야 적용됩니다!|r"
 L.raidIconsDescription = "몇몇 우두머리 전투는 특정 플레이어를 지정하는 폭탄-유형 능력이나 추적당하는 플레이어, 또는 다른 방법으로 관심이 가는 특정 플레이어 같은 요소를 포함합니다. 여기서 이 플레이어들을 표시하는데 사용할 공격대 아이콘을 사용자 설정할 수 있습니다.\n\n우두머리 전투가 표시할만한 능력을 하나만 가지고 있으면 첫번째 아이콘만 사용합니다. 하나의 아이콘은 같은 우두머리 전투에서 다른 2개의 능력에 사용되지 않으며, 다음에도 주어진 능력에 항상 같은 아이콘을 사용합니다.\n\n|cffff4411참고: 플레이어에게 수동으로 표시가 되어있으면 BigWigs는 아이콘을 변경하지 않습니다.|r"
 L.primary = "첫번째"
 L.primaryDesc = "우두머리 전투 스크립트가 사용할 첫번째 공격대 대상 아이콘입니다."
@@ -325,6 +363,7 @@ L.secondaryDesc = "우두머리 전투 스크립트가 사용할 두번째 공�
 --
 
 L.Sounds = "소리"
+L.soundsDesc = "빅윅은 '주 음량' 소리 채널로 모든 소리를 재생합니다. 소리가 너무 작거나 너무 크다면, 와우의 음향 설정에 들어가서 '주 음량' 을 알맞게 조정하십시오.\n\n아래에선 특별한 상황에서 나오는 다양한 소리들을 설정하거나, '없음'으로 설정해서 비활성화 할 수 있습니다. 특성 보스의 능력의 소리만 바꾸고 싶다면, 보스 전투 설정에서 바꾸십시오.\n\n"
 L.oldSounds = "예전 소리들"
 
 L.Alarm = "알람"
@@ -336,7 +375,6 @@ L.onyou = "나에게 적용되는 주문, 강화 효과, 약화 효과"
 L.underyou = "내 밑의 \"바닥\"을 피해야 할 때"
 
 L.sound = "소리"
-L.soundDesc = "메시지는 소리와 함게 나타날 수 있습니다. 몇몇 사람들은 메시지와 함께 어떤 소리가 재생되는지 배운 후에는 실제 메시지를 읽는 것보다 소리를 듣는 것으로 더 쉽게 찾을 수 있습니다."
 
 L.customSoundDesc = "모듈이 제공한 소리 대신에 선택된 사용자 설정 소리를 재생합니다."
 L.resetSoundDesc = "소리에 관련된 모든 설정을 기본값으로 초기화합니다."

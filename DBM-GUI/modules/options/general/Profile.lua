@@ -12,7 +12,7 @@ local profilePanel			= DBM_GUI.Cat_General:CreateNewPanel(L.Panel_Profile, "opti
 local createProfileArea		= profilePanel:CreateArea(L.Area_CreateProfile)
 local createTextbox			= createProfileArea:CreateEditBox(L.EnterProfileName, "", 175)
 createTextbox:SetMaxLetters(17)
-createTextbox:SetPoint("TOPLEFT", 30, -25)
+createTextbox:SetPoint("TOPLEFT", 25, -25)
 createTextbox:SetScript("OnEnterPressed", function()
 	Create()
 end)
@@ -76,11 +76,12 @@ local function actuallyImport(importTable)
 	else
 		LibStub("LibDBIcon-1.0"):Show("DBM")
 	end
+	DBT:SetOption("Skin", DBT.Options.Skin) -- Forces a hard update on bars.
 	DBM:AddMsg("Profile imported.")
 end
 
 local importExportProfilesArea = profilePanel:CreateArea(L.Area_ImportExportProfile)
-importExportProfilesArea:CreateText(L.ImportExportInfo, nil, true)
+local importExportText = importExportProfilesArea:CreateText(L.ImportExportInfo, nil, true)
 local exportProfile = importExportProfilesArea:CreateButton(L.ButtonExportProfile, 120, 20, function()
 	DBM_GUI:CreateExportProfile({
 		DBM		= DBM.Options,
@@ -88,25 +89,42 @@ local exportProfile = importExportProfilesArea:CreateButton(L.ButtonExportProfil
 		minimap	= DBM_MinimapIcon
 	})
 end)
-exportProfile:SetPoint("TOPLEFT", 12, -20)
+exportProfile:SetPoint("TOPLEFT", importExportText, "BOTTOMLEFT", 0, -12)
+local localeTable = {
+	RaidWarningSound		= "RaidWarnSound",
+	SpecialWarningSound		= "SpecialWarnSoundOption",
+	SpecialWarningSound2	= "SpecialWarnSoundOption",
+	SpecialWarningSound3	= "SpecialWarnSoundOption",
+	SpecialWarningSound4	= "SpecialWarnSoundOption",
+	SpecialWarningSound5	= "SpecialWarnSoundOption",
+	EventSoundVictory2		= "EventVictorySound",
+	EventSoundWipe			= "EventWipeSound",
+	EventSoundEngage2		= "EventEngageSound",
+	EventSoundMusic			= "EventEngageMusic",
+	EventSoundDungeonBGM	= "EventDungeonMusic"
+}
+---@class DBMImportProfileButton: DBMPanelButton
 local importProfile = importExportProfilesArea:CreateButton(L.ButtonImportProfile, 120, 20, function()
 	DBM_GUI:CreateImportProfile(function(importTable)
 		local errors = {}
 		-- Check if voice pack missing
-		local activeVP = importTable.DBM.ChosenVoicePack
+		local activeVP = importTable.DBM.ChosenVoicePack2
 		if activeVP ~= "None" then
 			if not DBM.VoiceVersions[activeVP] or (DBM.VoiceVersions[activeVP] and DBM.VoiceVersions[activeVP] == 0) then
-				DBM:AddMsg(L.VOICE_MISSING)
-				tinsert(errors, "ChosenVoicePack")
+				if activeVP ~= "VEM" then
+					DBM:AddMsg(L.ImportVoiceMissing:format(activeVP))
+					tinsert(errors, "ChosenVoicePack2")
+				end
 			end
 		end
 		-- Check if sound packs are missing
 		for _, soundSetting in ipairs({
-			"RaidWarningSound", "SpecialWarningSound", "SpecialWarningSound3", "SpecialWarningSound4", "SpecialWarningSound5", "EventSoundVictory2",
+			"RaidWarningSound", "SpecialWarningSound", "SpecialWarningSound2", "SpecialWarningSound3", "SpecialWarningSound4", "SpecialWarningSound5", "EventSoundVictory2",
 			"EventSoundWipe", "EventSoundEngage2", "EventSoundMusic", "EventSoundDungeonBGM", "RangeFrameSound1", "RangeFrameSound2"
 		}) do
 			local activeSound = importTable.DBM[soundSetting]
 			if type(activeSound) == "string" and activeSound:lower() ~= "none" and not DBM:ValidateSound(activeSound, true, true) then
+				DBM:AddMsg(L.ImportErrorOn:format(L[localeTable[soundSetting]] or soundSetting))
 				tinsert(errors, soundSetting)
 			end
 		end
@@ -126,7 +144,7 @@ local importProfile = importExportProfilesArea:CreateButton(L.ButtonImportProfil
 		end
 	end)
 end)
-importProfile.myheight = 0
+importProfile.myheight = 12
 importProfile:SetPoint("LEFT", exportProfile, "RIGHT", 2, 0)
 
 function Create()

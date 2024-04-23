@@ -31,7 +31,7 @@ function mod:OnBossEnable()
 	self:Log("SPELL_CAST_START", "Shatter", 78807)
 	self:Log("SPELL_CAST_START", "GroundSlam", 78903)
 
-	self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", nil, "boss1")
+	self:RegisterUnitEvent("UNIT_HEALTH", nil, "boss1")
 end
 
 function mod:OnEngage()
@@ -53,8 +53,8 @@ function mod:ElementiumBulwarkRemoved(args)
 	self:StopBar(args.spellName)
 end
 
-function mod:UNIT_HEALTH_FREQUENT(event, unit)
-	local hp = UnitHealth(unit) / UnitHealthMax(unit) * 100
+function mod:UNIT_HEALTH(event, unit)
+	local hp = self:GetHealth(unit)
 	if hp < 27 then
 		self:UnregisterUnitEvent(event, unit)
 		self:MessageOld(80467, "yellow", nil, CL.soon:format(self:SpellName(80467)), false)

@@ -8,6 +8,14 @@ local POSTING_HISTORY_PROVIDER_LAYOUT ={
   },
   {
     headerTemplate = "AuctionatorStringColumnHeaderTemplate",
+    headerText = AUCTIONATOR_L_BID_PRICE,
+    headerParameters = { "bidPrice" },
+    cellTemplate = "AuctionatorPriceCellTemplate",
+    cellParameters = { "bidPrice" },
+    defaultHide = Auctionator.Constants.IsClassic,
+  },
+  {
+    headerTemplate = "AuctionatorStringColumnHeaderTemplate",
     headerText = AUCTIONATOR_L_QUANTITY,
     headerParameters = { "quantity" },
     cellTemplate = "AuctionatorStringCellTemplate",
@@ -27,11 +35,6 @@ AuctionatorPostingHistoryProviderMixin = CreateFromMixins(AuctionatorDataProvide
 
 function AuctionatorPostingHistoryProviderMixin:OnLoad()
   AuctionatorDataProviderMixin.OnLoad(self)
-
-  Auctionator.EventBus:Register( self, {
-    Auctionator.Selling.Events.BagItemClicked,
-    Auctionator.Selling.Events.RefreshHistory,
-  })
 end
 
 function AuctionatorPostingHistoryProviderMixin:OnShow()
@@ -44,25 +47,14 @@ function AuctionatorPostingHistoryProviderMixin:SetItem(dbKey)
   -- Reset columns
   self.onSearchStarted()
 
-  self.currentDBKey = dbKey
+  local entries = Auctionator.PostingHistory:GetPriceHistory(dbKey)
+  table.sort(entries, function(a, b) return b.rawDay < a.rawDay end)
 
-  self:AppendEntries(Auctionator.PostingHistory:GetPriceHistory(dbKey), true)
+  self:AppendEntries(entries, true)
 end
 
 function AuctionatorPostingHistoryProviderMixin:GetTableLayout()
   return POSTING_HISTORY_PROVIDER_LAYOUT
-end
-function AuctionatorPostingHistoryProviderMixin:GetColumnHideStates()
-  return Auctionator.Config.Get(Auctionator.Config.Options.COLUMNS_POSTING_HISTORY)
-end
-
-function AuctionatorPostingHistoryProviderMixin:ReceiveEvent(eventName, eventData)
-  if eventName == Auctionator.Selling.Events.BagItemClicked then
-    self:SetItem(Auctionator.Utilities.ItemKeyFromBrowseResult({ itemKey = eventData.itemKey }))
-
-  elseif eventName == Auctionator.Selling.Events.RefreshHistory and self.currentDBKey ~= nil then
-    self:SetItem(self.currentDBKey)
-  end
 end
 
 function AuctionatorPostingHistoryProviderMixin:UniqueKey(entry)
@@ -71,6 +63,7 @@ end
 
 local COMPARATORS = {
   price = Auctionator.Utilities.NumberComparator,
+  bidPrice = Auctionator.Utilities.NumberComparator,
   quantity = Auctionator.Utilities.NumberComparator,
   rawDay = Auctionator.Utilities.StringComparator
 }
@@ -82,9 +75,5 @@ function AuctionatorPostingHistoryProviderMixin:Sort(fieldName, sortDirection)
     return comparator(left, right)
   end)
 
-  self.onUpdate(self.results)
-end
-
-function AuctionatorPostingHistoryProviderMixin:GetRowTemplate()
-  return "AuctionatorPostingHistoryRowTemplate"
+  self:SetDirty()
 end

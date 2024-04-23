@@ -1,4 +1,3 @@
-
 --------------------------------------------------------------------------------
 -- Module Declaration
 --
@@ -6,7 +5,7 @@
 local mod, CL = BigWigs:NewBoss("Mephistroth", 1677, 1878)
 if not mod then return end
 mod:RegisterEnableMob(116944)
-mod.engageId = 2039
+mod:SetEncounterID(2039)
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -36,7 +35,7 @@ function mod:GetOptions()
 	return {
 		233155, -- Carrion Swarm
 		{233196, "SAY", "FLASH"}, -- Demonic Upheaval
-		{234817, "PROXIMITY"}, -- Dark Solitude
+		234817, -- Dark Solitude
 		233206, -- Shadow Fade
 		"custom_on_time_lost",
 	},{
@@ -58,9 +57,7 @@ end
 function mod:OnEngage()
 	phase = 1
 	timeLost = 0
-	wipe(upheavalWarned)
-	self:OpenProximity(234817, 8) -- Dark Solitude
-
+	upheavalWarned = {}
 	self:Bar(233196, 3.5) -- Demonic Upheaval
 	self:Bar(234817, 7.1) -- Dark Solitude
 	self:Bar(233155, 18.1) -- Carrion Swarm
@@ -70,10 +67,11 @@ end
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
+
 function mod:UNIT_SPELLCAST_SUCCEEDED(_, _, _, spellId)
 	if spellId == 234283 and phase == 2 then -- Expel Shadows
 		self:MessageOld(233206, "yellow", "warning", 234283)
-		local timeLeft = 0
+		local timeLeft
 		if timeLost == 0 or not self:GetOption("custom_on_time_lost") then
 			timeLeft = self:BarTimeLeft(233206) -- Shadow Fade
 		else
@@ -119,7 +117,7 @@ do
 				self:ScheduleTimer("TargetMessageOld", 1, 233196, list, "red", "warning", 233963) -- Travel time
 			end
 			if self:Me(guid) then
-				self:Say(233196)
+				self:Say(233196, nil, nil, "Demonic Upheaval")
 				self:Flash(233196)
 			end
 			upheavalWarned[n] = true
@@ -137,14 +135,12 @@ end
 function mod:ShadowFade(args)
 	phase = 2
 	timeLost = 0
-	self:CloseProximity(234817) -- Dark Solitude
 	self:MessageOld(args.spellId, "green", "long")
 	self:Bar(args.spellId, 34)
 end
 
 function mod:ShadowFadeRemoved(args)
 	phase = 1
-	self:OpenProximity(234817, 8) -- Dark Solitude
 	self:MessageOld(args.spellId, "green", "long", CL.removed:format(args.spellName))
 	self:Bar(args.spellId, 79.3)
 	self:Bar(233196, 3.5) -- Demonic Upheaval

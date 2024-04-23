@@ -1,218 +1,290 @@
-local ADDON = ...
-local L = Wheel("LibLocale"):NewLocale(ADDON, "zhCN")
-if (not L) then 
-	return 
-end 
+local L = LibStub("AceLocale-3.0"):NewLocale((...), "zhCN")
+if (not L) then return end
 
--- No, we don't want this. 
-ADDON = ADDON:gsub("_Classic", "")
-
--- 1.13.3 Battleground popup bugfix
-L["You can now enter a new battleground, right-click the green eye on the minimap to enter or leave!"] = "现在，你可以进入一个新的战场，右键单击小地图上的绿色眼睛即可进入或离开！"
-
--- General Stuff
---------------------------------------------
--- Most of these are inserted into other strings, 
--- the idea here is to keep them short and simple. 
-L["Enable"] = "启用" 
-L["Disable"] = "禁用" 
-L["Enabled"] = "|cff00aa00启用|r"
-L["Disabled"] = "|cffff0000禁用|r"
-L["<Left-Click>"] = "<鼠标左键>"
-L["<Middle-Click>"] = "<鼠标中键>"
-L["<Right-Click>"] = "<鼠标右键>"
-
--- Clock & Time Settings
---------------------------------------------
--- These are shown in tooltips
-L["New Event!"] = "新事件！"
-L["New Mail!"] = "新邮件！"
-L["%s to toggle calendar."] = "按下 %s 打开或关闭日历。"
-L["%s to use local computer time."] = "按下 %s 使用计算机本地时间。"
-L["%s to use game server time."] = "按下 %s 使用游戏服务器时间。"
-L["%s to use standard (12-hour) time."] = "按下 %s 使用12小时制。"
-L["%s to use military (24-hour) time."] = "按下 %s 使用24小时制。"
-L["Now using local computer time."] = "现在使用计算机本地时间。"
-L["Now using game server time."] = "现在使用游戏服务器时间。"
-L["Now using standard (12-hour) time."] = "现在使用12小时制。"
-L["Now using military (24-hour) time."] = "现在使用24小时制。"
-
--- Network & Performance Information
---------------------------------------------
--- These are shown in tooltips
-L["Network Stats"] = "网络状态"
-L["World latency:"] = "世界延迟:"
-L["This is the latency of the world server, and affects casting, crafting, interaction with other players and NPCs. This is the value that decides how delayed your combat actions are."] = "这是世界服务器的延迟，它影响施法，制造，与其他玩家或NPC的交互。这个数值决定战斗操作的延迟。" 
-L["Home latency:"] = "本地延迟:"
-L["This is the latency of the home server, which affects things like chat, guild chat, the auction house and some other non-combat related things."] = "这是本地服务器的延迟。它影响聊天，拍卖行和一些其他非战斗操作。"
-
--- XP, Honor & Artifact Bars
---------------------------------------------
--- These are in the tooltips
-L["Normal"] = "正常"
-L["Rested"] = "休息充分"
-L["Resting"] = "休息中"
-L["Current Artifact Power: "] = "当前神器能量: "
-L["Current Honor Points: "] = "当前荣誉点数: "
-L["Current Standing: "] = "当前声望: "
-L["Current XP: "] = "当前经验值: "
-L["Rested Bonus: "] = "休息充分奖励: "
-L["%s of normal experience gained from monsters."] = "%s 从怪物处获取到的正常经验值"
-L["You must rest for %s additional hours to become fully rested."] = "你还需要休息 %s 小时以获得休息充分状态。"
-L["You must rest for %s additional minutes to become fully rested."] = "你还需要休息 %s 分钟以获得休息充分状态。"
-L["You should rest at an Inn."] = "你应该在旅馆休息。"
-L["Sticky Minimap bars enabled."] = "粘性小地图条已启用。"
-L["Sticky Minimap bars disabled."] = "粘性小地图条已禁用。"
-
--- These are displayed within the circular minimap bar frame, 
--- and must be very short, or we'll have an ugly overflow going. 
-L["to level %s"] = "到 %s 级" 
-L["to %s"] = "到 %s"
-L["to next trait"] = "到下一个特质"
-L["to next level"] = "到下一个等级"
-
--- Try to keep the following fairly short, as they should
--- ideally be shown on a single line in the tooltip, 
--- even with the "<Right-Click>" and similar texts inserted.
-L["%s to toggle Artifact Window>"] = "按下 %s 打开或关闭神器窗口>"
-L["%s to toggle Honor Talents Window>"] = "按下 %s 打开或关闭荣誉天赋窗口>"
-L["%s to disable sticky bars."] = "按下 %s 禁用粘性小地图条。"
-L["%s to enable sticky bars."] = "按下 %s 启用粘性小地图条。"  
-
--- Config & Micro Menu
---------------------------------------------
--- Config button tooltip
--- *Doing it this way to keep the localization file generic, 
---  while making sure the end result still is personalized to the addon.
-L["Main Menu"] = ADDON
-L["Game Panels"] = "游戏面板"
-L["Click here to get access to game panels."] = "单击此处可访问各种游戏窗口，例如角色，法术书，天赋，或更改动作栏的各种设置。"
-
--- These should be fairly short to fit in a single line without 
--- having the tooltip grow to very high widths. 
-L["%s to toggle Blizzard Menu."] = "按下 %s 打开或关闭 Blizzard 菜单。"
-L["%s to toggle Options Menu."] = "按下 %s 打开或关闭 "..ADDON.." 菜单。"
-L["%s to toggle your Bags."] = "按下 %s 打开或关闭你的背包。"
-
--- Config Menu
---------------------------------------------
--- Remember that these shall fit on a button, 
--- so they can't be that long. 
--- You don't need a full description here. 
-L["Debug Mode"] = "调试工具" 
-L["Debug Console"] = "调试控制台" 
-L["Load Console"] = "加载控制台"
-L["Unload Console"] = "卸载控制台"
-L["Reload UI"] = "重新载入界面"
-L["Settings Profile"] = "设置配置文件"
-L["Global"] = true
-L["Faction"] = true
-L["Realm"] = true
-L["Character"] = true
-L["ActionBars"] = "动作栏"
-L["Button Lock"] = "按钮锁定"
-L["Cast on Down"] = "按下施法"
-L["Bind Mode"] = "键位绑定模式"
-L["Display Priority"] = "显示优先级"
-L["GamePad First"] = "手柄优先"
-L["Keyboard First"] = "键盘优先"
-L["GamePad Type"] = "手柄类型"
-L["Xbox"] = "Xbox"
-L["Xbox (Reversed)"] = "Xbox (反向)"
-L["Playstation"] = "PS"
-L["More Buttons"] = "更多按钮"
-L["No Extra Buttons"] = "无额外按钮"
-L["+%.0f Buttons"] = "+%.0f 按钮"
-L["Extra Buttons Visibility"] = "额外按钮显示模式"
-L["MouseOver"] = "鼠标停留显示"
-L["MouseOver + Combat"] = "鼠标停留及战斗中显示"
-L["Always Visible"] = "一直显示"
-L["Stance Bar"] = "姿态栏"
-L["Extra Bars"] = "额外的动作条"
-L["Secondary Bar"] = "附加动作条"
-L["Side Bar One"] = "边栏动作条1"
-L["Side Bar Two"] = "边栏动作条2"
-L["Pet Bar"] = "宠物栏"
-L["Pet Bar Visibility"] = "宠物栏显示模式"
-L["Chat Windows"] = "聊天窗口"
-L["Chat Outline"] = "文字阴影"
-L["Chat Filters"] = "信息过滤"
-L["Chat Styling"] = "聊天样式"
-L["Hide Monster Messages"] = "隐藏怪物消息"
-L["Hide Boss Messages"] = "隐藏首领台词"
-L["Hide Spam"] = "隐藏垃圾信息"
-L["Battleground Filter"] = "战场过滤器"
-L["UnitFrames"] = "单位框体"
-L["Party Frames"] = "队伍框体"
+L["<Ctrl and Right-Click to undo last change>"] = true
+L["<Left-Click and drag to move>"] = true
+L["<MouseWheel to change scale>"] = true
+L["<Shift-Click to reset to default>"] = true
+L["|cff44cc88/azerite|r to toggle options menu."] = true
+L["|cff44cc88/lock|r to toggle movable frames."] = true
+L["24 Hour Mode"] = "24小时模式"
+L["Action Bar %d"] = "动作条 %d"
+L["Action Bar Settings"] = "动作条设定"
+L["Action Bars"] = "动作条"
+L["ActionBars are banks of hotkeys that allow you to quickly access abilities and inventory items. Here you can activate additional ActionBars and control their behaviors."] = "动作条是一排用来放置快捷键的位置，可以使你快速使用技能和物品。你可以在这里开启额外的动作条并对它们进行设定。"
+L["Alerts"] = true
+L["Always show unit names."] = true
+L["Always use Power Crystal"] = true
+L["Anchor Point"] = "锚点"
+L["Anchor to Cursor"] = true
+L["Anchor tooltips that normally would appear in the default tooltip location to your cursor instead."] = true
+L["Apply"] = "应用"
+L["Arcane Charges"] = "奥术充能"
+L["Are you sure you want to delete the preset '%s'? This cannot be undone."] = true
+L["Arena Enemy Frames"] = "竞技场对手框体"
+L["Arena Frames"] = "竞技场框体"
+L["Aura Settings"] = true
+L["Automatically load an Edit Mode layout."] = true
+L["Bag Settings"] = true
+L["Bags"] = true
+L["Banners"] = true
+L["Bar Layout"] = true
+L["Boss Frames"] = "首领框体"
+L["Bottom Center"] = true
+L["Bottom-Left Corner"] = true
+L["Bottom-Right Corner"] = true
+L["Button Lock"] = true
+L["Button Padding"] = true
+L["Buttons Per Row"] = true
+L["Cancel"] = "取消"
+L["Cast action keybinds on key down"] = "按下快捷键时施法"
+L["Cast Bar"] = "施法条"
+L["Cast on Down"] = true
+L["Center"] = true
+L["Chat Settings"] = true
+L["Chat"] = "聊天"
+L["Chi"] = "真气"
+L["Choose an Edit Mode layout to automaically load when enabling this profile."] = true
+L["Choose from which side new items are inserted into your bags."] = true
+L["Choose how your auras are displayed."] = true
+L["Choose how your bar is displayed."] = true
+L["Choose in which direction items in your bags are sorted."] = true
+L["Choose the action bar layout type."] = true
+L["Choose when your auras will be visible."] = true
+L["Choose whether the bar initially should expand horizontally or vertically."] = true
+L["Choose whether to always show a power crystal or dynamically switch to the orb for mana users."] = true
+L["Choose which button to start the fading from."] = true
+L["Choose which horizontal direction the aura buttons should expand in."] = true
+L["Choose which horizontal direction the bar should expand in."] = true
+L["Choose which modifier key to hold  down to show the aura buttons."] = true
+L["Choose which vertical direction the aura buttons should expand in."] = true
+L["Choose which vertical direction the bar should expand in."] = true
+L["Class Power"] = true
+L["Click the button below to create an EditMode preset named '%s'."] = true
+L["Click the button below to reset the currently selected EditMode preset to positions matching the default layout."] = true
+L["Clock Settings"] = true
+L["Combo Points"] = "连击点数"
+L["Control where the tooltips appear when put in the default position. Disable to let blizzard or other addons handle this."] = true
+L["Copy"] = "复制"
+L["Create a new profile with the chosen name and copy the settings from the currently active one."] = true
+L["Create a new profile with the chosen name."] = true
+L["Create a new settings profile."] = true
+L["Create EditMode Layout"] = true
+L["Create New Profile"] = true
+L["Create"] = "创建"
+L["Current Frame"] = true
+L["Delete"] = "删除"
+L["Dim down and desaturate your action buttons when not engaged in combat and not currently targeting anything."] = true
+L["Dim the actionbuttons when inactive"] = true
+L["Don't fade in other bars"] = true
+L["Down"] = "下"
+L["Edit Mode Layout"] = "编辑模式布局"
+L["Edit Mode"] = "编辑模式"
+L["Elements to Fade"] = true
+L["Elements"] = true
+L["Enable Anchoring"] = true
+L["Enable Aura Fading"] = true
+L["Enable Aura Sorting"] = true
+L["Enable Bar Fading"] = true
+L["Enable Explorer Mode"] = true
+L["Enable Modifier Key"] = true
+L["Enable this to only show faded bars on mouseover, and not force them visible in combat."] = true
+L["Enable to use a 24 hour clock, disable to show a 12 hour clock with %s/%s suffixes."] = true
+L["Enable"] = "启用"
+L["Enables the immersive Explorer Mode"] = true
+L["Essence"] = "精华"
+L["Exits Explorer Mode when in vehicles, when possessing a unit or any other situation that would replace your character's action bar with a temporary one."] = true
+L["Explorer Mode Settings"] = true
+L["Explorer Mode"] = true
+L["Fade ActionBars"] = true
+L["Fade Chat Windows"] = true
+L["Fade Focus unit frame"] = true
+L["Fade Objectives Tracker"] = true
+L["Fade Pet unit frame"] = true
+L["Fade PetBar"] = true
+L["Fade Player Class Power frame"] = true
+L["Fade Player unit frame"] = true
+L["Fade StanceBar"] = true
+L["First ZigZag Button"] = true
+L["Focus"] = true
+L["Frame Fade Settings"] = true
+L["Frame Fading"] = true
+L["Grid Layout"] = true
+L["Here you can change settings related to the aura buttons appearing at each unitframe."] = true
+L["Here you can change settings related to the aura buttons appearing by default in the top right corner of the screen. None of these settings apply to the aura buttons found at the unitframes."] = true
+L["Here you can select which situations should be considered unsafe and exit the Explorer Mode."] = true
+L["Hide ActionBar Tooltips in Combat"] = true
+L["Hide ActionButton Tooltips while engaged in combat."] = true
+L["Hide in Combat"] = true
+L["Hide Tooltips while engaged in combat."] = true
+L["Hide UnitFrame Tooltips in Combat"] = true
+L["Hide UnitFrame Tooltips while engaged in combat. This refers to stationary unitframes in the user interface and does not affect units in the world."] = true
+L["Hide when targeting player."] = true
+L["Hide when targeting self."] = true
+L["Hide"] = "隐藏"
+L["Holy Power"] = "神圣能量"
+L["Horizontal Growth"] = true
+L["Horizontal Layout"] = true
+L["Horizontal Padding"] = true
+L["HUD Edit Mode"] = "HUD编辑模式"
+L["Ignore current target"] = true
+L["Initial Growth"] = true
+L["Insert Point"] = true
+L["Layout:"] = "布局："
+L["Left to Right"] = true
+L["Left"] = "左"
+L["Line Break"] = true
+L["Line Padding"] = true
+L["Makes the ToT frame transparent when its target is itself."] = true
+L["Makes the ToT frame transparent when its target is you."] = true
+L["Middle Left Side"] = true
+L["Middle Right Side"] = true
+L["Minimap Settings"] = true
+L["Minimap"] = "小地图"
+L["Modifier Key"] = true
+L["Movable Frames Manager"] = true
+L["Name of new profile:"] = true
+L["Name the New Layout"] = "给新布局起名"
+L["Nameplate Settings"] = true
+L["Nameplates"] = "姓名板"
+L["Normally auras will be hidden when you have a target, as their position directly conflicts with the position of the target frame. By enabling this the auras will ignore your target and remain visible."] = true
+L["Nothing Selected"] = true
+L["Number of buttons"] = true
+L["Only dim the actionbuttons when resting"] = true
+L["Only show buttons from this specific bar when hovering it."] = true
+L["Only show on mouseover"] = true
+L["Party Frames"] = "小队框体"
+L["Pet Bar"] = "宠物条"
+L["Pet"] = true
+L["Player Auras"] = true
+L["Player"] = true
+L["Position"] = true
+L["Profile already exists."] = true
 L["Raid Frames"] = "团队框体"
-L["PvP Frames"] = "PVP框体"
-L["Use Mana Orb"] = "使用魔法球"
-L["HUD"] = "界面显示"
-L["CastBar"] = "施法条"
-L["ClassPower"] = "连击点数"
-L["Alerts"] = "警示信息"
-L["Kills, Levels, Loot"] = "击杀，等级，战利品"
-L["Monster Emotes"] = "怪物表情"
-L["Raid Warnings"] = "团队警告"
-L["TalkingHead"] = "对话框"
-L["Objectives Tracker"] = "任务追踪器"
-L["NamePlates"] = "姓名板"
-L["Auras"] = "光环"
-L["Player"] = "玩家"
-L["Enemies"] = "敌方"
-L["Friends"] = "友方"
-L["Aspect Ratio"] = "长宽比"
-L["Widescreen (16:9)"] = "宽屏 |cff666666(16:9)|r"
-L["Ultrawide (21:9)"] = "带鱼屏 |cff666666(21:9)|r"
-L["Unlimited"] = "全屏"
-L["Aura Filters"] = "光环过滤器"
-L["Strict"] = "严格"
-L["Slack"] = "过滤永久光环"
-L["Spam"] = "不过滤"
-L["Explorer Mode"] = "探索者模式"
-L["Player Fading"] = "玩家渐隐"
-L["Tracker Fading"] = "任务追踪渐隐"
-L["Chat Positioning"] = "聊天框位移"
-L["Healer Mode"] = "治疗模式" -- it's a layout change, so let's reflect this!
-
--- Menu button tooltips, not actually used at the moment. 
-L["Click to enable the Stance Bar."] = "点击以启用姿态栏。"
-L["Click to disable the Stance Bar."] = "点击以禁用姿态栏。"
-L["Click to enable the Pet Action Bar."] = "点击以启用宠物动作栏。"
-L["Click to disable the Pet Action Bar."] = "点击以禁用宠物动作栏。"
-
--- Various Button Tooltips
---------------------------------------------
-L["%s to leave the vehicle."] = "按下 %s 离开载具。"
-L["%s to dismount."] = "按下 %s 解散坐骑。"
-L["%s to dismiss your controlled minion."] = "按下 %s来解散你被控制的仆从。"
-
--- Abbreviations
---------------------------------------------
--- This is shown of group frames when the unit 
--- has low or very low mana. Keep it to 3 letters max! 
-L["oom"] = "oom" -- out of mana
-
--- These are shown on the minimap compass when 
--- rotating minimap is enabled. Keep it to single letters!
-L["N"] = "北" -- compass North
-L["E"] = "东" -- compass East
-L["S"] = "南" -- compass South
-L["W"] = "西" -- compass West
-
--- Keybind mode
---------------------------------------------
--- This is shown in the frame, it is word-wrapped. 
--- Try to keep the length fairly identical to enUS, though, 
--- to make sure it fits properly inside the window. 
-L["Hover your mouse over any actionbutton and press a key or a mouse button to bind it. Press the ESC key to clear the current actionbutton's keybinding."] = "鼠标指向任何动作条按钮来绑定它。按Esc键来清除当前动作条按钮的按键绑定。"
-
--- These are output to the chat frame. 
-L["Keybinds cannot be changed while engaged in combat."] = "战斗中无法修改键位绑定。"
-L["Keybind changes were discarded because you entered combat."] = "键位绑定改动因进入战斗状态而被舍弃。"
-L["Keybind changes were saved."] = "键位绑定改动已保存。"
-L["Keybind changes were discarded."] = "键位绑定改动已舍弃。"
-L["No keybinds were changed."] = "键位绑定无改动。"
-L["No keybinds set."] = "无键位绑定。"
-L["%s is now unbound."] = "%s 已解除绑定。"
-L["%s is now bound to %s"] = "%s 已绑定到 %s"
+L["Require a modifier key to show the auras."] = true
+L["Reset EditMode Layout"] = true
+L["Reset"] = "重置"
+L["Right to Left"] = true
+L["Right"] = "右"
+L["Runes"] = "符文"
+L["Save"] = "保存"
+L["Scale"] = true
+L["Select Frame"] = true
+L["Set the clock to your computer's local time, disable to show the server time instead."] = true
+L["Set the Low Energy/Focus threshold"] = true
+L["Set the Low Health threshold"] = true
+L["Set the Low Mana threshold"] = true
+L["Set the Low Mana while in a Druid from threshold"] = true
+L["Sets the anchor point."] = true
+L["Sets the horizontal offset from your chosen anchor point. Positive values means right, negative values means left."] = true
+L["Sets the horizontal padding between your aura buttons."] = true
+L["Sets the maximum number of aura buttons per row."] = true
+L["Sets the number of action buttons on the action bar."] = true
+L["Sets the padding between buttons on the same line."] = true
+L["Sets the padding between multiple lines of buttons."] = true
+L["Sets the relative scale of this element. Default scale is set to match the ideal size."] = true
+L["Sets the threshold in a percentage of maximum energy or focus for when the Explorer Mode will exit."] = true
+L["Sets the threshold in a percentage of maximum health for when the Explorer Mode will exit."] = true
+L["Sets the threshold in a percentage of maximum mana for when the Explorer Mode will exit when in a Druid shapeshift form not currently having mana as the primary resource."] = true
+L["Sets the threshold in a percentage of maximum mana for when the Explorer Mode will exit."] = true
+L["Sets the time spent fading before hiding the chat."] = true
+L["Sets the time visible before initiating the fade."] = true
+L["Sets the vertical offset from your chosen anchor point. Positive values means up, negative values means down."] = true
+L["Sets when a new line of buttons should begin."] = true
+L["Sets which button the zigzag pattern should begin at."] = true
+L["Show Arcane Charges (Mage)"] = true
+L["Show Auras only on current target."] = true
+L["Show Auras"] = true
+L["Show Chi (Monk)"] = true
+L["Show Combo Points"] = true
+L["Show Holy Power (Paladin)"] = true
+L["Show in Battlegrounds"] = true
+L["Show in parties."] = true
+L["Show in party sized raid groups (1-5 Players)."] = true
+L["Show in raids."] = true
+L["Show itemID"] = true
+L["Show player"] = true
+L["Show Runes (Death Knight)"] = true
+L["Show Soul Shards (Warlock)"] = true
+L["Show spellID"] = true
+L["Show Stagger (Monk)"] = true
+L["Show Unit Name"] = true
+L["Sort Direction"] = true
+L["Soul Shards"] = "灵魂碎片"
+L["Stagger"] = "醉拳"
+L["Stance Bar"] = "姿态栏"
+L["Start Fading from"] = true
+L["Target of Target"] = true
+L["Target"] = "目标"
+L["Texture Variations"] = true
+L["The Explorer Mode is a collection of settings that affect primarily the actionbars and player unit frame,allowing them to fade out in various situations to get a more immersive experience."] = true
+L["The new profile needs a name."] = true
+L["This restricts the dimming to when the player is resting."] = true
+L["Time & Info Settings"] = true
+L["Time & Info"] = true
+L["Time Fading"] = true
+L["Time Visible"] = true
+L["to %s"] = true
+L["to level %s"] = true
+L["to next level"] = true
+L["Toggle whether to add itemID to item tooltips or not."] = true
+L["Toggle whether to add spellIDs and auraIDs in tooltips containing actions, spells or auras."] = true
+L["Toggle whether to enable the buttons of this action bar to fade out."] = true
+L["Toggle whether to enable the player aura buttons to fade out when not moused over."] = true
+L["Toggle whether to enable this action bar or not."] = true
+L["Toggle whether to enable this element or not."] = true
+L["Toggle whether to fade unit frames of units that are out of range."] = true
+L["Toggle whether to show a larger texture for bosses."] = true
+L["Toggle whether to show a smaller texture for critters."] = true
+L["Toggle whether to show auras on this unit frame."] = true
+L["Toggle whether to show Combo Points."] = true
+L["Toggle whether to show Death Knight Runes."] = true
+L["Toggle whether to show flag carrier frames in Battlegrounds."] = true
+L["Toggle whether to show Mage Arcane Charges."] = true
+L["Toggle whether to show Monk Chi."] = true
+L["Toggle whether to show Monk Stagger."] = true
+L["Toggle whether to show Paladin Holy Power."] = true
+L["Toggle whether to show the ice power crystal or the regular power crystal colored by resource type."] = true
+L["Toggle whether to show the name of the unit."] = true
+L["Toggle whether to show the party frames while in a raid group.\n\nIt is not possible to show both the Raid Frames and the Party Frames at the same time. Setting this option will disable the raid frames from being shown in party sized raid groups."] = true
+L["Toggle whether to show the party frames while in parties.\n\nIt is not possible to show both the Raid Frames and the Party Frames at the same time. Setting this option will disable the raid frames from being shown in parties."] = true
+L["Toggle whether to show the player aura buttons or not."] = true
+L["Toggle whether to show the player while in a party."] = true
+L["Toggle whether to show the raid frames while in a raid groups of five members or more."] = true
+L["Toggle whether to show the raid frames while in parties.\n\nIt is not possible to show both the Raid Frames and the Party Frames at the same time. Setting this option will disable the party frames when in parties."] = true
+L["Toggle whether to show the raid frames while in party sized raid groups.\n\nIt is not possible to show both the Raid Frames and the Party Frames at the same time. Setting this option will disable the party frames from being shown in party sized raid groups."] = true
+L["Toggle whether to show Warlock Soul Shards."] = true
+L["Tooltip Settings"] = true
+L["Tooltips"] = true
+L["Top Center"] = true
+L["Top-Left Corner"] = true
+L["Top-Right Corner"] = true
+L["Totem Bar"] = "图腾栏"
+L["Unit Frames"] = "单位框体"
+L["UnitFrame Settings"] = true
+L["Up"] = "上"
+L["Use Ice Crystal"] = true
+L["Use Large Boss Texture"] = true
+L["Use Local Time"] = "使用本地时间"
+L["Use Range Indicator"] = true
+L["Use Small Critter Texture"] = true
+L["Vertical Growth"] = true
+L["Vertical Layout"] = true
+L["Vertical Padding"] = true
+L["Visibility"] = "可见性"
+L["Welcome to %s"] = true
+L["When enabled, unitframe auras will be sorted depending on time left and who cast the aura. When disabled, unitframe auras will appear in the order they were applied, like in the default user interface."] = true
+L["When to exit Explorer Mode"] = true
+L["While engaged in combat"] = true
+L["While having a focus target"] = true
+L["While having a friendly target"] = true
+L["While having a hostile target"] = true
+L["While having any sort of replacement actionbar"] = true
+L["While having low health"] = true
+L["While having low mana"] = true
+L["While in a group"] = true
+L["While in an instance"] = true
+L["X Offset"] = "X 偏移量"
+L["Y Offset"] = "Y 偏移量"
+L["You can now enter a new battleground, right-click the eye icon on the minimap to enter or leave!"] = true
+L["ZigZag Layout"] = true

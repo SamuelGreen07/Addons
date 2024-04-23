@@ -48,94 +48,106 @@ RAFdb.AchID[33] = {13684,13628,13767,13629,13724,13633,13716,13768,13726,13728,1
 RAFdb.AchID[34] = {14019,14008,14024,14023,14050,14193,14194,14195,14196,14041,14043,14044,14045,14046,14048,14049,14052,14139,14051,14054,14055}--Ny'althoa
 RAFdb.AchID[35] = {12937,12938,12823,12828,12772,12830,12836,12551,12521,12522,12523,12524,12526,12530,12527,12529,12531,12532,12533}--Uldir
 RAFdb.AchID[36] = {14293,14523,14617,14376,14294,14610,14356,14357,14360,14359,14358,14361,14362,14363,14364,14365}--CastleNathria
-
+RAFdb.AchID[37] = {14998,15065,15003,15122,15058,15105,15131,15123,15132,15040,15108,15124,15133,15125,15112,15113,15114,15115,15116,15117,15118,15119,15120,15121}--SanctumofDomination
+RAFdb.AchID[38] = {15381,15401,15398,15397,15419,15386,15315,15478,15479,15480,15481,15482,15483,15484,15485,15486,15487,15488,15489,15490}--Sepulcher
+RAFdb.AchID[39] = {16335,16365,16450,16419,16458,16450,16343,17111,17112,17110,16355,16346,16347,16348,16349,16350,16351,16352,16353}--VaultIncarnates
 --Lich King Dungeons
-RAFdb.AchID[37] = {2038,2056,1862,481,492} --Ahn'kahet
-RAFdb.AchID[38] = {1296,1297,1860,480,491} --Azjol'nerub
-RAFdb.AchID[39] = {1872,1817,479,500} --Culling of Strat
-RAFdb.AchID[40] = {2151,2057,2039,482,493} --Drak'tharon
-RAFdb.AchID[41] = {4522,4523,4516,4519} --Forge of Souls
-RAFdb.AchID[42] = {2058,2040,1864,2152,484,495} --Gun'drak
-RAFdb.AchID[43] = {1834,2042,1867,486,497} --Halls of Lightning
-RAFdb.AchID[44] = {4526,4518,4521} --Halls of Reflection
-RAFdb.AchID[45] = {2154,1866,2155,485,496} --Halls of Stone
-RAFdb.AchID[46] = {2150,2037,2036,478,490} --Nexus
-RAFdb.AchID[47] = {1868,2046,2045,2044,1871,487,498} --Oculus
-RAFdb.AchID[48] = {4524,4525,4517,4520} --Pit of Saron
-if uFaction == "A" then RAFdb.AchID[49] = {3802,3803,3804,4296,4298}
-else RAFdb.AchID[49] = {3802,3803,3804,3778,4297} end --Trial of the Champion
-RAFdb.AchID[50] = {1919,477,489} --Utgarde Keep
-RAFdb.AchID[51] = {2043,1873,2156,2157,488,499} --Utgarde Pinnacle
-RAFdb.AchID[52] = {2153,2041,1865,1816,483,494} --Violet Hold
+RAFdb.AchID[40] = {2038,2056,1862,481,492} --Ahn'kahet
+RAFdb.AchID[41] = {1296,1297,1860,480,491} --Azjol'nerub
+RAFdb.AchID[42] = {1872,1817,479,500} --Culling of Strat
+RAFdb.AchID[43] = {2151,2057,2039,482,493} --Drak'tharon
+RAFdb.AchID[44] = {4522,4523,4516,4519} --Forge of Souls
+RAFdb.AchID[45] = {2058,2040,1864,2152,484,495} --Gun'drak
+RAFdb.AchID[46] = {1834,2042,1867,486,497} --Halls of Lightning
+RAFdb.AchID[47] = {4526,4518,4521} --Halls of Reflection
+RAFdb.AchID[49] = {2154,1866,2155,485,496} --Halls of Stone
+RAFdb.AchID[40] = {2150,2037,2036,478,490} --Nexus
+RAFdb.AchID[50] = {1868,2046,2045,2044,1871,487,498} --Oculus
+RAFdb.AchID[51] = {4524,4525,4517,4520} --Pit of Saron
+if uFaction == "A" then RAFdb.AchID[52] = {3802,3803,3804,4296,4298} else RAFdb.AchID[52] = {3802,3803,3804,3778,4297} end --Trial of the Champion
+RAFdb.AchID[53] = {1919,477,489} --Utgarde Keep
+RAFdb.AchID[54] = {2043,1873,2156,2157,488,499} --Utgarde Pinnacle
+RAFdb.AchID[55] = {2153,2041,1865,1816,483,494} --Violet Hold
 -- Cataclysm Dungeons
-RAFdb.AchID[53] = {5281,5282,5283,5284,4833,5060} --Blackrock Caverns
-RAFdb.AchID[54] = {5366,5367,5368,5369,5370,5371,5083} -- Deadmines
-RAFdb.AchID[55] = {5995,6130,6117} --End Time
-RAFdb.AchID[56] = {5297,5298,4840,5062} --Grim Batol
-RAFdb.AchID[57] = {5293,5294,5296,5295,4841,5065} --Halls of Origination
-RAFdb.AchID[58] = {6132,6119} --Hour of Twilight
-RAFdb.AchID[59] = {5291,5290,5292,4848,5066} --Lost City of Tol'vir
-RAFdb.AchID[60] = {5503,5504,5505,5093}--Shadowfang Keep
-RAFdb.AchID[61] = {5287,4846,5063} --Stonecore
-RAFdb.AchID[62] = {5285,5286,4839,5061} --Throne of Tides
-RAFdb.AchID[63] = {5289,5288,4847,5064} --Vortex Pinnacle
-RAFdb.AchID[64] = {6127,6070,6118} --Well of Eternity
-RAFdb.AchID[65] = {5761,5750,5858,5760,5769} --Zul'Aman
-RAFdb.AchID[66] = {5743,5762,5765,5744,5759,5768} --Zul'gurub
+RAFdb.AchID[56] = {5281,5282,5283,5284,4833,5060} --Blackrock Caverns
+RAFdb.AchID[57] = {5366,5367,5368,5369,5370,5371,5083} -- Deadmines
+RAFdb.AchID[58] = {5995,6130,6117} --End Time
+RAFdb.AchID[59] = {5297,5298,4840,5062} --Grim Batol
+RAFdb.AchID[60] = {5293,5294,5296,5295,4841,5065} --Halls of Origination
+RAFdb.AchID[61] = {6132,6119} --Hour of Twilight
+RAFdb.AchID[62] = {5291,5290,5292,4848,5066} --Lost City of Tol'vir
+RAFdb.AchID[63] = {5503,5504,5505,5093}--Shadowfang Keep
+RAFdb.AchID[64] = {5287,4846,5063} --Stonecore
+RAFdb.AchID[65] = {5285,5286,4839,5061} --Throne of Tides
+RAFdb.AchID[66] = {5289,5288,4847,5064} --Vortex Pinnacle
+RAFdb.AchID[67] = {6127,6070,6118} --Well of Eternity
+RAFdb.AchID[68] = {5761,5750,5858,5760,5769} --Zul'Aman
+RAFdb.AchID[69] = {5743,5762,5765,5744,5759,5768} --Zul'gurub
 -- MoP Dungeons
-RAFdb.AchID[67] = {6479,6476,6945,10010,6759} --Gate of the Setting Sun
-RAFdb.AchID[68] = {6713,6478,6736,6755,6756} --Mogu'shan Palace
-RAFdb.AchID[69] = {6684,6427,6760} --Scarlet Halls
-RAFdb.AchID[70] = {6929,6928,6946,6761} --Scarlet Monastery
-RAFdb.AchID[71] = {6394,6396,6531,6715,6821,6762} --Scholomance
-RAFdb.AchID[72] = {6471,6477,6472,6469,6470} --Shado-Pan
-RAFdb.AchID[73] = {6485,6822,6688,10011,6763} --Siege of Niuzao Temple
-RAFdb.AchID[74] = {6420,6400,6089,6402,6457,6456} --Stormstout Brewery
-RAFdb.AchID[75] = {6475,6460,6671,6757,6758} --Temple of the Jade Serpent
+RAFdb.AchID[70] = {6479,6476,6945,10010,6759} --Gate of the Setting Sun
+RAFdb.AchID[71] = {6713,6478,6736,6755,6756} --Mogu'shan Palace
+RAFdb.AchID[72] = {6684,6427,6760} --Scarlet Halls
+RAFdb.AchID[73] = {6929,6928,6946,6761} --Scarlet Monastery
+RAFdb.AchID[74] = {6394,6396,6531,6715,6821,6762} --Scholomance
+RAFdb.AchID[75] = {6471,6477,6472,6469,6470} --Shado-Pan
+RAFdb.AchID[76] = {6485,6822,6688,10011,6763} --Siege of Niuzao Temple
+RAFdb.AchID[77] = {6420,6400,6089,6402,6457,6456} --Stormstout Brewery
+RAFdb.AchID[78] = {6475,6460,6671,6757,6758} --Temple of the Jade Serpent
 -- WoD Dungeons
-RAFdb.AchID[76] = {9023,9551,9552,9039,9049,10080}--Auchindoun
-RAFdb.AchID[77] = {8993,9005,9008,9037,9046,10076}--Bloodmaul Slag Mines
-RAFdb.AchID[78] = {9024,9007,9043,9052,10082}--Grimrail Depot
-RAFdb.AchID[79] = {9083,9081,9082,9038,9047,10079}--Iron Docks
-RAFdb.AchID[80] = {9018,9025,9026,9041,9054,10084}--Shadowmoon Burial Grounds
-RAFdb.AchID[81] = {9033,9034,9035,9036,8843,8844,10081}--Skyreach
-RAFdb.AchID[82] = {9017,9493,9223,9044,9053,10083}--The Everbloom
-RAFdb.AchID[83] = {9045,9058,9056,9057,9042,9055,10085}--UBRS
+RAFdb.AchID[79] = {9023,9551,9552,9039,9049,10080}--Auchindoun
+RAFdb.AchID[80] = {8993,9005,9008,9037,9046,10076}--Bloodmaul Slag Mines
+RAFdb.AchID[81] = {9024,9007,9043,9052,10082}--Grimrail Depot
+RAFdb.AchID[82] = {9083,9081,9082,9038,9047,10079}--Iron Docks
+RAFdb.AchID[83] = {9018,9025,9026,9041,9054,10084}--Shadowmoon Burial Grounds
+RAFdb.AchID[84] = {9033,9034,9035,9036,8843,8844,10081}--Skyreach
+RAFdb.AchID[85] = {9017,9493,9223,9044,9053,10083}--The Everbloom
+RAFdb.AchID[86] = {9045,9058,9056,9057,9042,9055,10085}--UBRS
 -- Legion Dungeons
-RAFdb.AchID[84] = {10554,10553,10798,10799,10800}--Violet Hold
-RAFdb.AchID[85] = {10710,10711,10709,10804,10805,10806}--Black Rook Hold
-RAFdb.AchID[86] = {11768,11769,11703,11700,11701,11702}--Cathedral
-RAFdb.AchID[87] = {10610,10611,10816}--Court of Stars
-RAFdb.AchID[88] = {10766,10769,10783,10784,10785}--Darkheart Thicket
-RAFdb.AchID[89] = {10456,10457,10458,10780,10781,10782}--Eye of Azshara
-RAFdb.AchID[90] = {10542,10544,10543,10786,10788,10789}--Halls of Valor
-RAFdb.AchID[91] = {11335,11338,11432,11431,11433,11429,11430}--Karazhan
-RAFdb.AchID[92] = {10411,10413,10412,10807,10808,10809}--Maw of Souls
-RAFdb.AchID[93] = {10996,10875,10795,10796,10797}--Neltharion's Lair
-RAFdb.AchID[94] = {12004,12005,12009,12007,12008}--Seat
-RAFdb.AchID[95] = {10773,10775,10776,10803}--The Arcway
-RAFdb.AchID[96] = {10707,10679,10680,10801,10802,10803}--Vault of the Wardens
+RAFdb.AchID[87] = {10554,10553,10798,10799,10800}--Violet Hold
+RAFdb.AchID[88] = {10710,10711,10709,10804,10805,10806}--Black Rook Hold
+RAFdb.AchID[89] = {11768,11769,11703,11700,11701,11702}--Cathedral
+RAFdb.AchID[90] = {10610,10611,10816}--Court of Stars
+RAFdb.AchID[91] = {10766,10769,10783,10784,10785}--Darkheart Thicket
+RAFdb.AchID[92] = {10456,10457,10458,10780,10781,10782}--Eye of Azshara
+RAFdb.AchID[93] = {10542,10544,10543,10786,10788,10789}--Halls of Valor
+RAFdb.AchID[94] = {11335,11338,11432,11431,11433,11429,11430}--Karazhan
+RAFdb.AchID[95] = {10411,10413,10412,10807,10808,10809}--Maw of Souls
+RAFdb.AchID[96] = {10996,10875,10795,10796,10797}--Neltharion's Lair
+RAFdb.AchID[97] = {12004,12005,12009,12007,12008}--Seat
+RAFdb.AchID[98] = {10773,10775,10776,10803}--The Arcway
+RAFdb.AchID[99] = {10707,10679,10680,10801,10802,10803}--Vault of the Wardens
 -- BfA Dungeons
-RAFdb.AchID[97] = {12824,12825,12826}--Atal'dazar
-RAFdb.AchID[98] = {12548,12998,12831,12832,12833}--Freehold
-RAFdb.AchID[99] = {12848}--King's Rest
-RAFdb.AchID[100] = {13698,13545,13723,13706}--Operation Mechagon
-RAFdb.AchID[101] = {12600,12601,12602,12835,12837,12838}--Shrine of the Storm
-RAFdb.AchID[102] = {12727,12726,12847}--Siege of Boralus
-RAFdb.AchID[103] = {12504,12505,12506}--Temple of Sethraliss
-RAFdb.AchID[104] = {12844,12845,12846}--The Motherlode!!
-RAFdb.AchID[105] = {12498,12549,12499,12500,12501,12502}--The Underrot
-RAFdb.AchID[106] = {12457,12462,12840,12841,12842}--Tol Dagor
-RAFdb.AchID[107] = {12489,12495,12490,12483,12484,12488}--Waycrest Manor
+RAFdb.AchID[100] = {12824,12825,12826}--Atal'dazar
+RAFdb.AchID[101] = {12548,12998,12831,12832,12833}--Freehold
+RAFdb.AchID[102] = {12848}--King's Rest
+RAFdb.AchID[103] = {13698,13545,13723,13706}--Operation Mechagon
+RAFdb.AchID[104] = {12600,12601,12602,12835,12837,12838}--Shrine of the Storm
+RAFdb.AchID[105] = {12727,12726,12847}--Siege of Boralus
+RAFdb.AchID[106] = {12504,12505,12506}--Temple of Sethraliss
+RAFdb.AchID[107] = {12844,12845,12846}--The Motherlode!!
+RAFdb.AchID[108] = {12498,12549,12499,12500,12501,12502}--The Underrot
+RAFdb.AchID[109] = {12457,12462,12840,12841,12842}--Tol Dagor
+RAFdb.AchID[110] = {12489,12495,12490,12483,12484,12488}--Waycrest Manor
 -- Shadowlands Dungeons
-RAFdb.AchID[108] = {14374,14606,14354,14373,14408,14409}--De Other Side
-RAFdb.AchID[109] = {14284,14352,14370,14410,14411}--Halls of Atonement
-RAFdb.AchID[110] = {14503,14291,14375,14371,14412,14413}--Mists of Tirna Scithe
-RAFdb.AchID[111] = {14295,14320,14285,14366,14367,14368}--The Necrotic Wake
-RAFdb.AchID[112] = {14347,14296,14292,14369,14414,14415}--Plaguefall
-RAFdb.AchID[113] = {14286,14290,14289,14197,14198,14199}--Sanguine Depths
-RAFdb.AchID[114] = {14331,14323,14327,14326,14324,14325}--Spires of Ascension
-RAFdb.AchID[115] = {14297,14607,14533,14372,14416,14417}--Theater of Pain
+RAFdb.AchID[111] = {14374,14606,14354,14373,14408,14409}--De Other Side
+RAFdb.AchID[112] = {14284,14352,14370,14410,14411}--Halls of Atonement
+RAFdb.AchID[113] = {14503,14291,14375,14371,14412,14413}--Mists of Tirna Scithe
+RAFdb.AchID[114] = {14295,14320,14285,14366,14367,14368}--The Necrotic Wake
+RAFdb.AchID[115] = {14347,14296,14292,14369,14414,14415}--Plaguefall
+RAFdb.AchID[116] = {14286,14290,14289,14197,14198,14199}--Sanguine Depths
+RAFdb.AchID[117] = {14331,14323,14327,14326,14324,14325}--Spires of Ascension
+RAFdb.AchID[118] = {15190,15106,15179,15109}--Tazavesh
+RAFdb.AchID[119] = {14297,14607,14533,14372,14416,14417}--Theater of Pain
+-- Shadowlands Dungeons
+RAFdb.AchID[120] = {16402,16320,16440,16267,16268}--Ruby Life Pools
+RAFdb.AchID[121] = {16447,16456,16620,16275,16276,16277}--Nokhud Offensive
+RAFdb.AchID[122] = {16110,16296,16762,16430,16404,16255,16256,16257}--Brackenhide Hollow
+RAFdb.AchID[123] = {16517,16426,16427,16260,16261,16262}--Halls of Infusion
+RAFdb.AchID[124] = {16434,16329,16441,16269,16270,16271}--Algeth'ar Academy
+RAFdb.AchID[125] = {16438,16432,16453,16263,16264,16265}--Neltharus
+RAFdb.AchID[126] = {16445,16330,16331,16272,16273,16274}--The Azure Vault
+RAFdb.AchID[127] = {16337,16282,16281,16278,16279,16280}--Uldaman
+
 RAFdb.MapID = {
 --Raids
 186,186,162,162,248,141,155,155,200,172,172,147,--LK
@@ -144,7 +156,7 @@ RAFdb.MapID = {
 596,661,610,--WoD
 909,777,764,850,806,--Legion
 1352,1363,1512,1580,1148,--BfA
-1735,--SL
+1735,2003,2061,2119,--SL
 --Dungeons
 132,157,130,160,183,154,138,185,140,129,142,184,171,133,136,168,--LK
 283,291,401,293,297,399,277,311,324,322,325,398,333,337,--Cata
@@ -152,61 +164,62 @@ RAFdb.MapID = {
 593,573,606,595,574,601,620,616,--WoD
 732,751,845,761,733,713,703,809,706,731,903,749,710,--Legion
 934,936,1004,1490,1039,1162,1038,1010,1041,980,1015,--BfA
-1677,1663,1669,1666,1697,1675,1692,1683}--SL
+1677,1663,1669,1666,1697,1675,1692,1997,1683,--SL
+2094,2093,2096,2082,2097,2080,2073,230}--DF
 --Scenarios
 if uFaction == "A" then 
-	RAFdb.AchID[116] = {7261,7258,7257,7252,8310}--Brewing
-	RAFdb.AchID[117] = {7989,7990,7991,7992,7993,7988}--Patience
-	RAFdb.AchID[118] = {7273,7272,7271}--Arena
-	RAFdb.AchID[119] = {8016,8017}--Assault
-	RAFdb.AchID[120] = {8347,8314,8364}--Battle
-	RAFdb.AchID[121] = {8329,8330,8316,8312}--Blood
-	RAFdb.AchID[122] = {6931,6930,6923}--Brewmoon
-	RAFdb.AchID[123] = {7275,7276,8368,7522,8311}--Crypt
-	RAFdb.AchID[124] = {7987,7984,7986,8009}--Dagger
-	RAFdb.AchID[125] = {8319,8317,8318}--DarkHeart
-	RAFdb.AchID[126] = {7267,7266,7265}--Greenstone
-	RAFdb.AchID[127] = {8012,8011,8010}--Lion's
-	RAFdb.AchID[128] = {8295,8294,8327}--Ragefire
-	RAFdb.AchID[129] = {7526,7527,7523}--Theramore
-	RAFdb.AchID[130] = {7231,7232,7239,7249,7248}--Unga
+	RAFdb.AchID[128] = {7261,7258,7257,7252,8310}--Brewing
+	RAFdb.AchID[129] = {7989,7990,7991,7992,7993,7988}--Patience
+	RAFdb.AchID[130] = {7273,7272,7271}--Arena
+	RAFdb.AchID[131] = {8016,8017}--Assault
+	RAFdb.AchID[132] = {8347,8314,8364}--Battle
+	RAFdb.AchID[133] = {8329,8330,8316,8312}--Blood
+	RAFdb.AchID[134] = {6931,6930,6923}--Brewmoon
+	RAFdb.AchID[135] = {7275,7276,8368,7522,8311}--Crypt
+	RAFdb.AchID[136] = {7987,7984,7986,8009}--Dagger
+	RAFdb.AchID[137] = {8319,8317,8318}--DarkHeart
+	RAFdb.AchID[138] = {7267,7266,7265}--Greenstone
+	RAFdb.AchID[139] = {8012,8011,8010}--Lion's
+	RAFdb.AchID[140] = {8295,8294,8327}--Ragefire
+	RAFdb.AchID[141] = {7526,7527,7523}--Theramore
+	RAFdb.AchID[142] = {7231,7232,7239,7249,7248}--Unga
 	local MapIDs = {447,487,480,451,524,523,452,481,488,520,448,911,522,483,450,1}
 	for i = 1, #MapIDs do tinsert(RAFdb.MapID, MapIDs[i]) end
-	for i = 1, 130 do RAFdb.MapName[i] = C_Map.GetMapInfo(RAFdb.MapID[i]).name; end
-	RAFdb.MapName[118] = "Arena of Annihilation"-- (Proving Grounds)
-	RAFdb.MapName[121] = "Blood in the Snow"-- (Dun Morogh)
-	RAFdb.MapName[125] = "Dark Heart of Pandaria"-- (Vale of Eternal Blossoms)
-	RAFdb.MapName[126] = "Greenstone Village"-- (Jade Forest)
-	RAFdb.MapName[127] = "Lion's Landing"-- (Krasarang Wilds)
-	RAFdb.MapName[129] = "Theramore's Fall"-- (Dustwallow Marsh)
+	for i = 1, 142 do RAFdb.MapName[i] = C_Map.GetMapInfo(RAFdb.MapID[i]).name; end
+	RAFdb.MapName[130] = "Arena of Annihilation"-- (Proving Grounds)
+	RAFdb.MapName[133] = "Blood in the Snow"-- (Dun Morogh)
+	RAFdb.MapName[137] = "Dark Heart of Pandaria"-- (Vale of Eternal Blossoms)
+	RAFdb.MapName[138] = "Greenstone Village"-- (Jade Forest)
+	RAFdb.MapName[139] = "Lion's Landing"-- (Krasarang Wilds)
+	RAFdb.MapName[141] = "Theramore's Fall"-- (Dustwallow Marsh)
 else
-	RAFdb.AchID[116] = {7261,7258,7257,7252,8310}--Brewing
-	RAFdb.AchID[117] = {7989,7990,7991,7992,7993,7988}--Patience
-	RAFdb.AchID[118] = {7273,7272,7271}--Arena
-	RAFdb.AchID[119] = {8016,8017}--Assault
-	RAFdb.AchID[120] = {8347,8315,8366}--Battle
-	RAFdb.AchID[121] = {8329,8330,8316,8312}--Blood
-	RAFdb.AchID[122] = {6931,6930,6923}--Brewmoon
-	RAFdb.AchID[123] = {7275,7276,8368,7522,8311}--Crypt
-	RAFdb.AchID[124] = {7987,7984,7986,8009}--Dagger
-	RAFdb.AchID[125] = {8319,8317,8318}--DarkHeart
-	RAFdb.AchID[126] = {8015,8014,8013}--Domination
-	RAFdb.AchID[127] = {7267,7266,7265}--Greenstone
-	RAFdb.AchID[128] = {8295,8294,8327}--Ragefire
-	RAFdb.AchID[129] = {7529,7530,7524}--Theramore
-	RAFdb.AchID[130] = {7231,7232,7239,7249,7248}--Unga
+	RAFdb.AchID[128] = {7261,7258,7257,7252,8310}--Brewing
+	RAFdb.AchID[129] = {7989,7990,7991,7992,7993,7988}--Patience
+	RAFdb.AchID[130] = {7273,7272,7271}--Arena
+	RAFdb.AchID[131] = {8016,8017}--Assault
+	RAFdb.AchID[132] = {8347,8315,8366}--Battle
+	RAFdb.AchID[133] = {8329,8330,8316,8312}--Blood
+	RAFdb.AchID[134] = {6931,6930,6923}--Brewmoon
+	RAFdb.AchID[135] = {7275,7276,8368,7522,8311}--Crypt
+	RAFdb.AchID[136] = {7987,7984,7986,8009}--Dagger
+	RAFdb.AchID[137] = {8319,8317,8318}--DarkHeart
+	RAFdb.AchID[138] = {8015,8014,8013}--Domination
+	RAFdb.AchID[139] = {7267,7266,7265}--Greenstone
+	RAFdb.AchID[140] = {8295,8294,8327}--Ragefire
+	RAFdb.AchID[141] = {7529,7530,7524}--Theramore
+	RAFdb.AchID[142] = {7231,7232,7239,7249,7248}--Unga
 	local MapIDs = {447,487,480,451,524,523,452,481,488,520,498,448,522,416,450,1}
 	for i = 1, #MapIDs do tinsert(RAFdb.MapID, MapIDs[i]) end
-	for i = 1, 130 do RAFdb.MapName[i] = C_Map.GetMapInfo(RAFdb.MapID[i]).name end
-	RAFdb.MapName[118] = "Arena of Annihilation"--(Proving Grounds)
-	RAFdb.MapName[121] = "Blood in the Snow"--(Dun Morogh)
-	RAFdb.MapName[125] = "Dark Heart of Pandaria"--(Vale of Eternal Blossoms)
-	RAFdb.MapName[126] = "Domination Point"--(Krasarang Wilds)
-	RAFdb.MapName[127] = "Greenstone Village"--(Jade Forest)
-	RAFdb.MapName[129] = "Theramore's Fall"--(Dustwallow Marsh)
+	for i = 1, 142 do RAFdb.MapName[i] = C_Map.GetMapInfo(RAFdb.MapID[i]).name end
+	RAFdb.MapName[130] = "Arena of Annihilation"--(Proving Grounds)
+	RAFdb.MapName[133] = "Blood in the Snow"--(Dun Morogh)
+	RAFdb.MapName[137] = "Dark Heart of Pandaria"--(Vale of Eternal Blossoms)
+	RAFdb.MapName[138] = "Domination Point"--(Krasarang Wilds)
+	RAFdb.MapName[139] = "Greenstone Village"--(Jade Forest)
+	RAFdb.MapName[141] = "Theramore's Fall"--(Dustwallow Marsh)
 end
-RAFdb.MapName[84] = "Assault on Violet Hold"
-RAFdb.MapName[92] = "Maw of Souls"
+RAFdb.MapName[87] = "Assault on Violet Hold"
+RAFdb.MapName[95] = "Maw of Souls"
 
 RAFdb.MapName[1] = RAFdb.MapName[1].." [10]"
 RAFdb.MapName[2] = RAFdb.MapName[2].." [25]"--ICC

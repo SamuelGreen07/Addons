@@ -234,6 +234,7 @@ local function parseItemList(parts, startPos, endToken, hasSlot)
             obj.level = tokens["v"] or 0
             obj.stat1 = tokens["j"] or 0
             obj.stat2 = tokens["k"] or 0
+            obj.craftQuality = tokens["l"] or 0
             obj.enchantId = tokens["e"] or 0
 			obj.inventoryId = tokens["t"] or 0
             
@@ -274,6 +275,7 @@ local function parseEssenceList(essenceString)
 end
 ]]
 
+--[[
 local function parseSoulbinds(soulbindString)
     local ret = {}
 
@@ -285,6 +287,7 @@ local function parseSoulbinds(soulbindString)
 
     return ret
 end
+]]
 
 --
 -- Import a character, returning nil on success, otherwise an error message, import result stored in the db.
@@ -383,16 +386,35 @@ function Amr:ImportCharacter(data, isTest, isChild)
     -- if we make it this far, the data is valid, so read item information
 	local specSlot = tonumber(parts[10])
     
-    local soulbindId = tonumber(parts[14])
-    local soulbindNodes = parseSoulbinds(parts[15])
+    local talents = {}
+    local talentStr = parts[13]
+    for talTier = 1, #talentStr do
+        local talCol = tonumber(talentStr:sub(talTier, talTier))
+        table.insert(talents, talCol)
+    end
+
+    --local soulbindId = tonumber(parts[14])
+    --local soulbindNodes = parseSoulbinds(parts[15])
     --local essences = parseEssenceList(parts[15])
 
-    local importData = parseItemList(parts, 17, "n/a", true)
+    local importData = parseItemList(parts, 15, "n/a", true)
     
     -- extra information contains setup id, display label, then extra enchant info        
     parts = { strsplit("@", data1[3]) }
 
     local setupId = parts[2]
+    
+    local setupTalentConfigId = nil
+
+    local idParts = { strsplit("#", setupId) }
+    setupId = idParts[1]
+    if #idParts > 1 then
+        setupTalentConfigId = idParts[2]
+        if setupTalentConfigId == "_" then
+            setupTalentConfigId = nil
+        end
+    end
+    
     local setupName = parts[3]
     local enchantInfo = {}
 
@@ -442,6 +464,8 @@ function Amr:ImportCharacter(data, isTest, isChild)
             Id = setupId,
             Label = setupName,
             Gear = importData,
+            Talents = talents,        
+            TalentConfigId = setupTalentConfigId,
             SoulbindId = soulbindId,
             SoulbindNodes = soulbindNodes
             --Essences = essences

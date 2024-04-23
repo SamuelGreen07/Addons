@@ -1,11 +1,15 @@
 # Lib: HereBeDragons
 
-## [2.04-release](https://github.com/Nevcairiel/HereBeDragons/tree/2.04-release) (2020-10-13)
-[Full Changelog](https://github.com/Nevcairiel/HereBeDragons/compare/2.03-release...2.04-release) [Previous Releases](https://github.com/Nevcairiel/HereBeDragons/releases)
+## [2.13-release](https://github.com/Nevcairiel/HereBeDragons/tree/2.13-release) (2023-07-12)
+[Full Changelog](https://github.com/Nevcairiel/HereBeDragons/compare/2.12-release...2.13-release) [Previous Releases](https://github.com/Nevcairiel/HereBeDragons/releases)
 
-- Update TOC  
-- Don't consider instance -1 as valid for overrides  
-- Remove HereBeDragons-1.0 compat folder  
-- Use C\_Minimap.GetViewRadius on WoW 9.0 instead guessing based on zoom  
-    This avoids MINIMAP\_UPDATE\_ZOOM spam, which was degrading performance.  
-- Migrate to GitHub actions  
+- Update TOC for 10.1.5  
+- HBD-Pins-2.0: Hack around combat limitations in 10.1.5  
+    SetPassThroughButtons can no longer be called in combat, but we allow  
+    creating pins at any time during play. Until such a point when this is  
+    fixed by Blizzard, noop out the function so that creating pins no longer  
+    errors.  
+    This function is called on the pin by Blizzards pin handler, which is of  
+    course insecure on addon-created pins.  
+- Update TOC for 10.1  
+- Update TOC for 10.0.7  

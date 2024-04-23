@@ -1,11 +1,11 @@
-## Interface: 90001
+## Interface: 100100
 ## Title: |cFF16C3F2Project|r|cFFFFFFFFAzilroka|r
-## Author: Azilroka, NihilisticPandemonium
-## Version: 1.73
-## OptionalDeps: Masque, Tukui, ElvUI
+## Author: Azilroka, Nihilistzsche
+## Version: 1.88
+## OptionalDeps: Masque, Tukui, ElvUI, SpartanUI
 ## SavedVariables: ProjectAzilrokaDB, stAddonManagerProfilesDB, stAddonManagerServerDB
-## X-Tukui-ProjectID: 79
-## X-Tukui-ProjectFolders: ProjectAzilroka
+## X-Curse-Project-ID: 311661
+## X-Wago-ID: baNDy46o
 
 Libs\Load_Libs.xml
 Locales\Load_Locales.xml
@@ -15,10 +15,8 @@ Init.lua
 Libs\oUF_pbuf\oUF_pbuf.xml
 
 Cooldowns.lua
-Modules\Enhanced_Config.lua
-
-Libs\LibElvUIPlugin-1.0\LibElvUIPlugin-1.0.lua
 
 Media\Media.lua
-Modules\Load_Modules.xml
 
+# Modules
+Modules\Load_Mainline.xml

@@ -1,77 +1,39 @@
-## Interface: 90002
-## Name: AzeriteUI
-## Title: |c00000002|r|cff7284abA|r|cff6a7a9ez|r|cff617092e|r|cff596785r|r|cff505d78i|r|cff48536bt|r|cff3f495fe|r|cffffffffUI|r |cfffff5693.1|r |cFFFF7D00Beta|r
-## Author: Daniel Troko, Lars Norberg
+## Interface: 100206
+## IconTexture: Interface\Addons\AzeriteUI\Assets\power-crystal-ice-icon.tga
+
+## Title: |cff4488bbAzerite|r |cfffafafaUI|r |cffcccccc5.2|r
 ## Notes: Custom user graphical interface.|n|nDesign by Daniel Troko and Lars Norberg.|nCode by Lars Norberg.|n|n|cff4488ffPayPal|r|cffffffff:|r |n|cffffffffwww.paypal.me/GoldpawsStuff|r|n|n|cff4488ffPatreon|r|cffffffff:|r |n|cffffffffwww.patreon.com/GoldpawsStuff|r
-## Version: 3.1-Beta
-## DefaultState: Enabled
-## SavedVariables: AzeriteUI_DB
-## OptionalDeps: Clique
+## Version: 5.2.166-RC
+## Author: Daniel Troko, Lars Norberg
+
 ## X-Category: Interface Enhancements
-## X-Discord: https://discord.gg/MUSfWXd
-## X-Website: https://www.patreon.com/goldpawsstuff
+## X-Curse-Project-ID: 298648
+## X-Wago-ID: R4N2PZKL
 ## X-License: Custom
 
-# Global Fonts
-FontStyles.xml
+## SavedVariables: AzeriteUI5_DB
+## OptionalDeps: TaintLess, Ace3, Clique, LibKeyBound-1.0, LibEditModeOverride, LibSharedMedia-3.0, !LibUIDropDownMenu, LibMoreEvents-1.0
 
-# Addon libraries & plugins, the main engine of it all.
-back-end\wheel.lua
-back-end\libraries.xml
-back-end\plugins.xml
-back-end\tools.xml
+# Fontstyles
+Fontstyles.xml
 
-# Addon localization.
-locale\enUS.lua
-locale\deDE.lua
-locale\esES.lua
-locale\esMX.lua
-locale\esMX.lua
-locale\frFR.lua
-locale\itIT.lua
-locale\koKR.lua
-locale\ptBR.lua
-locale\ptPT.lua
-locale\ruRU.lua
-locale\zhCN.lua
-locale\zhTW.lua  
+# Libraries
+Libs\Libs.xml
 
-# Private addon API and tools. 
-# Also the old addon specific layouts and design,
-# though these will eventually all be moved tools
-# the new tinkertown schematics system. 
-front-end\private.lua
+# Addon localization
+Locale\Locale.xml
 
-# Where tinkerers should tinker. 
-tinkertown\tinkertown.xml
+# Addon core
+Core\Core.xml
 
-# Main addon module, 
-# all others are children of this one. 
-front-end\root.lua
+# Options Menu
+Options\Options.xml
 
-# Menu Module. 
-# This one is required, even by the root.
-front-end\modules\menu-addon.lua
+# Static Layouts
+Static\Static.xml
 
-# Modules.
-front-end\modules\actionbars.lua
-front-end\modules\extrabars.lua
-front-end\modules\chatwindows.lua
-front-end\modules\menu-game.lua
-front-end\modules\menu-gamepanels.lua
-front-end\modules\minimap.lua
-front-end\modules\misc.lua
-front-end\modules\misc-floaters.lua
-front-end\modules\misc-timers.lua
-front-end\modules\objectivestracker.lua
-front-end\modules\tooltips.lua
-front-end\modules\tooltips-blizzard.lua
-front-end\modules\unitframes.lua
-front-end\modules\unitframes-grouptools.lua
-front-end\modules\unitframes-nameplates.lua
+# Addon components
+Components\Components.xml
 
-# These will be removed later.
-front-end\modules\deprecated\unitframes.lua
-
-# All addon- and module incompatibilities in one place.
-front-end\auto-disable.lua
+# Resolve Conflicts
+Core\Conflicts.lua

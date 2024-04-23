@@ -5,8 +5,8 @@
 local mod, CL = BigWigs:NewBoss("Anub'arakAN", 601, 587) -- AN (Azjol-Nerub) is intentional to prevent conflict with Anub'arak from Trial of the Crusader
 if not mod then return end
 mod:RegisterEnableMob(29120)
-mod.engageId = 1973
-mod.respawnTime = 30
+mod:SetEncounterID(mod:Classic() and 218 or 1973)
+mod:SetRespawnTime(30)
 
 -------------------------------------------------------------------------------
 --  Locals
@@ -20,13 +20,13 @@ local nextSubmergeWarning = 80
 
 function mod:GetOptions()
 	return {
-		53472, -- Pound
+		{53472, "CASTBAR"}, -- Pound
 		-6359, -- Submerge
 	}
 end
 
 function mod:OnBossEnable()
-	self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", nil, "boss1")
+	self:RegisterUnitEvent("UNIT_HEALTH", nil, "boss1")
 	self:RegisterUnitEvent("UNIT_TARGETABLE_CHANGED", nil, "boss1")
 
 	self:Log("SPELL_CAST_START", "Pound", 53472, 59433) -- normal, heroic
@@ -45,18 +45,27 @@ function mod:Pound(args)
 	self:MessageOld(53472, "yellow", "warning", CL.casting:format(args.spellName))
 end
 
-function mod:UNIT_TARGETABLE_CHANGED(_, unit)
-	-- Submerge
-	if UnitCanAttack("player", unit) then
-		self:MessageOld(-6359, "cyan", nil, CL.over:format(self:SpellName(-6359)))
-	else
-		self:MessageOld(-6359, "cyan")
-		self:Bar(-6359, self:Normal() and 41 or 62)
+do
+	local prev = 0
+	function mod:UNIT_TARGETABLE_CHANGED(_, unit)
+		if self:MobId(self:UnitGUID(unit)) ~= 29120 then return end
+		local t = GetTime()
+		if t - prev < 3 then return end
+		prev = t
+
+		-- Submerge
+		if UnitCanAttack("player", unit) then
+			self:MessageOld(-6359, "cyan", nil, CL.over:format(self:SpellName(-6359)))
+		else
+			self:MessageOld(-6359, "cyan")
+			self:Bar(-6359, self:Normal() and 41 or 62)
+		end
 	end
 end
 
-function mod:UNIT_HEALTH_FREQUENT(event, unit)
-	local hp = UnitHealth(unit) / UnitHealthMax(unit) * 100
+function mod:UNIT_HEALTH(event, unit)
+	if self:MobId(self:UnitGUID(unit)) ~= 29120 then return end
+	local hp = self:GetHealth(unit)
 	if hp < nextSubmergeWarning then
 		self:MessageOld(-6359, "cyan", nil, CL.soon:format(self:SpellName(-6359))) -- Submerge
 		nextSubmergeWarning = nextSubmergeWarning - 25

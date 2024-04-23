@@ -12,35 +12,49 @@ local RSGeneralDB = private.ImportLib("RareScannerGeneralDB")
 -- RareScanner service libraries
 local RSMinimap = private.ImportLib("RareScannerMinimap")
 
+-- RareScanner general libraries
+local RSUtils = private.ImportLib("RareScannerUtils")
+
 
 RSOverlayMixin = CreateFromMixins(MapCanvasPinMixin);
+
+RSOverlayMixin.SetPassThroughButtons = function() end
 
 function RSOverlayMixin:OnLoad()
 	self:SetScalingLimits(1, 1.4, 2.5);
 end
 
-function RSOverlayMixin:OnAcquired(x, y, pin)
+function RSOverlayMixin:OnAcquired(x, y, r, g, b, pin)
 	self:UseFrameLevelType("PIN_FRAME_LEVEL_DIG_SITE", self:GetMap():GetNumActivePinsByTemplate("RSOverlayTemplate"));
 
 	-- Set attributes
 	self.pin = pin
 	self.Texture:SetTexture(RSConstants.OVERLAY_SPOT_TEXTURE)
-	self:SetPosition(x, y);
+	self.Texture:SetVertexColor(r, g, b, 0.9)
+	self:SetPosition(RSUtils.FixCoord(x), RSUtils.FixCoord(y));
+	if (self.SetPassThroughButtons) then
+		self:SetPassThroughButtons("MiddleButton");
+	end
 end
 
 function RSOverlayMixin:OnMouseEnter()
-	if (not self.pin.ShowAnim:IsPlaying()) then
-		self.pin.ShowAnim:Play();
+	if (self.pin.ShowPingAnim and not self.pin.ShowPingAnim:IsPlaying()) then
+		self.pin.ShowPingAnim:Play();
 	end
 
 	GameTooltip:SetOwner(self, "ANCHOR_CURSOR")
-	GameTooltip:SetText(self.pin.POI.name)
+	
+	if (self.pin.POI) then
+		GameTooltip:SetText(self.pin.POI.name)
+	else
+		GameTooltip:SetText(self.pin.name)
+	end
 	GameTooltip:Show()
 end
 
 function RSOverlayMixin:OnMouseLeave()
-	if (self.pin.ShowAnim:IsPlaying()) then
-		self.pin.ShowAnim:Stop();
+	if (self.pin.ShowPingAnim and self.pin.ShowPingAnim:IsPlaying()) then
+		self.pin.ShowPingAnim:Stop();
 	end
 
 	GameTooltip:Hide()
@@ -48,10 +62,24 @@ end
 
 function RSOverlayMixin:OnMouseDown(button)
 	if (button == "RightButton") then
-		self:GetMap():RemoveAllPinsByTemplate("RSOverlayTemplate");
-		RSGeneralDB.RemoveOverlayActive()
+		for pin in self:GetMap():EnumeratePinsByTemplate("RSOverlayTemplate") do
+			if (pin ~= self and pin:GetEntityID() == self:GetEntityID()) then
+				self:GetMap():RemovePin(pin)
+			end
+		end
+		
+		self:GetMap():RemovePin(self)
+		RSGeneralDB.RemoveOverlayActive(self:GetEntityID())
 
 		-- Refresh minimap
 		RSMinimap.RefreshAllData(true)
+	end
+end
+
+function RSOverlayMixin:GetEntityID()
+	if (self.pin.POI) then
+		return self.pin.POI.entityID
+	else
+		return self.pin.entityID
 	end
 end

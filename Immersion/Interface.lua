@@ -1,15 +1,22 @@
 local API = {}; ImmersionAPI = API;
 -- Version
-local IS_CLASSIC = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC 
-local IS_RETAIL  = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+local IS_VANILLA = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC or nil;
+local IS_RETAIL  = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE or nil;
+local IS_CLASSIC = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC or nil;
+local IS_WOW10   = (function() -- WoW10 == modern API
+	local version = select(4, GetBuildInfo())
+	if version >= 30401 or ( version >= 11404 and version <= 20000 ) then
+		return true
+	end
+end)();
 
-function API:IsClassic(...) return IS_CLASSIC end
-function API:IsRetail(...)  return IS_RETAIL  end
+API.IsRetail = IS_RETAIL;
+API.IsWoW10  = IS_WOW10;
 
 API.ITERATORS = {
-	GOSSIP    = IS_CLASSIC and 2 or IS_RETAIL and 2;
-	ACTIVE    = IS_CLASSIC and 6 or IS_RETAIL and 7;
-	AVAILABLE = IS_CLASSIC and 7 or IS_RETAIL and 8;
+	GOSSIP    = (IS_VANILLA or IS_CLASSIC) and 2 or IS_RETAIL and 2;
+	ACTIVE    = (IS_VANILLA or IS_CLASSIC) and 6 or IS_RETAIL and 7;
+	AVAILABLE = (IS_VANILLA or IS_CLASSIC) and 7 or IS_RETAIL and 8;
 }
 
 -- Chunk iterators
@@ -21,12 +28,12 @@ function API:GetAvailableQuestIterator(...) return self.ITERATORS.AVAILABLE end
 local function map(lambda, step, ...)
 	local data = {}
 	for i = 1, select('#', ...), step do
-		data[#data + 1] = lambda(nil, i, ...)
+		data[#data + 1] = lambda(nil, i, ceil(i / step), ...)
 	end
 	return data
 end
 
-function API:MapGossipAvailableQuests(i, ...)
+function API:MapGossipAvailableQuests(i, idx, ...)
 	local title, level, trivial, frequency, repeatable, legendary, id = select(i, ...)
 	return {
 		title       = title,
@@ -35,11 +42,11 @@ function API:MapGossipAvailableQuests(i, ...)
 		frequency   = frequency,
 		repeatable  = repeatable,
 		isLegendary = legendary,
-		questID     = id,
+		questID     = id or idx,
 	}
 end
 
-function API:MapGossipActiveQuests(i, ...)
+function API:MapGossipActiveQuests(i, idx, ...)
 	local title, level, trivial, complete, legendary, id = select(i, ...)
 	return {
 		title       = title,
@@ -47,20 +54,22 @@ function API:MapGossipActiveQuests(i, ...)
 		isTrivial   = trivial,
 		isComplete  = complete,
 		isLegendary = legendary,
-		questID     = id,
+		questID     = id or idx,
 	}
 end
 
-function API:MapGossipOptions(i, ...)
+function API:MapGossipOptions(i, idx, ...)
 	local name, icon = select(i, ...)
 	return {
-		name = name,
-		type = icon,
+		name           = name,
+		type           = icon,
+		orderIndex     = idx,
 	}
 end
 
 -- Quest pickup API
-function API:CloseQuest(...)
+function API:CloseQuest(onQuestClosed, ...)
+	if onQuestClosed and IS_WOW10 then return end;
 	return CloseQuest and CloseQuest(...)
 end
 
@@ -101,7 +110,7 @@ function API:QuestFlagsPVP(...)
 end
 
 function API:GetQuestIconOffer(quest)
-	if QuestUtil.GetQuestIconOffer then
+	if QuestUtil and QuestUtil.GetQuestIconOffer then
 		return QuestUtil.GetQuestIconOffer(
 			quest.isLegendary,
 			quest.frequency,
@@ -111,14 +120,14 @@ function API:GetQuestIconOffer(quest)
 	end
 	local icon =
 		( quest.isLegendary and 'AvailableLegendaryQuestIcon') or
-		( quest.frequency and quest.frequency ~= 0 and 'DailyQuestIcon') or
+		( quest.frequency and quest.frequency > 1 and 'DailyQuestIcon') or
 		( quest.repeatable and 'DailyActiveQuestIcon') or
 		( 'AvailableQuestIcon' )
 	return ([[Interface\GossipFrame\%s]]):format(icon)
 end
 
 function API:GetQuestIconActive(quest)
-	if QuestUtil.GetQuestIconActive then
+	if QuestUtil and QuestUtil.GetQuestIconActive then
 		return QuestUtil.GetQuestIconActive(
 			quest.isComplete,
 			quest.isLegendary,
@@ -130,8 +139,8 @@ function API:GetQuestIconActive(quest)
 	local icon =
 		( quest.isComplete ) and (
 			( quest.isLegendary and  'ActiveLegendaryQuestIcon') or
-			( quest.isComplete and 'ActiveQuestIcon') ) or
-		( 'InCompleteQuestIcon' )
+			( quest.isComplete and 'ActiveQuestIcon')
+		) or ( 'InCompleteQuestIcon' )
 	return ([[Interface\GossipFrame\%s]]):format(icon)
 end
 
@@ -216,9 +225,9 @@ function API:IsQuestCompletable(...)
 end
 
 -- Gossip API
-function API:CloseGossip(...)
-	if CloseGossip then return CloseGossip(...) end
-	return C_GossipInfo.CloseGossip(...)
+function API:CloseGossip(onGossipClosed, ...)
+	if onGossipClosed and IS_WOW10 then return end;
+	return (C_GossipInfo and C_GossipInfo.CloseGossip or CloseGossip)(...)
 end
 
 function API:ForceGossip(...)
@@ -227,10 +236,15 @@ function API:ForceGossip(...)
 end
 
 function API:CanAutoSelectGossip(dontAutoSelect)
-	local gossip = self:GetGossipOptions()
-	if ( #gossip > 0  and gossip[1].type:lower() ~= 'gossip') then
+	local gossip, option = self:GetGossipOptions()
+	if ( #gossip > 0 ) then
+		local firstOption = gossip[1];
+		option = firstOption.selectOptionWhenOnlyOption and (firstOption.orderIndex or firstOption.gossipOptionID);
+		option = option or (firstOption.type and firstOption.type:lower() ~= 'gossip' and 1)
+	end
+	if option then
 		if not dontAutoSelect then
-			self:SelectGossipOption(1)
+			self:SelectGossipOption(option)
 		end
 		return true
 	end
@@ -252,8 +266,10 @@ function API:GetNumGossipActiveQuests(...)
 end
 
 function API:GetNumGossipOptions(...)
-	if GetNumGossipOptions then return GetNumGossipOptions(...) end
-	return C_GossipInfo.GetNumOptions(...)
+	return (GetNumGossipOptions or 
+		C_GossipInfo and C_GossipInfo.GetNumOptions or
+		C_GossipInfo and C_GossipInfo.GetOptions and
+		function() return #C_GossipInfo.GetOptions() end)(...)
 end
 
 function API:GetGossipAvailableQuests(...)
@@ -286,31 +302,51 @@ function API:GetGossipOptions(...)
 			GetGossipOptions(...)
 		)
 	end
+	assert(C_GossipInfo.GetOptions, 'C_GossipInfo.GetOptions does not exist.')
+	if GossipOptionSort then
+		local gossipOptions = C_GossipInfo.GetOptions(...)
+		table.sort(gossipOptions, GossipOptionSort)
+		return gossipOptions
+	end
 	return C_GossipInfo.GetOptions(...)
+end
+
+function API:GetGossipOptionID(option)
+	return option.orderIndex;
+end
+
+-- Quest greeting API
+function API:GetNumActiveQuests(...)
+	return GetNumActiveQuests and GetNumActiveQuests(...) or 0
+end
+
+function API:GetNumAvailableQuests(...)
+	return GetNumAvailableQuests and GetNumAvailableQuests(...) or 0
 end
 
 -- Gossip/quest selectors API
 function API:SelectActiveQuest(...)
-	if SelectActiveQuest then return SelectActiveQuest(...) end
+	if SelectActiveQuest then
+		return SelectActiveQuest(...)
+	end
 end
 
 function API:SelectAvailableQuest(...)
-	if SelectAvailableQuest then return SelectAvailableQuest(...) end
+	if SelectAvailableQuest then
+		return SelectAvailableQuest(...)
+	end
 end
 
 function API:SelectGossipOption(...)
-	if SelectGossipOption then return SelectGossipOption(...) end
-	return C_GossipInfo.SelectOption(...)
+	return (C_GossipInfo and (C_GossipInfo.SelectOptionByIndex or C_GossipInfo.SelectOption) or SelectGossipOption)(...)
 end
 
 function API:SelectGossipActiveQuest(...)
-	if SelectGossipActiveQuest then return SelectGossipActiveQuest(...) end
-	return C_GossipInfo.SelectActiveQuest(...)
+	return (C_GossipInfo and C_GossipInfo.SelectActiveQuest or SelectGossipActiveQuest)(...)
 end
 
 function API:SelectGossipAvailableQuest(...)
-	if SelectGossipAvailableQuest then return SelectGossipAvailableQuest(...) end
-	return C_GossipInfo.SelectAvailableQuest(...)
+	return (C_GossipInfo and C_GossipInfo.SelectAvailableQuest or SelectGossipAvailableQuest)(...)
 end
 
 -- Misc
@@ -318,15 +354,8 @@ function API:GetUnitName(...)
 	return GetUnitName and GetUnitName(...)
 end
 
-function API:GetFriendshipReputation(...)
-	if GetFriendshipReputation then
-		return GetFriendshipReputation(...)
-	end
-	return 0
-end
-
 function API:GetPortraitAtlas()
-	if GetAtlasInfo and GetAtlasInfo('TalkingHeads-PortraitFrame') then
+	if C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo('TalkingHeads-PortraitFrame') then
 		return 'TalkingHeads-PortraitFrame';
 	end
 	return 'TalkingHeads-Alliance-PortraitFrame';
@@ -358,4 +387,27 @@ end
 
 function API:CloseItemText(...)
 	if CloseItemText then return CloseItemText(...) end
+end
+
+function API:GetQuestDetailsTheme(...)
+	if C_QuestLog and C_QuestLog.GetQuestDetailsTheme then
+		return C_QuestLog.GetQuestDetailsTheme(...)
+	end
+end
+
+function API:GetQuestItemInfoLootType(...)
+	if GetQuestItemInfoLootType then
+		return GetQuestItemInfoLootType(...)
+	end
+end
+
+-- Interaction manager, events from PlayerInteractionManagerConstantsDocumentation.lua
+local StayOpenOnInteractionTypes = Enum and Enum.PlayerInteractionType and {
+	[Enum.PlayerInteractionType.Gossip] = true;
+	[Enum.PlayerInteractionType.Item] = true;
+	[Enum.PlayerInteractionType.QuestGiver] = true;
+} or {};
+
+function API:ShouldCloseOnInteraction(type)
+	return not StayOpenOnInteractionTypes[type];
 end

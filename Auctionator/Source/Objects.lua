@@ -12,7 +12,6 @@ Auctionator = {
 
   SavedState = {},
   Search = {
-    Categories = {},
     CategoryLookup = {},
     Filters = {},
   },
@@ -20,13 +19,16 @@ Auctionator = {
   Locales = {},
   Config = {},
   Variables = {},
-  ShoppingLists = {},
+  Shopping = { Tab = {}, Lists = {} },
   Cancelling = {},
   Enchant = {},
   Selling = {},
-  ReagentSearch = {},
+  Components = {},
+  CraftingInfo = {},
   IncrementalScan = {},
+  FullScan = {},
   PostingHistory = {},
+  Groups = {},
 
   Tabs = {
     State = {

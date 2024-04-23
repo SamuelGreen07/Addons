@@ -28,7 +28,7 @@ local empty=addon:Wrap("Empty")
 local todefault=addon:Wrap("todefault")
 
 local tonumber=tonumber
-local type=type
+local type=type --as
 local OHF=BFAMissionFrame
 local OHFMissionTab=BFAMissionFrame.MissionTab --Container for mission list and single mission
 local OHFMissions=BFAMissionFrame.MissionTab.MissionList -- same as BFAMissionFrameMissions Call Update on this to refresh Mission Listing
@@ -45,16 +45,16 @@ local OHFTOPLEFT=OHF.GarrCorners.TopLeftGarrCorner
 local OHFTOPRIGHT=OHF.GarrCorners.TopRightGarrCorner
 local OHFBOTTOMLEFT=OHF.GarrCorners.BottomTopLeftGarrCorner
 local OHFBOTTOMRIGHT=OHF.GarrCorners.BottomRightGarrCorner
-local LE_FOLLOWER_TYPE_GARRISON_6_0=Enum.GarrisonFollowerType.FollowerType_6_0
-local LE_FOLLOWER_TYPE_SHIPYARD_6_2=Enum.GarrisonFollowerType.FollowerType_6_2
-local LE_FOLLOWER_TYPE_GARRISON_7_0=Enum.GarrisonFollowerType.FollowerType_7_0
-local LE_FOLLOWER_TYPE_GARRISON_8_0=Enum.GarrisonFollowerType.FollowerType_8_0
-local LE_GARRISON_TYPE_6_0=Enum.GarrisonType.Type_6_0
-local LE_GARRISON_TYPE_6_2=Enum.GarrisonType.Type_6_2
-local LE_GARRISON_TYPE_7_0=Enum.GarrisonType.Type_7_0
-local LE_GARRISON_TYPE_8_0=Enum.GarrisonType.Type_8_0
-local followerType=Enum.GarrisonFollowerType.FollowerType_8_0
-local garrisonType=Enum.GarrisonType.Type_8_0
+local LE_FOLLOWER_TYPE_GARRISON_6_0=Enum.GarrisonFollowerType.FollowerType_6_0_GarrisonFollower
+local LE_FOLLOWER_TYPE_SHIPYARD_6_2=Enum.GarrisonFollowerType.FollowerType_6_0_Boat
+local LE_FOLLOWER_TYPE_GARRISON_7_0=Enum.GarrisonFollowerType.FollowerType_7_0_GarrisonFollower
+local LE_FOLLOWER_TYPE_GARRISON_8_0=Enum.GarrisonFollowerType.FollowerType_8_0_GarrisonFollower
+local LE_GARRISON_TYPE_6_0=Enum.GarrisonType.Type_6_0_Garrison
+local LE_GARRISON_TYPE_6_2=Enum.GarrisonType.Type_6_2_Garrison
+local LE_GARRISON_TYPE_7_0=Enum.GarrisonType.Type_7_0_Garrison
+local LE_GARRISON_TYPE_8_0=Enum.GarrisonType.Type_8_0_Garrison
+local followerType=Enum.GarrisonFollowerType.FollowerType_8_0_GarrisonFollower
+local garrisonType=Enum.GarrisonType.Type_8_0_Garrison
 local FAKE_FOLLOWERID="0x0000000000000000"
 local MAX_LEVEL=110
 
@@ -64,9 +64,9 @@ local HideTT=ChampionCommanderMixin.HideTT
 local dprint=print
 local ddump
 --[===[@debug@
-LoadAddOn("Blizzard_DebugTools")
+C_AddOns.LoadAddOn("Blizzard_DebugTools")
 ddump=DevTools_Dump
-LoadAddOn("LibDebug")
+C_AddOns.LoadAddOn("LibDebug")
 
 if LibDebug then LibDebug() dprint=print end
 local safeG=addon.safeG
@@ -82,6 +82,7 @@ local GARRISON_FOLLOWER_ON_MISSION=GARRISON_FOLLOWER_ON_MISSION
 local GARRISON_FOLLOWER_INACTIVE=GARRISON_FOLLOWER_INACTIVE
 local GARRISON_FOLLOWER_IN_PARTY=GARRISON_FOLLOWER_IN_PARTY
 local GARRISON_FOLLOWER_AVAILABLE=AVAILABLE
+---@diagnostic disable-next-line: undefined-field
 local ViragDevTool_AddData=_G.ViragDevTool_AddData
 if not ViragDevTool_AddData then ViragDevTool_AddData=function() end end
 local KEY_BUTTON1 = "\124TInterface\\TutorialFrame\\UI-Tutorial-Frame:12:12:0:0:512:512:10:65:228:283\124t" -- left mouse button
@@ -172,6 +173,7 @@ local function getCachedMissions()
 end
 local function getCachedFollowers()
 	if empty(cachedFollowers) then
+---@diagnostic disable-next-line: redundant-parameter
 		local followers=G.GetFollowers(followerType)
 		if type(followers)=="table" then
 			local time=GetTime()
@@ -398,6 +400,9 @@ local function Reward2Class(self,mission)
 	else
 		return "Generic",1
 	end
+	if not reward then
+	 return "Generic",1
+  end
 	if not overReward then overReward = emptyTable end
 	if reward.currencyID then
 		local qt=reward.currencyID==0 and reward.quantity/10000 or reward.quantity
@@ -540,7 +545,9 @@ local TroopsHeader
 function module:GetTroopsFrame()
 	if not TroopsHeader then
 		local frame=CreateFrame("Frame",nil,OHF,"TooltipBorderedFrameTemplate")
+---@diagnostic disable-next-line: undefined-field
 		frame.Background:Hide()
+---@diagnostic disable-next-line: inject-field
 		frame.Top=frame:CreateTexture(nil,"BACKGROUND",nil,-1)
 		frame.Top:SetPoint("TOPLEFT")
 		frame.Top:SetPoint("BOTTOMRIGHT")
@@ -554,6 +561,7 @@ function module:GetTroopsFrame()
 		frame:SetScript("OnDragStart",function(frame) if addon:GetBoolean('MOVEPANEL') then OHF:StartMoving() end end)
 		frame:SetScript("OnDragStop",function(frame) OHF:StopMovingOrSizing() end)
 		frame:Show()
+---@diagnostic disable-next-line: inject-field
 		frame.Buttons={}
 		TroopsHeader=frame
 	end
@@ -597,6 +605,7 @@ function module:DrawKrokuls(main)
         --module:DrawTroopStatus(main)
       end)
       b:SetAttribute("type","item")
+---@diagnostic disable-next-line: undefined-field
       b.Quantity:SetFontObject("GameFontNormalShadowHuge2")
       b:SetScale(0.65)
     end
@@ -610,11 +619,11 @@ function module:DrawKrokuls(main)
   end
 end
 function module:xDrawTroopStatus(main)
-  categoryInfo = G.GetClassSpecCategoryInfo(followerType)
+  categoryInfo = G.GetClassSpecCategoryInfo(followerType) or {}
   DevTools_Dump(categoryInfo)
   if not OHF:IsVisible() then return end
   local prevCategory, firstCategory;
-  local nCategories=_G.XX or #categoryInfo
+  local nCategories=#categoryInfo
   if nCategories < 1 then return end
   local previous
   local mask=nCategories <5 and CATEGORY_INFO_FORMAT or nCategories <7 and CATEGORY_INFO_FORMAT_SHORT or CATEGORY_INFO_FORMAT_VERY_SHORT
@@ -633,6 +642,7 @@ function module:xDrawTroopStatus(main)
       frame:SetScript("OnDragStart",function(frame) if addon:GetBoolean('MOVEPANEL') then OHF:StartMoving() end end)
       frame:SetScript("OnDragStop",function(frame) OHF:StopMovingOrSizing() end)
       frame:SetScript("OnClick",function(frame) local value=not addon:GetBoolean(frame.key) addon:SetVar(frame.key,value) paintCat(frame) addon:Apply(frame.key,value) end)
+---@diagnostic disable-next-line: inject-field
       frame.OnEnter=frame:GetScript("OnEnter")
       frame:SetScript("OnEnter",function(frame)
         frame:OnEnter()
@@ -718,12 +728,12 @@ function module:Refresh(event,...)
 	end
 end
 function module:OnInitialized()
-  LoadAddOn("Blizzard_OrderHallUI")
+  C_AddOns.LoadAddOn("Blizzard_OrderHallUI")
 	currency, _ = C_Garrison.GetCurrencyTypes(garrisonType);
 	local t= C_CurrencyInfo.GetCurrencyInfo(currency);
-	currencyName=t.name 
-	resources=t.quantity 
-	currencyTexture=t.iconFileID 
+	currencyName=t.name
+	resources=t.quantity
+	currencyTexture=t.iconFileID
 --[===[@debug@
 	print("Currency init",currencyName, resources, currencyTexture)
 --@end-debug@]===]
@@ -758,6 +768,7 @@ function addon:GetMissionData(...)
 	return module:GetMissionData(...)
 end
 function addon:RefreshFollowers()
+---@diagnostic disable-next-line: redundant-parameter
 	followerCache=G.GetFollowers(followerType)
 	rebuildFollowerIndex()
 --[===[@debug@
@@ -805,7 +816,7 @@ end
 local troopCosts={}
 function addon:GetTroopCost(classSpec)
 	if not troopCosts[classSpec] then
-		local t=G.GetClassSpecCategoryInfo(followerType)
+		local t=G.GetClassSpecCategoryInfo(followerType) or {}
 		for i=1,#t do
 			troopCosts[t[i].classSpec]=t[i].limit * 100
 		end
@@ -905,7 +916,7 @@ function addon:GetFullPermutations(dowipe)
 				if all[j] then
 					local class,id,value=strsplit('|',all[j])
 					tinsert(fullPermutations,'2,'.. strjoin(',',all[i],all[j]))
-					if class=="T" and seen[id] > 1 then
+					if class=="T" and (seen[id] or 0) > 1 then
 						-- I only see a classSpec once. Here if i know I have more than one troop for this spec, i force
 						-- a combination with both of them
 						tinsert(fullPermutations,'3,'.. strjoin(',',all[i],all[j],all[j] .. '|2'))

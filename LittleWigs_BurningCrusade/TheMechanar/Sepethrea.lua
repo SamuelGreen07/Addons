@@ -16,6 +16,17 @@ local mobCollector = {}
 local mobsFound = 0
 
 --------------------------------------------------------------------------------
+-- Localization
+--
+
+local L = mod:GetLocale()
+if L then
+	L.fixate = CL.fixate
+	L.fixate_desc = "Causes the caster to fixate on a random target."
+	L.fixate_icon = "spell_shadow_charm"
+end
+
+--------------------------------------------------------------------------------
 -- Initialization
 --
 
@@ -23,12 +34,12 @@ function mod:GetOptions()
 	return {
 		35250, -- Dragon's Breath
 		35314, -- Arcane Blast
-		{41951, "SAY"}, -- Fixate
-		-5488, -- Inferno
+		{"fixate", "SAY"}, -- Fixate
+		{-5488, "CASTBAR"}, -- Inferno
 		35312, -- Raging Flames (the trail of fire the adds leave behind them)
 	}, {
 		[35250] = "general",
-		[41951] = 35312, -- Raging Flames
+		["fixate"] = 35312, -- Raging Flames
 	}
 end
 
@@ -56,13 +67,10 @@ end
 
 function mod:OnEngage()
 	mobsFound = 0
-	wipe(mobCollector)
+	mobCollector = {}
 end
 
-function mod:OnBossDisable()
-	mobsFound = 0
-	wipe(mobCollector)
-end
+mod.OnBossDisable = mod.OnEngage
 
 --------------------------------------------------------------------------------
 -- Event Handlers
@@ -100,10 +108,10 @@ do
 	local prev = 0
 	function mod:PeriodicDamage(args)
 		if self:Me(args.destGUID) then
-			local t = GetTime()
+			local t = args.time
 			if t - prev > 1.5 then
 				prev = t
-				self:MessageOld(args.spellId == 35283 and -5488 or args.spellId, "blue", "alert", CL.underyou:format(args.spellName))
+				self:MessageOld(args.spellId == 35283 and -5488 or args.spellId, "blue", "alert", CL.underyou:format(args.spellName)) -- SetOption:-5488,35312:::
 			end
 		end
 	end
@@ -114,14 +122,14 @@ do
 	local fixatedTargets, isOnMe = mod:NewTargetList(), nil
 
 	local function showFixateMessage(self)
-		self:TargetMessageOld(41951, fixatedTargets, "yellow", "long")
+		self:TargetMessageOld("fixate", fixatedTargets, "yellow", "long", L.fixate, L.fixate_icon)
 		isOnMe = nil
 	end
 
 	local function fixateAnnounce(self, target, guid)
 		if self:Me(guid) and not isOnMe then
 			isOnMe = true
-			self:Say(41951)
+			self:Say("fixate", L.fixate, nil, "Fixate")
 		end
 
 		if #fixatedTargets > 0 and fixatedTargets[#fixatedTargets] == self:ColorName(target) then return end -- don't announce the same player twice
@@ -181,7 +189,7 @@ do
 
 	function mod:Inferno(args)
 		infernoCasts = infernoCasts + 1
-		local t = GetTime()
+		local t = args.time
 		if t - prev > 1 then
 			prev = t
 			self:MessageOld(-5488, "cyan", "info", CL.casting:format(args.spellName))

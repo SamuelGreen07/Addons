@@ -1,35 +1,15 @@
-if not WeakAuras.IsCorrectVersion() then return end
-local AddonName, OptionsPrivate = ...
+if not WeakAuras.IsLibsOK() then return end
+---@type string
+local AddonName = ...
+---@class OptionsPrivate
+local OptionsPrivate = select(2, ...)
 
-local SharedMedia = LibStub("LibSharedMedia-3.0");
 local L = WeakAuras.L;
-
-local screenWidth, screenHeight = math.ceil(GetScreenWidth() / 20) * 20, math.ceil(GetScreenHeight() / 20) * 20;
 
 local function createOptions(parentData, data, index, subIndex)
   local options = {
     __title = L["Border %s"]:format(subIndex),
     __order = 1,
-    __up = function()
-      if (OptionsPrivate.Private.ApplyToDataOrChildData(parentData, OptionsPrivate.MoveSubRegionUp, index, "subborder")) then
-        WeakAuras.ClearAndUpdateOptions(parentData.id)
-      end
-    end,
-    __down = function()
-      if (OptionsPrivate.Private.ApplyToDataOrChildData(parentData, OptionsPrivate.MoveSubRegionDown, index, "subborder")) then
-        WeakAuras.ClearAndUpdateOptions(parentData.id)
-      end
-    end,
-    __duplicate = function()
-      if (OptionsPrivate.Private.ApplyToDataOrChildData(parentData, OptionsPrivate.DuplicateSubRegion, index, "subborder")) then
-        WeakAuras.ClearAndUpdateOptions(parentData.id)
-      end
-    end,
-    __delete = function()
-      if (OptionsPrivate.Private.ApplyToDataOrChildData(parentData, WeakAuras.DeleteSubRegion, index, "subborder")) then
-        WeakAuras.ClearAndUpdateOptions(parentData.id)
-      end
-    end,
     border_visible = {
       type = "toggle",
       width = WeakAuras.doubleWidth,
@@ -53,6 +33,7 @@ local function createOptions(parentData, data, index, subIndex)
     },
     border_offset = {
       type = "range",
+      control = "WeakAurasSpinBox",
       width = WeakAuras.normalWidth,
       name = L["Border Offset"],
       order = 5,
@@ -62,6 +43,7 @@ local function createOptions(parentData, data, index, subIndex)
     },
     border_size = {
       type = "range",
+      control = "WeakAurasSpinBox",
       width = WeakAuras.normalWidth,
       name = L["Border Size"],
       order = 6,
@@ -78,6 +60,8 @@ local function createOptions(parentData, data, index, subIndex)
       hidden = function() return parentData.regionType ~= "aurabar" end
     }
   }
+
+  OptionsPrivate.AddUpDownDeleteDuplicate(options, parentData, index, "subborder")
 
   return options
 end

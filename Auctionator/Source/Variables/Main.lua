@@ -1,18 +1,29 @@
 local VERSION_8_3 = 6
+local VERSION_SERIALIZED = 7
 local POSTING_HISTORY_DB_VERSION = 1
+local VENDOR_PRICE_CACHE_DB_VERSION = 1
 
 function Auctionator.Variables.Initialize()
   Auctionator.Variables.InitializeSavedState()
 
-  Auctionator.Config.Initialize()
+  Auctionator.Config.InitializeData()
+  Auctionator.Config.InitializeFrames()
 
+  local GetAddOnMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
   Auctionator.State.CurrentVersion = GetAddOnMetadata("Auctionator", "Version")
 
   Auctionator.Variables.InitializeDatabase()
   Auctionator.Variables.InitializeShoppingLists()
   Auctionator.Variables.InitializePostingHistory()
+  Auctionator.Variables.InitializeVendorPriceCache()
+
+  Auctionator.Groups.Initialize()
 
   Auctionator.State.Loaded = true
+end
+
+function Auctionator.Variables.Commit()
+  Auctionator.Variables.CommitDatabase()
 end
 
 function Auctionator.Variables.InitializeSavedState()
@@ -20,24 +31,6 @@ function Auctionator.Variables.InitializeSavedState()
     AUCTIONATOR_SAVEDVARS = {}
   end
   Auctionator.SavedState = AUCTIONATOR_SAVEDVARS
-end
-
--- All "realms" that are connected together use the same AH database, this
--- determines which database is in use.
-function Auctionator.Variables.GetConnectedRealmRoot()
-  local currentRealm = GetRealmName()
-  local connections = GetAutoCompleteRealms()
-
-  -- We sort so that we always get the same first realm to use for the database
-  table.sort(connections)
-
-  if connections[1] ~= nil then
-    -- Case where we are on a connected realm
-    return connections[1]
-  else
-    -- We are not on a connected realm
-    return currentRealm
-  end
 end
 
 -- Attempt to import from other connected realms (this may happen if another
@@ -65,6 +58,24 @@ local function ImportFromConnectedRealm(rootRealm)
   return false
 end
 
+local function ImportFromNotNormalizedName(target)
+  local unwantedName = GetRealmName()
+
+  if AUCTIONATOR_PRICE_DATABASE[unwantedName] ~= nil then
+
+    AUCTIONATOR_PRICE_DATABASE[target] = AUCTIONATOR_PRICE_DATABASE[unwantedName]
+    -- Remove old database (no longer needed)
+    AUCTIONATOR_PRICE_DATABASE[unwantedName] = nil
+    return true
+  end
+
+  return false
+end
+
+-- Deserialize current realm when not already deserialized in the saved
+-- variables and serialize any other realms.
+-- We keep the current realm deserialized in the saved variables to speed up
+-- /reloads and logging in/out when only using one realm.
 function Auctionator.Variables.InitializeDatabase()
   Auctionator.Debug.Message("Auctionator.Database.Initialize()")
   -- Auctionator.Utilities.TablePrint(AUCTIONATOR_PRICE_DATABASE, "AUCTIONATOR_PRICE_DATABASE")
@@ -76,20 +87,50 @@ function Auctionator.Variables.InitializeDatabase()
     }
   end
 
+  local LibSerialize = LibStub("LibSerialize")
+
+  if AUCTIONATOR_PRICE_DATABASE["__dbversion"] == VERSION_8_3 then
+    AUCTIONATOR_PRICE_DATABASE["__dbversion"] = VERSION_SERIALIZED
+  end
+
   -- If we changed how we record item info we need to reset the DB
-  if AUCTIONATOR_PRICE_DATABASE["__dbversion"] ~= VERSION_8_3 then
+  if AUCTIONATOR_PRICE_DATABASE["__dbversion"] ~= VERSION_SERIALIZED then
     AUCTIONATOR_PRICE_DATABASE = {
-      ["__dbversion"] = VERSION_8_3
+      ["__dbversion"] = VERSION_SERIALIZED
     }
   end
 
   local realm = Auctionator.Variables.GetConnectedRealmRoot()
+  Auctionator.State.CurrentRealm = realm
 
   -- Check for current realm and initialize if not present
   if AUCTIONATOR_PRICE_DATABASE[realm] == nil then
-    if not ImportFromConnectedRealm(realm) then
+    if not ImportFromNotNormalizedName(realm) and not ImportFromConnectedRealm(realm) then
       AUCTIONATOR_PRICE_DATABASE[realm] = {}
     end
+  end
+
+  --[[
+  -- Serialize and other unserialized realms so their data doesn't contribute to
+  -- a constant overflow when the client parses the saved variables.
+  for key, data in pairs(AUCTIONATOR_PRICE_DATABASE) do
+    -- Convert one realm at a time, no need to hold up a login indefinitely
+    if key ~= "__dbversion" and key ~= realm and type(data) == "table" then
+      AUCTIONATOR_PRICE_DATABASE[key] = LibSerialize:Serialize(data)
+      break
+    end
+  end
+
+  -- Only deserialize the current realm and save the deserialization in the
+  -- saved variables to speed up reloads or changing character on the same
+  -- realm.
+  --]]
+  -- Deserialize the current realm if it was left serialized by a previous
+  -- version of Auctionator
+  local raw = AUCTIONATOR_PRICE_DATABASE[realm]
+  if type(raw) == "string" then
+    local success, data = LibSerialize:Deserialize(raw)
+    AUCTIONATOR_PRICE_DATABASE[realm] = data
   end
 
   Auctionator.Database = CreateAndInitFromMixin(Auctionator.DatabaseMixin, AUCTIONATOR_PRICE_DATABASE[realm])
@@ -110,12 +151,22 @@ function Auctionator.Variables.InitializePostingHistory()
 end
 
 function Auctionator.Variables.InitializeShoppingLists()
-  if AUCTIONATOR_SHOPPING_LISTS == nil then
-    AUCTIONATOR_SHOPPING_LISTS = {}
-  end
+  Auctionator.Shopping.ListManager = CreateAndInitFromMixin(
+    AuctionatorShoppingListManagerMixin,
+    function() return AUCTIONATOR_SHOPPING_LISTS end,
+    function(newVal) AUCTIONATOR_SHOPPING_LISTS = newVal end
+  )
 
-  Auctionator.ShoppingLists.Lists = AUCTIONATOR_SHOPPING_LISTS
-  Auctionator.ShoppingLists.Prune()
-  Auctionator.ShoppingLists.Sort()
-  AUCTIONATOR_SHOPPING_LISTS = Auctionator.ShoppingLists.Lists
+  AUCTIONATOR_RECENT_SEARCHES = AUCTIONATOR_RECENT_SEARCHES or {}
+end
+
+function Auctionator.Variables.InitializeVendorPriceCache()
+  Auctionator.Debug.Message("Auctionator.Variables.InitializeVendorPriceCache()")
+
+  if AUCTIONATOR_VENDOR_PRICE_CACHE == nil  or
+     AUCTIONATOR_VENDOR_PRICE_CACHE["__dbversion"] ~= VENDOR_PRICE_CACHE_DB_VERSION then
+    AUCTIONATOR_VENDOR_PRICE_CACHE = {
+      ["__dbversion"] = VENDOR_PRICE_CACHE_DB_VERSION
+    }
+  end
 end

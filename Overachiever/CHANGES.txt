@@ -1,21 +1,15 @@
 ------------------------------------------------------------------------
-r262 | tuhljin | 2020-11-23 11:19:02 +0000 (Mon, 23 Nov 2020) | 1 line
+r276 | tuhljin | 2021-09-21 00:34:21 +0000 (Tue, 21 Sep 2021) | 2 lines
 Changed paths:
-   M /trunk/readme.txt
-
-- Fix readme.txt version.
-------------------------------------------------------------------------
-r261 | tuhljin | 2020-11-23 11:00:07 +0000 (Mon, 23 Nov 2020) | 1 line
-Changed paths:
-   M /trunk/AchieveTracking.lua
    M /trunk/Overachiever.lua
    M /trunk/Overachiever.toc
    M /trunk/Overachiever_Cache/Overachiever_Cache.toc
    M /trunk/Overachiever_Tabs/Overachiever_Tabs.toc
-   M /trunk/Overachiever_Tabs/Suggestions.lua
    M /trunk/Overachiever_Trade/Overachiever_Trade.toc
+   M /trunk/Templates.xml
    M /trunk/readme.txt
 
-- Fixed an error where auto-tracking tried to track a completed achievement.
+- Updated TOC for WoW patch 9.1.x.
+- Fixed an error when a holiday/event toast is displayed. (Our toasts might look a little different now.)
 ------------------------------------------------------------------------
 

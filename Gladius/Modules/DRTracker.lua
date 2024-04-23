@@ -7,7 +7,7 @@ local LSM
 
 local DRData = LibStub("DRData-1.0")
 
--- Global Functions
+-- Global functions
 local _G = _G
 local pairs = pairs
 local strfind = string.find
@@ -216,7 +216,9 @@ function DRTracker:CreateFrame(unit)
 		return
 	end
 	-- create frame
-	self.frame[unit] = CreateFrame("Frame", "Gladius"..self.name.."Frame"..unit, button, "ActionButtonTemplate")
+	self.frame[unit] = CreateFrame("CheckButton", "Gladius"..self.name.."Frame"..unit, button, "ActionButtonTemplate")
+	self.frame[unit]:EnableMouse(false)
+	self.frame[unit]:SetNormalTexture("Interface\\COMMON\\spacer")
 end
 
 function DRTracker:Update(unit)

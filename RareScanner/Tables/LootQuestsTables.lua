@@ -315,4 +315,14 @@ private.LOOT_QUEST_IDS = {
 	[178562] = { 60271 }; --Molten Anima
 	[173718] = { 58078 }; --Bottle of Redelav Wine
 	[173711] = { 58073 }; --Portrait of The Sire
+	[182692] = { 61849 }; --Venthyr Fang
+	[180816] = { 61159 }; --Forsworn Insignia
+	[184155] = { 62804 }; --Recovered Containment Pack
+	[180804] = { 63140 }; --Worn Obleron Etching
+	[180808] = { 63153 }; --Discarded Torments
+	[180802] = { 63136 }; --Chaotic Runes
+	[180796] = { 61156 }; --Shimmerflight Quill
+	[180785] = { 61146 }; --Condensed Essence
+	[183436] = { 62362 }; --Animated Catalyst
+	[183061] = { 63158 }; --Wailing Coin
 }

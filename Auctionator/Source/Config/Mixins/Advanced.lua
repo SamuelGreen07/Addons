@@ -9,13 +9,15 @@ function AuctionatorConfigAdvancedFrameMixin:OnLoad()
   self:SetupPanel()
 end
 
-function AuctionatorConfigAdvancedFrameMixin:OnShow()
+function AuctionatorConfigAdvancedFrameMixin:ShowSettings()
+  self.ReplicateScan:SetChecked(Auctionator.Config.Get(Auctionator.Config.Options.REPLICATE_SCAN))
   self.Debug:SetChecked(Auctionator.Config.Get(Auctionator.Config.Options.DEBUG))
 end
 
 function AuctionatorConfigAdvancedFrameMixin:Save()
   Auctionator.Debug.Message("AuctionatorConfigAdvancedFrameMixin:Save()")
 
+  Auctionator.Config.Set(Auctionator.Config.Options.REPLICATE_SCAN, self.ReplicateScan:GetChecked())
   Auctionator.Config.Set(Auctionator.Config.Options.DEBUG, self.Debug:GetChecked())
 end
 

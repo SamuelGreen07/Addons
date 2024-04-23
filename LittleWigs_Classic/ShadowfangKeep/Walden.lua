@@ -32,11 +32,11 @@ end
 
 function mod:GetOptions()
 	return {
-		93527, -- Ice Shards
+		{93527, "CASTBAR"}, -- Ice Shards
 		93505, -- Conjure Frost Mixture
 		93697, -- Conjure Poisonous Mixture
-		93617, -- Toxic Coagulant
-		93689, -- Toxic Catalyst
+		{93617, "CASTBAR"}, -- Toxic Coagulant
+		{93689, "CASTBAR"}, -- Toxic Catalyst
 	}, {
 		[93527] = "general",
 		[93617] = "heroic",
@@ -79,7 +79,7 @@ function mod:ToxicCoagulant(args)
 	if self:Me(args.destGUID) and args.amount == 2 then
 		local remaining = coagulantCastEnds - GetTime()
 		if remaining >= 3 then
-			self:StackMessage(args.spellId, args.destName, args.amount, "orange", "warning")
+			self:StackMessageOld(args.spellId, args.destName, args.amount, "orange", "warning")
 		end
 	end
 end

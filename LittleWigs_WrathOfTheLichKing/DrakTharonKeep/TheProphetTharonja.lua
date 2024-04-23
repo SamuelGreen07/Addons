@@ -5,8 +5,8 @@
 local mod, CL = BigWigs:NewBoss("The Prophet Tharon'ja", 600, 591)
 if not mod then return end
 mod:RegisterEnableMob(26632)
-mod.engageId = 1975
--- mod.respawnTime = 0 -- resets, doesn't respawn
+mod:SetEncounterID(mod:Classic() and 375 or 1975)
+--mod:SetRespawnTime(0) -- resets, doesn't respawn
 
 -------------------------------------------------------------------------------
 --  Initialization
@@ -21,7 +21,7 @@ function mod:GetOptions()
 end
 
 function mod:OnBossEnable()
-	self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", nil, "boss1")
+	self:RegisterUnitEvent("UNIT_HEALTH", nil, "boss1")
 	self:Log("SPELL_AURA_APPLIED", "RainOfFire", 49518, 59971) -- normal, heroic
 	self:Log("SPELL_PERIODIC_DAMAGE", "RainOfFire", 49518, 59971)
 	self:Log("SPELL_PERIODIC_MISSED", "RainOfFire", 49518, 59971)
@@ -35,11 +35,12 @@ end
 --  Event Handlers
 --
 
-function mod:UNIT_HEALTH_FREQUENT(event, unit)
-	local hp = UnitHealth(unit) / UnitHealthMax(unit) * 100
+function mod:UNIT_HEALTH(event, unit)
+	if self:MobId(self:UnitGUID(unit)) ~= 26632 then return end
+	local hp = self:GetHealth(unit)
 	if hp < 60 then
 		self:UnregisterUnitEvent(event, unit)
-		self:MessageOld("stages", "cyan", nil, CL.soon:format(CL.phase:format(2)), false)
+		self:Message("stages", "cyan", CL.soon:format(CL.phase:format(2)), false)
 	end
 end
 
@@ -56,10 +57,11 @@ do
 	local prev = 0
 	function mod:RainOfFire(args)
 		if self:Me(args.destGUID) then
-			local t = GetTime()
-			if t - prev > 1.5 then
+			local t = args.time
+			if t - prev > 2 then
 				prev = t
-				self:MessageOld(59971, "blue", "alert", CL.you:format(args.spellName))
+				self:PersonalMessage(59971, "near")
+				self:PlaySound(59971, "underyou", nil, args.destName)
 			end
 		end
 	end
@@ -67,7 +69,7 @@ end
 
 function mod:CurseOfLife(args)
 	if self:Me(args.destGUID) or self:Healer() then -- despite its name, it's not actually a curse
-		self:TargetMessageOld(49527, args.destName, "orange")
+		self:TargetMessage(49527, "orange", args.destName)
 		self:TargetBar(49527, 9, args.destName)
 	end
 end

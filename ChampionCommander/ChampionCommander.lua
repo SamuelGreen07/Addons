@@ -27,7 +27,7 @@ local del=addon:Wrap("DelTable")
 local kpairs=addon:Wrap("Kpairs")
 local empty=addon:Wrap("Empty")
 local tonumber=tonumber
-local type=type
+local type=type --as
 local OHF=BFAMissionFrame
 local OHFMissionTab=BFAMissionFrame.MissionTab --Container for mission list and single mission
 local OHFMissions=BFAMissionFrame.MissionTab.MissionList -- same as BFAMissionFrameMissions Call Update on this to refresh Mission Listing
@@ -44,24 +44,24 @@ local OHFTOPLEFT=OHF.GarrCorners.TopLeftGarrCorner
 local OHFTOPRIGHT=OHF.GarrCorners.TopRightGarrCorner
 local OHFBOTTOMLEFT=OHF.GarrCorners.BottomTopLeftGarrCorner
 local OHFBOTTOMRIGHT=OHF.GarrCorners.BottomRightGarrCorner
-local LE_FOLLOWER_TYPE_GARRISON_6_0=Enum.GarrisonFollowerType.FollowerType_6_0
-local LE_FOLLOWER_TYPE_SHIPYARD_6_2=Enum.GarrisonFollowerType.FollowerType_6_2
-local LE_FOLLOWER_TYPE_GARRISON_7_0=Enum.GarrisonFollowerType.FollowerType_7_0
-local LE_FOLLOWER_TYPE_GARRISON_8_0=Enum.GarrisonFollowerType.FollowerType_8_0
-local LE_GARRISON_TYPE_6_0=Enum.GarrisonType.Type_6_0
-local LE_GARRISON_TYPE_6_2=Enum.GarrisonType.Type_6_2
-local LE_GARRISON_TYPE_7_0=Enum.GarrisonType.Type_7_0
-local LE_GARRISON_TYPE_8_0=Enum.GarrisonType.Type_8_0
-local followerType=Enum.GarrisonFollowerType.FollowerType_8_0
-local garrisonType=Enum.GarrisonType.Type_8_0
+local LE_FOLLOWER_TYPE_GARRISON_6_0=Enum.GarrisonFollowerType.FollowerType_6_0_GarrisonFollower
+local LE_FOLLOWER_TYPE_SHIPYARD_6_2=Enum.GarrisonFollowerType.FollowerType_6_0_Boat
+local LE_FOLLOWER_TYPE_GARRISON_7_0=Enum.GarrisonFollowerType.FollowerType_7_0_GarrisonFollower
+local LE_FOLLOWER_TYPE_GARRISON_8_0=Enum.GarrisonFollowerType.FollowerType_8_0_GarrisonFollower
+local LE_GARRISON_TYPE_6_0=Enum.GarrisonType.Type_6_0_Garrison
+local LE_GARRISON_TYPE_6_2=Enum.GarrisonType.Type_6_2_Garrison
+local LE_GARRISON_TYPE_7_0=Enum.GarrisonType.Type_7_0_Garrison
+local LE_GARRISON_TYPE_8_0=Enum.GarrisonType.Type_8_0_Garrison
+local followerType=Enum.GarrisonFollowerType.FollowerType_8_0_GarrisonFollower
+local garrisonType=Enum.GarrisonType.Type_8_0_Garrison
 local FAKE_FOLLOWERID="0x0000000000000000"
 local MAX_LEVEL=110
 local dprint=print
 local ddump
 --[===[@debug@
-LoadAddOn("Blizzard_DebugTools")
+C_AddOns.LoadAddOn("Blizzard_DebugTools")
 ddump=DevTools_Dump
-LoadAddOn("LibDebug")
+C_AddOns.LoadAddOn("LibDebug")
 -- Addon Build, we need to create globals the easy way
 local function encapsulate()
 if LibDebug then LibDebug() dprint=print end
@@ -93,6 +93,7 @@ local GARRISON_FOLLOWER_ON_MISSION=GARRISON_FOLLOWER_ON_MISSION
 local GARRISON_FOLLOWER_INACTIVE=GARRISON_FOLLOWER_INACTIVE
 local GARRISON_FOLLOWER_IN_PARTY=GARRISON_FOLLOWER_IN_PARTY
 local GARRISON_FOLLOWER_AVAILABLE=AVAILABLE
+---@diagnostic disable-next-line: undefined-field
 local ViragDevTool_AddData=_G.ViragDevTool_AddData
 if not ViragDevTool_AddData then ViragDevTool_AddData=function() end end
 local KEY_BUTTON1 = "\124TInterface\\TutorialFrame\\UI-Tutorial-Frame:12:12:0:0:512:512:10:65:228:283\124t" -- left mouse button
@@ -118,16 +119,18 @@ end
 -- End Template - DO NOT MODIFY ANYTHING BEFORE THIS LINE
 --*BEGIN
 
--- Dependency check
+-- Dependency check --
 
 if not LibStub("AceSerializer-3.0",true) then
    ns.die=true
 end
+
 if ns.die then
   addon:Popup(L["You need to close and restart World of Warcraft in order to update this version of ChampionCommander.\nSimply reloading UI is not enough"])
   ns.die=true
   return
 end
+
 local MISSING=ITEM_MISSING:format(""):gsub(' ','')
 local IGNORED=IGNORED
 local UNUSED=UNUSED

@@ -5,18 +5,23 @@ local Details = _G.Details
 local DF = _G.DetailsFramework
 local C_Timer = _G.C_Timer
 local unpack = _G.unpack
+local addonName, Details222 = ...
 
 --make a namespace for schedules
 Details.Schedules = {}
+
+local errorHandler = function(str)
+    return str
+end
 
 --run a scheduled function with its payload
 local triggerScheduledTick = function(tickerObject)
     local payload = tickerObject.payload
     local callback = tickerObject.callback
 
-    local result, errortext = pcall (callback, unpack(payload))
+    local result, errortext = xpcall(callback, geterrorhandler(), unpack(payload))
     if (not result) then
-        Details:Msg("error on scheduler: ", tickerObject.path, tickerObject.name, errortext)
+        --Details:Msg("Error:", errortext, tickerObject.name or "")
     end
     return result
 end
@@ -36,7 +41,10 @@ end
 
 --cancel an ongoing ticker
 function Details.Schedules.Cancel(tickerObject)
-    return tickerObject:Cancel()
+    --ignore if there's no ticker object
+    if (tickerObject) then
+        return tickerObject:Cancel()
+    end
 end
 
 --schedule a task with an interval of @time

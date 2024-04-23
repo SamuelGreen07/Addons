@@ -82,17 +82,6 @@
 		</Anchors>
 		<Frames>
 			<Frame name="$parentBackground" setAllPoints="true" inherits="BackdropTemplate">
-				<Backdrop edgeFile="Interface\AddOns\ChatBar CLassic\Skin\ChatBarBorder" bgFile="Interface\AddOns\ChatBar Classic\Skin\BlackBg">
-					<BackgroundInsets>
-						<AbsInset left="8" right="8" top="8" bottom="8"/>
-					</BackgroundInsets>
-					<TileSize>
-						<AbsValue val="8"/>
-					</TileSize>
-					<EdgeSize>
-						<AbsValue val="8"/>
-					</EdgeSize>
-				</Backdrop>
 			</Frame>
 			<Button name="$parentButton1" inherits="ChatBarButtonTemplate" id="1">
 				<Anchors>

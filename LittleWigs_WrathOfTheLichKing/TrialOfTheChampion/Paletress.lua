@@ -41,7 +41,12 @@ function mod:GetOptions()
 end
 
 function mod:OnBossEnable()
-	self:RegisterEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT", "CheckBossStatus")
+	if self:Classic() then
+		self:RegisterEvent("PLAYER_REGEN_DISABLED", "CheckForEngage")
+		self:RegisterEvent("PLAYER_REGEN_ENABLED", "CheckForWipe")
+	else
+		self:RegisterEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT", "CheckBossStatus")
+	end
 
 	self:Log("SPELL_AURA_APPLIED", "ReflectiveShield", 66515)
 	self:Log("SPELL_AURA_REMOVED", "ReflectiveShieldRemoved", 66515)
@@ -49,7 +54,7 @@ function mod:OnBossEnable()
 	self:Log("SPELL_AURA_APPLIED", "Confess", 66680)
 	self:Log("SPELL_AURA_APPLIED", "ShadowsOfThePast", 66619)
 
-	self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", nil, "boss1")
+	self:RegisterUnitEvent("UNIT_HEALTH", nil, "boss1")
 	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", nil, "boss1")
 end
 
@@ -90,8 +95,9 @@ function mod:ShadowsOfThePast(args)
 	self:TargetMessageOld(args.spellId, args.destName, "yellow")
 end
 
-function mod:UNIT_HEALTH_FREQUENT(event, unit)
-	local hp = UnitHealth(unit) / UnitHealthMax(unit) * 100
+function mod:UNIT_HEALTH(event, unit)
+	if self:MobId(self:UnitGUID(unit)) ~= 34928 then return end
+	local hp = self:GetHealth(unit)
 	if hp < 55 then
 		self:UnregisterUnitEvent(event, unit)
 		if self:CheckOption("confess", "MESSAGE") then -- both happen at the same time, just display one message depending on the user's settings
@@ -102,8 +108,12 @@ function mod:UNIT_HEALTH_FREQUENT(event, unit)
 	end
 end
 
-function mod:UNIT_SPELLCAST_SUCCEEDED(_, _, _, spellId)
-	if spellId == 43979 then -- Full Heal
-		self:Win()
+do
+	local prev = 0
+	function mod:UNIT_SPELLCAST_SUCCEEDED(_, _, castId, spellId)
+		if spellId == 43979 and castId ~= prev then -- Full Heal
+			prev = castId
+			self:Win()
+		end
 	end
 end

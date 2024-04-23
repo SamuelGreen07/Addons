@@ -70,7 +70,8 @@ function cargBags:GetImplementation(name)
 end
 
 local FRAME_THAT_OPENED_BAGS = nil
-local function IsAnyBagOpen() return cargBags.blizzard:IsVisible()  end
+local function nope() end
+local function isAnyBagOpen() return cargBags.blizzard:IsVisible()  end
 local function toggleBag(forceopen)	cargBags.blizzard:Toggle(forceopen)	end
 local function toggleNoForce()		cargBags.blizzard:Toggle()			end
 local function openBag()				cargBags.blizzard:Show()			end
@@ -80,7 +81,7 @@ local function openAllBags(frame)
 	if ( not UIParent:IsShown() ) then
 		return
 	end
-	if ( IsAnyBagOpen() ) then
+	if ( isAnyBagOpen() ) then
 		return
 	end
 	if( frame and not FRAME_THAT_OPENED_BAGS ) then
@@ -102,19 +103,21 @@ local function closeAllBags(frame)
 
 end
 local function openAllMC(frame)
-
-	if IsAnyBagOpen() then
-		return;
-	end
+	local count = 0
+--	if isAnyBagOpen() then
+--		return;
+--	end
 	for i = 0, NUM_BAG_FRAMES do
 		if ItemButtonUtil.GetItemContextMatchResultForContainer(i) == ItemButtonUtil.ItemContextMatchResult.Match then
 			cargBags.blizzard:Show()
+			count = 1
 			break
 		end
 	end
 	if frame and not FRAME_THAT_OPENED_BAGS then
 		FRAME_THAT_OPENED_BAGS = frame:GetName()
 	end
+	return count
 end
 local function checkHideUIPanel(frame)
 	if frame and frame:GetName() == FRAME_THAT_OPENED_BAGS then
@@ -124,6 +127,8 @@ local function checkHideUIPanel(frame)
 end
 hooksecurefunc("HideUIPanel", checkHideUIPanel)
 
+local hideFrame = CreateFrame("Frame")
+hideFrame:Hide()
 --- Overwrites Blizzards Bag-Toggle-Functions with the implementation's ones
 --  @param name <string> The name of the implementation [optional]
 function cargBags:ReplaceBlizzard(name)
@@ -140,8 +145,11 @@ function cargBags:ReplaceBlizzard(name)
 	CloseAllBags = closeAllBags
 	CloseBackpack = closeBag
 	
+	IsAnyBagOpen = isAnyBagOpen
+	
 	if _G.OpenAllBagsMatchingContext then OpenAllBagsMatchingContext = openAllMC end
 
+	BankFrame:SetParent(hideFrame)
 	BankFrame:UnregisterAllEvents()
 end
 

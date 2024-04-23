@@ -56,7 +56,7 @@ end
 
 local function CreateScaleAnim(group, target, order, duration, x, y, delay)
 	local scale = group:CreateAnimation("Scale")
-	scale:SetTarget(target:GetName())
+	scale:SetTarget(target)
 	scale:SetOrder(order)
 	scale:SetDuration(duration)
 	scale:SetScale(x, y)
@@ -68,7 +68,7 @@ end
 
 local function CreateAlphaAnim(group, target, order, duration, fromAlpha, toAlpha, delay)
 	local alpha = group:CreateAnimation("Alpha")
-	alpha:SetTarget(target:GetName())
+	alpha:SetTarget(target)
 	alpha:SetOrder(order)
 	alpha:SetDuration(duration)
 	alpha:SetFromAlpha(fromAlpha)
@@ -110,6 +110,18 @@ local function AnimIn_OnFinished(group)
 	frame.outerGlowOver:SetAlpha(0.0)
 	frame.outerGlowOver:SetSize(frameWidth, frameHeight)
 	frame.ants:SetAlpha(1.0)
+end
+
+local function OverlayGlow_OnUpdate(self, elapsed)
+	AnimateTexCoords(self.ants, 256, 256, 48, 48, 22, elapsed, 0.01)
+	local cooldown = self:GetParent().cooldown
+	-- we need some threshold to avoid dimming the glow during the gdc
+	-- (using 1500 exactly seems risky, what if casting speed is slowed or something?)
+	if cooldown and cooldown:IsShown() and cooldown:GetCooldownDuration() > 3000 then
+		self:SetAlpha(0.5)
+	else
+		self:SetAlpha(1.0)
+	end
 end
 
 local function CreateOverlayGlow()
@@ -187,7 +199,7 @@ local function CreateOverlayGlow()
 	overlay.animOut:SetScript("OnFinished", OverlayGlowAnimOutFinished)
 
 	-- scripts
-	overlay:SetScript("OnUpdate", ActionButton_OverlayGlowOnUpdate)
+	overlay:SetScript("OnUpdate", OverlayGlow_OnUpdate)
 	overlay:SetScript("OnHide", OverlayGlow_OnHide)
 
 	return overlay

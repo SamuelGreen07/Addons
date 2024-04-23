@@ -21,7 +21,7 @@ local nextSplitWarning = 71
 function mod:GetOptions()
 	return {
 		74373, -- Veil of Sky
-		74137, -- Supernova
+		{74137, "CASTBAR"}, -- Supernova
 		74135, -- Astral Rain
 		74045, -- Energy Flux
 		-2556, -- Mirror Images
@@ -46,7 +46,7 @@ end
 
 function mod:OnEngage()
 	nextSplitWarning = 71 -- 66% and 33%
-	self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", nil, "boss1")
+	self:RegisterUnitEvent("UNIT_HEALTH", nil, "boss1")
 end
 
 -------------------------------------------------------------------------------
@@ -90,8 +90,8 @@ do
 	end
 end
 
-function mod:UNIT_HEALTH_FREQUENT(event, unit)
-	local hp = UnitHealth(unit) / UnitHealthMax(unit) * 100
+function mod:UNIT_HEALTH(event, unit)
+	local hp = self:GetHealth(unit)
 	if hp < nextSplitWarning then
 		self:MessageOld(-2556, "green", nil, CL.soon:format(self:SpellName(-2556))) -- Mirror Image
 		nextSplitWarning = nextSplitWarning - 33

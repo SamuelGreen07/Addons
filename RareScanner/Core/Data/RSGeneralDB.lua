@@ -7,6 +7,8 @@ local RSGeneralDB = private.NewLib("RareScannerGeneralDB")
 
 -- RareScanner database libraries
 local RSNpcDB = private.ImportLib("RareScannerNpcDB")
+local RSContainerDB = private.ImportLib("RareScannerContainerDB")
+local RSConfigDB = private.ImportLib("RareScannerConfigDB")
 
 -- RareScanner libraries
 local RSConstants = private.ImportLib("RareScannerConstants")
@@ -111,16 +113,17 @@ function RSGeneralDB.UpdateAlreadyFoundEntityPlayerPosition(entityID)
 			local artID = C_Map.GetMapArtID(mapID)
 			if (mapPosition) then
 				local x, y = mapPosition:GetXY()
+				RSLogger:PrintDebugMessage(string.format("UpdateAlreadyFoundEntityPlayerPosition[%s]. Nueva posicion por cercania.", entityID))
 				RSGeneralDB.UpdateAlreadyFoundEntity(entityID, mapID, x, y, artID)
 			end
 		end
 	end
 end
 
-function RSGeneralDB.UpdateAlreadyFoundEntityTime(npcID)
-	if (npcID and private.dbglobal.rares_found[npcID]) then
-		private.dbglobal.rares_found[npcID].foundTime = time();
-		RSLogger:PrintDebugMessage(string.format("UpdateAlreadyFoundEntityTime[%s]. Nueva estampa de tiempo (%s)", npcID, RSGeneralDB.GetAlreadyFoundEntity(npcID).foundTime))
+function RSGeneralDB.UpdateAlreadyFoundEntityTime(entityID)
+	if (entityID and private.dbglobal.rares_found[entityID]) then
+		private.dbglobal.rares_found[entityID].foundTime = time();
+		--RSLogger:PrintDebugMessage(string.format("UpdateAlreadyFoundEntityTime[%s]. Nueva estampa de tiempo (%s)", entityID, RSGeneralDB.GetAlreadyFoundEntity(entityID).foundTime))
 	end
 end
 
@@ -183,15 +186,21 @@ function RSGeneralDB.AddAlreadyFoundEntity(entityID, mapID, x, y, artID, atlasNa
 	return nil
 end
 
-
----============================================================================
--- Not discovored entities
------ Stores entities not found. This lists are used to display non discovered
------ entities in the map in a faster way
----============================================================================
-
-function RSGeneralDB.InitNotDiscoveredListsDB()
-
+function RSGeneralDB.GetBestMapForUnit(entityID, atlasName)
+	local mapID = C_Map.GetBestMapForUnit("player")
+	if (mapID) then
+		return mapID
+	end
+	
+	if (RSConstants.IsNpcAtlas(atlasName) and RSNpcDB.IsInternalNpcMonoZone(entityID)) then
+		local npcInfo = RSNpcDB.GetInternalNpcInfo(entityID)
+		return npcInfo.zoneID
+	elseif (RSConstants.IsNpcAtlas(atlasName) and RSContainerDB.IsInternalContainerMonoZone(entityID)) then
+		local containerInfo = RSContainerDB.GetInternalContainerInfo(entityID)
+		return containerInfo.zoneID
+	end
+	
+	return nil
 end
 
 ---============================================================================
@@ -222,13 +231,12 @@ function RSGeneralDB.GetItemInfo(itemID)
 
 	-- The first time request the server for the information
 	if (not private.dbglobal.loot_info[itemID]) then
-		local retOk, itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, iconFileDataID, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, isCraftingReagent = pcall(GetItemInfo, itemID)
+		local retOk, _, itemLink, itemRarity, _, _, _, _, _, itemEquipLoc, iconFileDataID, _, itemClassID, itemSubClassID, _, _, _, _ = pcall(GetItemInfo, itemID)
 		if (itemLink and itemRarity and itemEquipLoc and iconFileDataID and itemClassID and itemSubClassID) then
 			RSGeneralDB.SetItemInfo(itemID, itemLink, itemRarity, itemEquipLoc, iconFileDataID, itemClassID, itemSubClassID)
-			return unpack(private.dbglobal.loot_info[itemID])
 		end
 		return itemLink, itemRarity, itemEquipLoc, iconFileDataID, itemClassID, itemSubClassID
-			-- Next time return cache
+	-- Next time return cached data
 	else
 		return unpack(private.dbglobal.loot_info[itemID])
 	end
@@ -246,18 +254,32 @@ end
 ---============================================================================
 
 function RSGeneralDB.InitCompletedQuestDB()
-	if (not private.dbchar.quests_completed) then
+	if (RSConstants.DEBUG_MODE and not private.dbchar.quests_completed) then
 		private.dbchar.quests_completed = {}
 	end
 end
 
 function RSGeneralDB.IsCompletedQuestInCache(questID)
-	return questID and private.dbchar.quests_completed[questID]
+	if (questID and private.dbchar.quests_completed) then
+		return private.dbchar.quests_completed[questID]
+	end
+	
+	return false
 end
 
 function RSGeneralDB.SetCompletedQuest(questID)
-	if (questID) then
+	if (questID and private.dbchar.quests_completed) then
 		private.dbchar.quests_completed[questID] = true
+	end
+end
+
+function RSGeneralDB.ResetCompletedQuestDB()
+	if (private.dbchar.quests_completed) then
+		if (RSConstants.DEBUG_MODE) then
+			private.dbchar.quests_completed = {}
+		else
+			private.dbchar.quests_completed = nil
+		end
 	end
 end
 
@@ -272,18 +294,12 @@ end
 function RSGeneralDB.DeleteRecentlySeen(npcID)
 	if (npcID and private.dbglobal.recentlySeen[npcID]) then
 		private.dbglobal.recentlySeen[npcID] = nil
-		RSLogger:PrintDebugMessage(string.format("DeleteRecentlySeen[%s]", npcID))
 	end
 end
 
 function RSGeneralDB.SetRecentlySeen(npcID)
 	if (npcID) then
 		private.dbglobal.recentlySeen[npcID] = true
-		RSLogger:PrintDebugMessage(string.format("SetRecentlySeen[%s]", npcID))
-
-		C_Timer.After(RSConstants.RECENTLY_SEEN_ENTITIES_RESET_TIMER, function()
-			RSGeneralDB.DeleteRecentlySeen(npcID)
-		end)
 	end
 end
 
@@ -299,19 +315,88 @@ end
 -- Overlay database
 ---============================================================================
 
-function RSGeneralDB.HasOverlayActive(npcID)
-	return private.dbchar.overlayActive and private.dbchar.overlayActive == npcID
+function RSGeneralDB.HasOverlayActive(entityID)
+	if (private.dbchar.overlayActive and entityID and private.dbchar.overlayActive[entityID]) then
+		return true
+	end
+	
+	return false
 end
 
-function RSGeneralDB.SetOverlayActive(npcID)
-	private.dbchar.overlayActive = npcID
+function RSGeneralDB.AddOverlayActive(entityID)
+	if (not private.dbchar.overlayActive) then
+		private.dbchar.overlayActive = {}
+	end
+	
+	-- if its already in the list ignore it
+	if (private.dbchar.overlayActive[entityID]) then
+		return RSConfigDB.GetWorldMapOverlayColour(private.dbchar.overlayActive[entityID].colourID)
+	end
+	
+	-- look for an available colour
+	local assignedColourId = nil;
+	for i = 1,private.db.map.overlayMaxColours,1 do 
+		local colourIdFound = false	
+		for id, info in pairs (private.dbchar.overlayActive) do
+			if (info.colourID == i) then
+				colourIdFound = true
+				break
+			end
+		end
+		
+		if (not colourIdFound) then
+			assignedColourId = i;
+			private.dbchar.overlayActive[entityID] = { colourID = i, timestamp = time() }
+			break
+		end
+	end
+	
+	-- if not added because all colours are used, replace the oldest
+	local replacedEntityID = nil
+	if (not assignedColourId) then
+		local a = {}
+		for _, info in pairs (private.dbchar.overlayActive) do
+			table.insert(a, info.timestamp)
+		end
+		table.sort(a)
+		for currentEntityID, info in pairs (private.dbchar.overlayActive) do
+			if (info.timestamp == a[1]) then
+				replacedEntityID = currentEntityID
+				private.dbchar.overlayActive[currentEntityID] = nil
+				private.dbchar.overlayActive[entityID] = { colourID = info.colourID, timestamp = time() }
+				assignedColourId = info.colourID
+				break
+			end
+		end
+	end
+	
+	local r, g, b = RSConfigDB.GetWorldMapOverlayColour(assignedColourId)
+	return r, g, b, replacedEntityID
 end
 
-function RSGeneralDB.GetOverlayActive()
-	return private.dbchar.overlayActive
+function RSGeneralDB.GetOverlayActive(entityID)
+	if (private.dbchar.overlayActive and entityID and private.dbchar.overlayActive[entityID]) then
+		return private.dbchar.overlayActive[entityID]
+	end
+	
+	return nil
 end
 
-function RSGeneralDB.RemoveOverlayActive()
+function RSGeneralDB.GetAllOverlayActive()
+	if (private.dbchar.overlayActive) then
+		return private.dbchar.overlayActive
+	end
+	
+	return {}
+end
+
+function RSGeneralDB.RemoveOverlayActive(entityID)
+	if (private.dbchar.overlayActive and entityID and private.dbchar.overlayActive[entityID]) then
+		private.dbchar.overlayActive[entityID] = nil
+	end
+end
+
+function RSGeneralDB.RemoveAllOverlayActive()
 	private.dbchar.overlayActive = nil
 end
 
@@ -428,6 +513,14 @@ end
 
 function RSGeneralDB.SetLootDbVersion(version)
 	private.dbglobal.lootdbversion = version
+end
+
+function RSGeneralDB.GetLastCleanDb()
+	return private.dbchar.lastClean
+end
+
+function RSGeneralDB.SetLastCleanDb()
+	private.dbchar.lastClean = time()
 end
 
 ---============================================================================

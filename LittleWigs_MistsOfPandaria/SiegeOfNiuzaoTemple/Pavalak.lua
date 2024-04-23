@@ -21,7 +21,7 @@ local nextReinforcementsWarning = 70
 
 function mod:GetOptions()
 	return {
-		124283, -- Blade Rush
+		{124283, "CASTBAR"}, -- Blade Rush
 		{119875, "HEALER"}, -- Tempest
 		-5946, -- Call Reinforcements
 	}
@@ -32,7 +32,7 @@ function mod:OnBossEnable()
 	self:Log("SPELL_CAST_START", "Tempest", 119875)
 	self:Log("SPELL_AURA_APPLIED", "ReinforcementsPhase", 119476) -- 119476 = Bulwark
 
-	self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", nil, "boss1")
+	self:RegisterUnitEvent("UNIT_HEALTH", nil, "boss1")
 end
 
 function mod:OnEngage()
@@ -56,11 +56,11 @@ function mod:ReinforcementsPhase()
 	self:MessageOld(-5946, "yellow", "info", CL.incoming:format(CL.adds), false)
 end
 
-function mod:UNIT_HEALTH_FREQUENT(event, unit)
-	local hp = UnitHealth(unit) / UnitHealthMax(unit) * 100
+function mod:UNIT_HEALTH(event, unit)
+	local hp = self:GetHealth(unit)
 	if hp < nextReinforcementsWarning then
 		nextReinforcementsWarning = nextReinforcementsWarning - 30
-		self:MessageOld(-5946, "yellow", nil, CL.soon:format(self:SpellName(-5946)))
+		self:MessageOld(-5946, "yellow", nil, CL.soon:format(self:SpellName(-5946)), false)
 		if nextReinforcementsWarning < 45 then
 			self:UnregisterUnitEvent(event, unit)
 		end

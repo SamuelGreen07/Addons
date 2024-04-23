@@ -5,6 +5,7 @@ local SLASH_COMMAND_DESCRIPTIONS = {
   {commands = "rdb, resetdatabase", message = "Reset Auctionator database."},
   {commands = "rt, resettimer", message = "Reset full scan timer."},
   {commands = "rc, resetconfig", message = "Reset configuration to defaults."},
+  {commands = "npd, nopricedb", message = "Disable recording auction prices."},
   {commands = "d, debug", message = "Toggle debug mode."},
   {commands = "c, config", message = "Show current configuration values."},
   {commands = "c [toggle-name], config [toggle-name]", message = "Toggle the value of the configuration value [toggle-name]."},
@@ -13,7 +14,6 @@ local SLASH_COMMAND_DESCRIPTIONS = {
 }
 
 function Auctionator.SlashCmd.Post()
-  Auctionator.Utilities.Message(AUCTIONATOR_L_POST_BUTTON_MACRO)
   Auctionator.EventBus
     :RegisterSource(Auctionator.SlashCmd.Post, "Auctionator.SlashCmd.Post")
     :Fire(Auctionator.SlashCmd.Post, Auctionator.Selling.Events.RequestPost)
@@ -21,7 +21,6 @@ function Auctionator.SlashCmd.Post()
 end
 
 function Auctionator.SlashCmd.CancelUndercut()
-  Auctionator.Utilities.Message(AUCTIONATOR_L_CANCEL_UNDERCUT_BUTTON_MACRO)
   Auctionator.EventBus
     :RegisterSource(Auctionator.SlashCmd.CancelUndercut, "Auctionator.SlashCmd.CancelUndercut")
     :Fire(Auctionator.SlashCmd.CancelUndercut, Auctionator.Cancelling.Events.RequestCancelUndercut)
@@ -50,7 +49,8 @@ end
 
 function Auctionator.SlashCmd.ResetTimer()
   if Auctionator.Debug.IsOn() then
-    Auctionator.SavedState.TimeOfLastScan = nil
+    Auctionator.SavedState.TimeOfLastReplicateScan = nil
+    Auctionator.SavedState.TimeOfLastGetAllScan = nil
     Auctionator.Utilities.Message("Scan timer reset.")
   else
     Auctionator.Utilities.Message("Requires debug mode.")
@@ -62,6 +62,15 @@ function Auctionator.SlashCmd.CleanReset()
   Auctionator.SlashCmd.ResetDatabase()
 end
 
+function Auctionator.SlashCmd.NoPriceDB()
+  Auctionator.Config.Set(Auctionator.Config.Options.NO_PRICE_DATABASE, true)
+
+  AUCTIONATOR_PRICE_DATABASE = nil
+  Auctionator.Variables.InitializeDatabase()
+
+  Auctionator.Utilities.Message("Disabled recording auction prices in the price database.")
+end
+
 function Auctionator.SlashCmd.ResetConfig()
   if Auctionator.Debug.IsOn() then
     Auctionator.Config.Reset()
@@ -71,27 +80,46 @@ function Auctionator.SlashCmd.ResetConfig()
   end
 end
 
-function Auctionator.SlashCmd.Config(name, value)
-  if name == nil then
-    Auctionator.Utilities.Message("Current config:")
+local INVALID_OPTION_VALUE = "Wrong config value type %s (required %s)"
+function Auctionator.SlashCmd.Config(optionName, value1, ...)
+  if optionName == nil then
+    Auctionator.Utilities.Message("No config option name supplied")
     for _, name in pairs(Auctionator.Config.Options) do
-      Auctionator.Utilities.Message(name .. "=" .. tostring(Auctionator.Config.Get(name)) .. " (" .. type(Auctionator.Config.Get(name)) .. ")")
+      Auctionator.Utilities.Message(name .. ": " .. tostring(Auctionator.Config.Get(name)))
     end
-  elseif type(Auctionator.Config.Get(name)) == "boolean" then
-    Auctionator.Config.Set(name, not Auctionator.Config.Get(name))
-    Auctionator.Utilities.Message("Config set " .. name .. " = " .. tostring(Auctionator.Config.Get(name)))
-  elseif type(Auctionator.Config.Get(name)) == "number" then
-    if tonumber(value) == nil then
-      Auctionator.Utilities.Message("Config " .. name .. " not modified; Numerical value required")
-    else
-      Auctionator.Config.Set(name, tonumber(value))
-    end
-    Auctionator.Utilities.Message("Config set " .. name .. " = " .. tostring(Auctionator.Config.Get(name)))
-  elseif Auctionator.Config.Get(name) ~= nil then
-    Auctionator.Utilities.Message("Unable to modify " .. name .. " at this time")
-  else
-    Auctionator.Utilities.Message("Unknown config " .. name)
+    return
   end
+
+  local currentValue = Auctionator.Config.Get(optionName)
+  if currentValue == nil then
+    Auctionator.Utilities.Message("Unknown config: " .. optionName)
+    return
+  end
+
+  if value1 == nil then
+    Auctionator.Utilities.Message("Config " .. optionName .. ": " .. tostring(currentValue))
+    return
+  end
+
+  if type(currentValue) == "boolean" then
+    if value1 ~= "true" and value1 ~= "false" then
+      Auctionator.Utilities.Message(INVALID_OPTION_VALUE:format(type(value1), type(currentValue)))
+      return
+    end
+    Auctionator.Config.Set(optionName, value1 == "true")
+  elseif type(currentValue) == "number" then
+    if tonumber(value1) == nil then
+      Auctionator.Utilities.Message(INVALID_OPTION_VALUE:format(type(value1), type(currentValue)))
+      return
+    end
+    Auctionator.Config.Set(optionName, tonumber(value1))
+  elseif type(currentValue) == "string" then
+    Auctionator.Config.Set(optionName, strjoin(" ", value1, ...))
+  else
+    Auctionator.Utilities.Message("Unable to edit option type " .. type(currentValue))
+    return
+  end
+  Auctionator.Utilities.Message("Now set " .. optionName .. ": " .. tostring(Auctionator.Config.Get(optionName)))
 end
 
 function Auctionator.SlashCmd.Version()

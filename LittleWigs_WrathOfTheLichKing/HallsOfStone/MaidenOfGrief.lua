@@ -5,8 +5,8 @@
 local mod, CL = BigWigs:NewBoss("Maiden of Grief", 599, 605)
 if not mod then return end
 mod:RegisterEnableMob(27975)
-mod.engageId = 1996
---mod.respawnTime = 0 -- resets, doesn't respawn
+mod:SetEncounterID(mod:Classic() and 565 or 1996)
+--mod:SetRespawnTime(0) -- resets, doesn't respawn
 
 -------------------------------------------------------------------------------
 --  Locals
@@ -51,7 +51,7 @@ do
 	local playerList = mod:NewTargetList()
 
 	function mod:ShockOfSorrowDebuff(args)
-		if bit.band(args.destFlags, 0x400) == 0 then return end -- COMBATLOG_OBJECT_TYPE_PLAYER
+		if not self:Player(args.destFlags) then return end
 
 		playerList[#playerList + 1] = args.destName
 		playersIncapacitated = playersIncapacitated + 1
@@ -62,7 +62,7 @@ do
 	end
 
 	function mod:ShockOfSorrowDebuffRemoved(args)
-		if bit.band(args.destFlags, 0x400) == 0 then return end -- COMBATLOG_OBJECT_TYPE_PLAYER
+		if not self:Player(args.destFlags) then return end
 
 		playersIncapacitated = playersIncapacitated - 1
 		if playersIncapacitated == 0 then
@@ -79,7 +79,7 @@ do
 	local prev = 0
 	function mod:StormOfGrief(args)
 		if self:Me(args.destGUID) and not shouldBeTakingDamage then
-			local t = GetTime()
+			local t = args.time
 			if t-prev > 2 then
 				prev = t
 				self:MessageOld(59772, "blue", "alert", CL.underyou:format(args.spellName))

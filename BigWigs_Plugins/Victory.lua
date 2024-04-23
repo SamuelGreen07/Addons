@@ -12,20 +12,27 @@ if not plugin then return end
 local L = BigWigsAPI:GetLocale("BigWigs: Plugins")
 local media = LibStub("LibSharedMedia-3.0")
 local SOUND = media.MediaType and media.MediaType.SOUND or "sound"
-local PlaySoundFile = PlaySoundFile
 
 -------------------------------------------------------------------------------
 -- Options
 --
 
-plugin.defaultDB = {
-	soundName = "BigWigs: Victory",
-	blizzMsg = true,
-	bigwigsMsg = false,
-}
+if BigWigsLoader.isRetail then
+	plugin.defaultDB = {
+		soundName = "BigWigs: Victory",
+		blizzMsg = true,
+		bigwigsMsg = false,
+	}
+else -- Blizz message doesn't exist on classic so we reverse the default
+	plugin.defaultDB = {
+		soundName = "BigWigs: Victory",
+		blizzMsg = false,
+		bigwigsMsg = true,
+	}
+end
 
 plugin.pluginOptions = {
-	name = L.Victory,
+	name = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\Menus\\Victory:20|t ".. L.Victory,
 	type = "group",
 	childGroups = "tab",
 	get = function(i) return plugin.db.profile[i[#i]] end,
@@ -40,6 +47,7 @@ plugin.pluginOptions = {
 			end
 		end
 	end,
+	order = 7,
 	args = {
 		heading = {
 			type = "description",
@@ -85,6 +93,7 @@ plugin.pluginOptions = {
 					desc = L.victoryMessageBlizzardDesc,
 					order = 2,
 					width = "full",
+					hidden = BigWigsLoader.isClassic,
 				},
 			},
 		},
@@ -95,12 +104,30 @@ plugin.pluginOptions = {
 -- Initialization
 --
 
-function plugin:OnPluginEnable()
-	if not self.db.profile.blizzMsg then
-		BossBanner:UnregisterEvent("BOSS_KILL")
+do
+	local function updateProfile()
+		local db = plugin.db.profile
+
+		for k, v in next, db do
+			local defaultType = type(plugin.defaultDB[k])
+			if defaultType == "nil" then
+				db[k] = nil
+			elseif type(v) ~= defaultType then
+				db[k] = plugin.defaultDB[k]
+			end
+		end
 	end
-	self:RegisterMessage("BigWigs_OnBossWin")
-	self:RegisterMessage("BigWigs_VictorySound")
+
+	function plugin:OnPluginEnable()
+		if not self.db.profile.blizzMsg and BossBanner then
+			BossBanner:UnregisterEvent("BOSS_KILL")
+		end
+		self:RegisterMessage("BigWigs_OnBossWin")
+		self:RegisterMessage("BigWigs_VictorySound")
+
+		self:RegisterMessage("BigWigs_ProfileUpdate", updateProfile)
+		updateProfile()
+	end
 end
 
 -------------------------------------------------------------------------------
@@ -118,7 +145,7 @@ function plugin:BigWigs_VictorySound()
 	if soundName ~= "None" then
 		local sound = media:Fetch(SOUND, soundName, true)
 		if sound then
-			PlaySoundFile(sound, "Master")
+			self:PlaySoundFile(sound)
 		end
 	end
 end

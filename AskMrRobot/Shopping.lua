@@ -48,9 +48,21 @@ local function onItemClick(widget)
 	local name = widget:GetUserData("itemName")
 	if name then
 
-		local query = {}
-		query.searchString = name
-		query.sorts = {}
+		local query = {
+			searchString = name,
+			sorts = {
+				{sortOrder = Enum.AuctionHouseSortOrder.Price, reverseSort = false},
+				{sortOrder = Enum.AuctionHouseSortOrder.Name, reverseSort = false}
+			},
+			filters = {
+				Enum.AuctionHouseFilter.PoorQuality,
+				Enum.AuctionHouseFilter.CommonQuality,
+				Enum.AuctionHouseFilter.UncommonQuality,
+				Enum.AuctionHouseFilter.RareQuality,
+				Enum.AuctionHouseFilter.EpicQuality
+			}
+		}
+		
 		C_AuctionHouse.SendBrowseQuery(query)
 		
 		--QueryAuctionItems(name)
@@ -129,8 +141,10 @@ function Amr:ShowShopWindow()
 			end
 			if _selectedSetup and not playerData.setups[_selectedSetup] then					
 				_selectedSetup = nil
-			else
+			elseif _selectedSetup then
 				_selectedSetup = player.Name .. "-" .. player.Realm .. "@" .. _selectedSetup
+			else
+				_selectedSetup = nil
 			end
 		end
 		

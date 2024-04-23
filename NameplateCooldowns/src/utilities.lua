@@ -79,6 +79,7 @@ end
 
 addonTable.SpellTextureByID = setmetatable({
 	[addonTable.SPELL_PVPTRINKET] =	1322720,
+    [42292] =                       1322720,
 	[200166] =				        1247262,
 }, {
 	__index = function(t, key)
@@ -141,3 +142,4 @@ do
         end
     end);
 end
+

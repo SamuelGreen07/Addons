@@ -45,10 +45,12 @@ local function initializeDb()
 		char = {
 			LastVersion = 0,           -- used to clean out old stuff	
 			FirstUse = true,           -- true if this is first time use, gets cleared after seeing the export help splash window
-			Talents = {},              -- for each spec, selected talents
-			Soulbinds = {},            -- selected nodes in each soulbind tree for this character
-			ActiveSoulbinds = {},      -- for each spec, active soulbind
-			UnlockedConduits = {},     -- unlocked conduits for this character
+			--Talents = {},              -- for each spec, selected talents
+			--Soulbinds = {},            -- selected nodes in each soulbind tree for this character
+			--ActiveSoulbinds = {},      -- for each spec, active soulbind
+			--UnlockedConduits = {},     -- unlocked conduits for this character
+			--CovenantRenownLevel = 0,   -- current covenant renown level
+			TalentConfigs = {},        -- new talent configs since dragonflight
 			Equipped = {},             -- for each spec, slot id to item info
 			BagItems = {},             -- list of item info for bags
 			BankItems = {},            -- list of item info for bank
@@ -77,6 +79,7 @@ local function initializeDb()
 				junkVendor = false,    -- auto-show junk list at vendor/scrapper
 				shopAh = false,        -- auto-show shopping list at AH
 				disableEm = false,     -- disable auto-creation of equipment manager sets
+				disableTal = false,    -- disable automatically setting talents/soulbind
 				uiScale = 1            -- custom scale for AMR UI
 			},
 			Logging = {                -- global logging settings
@@ -139,10 +142,25 @@ local function initializeDb()
 		Amr.db.char.GearSetups = {}
 	end
 
+	-- upgrade old talent info to new format
+	if Amr.db.char.Talents then
+		Amr.db.char.Talents = nil
+	end
+
+	if not Amr.db.char.TalentConfigs then
+		Amr.db.char.TalentConfigs = {}
+	end
+	
 	if Amr.db.global.Shopping then
 		Amr.db.global.Shopping = nil
 	end
-	
+
+	-- change default value for talent swapping setting
+	if not Amr.db.profile.options.talVer or Amr.db.profile.options.talVer < 1 then
+		Amr.db.profile.options.talVer = 1
+		Amr.db.profile.options.disableTal = true
+	end
+
 	Amr.db.RegisterCallback(Amr, "OnProfileChanged", "RefreshConfig")
 	Amr.db.RegisterCallback(Amr, "OnProfileCopied", "RefreshConfig")
 	Amr.db.RegisterCallback(Amr, "OnProfileReset", "RefreshConfig")
@@ -257,6 +275,7 @@ local _slashMethods = {
 	show      = "Show",
 	toggle    = "Toggle",
 	equip     = "EquipGearSet",
+	del       = "DeleteGearSet",
 	version   = "PrintVersions",
 	junk      = "ShowJunkWindow",
 	--wipe      = "Wipe",
@@ -708,13 +727,7 @@ function Amr:dump(o)
 	end
 end
 
+
 function Amr:Test()
-	
-	--local item = Item:CreateFromItemID(171416)
-	--local blah = C_LegendaryCrafting.GetRuneforgePowers(item:GetItemLocation())
-
-	--local info = C_LegendaryCrafting.GetRuneforgePowerInfo(30)
-
-	--print(Amr:dump(info))
 
 end

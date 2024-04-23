@@ -1,6 +1,3 @@
-
--- GLOBALS: tContains, tDeleteItem
-
 --------------------------------------------------------------------------------
 -- Module Declaration
 --
@@ -8,15 +5,14 @@
 local mod, CL = BigWigs:NewBoss("Mechano-Lord Capacitus", 554, 563)
 if not mod then return end
 mod:RegisterEnableMob(19219)
--- mod.engageId = 1932 -- no boss frames, only fires ENCOUNTER_* events once per instance reset (if you wipe - tough luck)
--- mod.respawnTime = 0 -- resets, doesn't respawn
+--mod:SetEncounterID(1932) -- no boss frames, only fires ENCOUNTER_* events once per instance reset (if you wipe - tough luck)
+--mod:SetRespawnTime(0) -- resets, doesn't respawn
 
 --------------------------------------------------------------------------------
 -- Locals
 --
 
 local playerCollector = {}
-local negativeList, positiveList = {}, {}
 
 --------------------------------------------------------------------------------
 -- Initialization
@@ -26,7 +22,7 @@ function mod:GetOptions()
 	return {
 		35158, -- Reflective Magic Shield
 		35159, -- Reflective Damage Shield
-		{39096, "PROXIMITY"}, -- Polarity Shift
+		{39096, "CASTBAR"}, -- Polarity Shift
 		"berserk",
 	}, {
 		[35158] = "normal",
@@ -70,17 +66,11 @@ function mod:PolarityShift(args)
 end
 
 do
-	local function fillTheTableAndOpenProximity(self, unit, sameChargeList, oppositeChargeList, spellId)
+	local function fillTheTable(self, unit, spellId)
 		local guid = self:UnitGUID(unit)
 		if not playerCollector[guid] then
 			playerCollector[guid] = true
-			local name = self:UnitName(unit)
-			if not tContains(sameChargeList, name) then
-				sameChargeList[#sameChargeList+1] = name
-			end
-			tDeleteItem(oppositeChargeList, name)
 			if self:Me(guid) then
-				self:OpenProximity(39096, 10, sameChargeList, true)
 				-- Cyan for Positive, Red for Negative
 				self:MessageOld(39096, spellId == 39088 and "cyan" or "red", "info", CL.you:format(self:SpellName(spellId)), spellId)
 			end
@@ -90,14 +80,14 @@ do
 	-- no SPELL_AURA_APPLIED events
 	function mod:UNIT_AURA(_, unit)
 		if self:UnitDebuff(unit, 39088) then -- Positive Charge
-			fillTheTableAndOpenProximity(self, unit, positiveList, negativeList, 39088)
+			fillTheTable(self, unit, 39088)
 		elseif self:UnitDebuff(unit, 39091) then -- Negative Charge
-			fillTheTableAndOpenProximity(self, unit, negativeList, positiveList, 39091)
+			fillTheTable(self, unit, 39091)
 		end
 	end
 
 	function mod:PolarityShiftSuccess()
-		wipe(playerCollector)
+		playerCollector = {}
 		self:RegisterUnitEvent("UNIT_AURA", nil, "player", "party1", "party2", "party3", "party4")
 		self:ScheduleTimer("UnregisterUnitEvent", 3, "UNIT_AURA", "player", "party1", "party2", "party3", "party4")
 	end

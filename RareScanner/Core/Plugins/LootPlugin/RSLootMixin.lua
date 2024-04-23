@@ -19,28 +19,43 @@ local RSUtils = private.ImportLib("RareScannerUtils")
 
 -- RareScanner services
 local RSLoot = private.ImportLib("RareScannerLoot")
+local RSLootTooltip = private.ImportLib("RareScannerLootTooltip")
 
 
 RSLootMixin = { };
 
 function RSLootMixin:OnLoad()
-	self:EnableKeyboard(true)
+	self:SetScript("OnEvent", function(self, event, key, down)
+		if (event ~= "MODIFIER_STATE_CHANGED") then
+			return
+		end
+	
+		if (down == 1) then
+			local toolTip = self:GetParent().LootBarToolTip
+			if (IsShiftKeyDown() and not IsAltKeyDown() and not IsControlKeyDown() and toolTip:IsShown()) then
+				GameTooltip_ShowCompareItem(toolTip)
+			end
+		elseif (down == 0) then
+			local toolTip = self:GetParent().LootBarToolTip
+			GameTooltip_HideShoppingTooltips(toolTip)
+		end
+	end)
 end
 
 function RSLootMixin:OnEnter()
 	if (self:GetParent() and self:GetParent():GetParent()) then
-		local _, _, _, _, itemClassID, itemSubClassID = RSGeneralDB.GetItemInfo(self.itemID)
+		local itemLink, _, _, _, itemClassID, itemSubClassID = RSGeneralDB.GetItemInfo(self.itemID)
 
 		local toolTip = self:GetParent().LootBarToolTip
 		toolTip:SetOwner(self:GetParent():GetParent(), RSConfigDB:GetLootTooltipPosition())
 		toolTip:SetHyperlink(self.itemLink)
 		toolTip:SetParent(self)
-		toolTip:AddLine(string.format(AL["LOOT_TOGGLE_FILTER"], GetItemClassInfo(self.itemClassID), GetItemSubClassInfo(self.itemClassID, self.itemSubClassID)), 1,1,0)
-		toolTip:AddLine(AL["LOOT_TOGGLE_INDIVIDUAL_FILTER"], 1,1,0)
-		if (RSConstants.DEBUG_MODE) then
-			toolTip:AddLine(self.itemID, 1,1,0)
-		end
+	
+		-- Adds extra information
+		RSLootTooltip.AddRareScannerInformation(toolTip, itemLink, self.itemID, itemClassID, itemSubClassID)
+		
 		toolTip:Show()
+		self:RegisterEvent("MODIFIER_STATE_CHANGED")
 
 		self.Icon.Anim:Play();
 	end
@@ -49,68 +64,15 @@ end
 function RSLootMixin:OnLeave()
 	self:GetParent().LootBarToolTip:Hide()
 	self.Icon.Anim:Stop();
+	self:UnregisterEvent("MODIFIER_STATE_CHANGED")
 end
 
-function RSLootMixin:OnKeyUp()
-	self:SetPropagateKeyboardInput(true)
-	local toolTip = self:GetParent().LootBarToolTip
-	GameTooltip_HideShoppingTooltips(toolTip)
-end
-
-function RSLootMixin:OnKeyDown()
-	self:SetPropagateKeyboardInput(true)
-	local toolTip = self:GetParent().LootBarToolTip
-	if (IsShiftKeyDown() and toolTip:IsShown()) then
-		GameTooltip_OnTooltipSetShoppingItem(toolTip)
-		GameTooltip_ShowCompareItem(toolTip)
-	end
-end
-
-function RSLootMixin:OnMouseDown()
-	if (IsControlKeyDown()) then
-		DressUpItemLink(self.itemLink)
-		DressUpBattlePetLink(self.itemLink)
-		DressUpMountLink(self.itemLink)
-	elseif (IsAltKeyDown()) then
-		if (IsShiftKeyDown()) then
-			if (not RSConfigDB.GetItemFiltered(self.itemID)) then
-				RSConfigDB.SetItemFiltered(self.itemID, true)
-				RSLogger:PrintMessage(string.format(AL["LOOT_INDIVIDUAL_FILTERED"], self.itemLink))
-			else
-				RSConfigDB.SetItemFiltered(self.itemID, false)
-				RSLogger:PrintMessage(string.format(AL["LOOT_INDIVIDUAL_NOT_FILTERED"], self.itemLink))
-			end
-			-- Refresh options panel (if its being initialized)
-			if (private.loadFilteredItems) then
-				private.loadFilteredItems()
-			end
-		else
-			if (RSConfigDB.GetLootFilterByCategory(self.itemClassID, self.itemSubClassID)) then
-				RSConfigDB.SetLootFilterByCategory(self.itemClassID, self.itemSubClassID, false)
-				RSLogger:PrintMessage(string.format(AL["LOOT_CATEGORY_FILTERED"], GetItemClassInfo(self.itemClassID), GetItemSubClassInfo(self.itemClassID, self.itemSubClassID)))
-			else
-				RSConfigDB.SetLootFilterByCategory(self.itemClassID, self.itemSubClassID, true)
-				RSLogger:PrintMessage(string.format(AL["LOOT_CATEGORY_NOT_FILTERED"], GetItemClassInfo(self.itemClassID), GetItemSubClassInfo(self.itemClassID, self.itemSubClassID)))
-			end
-		end
-	end
+function RSLootMixin:OnMouseDown(button)
+	RSLootTooltip.HandleInputEvents(button, self.itemLink, self.itemClassID, self.itemSubClassID, self.itemID)
 end
 
 function RSLootMixin:AddItem(itemID, numActive)
-	local itemLink, itemRarity, itemEquipLoc, iconFileDataID, itemClassID, itemSubClassID = RSGeneralDB.GetItemInfo(itemID)
-	if (not iconFileDataID) then
-		self.itemID = itemID
-		-- It will be refired after recieving the item info
-		return true
-			-- If we have already more items than wanted
-	elseif (numActive > RSConfigDB.GetMaxNumItemsToShow()) then
-		return false
-	end
-
-	-- Apply filters
-	if (RSLoot.IsFiltered(itemID, itemLink, itemRarity, itemEquipLoc, itemClassID, itemSubClassID)) then
-		return false;
-	end
+	local itemLink, _, _, iconFileDataID, itemClassID, itemSubClassID = RSGeneralDB.GetItemInfo(itemID)
 
 	-- Set item icon
 	self.Icon:SetTexture(iconFileDataID)
@@ -143,6 +105,4 @@ function RSLootMixin:AddItem(itemID, numActive)
 
 	self:GetParent():SetSize(self:GetWidth() * maxWidth, 20 * (floor(numActive/RSConfigDB.GetNumItemsPerRow()) + 1))
 	self:GetParent():SetPoint("TOP", self:GetParent():GetParent(), "BOTTOM", 0, -3)
-
-	return true
 end

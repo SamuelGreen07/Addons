@@ -24,11 +24,11 @@ local Fonts = DBM_GUI:MixinSharedMedia3("font", {
 	},
 	{
 		text	= "Skurri",
-		value	= "Fonts\\skurri.ttf"
+		value	= "Fonts\\SKURRI_CYR.ttf"
 	},
 	{
 		text	= "Morpheus",
-		value	= "Fonts\\MORPHEUS.ttf"
+		value	= "Fonts\\MORPHEUS_CYR.ttf"
 	}
 })
 
@@ -91,15 +91,15 @@ local Sounds = DBM_GUI:MixinSharedMedia3("sound", {
 	},
 	{
 		text	= "RaidWarning",
-		value	= 8959 -- "Sound\\interface\\RaidWarning.ogg"
+		value	= 567397 -- "Sound\\interface\\RaidWarning.ogg"
 	},
 	{
 		text	= "Classic",
-		value	= 11742 -- "Sound\\Doodad\\BellTollNightElf.ogg"
+		value	= 566558 -- "Sound\\Doodad\\BellTollNightElf.ogg"
 	},
 	{
 		text	= "Ding",
-		value	= 12889 -- "Sound\\interface\\AlarmClockWarning3.ogg"
+		value	= 567458 -- "Sound\\interface\\AlarmClockWarning3.ogg"
 	}
 })
 
@@ -180,16 +180,16 @@ local color1 = raidwarncolors:CreateColorSelect(64)
 local color2 = raidwarncolors:CreateColorSelect(64)
 local color3 = raidwarncolors:CreateColorSelect(64)
 local color4 = raidwarncolors:CreateColorSelect(64)
-local color1text = raidwarncolors:CreateText(L.RaidWarnColor_1, 64)
-local color2text = raidwarncolors:CreateText(L.RaidWarnColor_2, 64)
-local color3text = raidwarncolors:CreateText(L.RaidWarnColor_3, 64)
-local color4text = raidwarncolors:CreateText(L.RaidWarnColor_4, 64)
+local color1text = raidwarncolors:CreateText(L.RaidWarnColor_1, 64, nil, nil, "CENTER", 0)
+local color2text = raidwarncolors:CreateText(L.RaidWarnColor_2, 64, nil, nil, "CENTER", 0)
+local color3text = raidwarncolors:CreateText(L.RaidWarnColor_3, 64, nil, nil, "CENTER", 0)
+local color4text = raidwarncolors:CreateText(L.RaidWarnColor_4, 64, nil, nil, "CENTER", 0)
 local color1reset = raidwarncolors:CreateButton(L.Reset, 60, 10, nil, GameFontNormalSmall)
 local color2reset = raidwarncolors:CreateButton(L.Reset, 60, 10, nil, GameFontNormalSmall)
 local color3reset = raidwarncolors:CreateButton(L.Reset, 60, 10, nil, GameFontNormalSmall)
 local color4reset = raidwarncolors:CreateButton(L.Reset, 60, 10, nil, GameFontNormalSmall)
 
-color1.myheight = 84
+color1.myheight = 80
 color2.myheight = 0
 color3.myheight = 0
 color4.myheight = 0
@@ -229,5 +229,5 @@ UpdateColorFrames(color2, color2text, color2reset, 2)
 UpdateColorFrames(color3, color3text, color3reset, 3)
 UpdateColorFrames(color4, color4text, color4reset, 4)
 
-local infotext = raidwarncolors:CreateText(L.InfoRaidWarning, 380, false, GameFontNormalSmall, "LEFT")
+local infotext = raidwarncolors:CreateText(L.InfoRaidWarning, nil, false, GameFontNormalSmall)
 infotext:SetPoint("BOTTOMLEFT", raidwarncolors.frame, "BOTTOMLEFT", 10, 10)

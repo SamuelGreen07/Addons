@@ -1,6 +1,10 @@
-if not WeakAuras.IsCorrectVersion() then return end
-local AddonName, Private = ...
+if not WeakAuras.IsLibsOK() then return end
+---@type string
+local AddonName = ...
+---@class Private
+local Private = select(2, ...)
 
+---@class WeakAuras
 local WeakAuras = WeakAuras
 
 local histRepo, migrationRepo
@@ -37,11 +41,10 @@ function Private.CleanArchive(historyCutoff, migrationCutoff)
   end
 end
 
-function Private.SetHistory(uid, data, source, addon)
+function Private.SetHistory(uid, data, source)
   if uid and data then
     local repo = loadHistory()
     data.source = source
-    data.addon = source == "addon" and addon or nil
     local hist = repo:Set(uid, data, true)
     return hist
   end

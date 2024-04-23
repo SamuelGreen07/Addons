@@ -8,9 +8,14 @@ local ListButton = ListExample:GetItemButtonClass()
 
 ListExample:RegisterBlizzard()
 
+local isDF = select(4,GetBuildInfo()) >= 100000
+local NumBagContainer = isDF and 5 or 4
+local BankContainerStartID = NumBagContainer + 1
+local MaxNumContainer = isDF and 12 or 11
+
 function ListExample:OnInit()
-	local onlyBags =		function(item) return item.bagID >= 0 and item.bagID <= 4 end
-	local onlyBank =		function(item) return item.bagID == -1 or item.bagID >= 5 and item.bagID <= 11 end
+	local onlyBags =		function(item) return item.bagID >= 0 and item.bagID <= NumBagContainer end
+	local onlyBank =		function(item) return item.bagID == -1 or item.bagID >= BankContainerStartID and item.bagID <= MaxNumContainer end
 
 	-- Don't forget to position only the mainFrame, not the container itself!
 	local main = ScrollContainer:New("Main", {

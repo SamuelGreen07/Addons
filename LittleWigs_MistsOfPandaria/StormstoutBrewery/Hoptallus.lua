@@ -15,7 +15,7 @@ mod.respawnTime = 30
 
 function mod:GetOptions()
 	return {
-		{112992, "SAY"}, -- Furlwind
+		{112992, "SAY", "CASTBAR"}, -- Furlwind
 		112944, -- Carrot Breath
 		114291, -- Explosive Brew
 	}
@@ -44,12 +44,12 @@ do
 	local function printTarget(self, player, guid)
 		self:TargetMessageOld(112992, player, "yellow", "long", nil, nil, true)
 		if self:Me(guid) then
-			self:Say(112992)
+			self:Say(112992, nil, nil, "Furlwind")
 		end
 	end
 
 	function mod:FurlwindChanneling(args)
-		self:GetBossTarget(printTarget, 0.3, args.sourceGUID)
+		self:GetUnitTarget(printTarget, 0.3, args.sourceGUID)
 	end
 
 	function mod:Furlwind(args)

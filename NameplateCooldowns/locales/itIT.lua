@@ -2,7 +2,8 @@
 -- luacheck: globals LibStub
 
 local L = LibStub("AceLocale-3.0"):NewLocale("NameplateCooldowns", "itIT");
-L = L or {}
+L = L or {} -- luacheck: ignore
+--@non-debug@
 --[[Translation missing --]]
 L["anchor-point:bottom"] = "Bottom"
 --[[Translation missing --]]
@@ -25,9 +26,7 @@ L["anchor-point:topright"] = "Top right"
 L["anchor-point:x-offset"] = "X offset"
 --[[Translation missing --]]
 L["anchor-point:y-offset"] = "Y offset"
-L["chat:addon-is-disabled"] = "L'Addon è disabilitato"
 L["chat:addon-is-disabled-note"] = "Nota: questo addon è disabilitato. Puoi riattivarlo nelle opzioni o digitando /nc in chat."
-L["chat:addon-is-enabled"] = "L'addon è abilitato."
 L["chat:default-spell-is-added-to-ignore-list"] = "La magia di default è aggiunta alla lista ignorati: %s. Non riceverai aggiornamento sul tempo di ricarica per questa magia."
 L["chat:enable-only-for-target-nameplate"] = "Il tempo di ricarica sarà mostrato solo sulla barra dell'obiettivo."
 --[[Translation missing --]]
@@ -39,10 +38,9 @@ L["Current profile: [%s]"] = "Profilo selezionato: [%s]"
 L["Data from '%s' has been successfully copied to '%s'"] = "I dati da '%s' sono stati copiati con successo su '%s'"
 L["Delete"] = "Elimina"
 L["Delete profile:"] = "Elimina profilo:"
-L["Disable test mode"] = "Disabilita la modalità di test"
-L["Enable test mode (need at least one visible nameplate)"] = "Abilita la modalità di test (è necessario visualizzare almeno un nameplate)"
 L["Filters"] = "Filtri"
-L["filters.instance-types"] = "Imposta la visibilità dei tempi di ricarica in diversi tipi di luoghi"
+L["filters.instance-types"] = [=[Imposta la visibilità dei tempi di ricarica
+in diversi tipi di luoghi]=]
 L["Font:"] = "Carattere:"
 L["General"] = "Generale"
 L["general.sort-mode"] = "Metodologia di ordinamento:"
@@ -61,6 +59,8 @@ L["instance-type:arena"] = "Arene"
 L["instance-type:none"] = "Mondo Aperto"
 L["instance-type:party"] = "Gruppo da 5"
 L["instance-type:pvp"] = "Campi di Battaglia"
+--[[Translation missing --]]
+L["instance-type:pvp_bg_40ppl"] = "Epic Battlegrounds"
 L["instance-type:raid"] = "Spedizioni e Scorrerie"
 L["instance-type:scenario"] = "Scenario"
 L["instance-type:unknown"] = "Scorreria sconosciuta (alcuni scenari legati alle quest)"
@@ -83,15 +83,11 @@ L["options:general:anchor-point"] = "Anchor point"
 --[[Translation missing --]]
 L["options:general:anchor-point-to-parent"] = "Anchor point (to parent)"
 --[[Translation missing --]]
-L["options:general:disable-addon-btn"] = "Disable addon"
---[[Translation missing --]]
-L["options:general:enable-addon-btn"] = "Enable addon"
---[[Translation missing --]]
 L["options:general:enable-only-for-target-nameplate"] = "Show the cooldowns on the current target nameplate only"
 --[[Translation missing --]]
 L["options:general:full-opacity-always"] = "Icons are always completely opaque"
 --[[Translation missing --]]
-L["options:general:full-opacity-always:tooltip"] = [=[If this option is enabled, the icons will always be completely opaque. If not, the opacity will be the same as the health bar]=]
+L["options:general:full-opacity-always:tooltip"] = "If this option is enabled, the icons will always be completely opaque. If not, the opacity will be the same as the health bar"
 --[[Translation missing --]]
 L["options:general:icon-grow-direction"] = "Icons' growth direction"
 --[[Translation missing --]]
@@ -101,7 +97,17 @@ L["options:general:ignore-nameplate-scale:tooltip"] = [=[If this option is check
 change accordingly to nameplate scale
 (for example, if nameplate of your target becomes bigger)]=]
 --[[Translation missing --]]
+L["options:general:inverse-logic"] = "Inverse logic"
+--[[Translation missing --]]
+L["options:general:inverse-logic:tooltip"] = "Display icon if player IS ABLE to cast certain spell"
+--[[Translation missing --]]
 L["options:general:show-cd-on-allies"] = "Show cooldowns on nameplates of allies"
+--[[Translation missing --]]
+L["options:general:show-cooldown-animation"] = "Enable cooldown animation"
+--[[Translation missing --]]
+L["options:general:show-cooldown-animation:tooltip"] = "Enables spin animation on cooldown icons"
+--[[Translation missing --]]
+L["options:general:show-cooldown-tooltip"] = "Show cooldown tooltip"
 --[[Translation missing --]]
 L["options:general:show-inactive-cd"] = "Show inactive cooldowns"
 --[[Translation missing --]]
@@ -110,7 +116,9 @@ You will see ONLY those cooldowns that foe has already used]=]
 --[[Translation missing --]]
 L["options:general:space-between-icons"] = "Space between icons (px)"
 --[[Translation missing --]]
-L["options:profiles:open-profiles-dialog"] = "Open profiles dialog"
+L["options:general:test-mode"] = "Test mode"
+--[[Translation missing --]]
+L["options:profiles"] = "Profiles"
 --[[Translation missing --]]
 L["options:spells:add-new-spell"] = "Add new spell (name or id):"
 --[[Translation missing --]]
@@ -119,6 +127,10 @@ L["options:spells:add-spell"] = "Add spell"
 L["options:spells:click-to-select-spell"] = "Click to select spell"
 --[[Translation missing --]]
 L["options:spells:cooldown-time"] = "Cooldown time"
+--[[Translation missing --]]
+L["options:spells:custom-cooldown"] = "Custom cooldown value"
+--[[Translation missing --]]
+L["options:spells:custom-cooldown-value"] = "Cooldown (sec)"
 --[[Translation missing --]]
 L["options:spells:delete-all-spells"] = "Delete all spells"
 --[[Translation missing --]]
@@ -159,10 +171,11 @@ L["options:timer-text:scale-font-size"] = [=[Scale font size
 according to
 icon size]=]
 L["Profile '%s' has been successfully deleted"] = "Il profilo '%s' è stato creato con successo"
-L["Profiles"] = "Profili"
 --[[Translation missing --]]
 L["Show border around interrupts"] = "Show border around interrupts"
 --[[Translation missing --]]
 L["Show border around trinkets"] = "Show border around trinkets"
 L["Unknown spell: %s"] = "Magia sconosciuta: %s"
 L["Value must be a number"] = "Il valore deve essere un numero"
+
+--@end-non-debug@

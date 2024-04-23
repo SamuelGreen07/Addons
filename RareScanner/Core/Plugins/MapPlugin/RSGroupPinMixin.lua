@@ -12,38 +12,53 @@ local RSGuideDB = private.ImportLib("RareScannerGuideDB")
 
 -- RareScanner service libraries
 local RSTooltip = private.ImportLib("RareScannerTooltip")
+local RSMinimap = private.ImportLib("RareScannerMinimap")
 
 -- RareScanner services
 local RSGuidePOI = private.ImportLib("RareScannerGuidePOI")
 
+-- RareScanner general libraries
+local RSUtils = private.ImportLib("RareScannerUtils")
+
 RSGroupPinMixin = CreateFromMixins(MapCanvasPinMixin);
+
+RSGroupPinMixin.SetPassThroughButtons = function() end
 
 function RSGroupPinMixin:OnLoad()
 	self:SetScalingLimits(1, 1, 1.0);
 end
 
-function RSGroupPinMixin:OnAcquired(POI)
+function RSGroupPinMixin:OnAcquired(POI, dataProvider)
 	self:UseFrameLevelType("PIN_FRAME_LEVEL_VIGNETTE", self:GetMap():GetNumActivePinsByTemplate("RSGroupPinTemplate"));
 	self.POI = POI
+	self.dataProvider = dataProvider
 	if (POI.TopTexture) then
 		self.TopTexture:SetTexture(POI.TopTexture)
 		self.TopTexture:SetScale(RSConfigDB.GetIconsWorldMapScale())
+		MapPinHighlight_CheckHighlightPin(self:GetHighlightType(), self, self.TopTexture, AREAPOI_HIGHLIGHT_PARAMS);
 	else
 		self.TopTexture:SetTexture(nil)
 	end
 	if (POI.LeftTexture) then
 		self.LeftTexture:SetTexture(POI.LeftTexture)
 		self.LeftTexture:SetScale(RSConfigDB.GetIconsWorldMapScale())
+		MapPinHighlight_CheckHighlightPin(self:GetHighlightType(), self, self.LeftTexture, AREAPOI_HIGHLIGHT_PARAMS);
 	else
 		self.LeftTexture:SetTexture(nil)
 	end
 	if (POI.RightTexture) then
 		self.RightTexture:SetTexture(POI.RightTexture)
 		self.RightTexture:SetScale(RSConfigDB.GetIconsWorldMapScale())
+		MapPinHighlight_CheckHighlightPin(self:GetHighlightType(), self, self.RightTexture, AREAPOI_HIGHLIGHT_PARAMS);
 	else
 		self.RightTexture:SetTexture(nil)
 	end
+	self.IconTexture:SetAtlas(POI.iconAtlas)
 	self:SetPosition(POI.x, POI.y);
+	
+	if (self.SetPassThroughButtons) then
+		self:SetPassThroughButtons("MiddleButton");
+	end
 end
 
 function RSGroupPinMixin:OnMouseEnter()
@@ -75,36 +90,48 @@ function RSGroupPinMixin:ShowOverlay(childPOI)
 	end
 
 	if (overlay) then
+		-- Checks if the overlay is already shown, in which case is already active in the minimap
+		local hasOverlayActive = RSGeneralDB.HasOverlayActive(childPOI.entityID);
+		
+		local r, g, b, replacedEntityID = RSGeneralDB.AddOverlayActive(childPOI.entityID)
+		
+		-- Cleans the replaced overlay
+		if (replacedEntityID) then
+			for pin in self:GetMap():EnumeratePinsByTemplate("RSOverlayTemplate") do
+				if (pin:GetEntityID() == replacedEntityID) then
+					self:GetMap():RemovePin(pin)
+				end
+			end
+			
+			-- Cleans the replaced overly in the minimap
+			RSMinimap.RemoveOverlay(replacedEntityID)
+		end
+		
+		-- Adds the new one
 		for _, coordinates in ipairs (overlay) do
 			local x, y = strsplit("-", coordinates)
-			self:GetMap():AcquirePin("RSOverlayTemplate", tonumber(x), tonumber(y), self);
+			self:GetMap():AcquirePin("RSOverlayTemplate", tonumber(x), tonumber(y), r, g, b, childPOI);
 		end
-		RSGeneralDB.SetOverlayActive(childPOI.entityID)
-	else
-		RSGeneralDB.RemoveOverlayActive()
+		
+		-- Adds the new one to the minimap
+		if (not hasOverlayActive) then
+			RSMinimap.AddOverlay(childPOI.entityID)
+		end
 	end
 end
 
-function RSGroupPinMixin:ShowGuide(childPOI)
-	-- Guide
-	local guide = nil
-	if (childPOI.isNpc) then
-		guide = RSGuideDB.GetNpcGuide(childPOI.entityID)
-	elseif (childPOI.isContainer) then
-		guide = RSGuideDB.GetContainerGuide(childPOI.entityID)
-	else
-		guide = RSGuideDB.GetEventGuide(childPOI.entityID)
-	end
 
-	if (guide) then
-		for pinType, info in pairs (guide) do
-			if (not info.questID or not C_QuestLog.IsQuestFlaggedCompleted(info.questID)) then
-				local POI = RSGuidePOI.GetGuidePOI(childPOI.entityID, pinType, info)
-				self:GetMap():AcquirePin("RSGuideTemplate", POI, self);
+function RSGroupPinMixin:GetHighlightType() -- override
+	if (RSConfigDB.IsHighlightingReputation()) then
+		local _, bountyFactionID, bountyFrameType = self.dataProvider:GetBountyInfo();
+		if (bountyFrameType == BountyFrameType.ActivityTracker) then
+			for _, childPOI in pairs (self.POI.POIs) do
+				if (childPOI.factionID and RSUtils.Contains(childPOI.factionID, bountyFactionID)) then
+					return MapPinHighlightType.SupertrackedHighlight;
+				end
 			end
 		end
-		RSGeneralDB.SetGuideActive(childPOI.entityID)
-	else
-		RSGeneralDB.RemoveGuideActive()
 	end
+
+	return MapPinHighlightType.None;
 end

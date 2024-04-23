@@ -1,1025 +1,1945 @@
 do
 
-	local _detalhes = 		_G._detalhes
-	
+	local _detalhes = 		_G.Details
+	local addonName, Details222 = ...
+
 	--import potion list from the framework
 	_detalhes.PotionList = {}
-	for spellID, _ in pairs (DetailsFramework.PotionIDs) do
+	for spellID, _ in pairs(DetailsFramework.PotionIDs) do
 		_detalhes.PotionList [spellID] = true
 	end
 
-	_detalhes.SpecSpellList = { --~spec
+	if (DetailsFramework.IsDragonflight()) then
+		--/details generatespelllist
+		_detalhes.SpecSpellList = { --~spec
+			--Evoker Augmentation
+			--[409632] = 1473, --Breath of Eons
+			[396288] = 1473, --Upheaval
+			[395160] = 1473, --Eruption
 
-	-- havoc demon hunter --577
-	[188499]        =       577,    --      Blade Dance
-	[320402]        =       577,    --      Blade Dance
-	[203550]        =       577,    --      Blind Fury
-	[198589]        =       577,    --      Blur
-	[320407]        =       577,    --      Blur
-	[320374]        =       577,    --      Burning Hatred
-	[179057]        =       577,    --      Chaos Nova
-	[320412]        =       577,    --      Chaos Nova
-	[162794]        =       577,    --      Chaos Strike
-	[197125]        =       577,    --      Chaos Strike
-	[320413]        =       577,    --      Chaos Strike
-	[343206]        =       577,    --      Chaos Strike
-	[258887]        =       577,    --      Cycle of Hatred
-	[196718]        =       577,    --      Darkness
-	[320420]        =       577,    --      Darkness
-	[203555]        =       577,    --      Demon Blades
-	[162243]        =       577,    --      Demon's Bite
-	[206478]        =       577,    --      Demonic Appetite
-	[205411]        =       577,    --      Desperate Instincts
-	[258860]        =       577,    --      Essence Break
-	[198013]        =       577,    --      Eye Beam
-	[320415]        =       577,    --      Eye Beam
-	[258925]        =       577,    --      Fel Barrage
-	[211881]        =       577,    --      Fel Eruption
-	[195072]        =       577,    --      Fel Rush
-	[320416]        =       577,    --      Fel Rush
-	[343017]        =       577,    --      Fel Rush
-	[206416]        =       577,    --      First Blood
-	[342817]        =       577,    --      Glaive Tempest
-	[258876]        =       577,    --      Insatiable Hunger
-	[203556]        =       577,    --      Master of the Glaive
-	[206476]        =       577,    --      Momentum
-	[196555]        =       577,    --      Netherwalk
-	[258881]        =       577,    --      Trail of Ruin
-	[275144]        =       577,    --      Unbound Chaos
-	[206477]        =       577,    --      Unleashed Power
-	[198793]        =       577,    --      Vengeful Retreat
-	[320635]        =       577,    --      Vengeful Retreat
+			--Unholy Death Knight:
+			[390175] = 252, --Plaguebringer
+			[275699] = 252, --Apocalypse
+			[207317] = 252, --Epidemic
+			[207289] = 252, --Unholy Assault
+			[55090] = 252, --Scourge Strike
+			[115989] = 252, --Unholy Blight
+			[390279] = 252, --Vile Contagion
+			[63560] = 252, --Dark Transformation
+			[77575] = 252, --Outbreak
+			[49206] = 252, --Summon Gargoyle
+			[42650] = 252, --Army of the Dead
+			[85948] = 252, --Festering Strike
 
-	-- vengeance demon hunter --581
-	[207550]        =       581,    --      Abyssal Strike
-	[207548]        =       581,    --      Agonizing Flames
-	[320341]        =       581,    --      Bulk Extraction
-	[207739]        =       581,    --      Burning Alive
-	[336639]        =       581,    --      Charred Flesh
-	[207666]        =       581,    --      Concentrated Sigils
-	[203720]        =       581,    --      Demon Spikes
-	[321028]        =       581,    --      Demon Spikes
-	[227174]        =       581,    --      Fallout
-	[207697]        =       581,    --      Feast of Souls
-	[218612]        =       581,    --      Feed the Demon
-	[212084]        =       581,    --      Fel Devastation
-	[320639]        =       581,    --      Fel Devastation
-	[204021]        =       581,    --      Fiery Brand
-	[320962]        =       581,    --      Fiery Brand
-	[343010]        =       581,    --      Fiery Brand
-	[263642]        =       581,    --      Fracture
-	[320331]        =       581,    --      Infernal Armor
-	[189110]        =       581,    --      Infernal Strike
-	[320791]        =       581,    --      Infernal Strike
-	[343016]        =       581,    --      Infernal Strike
-	[209258]        =       581,    --      Last Resort
-	[209281]        =       581,    --      Quickened Sigils
-	[343014]        =       581,    --      Revel in Pain
-	[326853]        =       581,    --      Ruinous Bulwark
-	[203782]        =       581,    --      Shear
-	[203783]        =       581,    --      Shear
-	[202138]        =       581,    --      Sigil of Chains
-	[204596]        =       581,    --      Sigil of Flame
-	[320794]        =       581,    --      Sigil of Flame
-	[207684]        =       581,    --      Sigil of Misery
-	[320418]        =       581,    --      Sigil of Misery
-	[202137]        =       581,    --      Sigil of Silence
-	[320417]        =       581,    --      Sigil of Silence
-	[263648]        =       581,    --      Soul Barrier
-	[228477]        =       581,    --      Soul Cleave
-	[321021]        =       581,    --      Soul Cleave
-	[343207]        =       581,    --      Soul Cleave
-	[247454]        =       581,    --      Spirit Bomb
-	[320380]        =       581,    --      Thick Skin
-	[268175]        =       581,    --      Void Reaver
+			--Frost Death Knight:
+			[49184] = 251, --Howling Blast
+			[57330] = 251, --Horn of Winter
+			[305392] = 251, --Chill Streak
+			[196770] = 251, --Remorseless Winter
+			[49143] = 251, --Frost Strike
+			[152279] = 251, --Breath of Sindragosa
+			[279302] = 251, --Frostwyrm's Fury
+			[194913] = 251, --Glacial Advance
+			[207230] = 251, --Frostscythe
+			[51271] = 251, --Pillar of Frost
+			[49020] = 251, --Obliterate
 
-	-- Unholy Death Knight:
-	[194916]        =       252,    --      All Will Serve
-	[275699]        =       252,    --      Apocalypse
-	[316961]        =       252,    --      Apocalypse
-	[343755]        =       252,    --      Apocalypse
-	[276837]        =       252,    --      Army of the Damned
-	[42650] =       252,    --      Army of the Dead
-	[207264]        =       252,    --      Bursting Sores
-	[207311]        =       252,    --      Clawing Shadows
-	[325554]        =       252,    --      Dark Transformation
-	[63560] =       252,    --      Dark Transformation
-	[152280]        =       252,    --      Defile
-	[207269]        =       252,    --      Ebon Fever
-	[207317]        =       252,    --      Epidemic
-	[276023]        =       252,    --      Harbinger of Doom
-	[207272]        =       252,    --      Infected Claws
-	[77575] =       252,    --      Outbreak
-	[277234]        =       252,    --      Pestilence
-	[194917]        =       252,    --      Pestilent Pustules
-	[51462] =       252,    --      Runic Corruption
-	[317234]        =       252,    --      Scourge Strike
-	[55090] =       252,    --      Scourge Strike
-	[343294]        =       252,    --      Soul Reaper
-	[207321]        =       252,    --      Spell Eater
-	[49530] =       252,    --      Sudden Doom
-	[317250]        =       252,    --      Summon Gargoyle
-	[49206] =       252,    --      Summon Gargoyle
-	[207289]        =       252,    --      Unholy Assault
-	[115989]        =       252,    --      Unholy Blight
-	[319230]        =       252,    --      Unholy Pact
-	
-	-- Frost Death Knight:
-	[207142]        =       251,    --      Avalanche
-	[207167]        =       251,    --      Blinding Sleet
-	[152279]        =       251,    --      Breath of Sindragosa
-	[281208]        =       251,    --      Cold Heart
-	[317230]        =       251,    --      Empower Rune Weapon
-	[47568] =       251,    --      Empower Rune Weapon
-	[316803]        =       251,    --      Frost Strike
-	[49143] =       251,    --      Frost Strike
-	[207230]        =       251,    --      Frostscythe
-	[279302]        =       251,    --      Frostwyrm's Fury
-	[194909]        =       251,    --      Frozen Pulse
-	[194912]        =       251,    --      Gathering Storm
-	[194913]        =       251,    --      Glacial Advance
-	[57330] =       251,    --      Horn of Winter
-	[49184] =       251,    --      Howling Blast
-	[321995]        =       251,    --      Hypothermic Presence
-	[207126]        =       251,    --      Icecap
-	[194878]        =       251,    --      Icy Talons
-	[253593]        =       251,    --      Inexorable Assault
-	[317214]        =       251,    --      Killing Machine
-	[51128] =       251,    --      Killing Machine
-	[343252]        =       251,    --      Might of the Frozen Wastes
-	[81333] =       251,    --      Might of the Frozen Wastes
-	[207061]        =       251,    --      Murderous Efficiency
-	[317198]        =       251,    --      Obliterate
-	[49020] =       251,    --      Obliterate
-	[281238]        =       251,    --      Obliteration
-	[207200]        =       251,    --      Permafrost
-	[316849]        =       251,    --      Pillar of Frost
-	[51271] =       251,    --      Pillar of Frost
-	[196770]        =       251,    --      Remorseless Winter
-	[316794]        =       251,    --      Remorseless Winter
-	[316838]        =       251,    --      Rime
-	[59057] =       251,    --      Rime
-	[207104]        =       251,    --      Runic Attenuation
-	[81229] =       251,    --      Runic Empowerment
-	
-	-- Blood Death Knight:
-	[205727]        =       250,    --      Anti-Magic Barrier
-	[316634]        =       250,    --      Blood Boil
-	[50842] =       250,    --      Blood Boil
-	[221699]        =       250,    --      Blood Tap
-	[206931]        =       250,    --      Blooddrinker
-	[195679]        =       250,    --      Bloodworms
-	[194844]        =       250,    --      Bonestorm
-	[205224]        =       250,    --      Consumption
-	[274156]        =       250,    --      Consumption
-	[81136] =       250,    --      Crimson Scourge
-	[49028] =       250,    --      Dancing Rune Weapon
-	[195292]        =       250,    --      Death's Caress
-	[206974]        =       250,    --      Foul Bulwark
-	[108199]        =       250,    --      Gorefiend's Grasp
-	[206930]        =       250,    --      Heart Strike
-	[316575]        =       250,    --      Heart Strike
-	[317090]        =       250,    --      Heart Strike
-	[221536]        =       250,    --      Heartbreaker
-	[273946]        =       250,    --      Hemostasis
-	[206940]        =       250,    --      Mark of Blood
-	[195182]        =       250,    --      Marrowrend
-	[316746]        =       250,    --      Marrowrend
-	[219786]        =       250,    --      Ossuary
-	[114556]        =       250,    --      Purgatory
-	[194662]        =       250,    --      Rapid Decomposition
-	[205723]        =       250,    --      Red Thirst
-	[317610]        =       250,    --      Relish in Blood
-	[194679]        =       250,    --      Rune Tap
-	[316616]        =       250,    --      Rune Tap
-	[206970]        =       250,    --      Tightening Grasp
-	[219809]        =       250,    --      Tombstone
-	[317133]        =       250,    --      Vampiric Blood
-	[55233] =       250,    --      Vampiric Blood
-	[273953]        =       250,    --      Voracious
-	[206967]        =       250,    --      Will of the Necropolis
+			--Blood Death Knight:
+			[195292] = 250, --Death's Caress
+			[194844] = 250, --Bonestorm
+			[49028] = 250, --Dancing Rune Weapon
+			[206940] = 250, --Mark of Blood
+			[195182] = 250, --Marrowrend
+			[206931] = 250, --Blooddrinker
+			[55233] = 250, --Vampiric Blood
+			[274156] = 250, --Consumption
+			[221699] = 250, --Blood Tap
+			[108199] = 250, --Gorefiend's Grasp
+			[219809] = 250, --Tombstone
+			[194679] = 250, --Rune Tap
+			[50842] = 250, --Blood Boil
+			[206930] = 250, --Heart Strike
 
-	
-	-- Balance Druid:
-	[236168] 		= 	102, -- Starfall
-	[136060] 		= 	102, -- Celestial Alignment
-	[252188] 		= 	102, -- Solar Beam
-	[631519] 		= 	102, -- Shooting Stars
-	[132123] 		= 	102, -- Fury of Elune
+			--Havoc Demon Hunter:
+			[188499] = 577, --Blade Dance
+			[342817] = 577, --Glaive Tempest
+			[211881] = 577, --Fel Eruption
+			[196555] = 577, --Netherwalk
+			[195072] = 577, --Fel Rush
+			[162794] = 577, --Chaos Strike
+			[198013] = 577, --Eye Beam
+			[162243] = 577, --Demon's Bite
+			[258860] = 577, --Essence Break
+			[258925] = 577, --Fel Barrage
+			[198589] = 577, --Blur
 
-	-- Feral 		Druid:
-	[132185] 		= 	103, -- Predatory Swiftness
-	[132242] 		= 	103, -- Tiger's Fury
-	[132278] 		= 	103, -- Primal Fury
-	[132141] 		= 	103, -- Brutal Slash
+			--Vengeance Demon Hunter:
+			[203782] = 581, --Shear
+			[202138] = 581, --Sigil of Chains
+			[207407] = 581, --Soul Carver
+			[263648] = 581, --Soul Barrier
+			[320341] = 581, --Bulk Extraction
+			[228477] = 581, --Soul Cleave
+			[212084] = 581, --Fel Devastation
+			[204021] = 581, --Fiery Brand
+			[203720] = 581, --Demon Spikes
+			[189110] = 581, --Infernal Strike
+			[247454] = 581, --Spirit Bomb
+			[202137] = 581, --Sigil of Silence
+			[263642] = 581, --Fracture
 
-	-- Guardian Druid:
-	[571585] 		= 	104, -- Gore
-	[1033479] 		= 	104, -- Guardian of Elune
-	[1033490] 		= 	104, -- Pulverize
-	[132139] 		= 	104, -- Blood Frenzy
-	[571586] 		= 	104, -- Incarnation: Guardian of Ursoc
-	
-	-- Restoration Druid:
-	[740] 		= 		105, -- Tranquility
-	[102342] 		= 	105, -- Ironbark
-	[33763] 		= 	105, -- Lifebloom
-	[88423] 		= 	105, -- Nature's Cure
-	[145205] 		= 	105, --Efflorescence
+			--Windwalker Monk:
+			[152175] = 269, --Whirling Dragon Punch
+			[113656] = 269, --Fists of Fury
+			[123904] = 269, --Invoke Xuen, the White Tiger
+			[137639] = 269, --Storm, Earth, and Fire
+			[122470] = 269, --Touch of Karma
+			[152173] = 269, --Serenity
+			[101545] = 269, --Flying Serpent Kick
+			[392983] = 269, --Strike of the Windlord
 
-	-- Beast Mastery Hunter:
-	[267116]        =       253,    --      Animal Companion
-	[191384]        =       253,    --      Aspect of the Beast
-	[193530]        =       253,    --      Aspect of the Wild
-	[217200]        =       253,    --      Barbed Shot
-	[115939]        =       253,    --      Beast Cleave
-	[19574] =       253,    --      Bestial Wrath
-	[231548]        =       253,    --      Bestial Wrath
-	[321530]        =       253,    --      Bloodshed
-	[193455]        =       253,    --      Cobra Shot
-	[262838]        =       253,    --      Cobra Shot
-	[120679]        =       253,    --      Dire Beast
-	[53270] =       253,    --      Exotic Beasts
-	[199532]        =       253,    --      Killer Cobra
-	[273887]        =       253,    --      Killer Instinct
-	[56315] =       253,    --      Kindred Spirits
-	[199528]        =       253,    --      One with the Pack
-	[321014]        =       253,    --      Pack Tactics
-	[193532]        =       253,    --      Scent of Blood
-	[285564]        =       253,    --      Scent of Blood
-	[257891]        =       253,    --      Spitting Cobra
-	[201430]        =       253,    --      Stampede
-	[199530]        =       253,    --      Stomp
-	[257944]        =       253,    --      Thrill of the Hunt
-	[185789]        =       253,    --      Wild Call
-	
-	-- Marksmanship Hunter:
-	[19434] =       254,    --      Aimed Shot
-	[321468]        =       254,    --      Binding Shackles
-	[186387]        =       254,    --      Bursting Shot
-	[260404]        =       254,    --      Calling the Shots
-	[260228]        =       254,    --      Careful Aim
-	[321460]        =       254,    --      Dead Eye
-	[260402]        =       254,    --      Double Tap
-	[212431]        =       254,    --      Explosive Shot
-	[260393]        =       254,    --      Lethal Shots
-	[194595]        =       254,    --      Lock and Load
-	[155228]        =       254,    --      Lone Wolf
-	[260309]        =       254,    --      Master Marksman
-	[260240]        =       254,    --      Precise Shots
-	[257044]        =       254,    --      Rapid Fire
-	[321281]        =       254,    --      Rapid Fire
-	[193533]        =       254,    --      Steady Focus
-	[260367]        =       254,    --      Streamline
-	[257621]        =       254,    --      Trick Shots
-	[288613]        =       254,    --      Trueshot
-	[260243]        =       254,    --      Volley
-	[260247]        =       254,    --      Volley
-	
-	-- Survival Hunter:
-	[269737]        =       255,    --      Alpha Predator
-	[186289]        =       255,    --      Aspect of the Eagle
-	[260331]        =       255,    --      Birds of Prey
-	[260248]        =       255,    --      Bloodseeker
-	[212436]        =       255,    --      Butchery
-	[187708]        =       255,    --      Carve
-	[294029]        =       255,    --      Carve
-	[259391]        =       255,    --      Chakrams
-	[259398]        =       255,    --      Chakrams
-	[272651]        =       255,    --      Command Pet
-	[266779]        =       255,    --      Coordinated Assault
-	[269751]        =       255,    --      Flanking Strike
-	[190925]        =       255,    --      Harpoon
-	[231550]        =       255,    --      Harpoon
-	[260241]        =       255,    --      Hydra's Bite
-	[259387]        =       255,    --      Mongoose Bite
-	[187707]        =       255,    --      Muzzle
-	[186270]        =       255,    --      Raptor Strike
-	[162487]        =       255,    --      Steel Trap
-	[162488]        =       255,    --      Steel Trap
-	[265895]        =       255,    --      Terms of Engagement
-	[260285]        =       255,    --      Tip of the Spear
-	[268501]        =       255,    --      Viper's Venom
-	[259495]        =       255,    --      Wildfire Bomb
-	[271014]        =       255,    --      Wildfire Infusion
-	[195645]        =       255,    --      Wing Clip
-	[321026]        =       255,    --      Wing Clip
-	
-	-- Arcane Mage:
-	[231564]        =       62,     --      Arcane Barrage
-	[321526]        =       62,     --      Arcane Barrage
-	[44425] =       62,     --      Arcane Barrage
-	[30451] =       62,     --      Arcane Blast
-	[342231]        =       62,     --      Arcane Echo
-	[205022]        =       62,     --      Arcane Familiar
-	[5143]  =       62,     --      Arcane Missiles
-	[7268]  =       62,     --      Arcane Missiles
-	[153626]        =       62,     --      Arcane Orb
-	[12042] =       62,     --      Arcane Power
-	[321739]        =       62,     --      Arcane Power
-	[343208]        =       62,     --      Arcane Power
-	[235711]        =       62,     --      Chrono Shift
-	[16870] =       62,     --      Clearcasting
-	[321420]        =       62,     --      Clearcasting
-	[321758]        =       62,     --      Clearcasting
-	[321387]        =       62,     --      Enlightened
-	[12051] =       62,     --      Evocation
-	[231565]        =       62,     --      Evocation
-	[110959]        =       62,     --      Greater Invisibility
-	[342249]        =       62,     --      Master of Time
-	[114923]        =       62,     --      Nether Tempest
-	[114954]        =       62,     --      Nether Tempest
-	[155147]        =       62,     --      Overpowered
-	[205025]        =       62,     --      Presence of Mind
-	[321742]        =       62,     --      Presence of Mind
-	[235450]        =       62,     --      Prismatic Barrier
-	[321745]        =       62,     --      Prismatic Barrier
-	[205028]        =       62,     --      Resonance
-	[281482]        =       62,     --      Reverberate
-	[264354]        =       62,     --      Rule of Threes
-	[236457]        =       62,     --      Slipstream
-	[31589] =       62,     --      Slow
-	[321747]        =       62,     --      Slow
-	[157980]        =       62,     --      Supernova
-	[210805]        =       62,     --      Time Anomaly
-	[321507]        =       62,     --      Touch of the Magi
-	[343215]        =       62,     --      Touch of the Magi
-	
-	-- Fire Mage:
-	[235870]        =       63,     --      Alexstrasza's Fury
-	[157981]        =       63,     --      Blast Wave
-	[235313]        =       63,     --      Blazing Barrier
-	[321708]        =       63,     --      Blazing Barrier
-	[235365]        =       63,     --      Blazing Soul
-	[86949] =       63,     --      Cauterize
-	[190319]        =       63,     --      Combustion
-	[321710]        =       63,     --      Combustion
-	[205023]        =       63,     --      Conflagration
-	[117216]        =       63,     --      Critical Mass
-	[231630]        =       63,     --      Critical Mass
-	[321707]        =       63,     --      Dragon's Breath
-	[133]   =       63,     --      Fireball
-	[157642]        =       63,     --      Fireball
-	[343194]        =       63,     --      Fireball
-	[203283]        =       63,     --      Firestarter
-	[205026]        =       63,     --      Firestarter
-	[205029]        =       63,     --      Flame On
-	[205037]        =       63,     --      Flame Patch
-	[2120]  =       63,     --      Flamestrike
-	[321709]        =       63,     --      Flamestrike
-	[343230]        =       63,     --      Flamestrike
-	[236058]        =       63,     --      Frenetic Speed
-	[342344]        =       63,     --      From the Ashes
-	[195283]        =       63,     --      Hot Streak
-	[155148]        =       63,     --      Kindling
-	[44457] =       63,     --      Living Bomb
-	[44461] =       63,     --      Living Bomb
-	[153561]        =       63,     --      Meteor
-	[257541]        =       63,     --      Phoenix Flames
-	[343222]        =       63,     --      Phoenix Flames
-	[321711]        =       63,     --      Pyroblast
-	[269650]        =       63,     --      Pyroclasm
-	[205020]        =       63,     --      Pyromaniac
-	[2948]  =       63,     --      Scorch
-	[269644]        =       63,     --      Searing Touch
-	
-	-- Frost Mage:
-	[190356]        =       64,     --      Blizzard
-	[321696]        =       64,     --      Blizzard
-	[205027]        =       64,     --      Bone Chilling
-	[190447]        =       64,     --      Brain Freeze
-	[231584]        =       64,     --      Brain Freeze
-	[278309]        =       64,     --      Chain Reaction
-	[235219]        =       64,     --      Cold Snap
-	[321699]        =       64,     --      Cold Snap
-	[153595]        =       64,     --      Comet Storm
-	[120]   =       64,     --      Cone of Cold
-	[343180]        =       64,     --      Cone of Cold
-	[257537]        =       64,     --      Ebonbolt
-	[112965]        =       64,     --      Fingers of Frost
-	[44614] =       64,     --      Flurry
-	[270233]        =       64,     --      Freezing Rain
-	[235224]        =       64,     --      Frigid Winds
-	[84714] =       64,     --      Frozen Orb
-	[84721] =       64,     --      Frozen Orb
-	[205030]        =       64,     --      Frozen Touch
-	[235297]        =       64,     --      Glacial Insulation
-	[199786]        =       64,     --      Glacial Spike
-	[11426] =       64,     --      Ice Barrier
-	[108839]        =       64,     --      Ice Floes
-	[30455] =       64,     --      Ice Lance
-	[343175]        =       64,     --      Ice Lance
-	[157997]        =       64,     --      Ice Nova
-	[12472] =       64,     --      Icy Veins
-	[321702]        =       64,     --      Icy Veins
-	[205024]        =       64,     --      Lonely Winter
-	[205021]        =       64,     --      Ray of Frost
-	[12982] =       64,     --      Shatter
-	[231582]        =       64,     --      Shatter
-	[31687] =       64,     --      Summon Water Elemental
-	[155149]        =       64,     --      Thermal Void
+			--Mistweaver Monk:
+			[388615] = 270, --Restoral
+			[212051] = 270, --Reawaken
+			[198898] = 270, --Song of Chi-Ji
+			[124081] = 270, --Zen Pulse
+			[124682] = 270, --Enveloping Mist
+			[322118] = 270, --Invoke Yu'lon, the Jade Serpent
+			[115310] = 270, --Revival
+			[115450] = 270, --Detox
+			[196725] = 270, --Refreshing Jade Wind
+			[191837] = 270, --Essence Font
+			[116849] = 270, --Life Cocoon
+			[116680] = 270, --Thunder Focus Tea
+			[115151] = 270, --Renewing Mist
+			[325197] = 270, --Invoke Chi-Ji, the Red Crane
+			[197908] = 270, --Mana Tea
 
-	-- Brewmaster Monk:
-	[115399]        =       268,    --      Black Ox Brew
-	[196736]        =       268,    --      Blackout Combo
-	[280515]        =       268,    --      Bob and Weave
-	[115181]        =       268,    --      Breath of Fire
-	[123725]        =       268,    --      Breath of Fire
-	[245013]        =       268,    --      Brewmaster's Balance
-	[322507]        =       268,    --      Celestial Brew
-	[322510]        =       268,    --      Celestial Brew
-	[325177]        =       268,    --      Celestial Flames
-	[216519]        =       268,    --      Celestial Fortune
-	[324312]        =       268,    --      Clash
-	[325153]        =       268,    --      Exploding Keg
-	[124502]        =       268,    --      Gift of the Ox
-	[124507]        =       268,    --      Gift of the Ox
-	[196737]        =       268,    --      High Tolerance
-	[121253]        =       268,    --      Keg Smash
-	[325093]        =       268,    --      Light Brewing
-	[119582]        =       268,    --      Purifying Brew
-	[343743]        =       268,    --      Purifying Brew
-	[322120]        =       268,    --      Shuffle
-	[196730]        =       268,    --      Special Delivery
-	[242580]        =       268,    --      Spitfire
-	[115069]        =       268,    --      Stagger
-	[322522]        =       268,    --      Stagger
-	[115315]        =       268,    --      Summon Black Ox Statue
-	[115176]        =       268,    --      Zen Meditation
-	[328682]        =       268,    --      Zen Meditation
+			--Brewmaster Monk:
+			[322960] = 268, --Fortifying Brew
+			[322507] = 268, --Celestial Brew
+			[119582] = 268, --Purifying Brew
+			[387184] = 268, --Weapons of Order
+			[115399] = 268, --Black Ox Brew
+			[324312] = 268, --Clash
+			[115176] = 268, --Zen Meditation
+			[121253] = 268, --Keg Smash
+			[325153] = 268, --Exploding Keg
+			[115181] = 268, --Breath of Fire
+			[132578] = 268, --Invoke Niuzao, the Black Ox
 
+			--Enhancement Shaman:
+			[333974] = 263, --Fire Nova
+			[51533] = 263, --Feral Spirit
+			[384352] = 263, --Doom Winds
+			[197214] = 263, --Sundering
+			[114051] = 263, --Ascendance
+			[196884] = 263, --Feral Lunge
+			[8512] = 263, --Windfury Totem
+			[187874] = 263, --Crash Lightning
+			[60103] = 263, --Lava Lash
+			[342240] = 263, --Ice Strike
+			[33757] = 263, --Windfury Weapon
 
-	-- Windwalker Monk:
-	[116092]        =       269,    --      Afterlife
-	[196707]        =       269,    --      Afterlife
-	[322719]        =       269,    --      Afterlife
-	[115396]        =       269,    --      Ascension
-	[161862]        =       269,    --      Ascension
-	[325201]        =       269,    --      Dance of Chi-Ji
-	[116095]        =       269,    --      Disable
-	[343731]        =       269,    --      Disable
-	[115288]        =       269,    --      Energizing Elixir
-	[261947]        =       269,    --      Fist of the White Tiger
-	[113656]        =       269,    --      Fists of Fury
-	[117418]        =       269,    --      Fists of Fury
-	[101545]        =       269,    --      Flying Serpent Kick
-	[123586]        =       269,    --      Flying Serpent Kick
-	[280195]        =       269,    --      Good Karma
-	[196740]        =       269,    --      Hit Combo
-	[261767]        =       269,    --      Inner Strength
-	[152173]        =       269,    --      Serenity
-	[280197]        =       269,    --      Spiritual Focus
-	[122470]        =       269,    --      Touch of Karma
-	[124280]        =       269,    --      Touch of Karma
-	[152175]        =       269,    --      Whirling Dragon Punch
-	[157411]        =       269,    --      Windwalking
-	
-	-- Mistweaver Monk:
-	[343655]        =       270,    --      Enveloping Breath
-	[124682]        =       270,    --      Enveloping Mist
-	[231605]        =       270,    --      Enveloping Mist
-	[191837]        =       270,    --      Essence Font
-	[231633]        =       270,    --      Essence Font
-	[197895]        =       270,    --      Focused Thunder
-	[116849]        =       270,    --      Life Cocoon
-	[197915]        =       270,    --      Lifecycles
-	[197908]        =       270,    --      Mana Tea
-	[197900]        =       270,    --      Mist Wrap
-	[212051]        =       270,    --      Reawaken
-	[196725]        =       270,    --      Refreshing Jade Wind
-	[115151]        =       270,    --      Renewing Mist
-	[119611]        =       270,    --      Renewing Mist
-	[281231]        =       270,    --      Renewing Mist
-	[115310]        =       270,    --      Revival
-	[274909]        =       270,    --      Rising Mist
-	[198898]        =       270,    --      Song of Chi-Ji
-	[115175]        =       270,    --      Soothing Mist
-	[209525]        =       270,    --      Soothing Mist
-	[210802]        =       270,    --      Spirit of the Crane
-	[115313]        =       270,    --      Summon Jade Serpent Statue
-	[116645]        =       270,    --      Teachings of the Monastery
-	[116680]        =       270,    --      Thunder Focus Tea
-	[231876]        =       270,    --      Thunder Focus Tea
-	[274963]        =       270,    --      Upwelling
-	
-	-- Holy Paladin:
-	[212056]        =       65,     --      Absolution
-	[31821] =       65,     --      Aura Mastery
-	[248033]        =       65,     --      Awakening
-	[156910]        =       65,     --      Beacon of Faith
-	[53563] =       65,     --      Beacon of Light
-	[53652] =       65,     --      Beacon of Light
-	[200025]        =       65,     --      Beacon of Virtue
-	[223306]        =       65,     --      Bestow Faith
-	[4987]  =       65,     --      Cleanse
-	[196926]        =       65,     --      Crusader's Might
-	[498]   =       65,     --      Divine Protection
-	[325966]        =       65,     --      Glimmer of Light
-	[82326] =       65,     --      Holy Light
-	[114165]        =       65,     --      Holy Prism
-	[114852]        =       65,     --      Holy Prism
-	[114871]        =       65,     --      Holy Prism
-	[20473] =       65,     --      Holy Shock
-	[25912] =       65,     --      Holy Shock
-	[25914] =       65,     --      Holy Shock
-	[272906]        =       65,     --      Holy Shock
-	[289941]        =       65,     --      Holy Shock
-	[53576] =       65,     --      Infusion of Light
-	[85222] =       65,     --      Light of Dawn
-	[183998]        =       65,     --      Light of the Martyr
-	[219562]        =       65,     --      Light of the Martyr
-	[114158]        =       65,     --      Light's Hammer
-	[114919]        =       65,     --      Light's Hammer
-	[214202]        =       65,     --      Rule of Law
-	[157047]        =       65,     --      Saved by the Light
+			--Restoration Shaman:
+			[197995] = 264, --Wellspring
+			[114052] = 264, --Ascendance
+			[383009] = 264, --Stormkeeper
+			[98008] = 264, --Spirit Link Totem
+			[73685] = 264, --Unleash Life
+			[77130] = 264, --Purify Spirit
+			[16191] = 264, --Mana Tide Totem
+			[382021] = 264, --Earthliving Weapon
+			[382029] = 264, --Ever-Rising Tide
+			[207778] = 264, --Downpour
+			[61295] = 264, --Riptide
+			[73920] = 264, --Healing Rain
+			[207399] = 264, --Ancestral Protection Totem
+			[198838] = 264, --Earthen Wall Totem
+			[77472] = 264, --Healing Wave
+			[108280] = 264, --Healing Tide Totem
+			[52127] = 264, --Water Shield
+			[212048] = 264, --Ancestral Vision
 
-	
-	-- Protection Paladin:
-	[31850] =       66,     --      Ardent Defender
-	[66235] =       66,     --      Ardent Defender
-	[231665]        =       66,     --      Avenger's Shield
-	[31935] =       66,     --      Avenger's Shield
-	[337261]        =       66,     --      Avenger's Shield
-	[204019]        =       66,     --      Blessed Hammer
-	[229976]        =       66,     --      Blessed Hammer
-	[204018]        =       66,     --      Blessing of Spellwarding
-	[204023]        =       66,     --      Crusader's Judgment
-	[204077]        =       66,     --      Final Stand
-	[203776]        =       66,     --      First Avenger
-	[85043] =       66,     --      Grand Crusader
-	[86659] =       66,     --      Guardian of Ancient Kings
-	[317854]        =       66,     --      Hammer of the Righteous
-	[337287]        =       66,     --      Hammer of the Righteous
-	[53595] =       66,     --      Hammer of the Righteous
-	[315924]        =       66,     --      Hand of the Protector
-	[327193]        =       66,     --      Moment of Glory
-	[280373]        =       66,     --      Redoubt
-	[204074]        =       66,     --      Righteous Protector
-	[161800]        =       66,     --      Riposte
-	[321136]        =       66,     --      Shining Light
+			--Elemental Shaman:
+			[192222] = 262, --Liquid Magma Totem
+			[210714] = 262, --Icefury
+			[8042] = 262, --Earth Shock
+			[198067] = 262, --Fire Elemental
+			[192249] = 262, --Storm Elemental
+			[61882] = 262, --Earthquake
+			[114050] = 262, --Ascendance
+			[191634] = 262, --Stormkeeper
 
-	
-	-- Retribution Paladin:
-	[267344]        =       70,     --      Art of War
-	[317912]        =       70,     --      Art of War
-	[184575]        =       70,     --      Blade of Justice
-	[327981]        =       70,     --      Blade of Justice
-	[231832]        =       70,     --      Blade of Wrath
-	[231895]        =       70,     --      Crusade
-	[53385] =       70,     --      Divine Storm
-	[326732]        =       70,     --      Empyrean Power
-	[343527]        =       70,     --      Execution Sentence
-	[343721]        =       70,     --      Final Reckoning
-	[203316]        =       70,     --      Fires of Justice
-	[183218]        =       70,     --      Hand of Hindrance
-	[215661]        =       70,     --      Justicar's Vengeance
-	[267610]        =       70,     --      Righteous Verdict
-	[85256] =       70,     --      Templar's Verdict
-	[255937]        =       70,     --      Wake of Ashes
-	[269569]        =       70,     --      Zeal
+			--Feral Druid:
+			[5217] = 103, --Tiger's Fury
+			[285381] = 103, --Primal Wrath
+			[106951] = 103, --Berserk
+			[274837] = 103, --Feral Frenzy
+
+			--Guardian Druid:
+			[343240] = 104, --Berserk: Ravage
+			[80313] = 104, --Pulverize
+			[102558] = 104, --Incarnation: Guardian of Ursoc
+			[6807] = 104, --Maul
+			[377623] = 104, --Berserk: Unchecked Aggression
+			[377779] = 104, --Berserk: Persistence
+			[200851] = 104, --Rage of the Sleeper
+			[155835] = 104, --Bristling Fur
+			[50334] = 104, --Berserk
+
+			--Balance Druid:
+			[191034] = 102, --Starfall
+			[78675] = 102, --Solar Beam
+			[202770] = 102, --Fury of Elune
+			[102560] = 102, --Incarnation: Chosen of Elune
+			[202347] = 102, --Stellar Flare
+			[194223] = 102, --Celestial Alignment
+			[205636] = 102, --Force of Nature
+			[274281] = 102, --New Moon
+			[202425] = 102, --Warrior of Elune
+			[88747] = 102, --Wild Mushroom
+			[24858] = 102, --Moonkin Form -Balance Specific
+			[194153] = 102, --Starfire -Balance Specific
+			[78674] = 102, --Starsurge -Balance Specific
+
+			--Restoration Druid:
+			[102342] = 105, --Ironbark
+			[88423] = 105, --Nature's Cure
+			[203651] = 105, --Overgrowth
+			[212040] = 105, --Revitalize
+			[392160] = 105, --Invigorate
+			[740] = 105, --Tranquility
+			[197721] = 105, --Flourish
+			[132158] = 105, --Nature's Swiftness
+			[102351] = 105, --Cenarion Ward
+			[50464] = 105, --Nourish
+			[33763] = 105, --Lifebloom
+			[145205] = 105, --Efflorescence
+			[33891] = 105, --Incarnation: Tree of Life
+
+			--Retribution Paladin:
+			[383185] = 70, --Exorcism
+			[53385] = 70, --Divine Storm
+			[384052] = 70, --Radiant Decree
+			[343721] = 70, --Final Reckoning
+			[215661] = 70, --Justicar's Vengeance
+			[326734] = 70, --Healing Hands
+			[205191] = 70, --Eye for an Eye
+			[343527] = 70, --Execution Sentence
+			[184575] = 70, --Blade of Justice
+			[184662] = 70, --Shield of Vengeance
+			[255937] = 70, --Wake of Ashes
+			[183218] = 70, --Hand of Hindrance
+			[384392] = 70, --Crusade
+			[85256] = 70, --Templar's Verdict
+			[383327] = 70, --Final Verdict
+
+			--Holy Paladin:
+			[85222] = 65, --Light of Dawn
+			[148039] = 65, --Barrier of Faith
+			[20473] = 65, --Holy Shock
+			[53563] = 65, --Beacon of Light
+			[82326] = 65, --Holy Light
+			[114165] = 65, --Holy Prism
+			[31821] = 65, --Aura Mastery
+			[156910] = 65, --Beacon of Faith
+			[214202] = 65, --Rule of Law
+			[394088] = 65, --Avenging Crusader
+			[212056] = 65, --Absolution
+			[200652] = 65, --Tyr's Deliverance
+			[114158] = 65, --Light's Hammer
+			[183998] = 65, --Light of the Martyr
+			[223306] = 65, --Bestow Faith
+			[210294] = 65, --Divine Favor
+			[388007] = 65, --Blessing of Summer
+			[4987] = 65, --Cleanse
+
+			--Protection Paladin:
+			[31850] = 66, --Ardent Defender
+			[31935] = 66, --Avenger's Shield
+			[86659] = 66, --Guardian of Ancient Kings
+			[386653] = 66, --Bulwark of Righteous Fury
+			[387174] = 66, --Eye of Tyr
+			[327193] = 66, --Moment of Glory
+			[378974] = 66, --Bastion of Light
+			[204019] = 66, --Blessed Hammer
+			[204018] = 66, --Blessing of Spellwarding
+
+			--Demonology Warlock:
+			[264130] = 266, --Power Siphon
+			[264119] = 266, --Summon Vilefiend
+			[267217] = 266, --Nether Portal
+			[603] = 266, --Doom
+			[111898] = 266, --Grimoire: Felguard
+			[267211] = 266, --Bilescourge Bombers
+			[264057] = 266, --Soul Strike
+			[104316] = 266, --Call Dreadstalkers
+			[264178] = 266, --Demonbolt
+			[386833] = 266, --Guillotine
+			[105174] = 266, --Hand of Gul'dan
+			[265187] = 266, --Summon Demonic Tyrant
+			[267171] = 266, --Demonic Strength
+			[196277] = 266, --Implosion
+
+			--Destruction Warlock:
+			[196447] = 267, --Channel Demonfire
+			[17877] = 267, --Shadowburn
+			[1122] = 267, --Summon Infernal
+			[6353] = 267, --Soul Fire
+			[80240] = 267, --Havoc
+			[5740] = 267, --Rain of Fire
+			[17962] = 267, --Conflagrate
+			[116858] = 267, --Chaos Bolt
+			[387976] = 267, --Dimensional Rift
+			[348] = 267, --Immolate
+			[29722] = 267, --Incinerate
+			[152108] = 267, --Cataclysm
+
+			--Affliction Warlock:
+			[278350] = 265, --Vile Taint
+			[205179] = 265, --Phantom Singularity
+			[48181] = 265, --Haunt
+			[386951] = 265, --Soul Swap
+			[316099] = 265, --Unstable Affliction
+			[63106] = 265, --Siphon Life
+			[386997] = 265, --Soul Rot
+			[205180] = 265, --Summon Darkglare
+			[27243] = 265, --Seed of Corruption
+			[387073] = 265, --Soul Tap
+			[388667] = 265, --Drain Soul
+			[324536] = 265, --Malefic Rapture
+			[980] = 265, --Agony
+
+			--Outlaw Rogue:
+			[195457] = 260, --Grappling Hook
+			[381989] = 260, --Keep It Rolling
+			[51690] = 260, --Killing Spree
+			[315341] = 260, --Between the Eyes
+			[196937] = 260, --Ghostly Strike
+			[2098] = 260, --Dispatch
+			[13877] = 260, --Blade Flurry
+			[271877] = 260, --Blade Rush
+			[315508] = 260, --Roll the Bones
+			[185763] = 260, --Pistol Shot
+			[343142] = 260, --Dreadblades
+			[13750] = 260, --Adrenaline Rush
+
+			--Subtlety Rogue:
+			[114014] = 261, --Shuriken Toss
+			[197835] = 261, --Shuriken Storm
+			[185438] = 261, --Shadowstrike
+			[384631] = 261, --Flagellation
+			[277925] = 261, --Shuriken Tornado
+			[280719] = 261, --Secret Technique
+			[53] = 261, --Backstab
+			[212283] = 261, --Symbols of Death
+			[319175] = 261, --Black Powder
+			[121471] = 261, --Shadow Blades
+
+			--Assassination Rogue:
+			[360194] = 259, --Deathmark
+			[381802] = 259, --Indiscriminate Carnage
+			[185565] = 259, --Poisoned Knife
+			[385424] = 259, --Serrated Bone Spike
+			[381664] = 259, --Amplifying Poison
+			[385627] = 259, --Kingsbane
+			[51723] = 259, --Fan of Knives
+			[703] = 259, --Garrote
+			[32645] = 259, --Envenom
+			[200806] = 259, --Exsanguinate
+			[121411] = 259, --Crimson Tempest
+			[2823] = 259, --Deadly Poison
+			[1329] = 259, --Mutilate
+
+			--Frost Mage:
+			[30455] = 64, --Ice Lance
+			[257537] = 64, --Ebonbolt
+			[235219] = 64, --Cold Snap
+			[190356] = 64, --Blizzard
+			[199786] = 64, --Glacial Spike
+			[153595] = 64, --Comet Storm
+			[44614] = 64, --Flurry
+			[12472] = 64, --Icy Veins
+			[205021] = 64, --Ray of Frost
+			[11426] = 64, --Ice Barrier
+			[31687] = 64, --Summon Water Elemental
+			[84714] = 64, --Frozen Orb
+
+			--Fire Mage:
+			[133] = 63, --Fireball
+			[2120] = 63, --Flamestrike
+			[257541] = 63, --Phoenix Flames
+			[2948] = 63, --Scorch
+			[44457] = 63, --Living Bomb
+			[11366] = 63, --Pyroblast
+			[235313] = 63, --Blazing Barrier
+			[190319] = 63, --Combustion
+
+			--Arcane Mage:
+			[365350] = 62, --Arcane Surge
+			[153626] = 62, --Arcane Orb
+			[12051] = 62, --Evocation
+			[157980] = 62, --Supernova
+			[30451] = 62, --Arcane Blast
+			[376103] = 62, --Radiant Spark
+			[759] = 62, --Conjure Mana Gem
+			[235450] = 62, --Prismatic Barrier
+			[114923] = 62, --Nether Tempest
+			[5143] = 62, --Arcane Missiles
+			[321507] = 62, --Touch of the Magi
+			[205025] = 62, --Presence of Mind
+			[44425] = 62, --Arcane Barrage
+			[205022] = 62, --Arcane Familiar
+
+			--Holy Priest:
+			[372835] = 257, --Lightwell
+			[14914] = 257, --Holy Fire
+			[2050] = 257, --Holy Word: Serenity
+			[34861] = 257, --Holy Word: Sanctify
+			[596] = 257, --Prayer of Healing
+			[204883] = 257, --Circle of Healing
+			[2060] = 257, --Heal
+			[392941] = 257, --Apotheosis
+			[64843] = 257, --Divine Hymn
+			[372616] = 257, --Empyreal Blaze
+			[372760] = 257, --Divine Word
+			[47788] = 257, --Guardian Spirit
+			[64901] = 257, --Symbol of Hope
+			[88625] = 257, --Holy Word: Chastise
+
+			--Shadow Priest:
+			[391109] = 258, --Dark Ascension
+			[48045] = 258, --Mind Sear
+			[335467] = 258, --Devouring Plague
+			[263346] = 258, --Dark Void
+			[64044] = 258, --Psychic Horror
+			[341374] = 258, --Damnation
+			[228260] = 258, --Void Eruption
+			[73510] = 258, --Mind Spike
+			[15407] = 258, --Mind Flay
+			[263165] = 258, --Void Torrent
+			[15487] = 258, --Silence
+			[47585] = 258, --Dispersion
+			[232698] = 258, --Shadowform
+			[205385] = 258, --Shadow Crash
+			[34914] = 258, --Vampiric Touch
+
+			--Discipline Priest:
+			[62618] = 256, --Power Word: Barrier
+			[47536] = 256, --Rapture
+			[246287] = 256, --Evangelism
+			[194509] = 256, --Power Word: Radiance
+			[373178] = 256, --Light's Wrath
+			[33206] = 256, --Pain Suppression
+			[47540] = 256, --Penance
+			[129250] = 256, --Power Word: Solace
+			[314867] = 256, --Shadow Covenant
+			[214621] = 256, --Schism
+			[204197] = 256, --Purge the Wicked
+
+			--Devastation Evoker:
+			[368847] = 1467, --Firestorm
+			[369374] = 1467, --Firestorm
+			[370452] = 1467, --Shattering Star
+			[375087] = 1467, --Dragonrage
+			[359073] = 1467, --Eternity Surge
+			[359077] = 1467, --Eternity Surge
+			[382411] = 1467, --Eternity Surge
+			[357211] = 1467, --Pyre
+			[357212] = 1467, --Pyre
+
+			--Preservation Evoker:
+			[370960] = 1468, --Emerald Communion
+			[370537] = 1468, --Stasis
+			[367226] = 1468, --Spiritbloom
+			[361178] = 1468, --Mass Return
+			[359816] = 1468, --Dream Flight
+			[355936] = 1468, --Dream Breath
+			[357170] = 1468, --Time Dilation
+			[363534] = 1468, --Rewind
+			[360823] = 1468, --Naturalize
+			[373861] = 1468, --Temporal Anomaly
+			[366155] = 1468, --Reversion
+			[364343] = 1468, --Echo
+
+			--Protection Warrior:
+			[12975] = 73, --Last Stand
+			[6572] = 73, --Revenge
+			[1160] = 73, --Demoralizing Shout
+			[20243] = 73, --Devastate
+			[871] = 73, --Shield Wall
+			[1161] = 73, --Challenging Shout
+			[394062] = 73, --Rend
+			[385952] = 73, --Shield Charge
+			[392966] = 73, --Spell Block
+
+			--Arms Warrior:
+			[7384] = 71, --Overpower
+			[118038] = 71, --Die by the Sword
+			[772] = 71, --Rend
+			[260708] = 71, --Sweeping Strikes
+			[227847] = 71, --Bladestorm
+			[12294] = 71, --Mortal Strike
+			[260643] = 71, --Skullsplitter
+			[167105] = 71, --Colossus Smash
+			[845] = 71, --Cleave
+
+			--Fury Warrior:
+			[85288] = 72, --Raging Blow
+			[1719] = 72, --Recklessness
+			[315720] = 72, --Onslaught
+			[184367] = 72, --Rampage
+			[184364] = 72, --Enraged Regeneration
+			[5308] = 72, --Execute
+			[385059] = 72, --Odyn's Fury
+			[190411] = 72, --Whirlwind
+			[23881] = 72, --Bloodthirst
+
+			--Survival Hunter:
+			[360952] = 255, --Coordinated Assault
+			[186270] = 255, --Raptor Strike
+			[186289] = 255, --Aspect of the Eagle
+			[212436] = 255, --Butchery
+			[259495] = 255, --Wildfire Bomb
+			[269751] = 255, --Flanking Strike
+			[190925] = 255, --Harpoon
+			[187708] = 255, --Carve
+			[203415] = 255, --Fury of the Eagle
+			[360966] = 255, --Spearhead
+			[259489] = 255, --Kill Command -Survival Specific
+			[320976] = 255, --Kill Shot -Survival Specific
+			[187707] = 255, --Muzzle -Survival Interrupt
+
+			--Marksmanship Hunter:
+			[260402] = 254, --Double Tap
+			[260243] = 254, --Volley
+			[186387] = 254, --Bursting Shot
+			[257620] = 254, --Multi-Shot
+			[288613] = 254, --Trueshot
+			[257044] = 254, --Rapid Fire
+			[19434] = 254, --Aimed Shot
+
+			--Beast Mastery Hunter:
+			[2643] = 253, --Multi-Shot
+			[120679] = 253, --Dire Beast
+			[359844] = 253, --Call of the Wild
+			[321530] = 253, --Bloodshed
+			[131894] = 253, --A Murder of Crows
+			[19574] = 253, --Bestial Wrath
+			[217200] = 253, --Barbed Shot
+			[193530] = 253, --Aspect of the Wild
+			[193455] = 253, --Cobra Shot
 
 
-	-- Discipline Priest:
-	[81749] =       256,    --      Atonement
-	[193134]        =       256,    --      Castigation
-	[197419]        =       256,    --      Contrition
-	[205367]        =       256,    --      Dominant Mind
-	[246287]        =       256,    --      Evangelism
-	[238063]        =       256,    --      Lenience
-	[193063]        =       256,    --      Masochism
-	[33206] =       256,    --      Pain Suppression
-	[47540] =       256,    --      Penance
-	[47666] =       256,    --      Penance
-	[47750] =       256,    --      Penance
-	[198068]        =       256,    --      Power of the Dark Side
-	[204197]        =       256,    --      Purge the Wicked
-	[47536] =       256,    --      Rapture
-	[214621]        =       256,    --      Schism
-	[314867]        =       256,    --      Shadow Covenant
-	[197045]        =       256,    --      Shield Discipline
-	[280391]        =       256,    --      Sins of the Many
-	[109964]        =       256,    --      Spirit Shell
-	
-	-- Holy Priest:
-	[116092]        =       257,    --      Afterlife
-	[196707]        =       257,    --      Afterlife
-	[322719]        =       257,    --      Afterlife
-	[238100]        =       257,    --      Angel's Mercy
-	[200183]        =       257,    --      Apotheosis
-	[193157]        =       257,    --      Benediction
-	[32546] =       257,    --      Binding Heal
-	[200199]        =       257,    --      Censure
-	[204883]        =       257,    --      Circle of Healing
-	[238136]        =       257,    --      Cosmic Ripple
-	[64843] =       257,    --      Divine Hymn
-	[193155]        =       257,    --      Enlightenment
-	[2061]  =       257,    --      Flash Heal
-	[200209]        =       257,    --      Guardian Angel
-	[47788] =       257,    --      Guardian Spirit
-	[2060]  =       257,    --      Heal
-	[14914] =       257,    --      Holy Fire
-	[196985]        =       257,    --      Light of the Naaru
-	[321377]        =       257,    --      Prayer Circle
-	[596]   =       257,    --      Prayer of Healing
-	[319912]        =       257,    --      Prayer of Mending
-	[33076] =       257,    --      Prayer of Mending
-	[33110] =       257,    --      Prayer of Mending
-	[139]   =       257,    --      Renew
-	[341997]        =       257,    --      Renewed Faith
-	[20711] =       257,    --      Spirit of Redemption
-	[215769]        =       257,    --      Spirit of Redemption
-	[109186]        =       257,    --      Surge of Light
-	[64901] =       257,    --      Symbol of Hope
-	[200128]        =       257,    --      Trail of Light
+		}
 
-	-- Shadow Priest:
-	[341240]        =       258,    --      Ancient Madness
-	[341374]        =       258,    --      Damnation
-	[341205]        =       258,    --      Dark Thoughts
-	[321291]        =       258,    --      Death and Madness
-	[335467]        =       258,    --      Devouring Plague
-	[322108]        =       258,    --      Dispersion
-	[193195]        =       258,    --      Fortress of the Mind
-	[280752]        =       258,    --      Hallucinations
-	[288733]        =       258,    --      Intangibility
-	[263716]        =       258,    --      Last Word
-	[193225]        =       258,    --      Legacy of the Void
-	[205369]        =       258,    --      Mind Bomb
-	[15407] =       258,    --      Mind Flay
-	[238558]        =       258,    --      Misery
-	[64044] =       258,    --      Psychic Horror
-	[213634]        =       258,    --      Purify Disease
-	[199855]        =       258,    --      San'layn
-	[341385]        =       258,    --      Searing Nightmare
-	[342834]        =       258,    --      Shadow Crash
-	[232698]        =       258,    --      Shadowform
-	[341491]        =       258,    --      Shadowy Apparitions
-	[78203] =       258,    --      Shadowy Apparitions
-	[15487] =       258,    --      Silence
-	[319952]        =       258,    --      Surrender to Madness
-	[341273]        =       258,    --      Unfurling Darkness
-	[322110]        =       258,    --      Vampiric Embrace
-	[322116]        =       258,    --      Vampiric Touch
-	[34914] =       258,    --      Vampiric Touch
-	[228266]        =       258,    --      Void Bolt
-	[231688]        =       258,    --      Void Bolt
-	[319914]        =       258,    --      Void Bolt
-	[228260]        =       258,    --      Void Eruption
-	[319908]        =       258,    --      Void Eruption
-	[263165]        =       258,    --      Void Torrent
-	[185916]        =       258,    --      Voidform
-	[228264]        =       258,    --      Voidform
-	
-	-- Assassination Rogue:
-	[328085]        =       259,    --      Blindside
-	[121411]        =       259,    --      Crimson Tempest
-	[193640]        =       259,    --      Elaborate Planning
-	[32645] =       259,    --      Envenom
-	[200806]        =       259,    --      Exsanguinate
-	[51723] =       259,    --      Fan of Knives
-	[231719]        =       259,    --      Garrote
-	[703]   =       259,    --      Garrote
-	[270061]        =       259,    --      Hidden Blades
-	[14117] =       259,    --      Improved Poisons
-	[330542]        =       259,    --      Improved Poisons
-	[154904]        =       259,    --      Internal Bleeding
-	[196861]        =       259,    --      Iron Wire
-	[280716]        =       259,    --      Leeching Poison
-	[255989]        =       259,    --      Master Assassin
-	[196864]        =       259,    --      Master Poisoner
-	[1329]  =       259,    --      Mutilate
-	[27576] =       259,    --      Mutilate
-	[5374]  =       259,    --      Mutilate
-	[255544]        =       259,    --      Poison Bomb
-	[185565]        =       259,    --      Poisoned Knife
-	[14190] =       259,    --      Seal Fate
-	[319568]        =       259,    --      Vendetta
-	[79140] =       259,    --      Vendetta
-	[152152]        =       259,    --      Venom Rush
-	[79134] =       259,    --      Venomous Wounds
+	elseif (DetailsFramework.IsWotLKWow()) then
+		_detalhes.SpecSpellList = { --~spec
 
-	-- Outlaw Rogue:
-	[196924]        =       260,    --      Acrobatic Strikes
-	[13750] =       260,    --      Adrenaline Rush
-	[235484]        =       260,    --      Between the Eyes
-	[315341]        =       260,    --      Between the Eyes
-	[13877] =       260,    --      Blade Flurry
-	[22482] =       260,    --      Blade Flurry
-	[331851]        =       260,    --      Blade Flurry
-	[271877]        =       260,    --      Blade Rush
-	[256165]        =       260,    --      Blinding Powder
-	[35551] =       260,    --      Combat Potency
-	[61329] =       260,    --      Combat Potency
-	[272026]        =       260,    --      Dancing Steel
-	[108216]        =       260,    --      Dirty Tricks
-	[2098]  =       260,    --      Dispatch
-	[343142]        =       260,    --      Dreadblades
-	[196937]        =       260,    --      Ghostly Strike
-	[1776]  =       260,    --      Gouge
-	[195457]        =       260,    --      Grappling Hook
-	[319600]        =       260,    --      Grappling Hook
-	[196922]        =       260,    --      Hit and Run
-	[193546]        =       260,    --      Iron Stomach
-	[51690] =       260,    --      Killing Spree
-	[256170]        =       260,    --      Loaded Dice
-	[185763]        =       260,    --      Pistol Shot
-	[196938]        =       260,    --      Quick Draw
-	[79096] =       260,    --      Restless Blades
-	[256188]        =       260,    --      Retractable Hook
-	[315508]        =       260,    --      Roll the Bones
-	[14161] =       260,    --      Ruthlessness
-	[1752]  =       260,    --      Sinister Strike
-	[193315]        =       260,    --      Sinister Strike
-	[279876]        =       260,    --      Sinister Strike
-	[279877]        =       260,    --      Sinister Strike
+			-- Balance Druid:
+			[33831] 		= 	102, -- Force of Nature
+			[24858] 		= 	102, -- Moonkin Form
+			[50516]			= 	102, -- Typhoon (rank 1)
+			[53223]			=	102, -- Typhoon (rank 2)
+			[53225] 		=	102, -- Typhoon (rank 3)
+			[53226] 		= 	102, -- Typhoon (rank 4)
+			[61384] 		= 	102, -- Typhoon (rank 5)
+			[48505] 		=	102, -- Starfall (rank 1)
+			[53199] 		=	102, -- Starfall (rank 2)
+			[53200] 		=	102, -- Starfall (rank 3)
+			[53201] 		= 	102, -- Starfall (rank 4)
 
-	-- Subtlety Rogue:
-	[319949]        =       261,    --      Backstab
-	[53]    =       261,    --      Backstab
-	[245687]        =       261,    --      Dark Shadow
-	[185314]        =       261,    --      Deepening Shadows
-	[238104]        =       261,    --      Enveloping Shadows
-	[196819]        =       261,    --      Eviscerate
-	[231716]        =       261,    --      Eviscerate
-	[316219]        =       261,    --      Find Weakness
-	[200758]        =       261,    --      Gloomblade
-	[196976]        =       261,    --      Master of Shadows
-	[277953]        =       261,    --      Night Terrors
-	[343160]        =       261,    --      Premeditation
-	[58423] =       261,    --      Relentless Strikes
-	[280719]        =       261,    --      Secret Technique
-	[121471]        =       261,    --      Shadow Blades
-	[185313]        =       261,    --      Shadow Dance
-	[108209]        =       261,    --      Shadow Focus
-	[196912]        =       261,    --      Shadow Techniques
-	[319706]        =       261,    --      Shadow Techniques
-	[319175]        =       261,    --      Shadow Vault
-	[319178]        =       261,    --      Shadow Vault
-	[185438]        =       261,    --      Shadowstrike
-	[231718]        =       261,    --      Shadowstrike
-	[257505]        =       261,    --      Shot in the Dark
-	[197835]        =       261,    --      Shuriken Storm
-	[319951]        =       261,    --      Shuriken Storm
-	[277925]        =       261,    --      Shuriken Tornado
-	[114014]        =       261,    --      Shuriken Toss
-	[200759]        =       261,    --      Soothing Darkness
-	[212283]        =       261,    --      Symbols of Death
-	[328077]        =       261,    --      Symbols of Death
+			-- Feral DPS (Cat):
+			[33876] 		= 	103, -- Mangle Cat (rank 1)
+			[33982]			=	103, -- Mangle Cat (rank 2)
+			[33983]			= 	103, -- Mangle Cat (rank 3)
+			[48565]			=	103, -- Mangle Cat (rank 4)
+			[48566]			=	103, -- Mangle Cat (rank 5)
 
-	-- Elemental Shaman:
-	[273221] = 262, -- Aftershock
-	[108281] = 262, -- Ancestral Guidance
-	[114911] = 262, -- Ancestral Guidance
-	[8042] = 262, -- Earth Shock
-	[170374] = 262, -- Earthen Rage
-	[61882] = 262, -- Earthquake
-	[77478] = 262, -- Earthquake
-	[320125] = 262, -- Echoing Shock
-	[343190] = 262, -- Elemental Fury
-	[60188] = 262, -- Elemental Fury
-	[198067] = 262, -- Fire Elemental
-	[210714] = 262, -- Icefury
-	[192222] = 262, -- Liquid Magma Totem
-	[16166] = 262, -- Master of the Elements
-	[117013] = 262, -- Primal Elementalist
-	[342243] = 262, -- Static Discharge
-	[192249] = 262, -- Storm Elemental
-	[262303] = 262, -- Surge of Power
-	[51490] = 262, -- Thunderstorm
-	[260895] = 262, -- Unlimited Power
+			-- Feral Tank (Bear) / Guardian Druid:
+			[33878] 		= 	104, -- Mangle Bear (rank 1)
+			[33986] 		= 	104, -- Mangle Bear (rank 2)
+			[33987] 		= 	104, -- Mangle Bear (rank 3)
+			[48563]			= 	104, -- Mangle Bear (rank 4)
+			[48564]			= 	104, -- Mangle Bear (rank 5)
 
-	-- Enhancement Shaman:
-	[187874] = 263, -- Crash Lightning
-	[192246] = 263, -- Crashing Storm
-	[188089] = 263, -- Earthen Spike
-	[210853] = 263, -- Elemental Assault
-	[262624] = 263, -- Elemental Spirits
-	[196884] = 263, -- Feral Lunge
-	[231723] = 263, -- Feral Spirit
-	[51533] = 263, -- Feral Spirit
-	[333974] = 263, -- Fire Nova
-	[8349] = 263, -- Fire Nova
-	[262647] = 263, -- Forceful Winds
-	[334195] = 263, -- Hailstorm
-	[201900] = 263, -- Hot Hand
-	[342240] = 263, -- Ice Strike
-	[334046] = 263, -- Lashing Flames
-	[334033] = 263, -- Lava Lash
-	[60103] = 263, -- Lava Lash
-	[187880] = 263, -- Maelstrom Weapon
-	[58875] = 263, -- Spirit Walk
-	[201845] = 263, -- Stormbringer
-	[319930] = 263, -- Stormbringer
-	[334175] = 263, -- Stormfury
-	[17364] = 263, -- Stormstrike
-	[32175] = 263, -- Stormstrike
-	[32176] = 263, -- Stormstrike Off-Hand
-	[197214] = 263, -- Sundering
-	[343211] = 263, -- Windfury Totem
-	[8512] = 263, -- Windfury Totem
-	[33757] = 263, -- Windfury Weapon
+			-- Restoration Druid:
+			[33891] 		= 	105, -- Tree of Life
+			[18562] 		= 	105, -- Swiftmend
+			[48438]			=	105, -- Wild Growth (rank 1)
+			[53248]			=	105, -- Wild Growth (rank 2)
+			[53249]			= 	105, -- Wild Growth (rank 3)
+			[53251]			=	105, -- Wild Growth (rank 4)
 
-	-- Restoration Shaman:
-	[207399] = 264, -- Ancestral Protection Totem
-	[207401] = 264, -- Ancestral Vigor
-	[212048] = 264, -- Ancestral Vision
-	[157153] = 264, -- Cloudburst Totem
-	[200076] = 264, -- Deluge
-	[207778] = 264, -- Downpour
-	[198838] = 264, -- Earthen Wall Totem
-	[280614] = 264, -- Flash Flood
-	[192088] = 264, -- Graceful Spirit
-	[73920] = 264, -- Healing Rain
-	[108280] = 264, -- Healing Tide Totem
-	[343205] = 264, -- Healing Tide Totem
-	[77472] = 264, -- Healing Wave
-	[157154] = 264, -- High Tide
-	[16191] = 264, -- Mana Tide Totem
-	[343182] = 264, -- Mana Tide Totem
-	[77130] = 264, -- Purify Spirit
-	[16196] = 264, -- Resurgence
-	[61295] = 264, -- Riptide
-	[98008] = 264, -- Spirit Link Totem
-	[320746] = 264, -- Surge of Earth
-	[320747] = 264, -- Surge of Earth
-	[231785] = 264, -- Tidal Waves
-	[51564] = 264, -- Tidal Waves
-	[200072] = 264, -- Torrent
-	[200071] = 264, -- Undulation
-	[73685] = 264, -- Unleash Life
-	[52127] = 264, -- Water Shield
-	[197995] = 264, -- Wellspring
+			-- Beast Mastery Hunter:
+			[19574]			=	253, -- Bestial Wrath
+			[53257]			=	253, -- Cobra Strikes
 
-	-- Affliction :
-	[196103]        =       265,    --      Absolute Corruption
-	[231792]        =       265,    --      Agony
-	[980]   =       265,    --      Agony
-	[264000]        =       265,    --      Creeping Death
-	[334183]        =       265,    --      Dark Caller
-	[198590]        =       265,    --      Drain Soul
-	[48181] =       265,    --      Haunt
-	[334319]        =       265,    --      Inevitable Demise
-	[324536]        =       265,    --      Malefic Rapture
-	[108558]        =       265,    --      Nightfall
-	[205179]        =       265,    --      Phantom Singularity
-	[27243] =       265,    --      Seed of Corruption
-	[27285] =       265,    --      Seed of Corruption
-	[32388] =       265,    --      Shadow Embrace
-	[63106] =       265,    --      Siphon Life
-	[196226]        =       265,    --      Sow the Seeds
-	[205180]        =       265,    --      Summon Darkglare
-	[231791]        =       265,    --      Unstable Affliction
-	[316099]        =       265,    --      Unstable Affliction
-	[334315]        =       265,    --      Unstable Affliction
-	[278350]        =       265,    --      Vile Taint
-	[196102]        =       265,    --      Writhe in Agony
-	
-	--  Demonology Warlock:
-	[267211]        =       266,    --      Bilescourge Bombers
-	[104316]        =       266,    --      Call Dreadstalkers
-	[334727]        =       266,    --      Call Dreadstalkers
-	[264178]        =       266,    --      Demonbolt
-	[205145]        =       266,    --      Demonic Calling
-	[267215]        =       266,    --      Demonic Consumption
-	[267171]        =       266,    --      Demonic Strength
-	[603]   =       266,    --      Doom
-	[264078]        =       266,    --      Dreadlash
-	[267170]        =       266,    --      From the Shadows
-	[105174]        =       266,    --      Hand of Gul'dan
-	[196277]        =       266,    --      Implosion
-	[267216]        =       266,    --      Inner Demons
-	[267217]        =       266,    --      Nether Portal
-	[264130]        =       266,    --      Power Siphon
-	[267214]        =       266,    --      Sacrificed Souls
-	[108415]        =       266,    --      Soul Link
-	[264057]        =       266,    --      Soul Strike
-	[265187]        =       266,    --      Summon Demonic Tyrant
-	[334585]        =       266,    --      Summon Demonic Tyrant
-	[30146] =       266,    --      Summon Felguard
-	[264119]        =       266,    --      Summon Vilefiend
+			-- Marksmanship Hunter:
+			[34490]			=	254, -- Silecing Shot
+			[19506]			=	254, -- Trueshot Aura
+			[53209]			=	254, -- Chimera Shot
 
-	--  Destruction Warlock:
-	[196406]        =       267,    --      Backdraft
-	[152108]        =       267,    --      Cataclysm
-	[196447]        =       267,    --      Channel Demonfire
-	[116858]        =       267,    --      Chaos Bolt
-	[215279]        =       267,    --      Chaos Bolt
-	[17962] =       267,    --      Conflagrate
-	[231793]        =       267,    --      Conflagrate
-	[196412]        =       267,    --      Eradication
-	[196408]        =       267,    --      Fire and Brimstone
-	[267115]        =       267,    --      Flashover
-	[335174]        =       267,    --      Havoc
-	[80240] =       267,    --      Havoc
-	[193541]        =       267,    --      Immolate
-	[348]   =       267,    --      Immolate
-	[29722] =       267,    --      Incinerate
-	[270545]        =       267,    --      Inferno
-	[266134]        =       267,    --      Internal Combustion
-	[266086]        =       267,    --      Rain of Chaos
-	[335189]        =       267,    --      Rain of Fire
-	[42223] =       267,    --      Rain of Fire
-	[5740]  =       267,    --      Rain of Fire
-	[205148]        =       267,    --      Reverse Entropy
-	[205184]        =       267,    --      Roaring Blaze
-	[17877] =       267,    --      Shadowburn
-	[6353]  =       267,    --      Soul Fire
-	[1122]  =       267,    --      Summon Infernal
-	[335175]        =       267,    --      Summon Infernal
+			-- Survival Hunter:
+			[19386]			=	255, -- Wyvern Sting (rank 1)
+			[24132]			=	255, -- Wyvern Sting (rank 2)
+			[24133]			=	255, -- Wyvern Sting (rank 3)
+			[27068]			=	255, -- Wyvern Sting (rank 4)
+			[49011]			=	255, -- Wyvern Sting (rank 5)
+			[49012]			=	255, -- Wyvern Sting (rank 6)
+			[3674]			= 	255, -- Black Arrow (rank 1)
+			[63668]			=	255, -- Black Arrow (rank 2)
+			[63669]			= 	255, -- Black Arrow (rank 3)
+			[63670]			=	255, -- Black Arrow (rank 4)
+			[63671]			=	255, -- Black Arrow (rank 5)
+			[63672]			=	255, -- Black Arrow (rank 6)
+			[53301]			=	255, -- Explosive Shot (rank 1)
+			[60051]			=	255, -- Explosive Shot (rank 2)
+			[60052]			=	255, -- Explosive Shot (rank 3)
+			[60053]			=	255, -- Explosive Shot (rank 4)
+
+			-- Arcane Mage:
+			[12043]			=	62, -- Presence of Mind
+			[12042]			=	62, -- Arcane Power
+			[31589]			=	62, -- Slow
+			[44425]			=	62, -- Arcane Barrage (rank 1)
+			[44780]			=	62, -- Arcane Barrage (rank 2)
+			[44781]			=	62, -- Arcane Barrage (rank 3)
+
+			-- Fire Mage:
+			[28682]			=	63, -- Combustion
+			[48108]			=	63, -- Hot Streak
+			[31661]			=	63, -- Dragon's Breath (rank 1)
+			[33041]			=	63, -- Dragon's Breath (rank 2)
+			[33042]			=	63, -- Dragon's Breath (rank 3)
+			[33043]			=	63, -- Dragon's Breath (rank 4)
+			[42949]			=	63, -- Dragon's Breath (rank 5)
+			[42950]			=	63, -- Dragon's Breath (rank 6)
+			[44457]			=	63, -- Living Bomb (rank 1)
+			[55359]			=	63, -- Living Bomb (rank 2)
+			[55360]			=	63, -- Living Bomb (rank 3)
+
+			-- Frost Mage:
+			[11426]			=	64, -- Ice Barrier (rank 1)
+			[13031]			=	64, -- Ice Barrier (rank 2)
+			[13032]			=	64, -- Ice Barrier (rank 3)
+			[13033]			=	64, -- Ice Barrier (rank 4)
+			[27134]			=	64, -- Ice Barrier (rank 5)
+			[33405]			=	64, -- Ice Barrier (rank 6)
+			[43038]			=	64, -- Ice Barrier (rank 7)
+			[43039]			=	64, -- Ice Barrier (rank 8)
+			[44544]			=	64, -- Fingers of Frost
+			[57761]			=	64, -- Fireball! (Brain Freeze talent)
+			[31687]			=	64, -- Summon Water Elemental
+			[44572]			=	64, -- Deep Freeze
+
+			-- Holy Paladin:
+			[20473]			=	65, -- Holy Shock (rank 1)
+			[20929]			=	65, -- Holy Shock (rank 2)
+			[20930]			=	65, -- Holy Shock (rank 3)
+			[27174]			=	65, -- Holy Shock (rank 4)
+			[33072]			=	65, -- Holy Shock (rank 5)
+			[48824]			=	65, -- Holy Shock (rank 6)
+			[48825]			=	65, -- Holy Shock (rank 7)
+			[31842]			=	65, -- Divine Illumination
+			[53563]			=	65, -- Beacon of Light
+
+			-- Protection Paladin:
+			[20925]			=	66, -- Holy Shield (rank 1)
+			[20927]			=	66, -- Holy Shield (rank 2)
+			[20928]			=	66, -- Holy Shield (rank 3)
+			[27179]			=	66, -- Holy Shield (rank 4)
+			[48951]			=	66, -- Holy Shield (rank 5)
+			[48952]			=	66, -- Holy Shield (rank 6)
+			[31935]			=	66, -- Avenger's Shield (rank 1)
+			[32699]			=	66, -- Avenger's Shield (rank 2)
+			[32700]			=	66, -- Avenger's Shield (rank 3)
+			[48826]			=	66, -- Avenger's Shield (rank 4)
+			[48827]			=	66, -- Avenger's Shield (rank 5)
+			[53595]			=	66, -- Hammer of the Righteous
+
+			-- Retribution Paladin:
+			[53489]			=	70, -- The Art of War (rank 1)
+			[59578]			=	70, -- The Art of War (rank 2)
+			[20066]			=	70, -- Repentance
+			[35395]			=	70, -- Crusader Strike
+			[53385]			=	70, -- Divine Storm
+
+			-- Discipline Priest:
+			--[63944]			=	256, -- Renewed Hope
+			[10060]			=	256, -- Power Infusion
+			[33206]			=	256, -- Pain Suppression
+			[47540]			=	256, -- Penance (rank 1)
+			[53005]			=	256, -- Penance (rank 2)
+			[53006]			=	256, -- Penance (rank 3)
+			[53007]			=	256, -- Penance (rank 4)
+
+			-- Holy Priest:
+			[20711]			=	257, -- Spirit of Redemption
+			[724]			=	257, -- Lightwell (rank 1)
+			[27870]			=	257, -- Lightwell (rank 2)
+			[27871]			=	257, -- Lightwell (rank 3)
+			[27875]			=	257, -- Lightwell (rank 4)
+			[48086]			=	257, -- Lightwell (rank 5)
+			[48087]			=	257, -- Lightwell (rank 6)
+			[34861]			=	257, -- Circle of Healing (rank 1)
+			[34863]			=	257, -- Circle of Healing (rank 2)
+			[34864]			=	257, -- Circle of Healing (rank 3)
+			[34865]			=	257, -- Circle of Healing (rank 4)
+			[34866]			=	257, -- Circle of Healing (rank 5)
+			[48088]			=	257, -- Circle of Healing (rank 6)
+			[48089]			=	257, -- Circle of Healing (rank 7)
+			[47788]			=	257, -- Guardian Spirit
+
+			-- Shadow Priest:
+			[15286]			=	258, -- Vampiric Embrace
+			[15473]			=	258, -- Shadowform
+			[34914]			=	258, -- Vampiric Touch (rank 1)
+			[34916]			=	258, -- Vampiric Touch (rank 2)
+			[34917]			=	258, -- Vampiric Touch (rank 3)
+			[48159]			=	258, -- Vampiric Touch (rank 4)
+			[48160]			=	258, -- Vampiric Touch (rank 5)
+			[47585]			=	258, -- Dispersion
+
+			-- Assassination Rogue:
+			[58427]			=	259, -- Overkill
+			[1329]			=	259, -- Mutilate (rank 1)
+			[34411]			=	259, -- Mutilate (rank 2)
+			[34412]			=	259, -- Mutilate (rank 3)
+			[34413]			=	259, -- Mutilate (rank 4)
+			[48663]			=	259, -- Mutilate (rank 5)
+			[48666]			=	259, -- Mutilate (rank 6)
+			[52914]			=	259, -- Turn the Tables (rank 1)
+			[52915]			=	259, -- Turn the Tables (rank 2)
+			[52910]			=	259, -- Turn the Tables (rank 3)
+			[51662]			=	259, -- Hunger For Blood
+
+			-- Combat Rogue (Outlaw Rogue):
+			[13750]			=	260, -- Adrenaline Rush
+			[51690]			=	260, -- Killing Spree
+			[58684]			=	260, -- Savage Combat (rank 1)
+			[58683]			=	260, -- Savage Combat (rank 2)
+
+			-- Subtlety Rogue:
+			[14183]			=	261, -- Premeditation
+			[36554]			=	261, -- Shadowstep
+			[51713]			=	261, -- Shadow Dance
+
+			-- Elemental Shaman:
+			[16166]			=	262, -- Elemental Mastery
+			[30706]			=	262, -- Totem of Wrath (rank 1)
+			[57720]			=	262, -- Totem of Wrath (rank 2)
+			[57721]			=	262, -- Totem of Wrath (rank 3)
+			[57722]			=	262, -- Totem of Wrath (rank 4)
+			[51490]			=	262, -- Thunderstorm (rank 1)
+			[59156]			=	262, -- Thunderstorm (rank 2)
+			[59158]			=	262, -- Thunderstorm (rank 3)
+			[59159]			=	262, -- Thunderstorm (rank 4)
+
+			-- Enhancement Shaman:
+			[17364]			=	263, -- Stormstrike
+			[60103]			=	263, -- Lava Lash
+			[30823]			=	263, -- Shamanistic Rage
+			[53817]			=	263, -- Maelstrom Weapon
+			[51533]			=	263, -- Feral Spirit
+
+			-- Restoration Shaman:
+			[16190]			=	264, -- Mana Tide Totem
+			[51886]			=	264, -- Cleanse Spirit
+			[974]			=	264, -- Earth Shield (rank 1)
+			[32593]			=	264, -- Earth Shield (rank 2)
+			[32594]			=	264, -- Earth Shield (rank 3)
+			[49283]			=	264, -- Earth Shield (rank 4)
+			[49284]			=	264, -- Earth Shield (rank 5)
+			[61295]			=	264, -- Riptide (rank 1)
+			[61299]			=	264, -- Riptide (rank 2)
+			[61300]			=	264, -- Riptide (rank 3)
+			[61301]			=	264, -- Riptide (rank 4)
+
+			-- Affliction Warlock:
+			[30108]			=	265, -- Unstable Affliction (rank 1)
+			[30404]			=	265, -- Unstable Affliction (rank 2)
+			[30405]			=	265, -- Unstable Affliction (rank 3)
+			[47841]			=	265, -- Unstable Affliction (rank 4)
+			[47843]			=	265, -- Unstable Affliction (rank 5)
+			[18220]			=	265, -- Dark Pact (rank 1)
+			[18937]			=	265, -- Dark Pact (rank 2)
+			[18938]			=	265, -- Dark Pact (rank 3)
+			[27265]			=	265, -- Dark Pact (rank 4)
+			[59092]			=	265, -- Dark Pact (rank 5)
+			[48181]			=	265, -- Haunt (rank 1)
+			[59161]			=	265, -- Haunt (rank 2)
+			[59163]			=	265, -- Haunt (rank 3)
+			[59164]			=	265, -- Haunt (rank 4)
+
+			-- Demonology Warlock:
+			[30146]			=	266, -- Summon Felguard
+			-- [48090]			=	266, -- Demonic Pact -- Need confirmation for WotLK Classic whether this is the right buff
+			[47383]			=	266, -- Molten Core (rank 1)
+			[71162]			=	266, -- Molten Core (rank 2)
+			[71165]			=	266, -- Molten Core (rank 3)
+			[63165]			=	266, -- Decimation (rank 1)
+			[63167]			=	266, -- Decimation (rank 2)
+			[47241]			=	266, -- Metamorphosis
+
+			-- Destruction Warlock:
+			[17962]			=	267, -- Conflagrate
+			[30283]			=	267, -- Shadowfury (rank 1)
+			[30413]			=	267, -- Shadowfury (rank 2)
+			[30414]			=	267, -- Shadowfury (rank 3)
+			[47846]			=	267, -- Shadowfury (rank 4)
+			[47847]			=	267, -- Shadowfury (rank 5)
+			[50796]			=	267, -- Chaos Bolt (rank 1)
+			[59170]			=	267, -- Chaos Bolt (rank 2)
+			[59171]			=	267, -- Chaos Bolt (rank 3)
+			[59172]			=	267, -- Chaos Bolt (rank 4)
+
+			-- Arms Warrior:
+			[46856]			=	71, -- Trauma (rank 1)
+			[46857]			=	71, -- Trauma (rank 2)
+			[12294]			=	71, -- Mortal Strike (rank 1)
+			[21551]			=	71, -- Mortal Strike (rank 2)
+			[21552]			=	71, -- Mortal Strike (rank 3)
+			[21553]			=	71, -- Mortal Strike (rank 4)
+			[25248]			=	71, -- Mortal Strike (rank 5)
+			[30330]			=	71, -- Mortal Strike (rank 6)
+			[47485]			=	71, -- Mortal Strike (rank 7)
+			[47486]			=	71, -- Mortal Strike (rank 8)
+			[29623]			=	71, -- Endless Rage
+			[46924]			=	71, -- Bladestorm
+
+			-- Fury Warrior:
+			[29801]			=	72, -- Rampage
+			[23881]			=	72, -- Bloodthirst
+
+			-- Protection Warrior:
+			[50720]			=	73, -- Vigilance
+			[20243]			=	73, -- Devastate (rank 1)
+			[30016]			=	73, -- Devastate (rank 2)
+			[30022]			=	73, -- Devastate (rank 3)
+			[47497]			=	73, -- Devastate (rank 4)
+			[47498]			=	73, -- Devastate (rank 5)
+			[50227]			=	73, -- Sword and Board
+			[46968]			=	73, -- Shockwave
+
+			-- Blood Death Knight:
+			[53137]			=	250, -- Abomination's Might (rank 1)
+			[53138]			=	250, -- Abomination's Might (rank 2)
+			[50452]			=	250, -- Bloodworms
+			[49016]			=	250, -- Hysteria
+			[55233]			=	250, -- Vampiric Blood
+			[55050]			=	250, -- Heart Strike (rank 1)
+			[55258]			=	250, -- Heart Strike (rank 2)
+			[55259]			=	250, -- Heart Strike (rank 3)
+			[55260]			=	250, -- Heart Strike (rank 4)
+			[55261]			=	250, -- Heart Strike (rank 5)
+			[55262]			=	250, -- Heart Strike (rank 6)
+			[49028]			=	250, -- Dancing Rune Weapon
+
+			-- Frost Death Knight:
+			[49203]			=	251, -- Hungering Cold
+			[51271]			=	251, -- Unbreakable Armor
+			[49143]			=	251, -- Frost Strike (rank 1)
+			[51416]			=	251, -- Frost Strike (rank 2)
+			[51417]			=	251, -- Frost Strike (rank 3)
+			[51418]			=	251, -- Frost Strike (rank 4)
+			[51419]			=	251, -- Frost Strike (rank 5)
+			[55268]			=	251, -- Frost Strike (rank 6)
+			[49184]			=	251, -- Howling Blast (rank 1)
+			[51409]			=	251, -- Howling Blast (rank 2)
+			[51410]			=	251, -- Howling Blast (rank 3)
+			[51411]			=	251, -- Howling Blast (rank 4)
+
+			-- Unholy Death Knight:
+			[51052]			=	252, -- Anti-Magic Zone
+			[63583]			=	252, -- Desolation (rank 1)
+			[66800]			=	252, -- Desolation (rank 2)
+			[66801]			=	252, -- Desolation (rank 3)
+			[66802]			=	252, -- Desolation (rank 4)
+			[66803]			=	252, -- Desolation (rank 5)
+			[49222]			=	252, -- Bone Shield
+			[51726]			=	252, -- Ebon Plague (rank 1)
+			[51734]			=	252, -- Ebon Plague (rank 2)
+			[51735]			=	252, -- Ebon Plague (rank 3)
+			[55090]			=	252, -- Scourge Strike (rank 1)
+			[55265]			=	252, -- Scourge Strike (rank 2)
+			[55270]			=	252, -- Scourge Strike (rank 3)
+			[55271]			=	252, -- Scourge Strike (rank 4)
+			[49206]			=	252, -- Summon Gargoyle
+		}
+
+	else
+		--shadowlands
+		_detalhes.SpecSpellList = { --~spec
+
+		--spyro healer
+		[359816] = 1468, --dream flight
+		[370960] = 1468, --emerald communion
+		[370537] = 1468, --stasis
+		[373270] = 1468, --lifebind
+		[367226] = 1468, --spiritbloom
+		[371270] = 1468, --time keeper
+		[368412] = 1468, --time of need
+		[371426] = 1468, --life givers flame
+		[377509] = 1468, --dream projection
+		[373834] = 1468, --call of ysera
+		[371832] = 1468, --cycle of life
+		[373861] = 1468, --temporal anomaly
+		[363510] = 1468, --mastery life binder
+		[356810] = 1468, --preservation evoker
+		[376210] = 1468, --borrowed time
+		[376207] = 1468, --delay harm
+		[355936] = 1468, --dream breath
+		[377082] = 1468, --dreamwalker
+		[364343] = 1468, --echo
+		[376138] = 1468, --empath
+		[372233] = 1468, --energy loop
+
+		--spyro dps
+		[370837] = 1467, --engulfing blaze
+		[365937] = 1467, --ruby embers
+		[370452] = 1467, --shattering star
+		[362980] = 1467, --mastery giantkiller
+		[375797] = 1467, --animosity
+		[356809] = 1467, --devastation evoker
+		[375618] = 1467, --arcane intensity
+		[386342] = 1467, --arcane vigor
+		[375721] = 1467, --azure essence burst
+		[375801] = 1467, --burnout
+		[375796] = 1467, --cascading power
+		[386283] = 1467, --catalyze
+		[375777] = 1467, --causality
+		[370455] = 1467, --charged blast
+		[369375] = 1467, --continuum
+		[370962] = 1467, --dense energy
+		[375087] = 1467, --dragonrage
+		[375757] = 1467, --eternitys span
+		[370819] = 1467, --everburning flame
+		[369846] = 1467, --feed the flames
+		[386336] = 1467, --focusing iris
+		[370845] = 1467, --tyranny
+		[360995] = 1467, --rescue
+		[370843] = 1467, --focusing iris
+		[370839] = 1467, --power swell
+		[370783] = 1467, --snapfire
+		[359073] = 1467, --eternity surge
+		[368847] = 1467, --firestorm
+		[369089] = 1467, --volatility
+		[372048] = 1467, --oppressing roar
+		[384660] = 1467, --crippling force
+
+		-- havoc demon hunter --577
+		[188499]        =       577,    --      Blade Dance
+		[320402]        =       577,    --      Blade Dance
+		[203550]        =       577,    --      Blind Fury
+		[198589]        =       577,    --      Blur
+		[320407]        =       577,    --      Blur
+		[320374]        =       577,    --      Burning Hatred
+		[179057]        =       577,    --      Chaos Nova
+		[320412]        =       577,    --      Chaos Nova
+		[162794]        =       577,    --      Chaos Strike
+		[197125]        =       577,    --      Chaos Strike
+		[320413]        =       577,    --      Chaos Strike
+		[343206]        =       577,    --      Chaos Strike
+		[258887]        =       577,    --      Cycle of Hatred
+		[196718]        =       577,    --      Darkness
+		[320420]        =       577,    --      Darkness
+		[203555]        =       577,    --      Demon Blades
+		[162243]        =       577,    --      Demon's Bite
+		[206478]        =       577,    --      Demonic Appetite
+		[205411]        =       577,    --      Desperate Instincts
+		[258860]        =       577,    --      Essence Break
+		[198013]        =       577,    --      Eye Beam
+		[320415]        =       577,    --      Eye Beam
+		[258925]        =       577,    --      Fel Barrage
+		[211881]        =       577,    --      Fel Eruption
+		[195072]        =       577,    --      Fel Rush
+		[320416]        =       577,    --      Fel Rush
+		[343017]        =       577,    --      Fel Rush
+		[206416]        =       577,    --      First Blood
+		[342817]        =       577,    --      Glaive Tempest
+		[258876]        =       577,    --      Insatiable Hunger
+		[203556]        =       577,    --      Master of the Glaive
+		[206476]        =       577,    --      Momentum
+		[196555]        =       577,    --      Netherwalk
+		[258881]        =       577,    --      Trail of Ruin
+		[275144]        =       577,    --      Unbound Chaos
+		[206477]        =       577,    --      Unleashed Power
+		[198793]        =       577,    --      Vengeful Retreat
+		[320635]        =       577,    --      Vengeful Retreat
+
+		-- vengeance demon hunter --581
+		[207550]        =       581,    --      Abyssal Strike
+		[207548]        =       581,    --      Agonizing Flames
+		[320341]        =       581,    --      Bulk Extraction
+		[207739]        =       581,    --      Burning Alive
+		[336639]        =       581,    --      Charred Flesh
+		[207666]        =       581,    --      Concentrated Sigils
+		[203720]        =       581,    --      Demon Spikes
+		[321028]        =       581,    --      Demon Spikes
+		[227174]        =       581,    --      Fallout
+		[207697]        =       581,    --      Feast of Souls
+		[218612]        =       581,    --      Feed the Demon
+		[212084]        =       581,    --      Fel Devastation
+		[320639]        =       581,    --      Fel Devastation
+		[204021]        =       581,    --      Fiery Brand
+		[320962]        =       581,    --      Fiery Brand
+		[343010]        =       581,    --      Fiery Brand
+		[263642]        =       581,    --      Fracture
+		[320331]        =       581,    --      Infernal Armor
+		[189110]        =       581,    --      Infernal Strike
+		[320791]        =       581,    --      Infernal Strike
+		[343016]        =       581,    --      Infernal Strike
+		[209258]        =       581,    --      Last Resort
+		[209281]        =       581,    --      Quickened Sigils
+		[343014]        =       581,    --      Revel in Pain
+		[326853]        =       581,    --      Ruinous Bulwark
+		[203782]        =       581,    --      Shear
+		[203783]        =       581,    --      Shear
+		[202138]        =       581,    --      Sigil of Chains
+		[204596]        =       581,    --      Sigil of Flame
+		[320794]        =       581,    --      Sigil of Flame
+		[207684]        =       581,    --      Sigil of Misery
+		[320418]        =       581,    --      Sigil of Misery
+		[202137]        =       581,    --      Sigil of Silence
+		[320417]        =       581,    --      Sigil of Silence
+		[263648]        =       581,    --      Soul Barrier
+		[228477]        =       581,    --      Soul Cleave
+		[321021]        =       581,    --      Soul Cleave
+		[343207]        =       581,    --      Soul Cleave
+		[247454]        =       581,    --      Spirit Bomb
+		[320380]        =       581,    --      Thick Skin
+		[268175]        =       581,    --      Void Reaver
+
+		-- Unholy Death Knight:
+		[194916]        =       252,    --      All Will Serve
+		[275699]        =       252,    --      Apocalypse
+		[316961]        =       252,    --      Apocalypse
+		[343755]        =       252,    --      Apocalypse
+		[276837]        =       252,    --      Army of the Damned
+		[42650] =       252,    --      Army of the Dead
+		[207264]        =       252,    --      Bursting Sores
+		[207311]        =       252,    --      Clawing Shadows
+		[325554]        =       252,    --      Dark Transformation
+		[63560] =       252,    --      Dark Transformation
+		[152280]        =       252,    --      Defile
+		[207269]        =       252,    --      Ebon Fever
+		[207317]        =       252,    --      Epidemic
+		[276023]        =       252,    --      Harbinger of Doom
+		[207272]        =       252,    --      Infected Claws
+		[77575] =       252,    --      Outbreak
+		[277234]        =       252,    --      Pestilence
+		[194917]        =       252,    --      Pestilent Pustules
+		[51462] =       252,    --      Runic Corruption
+		[317234]        =       252,    --      Scourge Strike
+		[55090] =       252,    --      Scourge Strike
+		[343294]        =       252,    --      Soul Reaper
+		[207321]        =       252,    --      Spell Eater
+		[49530] =       252,    --      Sudden Doom
+		[317250]        =       252,    --      Summon Gargoyle
+		[49206] =       252,    --      Summon Gargoyle
+		[207289]        =       252,    --      Unholy Assault
+		[115989]        =       252,    --      Unholy Blight
+		[319230]        =       252,    --      Unholy Pact
+
+		-- Frost Death Knight:
+		[207142]        =       251,    --      Avalanche
+		[207167]        =       251,    --      Blinding Sleet
+		[152279]        =       251,    --      Breath of Sindragosa
+		[281208]        =       251,    --      Cold Heart
+		[317230]        =       251,    --      Empower Rune Weapon
+		[47568] =       251,    --      Empower Rune Weapon
+		[316803]        =       251,    --      Frost Strike
+		[49143] =       251,    --      Frost Strike
+		[207230]        =       251,    --      Frostscythe
+		[279302]        =       251,    --      Frostwyrm's Fury
+		[194909]        =       251,    --      Frozen Pulse
+		[194912]        =       251,    --      Gathering Storm
+		[194913]        =       251,    --      Glacial Advance
+		[57330] =       251,    --      Horn of Winter
+		[49184] =       251,    --      Howling Blast
+		[321995]        =       251,    --      Hypothermic Presence
+		[207126]        =       251,    --      Icecap
+		[194878]        =       251,    --      Icy Talons
+		[253593]        =       251,    --      Inexorable Assault
+		[317214]        =       251,    --      Killing Machine
+		[51128] =       251,    --      Killing Machine
+		[343252]        =       251,    --      Might of the Frozen Wastes
+		[81333] =       251,    --      Might of the Frozen Wastes
+		[207061]        =       251,    --      Murderous Efficiency
+		[317198]        =       251,    --      Obliterate
+		[49020] =       251,    --      Obliterate
+		[281238]        =       251,    --      Obliteration
+		[207200]        =       251,    --      Permafrost
+		[316849]        =       251,    --      Pillar of Frost
+		[51271] =       251,    --      Pillar of Frost
+		[196770]        =       251,    --      Remorseless Winter
+		[316794]        =       251,    --      Remorseless Winter
+		[316838]        =       251,    --      Rime
+		[59057] =       251,    --      Rime
+		[207104]        =       251,    --      Runic Attenuation
+		[81229] =       251,    --      Runic Empowerment
+
+		-- Blood Death Knight:
+		[205727]        =       250,    --      Anti-Magic Barrier
+		[316634]        =       250,    --      Blood Boil
+		[50842] =       250,    --      Blood Boil
+		[221699]        =       250,    --      Blood Tap
+		[206931]        =       250,    --      Blooddrinker
+		[195679]        =       250,    --      Bloodworms
+		[194844]        =       250,    --      Bonestorm
+		[205224]        =       250,    --      Consumption
+		[274156]        =       250,    --      Consumption
+		[81136] =       250,    --      Crimson Scourge
+		[49028] =       250,    --      Dancing Rune Weapon
+		[195292]        =       250,    --      Death's Caress
+		[206974]        =       250,    --      Foul Bulwark
+		[108199]        =       250,    --      Gorefiend's Grasp
+		[206930]        =       250,    --      Heart Strike
+		[316575]        =       250,    --      Heart Strike
+		[317090]        =       250,    --      Heart Strike
+		[221536]        =       250,    --      Heartbreaker
+		[273946]        =       250,    --      Hemostasis
+		[206940]        =       250,    --      Mark of Blood
+		[195182]        =       250,    --      Marrowrend
+		[316746]        =       250,    --      Marrowrend
+		[219786]        =       250,    --      Ossuary
+		[114556]        =       250,    --      Purgatory
+		[194662]        =       250,    --      Rapid Decomposition
+		[205723]        =       250,    --      Red Thirst
+		[317610]        =       250,    --      Relish in Blood
+		[194679]        =       250,    --      Rune Tap
+		[316616]        =       250,    --      Rune Tap
+		[206970]        =       250,    --      Tightening Grasp
+		[219809]        =       250,    --      Tombstone
+		[317133]        =       250,    --      Vampiric Blood
+		[55233] =       250,    --      Vampiric Blood
+		[273953]        =       250,    --      Voracious
+		[206967]        =       250,    --      Will of the Necropolis
 
 
-	--  Arms Warrior:
-	[845]   =       71,     --      Cleave
-	[334779]        =       71,     --      Collateral Damage
-	[167105]        =       71,     --      Colossus Smash
-	[316411]        =       71,     --      Colossus Smash
-	[262228]        =       71,     --      Deadly Calm
-	[197690]        =       71,     --      Defensive Stance
-	[118038]        =       71,     --      Die by the Sword
-	[315948]        =       71,     --      Die by the Sword
-	[262150]        =       71,     --      Dreadnaught
-	[202316]        =       71,     --      Fervor of Battle
-	[248621]        =       71,     --      In For The Kill
-	[12294] =       71,     --      Mortal Strike
-	[261900]        =       71,     --      Mortal Strike
-	[316440]        =       71,     --      Overpower
-	[316441]        =       71,     --      Overpower
-	[7384]  =       71,     --      Overpower
-	[772]   =       71,     --      Rend
-	[279423]        =       71,     --      Seasoned Soldier
-	[29838] =       71,     --      Second Wind
-	[260643]        =       71,     --      Skullsplitter
-	[260708]        =       71,     --      Sweeping Strikes
-	[316432]        =       71,     --      Sweeping Strikes
-	[316433]        =       71,     --      Sweeping Strikes
-	[184783]        =       71,     --      Tactician
-	[262161]        =       71,     --      Warbreaker
+		-- Balance Druid:
+		[236168] 		= 	102, -- Starfall
+		[136060] 		= 	102, -- Celestial Alignment
+		[252188] 		= 	102, -- Solar Beam
+		[631519] 		= 	102, -- Shooting Stars
+		[132123] 		= 	102, -- Fury of Elune
 
-	--  Fury Warrior:
-	[23881] =       72,     --      Bloodthirst
-	[316537]        =       72,     --      Bloodthirst
-	[335070]        =       72,     --      Cruelty
-	[184361]        =       72,     --      Enrage
-	[316424]        =       72,     --      Enrage
-	[316425]        =       72,     --      Enrage
-	[184364]        =       72,     --      Enraged Regeneration
-	[316474]        =       72,     --      Enraged Regeneration
-	[335077]        =       72,     --      Frenzy
-	[215568]        =       72,     --      Fresh Meat
-	[215571]        =       72,     --      Frothing Berserker
-	[202224]        =       72,     --      Furious Charge
-	[280392]        =       72,     --      Meat Cleaver
-	[315720]        =       72,     --      Onslaught
-	[316452]        =       72,     --      Raging Blow
-	[316453]        =       72,     --      Raging Blow
-	[85288] =       72,     --      Raging Blow
-	[85384] =       72,     --      Raging Blow
-	[96103] =       72,     --      Raging Blow
-	[184367]        =       72,     --      Rampage
-	[209694]        =       72,     --      Rampage
-	[316412]        =       72,     --      Rampage
-	[316519]        =       72,     --      Rampage
-	[202751]        =       72,     --      Reckless Abandon
-	[1719]  =       72,     --      Recklessness
-	[316828]        =       72,     --      Recklessness
-	[335091]        =       72,     --      Seethe
-	[280772]        =       72,     --      Siegebreaker
-	[81099] =       72,     --      Single-Minded Fury
-	[46917] =       72,     --      Titan's Grip
-	[208154]        =       72,     --      Warpaint
+		-- Feral 		Druid:
+		[132185] 		= 	103, -- Predatory Swiftness
+		[132242] 		= 	103, -- Tiger's Fury
+		[132278] 		= 	103, -- Primal Fury
+		[132141] 		= 	103, -- Brutal Slash
+
+		-- Guardian Druid:
+		[571585] 		= 	104, -- Gore
+		[1033479] 		= 	104, -- Guardian of Elune
+		[1033490] 		= 	104, -- Pulverize
+		[132139] 		= 	104, -- Blood Frenzy
+		[571586] 		= 	104, -- Incarnation: Guardian of Ursoc
+
+		-- Restoration Druid:
+		[740] 		= 		105, -- Tranquility
+		[102342] 		= 	105, -- Ironbark
+		[33763] 		= 	105, -- Lifebloom
+		[88423] 		= 	105, -- Nature's Cure
+		[145205] 		= 	105, --Efflorescence
+
+		-- Beast Mastery Hunter:
+		[267116]        =       253,    --      Animal Companion
+		[191384]        =       253,    --      Aspect of the Beast
+		[193530]        =       253,    --      Aspect of the Wild
+		[217200]        =       253,    --      Barbed Shot
+		[115939]        =       253,    --      Beast Cleave
+		[19574] =       253,    --      Bestial Wrath
+		[231548]        =       253,    --      Bestial Wrath
+		[321530]        =       253,    --      Bloodshed
+		[193455]        =       253,    --      Cobra Shot
+		[262838]        =       253,    --      Cobra Shot
+		[120679]        =       253,    --      Dire Beast
+		[53270] =       253,    --      Exotic Beasts
+		[199532]        =       253,    --      Killer Cobra
+		[273887]        =       253,    --      Killer Instinct
+		[56315] =       253,    --      Kindred Spirits
+		[199528]        =       253,    --      One with the Pack
+		[321014]        =       253,    --      Pack Tactics
+		[193532]        =       253,    --      Scent of Blood
+		[285564]        =       253,    --      Scent of Blood
+		[257891]        =       253,    --      Spitting Cobra
+		[201430]        =       253,    --      Stampede
+		[199530]        =       253,    --      Stomp
+		[257944]        =       253,    --      Thrill of the Hunt
+		[185789]        =       253,    --      Wild Call
+
+		-- Marksmanship Hunter:
+		[19434] =       254,    --      Aimed Shot
+		[321468]        =       254,    --      Binding Shackles
+		[186387]        =       254,    --      Bursting Shot
+		[260404]        =       254,    --      Calling the Shots
+		[260228]        =       254,    --      Careful Aim
+		[321460]        =       254,    --      Dead Eye
+		[260402]        =       254,    --      Double Tap
+		[212431]        =       254,    --      Explosive Shot
+		[260393]        =       254,    --      Lethal Shots
+		[194595]        =       254,    --      Lock and Load
+		[155228]        =       254,    --      Lone Wolf
+		[260309]        =       254,    --      Master Marksman
+		[260240]        =       254,    --      Precise Shots
+		[257044]        =       254,    --      Rapid Fire
+		[321281]        =       254,    --      Rapid Fire
+		[193533]        =       254,    --      Steady Focus
+		[260367]        =       254,    --      Streamline
+		[257621]        =       254,    --      Trick Shots
+		[288613]        =       254,    --      Trueshot
+		[260243]        =       254,    --      Volley
+		[260247]        =       254,    --      Volley
+
+		-- Survival Hunter:
+		[269737]        =       255,    --      Alpha Predator
+		[186289]        =       255,    --      Aspect of the Eagle
+		[260331]        =       255,    --      Birds of Prey
+		[260248]        =       255,    --      Bloodseeker
+		[212436]        =       255,    --      Butchery
+		[187708]        =       255,    --      Carve
+		[294029]        =       255,    --      Carve
+		[259391]        =       255,    --      Chakrams
+		[259398]        =       255,    --      Chakrams
+		[272651]        =       255,    --      Command Pet
+		[266779]        =       255,    --      Coordinated Assault
+		[269751]        =       255,    --      Flanking Strike
+		[190925]        =       255,    --      Harpoon
+		[231550]        =       255,    --      Harpoon
+		[260241]        =       255,    --      Hydra's Bite
+		[259387]        =       255,    --      Mongoose Bite
+		[187707]        =       255,    --      Muzzle
+		[186270]        =       255,    --      Raptor Strike
+		[162487]        =       255,    --      Steel Trap
+		[162488]        =       255,    --      Steel Trap
+		[265895]        =       255,    --      Terms of Engagement
+		[260285]        =       255,    --      Tip of the Spear
+		[268501]        =       255,    --      Viper's Venom
+		[259495]        =       255,    --      Wildfire Bomb
+		[271014]        =       255,    --      Wildfire Infusion
+		[195645]        =       255,    --      Wing Clip
+		[321026]        =       255,    --      Wing Clip
+
+		-- Arcane Mage:
+		[231564]        =       62,     --      Arcane Barrage
+		[321526]        =       62,     --      Arcane Barrage
+		[44425] =       62,     --      Arcane Barrage
+		[30451] =       62,     --      Arcane Blast
+		[342231]        =       62,     --      Arcane Echo
+		[205022]        =       62,     --      Arcane Familiar
+		[5143]  =       62,     --      Arcane Missiles
+		[7268]  =       62,     --      Arcane Missiles
+		[153626]        =       62,     --      Arcane Orb
+		[12042] =       62,     --      Arcane Power
+		[321739]        =       62,     --      Arcane Power
+		[343208]        =       62,     --      Arcane Power
+		[235711]        =       62,     --      Chrono Shift
+		[16870] =       62,     --      Clearcasting
+		[321420]        =       62,     --      Clearcasting
+		[321758]        =       62,     --      Clearcasting
+		[321387]        =       62,     --      Enlightened
+		[12051] =       62,     --      Evocation
+		[231565]        =       62,     --      Evocation
+		[110959]        =       62,     --      Greater Invisibility
+		[342249]        =       62,     --      Master of Time
+		[114923]        =       62,     --      Nether Tempest
+		[114954]        =       62,     --      Nether Tempest
+		[155147]        =       62,     --      Overpowered
+		[205025]        =       62,     --      Presence of Mind
+		[321742]        =       62,     --      Presence of Mind
+		[235450]        =       62,     --      Prismatic Barrier
+		[321745]        =       62,     --      Prismatic Barrier
+		[205028]        =       62,     --      Resonance
+		[281482]        =       62,     --      Reverberate
+		[264354]        =       62,     --      Rule of Threes
+		[236457]        =       62,     --      Slipstream
+		[31589] =       62,     --      Slow
+		[321747]        =       62,     --      Slow
+		[157980]        =       62,     --      Supernova
+		[210805]        =       62,     --      Time Anomaly
+		[321507]        =       62,     --      Touch of the Magi
+		[343215]        =       62,     --      Touch of the Magi
+
+		-- Fire Mage:
+		[235870]        =       63,     --      Alexstrasza's Fury
+		[157981]        =       63,     --      Blast Wave
+		[235313]        =       63,     --      Blazing Barrier
+		[321708]        =       63,     --      Blazing Barrier
+		[235365]        =       63,     --      Blazing Soul
+		[86949] =       63,     --      Cauterize
+		[190319]        =       63,     --      Combustion
+		[321710]        =       63,     --      Combustion
+		[205023]        =       63,     --      Conflagration
+		[117216]        =       63,     --      Critical Mass
+		[231630]        =       63,     --      Critical Mass
+		[321707]        =       63,     --      Dragon's Breath
+		[133]   =       63,     --      Fireball
+		[157642]        =       63,     --      Fireball
+		[343194]        =       63,     --      Fireball
+		[203283]        =       63,     --      Firestarter
+		[205026]        =       63,     --      Firestarter
+		[205029]        =       63,     --      Flame On
+		[205037]        =       63,     --      Flame Patch
+		[2120]  =       63,     --      Flamestrike
+		[321709]        =       63,     --      Flamestrike
+		[343230]        =       63,     --      Flamestrike
+		[236058]        =       63,     --      Frenetic Speed
+		[342344]        =       63,     --      From the Ashes
+		[195283]        =       63,     --      Hot Streak
+		[155148]        =       63,     --      Kindling
+		[44457] =       63,     --      Living Bomb
+		[44461] =       63,     --      Living Bomb
+		[153561]        =       63,     --      Meteor
+		[257541]        =       63,     --      Phoenix Flames
+		[343222]        =       63,     --      Phoenix Flames
+		[321711]        =       63,     --      Pyroblast
+		[269650]        =       63,     --      Pyroclasm
+		[205020]        =       63,     --      Pyromaniac
+		[2948]  =       63,     --      Scorch
+		[269644]        =       63,     --      Searing Touch
+
+		-- Frost Mage:
+		[190356]        =       64,     --      Blizzard
+		[321696]        =       64,     --      Blizzard
+		[205027]        =       64,     --      Bone Chilling
+		[190447]        =       64,     --      Brain Freeze
+		[231584]        =       64,     --      Brain Freeze
+		[278309]        =       64,     --      Chain Reaction
+		[235219]        =       64,     --      Cold Snap
+		[321699]        =       64,     --      Cold Snap
+		[153595]        =       64,     --      Comet Storm
+		[120]   =       64,     --      Cone of Cold
+		[343180]        =       64,     --      Cone of Cold
+		[257537]        =       64,     --      Ebonbolt
+		[112965]        =       64,     --      Fingers of Frost
+		[44614] =       64,     --      Flurry
+		[270233]        =       64,     --      Freezing Rain
+		[235224]        =       64,     --      Frigid Winds
+		[84714] =       64,     --      Frozen Orb
+		[84721] =       64,     --      Frozen Orb
+		[205030]        =       64,     --      Frozen Touch
+		[235297]        =       64,     --      Glacial Insulation
+		[199786]        =       64,     --      Glacial Spike
+		[11426] =       64,     --      Ice Barrier
+		[108839]        =       64,     --      Ice Floes
+		[30455] =       64,     --      Ice Lance
+		[343175]        =       64,     --      Ice Lance
+		[157997]        =       64,     --      Ice Nova
+		[12472] =       64,     --      Icy Veins
+		[321702]        =       64,     --      Icy Veins
+		[205024]        =       64,     --      Lonely Winter
+		[205021]        =       64,     --      Ray of Frost
+		[12982] =       64,     --      Shatter
+		[231582]        =       64,     --      Shatter
+		[31687] =       64,     --      Summon Water Elemental
+		[155149]        =       64,     --      Thermal Void
+
+		-- Brewmaster Monk:
+		[115399]        =       268,    --      Black Ox Brew
+		[196736]        =       268,    --      Blackout Combo
+		[280515]        =       268,    --      Bob and Weave
+		[115181]        =       268,    --      Breath of Fire
+		[123725]        =       268,    --      Breath of Fire
+		[245013]        =       268,    --      Brewmaster's Balance
+		[322507]        =       268,    --      Celestial Brew
+		[322510]        =       268,    --      Celestial Brew
+		[325177]        =       268,    --      Celestial Flames
+		[216519]        =       268,    --      Celestial Fortune
+		[324312]        =       268,    --      Clash
+		[325153]        =       268,    --      Exploding Keg
+		[124502]        =       268,    --      Gift of the Ox
+		[124507]        =       268,    --      Gift of the Ox
+		[196737]        =       268,    --      High Tolerance
+		[121253]        =       268,    --      Keg Smash
+		[325093]        =       268,    --      Light Brewing
+		[119582]        =       268,    --      Purifying Brew
+		[343743]        =       268,    --      Purifying Brew
+		[322120]        =       268,    --      Shuffle
+		[196730]        =       268,    --      Special Delivery
+		[242580]        =       268,    --      Spitfire
+		[115069]        =       268,    --      Stagger
+		[322522]        =       268,    --      Stagger
+		[115315]        =       268,    --      Summon Black Ox Statue
+		[115176]        =       268,    --      Zen Meditation
+		[328682]        =       268,    --      Zen Meditation
 
 
-	--  Protection Warrior:
-	[202560]        =       73,     --      Best Served Cold
-	[280001]        =       73,     --      Bolster
-	[202743]        =       73,     --      Booming Voice
-	[203201]        =       73,     --      Crackling Thunder
-	[115767]        =       73,     --      Deep Wounds
-	[115768]        =       73,     --      Deep Wounds
-	[1160]  =       73,     --      Demoralizing Shout
-	[316464]        =       73,     --      Demoralizing Shout
-	[20243] =       73,     --      Devastate
-	[236279]        =       73,     --      Devastator
-	[203177]        =       73,     --      Heavy Repercussions
-	[202095]        =       73,     --      Indomitable
-	[202603]        =       73,     --      Into the Fray
-	[12975] =       73,     --      Last Stand
-	[275338]        =       73,     --      Menace
-	[202561]        =       73,     --      Never Surrender
-	[275334]        =       73,     --      Punish
-	[6572]  =       73,     --      Revenge
-	[161798]        =       73,     --      Riposte
-	[275339]        =       73,     --      Rumbling Earth
-	[316834]        =       73,     --      Shield Wall
-	[871]   =       73,     --      Shield Wall
-	[46968] =       73,     --      Shockwave
-	[316414]        =       73,     --      Thunder Clap
-	[6343]  =       73,     --      Thunder Clap
-	[275336]        =       73,     --      Unstoppable Force
-	[316428]        =       73,     --      Vanguard
-	[71]    =       73,     --      Vanguard
+		-- Windwalker Monk:
+		[116092]        =       269,    --      Afterlife
+		[196707]        =       269,    --      Afterlife
+		[322719]        =       269,    --      Afterlife
+		[115396]        =       269,    --      Ascension
+		[161862]        =       269,    --      Ascension
+		[325201]        =       269,    --      Dance of Chi-Ji
+		[116095]        =       269,    --      Disable
+		[343731]        =       269,    --      Disable
+		[115288]        =       269,    --      Energizing Elixir
+		[261947]        =       269,    --      Fist of the White Tiger
+		[113656]        =       269,    --      Fists of Fury
+		[117418]        =       269,    --      Fists of Fury
+		[101545]        =       269,    --      Flying Serpent Kick
+		[123586]        =       269,    --      Flying Serpent Kick
+		[280195]        =       269,    --      Good Karma
+		[196740]        =       269,    --      Hit Combo
+		[261767]        =       269,    --      Inner Strength
+		[152173]        =       269,    --      Serenity
+		[280197]        =       269,    --      Spiritual Focus
+		[122470]        =       269,    --      Touch of Karma
+		[124280]        =       269,    --      Touch of Karma
+		[152175]        =       269,    --      Whirling Dragon Punch
+		[157411]        =       269,    --      Windwalking
 
-}
+		-- Mistweaver Monk:
+		[343655]        =       270,    --      Enveloping Breath
+		[124682]        =       270,    --      Enveloping Mist
+		[231605]        =       270,    --      Enveloping Mist
+		[191837]        =       270,    --      Essence Font
+		[231633]        =       270,    --      Essence Font
+		[197895]        =       270,    --      Focused Thunder
+		[116849]        =       270,    --      Life Cocoon
+		[197915]        =       270,    --      Lifecycles
+		[197908]        =       270,    --      Mana Tea
+		[197900]        =       270,    --      Mist Wrap
+		[212051]        =       270,    --      Reawaken
+		[196725]        =       270,    --      Refreshing Jade Wind
+		[115151]        =       270,    --      Renewing Mist
+		[119611]        =       270,    --      Renewing Mist
+		[281231]        =       270,    --      Renewing Mist
+		[115310]        =       270,    --      Revival
+		[274909]        =       270,    --      Rising Mist
+		[198898]        =       270,    --      Song of Chi-Ji
+		[115175]        =       270,    --      Soothing Mist
+		[209525]        =       270,    --      Soothing Mist
+		[210802]        =       270,    --      Spirit of the Crane
+		[115313]        =       270,    --      Summon Jade Serpent Statue
+		[116645]        =       270,    --      Teachings of the Monastery
+		[116680]        =       270,    --      Thunder Focus Tea
+		[231876]        =       270,    --      Thunder Focus Tea
+		[274963]        =       270,    --      Upwelling
+
+		-- Holy Paladin:
+		[212056]        =       65,     --      Absolution
+		[31821] =       65,     --      Aura Mastery
+		[248033]        =       65,     --      Awakening
+		[156910]        =       65,     --      Beacon of Faith
+		[53563] =       65,     --      Beacon of Light
+		[53652] =       65,     --      Beacon of Light
+		[200025]        =       65,     --      Beacon of Virtue
+		[223306]        =       65,     --      Bestow Faith
+		[4987]  =       65,     --      Cleanse
+		[196926]        =       65,     --      Crusader's Might
+		[498]   =       65,     --      Divine Protection
+		[325966]        =       65,     --      Glimmer of Light
+		[82326] =       65,     --      Holy Light
+		[114165]        =       65,     --      Holy Prism
+		[114852]        =       65,     --      Holy Prism
+		[114871]        =       65,     --      Holy Prism
+		[20473] =       65,     --      Holy Shock
+		[25912] =       65,     --      Holy Shock
+		[25914] =       65,     --      Holy Shock
+		[272906]        =       65,     --      Holy Shock
+		[289941]        =       65,     --      Holy Shock
+		[53576] =       65,     --      Infusion of Light
+		[85222] =       65,     --      Light of Dawn
+		[183998]        =       65,     --      Light of the Martyr
+		[219562]        =       65,     --      Light of the Martyr
+		[114158]        =       65,     --      Light's Hammer
+		[114919]        =       65,     --      Light's Hammer
+		[214202]        =       65,     --      Rule of Law
+		[157047]        =       65,     --      Saved by the Light
+
+
+		-- Protection Paladin:
+		[31850] =       66,     --      Ardent Defender
+		[66235] =       66,     --      Ardent Defender
+		[231665]        =       66,     --      Avenger's Shield
+		[31935] =       66,     --      Avenger's Shield
+		[337261]        =       66,     --      Avenger's Shield
+		[204019]        =       66,     --      Blessed Hammer
+		[229976]        =       66,     --      Blessed Hammer
+		[204018]        =       66,     --      Blessing of Spellwarding
+		[204023]        =       66,     --      Crusader's Judgment
+		[204077]        =       66,     --      Final Stand
+		[203776]        =       66,     --      First Avenger
+		[85043] =       66,     --      Grand Crusader
+		[86659] =       66,     --      Guardian of Ancient Kings
+		[317854]        =       66,     --      Hammer of the Righteous
+		[337287]        =       66,     --      Hammer of the Righteous
+		[53595] =       66,     --      Hammer of the Righteous
+		[315924]        =       66,     --      Hand of the Protector
+		[327193]        =       66,     --      Moment of Glory
+		[280373]        =       66,     --      Redoubt
+		[204074]        =       66,     --      Righteous Protector
+		[161800]        =       66,     --      Riposte
+		[321136]        =       66,     --      Shining Light
+
+
+		-- Retribution Paladin:
+		[267344]        =       70,     --      Art of War
+		[317912]        =       70,     --      Art of War
+		[184575]        =       70,     --      Blade of Justice
+		[327981]        =       70,     --      Blade of Justice
+		[231832]        =       70,     --      Blade of Wrath
+		[231895]        =       70,     --      Crusade
+		[53385] =       70,     --      Divine Storm
+		[326732]        =       70,     --      Empyrean Power
+		[343527]        =       70,     --      Execution Sentence
+		[343721]        =       70,     --      Final Reckoning
+		[203316]        =       70,     --      Fires of Justice
+		[183218]        =       70,     --      Hand of Hindrance
+		[215661]        =       70,     --      Justicar's Vengeance
+		[267610]        =       70,     --      Righteous Verdict
+		[85256] =       70,     --      Templar's Verdict
+		[255937]        =       70,     --      Wake of Ashes
+		[269569]        =       70,     --      Zeal
+
+
+		-- Discipline Priest:
+		[81749] =       256,    --      Atonement
+		[193134]        =       256,    --      Castigation
+		[197419]        =       256,    --      Contrition
+		[205367]        =       256,    --      Dominant Mind
+		[246287]        =       256,    --      Evangelism
+		[238063]        =       256,    --      Lenience
+		[193063]        =       256,    --      Masochism
+		[33206] =       256,    --      Pain Suppression
+		[47540] =       256,    --      Penance
+		[47666] =       256,    --      Penance
+		[47750] =       256,    --      Penance
+		[198068]        =       256,    --      Power of the Dark Side
+		[204197]        =       256,    --      Purge the Wicked
+		[47536] =       256,    --      Rapture
+		[214621]        =       256,    --      Schism
+		[314867]        =       256,    --      Shadow Covenant
+		[197045]        =       256,    --      Shield Discipline
+		[280391]        =       256,    --      Sins of the Many
+		[109964]        =       256,    --      Spirit Shell
+
+		-- Holy Priest:
+		[116092]        =       257,    --      Afterlife
+		[196707]        =       257,    --      Afterlife
+		[322719]        =       257,    --      Afterlife
+		[238100]        =       257,    --      Angel's Mercy
+		[200183]        =       257,    --      Apotheosis
+		[193157]        =       257,    --      Benediction
+		[32546] =       257,    --      Binding Heal
+		[200199]        =       257,    --      Censure
+		[204883]        =       257,    --      Circle of Healing
+		[238136]        =       257,    --      Cosmic Ripple
+		[64843] =       257,    --      Divine Hymn
+		[193155]        =       257,    --      Enlightenment
+		[2061]  =       257,    --      Flash Heal
+		[200209]        =       257,    --      Guardian Angel
+		[47788] =       257,    --      Guardian Spirit
+		[2060]  =       257,    --      Heal
+		[14914] =       257,    --      Holy Fire
+		[196985]        =       257,    --      Light of the Naaru
+		[321377]        =       257,    --      Prayer Circle
+		[596]   =       257,    --      Prayer of Healing
+		[319912]        =       257,    --      Prayer of Mending
+		[33076] =       257,    --      Prayer of Mending
+		[33110] =       257,    --      Prayer of Mending
+		[139]   =       257,    --      Renew
+		[341997]        =       257,    --      Renewed Faith
+		[20711] =       257,    --      Spirit of Redemption
+		[215769]        =       257,    --      Spirit of Redemption
+		[109186]        =       257,    --      Surge of Light
+		[64901] =       257,    --      Symbol of Hope
+		[200128]        =       257,    --      Trail of Light
+
+		-- Shadow Priest:
+		[341240]        =       258,    --      Ancient Madness
+		[341374]        =       258,    --      Damnation
+		[341205]        =       258,    --      Dark Thoughts
+		[321291]        =       258,    --      Death and Madness
+		[335467]        =       258,    --      Devouring Plague
+		[322108]        =       258,    --      Dispersion
+		[193195]        =       258,    --      Fortress of the Mind
+		[280752]        =       258,    --      Hallucinations
+		[288733]        =       258,    --      Intangibility
+		[263716]        =       258,    --      Last Word
+		[193225]        =       258,    --      Legacy of the Void
+		[205369]        =       258,    --      Mind Bomb
+		[15407] =       258,    --      Mind Flay
+		[238558]        =       258,    --      Misery
+		[64044] =       258,    --      Psychic Horror
+		[213634]        =       258,    --      Purify Disease
+		[199855]        =       258,    --      San'layn
+		[341385]        =       258,    --      Searing Nightmare
+		[342834]        =       258,    --      Shadow Crash
+		[232698]        =       258,    --      Shadowform
+		[341491]        =       258,    --      Shadowy Apparitions
+		[78203] =       258,    --      Shadowy Apparitions
+		[15487] =       258,    --      Silence
+		[319952]        =       258,    --      Surrender to Madness
+		[341273]        =       258,    --      Unfurling Darkness
+		[322110]        =       258,    --      Vampiric Embrace
+		[322116]        =       258,    --      Vampiric Touch
+		[34914] =       258,    --      Vampiric Touch
+		[228266]        =       258,    --      Void Bolt
+		[231688]        =       258,    --      Void Bolt
+		[319914]        =       258,    --      Void Bolt
+		[228260]        =       258,    --      Void Eruption
+		[319908]        =       258,    --      Void Eruption
+		[263165]        =       258,    --      Void Torrent
+		[185916]        =       258,    --      Voidform
+		[228264]        =       258,    --      Voidform
+
+		-- Assassination Rogue:
+		[328085]        =       259,    --      Blindside
+		[121411]        =       259,    --      Crimson Tempest
+		[193640]        =       259,    --      Elaborate Planning
+		[32645] =       259,    --      Envenom
+		[200806]        =       259,    --      Exsanguinate
+		[51723] =       259,    --      Fan of Knives
+		[231719]        =       259,    --      Garrote
+		[703]   =       259,    --      Garrote
+		[270061]        =       259,    --      Hidden Blades
+		[14117] =       259,    --      Improved Poisons
+		[330542]        =       259,    --      Improved Poisons
+		[154904]        =       259,    --      Internal Bleeding
+		[196861]        =       259,    --      Iron Wire
+		[280716]        =       259,    --      Leeching Poison
+		[255989]        =       259,    --      Master Assassin
+		[196864]        =       259,    --      Master Poisoner
+		[1329]  =       259,    --      Mutilate
+		[27576] =       259,    --      Mutilate
+		[5374]  =       259,    --      Mutilate
+		[255544]        =       259,    --      Poison Bomb
+		[185565]        =       259,    --      Poisoned Knife
+		[14190] =       259,    --      Seal Fate
+		[319568]        =       259,    --      Vendetta
+		[79140] =       259,    --      Vendetta
+		[152152]        =       259,    --      Venom Rush
+		[79134] =       259,    --      Venomous Wounds
+
+		-- Outlaw Rogue:
+		[196924]        =       260,    --      Acrobatic Strikes
+		[13750] =       260,    --      Adrenaline Rush
+		[235484]        =       260,    --      Between the Eyes
+		[315341]        =       260,    --      Between the Eyes
+		[13877] =       260,    --      Blade Flurry
+		[22482] =       260,    --      Blade Flurry
+		[331851]        =       260,    --      Blade Flurry
+		[271877]        =       260,    --      Blade Rush
+		[256165]        =       260,    --      Blinding Powder
+		[35551] =       260,    --      Combat Potency
+		[61329] =       260,    --      Combat Potency
+		[272026]        =       260,    --      Dancing Steel
+		[108216]        =       260,    --      Dirty Tricks
+		[2098]  =       260,    --      Dispatch
+		[343142]        =       260,    --      Dreadblades
+		[196937]        =       260,    --      Ghostly Strike
+		[1776]  =       260,    --      Gouge
+		[195457]        =       260,    --      Grappling Hook
+		[319600]        =       260,    --      Grappling Hook
+		[196922]        =       260,    --      Hit and Run
+		[193546]        =       260,    --      Iron Stomach
+		[51690] =       260,    --      Killing Spree
+		[256170]        =       260,    --      Loaded Dice
+		[185763]        =       260,    --      Pistol Shot
+		[196938]        =       260,    --      Quick Draw
+		[79096] =       260,    --      Restless Blades
+		[256188]        =       260,    --      Retractable Hook
+		[315508]        =       260,    --      Roll the Bones
+		[14161] =       260,    --      Ruthlessness
+		[1752]  =       260,    --      Sinister Strike
+		[193315]        =       260,    --      Sinister Strike
+		[279876]        =       260,    --      Sinister Strike
+		[279877]        =       260,    --      Sinister Strike
+
+		-- Subtlety Rogue:
+		[319949]        =       261,    --      Backstab
+		[53]    =       261,    --      Backstab
+		[245687]        =       261,    --      Dark Shadow
+		[185314]        =       261,    --      Deepening Shadows
+		[238104]        =       261,    --      Enveloping Shadows
+		[196819]        =       261,    --      Eviscerate
+		[231716]        =       261,    --      Eviscerate
+		[316219]        =       261,    --      Find Weakness
+		[200758]        =       261,    --      Gloomblade
+		[196976]        =       261,    --      Master of Shadows
+		[277953]        =       261,    --      Night Terrors
+		[343160]        =       261,    --      Premeditation
+		[58423] =       261,    --      Relentless Strikes
+		[280719]        =       261,    --      Secret Technique
+		[121471]        =       261,    --      Shadow Blades
+		[185313]        =       261,    --      Shadow Dance
+		[108209]        =       261,    --      Shadow Focus
+		[196912]        =       261,    --      Shadow Techniques
+		[319706]        =       261,    --      Shadow Techniques
+		[319175]        =       261,    --      Shadow Vault
+		[319178]        =       261,    --      Shadow Vault
+		[185438]        =       261,    --      Shadowstrike
+		[231718]        =       261,    --      Shadowstrike
+		[257505]        =       261,    --      Shot in the Dark
+		[197835]        =       261,    --      Shuriken Storm
+		[319951]        =       261,    --      Shuriken Storm
+		[277925]        =       261,    --      Shuriken Tornado
+		[114014]        =       261,    --      Shuriken Toss
+		[200759]        =       261,    --      Soothing Darkness
+		[212283]        =       261,    --      Symbols of Death
+		[328077]        =       261,    --      Symbols of Death
+
+		-- Elemental Shaman:
+		[273221] = 262, -- Aftershock
+		[108281] = 262, -- Ancestral Guidance
+		[114911] = 262, -- Ancestral Guidance
+		[8042] = 262, -- Earth Shock
+		[170374] = 262, -- Earthen Rage
+		[61882] = 262, -- Earthquake
+		[77478] = 262, -- Earthquake
+		[320125] = 262, -- Echoing Shock
+		[343190] = 262, -- Elemental Fury
+		[60188] = 262, -- Elemental Fury
+		[198067] = 262, -- Fire Elemental
+		[210714] = 262, -- Icefury
+		[192222] = 262, -- Liquid Magma Totem
+		[16166] = 262, -- Master of the Elements
+		[117013] = 262, -- Primal Elementalist
+		[342243] = 262, -- Static Discharge
+		[192249] = 262, -- Storm Elemental
+		[262303] = 262, -- Surge of Power
+		[51490] = 262, -- Thunderstorm
+		[260895] = 262, -- Unlimited Power
+
+		-- Enhancement Shaman:
+		[187874] = 263, -- Crash Lightning
+		[192246] = 263, -- Crashing Storm
+		[188089] = 263, -- Earthen Spike
+		[210853] = 263, -- Elemental Assault
+		[262624] = 263, -- Elemental Spirits
+		[196884] = 263, -- Feral Lunge
+		[231723] = 263, -- Feral Spirit
+		[51533] = 263, -- Feral Spirit
+		[333974] = 263, -- Fire Nova
+		[8349] = 263, -- Fire Nova
+		[262647] = 263, -- Forceful Winds
+		[334195] = 263, -- Hailstorm
+		[201900] = 263, -- Hot Hand
+		[342240] = 263, -- Ice Strike
+		[334046] = 263, -- Lashing Flames
+		[334033] = 263, -- Lava Lash
+		[60103] = 263, -- Lava Lash
+		[187880] = 263, -- Maelstrom Weapon
+		[58875] = 263, -- Spirit Walk
+		[201845] = 263, -- Stormbringer
+		[319930] = 263, -- Stormbringer
+		[334175] = 263, -- Stormfury
+		[17364] = 263, -- Stormstrike
+		[32175] = 263, -- Stormstrike
+		[32176] = 263, -- Stormstrike Off-Hand
+		[197214] = 263, -- Sundering
+		[343211] = 263, -- Windfury Totem
+		[8512] = 263, -- Windfury Totem
+		[33757] = 263, -- Windfury Weapon
+
+		-- Restoration Shaman:
+		[207399] = 264, -- Ancestral Protection Totem
+		[207401] = 264, -- Ancestral Vigor
+		[212048] = 264, -- Ancestral Vision
+		[157153] = 264, -- Cloudburst Totem
+		[200076] = 264, -- Deluge
+		[207778] = 264, -- Downpour
+		[198838] = 264, -- Earthen Wall Totem
+		[280614] = 264, -- Flash Flood
+		[192088] = 264, -- Graceful Spirit
+		[73920] = 264, -- Healing Rain
+		[108280] = 264, -- Healing Tide Totem
+		[343205] = 264, -- Healing Tide Totem
+		[77472] = 264, -- Healing Wave
+		[157154] = 264, -- High Tide
+		[16191] = 264, -- Mana Tide Totem
+		[343182] = 264, -- Mana Tide Totem
+		[77130] = 264, -- Purify Spirit
+		[16196] = 264, -- Resurgence
+		[61295] = 264, -- Riptide
+		[98008] = 264, -- Spirit Link Totem
+		[320746] = 264, -- Surge of Earth
+		[320747] = 264, -- Surge of Earth
+		[231785] = 264, -- Tidal Waves
+		[51564] = 264, -- Tidal Waves
+		[200072] = 264, -- Torrent
+		[200071] = 264, -- Undulation
+		[73685] = 264, -- Unleash Life
+		[52127] = 264, -- Water Shield
+		[197995] = 264, -- Wellspring
+
+		-- Affliction :
+		[196103]        =       265,    --      Absolute Corruption
+		[231792]        =       265,    --      Agony
+		[980]   =       265,    --      Agony
+		[264000]        =       265,    --      Creeping Death
+		[334183]        =       265,    --      Dark Caller
+		[198590]        =       265,    --      Drain Soul
+		[48181] =       265,    --      Haunt
+		[334319]        =       265,    --      Inevitable Demise
+		[324536]        =       265,    --      Malefic Rapture
+		[108558]        =       265,    --      Nightfall
+		[205179]        =       265,    --      Phantom Singularity
+		[27243] =       265,    --      Seed of Corruption
+		[27285] =       265,    --      Seed of Corruption
+		[32388] =       265,    --      Shadow Embrace
+		[63106] =       265,    --      Siphon Life
+		[196226]        =       265,    --      Sow the Seeds
+		[205180]        =       265,    --      Summon Darkglare
+		[231791]        =       265,    --      Unstable Affliction
+		[316099]        =       265,    --      Unstable Affliction
+		[334315]        =       265,    --      Unstable Affliction
+		[278350]        =       265,    --      Vile Taint
+		[196102]        =       265,    --      Writhe in Agony
+
+		--  Demonology Warlock:
+		[267211]        =       266,    --      Bilescourge Bombers
+		[104316]        =       266,    --      Call Dreadstalkers
+		[334727]        =       266,    --      Call Dreadstalkers
+		[264178]        =       266,    --      Demonbolt
+		[205145]        =       266,    --      Demonic Calling
+		[267215]        =       266,    --      Demonic Consumption
+		[267171]        =       266,    --      Demonic Strength
+		[603]   =       266,    --      Doom
+		[264078]        =       266,    --      Dreadlash
+		[267170]        =       266,    --      From the Shadows
+		[105174]        =       266,    --      Hand of Gul'dan
+		[196277]        =       266,    --      Implosion
+		[267216]        =       266,    --      Inner Demons
+		[267217]        =       266,    --      Nether Portal
+		[264130]        =       266,    --      Power Siphon
+		[267214]        =       266,    --      Sacrificed Souls
+		[108415]        =       266,    --      Soul Link
+		[264057]        =       266,    --      Soul Strike
+		[265187]        =       266,    --      Summon Demonic Tyrant
+		[334585]        =       266,    --      Summon Demonic Tyrant
+		[30146] =       266,    --      Summon Felguard
+		[264119]        =       266,    --      Summon Vilefiend
+
+		--  Destruction Warlock:
+		[196406]        =       267,    --      Backdraft
+		[152108]        =       267,    --      Cataclysm
+		[196447]        =       267,    --      Channel Demonfire
+		[116858]        =       267,    --      Chaos Bolt
+		[215279]        =       267,    --      Chaos Bolt
+		[17962] =       267,    --      Conflagrate
+		[231793]        =       267,    --      Conflagrate
+		[196412]        =       267,    --      Eradication
+		[196408]        =       267,    --      Fire and Brimstone
+		[267115]        =       267,    --      Flashover
+		[335174]        =       267,    --      Havoc
+		[80240] =       267,    --      Havoc
+		[193541]        =       267,    --      Immolate
+		[348]   =       267,    --      Immolate
+		[29722] =       267,    --      Incinerate
+		[270545]        =       267,    --      Inferno
+		[266134]        =       267,    --      Internal Combustion
+		[266086]        =       267,    --      Rain of Chaos
+		[335189]        =       267,    --      Rain of Fire
+		[42223] =       267,    --      Rain of Fire
+		[5740]  =       267,    --      Rain of Fire
+		[205148]        =       267,    --      Reverse Entropy
+		[205184]        =       267,    --      Roaring Blaze
+		[17877] =       267,    --      Shadowburn
+		[6353]  =       267,    --      Soul Fire
+		[1122]  =       267,    --      Summon Infernal
+		[335175]        =       267,    --      Summon Infernal
+
+
+		--  Arms Warrior:
+		[845]   =       71,     --      Cleave
+		[334779]        =       71,     --      Collateral Damage
+		[167105]        =       71,     --      Colossus Smash
+		[316411]        =       71,     --      Colossus Smash
+		[262228]        =       71,     --      Deadly Calm
+		[197690]        =       71,     --      Defensive Stance
+		[118038]        =       71,     --      Die by the Sword
+		[315948]        =       71,     --      Die by the Sword
+		[262150]        =       71,     --      Dreadnaught
+		[202316]        =       71,     --      Fervor of Battle
+		[248621]        =       71,     --      In For The Kill
+		[12294] =       71,     --      Mortal Strike
+		[261900]        =       71,     --      Mortal Strike
+		[316440]        =       71,     --      Overpower
+		[316441]        =       71,     --      Overpower
+		[7384]  =       71,     --      Overpower
+		[772]   =       71,     --      Rend
+		[279423]        =       71,     --      Seasoned Soldier
+		[29838] =       71,     --      Second Wind
+		[260643]        =       71,     --      Skullsplitter
+		[260708]        =       71,     --      Sweeping Strikes
+		[316432]        =       71,     --      Sweeping Strikes
+		[316433]        =       71,     --      Sweeping Strikes
+		[184783]        =       71,     --      Tactician
+		[262161]        =       71,     --      Warbreaker
+
+		--  Fury Warrior:
+		[23881] =       72,     --      Bloodthirst
+		[316537]        =       72,     --      Bloodthirst
+		[335070]        =       72,     --      Cruelty
+		[184361]        =       72,     --      Enrage
+		[316424]        =       72,     --      Enrage
+		[316425]        =       72,     --      Enrage
+		[184364]        =       72,     --      Enraged Regeneration
+		[316474]        =       72,     --      Enraged Regeneration
+		[335077]        =       72,     --      Frenzy
+		[215568]        =       72,     --      Fresh Meat
+		[215571]        =       72,     --      Frothing Berserker
+		[202224]        =       72,     --      Furious Charge
+		[280392]        =       72,     --      Meat Cleaver
+		[315720]        =       72,     --      Onslaught
+		[316452]        =       72,     --      Raging Blow
+		[316453]        =       72,     --      Raging Blow
+		[85288] =       72,     --      Raging Blow
+		[85384] =       72,     --      Raging Blow
+		[96103] =       72,     --      Raging Blow
+		[184367]        =       72,     --      Rampage
+		[209694]        =       72,     --      Rampage
+		[316412]        =       72,     --      Rampage
+		[316519]        =       72,     --      Rampage
+		[202751]        =       72,     --      Reckless Abandon
+		[1719]  =       72,     --      Recklessness
+		[316828]        =       72,     --      Recklessness
+		[335091]        =       72,     --      Seethe
+		[280772]        =       72,     --      Siegebreaker
+		[81099] =       72,     --      Single-Minded Fury
+		[46917] =       72,     --      Titan's Grip
+		[208154]        =       72,     --      Warpaint
+
+
+		--  Protection Warrior:
+		[202560]        =       73,     --      Best Served Cold
+		[280001]        =       73,     --      Bolster
+		[202743]        =       73,     --      Booming Voice
+		[203201]        =       73,     --      Crackling Thunder
+		[115767]        =       73,     --      Deep Wounds
+		[115768]        =       73,     --      Deep Wounds
+		[1160]  =       73,     --      Demoralizing Shout
+		[316464]        =       73,     --      Demoralizing Shout
+		[20243] =       73,     --      Devastate
+		[236279]        =       73,     --      Devastator
+		[203177]        =       73,     --      Heavy Repercussions
+		[202095]        =       73,     --      Indomitable
+		[202603]        =       73,     --      Into the Fray
+		[12975] =       73,     --      Last Stand
+		[275338]        =       73,     --      Menace
+		[202561]        =       73,     --      Never Surrender
+		[275334]        =       73,     --      Punish
+		[6572]  =       73,     --      Revenge
+		[161798]        =       73,     --      Riposte
+		[275339]        =       73,     --      Rumbling Earth
+		[316834]        =       73,     --      Shield Wall
+		[871]   =       73,     --      Shield Wall
+		[46968] =       73,     --      Shockwave
+		[316414]        =       73,     --      Thunder Clap
+		[6343]  =       73,     --      Thunder Clap
+		[275336]        =       73,     --      Unstoppable Force
+		[316428]        =       73,     --      Vanguard
+		[71]    =       73,     --      Vanguard
+
+	}
+	end
 
 	_detalhes.SpecIDToClass = {
 		[577] = "DEMONHUNTER", -- Havoc Demon Hunter
@@ -1028,16 +1948,16 @@ do
 		[252] = "DEATHKNIGHT", -- Unholy Death Knight
 		[251] = "DEATHKNIGHT", -- Frost Death Knight
 		[250] = "DEATHKNIGHT", -- Blood Death Knight
-		
+
 		[102] = "DRUID", -- Balance Druid
 		[103] = "DRUID", -- Feral Druid
 		[104] = "DRUID", -- Guardian Druid
 		[105] = "DRUID", -- Restoration Druid
-		
+
 		[253] = "HUNTER", -- Beast Mastery Hunter
 		[254] = "HUNTER", -- Marksmanship Hunter
 		[255] = "HUNTER", -- Survival Hunter
-		
+
 		[62] = "MAGE", -- Arcane Mage
 		[63] = "MAGE", -- Fire Mage
 		[64] = "MAGE", -- Frost Mage
@@ -1045,32 +1965,36 @@ do
 		[268] = "MONK", -- Brewmaster Monk
 		[269] = "MONK", -- Windwalker Monk
 		[270] = "MONK", -- Mistweaver Monk
-		
+
 		[65] = "PALADIN", -- Holy Paladin
 		[66] = "PALADIN", -- Protection Paladin
 		[70] = "PALADIN", -- Retribution Paladin
-		
+
 		[256] = "PRIEST", -- Discipline Priest
 		[257] = "PRIEST", -- Holy Priest
 		[258] = "PRIEST", -- Shadow Priest
-		
+
 		[259] = "ROGUE", -- Assassination Rogue
 		[260] = "ROGUE", -- Outlaw Rogue
 		[261] = "ROGUE", -- Subtlety Rogue
-		
+
 		[262] = "SHAMAN", -- Elemental Shaman
 		[263] = "SHAMAN", -- Enhancement Shaman
 		[264] = "SHAMAN", -- Restoration Shaman
-		
+
 		[265] = "WARLOCK", -- Affliction Warlock
 		[266] = "WARLOCK", -- Demonology Warlock
 		[267] = "WARLOCK", -- Destruction Warlock
-		
+
 		[71] = "WARRIOR", -- Arms Warrior
 		[72] = "WARRIOR", -- Fury Warrior
 		[73] = "WARRIOR", -- Protection Warrior
+
+		[1467] = "EVOKER", --Devastation Evoker
+		[1468] = "EVOKER", --Preservation Evoker
+		[1473] = "EVOKER", --Augmentation Evoker
 	}
-	
+
 	_detalhes.ClassSpellList = {
 
 		--death knight
@@ -1141,7 +2065,7 @@ do
 		[49998]	=	"DEATHKNIGHT", --death strike
 		[55090]	=	"DEATHKNIGHT",--scourge strike
 		[47632]	=	"DEATHKNIGHT",--death coil
-	
+
 	--demmon hunter
 		[185123] = "DEMONHUNTER", -- "Throw Glaive"
 		[196718] = "DEMONHUNTER", -- "Darkness"
@@ -1176,11 +2100,11 @@ do
 		[247455] = "DEMONHUNTER", -- spirit bomb
 		[225921] = "DEMONHUNTER", -- fracture
 		[225919] = "DEMONHUNTER", -- fracture
-	
+
 	--druid
 		[155722]	=	"DRUID", -- rake
 		[192090]	=	"DRUID", -- thrash
-		
+
 		[145110]	=	"DRUID", -- "Ysera's Gift"
 		[155777]	=	"DRUID", -- "Rejuvenation (Germination)"
 		[101024]	=	"DRUID", -- "Glyph of Ferocious Bite"
@@ -1193,12 +2117,12 @@ do
 		[20484]	=	"DRUID", -- "Rebirth"
 		[106839]	=	"DRUID", -- "Skull Bash"
 		[42231]	=	"DRUID", -- "Hurricane"
-		[164815]	=	"DRUID", -- "Sunfire"		
+		[164815]	=	"DRUID", -- "Sunfire"
 		[164812]	=	"DRUID", -- "Moonfire"
 		[106785]	=	"DRUID", -- "Swipe"
 		[50288]	=	"DRUID", -- "Starfall"
-		[152221]	=	"DRUID", -- "Stellar Flare"	
-		[80313]	=	"DRUID", -- "Pulverize"	
+		[152221]	=	"DRUID", -- "Stellar Flare"
+		[80313]	=	"DRUID", -- "Pulverize"
 		[124991]	=	"DRUID", -- "Nature's Vigil"
 		[33917]	=	"DRUID", -- "Mangle"
 		[102417]	=	 "DRUID", --  Wild Charge
@@ -1221,7 +2145,7 @@ do
 		[102359]	=	 "DRUID", --  Mass Entanglement
 		[108293]	=	 "DRUID", --  Heart of the Wild
 		[5211]	=	 "DRUID", --  Mighty Bash
-		[108291]	=	 "DRUID", --  Heart of the Wild		
+		[108291]	=	 "DRUID", --  Heart of the Wild
 		[18562]	=	 "DRUID", --Swiftmend
 		[132158]	=	 "DRUID", -- Nature's Swiftness
 		[33763]	=	 "DRUID", -- Lifebloom
@@ -1243,7 +2167,7 @@ do
 		[102543]	=	 "DRUID", -- Incarnation: King of the Jungle
 		[1850]	=	 "DRUID", -- Dash
 		[77764]	=	 "DRUID", -- Stampeding Roar
-		[22568]	=	 "DRUID", -- Ferocious Bite	
+		[22568]	=	 "DRUID", -- Ferocious Bite
 		[147349]	=	 "DRUID", -- Wild Mushroom
 		[77758]	=	 "DRUID", -- Thrash
 		[108294]	=	 "DRUID", -- Heart of the Wild
@@ -1360,7 +2284,7 @@ do
 		[83244]	=	"HUNTER",-- Call Pet 4
 		[5118]	=	"HUNTER",-- Aspect of the Cheetah
 		[120360]	=	"HUNTER",-- Barrage
-		[19577]	=	"HUNTER",-- Intimidation			
+		[19577]	=	"HUNTER",-- Intimidation
 		[131900]	=	"HUNTER",--a murder of crows
 		[118253]	=	"HUNTER",--serpent sting
 		[77767]	=	"HUNTER",--cobra shot
@@ -1368,7 +2292,7 @@ do
 		[53301]	=	"HUNTER",--explosive shot
 		[120361]	=	"HUNTER",--barrage
 		[53351]	=	"HUNTER",--kill shot
-	
+
 	--mage
 		[87023]	=	"MAGE", -- "Cauterize"
 		[152087]	=	"MAGE", -- "Prismatic Crystal"
@@ -1439,7 +2363,7 @@ do
 		[2948]	=	"MAGE",--scorch
 		[30451]	=	"MAGE",--arcane blase
 		[12051]	=	"MAGE",--evocation
-	
+
 	--monk
 		[116995]	=	"MONK", -- "Surging Mist"
 		[162530]	=	"MONK", -- "Rushing Jade Wind"
@@ -1462,12 +2386,12 @@ do
 		[123586]	=	"MONK", -- "Flying Serpent Kick"
 		[115176]	=	"MONK", -- Zen Meditation cooldown
 		[115203]	=	"MONK", -- Fortifying Brew
-		
+
 		[124081]	=	"MONK", -- Zen Sphere
 		[125355]	=	"MONK", -- Healing Sphere
 		[122278]	=	"MONK", -- Dampen Harm
 		[115450]	=	"MONK", -- Detox
-		
+
 		[121827]	=	"MONK", -- Roll
 		[115315]	=	"MONK", -- Summon Black Ox Statue
 		[115399]	=	"MONK", -- Chi Brew
@@ -1477,19 +2401,19 @@ do
 		[116680]	=	"MONK", -- Thunder Focus Tea
 		[115070]	=	"MONK", -- Stance of the Wise Serpent
 		[115069]	=	"MONK", -- Stance of the Sturdy Ox
-		
+
 		[119381]	=	"MONK", -- Leg Sweep
 		[115695]	=	"MONK", -- Jab
 		[137639]	=	"MONK", -- Storm, Earth, and Fire
 		[115008]	=	"MONK", -- Chi Torpedo
-		[121828]	=	"MONK", -- --Chi Torpedo 
+		[121828]	=	"MONK", -- --Chi Torpedo
 		[115180]	=	"MONK", -- Dizzying Haze
 		[123986]	=	"MONK", -- Chi Burst
 		[130654]	=	"MONK", -- Chi Burst
 		[148135]	=	"MONK", -- Chi Burst
 		[119392]	=	"MONK", -- Charging Ox Wave
 		[116095]	=	"MONK", -- Disable
-		[115687]	=	"MONK", -- Jab		
+		[115687]	=	"MONK", -- Jab
 		[117993]	=	"MONK", -- Chi Torpedo
 		[100780]	=	"MONK", -- Jab
 		[116740]	=	"MONK", -- Tigereye Brew
@@ -1533,7 +2457,7 @@ do
 		[116844]	=	"MONK", -- Ring of Peace
 		[107428]	=	"MONK", --rising sun kick
 		[100784]	=	"MONK", --blackout kick
-		[132467]	=	"MONK", --Chi wave	
+		[132467]	=	"MONK", --Chi wave
 		[107270]	=	"MONK", --spinning crane kick
 		[100787]	=	"MONK", --tiger palm
 		[123761]	=	"MONK", --mana tea
@@ -1548,7 +2472,7 @@ do
 		[117895]	=	"MONK", --eminence (statue)
 		[115295]	=	"MONK", --guard
 		[115072]	=	"MONK", --expel harm
-		
+
 	--paladin
 		[121129]	=	"PALADIN", -- "Daybreak"
 		[159375]	=	"PALADIN", -- "Shining Protector"
@@ -1558,7 +2482,7 @@ do
 		[152262]	=	"PALADIN", -- "Seraphim"
 		[20164]	=	"PALADIN", -- "Seal of Justice"
 		[20170]	=	"PALADIN", -- "Seal of Justice"
-		[157122]	=	"PALADIN", -- "Holy Shield"		
+		[157122]	=	"PALADIN", -- "Holy Shield"
 		[96172]	=	"PALADIN", -- "Hand of Light"
 		[101423]	=	"PALADIN", -- "Seal of Righteousness"
 		[42463]	=	"PALADIN", -- "Seal of Truth"
@@ -1615,7 +2539,7 @@ do
 		[31935]	=	"PALADIN",--avenger's shield
 		[20271]	=	"PALADIN", --judgment
 		[35395]	=	"PALADIN", --cruzader strike
-		[81297]	=	"PALADIN", --consacration	
+		[81297]	=	"PALADIN", --consacration
 		[31803]	=	"PALADIN", --censure
 		[65148]	=	"PALADIN", --Sacred Shield
 		[20167]	=	"PALADIN", --Seal of Insight
@@ -1642,19 +2566,19 @@ do
 		[155521]	=	"PRIEST", -- "Auspicious Spirits"
 		[148859]	=	"PRIEST", -- "Shadowy Apparition"
 		[120696]	=	"PRIEST", -- "Halo"
-		[122128]	=	"PRIEST", -- "Divine Star"		
+		[122128]	=	"PRIEST", -- "Divine Star"
 		[132157]	=	"PRIEST", -- "Holy Nova"
 		[19236] 	= 	"PRIEST", -- Desperate Prayer
 		[47788] 	= 	"PRIEST", -- Guardian Spirit
 		[81206] 	= 	"PRIEST", -- Chakra: Sanctuary
 		[62618] 	= 	"PRIEST", -- Power Word: Barrier
 		[32375] 	= 	"PRIEST", -- Mass Dispel
-		[32546] 	= 	"PRIEST", -- Binding Heal			
+		[32546] 	= 	"PRIEST", -- Binding Heal
 		[126135] 	= 	"PRIEST", -- Lightwell
 		[81209] 	= 	"PRIEST", -- Chakra: Chastise
 		[81208] 	= 	"PRIEST", -- Chakra: Serenity
 		[2006] 	= 	"PRIEST", -- Resurrection
-		[1706] 	= 	"PRIEST", -- Levitate			
+		[1706] 	= 	"PRIEST", -- Levitate
 		[73510] 	= 	"PRIEST", -- Mind Spike
 		[127632] 	= 	"PRIEST", -- Cascade
 		[88625] 	= 	"PRIEST", -- Holy Word: Chastise
@@ -1718,7 +2642,7 @@ do
 		[88686]	=	"PRIEST", --santuary
 		[17]		=	"PRIEST", --power word: shield
 		[129250]	=	"PRIEST", --power word: solace
-	
+
 	--rogue
 		[112974]	=	"ROGUE", -- "Leeching Poison"
 		[13877]	=	"ROGUE", -- "Blade Flurry"
@@ -1740,7 +2664,7 @@ do
 		[108211] 	= 	"ROGUE", -- Leeching Poison
 		--[5761] 	= 	"ROGUE", -- Mind-numbing Poison
 		[8679] 	= 	"ROGUE", -- Wound Poison
-		
+
 		[137584] 	= 	"ROGUE", -- Shuriken Toss
 		[137585] 	= 	"ROGUE", -- Shuriken Toss Off-hand
 		[1833] 	= 	"ROGUE", -- Cheap Shot
@@ -1790,7 +2714,7 @@ do
 		[35546]	=	"ROGUE", --combat potency (energy)
 		[98440]	=	"ROGUE", --relentless strikes (energy)
 		[51637]	=	"ROGUE", --venomous vim (energy)
-		
+
 	--shaman
 		[55533]	=	"SHAMAN", -- "Glyph of Healing Wave"
 		[157503]	=	"SHAMAN", -- "Cloudburst"
@@ -1877,16 +2801,16 @@ do
 		[61295]	=	"SHAMAN", --riptide
 		[114083]	=	"SHAMAN", --restorative mists
 		[8004]	=	"SHAMAN", --healing surge
-		
+
 	--warlock
 		[104318]	=	"WARLOCK", -- fel firebolt
 		[270481]	=	"WARLOCK", -- demonfire
 		[271971]	=	"WARLOCK", -- dreadbite
 		[264178]	=	"WARLOCK", -- demonbolt
-		
+
 		[233490]	=	"WARLOCK", -- unstable affliction
 		[232670]	=	"WARLOCK", -- shadow bolt
-		
+
 		[108447]	=	"WARLOCK", -- "Soul Link"
 		[108508]	=	"WARLOCK", -- "Mannoroth's Fury"
 		[108482]	=	"WARLOCK", -- "Unbound Will"
@@ -1906,7 +2830,7 @@ do
 		[119914]	=	"WARLOCK", -- "Felstorm"
 		[86121]	=	"WARLOCK", -- "Soul Swap"
 		[86213]	=	"WARLOCK", -- "Soul Swap Exhale"
-		[157695]	=	"WARLOCK", -- "Demonbolt"	
+		[157695]	=	"WARLOCK", -- "Demonbolt"
 		[86040]	=	"WARLOCK", -- "Hand of Gul'dan"
 		[124915]	=	"WARLOCK", -- "Chaos Wave"
 		[22703]	=	"WARLOCK", -- "Infernal Awakening"
@@ -1915,7 +2839,7 @@ do
 		[152108]	=	"WARLOCK", -- "Cataclysm"
 		[27285]	=	"WARLOCK", -- "Seed of Corruption"
 		[131740]	=	"WARLOCK", -- "Corruption"
-		[131737]	=	"WARLOCK", -- "Agony"		
+		[131737]	=	"WARLOCK", -- "Agony"
 		[131736]	=	"WARLOCK", -- "Unstable Affliction"
 		[80240] 	= 	"WARLOCK", -- Havoc
 		[112921] 	= 	"WARLOCK", -- Summon Abyssal
@@ -1974,8 +2898,8 @@ do
 		[103103]	=	"WARLOCK", --malefic grasp
 		[980]	=	"WARLOCK", --agony
 		[30108]	=	"WARLOCK", --unstable affliction
-		[172]	=	"WARLOCK", --corruption	
-		[48181]	=	"WARLOCK", --haunt	
+		[172]	=	"WARLOCK", --corruption
+		[48181]	=	"WARLOCK", --haunt
 		[29722]	=	"WARLOCK", --incenerate
 		[348]	=	"WARLOCK", --Immolate
 		[116858]	=	"WARLOCK", --Chaos Bolt
@@ -1989,7 +2913,7 @@ do
 		[104027]	=	"WARLOCK", --soul fire
 		[603]	=	"WARLOCK", --doom
 		[108371]	=	"WARLOCK", --Harvest life
-		
+
 	--warrior
 		[117313]	=	"WARRIOR", -- "Bloodthirst Heal"
 		[118779]	=	"WARRIOR", -- "Victory Rush"
@@ -2058,8 +2982,34 @@ do
 		[20243]	=	"WARRIOR", --devastate
 		[115767]	=	"WARRIOR", --deep wounds
 		[109128]	=	"WARRIOR", --charge
-		[109128]	=	"WARRIOR", --charge
 		[12880]	=	"WARRIOR", --enrage
+
+	--evoker:
+		[368847] = "EVOKER", --Firestorm
+		[370452] = "EVOKER", --Shattering Star
+		[375087] = "EVOKER", --Dragonrage
+		[359073] = "EVOKER", --Eternity Surge
+		[369374] = "EVOKER", --Firestorm
+		[357211] = "EVOKER", --Pyre
+		[357212] = "EVOKER", --Pyre
+		[370960] = "EVOKER", --Emerald Communion
+		[370537] = "EVOKER", --Stasis
+		[367226] = "EVOKER", --Spiritbloom
+		[361178] = "EVOKER", --Mass Return
+		[359816] = "EVOKER", --Dream Flight
+		[355936] = "EVOKER", --Dream Breath
+		[357170] = "EVOKER", --Time Dilation
+		[363534] = "EVOKER", --Rewind
+		[360823] = "EVOKER", --Naturalize
+		[373861] = "EVOKER", --Temporal Anomaly
+		[366155] = "EVOKER", --Reversion
+		[364343] = "EVOKER", --Echo
+		[356995] = "EVOKER", --Desintegrate
+		[357209] = "EVOKER", --Fire Breath
+		[359077] = "EVOKER", --Eternity Surge
+		[361500] = "EVOKER", --Living Flame
+		[353759] = "EVOKER", --Deep Breath
+		[387036] = "EVOKER", --Burning Embers
 	}
 
 	_detalhes.AbsorbSpells = {
@@ -2070,14 +3020,14 @@ do
 			[114908]	=	true,  --Spirit Shell (discipline)
 			[114214]	=	true,  --Angelic Bulwark (talent)
 			[152118]	=	true,  --Clarity of Will (talent)
-			
+
 		--death knight
 			[48707]	=	true, --Anti-Magic Shell
 			[116888]	=	true, --Shroud of Purgatory (talent)
 			[51052]	=	true, --Anti-Magic Zone (talent)
 			[77535]	=	true, --Blood Shield
 			[115635]	=	true, --death barrier
-			
+
 		--shaman
 			[114893]	=	true, --Stone Bulwark (stone bulwark totem)
 			[145379]	=	true, --Barreira da Natureza
@@ -2086,16 +3036,16 @@ do
 		--paladin
 			[86273]	=	true, --Illuminated Healing (holy)
 			[65148]	=	true, --Sacred Shield (talent)
-		
+
 		--monk
 			[116849]	=	true, --Life Cocoon (mistweaver)
 			[115295]	=	true, --Guard (brewmaster)
 			--[118604]	=	true, --Guard (brewmaster)
-			[145051]	=	true, --Prote��o de Niuzao 
+			[145051]	=	true, --Prote��o de Niuzao
 			[145056]	=	true, --
 			[145441]	=	true, --2P T16
 			[145439]	=	true, --2P T16
-		
+
 		--warlock
 			--[6229]	=	true, --Twilight Ward
 			[108366]	=	true, --Soul Leech (talent)
@@ -2106,10 +3056,10 @@ do
 		--mage
 			[11426]	=	true, --Ice Barrier (talent)
 			[1463]	=	true, --Incanter's Ward (talent)
-		
+
 		--warrior
 			[112048]	=	true, -- Shield Barrier (protection)
-			
+
 		--others
 			[116631]	=	true, -- enchant "Enchant Weapon - Colossus"
 			[140380]	=	true, -- trinket "Inscribed Bag of Hydra-Spawn"
@@ -2117,178 +3067,58 @@ do
 
 	}
 
-		-- ~cooldown 1 self
-	_detalhes.DefensiveCooldownSpellsNoBuff = {
-		
-		[20594] = {120, 8, 1}, --racial stoneform
-		
-		--[6262] = {120, 1, 1}, --healthstone
-		
-		--["DEATHKNIGHT"] = {},
-		[48707] = {45, 5, 1}, -- Anti-Magic Shell
-		[48743] = {120, 0, 1}, --Death Pact
-		[51052] = {120, 3, 0}, --Anti-Magic Zone
-		[152279] = {120, 6}, -- "Breath of Sindragosa"
-		[48982] = {30, 0, 1}, -- "Blood T�p"
-		
-		--["DRUID"] = {},
-		[740] = {480, 8, 0}, --Tranquility
-		[22842] = {0, 0, 1}, --Frenzied Regeneration
-		--[124988] = {90, 30, 0}, --Nature's Vigil
-		[124974] = {90, 30, 0}, --Nature's Vigil
-		
-		--["HUNTER"] = {},
-		[172106] = {180, 6}, -- "Aspect of the Fox"
-		
-		--["MAGE"] = {},
-		[159916]	= {120, 6}, -- "Amplify Magic"
-		[157913]	= {45, 3, 1}, -- "Evanesce"
-		[110960] = {90, 20, 1}, -- greater invisibility - 110959 too
-		
-		--["MONK"] = {},
-		[115295] = {30, 30, 1}, -- Guard
-		[116849] = {120, 12, 0}, -- Life Cocoon (a)
-		[115310] = {180, 0, 0}, -- Revival
-		[119582] = {60, 0, 1}, -- Purifying Brew
-		[116844] = {45, 8, 0}, --Ring of Peace
-		[115308] = {0, 6, 1}, --Elusive Brew
-		[122783] = {90, 6}, -- Diffuse Magic
-		[122278] = {90, 45}, -- Dampen Harm
-		[115176] = {180, 8, 1}, -- Zen Meditation
-		[115203] = {180, 20, 1}, -- Fortifying Brew
-		[157535] = {90, 10}, -- "Breath of the Serpent"
-		
-		--["PALADIN"] = {},
-		[633]	=	{600, 0, 0}, --Lay on Hands
-		[31821]	=	{180, 6, 0},-- Devotion Aura
-		
-		--["PRIEST"] = {},
-		[62618] = {180, 10, 0}, --Power Word: Barrier
-		[109964] = {60, 10, 0}, --Spirit Shell
-		[64843] = {180, 8, 0}, --Divine Hymn
-		--[108968] = {300, 0, 0}, --Void Shift holy disc
-		--[142723] = {600, 0, 0}, --Void Shift shadow
-		
-		--["ROGUE"] = {},
-		[76577] = {180, 0, 0}, --Smoke Bomb
-		
-		--["SHAMAN"] = {},
-		[108270] = {60, 5, 1}, -- Stone Bulwark Totem
-		[108280]	=	{180, 12}, -- Healing Tide Totem
-		[98008]	=	{180, 6}, -- Spirit Link Totem
-		[108281]	=	{120, 10}, -- Ancestral Guidance
-		[165344]	=	{180, 15}, -- "Ascendance"
-		[152256]	=	{300, 60}, -- "Storm Elemental Totem"
-		
-		--["WARLOCK"] = {108416, 6229},
-		[108416] = {60, 20, 1}, -- Sacrificial Pact  1 = self
-		--[6229] = {30, 30, 1}, -- Twilight Ward  1 = self
-		
-		--["WARRIOR"] = {},
-		--[114203]	= {180, 15}, -- Demoralizing Banner
-		[114028]	= {60, 5}, -- Mass Spell Reflection
-		[97462]	= {180, 10}, -- Rallying Cry
-		[2565] 	= {12, 6, 1}, -- Shield Block
-		[871] = {180, 12, 1}, -- Shield Wall
-		[12975] = {180, 20, 1}, -- Last Stand
-		[23920] = {25, 5, 1}, -- Spell Reflection
-		[114030] = {120, 12}, -- Vigilance
-		[118038] = {120, 8, 1}, -- Die by the Sword
-		[112048]	= {90, 6, 1}, -- Shield Barrier
+	local allowedCooldownTypes = { --LIB_OPEN_RAID_COOLDOWNS_INFO types
+		[1] = false, --attack
+		[2] = true, --defensive
+		[3] = true, --defensive
+		[4] = true, --defensive
+		[5] = false, --utility
+		[6] = false, --interrupt
+		[7] = false, --dispel
+		[8] = false, --crowd control
+		[9] = false, --racials
+		[10] = false, --item heal
+		[11] = false, --item power
+		[12] = false, --item utility
 	}
 
 	local getCooldownsForClass = function(class)
 		local result = {}
-		for spellId, spellInfo in pairs (_G.DetailsFramework.CooldownsInfo) do
-			if (class == spellInfo.class) then
-				result[#result+1] = spellId
+		--Use LibOpenRaid if possible. Otherwise fallback to DF.
+		if (LIB_OPEN_RAID_COOLDOWNS_INFO) then
+			for spellId, spellInfo in pairs(LIB_OPEN_RAID_COOLDOWNS_INFO) do
+				if (class == spellInfo.class and allowedCooldownTypes[spellInfo.type]) then
+					result[#result+1] = spellId
+				end
+			end
+		else
+			for spellId, spellInfo in pairs(_G.DetailsFramework.CooldownsInfo) do
+				if (class == spellInfo.class) then
+					result[#result+1] = spellId
+				end
 			end
 		end
 		return result
 	end
 
 	_detalhes.DefensiveCooldownSpells = {
-
-		--> spellid = {cooldown, duration}
-
-		-- Death Knigh
-		[55233] = {60, 10}, -- Vampiric Blood
-		[49222] = {60, 300}, -- Bone Shield
-		[48792] = {180, 12}, -- Icebound Fortitude
-		[48743] = {120, 0}, -- Death Pact
-		[49039] = {12, 10}, -- Lichborne
 		["DEATHKNIGHT"] = getCooldownsForClass("DEATHKNIGHT"),
-
-		-- Druid
-		[62606] = {1.5, 6}, -- Savage Defense
-		--[106922] = {180, 20}, -- Might of Ursoc
-		[102342] = {60, 12}, -- Ironbark
-		[61336] = {180, 12}, -- Survival Instincts
-		[22812] = {60, 12}, -- Barkskin
-		[155835] = {60, 3}, -- Bristling Fur
+		["DEMONHUNTER"] = getCooldownsForClass("DEMONHUNTER"),
 		["DRUID"] = getCooldownsForClass("DRUID"),
-		
-		-- Hunter
-		[19263] = {120, 5}, -- Deterrence
+		["EVOKER"] = getCooldownsForClass("EVOKER"),
 		["HUNTER"] = getCooldownsForClass("HUNTER"),
-		
-		-- Mage
-		[45438] = {300, 12}, -- Ice Block
 		["MAGE"] = getCooldownsForClass("MAGE"),
-		
-		-- Monk
-		[122470] = {90, 10}, -- Touch of Karma
-		--[115213] = {180, 6}, -- Avert Harm
 		["MONK"] = getCooldownsForClass("MONK"),
-		
-		-- Paladin
-		[86659] = {180, 12}, -- Guardian of Ancient Kings
-		[31850] = {180, 10}, -- Ardent Defender
-		[498] = {60, 10}, -- Divine Protection
-		[642] = {300, 8}, -- Divine Shield
-		[6940] = {120, 12}, -- Hand of Sacrifice
-		[1022] = {300, 10}, -- Hand of Protection
-		[1038] = {120, 10}, -- Hand of Salvation
 		["PALADIN"] = getCooldownsForClass("PALADIN"),
-
-		-- Priest
-		[15286] = {180, 15}, -- Vampiric Embrace
-		[47788] = {180, 10}, -- Guardian Spirit
-		[47585] = {120, 6}, -- Dispersion
-		[33206] = {180, 8}, -- Pain Suppression
 		["PRIEST"] = getCooldownsForClass("PRIEST"),
-		
-		-- Rogue
-		[1966] = {1.5, 5}, -- Feint
-		[31224] = {60, 5}, -- Cloak of Shadows
-		[5277] = {180, 15}, -- Evasion,
-		[1856] = {120 , 0}, -- Vanish
 		["ROGUE"] = getCooldownsForClass("ROGUE"),
-		
-		-- Shaman
-		[30823] = {60, 15}, -- Shamanistic Rage
-		[108271] = {120, 6}, -- Astral Shift
 		["SHAMAN"] = getCooldownsForClass("SHAMAN"),
-		
-		-- Warlock
-		[104773] = {180, 8}, -- Unending Resolve
-		[108359] = {120, 12}, -- Dark Regeneration
-		[110913] = {180, 8}, -- Dark Bargain
 		["WARLOCK"] = getCooldownsForClass("WARLOCK"),
-
-		-- Warrior
-		[871] = {180, 12}, -- Shield Wall
-		[12975] = {180, 20}, -- Last Stand
-		[23920] = {25, 5}, -- Spell Reflection
-		[114030] = {120, 12}, -- Vigilance
-		[118038] = {120, 8}, -- Die by the Sword
-		[112048]	= {90, 6}, -- Shield Barrier
 		["WARRIOR"] = getCooldownsForClass("WARRIOR"),
-
 	}
 
 	_detalhes.HarmfulSpells = {
-		
+
 		--death knight
 		[49020] 	= 	true, -- obliterate
 		[49143] 	=	true, -- frost strike
@@ -2320,7 +3150,7 @@ do
 		--[45902]	=	true, -- Blood Strike
 		[108194]	=	true, --  Asphyxiate
 		[77606]	=	true, --  Dark Simulacrum
-		
+
 		--druid
 		--[80965]	=	 true, --  Skull Bashs
 		[78675]	=	 true, --  Solar Beam
@@ -2356,8 +3186,8 @@ do
 		--[114236]	=	 true, -- Shred!
 		[48505]	=	 true, -- Starfall
 		[78674]	=	 true, -- Starsurge
-		--[80964]	=	 true, -- Skull Bash	
-		
+		--[80964]	=	 true, -- Skull Bash
+
 		--hunter
 		--[19503]	=	true,--  Scatter Shot
 		[109259]	=	true,--  Powershot
@@ -2372,11 +3202,11 @@ do
 		[3674]	=	true,-- Black Arrow
 		[117050]	=	true,-- Glaive Toss
 		--[1978]	=	true,-- Serpent Sting
-		[34026]	=	true,-- Kill Command		
+		[34026]	=	true,-- Kill Command
 		[2643]	=	true,-- Multi-Shot
 		[109248]	=	true,-- Binding Shot
 		[149365]	=	true,-- Dire Beast
-		[120679]	=	true,-- Dire Beast		
+		[120679]	=	true,-- Dire Beast
 		[3045]	=	true,-- Rapid Fire
 		[19574]	=	true,-- Bestial Wrath
 		[19386]	=	true,-- Wyvern Sting
@@ -2390,7 +3220,7 @@ do
 		[147362]	=	true,-- Counter Shot
 		[19801]	=	true,-- Tranquilizing Shot
 		--[82654]	=	true,-- Widow Venom
-		
+
 		--mage
 		[116]	=	true, --frost bolt
 		[30455]	=	true, --ice lance
@@ -2418,11 +3248,11 @@ do
 		[44572]	=	true,-- Deep Freeze
 		[113724]	=	true,-- Ring of Frost
 		[31661]	=	true,--  Dragon's Breath
-		
+
 		--monk
 		[107428]	=	true, --rising sun kick
 		[100784]	=	true, --blackout kick
-		[132467]	=	true, --Chi wave	
+		[132467]	=	true, --Chi wave
 		[107270]	=	true, --spinning crane kick
 		[100787]	=	true, --tiger palm
 		[132463]	=	true, -- shi wave
@@ -2452,16 +3282,16 @@ do
 		[137639]	=	true, -- Storm, Earth, and Fire
 		--[115073]	=	true, -- Spinning Fire Blossom
 		[115008]	=	true, -- Chi Torpedo
-		[121828]	=	true, -- --Chi Torpedo 
+		[121828]	=	true, -- --Chi Torpedo
 		[115180]	=	true, -- Dizzying Haze
 		[123986]	=	true, -- Chi Burst
 		[130654]	=	true, -- Chi Burst
 		[148135]	=	true, -- Chi Burst
 		[119392]	=	true, -- Charging Ox Wave
 		[116095]	=	true, -- Disable
-		[115687]	=	true, -- Jab		
+		[115687]	=	true, -- Jab
 		[117993]	=	true, -- Chi Torpedo
-		
+
 		--paladin
 		[35395]	=	true,--cruzade strike
 		[879]	=	true,--exorcism
@@ -2471,7 +3301,7 @@ do
 		[35395]	=	true, --cruzader strike
 		[81297]	=	true, --consacration
 		[31803]	=	true, --censure
-		[20473]	=	true,-- Holy Shock	
+		[20473]	=	true,-- Holy Shock
 		[114158]	=	true,-- Light's Hammer
 		[24275]	=	true,-- Hammer of Wrath
 		[88263]	=	true,-- Hammer of the Righteous
@@ -2487,7 +3317,7 @@ do
 		[116467] 	= 	true, -- Consecration
 		[31801] 	= 	true, -- Seal of Truth
 		[20165] 	= 	true, -- Seal of Insight
-		
+
 		--priest
 		[589]	=	true, --shadow word: pain
 		[34914]	=	true, --vampiric touch
@@ -2499,7 +3329,7 @@ do
 		[47666]	=	true, --penance
 		[14914]	=	true, --holy fire
 		[48045]	=	true, -- Mind Sear
-		[49821]	=	true, -- Mind Sear		
+		[49821]	=	true, -- Mind Sear
 		[32379]	=	true, -- Shadow Word: Death
 		[129176]	=	true, -- Shadow Word: Death
 		[120517]	=	true, -- Halo
@@ -2511,7 +3341,7 @@ do
 		[127632] 	= 	true, -- Cascade
 		--[108921] 	= 	true, -- Psyfiend
 		[88625] 	= 	true, -- Holy Word: Chastise
-		
+
 		--rogue
 		[53]		= 	true, --backstab
 		[2098]	= 	true, --eviscerate
@@ -2540,7 +3370,7 @@ do
 		[137585] 	= 	true, -- Shuriken Toss Off-hand
 		[1833] 	= 	true, -- Cheap Shot
 		[121733] 	= 	true, -- Throw
-		[1776] 	= 	true, -- Gouge		
+		[1776] 	= 	true, -- Gouge
 
 		--shaman
 		[51505]	=	true, --lava burst
@@ -2569,8 +3399,8 @@ do
 		[103103]	=	true, --malefic grasp
 		[980]	=	true, --agony
 		[30108]	=	true, --unstable affliction
-		[172]	=	true, --corruption	
-		[48181]	=	true, --haunt	
+		[172]	=	true, --corruption
+		[48181]	=	true, --haunt
 		[29722]	=	true, --incenerate
 		[348]	=	true, --Immolate
 		[116858]	=	true, --Chaos Bolt
@@ -2603,7 +3433,7 @@ do
 		--[109466]	=	true, -- Curse of Enfeeblement
 		--[112092] 	= 	true, -- Shadow Bolt
 		--[103967] 	= 	true, -- Carrion Swarm
-		
+
 		--warrior
 		[100130]	=	true, --wild strike
 		[96103]	=	true, --raging blow
@@ -2643,7 +3473,7 @@ do
 		--[7386] 	= 	true, -- Sunder Armor
 		[107566] 	= 	true, -- Staggering Shout
 	}
-	
+
 	_detalhes.MiscClassSpells = {
 		--death knight
 		[49576]	=	true, -- Death Grip
@@ -2661,8 +3491,8 @@ do
 		[108199]	=	true, --  Gorefiend's Grasp
 		[108201]	=	true, --  Desecrated Ground
 		[48265]	=	true, --  Unholy Presence
-		[61999]	=	true, --  Raise Ally	
-		
+		[61999]	=	true, --  Raise Ally
+
 		--druid
 		--[16689]	=	 true, --  Nature's Grasp
 		[102417]	=	 true, --  Wild Charge
@@ -2695,7 +3525,7 @@ do
 		[24858]	=	 true, -- Moonkin Form
 		--[81070]	=	true, --eclipse
 		--[29166]	=	true, --innervate
-		
+
 		--hunter
 		[781]	=	true,-- Disengage
 		[82948]	=	true,-- Snake Trap
@@ -2718,7 +3548,7 @@ do
 		--[13165]	=	true,--  Aspect of the Hawk
 		[53271]	=	true,--  Master's Call
 		[1543]	=	true,--  Flare
-		
+
 		--mage
 		[1953]	=	true,-- Blink
 		[108843]	=	true,-- Blazing Speed
@@ -2741,7 +3571,7 @@ do
 		[53140]	=	true,--  Teleport: Dalaran
 		[11417]	=	true,--  Portal: Orgrimmar
 		[42955]	=	true,--  Conjure Refreshment
-		
+
 		--monk
 		[109132]	=	true, -- Roll (neutral)
 		[115313]	=	true, -- Summon Jade Serpent Statue
@@ -2758,7 +3588,7 @@ do
 		[116680]	=	true, -- Thunder Focus Tea
 		[115070]	=	true, -- Stance of the Wise Serpent
 		[115069]	=	true, -- Stance of the Sturdy Ox
-		
+
 		--paladin
 		[85499]	=	true,-- Speed of Light
 		--[84963]	=	true,-- Inquisition
@@ -2771,7 +3601,7 @@ do
 		[19740]	=	true,-- Blessing of Might
 		--[54428] 	= 	true, -- Divine Plea --misc
 		[7328] 	= 	true, -- Redemption
-		
+
 		--priest
 		[8122]	=	true, -- Psychic Scream
 		[81700]	=	true, -- Archangel
@@ -2790,7 +3620,7 @@ do
 		[81208] 	= 	true, -- Chakra: Serenity
 		[2006] 	= 	true, -- Resurrection
 		[1706] 	= 	true, -- Levitate
-		
+
 		--rogue
 		[108212]	=	true, -- Burst of Speed (misc)
 		[5171]	=	true, -- Slice and Dice
@@ -2806,7 +3636,7 @@ do
 		[108211] 	= 	true, -- Leeching Poison
 		--[5761] 	= 	true, -- Mind-numbing Poison
 		[8679] 	= 	true, -- Wound Poison
-		
+
 		--shaman
 		[73680]	=	true, -- Unleash Elements (misc)
 		[3599]	=	true, -- Searing Totem
@@ -2825,7 +3655,7 @@ do
 		[51514] 	= 	true, -- Hex
 		--[73682] 	= 	true, -- Unleash Frost
 		--[8033] 	= 	true, -- Frostbrand Weapon
-		
+
 		--warlock
 		[697]	=	true, -- Summon Voidwalker
 		[6201]	=	true, -- Create Healthstone
@@ -2857,7 +3687,7 @@ do
 		[688] 	= 	true, -- Summon Imp
 		[112870] 	= 	true, -- Summon Wrathguard
 		[104316] 	= 	true, -- Imp Swarm
-		
+
 		--warrior
 		[18499]	=	true, -- Berserker Rage (class)
 		[100]	=	true, -- Charge
@@ -2867,9 +3697,9 @@ do
 		[2457] 	= 	true, -- Battle Stance
 		[12328] 	= 	true, -- Sweeping Strikes
 		[114192] 	= 	true, -- Mocking Banner
-		
+
 	}
-	
+
 	_detalhes.AttackCooldownSpells = {
 		--death knight
 		--[49016]	=	true, -- Unholy Frenzy (attack cd)
@@ -2877,7 +3707,7 @@ do
 		[49028]	=	true, -- Dancing Rune Weapon (attack cd)
 		[51271]	=	true, -- Pillar of Frost (attack cd)
 		[63560]	=	true, -- Dark Transformation (pet)
-		
+
 		--druid
 		[106951]	=	 true, -- Berserk (attack cd)
 		[124974]	=	 true, -- Nature's Vigil (attack cd)
@@ -2889,13 +3719,13 @@ do
 		[127663]	=	 true, -- Astral Communion
 		[108293]	=	 true, --  Heart of the Wild (attack cd)
 		[108291]	=	 true, --  Heart of the Wild
-		
+
 		--hunter
 		[131894]	=	true,-- A Murder of Crows (attack cd)
 		[121818]	=	true,-- Stampede (attack cd)
 		[82692]	=	true,-- Focus Fire
 		[120360]	=	true,-- Barrage
-		
+
 		--mage
 		[80353]	=	true,-- Time Warp
 		--[131078]	=	true,-- Icy Veins
@@ -2904,22 +3734,22 @@ do
 		[108978]	=	true,-- Alter Time
 		[127140]	=	true,-- Alter Time
 		[12042]	=	true,-- Arcane Power
-		
+
 		--monk
 		[116740]	=	true, -- Tigereye Brew (attack cd?)
 		[123904]	=	true, -- Invoke Xuen, the White Tiger
 		[115288]	=	true, -- Energizing Brew
-		
+
 		--paladin
 		[31884]	=	true,-- Avenging Wrath
 		[105809]	=	true,-- Holy Avenger
 		[31842] 	= 	true, -- Divine Favor
-		
+
 		--priest
 		[34433]	=	true, -- Shadowfiend
 		[123040]	=	true, -- Mindbender
 		[10060]	=	true, -- Power Infusion
-		
+
 		--rogue
 		[13750]	=	true, -- Adrenaline Rush (attack cd)
 		--[121471]	=	true, -- Shadow Blades
@@ -2928,7 +3758,7 @@ do
 		[51690]	=	true, -- Killing Spree
 		[51713]	=	true, -- Shadow Dance
 		[152151]	=	true, -- "Shadow Reflection"
-		
+
 		--shaman
 		--[120668]	=	true, --Stormlash Totem (attack cd)
 		[2894]	=	true, -- Fire Elemental Totem
@@ -2938,19 +3768,19 @@ do
 		[51533]	=	true, -- Feral Spirit
 		[16188]	=	true, -- Ancestral Swiftness
 		[2062]	=	true, -- Earth Elemental Totem
-		
+
 		--warlock
 		[113860]	=	true, -- Dark Soul: Misery (attack cd)
 		[113858]	=	true, -- Dark Soul: Instability
 		[113861] 	= 	true, -- Dark Soul: Knowledge
-		
+
 		--warrior
 		[1719]	=	true, -- Recklessness (attack cd)
 		--[114207]	=	true, -- Skull Banner
 		[107574]	=	true, -- Avatar
 		[12292]	=	true, -- Bloodbath
 	}
-	
+
 	_detalhes.HelpfulSpells = {
 		--death knight
 		[45470] = true, -- Death Strike (heal)
@@ -2960,7 +3790,7 @@ do
 		[48982] = true, -- rune tap
 		[119975]	=	true, -- Conversion (heal)
 		[48743]	=	true, -- Death Pact (heal)
-		
+
 		--druid
 		--[33878] =	true, --mangle (energy gain)
 		[17057] =	true, --bear form (energy gain)
@@ -2976,7 +3806,7 @@ do
 		[8936]	=	true, --regrowth
 		[33778]	=	true, --lifebloom
 		[48503]	=	true, --living seed
-		--[50464]	=	true, --nourish	
+		--[50464]	=	true, --nourish
 		[18562]	=	 true, --Swiftmend (heal)
 		[145205]	=	 true, -- Wild Mushroom (heal)
 		[33763]	=	 true, -- Lifebloom (heal)
@@ -2985,19 +3815,19 @@ do
 		[108238]	=	 true, -- Renewal
 		[102351]	=	 true, --  Cenarion Ward
 
-		
+
 		--hunter
 		[109304]	=	true,-- Exhilaration (heal)
-		
+
 		--mage
 		[11426]	=	true, --Ice Barrier (heal)
 		[115610]	=	true,-- Temporal Shield
 		[111264]	=	true,-- Ice Ward
-		
+
 		--monk
 		[124682]	=	true, -- Enveloping Mist (helpful)
 		[115460]	=	true, -- Healing Sphere
-		--[115464]	=	true, -- Healing Sphere	
+		--[115464]	=	true, -- Healing Sphere
 		[115151]	=	true, -- Renewing Mist
 		[122783]	=	true, -- Diffuse Magic
 		[147489]	=	true, -- Expel Harm
@@ -3025,7 +3855,7 @@ do
 		[125355]	=	true, -- Healing Sphere
 		[122278]	=	true, -- Dampen Harm
 		[115450]	=	true, -- Detox
-		
+
 		--paladin
 		[85673]	=	true,-- Word of Glory (heal)
 		[20925]	=	true,-- Sacred Shield
@@ -3051,7 +3881,7 @@ do
 		[114039] 	= 	true, -- Hand of Purity
 		[4987] 	= 	true, -- Cleanse
 		[136494] 	= 	true, -- Word of Glory
-		
+
 		--priest
 		[19236] 	= 	true, -- Desperate Prayer
 		[47788] 	= 	true, -- Guardian Spirit
@@ -3081,7 +3911,7 @@ do
 		[15286]	=	true, -- Vampiric Embrace
 		--[2050]	=	true, -- Heal
 		[123259]	=	true, -- Prayer of Mending
-		
+
 		--rogue
 		[73651]	=	true, --Recuperate (heal)
 		[35546]	=	true, --combat potency (energy)
@@ -3091,7 +3921,7 @@ do
 		[1966]	=	true, -- Feint (helpful)
 		[76577]	=	true, -- Smoke Bomb
 		[5277]	=	true, -- Evasion
-		
+
 		--shaman
 		--[88765]	=	true, --rolling thunder (mana)
 		[51490]	=	true, --thunderstorm (mana)
@@ -3118,7 +3948,7 @@ do
 		[77130]	=	true, -- Purify Spirit
 		[51886] 	= 	true, -- Cleanse Spirit
 		[98008] 	= 	true, -- Spirit Link Totem
-		
+
 		--warlock
 		[108359]	=	true, -- Dark Regeneration (helpful)
 		[110913]	=	true, -- Dark Bargain
@@ -3142,11 +3972,11 @@ do
 		[12975]	=	true, -- Last Stand
 		[2565] 	= 	true, -- Shield Block
 	}
-	
 
-	local Loc = LibStub ("AceLocale-3.0"):GetLocale ( "Details" )
+
+	local Loc = LibStub("AceLocale-3.0"):GetLocale ( "Details" )
 	_detalhes.SpellOverwrite = {
-		--[124464] = {name = GetSpellInfo (124464) .. " (" .. Loc ["STRING_MASTERY"] .. ")"}, --> shadow word: pain mastery proc (priest)
+		--[124464] = {name = GetSpellInfo(124464) .. " (" .. Loc ["STRING_MASTERY"] .. ")"}, --shadow word: pain mastery proc (priest)
 	}
 
 	_detalhes.spells_school = {
@@ -3178,7 +4008,7 @@ do
 		[72] = {name = STRING_SCHOOL_SPELLSTORM, formated = "|cFFAFB9AF" .. STRING_SCHOOL_SPELLSTORM .. "|r", hex = "FFAFB9AF", rgb = {175, 175, 175}, decimals = {0.6863, 0.7255, 0.6863}}, --#AFB9AF
 		[80] = {name = STRING_SCHOOL_SPELLFROST , formated = "|cFFC0C0FF" .. STRING_SCHOOL_SPELLFROST  .. "|r", hex = "FFC0C0FF", rgb = {192, 255, 255}, decimals = {0.7529, 0.7529, 1.0000}},--#C0C0FF
 		[96] = {name = STRING_SCHOOL_SPELLSHADOW, formated = "|cFFB980FF" .. STRING_SCHOOL_SPELLSHADOW .. "|r", hex = "FFB980FF", rgb = {185, 255, 255}, decimals = {0.7255, 0.5020, 1.0000}},--#B980FF
-		
+
 		[28] = {name = STRING_SCHOOL_ELEMENTAL, formated = "|cFF0070DE" .. STRING_SCHOOL_ELEMENTAL .. "|r", hex = "FF0070DE", rgb = {0, 222, 222}, decimals = {0.0000, 0.4392, 0.8706}},
 		[124] = {name = STRING_SCHOOL_CHROMATIC, formated = "|cFFC0C0C0" .. STRING_SCHOOL_CHROMATIC .. "|r", hex = "FFC0C0C0", rgb = {192, 192, 192}, decimals = {0.7529, 0.7529, 0.7529}},
 		[126] = {name = STRING_SCHOOL_MAGIC , formated = "|cFF1111FF" .. STRING_SCHOOL_MAGIC  .. "|r", hex = "FF1111FF", rgb = {17, 255, 255}, decimals = {0.0667, 0.0667, 1.0000}},
@@ -3186,25 +4016,48 @@ do
 	--[[custom]]	[1024] = {name = "Reflection", formated = "|cFFFFFFFF" .. "Reflection" .. "|r", hex = "FFFFFFFF", rgb = {255, 255, 255}, decimals = {1, 1, 1}},
 	}
 
-	function _detalhes:GetSpellSchoolName (school)
-		return _detalhes.spells_school [school] and _detalhes.spells_school [school].name or ""
+	---return the school of a spell, this value is gotten from a cache
+	---@param spellID spellid|spellname
+	---@return spellschool
+	function Details:GetSpellSchool(spellID)
+		if (spellID == "number") then
+			spellID = GetSpellInfo(spellID)
+		end
+		local school = Details.spell_school_cache[spellID] or 1
+		return school
 	end
-	function _detalhes:GetSpellSchoolFormatedName (school)
-		return _detalhes.spells_school [school] and _detalhes.spells_school [school].formated or ""
+
+	---return the name of a spell school
+	---@param school spellschool
+	---@return string
+	function Details:GetSpellSchoolName(school)
+		return Details.spells_school [school] and Details.spells_school [school].name or ""
 	end
+
+	---return the name of a spell school containing the scape code to color the name by the school color
+	---@param school spellschool
+	---@return string
+	function Details:GetSpellSchoolFormatedName(school)
+		return Details.spells_school[school] and Details.spells_school[school].formated or ""
+	end
+
 	local default_school_color = {145/255, 180/255, 228/255}
-	function _detalhes:GetSpellSchoolColor (school)
-		return unpack (_detalhes.spells_school [school] and _detalhes.spells_school [school].decimals or default_school_color)
+	---return the color of a spell school
+	---@param school spellschool
+	---@return red, green, blue
+	function Details:GetSpellSchoolColor(school)
+		return unpack(Details.spells_school[school] and Details.spells_school[school].decimals or default_school_color)
 	end
-	function _detalhes:GetCooldownList (class)
-		class = class or select (2, UnitClass ("player"))
-		return _detalhes.DefensiveCooldownSpells [class]
+
+	function Details:GetCooldownList(class)
+		class = class or select(2, UnitClass("player"))
+		return Details.DefensiveCooldownSpells[class]
 	end
 end
 
 
 --save spells of a segment
-local SplitLoadFrame = CreateFrame ("frame")
+local SplitLoadFrame = CreateFrame("frame")
 local MiscContainerNames = {
     "dispell_spells",
     "cooldowns_defensive_spells",
@@ -3215,42 +4068,42 @@ local MiscContainerNames = {
     "cc_break_spells",
     "ress_spells",
 }
-local SplitLoadFunc = function (self, deltaTime)
+local SplitLoadFunc = function(self, deltaTime)
     --which container it will iterate on this tick
     local container = Details.tabela_vigente and Details.tabela_vigente [SplitLoadFrame.NextActorContainer] and Details.tabela_vigente [SplitLoadFrame.NextActorContainer]._ActorTable
 
     if (not container) then
         if (Details.debug) then
-            Details:Msg ("(debug) finished index spells.")
+            --Details:Msg("(debug) finished index spells.")
         end
-        SplitLoadFrame:SetScript ("OnUpdate", nil)
+        SplitLoadFrame:SetScript("OnUpdate", nil)
         return
     end
-    
+
     local inInstance = IsInInstance()
     local isEncounter = Details.tabela_vigente and Details.tabela_vigente.is_boss
     local encounterID = isEncounter and isEncounter.id
-    
+
     --get the actor
     local actorToIndex = container [SplitLoadFrame.NextActorIndex]
-    
+
     --no actor? go to the next container
     if (not actorToIndex) then
         SplitLoadFrame.NextActorIndex = 1
         SplitLoadFrame.NextActorContainer = SplitLoadFrame.NextActorContainer + 1
-        
+
         --finished all the 4 container? kill the process
         if (SplitLoadFrame.NextActorContainer == 5) then
-            SplitLoadFrame:SetScript ("OnUpdate", nil)
+            SplitLoadFrame:SetScript("OnUpdate", nil)
             if (Details.debug) then
-                Details:Msg ("(debug) finished index spells.")
+                --Details:Msg("(debug) finished index spells.")
             end
             return
         end
     else
         --++
         SplitLoadFrame.NextActorIndex = SplitLoadFrame.NextActorIndex + 1
-        
+
         --get the class name or the actor name in case the actor isn't a player
         local source
         if (inInstance) then
@@ -3258,7 +4111,7 @@ local SplitLoadFunc = function (self, deltaTime)
         else
             source = RAID_CLASS_COLORS [actorToIndex.classe] and Details.classstring_to_classid [actorToIndex.classe]
         end
-        
+
         --if found a valid actor
         if (source) then
             --if is damage, heal or energy
@@ -3266,11 +4119,11 @@ local SplitLoadFunc = function (self, deltaTime)
                 --get the spell list in the spells container
                 local spellList = actorToIndex.spells and actorToIndex.spells._ActorTable
                 if (spellList) then
-                
+
                     local SpellPool = Details.spell_pool
                     local EncounterSpellPool = Details.encounter_spell_pool
-                    
-                    for spellID, _ in pairs (spellList) do
+
+                    for spellID, _ in pairs(spellList) do
                         if (not SpellPool [spellID]) then
                             SpellPool [spellID] = source
                         end
@@ -3281,48 +4134,52 @@ local SplitLoadFunc = function (self, deltaTime)
                         end
                     end
                 end
-            
+
             --if is a misc container
             elseif (SplitLoadFrame.NextActorContainer == 4) then
-                for _, containerName in ipairs (MiscContainerNames) do 
+                for _, containerName in ipairs(MiscContainerNames) do
                     --check if the actor have this container
                     if (actorToIndex [containerName]) then
                         local spellList = actorToIndex [containerName]._ActorTable
                         if (spellList) then
-                        
-                            local SpellPool = Details.spell_pool
-                            local EncounterSpellPool = Details.encounter_spell_pool
-                            
-                            for spellID, _ in pairs (spellList) do
-                                if (not SpellPool [spellID]) then
-                                    SpellPool [spellID] = source
+                            local spellPool = Details.spell_pool
+                            local encounterSpellPool = Details.encounter_spell_pool
+
+                            for spellId, _ in pairs(spellList) do
+                                if (not spellPool[spellId]) then
+                                    spellPool[spellId] = source
                                 end
-                                if (encounterID and not EncounterSpellPool [spellID]) then
+                                if (encounterID and not encounterSpellPool[spellId]) then
                                     if (actorToIndex:IsEnemy()) then
-                                        EncounterSpellPool [spellID] = {encounterID, source}
+                                        encounterSpellPool[spellId] = {encounterID, source}
                                     end
                                 end
                             end
                         end
                     end
                 end
-                
+
+				--[=[ .spell_cast is deprecated
                 --spells the actor casted
                 if (actorToIndex.spell_cast) then
-                    local SpellPool = Details.spell_pool
-                    local EncounterSpellPool = Details.encounter_spell_pool
-                    
-                    for spellID, _ in pairs (actorToIndex.spell_cast) do
-                        if (not SpellPool [spellID]) then
-                            SpellPool [spellID] = source
-                        end
-                        if (encounterID and not EncounterSpellPool [spellID]) then
-                            if (actorToIndex:IsEnemy()) then
-                                EncounterSpellPool [spellID] = {encounterID, source}
-                            end
-                        end
+                    local spellPool = Details.spell_pool
+                    local encounterSpellPool = Details.encounter_spell_pool
+
+                    for spellName, _ in pairs(actorToIndex.spell_cast) do
+						local _, _, _, _, _, _, spellId = GetSpellInfo(spellName)
+						if (spellId) then
+							if (not spellPool[spellId]) then
+								spellPool[spellId] = source
+							end
+							if (encounterID and not encounterSpellPool[spellId]) then
+								if (actorToIndex:IsEnemy()) then
+									encounterSpellPool[spellId] = {encounterID, source}
+								end
+							end
+						end
                     end
                 end
+				--]=]
             end
         end
     end
@@ -3330,9 +4187,9 @@ end
 
 function Details.StoreSpells()
     if (Details.debug) then
-        Details:Msg ("(debug) started to index spells.")
+        --Details:Msg("(debug) started to index spells.")
     end
-    SplitLoadFrame:SetScript ("OnUpdate", SplitLoadFunc)
+    SplitLoadFrame:SetScript("OnUpdate", SplitLoadFunc)
     SplitLoadFrame.NextActorContainer = 1
     SplitLoadFrame.NextActorIndex = 1
 end

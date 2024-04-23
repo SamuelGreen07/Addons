@@ -1,8 +1,17 @@
 local addon, ns = ...
 local cargBags = ns.cargBags
 
-local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+local isClassic = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE
 local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+
+local GetContainerNumSlots = GetContainerNumSlots or C_Container.GetContainerNumSlots
+
+local isDF = select(4,GetBuildInfo()) >= 100000
+local NumBagContainer = isDF and 5 or 4
+local BankContainerStartID = NumBagContainer + 1
+local MaxNumContainer = isDF and 12 or 11
+
+local GetContainerNumFreeSlots = GetContainerNumFreeSlots or C_Container.GetContainerNumFreeSlots
 
 local BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate" or nil
 
@@ -437,8 +446,22 @@ function cbNivaya:OnClose()
 	for _,v in ipairs(cB_CustomBags) do if v.active then cbNivaya:HideBags(cB_Bags[v.name]) end end
 end
 
+local function GetNumFreeBankSlots()
+	local free = 0
+	local containerIDs = isDF and {-1,6,7,8,9,10,11,12} or {-1,5,6,7,8,9,10,11}
+	for _,i in next, containerIDs do	
+		free = free + GetContainerNumFreeSlots(i)
+	end
+	return free
+end
+
 function cbNivaya:OnBankOpened() 
 	cB_Bags.bank:Show(); 
+	
+	cB_Bags.bank.EmptySlotCounter:SetText(GetNumFreeBankSlots())
+	if isRetail then
+		cB_Bags.bankReagent.EmptySlotCounter:SetText(GetContainerNumFreeSlots(-3))
+	end
 	
 	if isRetail then
 		cbNivaya:ShowBags(cB_Bags.bankSets, cB_Bags.bankReagent, cB_Bags.bankArmor, cB_Bags.bankGem, cB_Bags.bankQuest, cB_Bags.bankTrade, cB_Bags.bankConsumables, cB_Bags.bankArtifactPower, cB_Bags.bankBattlePet)
@@ -485,7 +508,7 @@ end
 local SetFrameMovable = function(f, v)
 	f:SetMovable(true)
 	f:SetUserPlaced(true)
-	f:RegisterForClicks("LeftButton", "RightButton")
+	f:RegisterForClicks("LeftButtonDown", "LeftButtonUp", "RightButtonDown", "RightButtonUp")
 	if v then 
 		f:SetScript("OnMouseDown", function() 
 			f:ClearAllPoints() 
@@ -752,7 +775,7 @@ local Event =  CreateFrame('Frame', nil)
 Event:RegisterEvent("PLAYER_ENTERING_WORLD")
 Event:SetScript('OnEvent', function(self, event, ...)
 	if event == "PLAYER_ENTERING_WORLD" then
-		for bagID = -3, 11 do
+		for bagID = -3, MaxNumContainer do
 			local slots = GetContainerNumSlots(bagID)
 			for slotID=1,slots do
 				local button = cbNivaya.buttonClass:New(bagID, slotID)

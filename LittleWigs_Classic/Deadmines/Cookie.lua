@@ -3,7 +3,7 @@
 -- Module declaration
 --
 
-local mod, CL = BigWigs:NewBoss("\"Captain\" Cookie", 756, 93)
+local mod, CL = BigWigs:NewBoss("Cookie", 756, 93)
 if not mod then return end
 mod:RegisterEnableMob(47739)
 
@@ -13,7 +13,7 @@ mod:RegisterEnableMob(47739)
 
 function mod:GetOptions()
 	return {
-		89252, -- Cauldron Fire
+		-- 89252, -- Cauldron Fire
 	}
 end
 

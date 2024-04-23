@@ -18,7 +18,7 @@ end
 do
 	-- Ours
 	local SOUND = media.MediaType and media.MediaType.SOUND or "sound"
-	media:Register(SOUND, L.spell_on_you, "Interface\\AddOns\\BigWigs\\Media\\Sounds\\spell_on_you.ogg")
+	--media:Register(SOUND, L.spell_on_you, "Interface\\AddOns\\BigWigs\\Media\\Sounds\\spell_on_you.ogg")
 	media:Register(SOUND, L.spell_under_you, "Interface\\AddOns\\BigWigs\\Media\\Sounds\\spell_under_you.ogg")
 	media:Register(SOUND, "BigWigs: Long", "Interface\\AddOns\\BigWigs\\Media\\Sounds\\Long.ogg")
 	media:Register(SOUND, "BigWigs: Info", "Interface\\AddOns\\BigWigs\\Media\\Sounds\\Info.ogg")
@@ -44,6 +44,6 @@ end
 -- Fonts
 do
 	local FONT = media.MediaType and media.MediaType.FONT or "font"
-	media:Register(FONT, "Noto Sans Regular", "Interface\\AddOns\\BigWigs\\Media\\Fonts\\Noto.ttf", 130) -- 130 latin + cyr
-	media:Register(FONT, "Noto Sans SemiCondensed", "Interface\\AddOns\\BigWigs\\Media\\Fonts\\NotoSans-SemiCondensed.ttf", 130) -- 130 latin + cyr
+	media:Register(FONT, "Noto Sans Regular", "Interface\\AddOns\\BigWigs\\Media\\Fonts\\NotoSans-Regular.otf", 130) -- 130 latin + cyr
+	media:Register(FONT, "Noto Sans SemiCondensed", "Interface\\AddOns\\BigWigs\\Media\\Fonts\\NotoSans-SemiCondensed.otf", 130) -- 130 latin + cyr
 end

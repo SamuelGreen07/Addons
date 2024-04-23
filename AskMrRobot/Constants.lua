@@ -2,10 +2,10 @@ local Amr = LibStub("AceAddon-3.0"):GetAddon("AskMrRobot")
 local L = LibStub("AceLocale-3.0"):GetLocale("AskMrRobot", true)
 
 -- min import version that we will read from the website
-Amr.MIN_IMPORT_VERSION = 77
+Amr.MIN_IMPORT_VERSION = 114
 
 -- min addon version that we will support for inter-addon communication
-Amr.MIN_ADDON_VERSION = 65
+Amr.MIN_ADDON_VERSION = 114
 
 -- import some constants from the serializer for convenience
 Amr.ChatPrefix = Amr.Serializer.ChatPrefix
@@ -77,37 +77,40 @@ Amr.SpecIcons = {
     [7] = "ability_druid_catform", -- DruidFeral
     [8] = "ability_racial_bearform", -- DruidGuardian
     [9] = "spell_nature_healingtouch", -- DruidRestoration
-    [10] = "ability_hunter_bestialdiscipline", -- HunterBeastMastery
-    [11] = "ability_hunter_focusedaim", -- HunterMarksmanship
-    [12] = "ability_hunter_camouflage", -- HunterSurvival
-    [13] = "spell_holy_magicalsentry", -- MageArcane
-    [14] = "spell_fire_firebolt02", -- MageFire
-    [15] = "spell_frost_frostbolt02", -- MageFrost
-    [16] = "spell_monk_brewmaster_spec", -- MonkBrewmaster
-    [17] = "spell_monk_mistweaver_spec", -- MonkMistweaver
-    [18] = "spell_monk_windwalker_spec", -- MonkWindwalker
-    [19] = "spell_holy_holybolt", -- PaladinHoly
-    [20] = "ability_paladin_shieldofthetemplar", -- PaladinProtection
-    [21] = "spell_holy_auraoflight", -- PaladinRetribution
-    [22] = "spell_holy_powerwordshield", -- PriestDiscipline
-    [23] = "spell_holy_guardianspirit", -- PriestHoly
-    [24] = "spell_shadow_shadowwordpain", -- PriestShadow
-    [25] = "ability_rogue_eviscerate", -- RogueAssassination
-    [26] = "inv_sword_30", -- RogueOutlaw
-    [27] = "ability_stealth", -- RogueSubtlety
-    [28] = "spell_nature_lightning", -- ShamanElemental
-    [29] = "spell_nature_lightningshield", -- ShamanEnhancement
-    [30] = "spell_nature_magicimmunity", -- ShamanRestoration
-    [31] = "spell_shadow_deathcoil", -- WarlockAffliction
-    [32] = "spell_shadow_metamorphosis", -- WarlockDemonology
-    [33] = "spell_shadow_rainoffire", -- WarlockDestruction
-    [34] = "ability_warrior_savageblow", -- WarriorArms
-    [35] = "ability_warrior_innerrage", -- WarriorFury
-    [36] = "ability_warrior_defensivestance", -- WarriorProtection
+    [10] = "classicon_evoker_devastation", -- EvokerDevastation
+    [11] = "classicon_evoker_preservation", -- EvokerPreservation
+    [12] = "classicon_evoker_augmentation", -- EvokerAugmentation
+    [13] = "ability_hunter_bestialdiscipline", -- HunterBeastMastery
+    [14] = "ability_hunter_focusedaim", -- HunterMarksmanship
+    [15] = "ability_hunter_camouflage", -- HunterSurvival
+    [16] = "spell_holy_magicalsentry", -- MageArcane
+    [17] = "spell_fire_firebolt02", -- MageFire
+    [18] = "spell_frost_frostbolt02", -- MageFrost
+    [19] = "spell_monk_brewmaster_spec", -- MonkBrewmaster
+    [20] = "spell_monk_mistweaver_spec", -- MonkMistweaver
+    [21] = "spell_monk_windwalker_spec", -- MonkWindwalker
+    [22] = "spell_holy_holybolt", -- PaladinHoly
+    [23] = "ability_paladin_shieldofthetemplar", -- PaladinProtection
+    [24] = "spell_holy_auraoflight", -- PaladinRetribution
+    [25] = "spell_holy_powerwordshield", -- PriestDiscipline
+    [26] = "spell_holy_guardianspirit", -- PriestHoly
+    [27] = "spell_shadow_shadowwordpain", -- PriestShadow
+    [28] = "ability_rogue_eviscerate", -- RogueAssassination
+    [29] = "inv_sword_30", -- RogueOutlaw
+    [30] = "ability_stealth", -- RogueSubtlety
+    [31] = "spell_nature_lightning", -- ShamanElemental
+    [32] = "spell_nature_lightningshield", -- ShamanEnhancement
+    [33] = "spell_nature_magicimmunity", -- ShamanRestoration
+    [34] = "spell_shadow_deathcoil", -- WarlockAffliction
+    [35] = "spell_shadow_metamorphosis", -- WarlockDemonology
+    [36] = "spell_shadow_rainoffire", -- WarlockDestruction
+    [37] = "ability_warrior_savageblow", -- WarriorArms
+    [38] = "ability_warrior_innerrage", -- WarriorFury
+    [39] = "ability_warrior_defensivestance", -- WarriorProtection
 }
 
 -- instance IDs ordered in preferred display order
-Amr.InstanceIdsOrdered = { 2296 }
+Amr.InstanceIdsOrdered = { 2549, 2569, 2522 }
 
 Amr.Difficulties = {
 	Lfr = 17,
@@ -188,6 +191,9 @@ function Amr.CreateItemLink(itemObj)
     if itemObj.stat2 and itemObj.stat2 ~= 0 then
         propCount = propCount + 1
     end
+    if itemObj.craftQuality and itemObj.craftQuality ~= 0 then
+        propCount = propCount + 1
+    end
 
     if propCount > 0 then
         table.insert(parts, propCount)
@@ -202,6 +208,10 @@ function Amr.CreateItemLink(itemObj)
         if itemObj.stat2 and itemObj.stat2 ~= 0 then
             table.insert(parts, 30)
             table.insert(parts, itemObj.stat2)
+        end
+        if itemObj.craftQuality and itemObj.craftQuality ~= 0 then
+            table.insert(parts, 38)
+            table.insert(parts, itemObj.craftQuality)
         end
     else
         table.insert(parts, 0) -- no props

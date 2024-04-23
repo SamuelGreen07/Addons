@@ -2,7 +2,7 @@
 -- ChatBar Classic.lua 
 --------------------------------------------------------------------------
 --[[
-ChatBar Classic
+ChatBar Classic for Dragonflight
 
 Author: AnduinLothar - karlkfi@yahoo.com
 Graphics: Vynn, Zseton
@@ -11,6 +11,27 @@ Edited: Foxylittlething, aNNiPAk, Yarko
 -Button Bar for openning chat messages of each type.
 
 Change Log:
+v 3.3-DF (Foxylittlething)
+- fixed 10.1.5 and 10.1.7 versions compatibality
+- fixed russian localization. Thanks to ZamestoTV
+v 3.22d-DF (Foxylittlething)
+- fixed 10.0.2 version compatibality
+v 3.22c-DF (Foxylittlething)
+- fixed backdrop errors apearance
+v 3.22b-DF (Foxylittlething)
+- fixed Dragonflight(DF) prepatch compatibility
+v 3.22a-DF (Foxylittlething)
+- fixed chinese translation
+v 3.22-DF (Foxylittlething)
+- Dragonflight(DF) compatibility
+- fixed 10.0.2(PTR) version compatibality
+v 3.21-SL (Foxylittlething)
+- fixed 9.2.7 version compatibality
+- lower archive size
+v 3.20-SL (Foxylittlething)
+- fixed 9.2.0 version compatibility
+v 3.18.1-SL (Foxylittlething)
+- fixed 9.1.0 version compatibility
 v 3.17.1b (Foxylittlething)
 - fixed errors, caused by new LUA. Thanks to aNNiPAk and dartraiden
 v 3.16.1b (Foxylittlething)

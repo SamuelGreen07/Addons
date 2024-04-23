@@ -13,14 +13,19 @@ local function ArrayContains(a, item)
     return false
 end
 
---@REMOVE AFTER 9.0
-local GetLogIndexForQuestID = C_QuestLog.GetLogIndexForQuestID
-local IsQuestFlaggedCompleted = C_QuestLog and C_QuestLog.IsQuestFlaggedCompleted or IsQuestFlaggedCompleted;
-if select(4, GetBuildInfo()) < 90000 then
-    GetLogIndexForQuestID = GetQuestLogIndexByID
-end
+local GetLogIndexForQuestID = C_QuestLog and C_QuestLog.GetLogIndexForQuestID or GetQuestLogIndexByID
+local IsQuestFlaggedCompleted = C_QuestLog and C_QuestLog.IsQuestFlaggedCompleted or IsQuestFlaggedCompleted
 
 local BtWQuestsCharactersMap = {} -- Map from name-realm to Character Mixin
+
+local ClassMap = {}
+for classID=1,GetNumClasses() do
+    local info = C_CreatureInfo.GetClassInfo(classID)
+    if info then
+        ClassMap[info.classFile] = info
+        ClassMap[info.classID] = info
+    end
+end
 
 BtWQuestsCharactersCharacterMixin = {}
 function BtWQuestsCharactersCharacterMixin:IsPartySync()
@@ -52,7 +57,7 @@ function BtWQuestsCharactersCharacterMixin:GetClass()
     return self.t.class
 end
 function BtWQuestsCharactersCharacterMixin:GetClassString()
-    return BTWQUESTS_CLASS_STRINGS[self.t.class]
+    return ClassMap[self.t.class].classFile
 end
 function BtWQuestsCharactersCharacterMixin:GetLevel()
     return self.t.level
@@ -303,12 +308,17 @@ function BtWQuestsCharactersCharacterMixin:GetChromieTimeID()
     return self.t.chromieTimeID or 0
 end
 
+function BtWQuestsCharactersCharacterMixin:GetCurrencyQuantity(id)
+    return self.t.currencies and self.t.currencies[id] and self.t.currencies[id].quantity or 0;
+end
 function BtWQuestsCharactersCharacterMixin:GetFriendshipReputation(factionID)
     local id, rep, maxRep, name, text, texture, reaction, threshold, nextThreshold;
-    
+
     if self.t.friendships then
         local data = self.t.friendships[factionID];
-        if data ~= nil then
+        if type(data) == "table" and data.friendshipFactionID then
+            return data;
+        elseif data ~= nil then
             if data[1] ~= nil then
                 id, rep, maxRep, name, text, texture, reaction, threshold, nextThreshold = unpack(data);
             else
@@ -317,11 +327,17 @@ function BtWQuestsCharactersCharacterMixin:GetFriendshipReputation(factionID)
         end
     end
 
-    return id, rep, maxRep, name, text, texture, reaction, threshold, nextThreshold;
-
-
-    -- local _, _, _, name, _, _, _, _ = GetFriendshipReputation(factionID)
-    -- return unpack((self.t.friendships or {})[factionID] or {})
+    return {
+        friendshipFactionID = id,
+        standing = rep,
+        maxRep = maxRep,
+        name = name,
+        text = text,
+        texture = texture,
+        reaction = reaction,
+        reactionThreshold = threshold,
+        nextThreshold = nextThreshold,
+    };
 end
 function BtWQuestsCharactersCharacterMixin:GetAchievementInfo(achievementID)
     local id, name, points, completed, month, day, year, description,
@@ -356,8 +372,6 @@ function BtWQuestsCharactersCharacterMixin:GetAchievementCriteriaInfo(achievemen
     if self.t.achievements then
         local data = self.t.achievements[achievementID];
         if data ~= nil then
-            id = id or achievementID;
-
             if data[1] ~= nil then
                 data = data[15];
             else
@@ -394,8 +408,6 @@ function BtWQuestsCharactersCharacterMixin:GetAchievementCriteriaInfoByID(achiev
     if self.t.achievements then
         local data = self.t.achievements[achievementID];
         if data ~= nil then
-            id = id or achievementID;
-
             if data[1] ~= nil then
                 data = data[15];
             else
@@ -491,9 +503,16 @@ end
 function BtWQuestsCharactersPlayerMixin:GetSex()
     return UnitSex("player")
 end
-function BtWQuestsCharactersPlayerMixin:GetSkillInfo(skillID)
-    local _, level, maxLevel = C_TradeSkillUI.GetTradeSkillLineInfoByID(skillID)
-    return level, maxLevel
+if C_TradeSkillUI then
+    function BtWQuestsCharactersPlayerMixin:GetSkillInfo(skillID)
+        if C_TradeSkillUI.GetProfessionInfoBySkillLineID then
+            local result = C_TradeSkillUI.GetProfessionInfoBySkillLineID(skillID)
+            return result and result.skillLevel or 0, result and result.maxSkillLevel or 0
+        else
+            local _, level, maxLevel = C_TradeSkillUI.GetTradeSkillLineInfoByID(skillID)
+            return level, maxLevel
+        end
+    end
 end
 function BtWQuestsCharactersPlayerMixin:GetFactionInfoByID(faction)
     local factionName, _, standing, barMin, barMax, value = GetFactionInfoByID(faction)
@@ -514,15 +533,19 @@ end
 function BtWQuestsCharactersPlayerMixin:GetHeartOfAzerothLevel()
     if C_AzeriteItem.HasActiveAzeriteItem() then
         local itemLocation = C_AzeriteItem.FindActiveAzeriteItem();
-        if itemLocation then
+        if itemLocation and itemLocation:IsValid() then
             return C_AzeriteItem.GetPowerLevel(itemLocation)
         end
     end
 
     return BtWQuestsCharactersCharacterMixin.GetHeartOfAzerothLevel(self)
 end
+function BtWQuestsCharactersPlayerMixin:GetCurrencyQuantity(id)
+    local info = C_CurrencyInfo.GetCurrencyInfo(id);
+    return info and info.quantity or 0
+end
 function BtWQuestsCharactersPlayerMixin:GetFriendshipReputation(factionId)
-    return GetFriendshipReputation(factionId)
+    return C_GossipInfo.GetFriendshipReputation(factionId)
 end
 function BtWQuestsCharactersPlayerMixin:GetAchievementInfo(achievementId)
     return GetAchievementInfo(achievementId)
@@ -557,36 +580,40 @@ local itemXpCache = {};
 local gemXpByID = {
     [153714] = 0.05,
 };
-xpTooltip:SetScript("OnTooltipSetItem", function (self)
-    local itemName, itemLink = self:GetItem();
-
-    for i=1,15 do
-        local text = _G[self:GetName().."TextLeft"..i];
-        if text and text:IsShown() then
-            local text = text:GetText();
-            local percent = string.match(text, "^Equip: Experience gained is increased by ([%d]+)%%.$");
-            if not percent then
-                percent = string.match(text, "^Equip: Experience gained from killing monsters and completing quests increased by ([%d]+)%%.$");
-            end
-
-            if percent then
-                itemXpCache[itemLink] = tonumber(percent) * 0.01;
-                break
+if not TooltipDataProcessor or not TooltipDataProcessor.AddTooltipPostCall then
+    xpTooltip:SetScript("OnTooltipSetItem", function (self)
+        local itemName, itemLink = self:GetItem();
+    
+        for i=1,15 do
+            local text = _G[self:GetName().."TextLeft"..i];
+            if text and text:IsShown() then
+                local text = text:GetText();
+                local percent = string.match(text, "^Equip: Experience gained is increased by ([%d]+)%%.$");
+                if not percent then
+                    percent = string.match(text, "^Equip: Experience gained from killing monsters and completing quests increased by ([%d]+)%%.$");
+                end
+    
+                if percent then
+                    itemXpCache[itemLink] = tonumber(percent) * 0.01;
+                    break
+                end
             end
         end
-    end
-end)
+    end)
+end
 local function PlayerXPModifier()
     local modifier = 0;
-    for inventorySlotId=INVSLOT_HEAD,INVSLOT_TABARD do
-        local itemLink = GetInventoryItemLink("player", inventorySlotId);
-        if itemLink then
-            for index=1,3 do
-                local _, gemLink = GetItemGem(itemLink, index);
-                if gemLink then
-                    local itemID = GetItemInfoInstant(gemLink);
-                    if gemXpByID[itemID] then
-                        modifier = modifier + gemXpByID[itemID];
+    if GetItemGem then
+        for inventorySlotId=INVSLOT_HEAD,INVSLOT_TABARD do
+            local itemLink = GetInventoryItemLink("player", inventorySlotId);
+            if itemLink then
+                for index=1,3 do
+                    local _, gemLink = GetItemGem(itemLink, index);
+                    if gemLink then
+                        local itemID = GetItemInfoInstant(gemLink);
+                        if gemXpByID[itemID] then
+                            modifier = modifier + gemXpByID[itemID];
+                        end
                     end
                 end
             end
@@ -598,10 +625,10 @@ function BtWQuestsCharactersPlayerMixin:GetXPModifier()
     return PlayerXPModifier();
 end
 function BtWQuestsCharactersPlayerMixin:IsWarModeDesired()
-    return C_PvP.IsWarModeDesired();
+    return C_PvP and C_PvP.IsWarModeDesired and C_PvP.IsWarModeDesired() or false;
 end
 function BtWQuestsCharactersPlayerMixin:GetWarModeRewardBonus()
-    return C_PvP.GetWarModeRewardBonus();
+    return C_PvP and C_PvP.GetWarModeRewardBonus and C_PvP.GetWarModeRewardBonus() or 0;
 end
 
 function BtWQuestsCharactersPlayerMixin:GetNumQuestLeaderBoards(questID)
@@ -747,7 +774,7 @@ function BtWQuestsCharacters:RemoveCharacter(name, realm)
     end
 end
 function BtWQuestsCharacters:GetPlayer()
-    if C_QuestSession.HasJoined() then
+    if C_QuestSession and C_QuestSession.HasJoined() then
         return self:GetCharacter("-partysync")
     else
         return self:GetCharacter(UnitName("player"), GetRealmName())
@@ -905,33 +932,21 @@ end
 local function GetFriendships(tbl, friendships)
     local tbl = tbl or {};
 
-    for id,data in pairs(tbl) do
-        temp[id] = data;
-    end
-
     wipe(tbl);
     for factionID in pairs(friendships) do
-        local id, rep, maxRep, name, text, texture, reaction, threshold, nextThreshold = GetFriendshipReputation(factionID);
-        if id ~= nil then
-            local data = temp[factionID] or {};
-            if data[1] ~= nil then
-                wipe(data);
-            end
-
-            data.name = name;
-            data.rep = rep;
-            data.maxRep = maxRep;
-            data.text = text;
-            data.texture = texture;
-            data.reaction = reaction;
-            data.threshold = threshold;
-            data.nextThreshold = nextThreshold;
-            
-            tbl[factionID] = data;
-        end
+        tbl[factionID] = C_GossipInfo.GetFriendshipReputation(factionID);
     end
 
-    wipe(temp);
+    return tbl;
+end
+local function GetCurrencies(tbl, currencies)
+    local tbl = tbl or {};
+
+    wipe(tbl);
+    for id in pairs(currencies) do
+        tbl[id] = C_CurrencyInfo.GetCurrencyInfo(id);
+    end
+
     return tbl;
 end
 local function GetSkills(tbl)
@@ -944,7 +959,13 @@ local function GetSkills(tbl)
     wipe(tbl);
     local skillIDs = C_TradeSkillUI.GetAllProfessionTradeSkillLines()
     for _,skillID in ipairs(skillIDs) do
-        local _, level, maxLevel = C_TradeSkillUI.GetTradeSkillLineInfoByID(skillID)
+        local _, level, maxLevel
+        if C_TradeSkillUI.GetProfessionInfoBySkillLineID then
+            local result = C_TradeSkillUI.GetProfessionInfoBySkillLineID(skillID)
+            level, maxLevel = result and result.skillLevel or 0, result and result.maxSkillLevel or 0
+        else
+            _, level, maxLevel = C_TradeSkillUI.GetTradeSkillLineInfoByID(skillID)
+        end
         if level ~= 0 then
             local data = temp[skillID] or {};
             if data[1] ~= nil then
@@ -987,8 +1008,12 @@ function BtWQuestsCharacters:OnEvent(event, ...)
         character.achievements = GetAchievements(character.achievements, self.achievements or {});
     end
     if event == "TRADE_SKILL_LIST_UPDATE" or event == "PLAYER_ENTERING_WORLD" then
-        character.skills = GetSkills(character.skills);
-        character.professions = GetKnownProfessions(character.professions, GetProfessions());
+        if C_TradeSkillUI then
+            character.skills = GetSkills(character.skills);
+        end
+        if GetProfessions then
+            character.professions = GetKnownProfessions(character.professions, GetProfessions());
+        end
     end
     if event == "QUEST_ACCEPTED" or event == "QUEST_COMPLETE" or event == "QUEST_REMOVED" or event == "QUEST_TURNED_IN" or event == "PLAYER_ENTERING_WORLD" then
         character.questsActive = character.questsActive or {}
@@ -1000,12 +1025,19 @@ function BtWQuestsCharacters:OnEvent(event, ...)
         character.questsActive = GetQuestsActive(character.questsActive);
         character.questsCompleted = GetQuestsCompleted(character.questsCompleted);
     end
-    if event == "WAR_MODE_STATUS_UPDATE" or event == "PLAYER_FLAGS_CHANGED" or event == "PLAYER_ENTERING_WORLD" then
-        character.warMode = C_PvP.IsWarModeDesired();
-        character.warModeBonus = C_PvP.GetWarModeRewardBonus();
+    if C_PvP.IsWarModeDesired then
+        if event == "WAR_MODE_STATUS_UPDATE" or event == "PLAYER_FLAGS_CHANGED" or event == "PLAYER_ENTERING_WORLD" then
+            character.warMode = C_PvP.IsWarModeDesired();
+            character.warModeBonus = C_PvP.GetWarModeRewardBonus();
+        end
     end
     if event == "PLAYER_EQUIPMENT_CHANGED" or event == "PLAYER_ENTERING_WORLD" then
         character.xpModifier = PlayerXPModifier();
+    end
+    if event == "COVENANT_CHOSEN" or event == "PLAYER_LOGIN" then
+        character.covenantID = C_Covenants and C_Covenants.GetActiveCovenantID() or nil
+        character.friendships = GetFriendships(character.friendships, self.friendships or {});
+
     end
     if event == "PLAYER_LOGOUT" then
         character.faction = UnitFactionGroup("player");
@@ -1016,16 +1048,16 @@ function BtWQuestsCharacters:OnEvent(event, ...)
         
         character.reputations = GetFactions(character.reputations);
         character.friendships = GetFriendships(character.friendships, self.friendships or {});
+        character.currencies = GetCurrencies(character.currencies, self.currencies or {});
 
-        if C_AzeriteItem.HasActiveAzeriteItem() then
+        if C_AzeriteItem and C_AzeriteItem.HasActiveAzeriteItem() then
             local itemLocation = C_AzeriteItem.FindActiveAzeriteItem();
-            if itemLocation then
+            if itemLocation and itemLocation:IsValid() then
                 character.heartOfAzerothLevel = C_AzeriteItem.GetPowerLevel(itemLocation)
             end
         end
 
         character.renownLevel = C_CovenantSanctumUI and C_CovenantSanctumUI.GetRenownLevel() or 0
-        character.covenantID = C_Covenants and C_Covenants.GetActiveCovenantID() or nil
         character.chromieTimeID = UnitChromieTimeID and UnitChromieTimeID("player") or 0
 
         character.ignoredChains = character.ignoredChains or (BtWQuests_Settings and BtWQuests_Settings.ignoredChains or {});
@@ -1038,6 +1070,12 @@ function BtWQuestsCharacters:AddFriendshipReputation(factionId)
         self.friendships = {}
     end
     self.friendships[factionId] = true;
+end
+function BtWQuestsCharacters:AddCurrency(id)
+    if self.currencies == nil then
+        self.currencies = {}
+    end
+    self.currencies[id] = true;
 end
 function BtWQuestsCharacters:AddAchievement(achievementId)
     if self.achievements == nil then
@@ -1060,18 +1098,26 @@ end
 
 local eventHandler = CreateFrame("Frame")
 eventHandler:RegisterEvent("PLAYER_ENTERING_WORLD");
-eventHandler:RegisterEvent("ACHIEVEMENT_EARNED");
 eventHandler:RegisterEvent("TRADE_SKILL_LIST_UPDATE");
 eventHandler:RegisterEvent("QUEST_ACCEPTED");
 eventHandler:RegisterEvent("QUEST_COMPLETE");
 eventHandler:RegisterEvent("QUEST_REMOVED");
 eventHandler:RegisterEvent("QUEST_TURNED_IN");
-eventHandler:RegisterEvent("WAR_MODE_STATUS_UPDATE");
 eventHandler:RegisterEvent("PLAYER_LOGIN");
 eventHandler:RegisterEvent("PLAYER_FLAGS_CHANGED");
 eventHandler:RegisterEvent("PLAYER_EQUIPMENT_CHANGED");
 eventHandler:RegisterEvent("PLAYER_LEAVING_WORLD");
 eventHandler:RegisterEvent("PLAYER_LOGOUT");
+if GetAchievementInfo then
+    eventHandler:RegisterEvent("ACHIEVEMENT_EARNED");
+end
+if C_PvP and C_PvP.IsWarModeDesired then
+    eventHandler:RegisterEvent("WAR_MODE_STATUS_UPDATE");
+end
+if C_Covenants and C_PvP.IsWarModeDesired then
+    eventHandler:RegisterEvent("COVENANT_CHOSEN");
+end
+
 eventHandler:SetScript("OnEvent", function (self, event, ...)
     BtWQuestsCharacters:OnEvent(event, ...)
 end)

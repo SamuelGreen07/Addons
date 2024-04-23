@@ -1,0 +1,16 @@
+lightweight tag 964f0a2541126656b9778af54b9581bfaf814bb6 1.10.0
+Author:	Alar of Runetotem <alar@aspide.it>
+Date:	Sun Apr 7 20:31:38 2024 +0200
+
+commit 964f0a2541126656b9778af54b9581bfaf814bb6
+Author: Alar of Runetotem <alar@aspide.it>
+Date:   Sun Apr 7 20:31:38 2024 +0200
+
+    10.2.6
+
+commit a1dff748672793ce9b606ab672cd3172ec2f15c9
+Author: Alar of Runetotem <alar@aspide.it>
+Date:   Thu Mar 14 19:56:42 2024 +0100
+
+    Cleaning Lua Standard
+

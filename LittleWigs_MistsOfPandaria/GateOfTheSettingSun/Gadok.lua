@@ -35,7 +35,7 @@ function mod:OnBossEnable()
 	self:Log("SPELL_DAMAGE", "GroundEffectDamage", 116297, 115458) -- Strafing Run, Acid Bomb
 	self:Log("SPELL_MISSED", "GroundEffectDamage", 116297, 115458)
 
-	self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", nil, "boss1")
+	self:RegisterUnitEvent("UNIT_HEALTH", nil, "boss1")
 end
 
 function mod:OnEngage()
@@ -69,14 +69,14 @@ do
 			local t = GetTime()
 			if t-prev > 1.5 then
 				prev = t
-				self:MessageOld(args.spellId == 115458 and args.spellId or -5660, "blue", "alert", CL.underyou:format(args.spellName))
+				self:MessageOld(args.spellId == 115458 and args.spellId or -5660, "blue", "alert", CL.underyou:format(args.spellName)) -- SetOption:-5660,115458:::
 			end
 		end
 	end
 end
 
-function mod:UNIT_HEALTH_FREQUENT(event, unit)
-	local hp = UnitHealth(unit) / UnitHealthMax(unit) * 100
+function mod:UNIT_HEALTH(event, unit)
+	local hp = self:GetHealth(unit)
 	if hp < nextStrafingWarning then
 		nextStrafingWarning = nextStrafingWarning - 40
 		self:MessageOld(-5660, "yellow", nil, CL.soon:format(self:SpellName(-5660)), false)

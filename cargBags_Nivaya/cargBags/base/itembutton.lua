@@ -20,7 +20,7 @@
 local addon, ns = ...
 local cargBags = ns.cargBags
 
-local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+local isClassic = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE
 
 local _G = _G
 
@@ -36,7 +36,7 @@ local ItemButton = cargBags:NewClass("ItemButton", nil, "Button")
 	@return tpl <string>
 ]]
 function ItemButton:GetTemplate(bagID)
-	bagID = bagID or self.bagID
+	bagID = bagID or self._bagID or self:GetParent():GetID()
 	return (bagID == -3 and "ReagentBankItemButtonGenericTemplate") or (bagID == -1 and "BankItemButtonGenericTemplate") or (bagID and "ContainerFrameItemButtonTemplate") or (isClassic and "ItemButtonTemplate" or ""),
       (bagID == -3 and ReagentBankFrame) or (bagID == -1 and BankFrame) or (bagID and _G["ContainerFrame"..bagID + (isClassic and 2 or 1)]);
 end 
@@ -54,9 +54,15 @@ function ItemButton:New(bagID, slotID)
 
 	local tpl, parent = self:GetTemplate(bagID)
 	local button = table.remove(self.recycled[tpl]) or self:Create(tpl, parent)
-	button.bagID = bagID
-	button.slotID = slotID
+	button._bagID = bagID
+	button._slotID = slotID
 	button:SetID(slotID)
+	
+	if not button.GetSlotAndBagID then
+		button.GetSlotAndBagID = function(f)
+			return f._slotID, f._bagID
+		end
+	end
 	
 	button:Show()
 	
@@ -114,6 +120,6 @@ end
 	@return item <table>
 ]]
 function ItemButton:GetCustomItemInfo(item)
-	return self.implementation:GetCustomItemInfo(self.bagID, self.slotID, item)
+	return self.implementation:GetCustomItemInfo(self._bagID, self._slotID, item)
 end
 

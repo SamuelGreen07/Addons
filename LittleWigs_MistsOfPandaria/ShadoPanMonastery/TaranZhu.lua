@@ -26,12 +26,12 @@ function mod:GetOptions()
 	return {
 		115002, -- Summon Gripping Hatred
 		{107087, "FLASH"}, -- Haze of Hate
-		107356, -- Rising Hate
+		{107356, "CASTBAR"}, -- Rising Hate
 	}
 end
 
 function mod:VerifyEnable(unit)
-	local hp = UnitHealth(unit) / UnitHealthMax(unit) * 100
+	local hp = self:GetHealth(unit)
 	if hp > 15 then
 		return true
 	end

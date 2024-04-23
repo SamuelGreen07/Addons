@@ -40,7 +40,7 @@ function mod:GetOptions()
 		106563, -- Bubble Shield
 		"summon",
 		114451, -- Ferment
-		115003, -- Carbonation
+		{115003, "CASTBAR"}, -- Carbonation
 		-5658, -- Wall of Suds
 	}, {
 		[114548] = "general",
@@ -70,13 +70,13 @@ end
 
 function mod:OnEngage()
 	addsSpawned = 0
-	wipe(mobCollector)
+	mobCollector = {}
 
 	self:StartTimers()
 end
 
 function mod:OnBossDisable()
-	wipe(mobCollector)
+	mobCollector = {}
 end
 
 --------------------------------------------------------------------------------
@@ -119,7 +119,7 @@ end
 function mod:BrewBolt(args)
 	local amount = args.amount or 1
 	if amount % 2 == 1 then
-		self:StackMessage(args.spellId, args.destName, amount, "red", "alert") -- casts when there's nobody nearby
+		self:StackMessageOld(args.spellId, args.destName, amount, "red", "alert") -- casts when there's nobody nearby
 	end
 end
 
@@ -131,7 +131,7 @@ function mod:BloatApplied(args)
 	self:TargetMessageOld(args.spellId, args.destName, "yellow", "alarm", nil, nil, true)
 	self:TargetBar(args.spellId, 30, args.destName)
 	if self:Me(args.destGUID) then
-		self:Say(args.spellId)
+		self:Say(args.spellId, nil, nil, "Bloat")
 	end
 end
 
@@ -146,7 +146,7 @@ end
 function mod:BlackoutBrewApplied(args)
 	local amount = args.amount or 3 -- 1 event for every 3 stacks
 	if self:Me(args.destGUID) then
-		self:StackMessage(args.spellId, args.destName, amount, "yellow", amount > 6 and "warning" or "alarm")
+		self:StackMessageOld(args.spellId, args.destName, amount, "yellow", amount > 6 and "warning" or "alarm")
 	end
 end
 

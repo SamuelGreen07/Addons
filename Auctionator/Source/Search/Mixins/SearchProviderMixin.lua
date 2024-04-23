@@ -24,6 +24,10 @@ end
 function AuctionatorSearchProviderMixin:HasCompleteTermResults()
 end
 
+-- Derive
+function AuctionatorSearchProviderMixin:GetCurrentEmptyResult()
+end
+
 function AuctionatorSearchProviderMixin:RegisterEvents(events)
   Auctionator.Debug.Message("AuctionatorSearchProviderMixin:RegisterEvents()", events)
 
@@ -36,10 +40,11 @@ function AuctionatorSearchProviderMixin:UnregisterEvents(events)
   FrameUtil.UnregisterFrameForEvents(self, events)
 end
 
-function AuctionatorSearchProviderMixin:SetTerms(terms)
-  Auctionator.Debug.Message("AuctionatorSearchProviderMixin:SetTerms()", terms)
+function AuctionatorSearchProviderMixin:SetTerms(terms, config)
+  Auctionator.Debug.Message("AuctionatorSearchProviderMixin:SetTerms()", terms, config)
 
   self.terms = terms
+  self.config = config or {}
   self.index = 1
 end
 
@@ -67,8 +72,12 @@ function AuctionatorSearchProviderMixin:GetNextSearchParameter()
   if self:HasMoreTerms() then
     self.index = self.index + 1
 
-    return self:CreateSearchTerm(self.terms[self.index - 1])
+    return self:CreateSearchTerm(self.terms[self.index - 1], self.config)
   else
     error("You requested a term that does not exist: " .. (self.index == nil and "nil" or self.index))
   end
+end
+
+function AuctionatorSearchProviderMixin:GetCurrentSearchParameter()
+  return self.terms[self.index - 1]
 end

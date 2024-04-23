@@ -6,14 +6,15 @@
 
 --values added into 'instance_skin_ignored_values' won't be passed when the user exports the profile or exports the skin individually.
 
-
-local _detalhes = 		_G._detalhes
+local _detalhes = 		_G.Details
 local SharedMedia = LibStub:GetLibrary("LibSharedMedia-3.0")
+local addonName, Details222 = ...
+local _ = nil
 
 function _detalhes:ResetInstanceConfig (maintainsnap)
-	for key, value in pairs (_detalhes.instance_defaults) do 
-		if (type (value) == "table") then
-			self [key] = table_deepcopy (value)
+	for key, value in pairs(_detalhes.instance_defaults) do 
+		if (type(value) == "table") then
+			self [key] = Details.CopyTable(value)
 		else
 			self [key] = value
 		end
@@ -57,10 +58,10 @@ _detalhes.instance_skin_ignored_values = {
 }
 
 function _detalhes:ResetInstanceConfigKeepingValues (maintainsnap)
-	for key, value in pairs (_detalhes.instance_defaults) do 
+	for key, value in pairs(_detalhes.instance_defaults) do 
 		if (not _detalhes.instance_skin_ignored_values [key]) then
-			if (type (value) == "table") then
-				self [key] = table_deepcopy (value)
+			if (type(value) == "table") then
+				self [key] = Details.CopyTable(value)
 			else
 				self [key] = value
 			end
@@ -75,19 +76,19 @@ function _detalhes:ResetInstanceConfigKeepingValues (maintainsnap)
 end
 
 function _detalhes:LoadInstanceConfig()
-	for key, value in pairs (_detalhes.instance_defaults) do 
+	for key, value in pairs(_detalhes.instance_defaults) do 
 		if (self [key] == nil) then
-			if (type (value) == "table") then
-				self [key] = table_deepcopy (_detalhes.instance_defaults [key])
+			if (type(value) == "table") then
+				self [key] = Details.CopyTable(_detalhes.instance_defaults [key])
 			else
 				self [key] = value
 			end
 			
-		elseif (type (value) == "table") then
-			for key2, value2 in pairs (value) do 
+		elseif (type(value) == "table") then
+			for key2, value2 in pairs(value) do 
 				if (self [key] [key2] == nil) then
-					if (type (value2) == "table") then
-						self [key] [key2] = table_deepcopy (_detalhes.instance_defaults [key] [key2])
+					if (type(value2) == "table") then
+						self [key] [key2] = Details.CopyTable(_detalhes.instance_defaults [key] [key2])
 					else
 						self [key] [key2] = value2
 					end
@@ -99,13 +100,13 @@ end
 
 _detalhes.instance_defaults = {
 
-	--> click through settings
+	--click through settings
 	clickthrough_toolbaricons = false,
 	clickthrough_rows = false,
 	clickthrough_window = false,
 	clickthrough_incombatonly = true,
 
-	--> window settings
+	--window settings
 		ignore_mass_showhide = false,
 	--skin
 		skin = _detalhes.default_skin_to_use,
@@ -154,9 +155,11 @@ _detalhes.instance_defaults = {
 		--anchor store the anchor point of main menu
 		menu_anchor = {5, 1, side = 1}, --mode segment attribute report on top position
 		menu_anchor_down = {5, 1}, --mode segment attribute report on bottom position
-		menu_icons_alpha = 0.5,
+		menu_icons_alpha = 1,
 		--blackwhiite icons
 		desaturated_menu = false, --mode segment attribute report
+		--menu icons color
+		menu_icons_color = {1, 1, 1},
 		--icons on menu
 		menu_icons = {true, true, true, true, true, false, space = -2, shadow = false}, --mode segment attribute report reset close
 		--menu icons size multiplicator factor
@@ -175,7 +178,12 @@ _detalhes.instance_defaults = {
 			enable_custom_text = false,
 			custom_text = "{name}",
 			show_timer = true,
+			show_timer_always = false, --show the timer even when not in an encounter
+			show_timer_bg = true, --show the timer within battleground, the timer is the elapsed battleground time
+			show_timer_arena = true, ---show the timer within arena, the timer is the elapsed time of the arena match
 		},
+		--attribute icon size
+		attribute_icon_size = 0,
 	--auto hide window borders statusbar main menu
 		menu_alpha = {enabled = false, iconstoo = true, onenter = 1, onleave = 1, ignorebars = false},
 	--instance button anchor store the anchor point of instance and delete button
@@ -185,12 +193,31 @@ _detalhes.instance_defaults = {
 	--row animation when show
 		row_show_animation = {anim = "Fade", options = {}},
 
+		rounded_corner_enabled = false,
+
 		--use one fontstring for each value in the lines, e.g. one fontstring to damage done, another fontstring to dps and another to percent amount
-		use_multi_fontstrings = false,
-		fontstrings_width = 35, --not in use
+		use_multi_fontstrings = true,
+		use_auto_align_multi_fontstrings = true,
+		fontstrings_text_limit_offset = -10,
 		fontstrings_text4_anchor = 0,
-		fontstrings_text3_anchor = 35,
-		fontstrings_text2_anchor = 70,
+		fontstrings_text3_anchor = 38,
+		fontstrings_text2_anchor = 73,
+
+	--title bar
+		titlebar_shown = false,
+		titlebar_height = 16,
+		titlebar_texture = "Details Serenity",
+		titlebar_texture_color = {.2, .2, .2, 0.8},
+
+	--full border
+		fullborder_shown = false,
+		fullborder_color = {0, 0, 0, 1},
+		fullborder_size = 0.5,
+
+	--row area border
+		rowareaborder_shown = false,
+		rowareaborder_color = {0, 0, 0, 1},
+		rowareaborder_size = 0.5,
 
 	--row info
 		row_info = {
@@ -228,6 +255,10 @@ _detalhes.instance_defaults = {
 				textR_outline = false,
 				textR_outline_small = true,
 				textR_outline_small_color = {0, 0, 0, 1},
+        	-- left text offset
+				textL_offset = 0,
+		  	-- text y offset
+				text_yoffset = 0,
 			--bar height
 				height = 14,
 			--font size
@@ -242,6 +273,9 @@ _detalhes.instance_defaults = {
 			--bar texture name
 				texture_file = [[Interface\AddOns\Details\images\bar4]],
 				texture_custom_file = "Interface\\",
+			--bar overlay texture file
+				overlay_texture = "Details D'ictum",
+				overlay_color = {.7, .7, .7, 0},
 			--bar texture on mouse over
 				texture_highlight = [[Interface\FriendsFrame\UI-FriendsList-Highlight]],
 			--bar background texture
@@ -254,17 +288,25 @@ _detalhes.instance_defaults = {
 				fixed_texture_background_color = {0, 0, 0, 0},
 			--space between bars
 				space = {left = 3, right = -5, between = 1},
+				row_offsets = {left = 0, right = 0, top = 0, bottom = 0},
 			--icon file
+				icon_size_offset = 0,
 				icon_file = [[Interface\AddOns\Details\images\classes_small]],
 				no_icon = false,
 				start_after_icon = true,
 				icon_grayscale = false,
+				icon_mask = "",
 			--icon offset
 				icon_offset = {0, 0}, --x y
 			--percent type
 				percent_type = 1,
 			--backdrop
-				backdrop = {enabled = false, size = 12, color = {1, 1, 1, 1}, texture = "Details BarBorder 2"}, --texture is deprecated
+				backdrop = {
+					enabled = false,
+					size = 12,
+					color = {1, 1, 1, 1},
+					use_class_colors = false,
+				},
 			--model
 				models = {
 					upper_enabled = false,
@@ -279,6 +321,12 @@ _detalhes.instance_defaults = {
 			--show spec icons
 				use_spec_icons = false,
 				spec_file = [[Interface\AddOns\Details\images\spec_icons_normal]],
+			--show faction icon
+				show_faction_icon = true,
+				faction_icon_size_offset = -10,
+			--show arena role icon
+				show_arena_role_icon = false,
+				arena_role_icon_size_offset = -10,
 		},
 	--instance window color
 		color = {1, 1, 1, 1},
@@ -390,7 +438,8 @@ _detalhes.instance_defaults = {
 			texcoord = {0, 1, 0, 1},
 			width = 0,
 			height = 0,
-			overlay = {1, 1, 1, 1}
+			overlay = {1, 1, 1, 1},
+			level = 2,
 		},
 	--tooltip amounts
 	tooltip = {

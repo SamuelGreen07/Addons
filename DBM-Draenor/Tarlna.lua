@@ -1,10 +1,11 @@
 local mod	= DBM:NewMod(1211, "DBM-Draenor", 1, 557)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20201111213748")
+mod:SetRevision("20220127091718")
 mod:SetCreatureID(81535)
 mod:SetEncounterID(1770)
 mod:SetReCombatTime(20)
+mod:EnableWBEngageSync()--Enable syncing engage in outdoors
 
 mod:RegisterCombat("combat")--no yell
 
@@ -21,15 +22,15 @@ mod:RegisterEventsInCombat(
 local warnSavageVines				= mod:NewTargetAnnounce(176004, 2)
 
 local specWarnColossalBlow			= mod:NewSpecialWarningDodge(175973, nil, nil, nil, 2, 2)
-local specWarnGenesis				= mod:NewSpecialWarningSpell(175979, nil, nil, nil, nil, 2)--Everyone. "Switch" is closest generic to "run around stomping flowers". Might need custom message
+local specWarnGenesis				= mod:NewSpecialWarningSpell(175979, nil, nil, nil, nil, 12)--Everyone. "Switch" is closest generic to "run around stomping flowers". Might need custom message
 local specWarnSavageVines			= mod:NewSpecialWarningYou(176004)
 local specWarnSavageVinesNear		= mod:NewSpecialWarningClose(176004)
 local specWarnGrowUntamedMandragora	= mod:NewSpecialWarningSwitch(176013, "-Healer", nil, nil, nil, 2)
 local specWarnNoxiousSpit			= mod:NewSpecialWarningMove(176037)
 
 --local timerColossalBlowCD			= mod:NewNextTimer(60, 175973, nil, nil, nil, 3)
-local timerGenesis					= mod:NewCastTimer(14, 169613)
-local timerGenesisCD				= mod:NewCDTimer(45, 169613, nil, nil, nil, 5)--45-60 variation
+local timerGenesis					= mod:NewCastTimer(14, 175979)
+local timerGenesisCD				= mod:NewCDTimer(45, 175979, nil, nil, nil, 5)--45-60 variation
 local timerGrowUntamedMandragoraCD	= mod:NewCDTimer(30, 176013, nil, nil, nil, 1)
 
 --mod:AddReadyCheckOption(37462, false, 100)
@@ -68,7 +69,7 @@ function mod:SPELL_CAST_START(args)
 		specWarnGenesis:Show()
 		timerGenesis:Start()
 		timerGenesisCD:Start()
-		specWarnGenesis:Play("169613")
+		specWarnGenesis:Play("runoverflowers")
 	end
 end
 

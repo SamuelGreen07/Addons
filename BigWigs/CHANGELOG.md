@@ -1,7 +1,13 @@
 # BigWigs
 
-## [v203-2-ge17e806](https://github.com/BigWigsMods/BigWigs/tree/e17e8064789cb8791a0555310e5843a6d6183742) (2021-01-07)
-[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v203...e17e8064789cb8791a0555310e5843a6d6183742) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
+## [v326.1-8-gf34d158](https://github.com/BigWigsMods/BigWigs/tree/f34d158a2d23d4113f2606a23ae36417d1ed0dee) (2024-04-23)
+[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v326.1...f34d158a2d23d4113f2606a23ae36417d1ed0dee) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
 
-- CastleNathria/SunKingsSalvation: Stop the Cloak of Flames bar when you enter the Shade phase in Mythic  
-- CastleNathria/Shriekwing: Fix Echolocation Say Countdown in Mythic  
+- NerubarPalace: Update name  
+- Update koKR  
+- Update zhCN/zhTW (#1625)  
+- Loader: Update beta check (#1624)  
+- Loader: Add The War Within dungeons (#1623)  
+- The War Within: Add NerubarPalace dummy modules and expansion support (#1622)  
+- Loader: Update Current Season to Season 4 dungeons (#1621)  
+- Plugins/Colors: Improve purple text contrast ratio (#1620)  

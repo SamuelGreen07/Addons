@@ -27,7 +27,7 @@ function mod:OnBossEnable()
 end
 
 function mod:OnEngage()
-	self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", "EnrageSoon", "boss1")
+	self:RegisterUnitEvent("UNIT_HEALTH", "EnrageSoon", "boss1")
 end
 
 --------------------------------------------------------------------------------
@@ -50,7 +50,7 @@ function mod:EnrageRemoved(args)
 end
 
 function mod:EnrageSoon(event, unit)
-	local hp = UnitHealth(unit) / UnitHealthMax(unit) * 100
+	local hp = self:GetHealth(unit)
 	if hp < 25 then
 		self:UnregisterUnitEvent(event, unit)
 		self:MessageOld(-5813, "green", "info", CL.soon:format(self:SpellName(38166)), false) -- Enrage

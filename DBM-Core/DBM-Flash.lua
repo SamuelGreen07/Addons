@@ -1,27 +1,24 @@
-﻿---------------
---  Globals  --
----------------
-DBM.Flash = {}
+---@class DBM
+local DBM = DBM
+
+---@class DBMFlash
+local flashFrame= {}
+DBM.Flash = flashFrame
 
 --------------
 --  Locals  --
 --------------
-local flashFrame = DBM.Flash
 local frame, duration, elapsed, totalRepeat
 
 --------------------
 --  Create Frame  --
 --------------------
-frame = CreateFrame("Frame", "DBMFlash", UIParent, DBM:IsShadowlands() and "BackdropTemplate")
-frame:Hide()
+---@class DBMFlashFrame: Frame, BackdropTemplate
+frame = CreateFrame("Frame", "DBMFlash", UIParent, "BackdropTemplate")
 frame.backdropInfo = {
-	bgFile	= "Interface\\Tooltips\\UI-Tooltip-Background" -- 137056
+	bgFile = "Interface\\Tooltips\\UI-Tooltip-Background" -- 137056
 }
-if DBM:IsShadowlands() then
-	frame:ApplyBackdrop()
-else
-	frame:SetBackdrop(frame.backdropInfo)
-end
+frame:ApplyBackdrop()
 frame:SetAllPoints(UIParent)
 frame:SetFrameStrata("BACKGROUND")
 frame:Hide()

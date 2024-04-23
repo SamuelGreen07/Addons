@@ -12,7 +12,7 @@ local HBD = LibStub("HereBeDragons-2.0")
 local HBDPins = LibStub("HereBeDragons-Pins-2.0")
 local HBDMigrate = LibStub("HereBeDragons-Migrate")
 
-local WoWClassic = select(4, GetBuildInfo()) < 20000
+local WoWClassic = (WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE)
 
 ---------------------------------------------------------
 -- Our db upvalue and db defaults
@@ -34,7 +34,7 @@ local defaults = {
 
 ---------------------------------------------------------
 -- Localize some globals
-local floor = floor
+local floor, min, max = floor, math.min, math.max
 local pairs, next, type = pairs, next, type
 local CreateFrame = CreateFrame
 local Minimap = Minimap
@@ -179,10 +179,14 @@ end
 local continentZoneList = WoWClassic and {
 	[1414] = true, -- Kalimdor
 	[1415] = true, -- Eastern Kingdoms
+	[1945] = true, -- Outlands
+	[113] = true, -- Northrend
 
 	-- mapFile compat entries
 	["Kalimdor"]              = 1414,
 	["Azeroth"]               = 1415,
+	["Expansion01"]           = 1945,
+	["Northrend"]             = 113,
 }
 or {
 	[12]  = true, -- Kalimdor
@@ -195,6 +199,7 @@ or {
 	[875] = true, -- Zandalar
 	[876] = true, -- Kul Tiras
 	[1550] = true, -- Shadowlands
+	[1978] = true, -- Dragon Isles
 
 	-- mapFile compat entries
 	["Kalimdor"]              = 12,
@@ -361,9 +366,14 @@ function HandyNotesWorldMapPinMixin:OnAcquired(pluginName, x, y, iconpath, scale
 
 	self:SetPosition(x, y)
 
+	-- we need to handle right clicks for our nodes, so disable button pass-through
+	if self.SetPassThroughButtons then
+		self:SetPassThroughButtons("")
+	end
+
 	local size = 12 * db.icon_scale * scale
 	self:SetSize(size, size)
-	self:SetAlpha(db.icon_alpha * alpha)
+	self:SetAlpha(min(max(db.icon_alpha * alpha, 0), 1))
 
 	local t = self.texture
 	if type(iconpath) == "table" then
@@ -400,6 +410,9 @@ end
 function HandyNotesWorldMapPinMixin:OnMouseUp(button)
 	pinsHandler.OnClick(self, button, false)
 end
+
+-- hack to avoid error in combat in 10.1.5
+HandyNotesWorldMapPinMixin.SetPassThroughButtons = function() end
 
 function HandyNotes:UpdateWorldMapPlugin(pluginName)
 	if not HandyNotes:IsEnabled() then return end
@@ -438,7 +451,7 @@ function HandyNotes:UpdateMinimapPlugin(pluginName)
 		scale = ourScale * (scale or 1.0)
 		icon:SetHeight(scale) -- Can't use :SetScale as that changes our positioning scaling as well
 		icon:SetWidth(scale)
-		icon:SetAlpha(ourAlpha * (alpha or 1.0))
+		icon:SetAlpha(min(max(ourAlpha * (alpha or 1.0), 0), 1))
 		local t = icon.texture
 		if type(iconpath) == "table" then
 			if iconpath.tCoordLeft then

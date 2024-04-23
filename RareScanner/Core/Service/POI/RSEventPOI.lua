@@ -21,6 +21,9 @@ local RSLogger = private.ImportLib("RareScannerLogger")
 local RSTimeUtils = private.ImportLib("RareScannerTimeUtils")
 local RSUtils = private.ImportLib("RareScannerUtils")
 
+-- RareScanner services
+local RSRecentlySeenTracker = private.ImportLib("RareScannerRecentlySeenTracker")
+
 
 ---============================================================================
 -- Not discovered entities
@@ -32,7 +35,7 @@ local notDiscoveredEventIDs = {}
 function RSEventPOI.InitializeNotDiscoveredEvents()
 	for eventID, _ in pairs (RSEventDB.GetAllInternalEventInfo()) do
 		if (not RSGeneralDB.GetAlreadyFoundEntity(eventID)) then
-			tinsert(notDiscoveredEventIDs, eventID)
+			notDiscoveredEventIDs[eventID] = true
 		end
 	end
 end
@@ -48,59 +51,73 @@ end
 ---- Manage adding Event icons to the world map and minimap
 ---============================================================================
 
-local function GetEventPOI(eventID, mapID, eventInfo, alreadyFoundInfo)
+function RSEventPOI.GetEventPOI(eventID, mapID, eventInfo, alreadyFoundInfo)
 	local POI = {}
 	POI.entityID = eventID
 	POI.isEvent = true
+	POI.grouping = true
 	POI.name = RSEventDB.GetEventName(eventID) or AL["EVENT"]
 	POI.mapID = mapID
-	if (alreadyFoundInfo) then
+	POI.foundTime = alreadyFoundInfo and alreadyFoundInfo.foundTime
+	POI.isCompleted = RSEventDB.IsEventCompleted(eventID)
+	POI.isDiscovered = POI.isCompleted or alreadyFoundInfo ~= nil
+	POI.achievementIDs = RSAchievementDB.GetNotCompletedAchievementIDsByMap(eventID, mapID)
+	
+	if (eventInfo) then
+		POI.worldmap = eventInfo.worldmap
+	end
+	
+	-- Coordinates
+	if (alreadyFoundInfo and alreadyFoundInfo.mapID == mapID) then
 		POI.x = alreadyFoundInfo.coordX
 		POI.y = alreadyFoundInfo.coordY
 	else
-		POI.x = eventInfo.x
-		POI.y = eventInfo.y
+		POI.x, POI.y = RSEventDB.GetInternalEventCoordinates(eventID, mapID)
 	end
-	POI.foundTime = alreadyFoundInfo and alreadyFoundInfo.foundTime
-	POI.isCompleted = RSEventDB.IsEventCompleted(eventID)
-	POI.isDiscovered = POI.isCompleted or alreadyFoundInfo
-	POI.achievementLink = RSAchievementDB.GetNotCompletedAchievementLink(eventID, mapID)
-
+	
 	-- Textures
 	if (POI.isCompleted) then
 		POI.Texture = RSConstants.BLUE_EVENT_TEXTURE
-	elseif (RSGeneralDB.IsRecentlySeen(eventID)) then
+	elseif (RSRecentlySeenTracker.IsRecentlySeen(eventID, POI.x, POI.y)) then
 		POI.Texture = RSConstants.PINK_EVENT_TEXTURE
-	elseif (not POI.isDiscovered and not POI.achievementLink) then
+	elseif (not POI.isDiscovered) then
 		POI.Texture = RSConstants.RED_EVENT_TEXTURE
-	elseif (not POI.isDiscovered and POI.achievementLink) then
-		POI.Texture = RSConstants.YELLOW_EVENT_TEXTURE
-	elseif (POI.achievementLink) then
-		POI.Texture = RSConstants.GREEN_EVENT_TEXTURE
 	else
 		POI.Texture = RSConstants.NORMAL_EVENT_TEXTURE
 	end
-
+	
+	-- Mini icons
+	if (eventInfo and eventInfo.prof) then
+		POI.iconAtlas = RSConstants.PROFFESION_ICON_ATLAS
+	elseif (RSUtils.GetTableLength(POI.achievementIDs) > 0) then
+		POI.iconAtlas = RSConstants.ACHIEVEMENT_ICON_ATLAS
+	end
+	
 	return POI
 end
 
 local function IsEventPOIFiltered(eventID, mapID, zoneQuestID, vignetteGUIDs, onWorldMap, onMinimap)
 	local name = RSEventDB.GetEventName(eventID) or AL["EVENT"]
+	
 	-- Skip if filtering by name in the world map search box
 	if (name and RSGeneralDB.GetWorldMapTextFilter() and not RSUtils.Contains(name, RSGeneralDB.GetWorldMapTextFilter())) then
 		RSLogger:PrintDebugMessageEntityID(eventID, string.format("Saltado Evento [%s]: Filtrado por nombre [%s][%s].", eventID, name, RSGeneralDB.GetWorldMapTextFilter()))
+		return true
+	end	
+	
+	-- Skip if part of a disabled event
+	if (RSEventDB.IsDisabledEvent(eventID)) then
+		RSLogger:PrintDebugMessageEntityID(eventID, string.format("Saltado Evento [%s]: Parte de un evento (mundial) desactivado.", eventID))
 		return true
 	end
 
 	-- Skip if the entity appears only while a quest event is going on and it isnt active
 	if (zoneQuestID) then
 		local active = false
-		if (RSUtils.Contains(C_QuestLog.GetActiveThreatMaps(), mapID)) then
-			for _, questID in ipairs(zoneQuestID) do
-				if (C_TaskQuest.IsActive(questID) or C_QuestLog.IsQuestFlaggedCompleted(questID)) then
-					active = true
-					break
-				end
+		for _, questID in ipairs(zoneQuestID) do
+			if (C_TaskQuest.IsActive(questID) or C_QuestLog.IsQuestFlaggedCompleted(questID)) then
+				active = true
+				break
 			end
 		end
 
@@ -108,6 +125,12 @@ local function IsEventPOIFiltered(eventID, mapID, zoneQuestID, vignetteGUIDs, on
 			RSLogger:PrintDebugMessageEntityID(eventID, string.format("Saltado Evento [%s]: Evento asociado no esta activo.", eventID))
 			return true
 		end
+	end
+
+	-- Skip if the entity is filtered
+	if (RSConfigDB.IsEventFiltered(eventID) or RSConfigDB.IsEventFilteredOnlyWorldmap(eventID)) then
+		RSLogger:PrintDebugMessageEntityID(eventID, string.format("Saltado Evento [%s]: Filtrado en opciones (filtro completo o mapa del mundo).", eventID))
+		return true
 	end
 
 	-- A 'not discovered' event will be setted as completed when the action is detected while loading the addon and its questID is completed
@@ -144,8 +167,13 @@ function RSEventPOI.GetMapNotDiscoveredEventPOIs(mapID, vignetteGUIDs, onWorldMa
 		return
 	end
 
+	-- Skip if not showing not discovered icons
+	if (not RSConfigDB.IsShowingNotDiscoveredEvents()) then
+		return
+	end
+	
 	local POIs = {}
-	for _, eventID in ipairs(notDiscoveredEventIDs) do
+	for eventID, _ in pairs(notDiscoveredEventIDs) do
 		local filtered = false
 		local eventInfo = RSEventDB.GetInternalEventInfo(eventID)
 
@@ -164,7 +192,7 @@ function RSEventPOI.GetMapNotDiscoveredEventPOIs(mapID, vignetteGUIDs, onWorldMa
 
 		-- Skip if common filters
 		if (not filtered and not IsEventPOIFiltered(eventID, mapID, eventInfo.zoneQuestId, vignetteGUIDs, onWorldMap, onMinimap)) then
-			tinsert(POIs, GetEventPOI(eventID, mapID, eventInfo))
+			tinsert(POIs, RSEventPOI.GetEventPOI(eventID, mapID, eventInfo))
 		end
 	end
 
@@ -209,6 +237,6 @@ function RSEventPOI.GetMapAlreadyFoundEventPOI(eventID, alreadyFoundInfo, mapID,
 	end
 
 	if (not IsEventPOIFiltered(eventID, mapID, zoneQuestID, vignetteGUIDs, onWorldMap, onMinimap)) then
-		return GetEventPOI(eventID, mapID, eventInfo, alreadyFoundInfo)
+		return RSEventPOI.GetEventPOI(eventID, mapID, eventInfo, alreadyFoundInfo)
 	end
 end

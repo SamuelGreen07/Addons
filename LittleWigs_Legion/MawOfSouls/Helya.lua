@@ -75,7 +75,7 @@ function mod:OnEngage()
 	end
 
 	-- check on IEEU for changes since IEEU fires before tentacle death events, so they don't have a boss token anymore :\
-	wipe(seen)
+	seen = {}
 	self:RegisterEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT", "CheckTentacles")
 end
 
@@ -115,7 +115,7 @@ end
 function mod:TaintOfTheSea(args)
 	self:TargetMessageOld(args.spellId, args.destName, "yellow", "alert", nil, nil, self:Dispeller("magic"))
 	if self:Me(args.destGUID) then
-		self:Say(args.spellId)
+		self:Say(args.spellId, nil, nil, "Taint of the Sea")
 	end
 end
 

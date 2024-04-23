@@ -24,6 +24,8 @@ DESCRIPTION:
 local parent, ns = ...
 local cargBags = ns.cargBags
 
+local GetContainerNumFreeSlots = GetContainerNumFreeSlots or C_Container.GetContainerNumFreeSlots
+
 -- Returns the numeric item id (12345)
 cargBags.itemKeys["id"] = function(i)
 	return i.link and tonumber(i.link:match("item:(%d+)"))

@@ -4,6 +4,9 @@ if (not DF or not DetailsFrameworkCanLoad) then
 	return 
 end
 
+local IS_WOW_PROJECT_MAINLINE = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+local IS_WOW_PROJECT_NOT_MAINLINE = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE
+
 DF_COOLDOWN_RAID = 4
 DF_COOLDOWN_EXTERNAL = 3
 
@@ -135,6 +138,7 @@ DF.CooldownsBySpec = {
 			[30283] = 5, --Shadowfury
 			[6789] = 5, --Mortal Coil (talent)
 			[333889] = 5, --Fel Domination
+			[5484] = 5, --Howl of Terror (talent)
 		},
 		--demonology
 		[266] = {
@@ -162,6 +166,7 @@ DF.CooldownsBySpec = {
 			[6789] = 5, --Mortal Coil (talent)
 			[30283] = 5, --Shadowfury
 			[333889] = 5, --Fel Domination
+			[5484] = 5, --Howl of Terror (talent)
 		},
 	
 	--WARRIOR
@@ -238,6 +243,7 @@ DF.CooldownsBySpec = {
 			[231895] = 1, --Crusade (talent)
 			[205191] = 2, --Eye for an Eye (talent)
 			[184662] = 2, --Shield of Vengeance
+			[403876] = 2, --Divine Protection
 			[642] = 2, --Divine Shield
 			[1022] = 3, --Blessing of Protection
 			[6940] = 3, --Blessing of Sacrifice
@@ -470,7 +476,7 @@ DF.CooldownsBySpec = {
 
 		},
 		--restoration
-		[263] = {
+		[264] = {
 			[108271] = 2, --Astral Shift
 			[114052] = 2, --Ascendance (talent)
 			[98008] = 4, --Spirit Link Totem
@@ -483,9 +489,209 @@ DF.CooldownsBySpec = {
 		},
 }
 
--->  tells the duration, requirements and cooldown of a cooldown
+--additional CDs / modifications for classic
+if (IS_WOW_PROJECT_NOT_MAINLINE) then
+	--WARRIOR
+	--Arms
+	DF.CooldownsBySpec[71][12292] = 1 --Death Wish (BCC)
+	
+	--ROGUE
+	--Outlaw
+	DF.CooldownsBySpec[260][13877] = 1 --Blade Flurry (talent) (BBC)
+	
+	--MAGE
+	--fire
+	DF.CooldownsBySpec[63][28682] = 1 --Combustion (talent) (BCC)
+
+	--HUNTER
+	--marksmanship
+	DF.CooldownsBySpec[254][3045] = 1 --Rapid Fire (BCC)
+	DF.CooldownsBySpec[254][34471] = 1 --The Beast Within (talent) (BCC)
+	
+	--auto-generated spell-ranks
+	--SHAMAN - 262
+	--SHAMAN - 263
+	--SHAMAN - 264
+
+	--WARRIOR - 71
+	--WARRIOR - 72
+	--WARRIOR - 73
+
+	--HUNTER - 253
+	--HUNTER - 254
+	--HUNTER - 255
+
+	--MAGE - 62
+	--MAGE - 63
+	--MAGE - 64
+	DF.CooldownsBySpec[64][13031] = 5 --ice barrier Rank 2
+	DF.CooldownsBySpec[64][13032] = 5 --ice barrier Rank 3
+	DF.CooldownsBySpec[64][13033] = 5 --ice barrier Rank 4
+	DF.CooldownsBySpec[64][27134] = 5 --ice barrier Rank 5
+	DF.CooldownsBySpec[64][33405] = 5 --ice barrier Rank 6
+
+	--PALADIN - 65
+	DF.CooldownsBySpec[65][1020] = 2 --divine shield Rank 2
+	DF.CooldownsBySpec[65][2800] = 3 --lay on hands Rank 2
+	DF.CooldownsBySpec[65][9257] = 3 --lay on hands Rank 2
+	DF.CooldownsBySpec[65][10310] = 3 --lay on hands Rank 3
+	DF.CooldownsBySpec[65][20236] = 3 --lay on hands Rank 2
+	DF.CooldownsBySpec[65][27154] = 3 --lay on hands Rank 4
+	DF.CooldownsBySpec[65][5588] = 5 --hammer of justice Rank 2
+	DF.CooldownsBySpec[65][5589] = 5 --hammer of justice Rank 3
+	DF.CooldownsBySpec[65][10308] = 5 --hammer of justice Rank 4
+	DF.CooldownsBySpec[65][10326] = 5 --Turn Evil
+	DF.CooldownsBySpec[65][20729] = 3 --blessing of sacrifice Rank 2
+	DF.CooldownsBySpec[65][27147] = 3 --blessing of sacrifice Rank 3
+	DF.CooldownsBySpec[65][27148] = 3 --blessing of sacrifice Rank 4
+	DF.CooldownsBySpec[65][5573] = 2 --divine protection Rank 2
+	DF.CooldownsBySpec[65][5599] = 3 --blessing of protection Rank 2
+	DF.CooldownsBySpec[65][10278] = 3 --blessing of protection Rank 3
+
+	--PALADIN - 66
+	DF.CooldownsBySpec[66][31851] = 2 --ardent defender Rank 2
+	DF.CooldownsBySpec[66][31852] = 2 --ardent defender Rank 3
+	DF.CooldownsBySpec[66][31853] = 2 --ardent defender Rank 4
+	DF.CooldownsBySpec[66][31854] = 2 --ardent defender Rank 5
+	DF.CooldownsBySpec[66][20729] = 3 --blessing of sacrifice Rank 2
+	DF.CooldownsBySpec[66][27147] = 3 --blessing of sacrifice Rank 3
+	DF.CooldownsBySpec[66][27148] = 3 --blessing of sacrifice Rank 4
+	DF.CooldownsBySpec[66][5588] = 5 --hammer of justice Rank 2
+	DF.CooldownsBySpec[66][5589] = 5 --hammer of justice Rank 3
+	DF.CooldownsBySpec[66][10308] = 5 --hammer of justice Rank 4
+	DF.CooldownsBySpec[66][10326] = 5 --Turn Evil
+	DF.CooldownsBySpec[66][5599] = 3 --blessing of protection Rank 2
+	DF.CooldownsBySpec[66][10278] = 3 --blessing of protection Rank 3
+
+	--PALADIN - 70
+	DF.CooldownsBySpec[70][1020] = 2 --divine shield Rank 2
+	DF.CooldownsBySpec[70][2800] = 3 --lay on hands Rank 2
+	DF.CooldownsBySpec[70][9257] = 3 --lay on hands Rank 2
+	DF.CooldownsBySpec[70][10310] = 3 --lay on hands Rank 3
+	DF.CooldownsBySpec[70][20236] = 3 --lay on hands Rank 2
+	DF.CooldownsBySpec[70][27154] = 3 --lay on hands Rank 4
+	DF.CooldownsBySpec[70][5588] = 5 --hammer of justice Rank 2
+	DF.CooldownsBySpec[70][5589] = 5 --hammer of justice Rank 3
+	DF.CooldownsBySpec[70][10308] = 5 --hammer of justice Rank 4
+	DF.CooldownsBySpec[70][10326] = 5 --Turn Evil
+	DF.CooldownsBySpec[70][5599] = 3 --blessing of protection Rank 2
+	DF.CooldownsBySpec[70][10278] = 3 --blessing of protection Rank 3
+	DF.CooldownsBySpec[70][20729] = 3 --blessing of sacrifice Rank 2
+	DF.CooldownsBySpec[70][27147] = 3 --blessing of sacrifice Rank 3
+	DF.CooldownsBySpec[70][27148] = 3 --blessing of sacrifice Rank 4
+
+	--PRIEST - 256
+	DF.CooldownsBySpec[256][8124] = 5 --psychic scream Rank 2
+	DF.CooldownsBySpec[256][10888] = 5 --psychic scream Rank 3
+	DF.CooldownsBySpec[256][10890] = 5 --psychic scream Rank 4
+	DF.CooldownsBySpec[256][27610] = 5 --psychic scream Rank 4
+	DF.CooldownsBySpec[256][19236] = 5 --desperate prayer Rank 2
+	DF.CooldownsBySpec[256][19238] = 5 --desperate prayer Rank 3
+	DF.CooldownsBySpec[256][19240] = 5 --desperate prayer Rank 4
+	DF.CooldownsBySpec[256][19241] = 5 --desperate prayer Rank 5
+	DF.CooldownsBySpec[256][19242] = 5 --desperate prayer Rank 6
+	DF.CooldownsBySpec[256][19243] = 5 --desperate prayer Rank 7
+	DF.CooldownsBySpec[256][25437] = 5 --desperate prayer Rank 8
+
+	--PRIEST - 257
+	DF.CooldownsBySpec[257][2052] = 5 --lesser heal Rank 2
+	DF.CooldownsBySpec[257][2053] = 5 --lesser heal Rank 3
+	DF.CooldownsBySpec[257][34863] = 5 --circle of healing Rank 2
+	DF.CooldownsBySpec[257][34864] = 5 --circle of healing Rank 3
+	DF.CooldownsBySpec[257][34865] = 5 --circle of healing Rank 4
+	DF.CooldownsBySpec[257][34866] = 5 --circle of healing Rank 5
+	DF.CooldownsBySpec[257][8124] = 5 --psychic scream Rank 2
+	DF.CooldownsBySpec[257][10888] = 5 --psychic scream Rank 3
+	DF.CooldownsBySpec[257][10890] = 5 --psychic scream Rank 4
+	DF.CooldownsBySpec[257][27610] = 5 --psychic scream Rank 4
+	DF.CooldownsBySpec[257][19236] = 5 --desperate prayer Rank 2
+	DF.CooldownsBySpec[257][19238] = 5 --desperate prayer Rank 3
+	DF.CooldownsBySpec[257][19240] = 5 --desperate prayer Rank 4
+	DF.CooldownsBySpec[257][19241] = 5 --desperate prayer Rank 5
+	DF.CooldownsBySpec[257][19242] = 5 --desperate prayer Rank 6
+	DF.CooldownsBySpec[257][19243] = 5 --desperate prayer Rank 7
+	DF.CooldownsBySpec[257][25437] = 5 --desperate prayer Rank 8
+
+	--PRIEST - 258
+	DF.CooldownsBySpec[258][8124] = 5 --psychic scream Rank 2
+	DF.CooldownsBySpec[258][10888] = 5 --psychic scream Rank 3
+	DF.CooldownsBySpec[258][10890] = 5 --psychic scream Rank 4
+	DF.CooldownsBySpec[258][27610] = 5 --psychic scream Rank 4
+	DF.CooldownsBySpec[258][19236] = 5 --desperate prayer Rank 2
+	DF.CooldownsBySpec[258][19238] = 5 --desperate prayer Rank 3
+	DF.CooldownsBySpec[258][19240] = 5 --desperate prayer Rank 4
+	DF.CooldownsBySpec[258][19241] = 5 --desperate prayer Rank 5
+	DF.CooldownsBySpec[258][19242] = 5 --desperate prayer Rank 6
+	DF.CooldownsBySpec[258][19243] = 5 --desperate prayer Rank 7
+	DF.CooldownsBySpec[258][25437] = 5 --desperate prayer Rank 8
+	DF.CooldownsBySpec[258][15286] = not IS_WOW_PROJECT_CLASSIC_WRATH and 5 or nil --vampiric embrace is a debuff in classic, not a buff; a 30min buff in wotlk (don't track it...)
+
+	--ROGUE - 259
+	DF.CooldownsBySpec[259][1857] = 2 --vanish Rank 2
+	DF.CooldownsBySpec[259][11329] = 2 --vanish Rank 2
+	DF.CooldownsBySpec[259][26888] = 2 --vanish Rank 3
+	DF.CooldownsBySpec[259][26889] = 2 --vanish Rank 3
+	DF.CooldownsBySpec[259][27617] = 2 --vanish Rank 2
+	DF.CooldownsBySpec[259][26669] = 2 --evasion Rank 2
+
+	--ROGUE - 260
+	DF.CooldownsBySpec[260][1857] = 2 --vanish Rank 2
+	DF.CooldownsBySpec[260][11329] = 2 --vanish Rank 2
+	DF.CooldownsBySpec[260][26888] = 2 --vanish Rank 3
+	DF.CooldownsBySpec[260][26889] = 2 --vanish Rank 3
+	DF.CooldownsBySpec[260][27617] = 2 --vanish Rank 2
+	DF.CooldownsBySpec[260][26669] = 2 --evasion Rank 2
+
+	--ROGUE - 261
+	DF.CooldownsBySpec[261][1857] = 2 --vanish Rank 2
+	DF.CooldownsBySpec[261][11329] = 2 --vanish Rank 2
+	DF.CooldownsBySpec[261][26888] = 2 --vanish Rank 3
+	DF.CooldownsBySpec[261][26889] = 2 --vanish Rank 3
+	DF.CooldownsBySpec[261][27617] = 2 --vanish Rank 2
+	DF.CooldownsBySpec[261][26669] = 2 --evasion Rank 2
+
+	--WARLOCK - 265
+	DF.CooldownsBySpec[265][30413] = 5 --shadowfury Rank 2
+	DF.CooldownsBySpec[265][30414] = 5 --shadowfury Rank 3
+	DF.CooldownsBySpec[265][17928] = 5 --howl of terror Rank 2
+	DF.CooldownsBySpec[265][17925] = 5 --death coil Rank 2
+	DF.CooldownsBySpec[265][17926] = 5 --death coil Rank 3
+	DF.CooldownsBySpec[265][27223] = 5 --death coil Rank 4
+
+	--WARLOCK - 266
+	DF.CooldownsBySpec[266][30413] = 5 --shadowfury Rank 2
+	DF.CooldownsBySpec[266][30414] = 5 --shadowfury Rank 3
+	DF.CooldownsBySpec[266][17928] = 5 --howl of terror Rank 2
+	DF.CooldownsBySpec[266][17925] = 5 --death coil Rank 2
+	DF.CooldownsBySpec[266][17926] = 5 --death coil Rank 3
+	DF.CooldownsBySpec[266][27223] = 5 --death coil Rank 4
+
+	--WARLOCK - 267
+	DF.CooldownsBySpec[267][17925] = 5 --death coil Rank 2
+	DF.CooldownsBySpec[267][17926] = 5 --death coil Rank 3
+	DF.CooldownsBySpec[267][27223] = 5 --death coil Rank 4
+	DF.CooldownsBySpec[267][17928] = 5 --howl of terror Rank 2
+	DF.CooldownsBySpec[267][30413] = 5 --shadowfury Rank 2
+	DF.CooldownsBySpec[267][30414] = 5 --shadowfury Rank 3
+
+	--DRUID - 102
+	DF.CooldownsBySpec[102][99] = nil --demoralizing roar disabled, no CC in tbc
+
+	--DRUID - 103
+	--DRUID - 104
+	DF.CooldownsBySpec[104][99] = nil --demoralizing roar disabled, no CC in tbc
+
+	--DRUID - 105
+	DF.CooldownsBySpec[105][8918] = 4 --tranquility Rank 2
+	DF.CooldownsBySpec[105][9862] = 4 --tranquility Rank 3
+	DF.CooldownsBySpec[105][9863] = 4 --tranquility Rank 4
+	DF.CooldownsBySpec[105][26983] = 4 --tranquility Rank 5
+	
+end
+
+-- tells the duration, requirements and cooldown of a cooldown
 DF.CooldownsInfo = {
-	--> paladin
+	--paladin
 	[31884] = {cooldown = 120, duration = 20, talent = false, charges = 1, class = "PALADIN", type = 1}, --Avenging Wrath
 	[216331] = {cooldown = 120, duration = 20, talent = 22190, charges = 1, class = "PALADIN", type = 1}, --Avenging Crusader (talent)
 	[498] = {cooldown = 60, duration = 8, talent = false, charges = 1, class = "PALADIN", type = 2}, --Divine Protection
@@ -507,7 +713,7 @@ DF.CooldownsInfo = {
 	[205191] = {cooldown = 60, duration = 10, talent = 22183, charges = 1, class = "PALADIN", type = 2}, --Eye for an Eye (talent)
 	[184662] = {cooldown = 120, duration = 15, talent = false, charges = 1, class = "PALADIN", type = 2}, --Shield of Vengeance
 	
-	--> warrior
+	--warrior
 	[107574] = {cooldown = 90, duration = 20, talent = 22397, charges = 1, class = "WARRIOR", type = 1}, --Avatar
 	[227847] = {cooldown = 90, duration = 5, talent = false, charges = 1, class = "WARRIOR", type = 1}, --Bladestorm
 	[152277] = {cooldown = 60, duration = 6, talent = 21667, charges = 1, class = "WARRIOR", type = 1}, --Ravager (talent)
@@ -523,7 +729,7 @@ DF.CooldownsInfo = {
 	[5246]  = {cooldown = 90, duration = 8, talent = false, charges = 1, class = "WARRIOR", type = 5}, --Intimidating Shout
 
 	
-	--> warlock
+	--warlock
 	[205180] = {cooldown = 180, duration = 20, talent = false, charges = 1, class = "WARLOCK", type = 1}, --Summon Darkglare
 	[342601] = {cooldown = 3600, duration = false, talent = false, charges = 1, class = "WARLOCK", type = 1}, --Ritual of Doom
 	[113860] = {cooldown = 120, duration = 20, talent = 19293, charges = 1, class = "WARLOCK", type = 1}, --Dark Soul: Misery (talent)
@@ -537,8 +743,9 @@ DF.CooldownsInfo = {
 	[113858] = {cooldown = 120, duration = 20, talent = 23092, charges = 1, class = "WARLOCK", type = 1}, --Dark Soul: Instability (talent)
 	[30283] = {cooldown = 60, duration = 3, talent = false, charges = 1, class = "WARLOCK", type = 5}, --Shadowfury
 	[333889] = {cooldown = 180, duration = 15, talent = false, charges = 1, class = "WARLOCK", type = 5}, --Fel Domination
+	[5484] = {cooldown = 40, duration = 20, talent = true, charges = 1, class = "WARLOCK", type = 5}, --Howl of Terror (talent)
 	
-	--> shaman
+	--shaman
 	[198067] = {cooldown = 150, duration = 30, talent = false, charges = 1, class = "SHAMAN", type = 1}, --Fire Elemental
 	[192249] = {cooldown = 150, duration = 30, talent = 19272, charges = 1, class = "SHAMAN", type = 1}, --Storm Elemental (talent)
 	[108271] = {cooldown = 90, duration = 8, talent = false, charges = 1, class = "SHAMAN", type = 2}, --Astral Shift
@@ -556,7 +763,7 @@ DF.CooldownsInfo = {
 	[65992] = {cooldown = 60, duration = 10, talent = false, charges = 1, class = "SHAMAN", type = 5}, --Tremor Totem
 	[192077] = {cooldown = 120, duration = 15, talent = 21966, charges = 1, class = "SHAMAN", type = 5}, --Wind Rush Totem (talent)
 	
-	--> monk
+	--monk
 	[132578] = {cooldown = 180, duration = 25, talent = false, charges = 1, class = "MONK", type = 1}, --Invoke Niuzao, the Black Ox
 	[115080] = {cooldown = 180, duration = false, talent = false, charges = 1, class = "MONK", type = 1}, --Touch of Death
 	[115203] = {cooldown = 420, duration = 15, talent = false, charges = 1, class = "MONK", type = 2}, --Fortifying Brew
@@ -577,7 +784,7 @@ DF.CooldownsInfo = {
 	[116844] = {cooldown = 45, duration = 5, talent = 19995, charges = 1, class = "MONK", type = 5}, --Ring of peace (talent)
 	[119381] = {cooldown = 50, duration = 3, talent = false, charges = 1, class = "MONK", type = 5}, --Leg Sweep
 	
-	--> hunter
+	--hunter
 	[193530] = {cooldown = 120, duration = 20, talent = false, charges = 1, class = "HUNTER", type = 1}, --Aspect of the Wild
 	[19574] = {cooldown = 90, duration = 12, talent = false, charges = 1, class = "HUNTER", type = 1}, --Bestial Wrath
 	[201430] = {cooldown = 180, duration = 12, talent = 23044, charges = 1, class = "HUNTER", type = 1}, --Stampede (talent)
@@ -593,7 +800,7 @@ DF.CooldownsInfo = {
 	[187650] = {cooldown = 25, duration = 60, talent = false, charges = 1, class = "HUNTER", type = 5}, --Freezing Trap
 	[186289] = {cooldown = 72, duration = 15, talent = false, charges = 1, class = "HUNTER", type = 5}, --Aspect of the eagle
 
-	--> druid
+	--druid
 	[194223] = {cooldown = 180, duration = 20, talent = false, charges = 1, class = "DRUID", type = 1}, --Celestial Alignment
 	[102560] = {cooldown = 180, duration = 30, talent = 21702, charges = 1, class = "DRUID", type = 1}, --Incarnation: Chosen of Elune (talent)
 	[22812] = {cooldown = 60, duration = 12, talent = false, charges = 1, class = "DRUID", type = 2}, --Barkskin
@@ -613,7 +820,7 @@ DF.CooldownsInfo = {
 	[132469] = {cooldown = 30, duration = false, talent = false, charges = 1, class = "DRUID", type = 5}, --Typhoon
 	[319454] = {cooldown = 300, duration = 45, talent = 18577, charges = 1, class = "DRUID", type = 5}, --Heart of the Wild (talent)
 
-	--> death knight
+	--death knight
 	[275699] = {cooldown = 90, duration = 15, talent = false, charges = 1, class = "DEATHKNIGHT", type = 1}, --Apocalypse
 	[42650] = {cooldown = 480, duration = 30, talent = false, charges = 1, class = "DEATHKNIGHT", type = 1}, --Army of the Dead
 	[49206] = {cooldown = 180, duration = 30, talent = 22110, charges = 1, class = "DEATHKNIGHT", type = 1}, --Summon Gargoyle (talent)
@@ -633,7 +840,7 @@ DF.CooldownsInfo = {
 	[108194] = {cooldown = 45, duration = 4, talent = 22520, charges = 1, class = "DEATHKNIGHT", type = 5}, --Asphyxiate (talent)
 	[221562]  = {cooldown = 45, duration = 5, talent = false, charges = 1, class = "DEATHKNIGHT", type = 5}, --Asphyxiate
 	
-	--> demon hunter
+	--demon hunter
 
 	[200166] = {cooldown = 240, duration = 30, talent = false, charges = 1, class = "DEMONHUNTER", type = 1}, --Metamorphosis
 	[198589] = {cooldown = 60, duration = 10, talent = false, charges = 1, class = "DEMONHUNTER", type = 2}, --Blur
@@ -652,7 +859,7 @@ DF.CooldownsInfo = {
 	[202137] = {cooldown = 60, duration = 8, talent = false, charges = 1, class = "DEMONHUNTER", type = 5}, --Sigil of Silence
 	[202138] = {cooldown = 90, duration = 6, talent = 22511, charges = 1, class = "DEMONHUNTER", type = 5}, --Sigil of Chains (talent)
 	
-	--> mage
+	--mage
 	[12042] = {cooldown = 90, duration = 10, talent = false, charges = 1, class = "MAGE", type = 1},  --Arcane Power
 	[12051] = {cooldown = 90, duration = 6, talent = false, charges = 1, class = "MAGE", type = 1},  --Evocation
 	[110960] = {cooldown = 120, duration = 20, talent = false, charges = 1, class = "MAGE", type = 2},  --Greater Invisibility
@@ -668,7 +875,7 @@ DF.CooldownsInfo = {
 	[235219] = {cooldown = 300, duration = false, talent = false, charges = 1, class = "MAGE", type = 5},  --Cold Snap
 	[113724] = {cooldown = 45, duration = 10, talent = 22471, charges = 1, class = "MAGE", type = 5},  --Ring of Frost (talent)
 
-	--> priest
+	--priest
 	[10060] = {cooldown = 120, duration = 20, talent = false, charges = 1, class = "PRIEST", type = 1},  --Power Infusion
 	[34433] = {cooldown = 180, duration = 15, talent = false, charges = 1, class = "PRIEST", type = 1},  --Shadowfiend
 	[123040] = {cooldown = 60, duration = 12, talent = 22094, charges = 1, class = "PRIEST", type = 1},  --Mindbender (talent)
@@ -689,7 +896,7 @@ DF.CooldownsInfo = {
 	[47585] = {cooldown = 120, duration = 6, talent = false, charges = 1, class = "PRIEST", type = 2},  --Dispersion
 	[15286] = {cooldown = 120, duration = 15, talent = false, charges = 1, class = "PRIEST", type = 4},  --Vampiric Embrace
 
-	--> rogue
+	--rogue
 	[79140] = {cooldown = 120, duration = 20, talent = false, charges = 1, class = "ROGUE", type = 1},  --Vendetta
 	[1856] = {cooldown = 120, duration = 3, talent = false, charges = 1, class = "ROGUE", type = 2},  --Vanish
 	[5277] = {cooldown = 120, duration = 10, talent = false, charges = 1, class = "ROGUE", type = 2},  --Evasion
@@ -710,12 +917,16 @@ DF.CooldownsInfo = {
 DF.CrowdControlSpells = {
 	[5246] = "WARRIOR", --Intimidating Shout
 	[132168] = "WARRIOR", --Shockwave (debuff spellid)
+	[6552] = "WARRIOR", --Pummel
 	[132169] = "WARRIOR", --Storm Bolt (talent debuff spellid)
-	
+
 	[118699] = "WARLOCK", --Fear (debuff spellid)
 	[6789] = "WARLOCK", --Mortal Coil
+	[19647] = "WARLOCK", --Spelllock
 	[30283] = "WARLOCK", --Shadowfury
 	[710] = "WARLOCK", --Banish
+	[212619] = "WARLOCK", --Call Fellhunt
+	[5484] = "WARLOCK", --Howl of Terror (talent)
 
 	[118] = "MAGE", --Polymorph
 	[61305] = "MAGE", --Polymorph (black cat)
@@ -727,11 +938,14 @@ DF.CrowdControlSpells = {
 	[61721] = "MAGE", --Polymorph Rabbit
 	[28272] = "MAGE", --Polymorph Pig
 	[277792] = "MAGE", --Polymorph Bumblebee
+	[391622] = "MAGE", --Polymorph Duck
+	[2139] = "MAGE", --Counterspell
 	
 	[82691] = "MAGE", --Ring of Frost (debuff spellid)
 	[122] = "MAGE", --Frost Nova
 	[157997] = "MAGE", --Ice Nova
 	[31661] = "MAGE", --Dragon's Breath
+	[157981] = "MAGE", --Blast Wave
 	
 	[205364] = "PRIEST", --Mind Control (talent)
 	[605] = "PRIEST", --Mind Control
@@ -741,20 +955,30 @@ DF.CrowdControlSpells = {
 	[200200] = "PRIEST", --Holy Word: Chastise (talent debuff spellid)
 	[226943] = "PRIEST", --Mind Bomb (talent)
 	[64044] = "PRIEST", --Psychic Horror (talent)
+	[15487] = "PRIEST", --Silence
 	
 	[2094] = "ROGUE", --Blind
+	[427773] = "ROGUE", --Blind (AoE)
 	[1833] = "ROGUE", --Cheap Shot
 	[408] = "ROGUE", --Kidney Shot
+	[1766] = "ROGUE", --Kick
 	[6770] = "ROGUE", --Sap
 	[1776] = "ROGUE", --Gouge
 	
 	[853] = "PALADIN", --Hammer of Justice
+	[96231] = "PALADIN", --Rebuke (tank)
 	[20066] = "PALADIN", --Repentance (talent)
 	[105421] = "PALADIN", --Blinding Light (talent)
+	[31935] = "PALADIN", --Avengers Shield
+	[217824] = "PALADIN", --Shield of Virtue
+	[10326] = "PALADIN", --Turn Evil
 	
 	[221562] = "DEATHKNIGHT", --Asphyxiate
 	[108194] = "DEATHKNIGHT", --Asphyxiate (talent)
+	[47528] = "DEATHKNIGHT", --Mind Frezer
+	[91807] = "DEATHKNIGHT", --Shab Rush
 	[207167] = "DEATHKNIGHT", --Blinding Sleet
+	[334693] = "DEAHTKNIGHT", --Absolute Zero (legendary)
 	
 	[339] = "DRUID", --Entangling Roots
 	[2637] = "DRUID", --Hibernate
@@ -768,22 +992,39 @@ DF.CrowdControlSpells = {
 	[50259] = "DRUID", --Dazed (from Wild Charge)
 	[209753] = "DRUID", --Cyclone (from pvp talent)
 	[33786] = "DRUID", --Cyclone (from pvp talent - resto druid)
-	[155722] = "DRUID", --Rake
+	[93985] = "DRUID", --Skullbash
+	[163505] = "DRUID", --Rake
+	[127797] = "DRUID", --Ursol's Vortex
 	
+	[147362] = "HUNTER", --Countershot
+	[187707] = "HUNTER", --Muzzle
     [3355] = "HUNTER", --Freezing Trap / Diamond Ice (from pvp talent)
 	[19577] = "HUNTER", --Intimidation
 	[190927] = "HUNTER", --Harpoon
 	[162480] = "HUNTER", --Steel Trap
 	[24394] = "HUNTER", --Intimidation
+	[117405] = "HUNTER", --Binding Shot (trigger)
+	[117526] = "HUNTER", --Binding Shot (triggered)
+	[1513] = "HUNTER", --Scare Beast
 	
 	[119381] = "MONK", --Leg Sweep
 	[115078] = "MONK", --Paralysis
 	[198909] = "MONK", --Song of Chi-Ji (talent)
 	[116706] = "MONK", --Disable
 	[107079] = "MONK", --Quaking Palm (racial)
+	[116705] = "MONK", --Spear kick
 	
 	[118905] = "SHAMAN", --Static Charge (Capacitor Totem)
 	[51514] = "SHAMAN", --Hex
+	[210873] = "SHAMAN", --Hex (Compy)
+	[211004] = "SHAMAN", --Hex (Spider)
+	[211010] = "SHAMAN", --Hex (Snake)
+	[211015] = "SHAMAN", --Hex (Cockroach)
+	[269352] = "SHAMAN", --Hex (Skeletal Hatchling)
+	[277778] = "SHAMAN", --Hex (Zandalari Tendonripper)
+	[277784] = "SHAMAN", --Hex (Wicker Mongrel)
+	[309328] = "SHAMAN", --Hex (Living Honey)
+	[57994] = "SHAMAN",  --Wind Shear
 	[64695] = "SHAMAN", --Earthgrab (talent)
 	[197214] = "SHAMAN", --Sundering (talent)
 	
@@ -792,7 +1033,90 @@ DF.CrowdControlSpells = {
 	[200166] = "DEMONHUNTER", --Metamorphosis
 	[207685] = "DEMONHUNTER", --Sigil of Misery
 	[211881] = "DEMONHUNTER", -- Fel Eruption
+	[183752] = "DEMONHUNTER", --Disrupt
+	
+	[331866] = "COVENANT|VENTHYR", --Agent of Chaos (Nadia soulbind)
+	
+	[372245] = "EVOKER", --Terror of the Skies
+	[360806] = "EVOKER", --Sleep Walk
 }
+
+-- additionals for classic
+if (IS_WOW_PROJECT_NOT_MAINLINE) then
+	DF.CrowdControlSpells[99] = nil --demoralizing roar disabled, no CC in tbc
+	
+	--auto-generated
+	DF.CrowdControlSpells[18657] = "DRUID" --hibernate Rank 2
+	DF.CrowdControlSpells[18658] = "DRUID" --hibernate Rank 3
+	DF.CrowdControlSpells[6798] = "DRUID" --bash Rank 2
+	DF.CrowdControlSpells[8983] = "DRUID" --bash Rank 3
+	DF.CrowdControlSpells[1062] = "DRUID" --entangling roots Rank 2
+	DF.CrowdControlSpells[5195] = "DRUID" --entangling roots Rank 3
+	DF.CrowdControlSpells[5196] = "DRUID" --entangling roots Rank 4
+	DF.CrowdControlSpells[9852] = "DRUID" --entangling roots Rank 5
+	DF.CrowdControlSpells[9853] = "DRUID" --entangling roots Rank 6
+	DF.CrowdControlSpells[19970] = "DRUID" --entangling roots Rank 6
+	DF.CrowdControlSpells[19971] = "DRUID" --entangling roots Rank 5
+	DF.CrowdControlSpells[19972] = "DRUID" --entangling roots Rank 4
+	DF.CrowdControlSpells[19973] = "DRUID" --entangling roots Rank 3
+	DF.CrowdControlSpells[19974] = "DRUID" --entangling roots Rank 2
+	DF.CrowdControlSpells[26989] = "DRUID" --entangling roots Rank 7
+	DF.CrowdControlSpells[27010] = "DRUID" --entangling roots Rank 7
+
+	DF.CrowdControlSpells[14310] = "HUNTER" --freezing trap Rank 2
+	DF.CrowdControlSpells[14311] = "HUNTER" --freezing trap Rank 3
+	DF.CrowdControlSpells[27753] = "HUNTER" --freezing trap Rank 3
+	DF.CrowdControlSpells[14308] = "HUNTER" --freezing trap effect Rank 2
+	DF.CrowdControlSpells[14309] = "HUNTER" --freezing trap effect Rank 3
+
+	DF.CrowdControlSpells[865] = "MAGE" --frost nova Rank 2
+	DF.CrowdControlSpells[6131] = "MAGE" --frost nova Rank 3
+	DF.CrowdControlSpells[9915] = "MAGE" --frost nova Rank 3
+	DF.CrowdControlSpells[10230] = "MAGE" --frost nova Rank 4
+	DF.CrowdControlSpells[27088] = "MAGE" --frost nova Rank 5
+	DF.CrowdControlSpells[33041] = "MAGE" --dragon's breath Rank 2
+	DF.CrowdControlSpells[33042] = "MAGE" --dragon's breath Rank 3
+	DF.CrowdControlSpells[33043] = "MAGE" --dragon's breath Rank 4
+	DF.CrowdControlSpells[12824] = "MAGE" --polymorph Rank 2
+	DF.CrowdControlSpells[12825] = "MAGE" --polymorph Rank 3
+	DF.CrowdControlSpells[12826] = "MAGE" --polymorph Rank 4
+	DF.CrowdControlSpells[1090] = "MAGE" --sleep Rank 2
+
+	DF.CrowdControlSpells[5588] = "PALADIN" --hammer of justice Rank 2
+	DF.CrowdControlSpells[5589] = "PALADIN" --hammer of justice Rank 3
+	DF.CrowdControlSpells[10308] = "PALADIN" --hammer of justice Rank 4
+	DF.CrowdControlSpells[10326] = "PALADIN" --Turn Evil
+
+	DF.CrowdControlSpells[8124] = "PRIEST" --psychic scream Rank 2
+	DF.CrowdControlSpells[10888] = "PRIEST" --psychic scream Rank 3
+	DF.CrowdControlSpells[10890] = "PRIEST" --psychic scream Rank 4
+	DF.CrowdControlSpells[27610] = "PRIEST" --psychic scream Rank 4
+	DF.CrowdControlSpells[9485] = "PRIEST" --shackle undead Rank 2
+	DF.CrowdControlSpells[10955] = "PRIEST" --shackle undead Rank 3
+	DF.CrowdControlSpells[10911] = "PRIEST" --mind control Rank 2
+	DF.CrowdControlSpells[10912] = "PRIEST" --mind control Rank 3
+
+	DF.CrowdControlSpells[1777] = "ROGUE" --gouge Rank 2
+	DF.CrowdControlSpells[8629] = "ROGUE" --gouge Rank 3
+	DF.CrowdControlSpells[11285] = "ROGUE" --gouge Rank 4
+	DF.CrowdControlSpells[11286] = "ROGUE" --gouge Rank 5
+	DF.CrowdControlSpells[38764] = "ROGUE" --gouge Rank 6
+	DF.CrowdControlSpells[2070] = "ROGUE" --sap Rank 2
+	DF.CrowdControlSpells[11297] = "ROGUE" --sap Rank 3
+	DF.CrowdControlSpells[8643] = "ROGUE" --kidney shot Rank 2
+	DF.CrowdControlSpells[27615] = "ROGUE" --kidney shot Rank 2
+	DF.CrowdControlSpells[30621] = "ROGUE" --kidney shot Rank 2
+
+	DF.CrowdControlSpells[17925] = "WARLOCK" --death coil Rank 2
+	DF.CrowdControlSpells[17926] = "WARLOCK" --death coil Rank 3
+	DF.CrowdControlSpells[27223] = "WARLOCK" --death coil Rank 4
+	DF.CrowdControlSpells[18647] = "WARLOCK" --banish Rank 2
+	DF.CrowdControlSpells[30413] = "WARLOCK" --shadowfury Rank 2
+	DF.CrowdControlSpells[30414] = "WARLOCK" --shadowfury Rank 3
+	DF.CrowdControlSpells[6213] = "WARLOCK" --fear Rank 2
+	DF.CrowdControlSpells[6215] = "WARLOCK" --fear Rank 3
+	DF.CrowdControlSpells[17928] = "WARLOCK" --howl of terror Rank 2
+end
 
 DF.SpecIds = {
 	[577] = "DEMONHUNTER",
@@ -825,7 +1149,7 @@ DF.SpecIds = {
 
 	[262] = "SHAMAN",
 	[263] = "SHAMAN",
-	[254] = "SHAMAN",
+	[264] = "SHAMAN",
 
 	[256] = "PRIEST",
 	[257] = "PRIEST",
@@ -844,6 +1168,69 @@ DF.SpecIds = {
 	[270] = "MONK",
 }
 
+DF.ClassSpecIds = { --private
+	["DEMONHUNTER"] = {
+		[577] = true, 
+		[581] = true,
+	},
+	["DEATHKNIGHT"] = {
+		[250] = true,
+		[251] = true,
+		[252] = true,
+	},
+	["WARRIOR"] = {
+		[71] = true,
+		[72] = true,
+		[73] = true,
+	},
+	["MAGE"] = {
+		[62] = true,
+		[63] = true,
+		[64] = true,
+	},
+	["ROGUE"] = {
+		[259] = true,
+		[260] = true,
+		[261] = true,
+	},
+	["DRUID"] = {
+		[102] = true,
+		[103] = true,
+		[104] = true,
+		[105] = true,
+	},
+	["HUNTER"] = {
+		[253] = true,
+		[254] = true,
+		[255] = true,
+	},
+	["SHAMAN"] = {
+		[262] = true,
+		[263] = true,
+		[264] = true,
+	},
+	["PRIEST"] = {
+		[256] = true,
+		[257] = true,
+		[258] = true,
+	},
+	["WARLOCK"] = {
+		[265] = true,
+		[266] = true,
+		[267] = true,
+	},
+	["PALADIN"] = {
+		[65] = true,
+		[66] = true,
+		[70] = true,
+	},
+	["MONK"] = {
+		[268] = true,
+		[269] = true,
+		[270] = true,
+	},
+}
+
 DF.CooldownToClass = {}
 
 DF.CooldownsAttack = {}
@@ -853,9 +1240,9 @@ DF.CooldownsRaid = {}
 
 DF.CooldownsAllDeffensive = {}
 
-for specId, cooldownTable in pairs (DF.CooldownsBySpec) do
+for specId, cooldownTable in pairs(DF.CooldownsBySpec) do
 	
-	for spellId, cooldownType in pairs (cooldownTable) do
+	for spellId, cooldownType in pairs(cooldownTable) do
 		
 		if (cooldownType == 1) then
 			DF.CooldownsAttack [spellId] = true
@@ -877,12 +1264,12 @@ for specId, cooldownTable in pairs (DF.CooldownsBySpec) do
 			
 		end
 		
-		DF.CooldownToClass [spellId] = DF.SpecIds [spellId]
+		DF.CooldownToClass [spellId] = DF.SpecIds [specId]
 	end
 end
 
 function DF:FindClassForCooldown (spellId)
-	for specId, cooldownTable in pairs (DF.CooldownsBySpec) do
+	for specId, cooldownTable in pairs(DF.CooldownsBySpec) do
 		local hasCooldown = cooldownTable [spellId]
 		if (hasCooldown) then
 			return DF.SpecIds [specId]
@@ -896,88 +1283,146 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --consumables
+if (DF.IsShadowlandsWow() or DF.IsDragonflight()) then --Temporary IsDragonFlight until I get the items together
+	DF.WeaponEnchantIds = {
+		[6188] = true, --shadowcore oil
+		[6190] = true, --embalmer's oil
+		[6201] = true, --weighted
+		[6200] = true, --sharpened
+		[5400] = true, --flametongue
+		[5401] = true, --windfury
+	}
 
-DF.WeaponEnchantIds = {
-	[6188] = true, --shadowcore oil
-	[6190] = true, --embalmer's oil
-	[6201] = true, --weighted
-	[6200] = true, --sharpened
-	[5400] = true, --flametongue
-	[5401] = true, --windfury
-}
-
-DF.FlaskIDs = {
-	--Shadowlands
-	[307185] = true, --Spectral Flask of Power
-	[307187] = true, --Spectral Stamina Flask
-	[307166] = true, --Eternal Flask
-
-
-
-}
-
-DF.FoodIDs = {
-	--shadowlands tier 1
-	[259454] = 1, -- (agility) Feast of Gluttonous Hedonism
-	[308434] = 1, -- (critical) Phantasmal Souffle and Fries
-	[308397] = 1, --(critical +18) Butterscotch Marinated Ribs
-	[308400] = 1, --(critical +30) Spinefin Souffle and Fries
-	[308488] = 1, -- (haste) Tenebrous Crown Roast Aspic
-	[308404] = 1, -- (haste +18) Cinnamon Bonefish Stew
-	[308405] = 1, -- (haste +30) Tenebrous Crown Roast Aspic
-	[308506] = 1, -- (mastery) Crawler Ravioli with Apple Sauce
-	[308412] = 1, -- (mastery +18) Meaty Apple Dumplings
-	[308413] = 1, -- (mastery +30) Iridescent Ravioli with Apple Sauce
-	[308525] = 1, -- (stamina) Banana Beef Pudding
-	[308414] = 1, -- (stamina +14) Pickled Meat Smoothie
-	[308415] = 1, -- (stamina +22) Banana Beef Pudding
-	[308514] = 1, -- (versatility) Steak a la Mode
-	[308425] = 1, -- (versatility +18) Sweet Silvergill Sausages
-	[308426] = 1, -- (versatility +30) Steak a la Mode
-	[308419] = 1, -- (periodicaly damage) Smothered Shank
-	[327715] = 1, -- (speed) Fried Bonefish
-
-}
-
-DF.PotionIDs = {
-	--Shadowlands
-	[307159] = true, --Potion of Spectral Agility
-	[307163] = true, --Potion of Spectral Stamina
-	[307164] = true, --Potion of Spectral Strength
-	[307160] = true, --Potion of Hardened Shadows
-	[307162] = true, --Potion of Spectral Intellect
-	[307494] = true, --Potion of Empowered Exorcisms
-	[307495] = true, --Potion of Phantom Fire
-	[307161] = true, --Potion of Spiritual Clarity
-	[307496] = true, --Potion of Divine Awakening
-	[307501] = true, --Potion of Specter Swiftness
-	[322302] = true, --Potion of Sacrificial Anima
-	[307497] = true, --Potion of Deathly Fixation
-	[307195] = true, --Potion of the Hidden Spirit
-	[307199] = true, --Potion of Soul Purity
-	[307196] = true, --Potion of Shadow Sight
-	[307192] = true, --Spiritual Healing Potion
-	[307194] = true, --Spiritual Rejuvenation Potion
-	[307193] = true, --Spiritual Mana Potion
-	[323436] = true, --Purify Soul (greek convent)
---	[] = true, --
-
-	[307165] = true, --Spiritual Anti-Venom
-
-
-}
-
-DF.FeastIDs = {
-	[308462] = true, --Feast of Gluttonous Hedonism
-	[307153] = true, --Eternal Cauldron
+	DF.FlaskIDs = {
+		--Shadowlands
+		[307185] = true, --Spectral Flask of Power
+		[307187] = true, --Spectral Stamina Flask
+		[307166] = true, --Eternal Flask
 
 
 
-}
+	}
 
-DF.RuneIDs = {
+	DF.FoodIDs = {
+		--shadowlands tier 1
+		[259454] = 1, -- (agility) Feast of Gluttonous Hedonism
+		[308434] = 1, -- (critical) Phantasmal Souffle and Fries
+		[308397] = 1, --(critical +18) Butterscotch Marinated Ribs
+		[308400] = 1, --(critical +30) Spinefin Souffle and Fries
+		[308488] = 1, -- (haste) Tenebrous Crown Roast Aspic
+		[308404] = 1, -- (haste +18) Cinnamon Bonefish Stew
+		[308405] = 1, -- (haste +30) Tenebrous Crown Roast Aspic
+		[308506] = 1, -- (mastery) Crawler Ravioli with Apple Sauce
+		[308412] = 1, -- (mastery +18) Meaty Apple Dumplings
+		[308413] = 1, -- (mastery +30) Iridescent Ravioli with Apple Sauce
+		[308525] = 1, -- (stamina) Banana Beef Pudding
+		[308414] = 1, -- (stamina +14) Pickled Meat Smoothie
+		[308415] = 1, -- (stamina +22) Banana Beef Pudding
+		[308514] = 1, -- (versatility) Steak a la Mode
+		[308425] = 1, -- (versatility +18) Sweet Silvergill Sausages
+		[308426] = 1, -- (versatility +30) Steak a la Mode
+		[308419] = 1, -- (periodicaly damage) Smothered Shank
+		[327715] = 1, -- (speed) Fried Bonefish
 
-}
+		--feasts
+		[327706] = 2, --strength +20
+		[327707] = 2, --stamina +20
+		[327708] = 2, --intellect +20
+		[327709] = 2, --agility +20
+
+		[327704] = 2, --intellect +18
+		[327701] = 2, --strength +18
+		[327705] = 2, --agility +18
+	}
+
+	DF.PotionIDs = {
+		--Shadowlands
+		[307159] = true, --Potion of Spectral Agility
+		[307163] = true, --Potion of Spectral Stamina
+		[307164] = true, --Potion of Spectral Strength
+		[307160] = true, --Potion of Hardened Shadows
+		[307162] = true, --Potion of Spectral Intellect
+		[307494] = true, --Potion of Empowered Exorcisms
+		[307495] = true, --Potion of Phantom Fire
+		[307161] = true, --Potion of Spiritual Clarity
+		[307496] = true, --Potion of Divine Awakening
+		[307501] = true, --Potion of Specter Swiftness
+		[322302] = true, --Potion of Sacrificial Anima
+		[307497] = true, --Potion of Deathly Fixation
+		[307195] = true, --Potion of the Hidden Spirit
+		[307199] = true, --Potion of Soul Purity
+		[307196] = true, --Potion of Shadow Sight
+		[307192] = true, --Spiritual Healing Potion
+		[307194] = true, --Spiritual Rejuvenation Potion
+		[307193] = true, --Spiritual Mana Potion
+		[323436] = true, --Purify Soul (greek convent)
+	--	[] = true, --
+
+		[307165] = true, --Spiritual Anti-Venom
+	}
+
+	DF.FeastIDs = {
+		[308462] = true, --Feast of Gluttonous Hedonism
+		[307153] = true, --Eternal Cauldron
+	}
+
+	DF.RuneIDs = {
+		[347901] = true, --Veiled Augmentation
+		[367405] = true, --Eternal Augmentation
+	}
+elseif (DF.IsWotLKWow()) then
+	DF.WeaponEnchantIds = {
+		[5400] = true, --flametongue
+		[5401] = true, --windfury
+	}
+	DF.FlaskIDs = {
+		[46377] = true, -- Flask of Endless Rage
+		[46376] = true, -- Flask of the Frost Wyrm
+		[54213] = true, -- Flask of Pure Mojo
+		[46379] = true, -- Flask of Stoneblood
+		[53899] = true, -- Lesser Flask of Toughness
+	}
+	DF.FoodIDs = {
+		[57367] = true, --(Agi +40, Stam +40) Blackended Dragonfin
+		[57294] = true, --(AP +60, SP +35, Stam +30) Dalaran Clam Chowder / Great Feast
+		[57365] = true, --(Spirit +40, Stam +40) Cuttlesteak
+		[57360] = true, --(Hit+40, Stam +40) Worg Tartare / Snapper Extreme
+		[57358] = true, --(ArmorPen +40, Stam +40) Hearty Rhino
+		[57356] = true, --(Expertise +40, Stam +40) Rhinolicious Wormsteak
+		[57334] = true, --(Mana per 5s +20, Stam +40) Spicy Fried Herring / Mighty Rhino Dogs
+		[57332] = true, --(Haste +40, Stam +40) Imperial Manta Steak / Very Burnt Worg
+		[57329] = true, --(Crit +40, Stam +40) Spicy Blue Nettlefish / Spicy Worm Burger
+		[57327] = true, --(SP +46, Stam +40) Firecracker Salmon / Tender Shoveltusk Steak
+		[57325] = true, --(AP +80, Stam +40) Poached Northern Sculpin / Mega Mammoth Head
+		[57291] = true, --(Mana per 5s +15, Stam +30) Rhino Dogs / Pickled Fangtooth
+		[57288] = true, --(Haste +30, Stam +30) Baked Manta Ray / Roasted Worg
+		[57286] = true, --(Crit +30, Stam +30) Poached Nettlefish / Worm Delight
+		[57139] = true, --(SP +35, Stam +30) Smoked Salmon / Shoveltusk Steak
+		[57111] = true, --(AP +60, Stam +30) Grilled Sculpin / Mammoth Meal
+	}
+	
+	DF.PotionIDs = {
+		[53762] = true, --Indestructable Potion
+		[53908] = true, --Potion of Speed
+		[53909] = true, --Potion of Wild Magic
+		[53753] = true, --Potion of Nightmares
+		[43185] = true, -- Runic Healing Potion
+		[67489] = true, -- Runic Healing Injector
+		[53761] = true, -- Powerful Rejuvenation Potion
+		[53750] = true, -- Crazy Alchemist's Potion
+		[43186] = true, -- Runic Mana Potion
+		[67490] = true, -- Runic Mana Injector
+	}
+	DF.FeastIDs = {}
+	DF.RuneIDs = {}
+
+elseif (DF.IsClassicWow()) then
+	DF.PotionIDs = {}
+	DF.FeastIDs = {}
+	DF.RuneIDs = {}
+	DF.FoodIDs = {}
+	DF.FlaskIDs = {}
+end
 
 --	/dump UnitAura ("player", 1)
 --	/dump UnitAura ("player", 2)
@@ -988,7 +1433,7 @@ function DF:GetSpellsForEncounterFromJournal (instanceEJID, encounterEJID)
 	local name, description, encounterID, rootSectionID, link = DetailsFramework.EncounterJournal.EJ_GetEncounterInfo (encounterEJID) --taloc (primeiro boss de Uldir)
 	
 	if (not name) then
-		print ("DetailsFramework: Encounter Info Not Found!", instanceEJID, encounterEJID)
+		print("DetailsFramework: Encounter Info Not Found!", instanceEJID, encounterEJID)
 		return {}
 	end
 	
@@ -999,21 +1444,21 @@ function DF:GetSpellsForEncounterFromJournal (instanceEJID, encounterEJID)
 	local nextID = {sectionInfo.siblingSectionID}
 	
 	while (nextID [1]) do
-		--> get the deepest section in the hierarchy
-		local ID = tremove (nextID)
+		--get the deepest section in the hierarchy
+		local ID = tremove(nextID)
 		local sectionInfo = C_EncounterJournal.GetSectionInfo (ID)
 		
 		if (sectionInfo) then
-			if (sectionInfo.spellID and type (sectionInfo.spellID) == "number" and sectionInfo.spellID ~= 0) then
-				tinsert (spellIDs, sectionInfo.spellID)
+			if (sectionInfo.spellID and type(sectionInfo.spellID) == "number" and sectionInfo.spellID ~= 0) then
+				tinsert(spellIDs, sectionInfo.spellID)
 			end
 			
 			local nextChild, nextSibling = sectionInfo.firstChildSectionID, sectionInfo.siblingSectionID
 			if (nextSibling) then
-				tinsert (nextID, nextSibling)
+				tinsert(nextID, nextSibling)
 			end
 			if (nextChild) then
-				tinsert (nextID, nextChild)
+				tinsert(nextID, nextChild)
 			end
 		else
 			break
@@ -1026,60 +1471,51 @@ end
 --default spells to use in the range check
 DF.SpellRangeCheckListBySpec = {
 	-- 185245 spellID for Torment, it is always failing to check range with IsSpellInRange()
-	[577] = 278326, --> havoc demon hunter - Consume Magic
-	[581] = 278326, --> vengeance demon hunter - Consume Magic
+	[577] = 278326, --havoc demon hunter - Consume Magic
+	[581] = 278326, --vengeance demon hunter - Consume Magic
 
-	[250] = 56222, --> blood dk - dark command
-	[251] = 56222, --> frost dk - dark command
-	[252] = 56222, --> unholy dk - dark command
+	[250] = 56222, --blood dk - dark command
+	[251] = 56222, --frost dk - dark command
+	[252] = 56222, --unholy dk - dark command
 	
-	[102] = 8921, -->  druid balance - Moonfire (45 yards)
-	[103] = 8921, -->  druid feral - Moonfire (40 yards)
-	[104] = 6795, -->  druid guardian - Growl
-	[105] = 8921, -->  druid resto - Moonfire (40 yards)
+	[102] = 8921, -- druid balance - Moonfire (45 yards)
+	[103] = 8921, -- druid feral - Moonfire (40 yards)
+	[104] = 6795, -- druid guardian - Growl
+	[105] = 8921, -- druid resto - Moonfire (40 yards)
 
-	[253] = 193455, -->  hunter bm - Cobra Shot
-	[254] = 19434, --> hunter marks - Aimed Shot
-	[255] = 271788, --> hunter survivor - Serpent Sting
+	[253] = 193455, -- hunter bm - Cobra Shot
+	[254] = 19434, --hunter marks - Aimed Shot
+	[255] = 271788, --hunter survivor - Serpent Sting
 	
-	[62] = 227170, --> mage arcane - arcane blast
-	[63] = 133, --> mage fire - fireball
-	[64] = 228597, --> mage frost - frostbolt
+	[62] = 227170, --mage arcane - arcane blast
+	[63] = 133, --mage fire - fireball
+	[64] = 228597, --mage frost - frostbolt
 	
-	[268] = 115546 , --> monk bm - Provoke
-	[269] = 117952, --> monk ww - Crackling Jade Lightning (40 yards)
-	[270] = 117952, --> monk mw - Crackling Jade Lightning (40 yards)
+	[268] = 115546 , --monk bm - Provoke
+	[269] = 117952, --monk ww - Crackling Jade Lightning (40 yards)
+	[270] = 117952, --monk mw - Crackling Jade Lightning (40 yards)
 	
-	[65] = 20473, --> paladin holy - Holy Shock (40 yards)
-	[66] = 62124, --> paladin protect - Hand of Reckoning
-	[70] = 62124, --> paladin ret - Hand of Reckoning
+	[65] = 20473, --paladin holy - Holy Shock (40 yards)
+	[66] = 62124, --paladin protect - Hand of Reckoning
+	[70] = 62124, --paladin ret - Hand of Reckoning
 	
-	[256] = 585, --> priest disc - Smite
-	[257] = 585, --> priest holy - Smite
-	[258] = 8092, --> priest shadow - Mind Blast
+	[256] = 585, --priest disc - Smite
+	[257] = 585, --priest holy - Smite
+	[258] = 8092, --priest shadow - Mind Blast
 	
-	[259] = 185565, --> rogue assassination - Poisoned Knife (30 yards)
-	[260] = 185763, --> rogue outlaw - Pistol Shot (20 yards)
-	[261] = 114014, --> rogue sub - Shuriken Toss (30 yards)
+	[259] = 185565, --rogue assassination - Poisoned Knife (30 yards)
+	[260] = 185763, --rogue outlaw - Pistol Shot (20 yards)
+	[261] = 114014, --rogue sub - Shuriken Toss (30 yards)
 
-	[262] = 188196, --> shaman elemental - Lightning Bolt
-	[263] = 187837, --> shaman enhancement - Lightning Bolt (instance cast)
-	[264] = 403, --> shaman resto - Lightning Bolt
+	[262] = 188196, --shaman elemental - Lightning Bolt
+	[263] = 187837, --shaman enhancement - Lightning Bolt (instance cast)
+	[264] = 403, --shaman resto - Lightning Bolt
 
-	[265] = 686, --> warlock aff - Shadow Bolt
-	[266] = 686, --> warlock demo - Shadow Bolt
-	[267] = 116858, --> warlock destro - Chaos Bolt
+	[265] = 686, --warlock aff - Shadow Bolt
+	[266] = 686, --warlock demo - Shadow Bolt
+	[267] = 116858, --warlock destro - Chaos Bolt
 	
-	[71] = 355, --> warrior arms - Taunt
-	[72] = 355, --> warrior fury - Taunt
-	[73] = 355, --> warrior protect - Taunt
+	[71] = 355, --warrior arms - Taunt
+	[72] = 355, --warrior fury - Taunt
+	[73] = 355, --warrior protect - Taunt
 }
-
-
-
-
-
-
-
-
-

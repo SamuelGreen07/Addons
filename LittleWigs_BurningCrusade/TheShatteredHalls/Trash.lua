@@ -87,7 +87,7 @@ end
 do
 	local prev = 0
 	function mod:PrayerOfHealing(args)
-		local t = GetTime()
+		local t = args.time
 		if t - prev > 1 then
 			prev = t
 			self:MessageOld(35943, "orange", self:Interrupter() and "long", CL.casting:format(args.spellName))
@@ -97,7 +97,7 @@ end
 
 function mod:Fear(args)
 	if self:Me(args.destGUID) then
-		self:Say(args.spellId) -- helps prioritizing dispelling those who are about to run into some pack
+		self:Say(args.spellId, nil, nil, "Fear") -- helps prioritizing dispelling those who are about to run into some pack
 	end
 	self:TargetMessageOld(args.spellId, args.destName, "red", "alert", nil, nil, self:Dispeller("magic"))
 	self:TargetBar(args.spellId, 4, args.destName)

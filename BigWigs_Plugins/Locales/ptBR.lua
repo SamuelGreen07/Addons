@@ -11,16 +11,32 @@ L.positionDesc = "Digite na caixa ou mova o cursor se precisa posicionamento exa
 L.width = "Largura"
 L.height = "Altura"
 L.sizeDesc = "Normalmente você define o tamanho arrastando a âncora. Se você precisa de um tamanho exato, você pode usar este controle deslizante ou digitar o valor na caixa, que não tem um tamanho máximo."
+L.fontSizeDesc = "Ajusta o tamanho da fonte usando a barra deslizante ou digitando o valor na caixa que tem um limite muito maior de 200."
+L.disableDesc = "Você está prestes a desabilitar a função '%s' e isso |cffff4411não é recomendado|r.\n\nVocê tem certeza disso?"
+L.transparency = "Transparência"
 
 -----------------------------------------------------------------------
 -- AltPower.lua
 --
 
-L.altPowerTitle = "Poder alternativo"
+L.altPowerTitle = "PoderAlt"
+L.altPowerDesc = "A janela de PoderAlt só vai aparecer pra chefes que aplicam PoderAlt em jogadores, isso é extremamente raro. A janela calcula a quantidade do 'Poder Alternativo' que você e seu grupo tem, mostrando isso em uma lista. Para mover a janela, por favor use o botão de teste abaixo."
 L.toggleDisplayPrint = "Esta exibição será usada da próxima vez. Para desativá-la completamente para esse encontro, você precisa desativar isto nas opções de encontro."
 L.disabled = "Desativado"
 L.disabledDisplayDesc = "Desativa a exibição para todos os módulos que usam ela."
-L.resetAltPowerDesc = "Reinicia todas as opções relacionadas a PoderAlternativo, incluindo a posição de âncora do PoderAlternativo."
+L.resetAltPowerDesc = "Reinicia todas as opções relacionadas a PoderAlt, incluindo a posição de âncora do PoderAlternativo."
+L.test = "Testar"
+L.altPowerTestDesc = "Mostra a janela de 'Poder Alternativo', permitindo que você mova, e simula a mudança de poderes que você veria no encontro de chefe."
+L.yourPowerBar = "Sua barra de poder"
+L.barColor = "Cor da barra"
+L.barTextColor = "Cor do texto da barra"
+L.additionalWidth = "Largura adicional"
+L.additionalHeight = "Altura adicional"
+L.additionalSizeDesc = "Adiciona tamanho a janela padrão ao ajustar essa barra deslizante, ou digite o valor na caixa que tem um limite muito maior de 100."
+L.yourPowerTest = "Seu Poder: %d" -- Your Power: 42
+L.yourAltPower = "Seu %s: %d" -- e.g. Your Corruption: 42
+L.player = "Jogador %d" -- Player 7
+L.disableAltPowerDesc = "Desativa globalmente a janela de PoderAlt, nunca mais será mostrada em encontros de chefes."
 
 -----------------------------------------------------------------------
 -- AutoReply.lua
@@ -58,6 +74,7 @@ L.nameplateAutoWidth = "Combinar a largura da placa de identificação"
 L.nameplateAutoWidthDesc = "Configura a largura da barra de identificação com a largura da barra de identificação pai."
 L.nameplateOffsetY = "Deslocamento Y"
 L.nameplateOffsetYDesc = "Deslocamento de cima da barra de identificação para cima e a de baixo da barra de identificação para baixo das barras."
+L.nameplateAlphaDesc = "Controla o quão transparente serão as barras de identificação."
 
 L.clickableBars = "Barras clicáveis"
 L.clickableBarsDesc = "As barras do BigWigs são clicáveis por padrão. Desta forma você pode mirar em objetos e lançar feitiços AoE através delas, trocar o ângulo da câmera, e assim sucessivamente, sem precisar do cursor estar em cima das barras. |cffff4411Se habilitar as barras clicáveis, isto deixará de funcionar.|r As barras interceptarão qualquer clique do mouse feito nelas."
@@ -82,10 +99,10 @@ L.texture = "Textura"
 L.emphasize = "Enfatizar"
 L.emphasizeMultiplier = "Multiplicador de Tamanho"
 L.emphasizeMultiplierDesc = "Se você desabilitar as barras movendo-as para a âncora em destaque, esta opção irá decidir qual tamanho as barras em destaque terão, ao se multiplicar o tamanho das barras normais."
+
 L.enable = "Habilitar"
 L.move = "Mover"
 L.moveDesc = "Move barras enfatizadas para a âncora de Enfatizar. Se esta opção estiver desativada, barras enfatizadas terão apenas sua cor e tamanho alterados."
-L.regularBars = "Barras regulares"
 L.emphasizedBars = "Barras enfatizadas"
 L.align = "Alinhamento"
 L.alignText = "Alinhar texto"
@@ -134,30 +151,55 @@ L.breakFinished = "Intervalo acabou!"
 --
 
 L.bossBlock = "Bloqueio de Chefe"
-L.bossBlockDesc = "Configura diversas coisas que você pode bloquear durante um encontro com um chefe."
+L.bossBlockDesc = "Configura diversas coisas que você pode bloquear durante um encontro com um chefe.\n\n"
+L.bossBlockAudioDesc = "Configura qual audio irá se desativar durante um encontro de chefe.\n\nQualquer opção aqui que estiver |cff808080em cinza|r foi desabilitada nas opções de som do WoW.\n\n"
 L.movieBlocked = "Você já viu esta animação anteriormente, pulando ela."
 L.blockEmotes = "Bloqueia frases no meio da tela"
 L.blockEmotesDesc = "Alguns chefes usam frases de efeito para certas habilidades, essas mensagens são muito longas e descritivas. Nós tentamos produzir mensagens menores, mais apropriadas que não interferem com sua jogabilidade, e não te dizem especificamente o que fazer.\n\nObservação: Frases de chefes ainda serão vistas no bate-papo se quiser lê-las."
 L.blockMovies = "Bloquear vídeos repetidos"
 L.blockMoviesDesc = "Vídeos de encontros com chefes só irão ser reproduzidos uma vez (para que possa assistir cada um) e então serão bloqueados."
-L.blockFollowerMission = "Bloqueia avisos da guarnição" -- Rename to follower mission
+L.blockFollowerMission = "Bloqueia avisos das missões de seguidores" -- Rename to follower mission
 L.blockFollowerMissionDesc = "Avisos da guarnição aparecem para algumas coisas, mas principalmente quando uma missão de seguidor é completada.\n\nEsses avisos podem cobrir partes essenciais de sua interface durante uma luta contra um chefe, então recomendamos bloqueá-las."
 L.blockGuildChallenge = "Bloquear avisos de desafios de guilda"
 L.blockGuildChallengeDesc = "Avisos de desafio de guilda aparecem por alguns motivos, principalmente quando um grupo em sua guilda completa uma masmorra heroica ou uma masmorra em modo desafio.\n\nEsses avisos podem cobrir partes essenciais de sua interface durante uma luta contra um chefe, então recomendamos bloqueá-los."
 L.blockSpellErrors = "Bloquear mensagens sobre feitiços que falharam."
 L.blockSpellErrorsDesc = "Mensagens do tipo \"O feitiço não está pronto ainda\" que normalmente aparecem no topo da tela serão bloqueados."
+L.blockZoneChanges = "Bloquear mensagens de troca de zona"
+L.blockZoneChangesDesc = "As mensagens que aparecem na parte central superior da tela quando você entra em uma nova zona como '|cFF33FF99Ventobravo|r' ou '|cFF33FF99Orgrimmar|r' serão bloqueadas."
 L.audio = "Áudio"
 L.music = "Música"
 L.ambience = "Som ambiente"
 L.sfx = "Efeitos sonoros"
+L.errorSpeech = "Sons de erro"
 L.disableMusic = "Desativar música (recomendado)"
 L.disableAmbience = "Desativar sons ambiente (recomendado)"
 L.disableSfx = "Desativar efeitos sonoros (não recomendado)"
+L.disableErrorSpeech = "Desativar sons de diálogo de erros (recomendado)"
 L.disableAudioDesc = "A opção '%s' do WoW será desligada, e depois será ligado novamente quando a luta contra o chefe acabar. Isso pode ajudar você a focar nos sons de alertas do BigWigs."
 L.blockTooltipQuests = "Bloqueia a dica de objetivos de missões"
 L.blockTooltipQuestsDesc = "Quando você precisa matar um chefe para uma missão, normalmente irá mostrar '0/1 completo' na barra de dica quando você passa o mouse pelo chefe. Isso será escondido quando em combate com o chefe para prevenir que a bara de dica fique muito grande."
 L.blockObjectiveTracker = "Esconder rastreador de missão"
 L.blockObjectiveTrackerDesc = "O rastreador de objetivos de missão será escondido durante um encontro de chefe para liberar espaço na tela.\n\nIsso NÃO irá acontecer se você estiver em uma Mítica+ ou estiver rastreando uma conquista."
+
+L.blockTalkingHead = "Esconder o popup de diálogo 'Cabeça Falante' do NPC"
+L.blockTalkingHeadDesc = "A 'Cabeça Falante' é um popup de diálogo que tem uma cabeça do NPC e um texto de chat embaixo no meio da tela que |cffff4411às vezes|r é mostrada quando um NPC está falando.\n\nVocê pode escolher diferentes tipos de instâncias para quando isso deve ser bloqueado de ser mostrado.\n\n|cFF33FF99Por favor note que:|r\n 1) Essa funcionalidade irá permitir que a vozd o NPC continue reproduzindo para que você continue a ouvi-lo.\n 2) Por segurança, somente cabeças falantes específicas serão bloqueadas. Qualquer uma especial ou única, como as missões de uma única vez, não serão bloqueadas."
+L.blockTalkingHeadDungeons = "Masmorras Normal & Heróica"
+L.blockTalkingHeadMythics = "Masmorras Míticas & Míticas+"
+L.blockTalkingHeadRaids = "Raides"
+L.blockTalkingHeadTimewalking = "Caminhada Temporal (Masmorras & Raides)"
+L.blockTalkingHeadScenarios = "Cenários"
+
+L.redirectPopups = "Redirecionar banners pop-up para mensagens do BigWigs"
+L.redirectPopupsDesc = "Banners de pop-up no meio da sua tela, como o banner '|cFF33FF99novo espaço no grande cofre desbloqueado|r' ou o banner que você vê ao entrar em uma masmorra Mítico+ será bloqueado e, em vez disso, exibido como mensagens do BigWigs. Esses banners podem ser bastante grandes, durar muito tempo e impedir sua capacidade de clicar através deles."
+L.redirectPopupsColor = "Cor da mensagem redirecionada"
+L.blockDungeonPopups = "Bloquear banners pop-up em masmorras"
+L.blockDungeonPopupsDesc = "Os banners de pop-up que aparecem ao entrar em uma masmorra às vezes podem conter textos muito longos. Ativar essa função os bloqueará completamente em vez de redirecioná-los para mensagens do BigWigs."
+L.itemLevel = "Nível do Item: %d"
+
+L.userNotifySfx = "Os Efeitos Sonoros estavam desativados pelo BossBlock e agora estão sendo reativados."
+L.userNotifyMusic = "A Música estava desativada pelo BossBlock e agora está sendo reativada."
+L.userNotifyAmbience = "A Ambiência estava desativada pelo BossBlock e agora está sendo reativada."
+L.userNotifyErrorSpeech = "A fala de erro estava desativada pelo BossBlock e agora está sendo reativada."
 
 L.subzone_grand_bazaar = "Grande Bazar" -- Battle of Dazar'alor raid (Battle for Azeroth)
 L.subzone_port_of_zandalar = "Porto de Zandalar" -- Battle of Dazar'alor raid (Battle for Azeroth)
@@ -171,7 +213,6 @@ L.colors = "Cores"
 
 L.text = "Texto"
 L.textShadow = "Sombra do texto"
-L.flash = "Piscar"
 L.normal = "Normal"
 L.emphasized = "Enfatizado"
 
@@ -227,19 +268,17 @@ L.resetMessagesDesc = "Reinicia todas as opções relacionadas a mensagens, incl
 
 L.bwEmphasized = "BigWigs enfatizado"
 L.messages = "Mensagens"
-L.normalMessages = "Mensagens normais"
 L.emphasizedMessages = "Mensagens enfatizadas"
 L.emphasizedDesc = "O objetivo das mensagens enfatizadas é ter a sua atenção, pois ela é uma mensagem grande no meio da tela. Isso é raramente habilitado por padrão, mas você pode habilitar para qualquer habilidade de chefe quando estiver olhando as configurações de habilidades específicas de chefes."
-L.output = "Saída"
 L.uppercase = "MAIÚSCULAS"
 L.uppercaseDesc = "Todas as mensagens enfatizadas serão convertidas para letras MAIÚSCULAS."
 
 L.useIcons = "Usar ícones"
 L.useIconsDesc = "Exibir ícones ao lado das mensagens."
 L.classColors = "Cores de classe"
-L.classColorsDesc = "Colore nomes de jogadores pela classe deles."
-L.chatMessages = "Mensagens no chat"
-L.chatMessagesDesc = "Mostra todas as mensagens na janela de chat padrão além da tela de configuração."
+L.classColorsDesc = "As mensagens as vezes terão os nomes dos jogadores. Habilitar essa opção irá colorir esses nomes usando as cores de classe."
+L.chatFrameMessages = "Mensagens no chat"
+L.chatFrameMessagesDesc = "Mostra todas as mensagens na janela de chat padrão além da tela de configuração."
 
 L.fontSize = "Tamanho da fonte"
 L.none = "Nenhum"
@@ -265,8 +304,6 @@ L.proximity_name = "Proximidade"
 L.soundDelay = "Atraso de som"
 L.soundDelayDesc = "Especifique o tempo que BigWigs deverá esperar para repetir o som de quando alguem está muito perto de você."
 
-L.proximity = "Exibição de proximidade"
-L.proximity_desc = "Mostra a janela de proximidade quando for apropriada para este encontro, listando os jogadores que estão muito pertos de você."
 L.resetProximityDesc = "Reinicia todas as opções relacionadas a proximidade, incluindo a posição de âncora de proximidade."
 
 L.close = "Fechar"
@@ -307,13 +344,14 @@ L.pullStoppedCombat = "Temporizador cancelado porque você entrou em combate."
 L.pullIn = "Pull em %d seg"
 L.sendPull = "Enviando contador de pull para usuários BigWigs e DBM."
 L.wrongPullFormat = "Deve estar entre 1 e 60 segundos. Um exemplo correto seria: /pull 5"
+L.countdownBegins = "Iniciar Contagem"
+L.countdownBegins_desc = "Escolhe quanto tempo deve restar de tempo de pull (em segundos) para começar a contagem."
 
 -----------------------------------------------------------------------
 -- RaidIcon.lua
 --
 
 L.icons = "Ícones"
-L.raidIconsDesc = "Alguns scripts de encontros usam os ícones de raide para marcar jogadores que são de interesse especial para seu grupo. Por exemplo, os efeitos tipo 'bomba' e controle mental. Se esta opção estiver desativada, não marcará nada.\n\n|cffff4411Somente aplicará as marcas se você for assistente ou líder!|r"
 L.raidIconsDescription = "Alguns encontros podem conter elementos de tipo 'bomba' focando em um jogador em especial, um jogador sendo perseguido, ou um jogador específico sendo de interesse em outros sentidos. Aqui você pode configurar quais ícones de raide devem ser usados para marcar esses jogadores.\n\nSe um encontro tem somente uma habilidade que exige marcação, somente o primeiro ícone será usado. Um ícone nunca será usado para duas habilidades diferentes no mesmo encontro, e uma mesma habilidade usará o mesmo ícone todas as vezes.\n\n|cffff4411Note que se um jogador já foi marcado manualmente o BigWigs não mudará seu ícone.|r"
 L.primary = "Primário"
 L.primaryDesc = "O primeiro ícone de raide que um script usará."
@@ -325,6 +363,7 @@ L.secondaryDesc = "O segundo ícone de raide que um script usará."
 --
 
 L.Sounds = "Sons"
+L.soundsDesc = "BigWigs usa o canal de som 'Geral' para reproduzir todos os sons. Se você acha que os sons estão muito baixos ou muito altos, abra as configurações de som do WoW e ajuste o 'Volume geral' para um nível que você goste.\n\nAbaixo você pode configurar globalmente os diferentes sons que irão reproduzir para ações específicas, ou configurar eles para 'Nenhum' para desabilita-los. Se você quer mudar somente o som para uma habilidade específica de chefe, isso pode ser feito nas configurações de encontro do chefe.\n\n"
 L.oldSounds = "Sons antigos"
 
 L.Alarm = "Alarme"
@@ -336,7 +375,6 @@ L.onyou = "Um feitiço, buff, ou debuff em você"
 L.underyou = "Você precisa se mover do feitiço embaixo de você"
 
 L.sound = "Som"
-L.soundDesc = "As mensagens podem conter um som. Para algumas pessoas fica mais fácil escutar quando aprendem que tal som aparece com tal mensagem, ao invés de ler a mensagem."
 
 L.customSoundDesc = "Reproduzir um som personalizado ao invés do padrão do módulo."
 L.resetSoundDesc = "Reinicia os sons acima para os padrões."
