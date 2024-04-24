@@ -270,6 +270,8 @@ after this pull]=]
 L["Bounty stacks after this pull"] = ""
 L["Bracken Warscourge"] = "Azote de guerra Frondacuero"
 L["Brackenhide Shaper"] = "Modeladora Frondacuero"
+--[[Translation missing --]]
+L["brackenhideCage"] = "Meat Storage"
 L["BrackenhideHollow"] = "Hondonada Frondacuero"
 L["Brain of Yogg-Saron"] = "Cerebro de Yogg-Saron"
 L["Brawling Patron"] = "Cliente camorrista"
@@ -341,6 +343,8 @@ L["Chrono-Lord Epoch"] = "Cronolord Época"
 L["Claw Fighter"] = "Luchador de zarpa"
 L["Click the fullscreen button for a maximized view of MDT."] = "Haz click en el botón de pantalla completa para maximizar la vista de MDT."
 L["Click to adjust color settings"] = "Click para ajustar los ajustes de color"
+--[[Translation missing --]]
+L["Click to assign player"] = ""
 L["Click to go to %s"] = "Click para ir a %s"
 L["Click to set dungeon level to 10"] = "Click para establecer una mazmorra al nivel 10"
 L["Click to switch to current week"] = "Click para cambiar a la semana actual"
@@ -1436,6 +1440,8 @@ L["Neltharion's Lair"] = "Guarida de Neltharion"
 L["Neltharion's Lair Sublevel"] = "Subnivel 1 de Guarida de Neltharion"
 --[[Translation missing --]]
 L["Neltharus"] = "Neltharus"
+--[[Translation missing --]]
+L["neltharusChain"] = "Burning Chain"
 L["Ner'zhul"] = "Ner'zhul"
 L["Netherspace"] = "Espacio Abisal"
 L["New"] = "Nuevo"

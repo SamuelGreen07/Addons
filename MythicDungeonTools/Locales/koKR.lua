@@ -280,6 +280,8 @@ L["Bounty stacks after this pull"] = ""
 L["Bracken Warscourge"] = "담쟁이 전쟁파멸자"
 L["Brackenhide Shaper"] = "담쟁이가죽 구체자"
 --[[Translation missing --]]
+L["brackenhideCage"] = "Meat Storage"
+--[[Translation missing --]]
 L["BrackenhideHollow"] = "Brackenhide Hollow"
 L["Brain of Yogg-Saron"] = "요그사론의 뇌"
 L["Brawling Patron"] = "난동 피우는 손님"
@@ -359,6 +361,8 @@ L["Claw Fighter"] = "발톱 싸움꾼"
 L["Click the fullscreen button for a maximized view of MDT."] = "Click the fullscreen button for a maximized view of MDT."
 --[[Translation missing --]]
 L["Click to adjust color settings"] = "Click to adjust color settings"
+--[[Translation missing --]]
+L["Click to assign player"] = ""
 --[[Translation missing --]]
 L["Click to go to %s"] = "Click to go to %s"
 --[[Translation missing --]]
@@ -1483,6 +1487,8 @@ L["Neltharion's Lair"] = "넬타리온의 둥지"
 L["Neltharion's Lair Sublevel"] = "넬타리온의 둥지"
 --[[Translation missing --]]
 L["Neltharus"] = "Neltharus"
+--[[Translation missing --]]
+L["neltharusChain"] = "Burning Chain"
 L["Ner'zhul"] = "넬쥴"
 L["Netherspace"] = "황천의 영역"
 L["New"] = "새"
