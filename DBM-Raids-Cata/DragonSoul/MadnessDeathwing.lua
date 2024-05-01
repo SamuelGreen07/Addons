@@ -3,7 +3,7 @@ local L		= mod:GetLocalizedStrings()
 
 mod.statTypes = "normal,normal25,heroic,heroic25,lfr"
 
-mod:SetRevision("20240412064728")
+mod:SetRevision("20240426180008")
 mod:SetCreatureID(56173)
 mod:SetEncounterID(1299)
 mod:SetUsedIcons(8)
@@ -84,7 +84,7 @@ local activateTetanusTimers = false
 local parasite = DBM:EJ_GetSectionInfo(4347)
 local parasiteScan = 0
 local parasiteCasted = false
-local debuffFilterDebuff, NozPresence, AlexPresence = DBM:GetSpellInfo(108649), DBM:GetSpellInfo(106027), DBM:GetSpellInfo(106028)
+local debuffFilterDebuff, NozPresence, AlexPresence = DBM:GetSpellName(108649), DBM:GetSpellName(106027), DBM:GetSpellName(106028)
 
 local debuffFilter
 do

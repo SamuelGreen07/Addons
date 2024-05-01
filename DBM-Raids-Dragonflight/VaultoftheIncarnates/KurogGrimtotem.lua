@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(2491, "DBM-Raids-Dragonflight", 3, 1200)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240424061710")
+mod:SetRevision("20240428104643")
 mod:SetCreatureID(184986)
 mod:SetEncounterID(2605)
 mod:SetUsedIcons(1, 2, 3, 4, 5)
@@ -109,7 +109,7 @@ local specWarnEarthSmite						= mod:NewSpecialWarningSpell(391268, nil, nil, nil
 local timerEarthSmiteCD							= mod:NewCDTimer(30, 391268, nil, nil, nil, 5)--Ironwrought Smasher
 local timerEruptingBedrockCD					= mod:NewCDTimer(60, 395893, nil, nil, nil, 2, nil, DBM_COMMON_L.MYTHIC_ICON)
 
-mod:AddSetIconOption("SetIconOnEnvelopingEarth", 391056, false, false, {1, 2, 3})
+mod:AddSetIconOption("SetIconOnEnvelopingEarth", 391056, false, 0, {1, 2, 3})
 --Storm Altar An altar of primal storm
 mod:AddTimerLine(DBM:EJ_GetSectionInfo(25068))
 local warnLightningCrash						= mod:NewTargetNoFilterAnnounce(373487, 4)
@@ -125,7 +125,7 @@ local yellShockingBurstFades					= mod:NewShortFadesYell(390920)
 local specWarnThunderStrike						= mod:NewSpecialWarningSoak(374215, nil, nil, nil, 2, 2)--No Debuff
 local specWarnThunderStrikeBad					= mod:NewSpecialWarningDodge(374215, nil, nil, nil, 2, 2)--Debuff
 
-mod:AddSetIconOption("SetIconOnShockingBurst", 390920, false, false, {4, 5})
+mod:AddSetIconOption("SetIconOnShockingBurst", 390920, false, 0, {4, 5})
 --mod:GroupSpells(373487, 373535)--Group Lighting crash source debuff with dest (nearest player) debuff
 ----Mythic Only (Stormwrought Despoiler)
 local warnOrbLightning							= mod:NewSpellAnnounce(394719, 3)
@@ -635,11 +635,11 @@ mod.SPELL_PERIODIC_MISSED = mod.SPELL_PERIODIC_DAMAGE
 do
 	local spellEasyMapping = {
 		--Biting Chill, Shocking Burst, Magma Burst, Erupting Bedrock
-		[391096] = {DBM:GetSpellInfo(373678), DBM:GetSpellInfo(373487), DBM:GetSpellInfo(382563), (DBM:GetSpellInfo(395893))},
+		[391096] = {DBM:GetSpellName(373678), DBM:GetSpellName(373487), DBM:GetSpellName(382563), (DBM:GetSpellName(395893))},
 		--Biting Chill, Shocking Burst, Magma Burst, Erupting Bedrock
-		[391100] = {DBM:GetSpellInfo(373678), DBM:GetSpellInfo(390920), DBM:GetSpellInfo(382563), (DBM:GetSpellInfo(395893))},
+		[391100] = {DBM:GetSpellName(373678), DBM:GetSpellName(390920), DBM:GetSpellName(382563), (DBM:GetSpellName(395893))},
 		--Ultimate Selection (Absolute Zero, Thunder Strike, Searing Carnage, Seismic Rupture
-		[374680] = {DBM:GetSpellInfo(372456), DBM:GetSpellInfo(374217), DBM:GetSpellInfo(374022), (DBM:GetSpellInfo(374705))}
+		[374680] = {DBM:GetSpellName(372456), DBM:GetSpellName(374217), DBM:GetSpellName(374022), (DBM:GetSpellName(374705))}
 	}
 	local iconEasyMapping = {
 		--Biting Chill, Shocking Burst, Magma Burst, Erupting Bedrock
@@ -651,11 +651,11 @@ do
 	}
 	local spellMapping = {
 		--Biting Chill, Lightning Crash, Magma Burst, Enveloping Earth
-		[391096] = {DBM:GetSpellInfo(373678), DBM:GetSpellInfo(373487), DBM:GetSpellInfo(382563), (DBM:GetSpellInfo(391055))},
+		[391096] = {DBM:GetSpellName(373678), DBM:GetSpellName(373487), DBM:GetSpellName(382563), (DBM:GetSpellName(391055))},
 		--Frigid Torrent, Shocking Burst, Molten Rupture, Erupting Bedrock
-		[391100] = {DBM:GetSpellInfo(391019), DBM:GetSpellInfo(390920), DBM:GetSpellInfo(373329), (DBM:GetSpellInfo(395893))},
+		[391100] = {DBM:GetSpellName(391019), DBM:GetSpellName(390920), DBM:GetSpellName(373329), (DBM:GetSpellName(395893))},
 		--Ultimate Selection (Absolute Zero, Thunder Strike, Searing Carnage, Seismic Rupture
-		[374680] = {DBM:GetSpellInfo(372456), DBM:GetSpellInfo(374217), DBM:GetSpellInfo(374022), (DBM:GetSpellInfo(374705))}
+		[374680] = {DBM:GetSpellName(372456), DBM:GetSpellName(374217), DBM:GetSpellName(374022), (DBM:GetSpellName(374705))}
 	}
 	local iconMapping = {
 		--Biting Chill, Lightning Crash, Magma Burst, Enveloping Earth

@@ -21,6 +21,16 @@ L["AUTO_COMBATLOG_DESC"] = "Schaltet die Kampfprotokollierung automatisch ein od
 L["BEST_FOR_DUNGEON"] = "Bester Durchlauf bei"
 L["BEST_RUN"] = "Bester Durchlauf"
 L["BEST_SCORE"] = "Beste M+ Wertung (%s)"
+--[[Translation missing --]]
+--[[ L["BINDING_CATEGORY_RAIDERIO"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["BINDING_HEADER_RAIDERIO_REPLAYUI"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["BINDING_NAME_RAIDERIO_REPLAYUI_TIMING_BOSS"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["BINDING_NAME_RAIDERIO_REPLAYUI_TIMING_DUNGEON"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["BINDING_NAME_RAIDERIO_REPLAYUI_TOGGLE"] = ""--]] 
 L["CANCEL"] = "Beenden"
 L["CHANGES_REQUIRES_UI_RELOAD"] = [=[Deine Änderungen wurden gespeichert, du musst jedoch die Benutzeroberfläche neu laden, damit diese wirksam werden.
 
@@ -164,6 +174,48 @@ L["PROFILE_BEST_RUNS"] = "Beste Durchläufe aller Dungeons"
 L["PROFILE_TOOLTIP_ANCHOR_TOOLTIP"] = "Sperrt den Raider.IO-Profilrahmen oder aktiviert die automatische Positionierung, um diesen Anker auszublenden."
 L["PROVIDER_NOT_LOADED"] = "|cffFF0000Warnung:|r |cffFFFFFF%s|r konnte keine Daten für die aktuelle Fraktion finden. Bitte überprüfe die |cffFFFFFF/raiderio|r Einstellungen und aktiviere die Tooltip-Daten für |cffFFFFFF%s|r."
 L["PVP_DATA_HEADER"] = "Raider.IO PvP Profil"
+--[[Translation missing --]]
+--[[ L["RAID_AATDH"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_AATSC"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_AVOTI"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AATDH_1"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AATDH_2"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AATDH_3"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AATDH_4"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AATDH_5"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AATDH_6"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AATDH_7"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AATDH_8"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AATDH_9"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AATSC_1"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AATSC_2"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AATSC_3"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AATSC_4"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AATSC_5"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AATSC_6"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AATSC_7"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AATSC_8"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AATSC_9"] = ""--]] 
 L["RAID_BOSS_ATDH_1"] = "Knorrenwurzel"
 L["RAID_BOSS_ATDH_2"] = "Igira die Grausame"
 L["RAID_BOSS_ATDH_3"] = "Volcoross"
@@ -182,6 +234,22 @@ L["RAID_BOSS_ATSC_6"] = "Der aufmerksame Verwalter, Zskarn"
 L["RAID_BOSS_ATSC_7"] = "Magmorax"
 L["RAID_BOSS_ATSC_8"] = "Echo von Neltharion"
 L["RAID_BOSS_ATSC_9"] = "Schuppenkommandant Sarkareth"
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AVOTI_1"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AVOTI_2"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AVOTI_3"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AVOTI_4"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AVOTI_5"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AVOTI_6"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AVOTI_7"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AVOTI_8"] = ""--]] 
 L["RAID_BOSS_CN_1"] = "Schrillschwinge"
 L["RAID_BOSS_CN_10"] = "Graf Denathrius"
 L["RAID_BOSS_CN_2"] = "Jäger Altimor"

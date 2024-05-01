@@ -3,7 +3,7 @@ local L		= mod:GetLocalizedStrings()
 
 mod.statTypes = "normal,heroic,mythic,lfr"
 
-mod:SetRevision("20240412050409")
+mod:SetRevision("20240428104741")
 mod:SetCreatureID(71454)
 mod:SetEncounterID(1595)
 mod:SetUsedIcons(8, 7, 6, 4, 3, 2, 1)
@@ -54,11 +54,11 @@ local berserkTimer						= mod:NewBerserkTimer(360)
 
 mod:AddRangeFrameOption("8/5")--Various things
 mod:AddSetIconOption("SetIconOnDisplacedEnergy", 142913, false)
-mod:AddSetIconOption("SetIconOnAdds", "ej7952", false, true)
+mod:AddSetIconOption("SetIconOnAdds", "ej7952", false, 5)
 mod:AddArrowOption("BloodrageArrow", 142879, true, true)
 
 --Upvales, don't need variables
-local displacedEnergyDebuff = DBM:GetSpellInfo(142913)
+local displacedEnergyDebuff = DBM:GetSpellName(142913)
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 --Not important, don't need to recover
 local playerDebuffs = 0

@@ -21,6 +21,16 @@ L["AUTO_COMBATLOG_DESC"] = "Il logging del Combattimento sarà attivato o disatt
 L["BEST_FOR_DUNGEON"] = "Migliore Questa Spedizione"
 L["BEST_RUN"] = "Miglior Spedizione"
 L["BEST_SCORE"] = "Miglior punteggio M+"
+--[[Translation missing --]]
+--[[ L["BINDING_CATEGORY_RAIDERIO"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["BINDING_HEADER_RAIDERIO_REPLAYUI"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["BINDING_NAME_RAIDERIO_REPLAYUI_TIMING_BOSS"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["BINDING_NAME_RAIDERIO_REPLAYUI_TIMING_DUNGEON"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["BINDING_NAME_RAIDERIO_REPLAYUI_TOGGLE"] = ""--]] 
 L["CANCEL"] = "Indietro"
 L["CHANGES_REQUIRES_UI_RELOAD"] = [=[Le tue modifiche sono state salvate, ma devi ricaricare la tua interfaccia affinché abbiano effetto.
 
@@ -53,8 +63,7 @@ L["DISABLE_RWF_MODE_BUTTON"] = "Disabilita "
 L["DISABLE_RWF_MODE_BUTTON_TOOLTIP"] = "Fai clic per disattivare la modalità Race World First. Ciò causerà il ricaricamento dell'interfaccia."
 L["DISABLE_RWF_MODE_RELOAD"] = "Stai disabilitando la modalità Race World First. Facendo clic su Conferma si ricaricherà l'interfaccia."
 L["DPS"] = "DPS"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_AA"] = ""--]] 
+L["DUNGEON_SHORT_NAME_AA"] = "ADA"
 --[[Translation missing --]]
 --[[ L["DUNGEON_SHORT_NAME_AD"] = ""--]] 
 L["DUNGEON_SHORT_NAME_AV"] = "CA"
@@ -178,6 +187,32 @@ L["PROFILE_BEST_RUNS"] = "Miglior Corsa per Spedizione"
 L["PROFILE_TOOLTIP_ANCHOR_TOOLTIP"] = "Blocca il frame del profilo Raider.IO o abilita il posizionamento automatico per nascondere questo ancoraggio."
 L["PROVIDER_NOT_LOADED"] = "| cffFF0000Warning: | r | cffFFFFFF% s | r non riesce a trovare i dati per la fazione corrente. Controllare le impostazioni | cffFFFFFF / raiderio | r e abilitare i dati del tooltip per | cffFFFFFF% s | r."
 L["PVP_DATA_HEADER"] = "Profilo PvP Raider.IO"
+--[[Translation missing --]]
+--[[ L["RAID_AATDH"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_AATSC"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_AVOTI"] = ""--]] 
+L["RAID_BOSS_AATDH_1"] = "Torciradice "
+L["RAID_BOSS_AATDH_2"] = "Igira la Crudele"
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AATDH_3"] = ""--]] 
+L["RAID_BOSS_AATDH_4"] = "Concilio dei Sogni"
+L["RAID_BOSS_AATDH_5"] = "Larodar, Custode della Fiamma"
+L["RAID_BOSS_AATDH_6"] = "Nymue, Tessitrice del Ciclo"
+L["RAID_BOSS_AATDH_7"] = "Ardiron"
+L["RAID_BOSS_AATDH_8"] = "Tindral Saggiaspina, Veggente della Fiamma"
+L["RAID_BOSS_AATDH_9"] = "Fyrakk l'Ardente"
+L["RAID_BOSS_AATSC_1"] = "Kaztara, l'Infernale "
+L["RAID_BOSS_AATSC_2"] = "La Sala dell'Amalgama"
+L["RAID_BOSS_AATSC_3"] = "Gli Esperimenti Dimenticati "
+L["RAID_BOSS_AATSC_4"] = "Assalto degli Zaqali"
+L["RAID_BOSS_AATSC_5"] = "Rashok, l'Anziano"
+L["RAID_BOSS_AATSC_6"] = "Il Sovrintendente Vigile, Zskarn"
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AATSC_7"] = ""--]] 
+L["RAID_BOSS_AATSC_8"] = "Eco di Neltharion "
+L["RAID_BOSS_AATSC_9"] = "Comandante delle Scaglie Sarkareth"
 L["RAID_BOSS_ATDH_1"] = "Torciradice"
 L["RAID_BOSS_ATDH_2"] = "Igira la Crudele"
 --[[Translation missing --]]
@@ -198,6 +233,16 @@ L["RAID_BOSS_ATSC_6"] = "Il Sovrintendente Vigile, Zskarn"
 --[[ L["RAID_BOSS_ATSC_7"] = ""--]] 
 L["RAID_BOSS_ATSC_8"] = "Eco di Neltharion "
 L["RAID_BOSS_ATSC_9"] = "Comandante delle Scaglie Sarkareth"
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AVOTI_1"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_AVOTI_2"] = ""--]] 
+L["RAID_BOSS_AVOTI_3"] = "Il Concilio Primordiale"
+L["RAID_BOSS_AVOTI_4"] = "Sennarth, il Soffio Gelido"
+L["RAID_BOSS_AVOTI_5"] = "Dathea, l'Ascesa"
+L["RAID_BOSS_AVOTI_6"] = "Kurog Totem Truce"
+L["RAID_BOSS_AVOTI_7"] = "Custode della Progenie Diurna"
+L["RAID_BOSS_AVOTI_8"] = "Raszageth la Mangiatempeste"
 L["RAID_BOSS_CN_1"] = "Alagrigia"
 L["RAID_BOSS_CN_10"] = "Sire Denathrius"
 L["RAID_BOSS_CN_2"] = "Altimor il Predatore"

@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(1438, "DBM-Raids-WoD", 1, 669)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240413054937")
+mod:SetRevision("20240428104732")
 mod:SetCreatureID(91331)--Doomfire Spirit (92208), Hellfire Deathcaller (92740), Felborne Overfiend (93615), Dreadstalker (93616), Infernal doombringer (94412)
 mod:SetEncounterID(1799)
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 2, 1)
@@ -130,10 +130,10 @@ local timerSeethingCorruptionCD		= mod:NewNextCountTimer(107, 190506, 66911, nil
 --local berserkTimer				= mod:NewBerserkTimer(360)
 
 mod:AddRangeFrameOption("6/8/10")
-mod:AddSetIconOption("SetIconOnFelBurst", 183634, true)
-mod:AddSetIconOption("SetIconOnShackledTorment2", 184964, false)
-mod:AddSetIconOption("SetIconOnMarkOfLegion2", 187050, true)
-mod:AddSetIconOption("SetIconOnInfernals2", "ej11618", false, true)
+mod:AddSetIconOption("SetIconOnFelBurst", 183634, true, 0)
+mod:AddSetIconOption("SetIconOnShackledTorment2", 184964, false, 0)
+mod:AddSetIconOption("SetIconOnMarkOfLegion2", 187050, true, 0)
+mod:AddSetIconOption("SetIconOnInfernals2", "ej11618", false, 5)
 mod:AddHudMapOption("HudMapOnFelBurst2", 183634, "Ranged")
 mod:AddHudMapOption("HudMapOnShackledTorment2", 184964, true)
 mod:AddHudMapOption("HudMapOnWrought", 184265)
@@ -183,7 +183,7 @@ local felburstTargets = {}
 local playerName = UnitName("player")
 local playerBanished = false
 local UnitDetailedThreatSituation, UnitClass, UnitIsUnit = UnitDetailedThreatSituation, UnitClass, UnitIsUnit
-local NetherBanish, shackledDebuff, felburstDebuff, markOfLegionDebuff = DBM:GetSpellInfo(186961), DBM:GetSpellInfo(184964), DBM:GetSpellInfo(183634), DBM:GetSpellInfo(187050)
+local NetherBanish, shackledDebuff, felburstDebuff, markOfLegionDebuff = DBM:GetSpellName(186961), DBM:GetSpellName(184964), DBM:GetSpellName(183634), DBM:GetSpellName(187050)
 local netherFilter, markOfLegionFilter
 do
 	netherFilter = function(uId)

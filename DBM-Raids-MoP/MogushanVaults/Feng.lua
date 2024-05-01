@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(689, "DBM-Raids-MoP", 5, 317)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240420125841")
+mod:SetRevision("20240426181222")
 mod:SetCreatureID(60009)--60781 Soul Fragment
 mod:SetEncounterID(1390)
 mod:SetUsedIcons(1, 2, 3, 4, 7)
@@ -106,7 +106,7 @@ mod.vb.sparkCount = 0
 mod.vb.fragmentCount = 5
 mod.vb.specialCount = 0
 local arcaneResonanceTargets = {}
-local nullBarrier = DBM:GetSpellInfo(115811)
+local nullBarrier = DBM:GetSpellName(115811)
 
 local function warnWildfire(self)
 	warnWildfireInfusion:Cancel()

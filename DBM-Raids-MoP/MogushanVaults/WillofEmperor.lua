@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(677, "DBM-Raids-MoP", 5, 317)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240420125841")
+mod:SetRevision("20240426181222")
 mod:SetCreatureID(60399, 60400)--60396 (Rage), 60397 (Strength), 60398 (Courage), 60480 (Titan Spark), 60399 (Qin-xi), 60400 (Jan-xi)
 mod:SetEncounterID(1407)
 
@@ -67,8 +67,8 @@ mod:AddInfoFrameOption(116525, false)
 mod:AddBoolOption("ArrowOnCombo", "Tank")--Very accurate for tank, everyone else not so much (tanks always in front, and boss always faces tank, so if he spins around on you, you expect it, melee on other hand have backwards arrows if you spun him around.
 
 --Upvales, don't need variables
-local focusedAssault = DBM:GetSpellInfo(116525)
-local UnitIsUnit, UnitPower, UnitGUID = UnitIsUnit, UnitPower, UnitGUID
+local focusedAssault = DBM:GetSpellName(116525)
+local UnitIsUnit = UnitIsUnit
 --Important, needs recover
 mod.vb.boss1ComboCount = 0
 mod.vb.boss2ComboCount = 0

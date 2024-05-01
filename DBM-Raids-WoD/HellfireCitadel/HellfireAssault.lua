@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(1426, "DBM-Raids-WoD", 1, 669)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240413054937")
+mod:SetRevision("20240426185029")
 mod:SetCreatureID(90019)--Main ID is door, door death= win. 94515 Siegemaster Mar'tak
 mod:SetEncounterID(1778)
 mod:SetUsedIcons(6, 5, 4, 3, 2, 1)
@@ -108,7 +108,7 @@ local berserkerTimers = {55.9, 26, 14.4, 36.7, 38.8, 49.5, 66.8, 38.7, 65.8, 47.
 local mythicberserkerTimers = {54.7, 59.6, 140.7, 39.7, 46.5, 28.5, 38.9}--29.5 (first) omitted
 local felcasterTimers = {8.5, 32.2, 39.5, 45.6, 50.9, 31.1, 36.7, 10, 103.8, 0.3, 27.8, 47.2}--35 (first) is omitted
 local mythicfelcasterTimers = {9.5, 160, 33.8, 49.4, 41.3, 44.9, 70.6}--35 (first) is omitted.
-local axeDebuff = DBM:GetSpellInfo(184369)
+local axeDebuff = DBM:GetSpellName(184369)
 local axeFilter
 do
 	axeFilter = function(uId)

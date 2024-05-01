@@ -1,7 +1,7 @@
-local mod	= DBM:NewMod(2109, "DBM-Party-BfA", 7, 1001)
+local mod	= DBM:NewMod(2109, "DBM-Party-BfA", 7, 1012)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20200918131610")
+mod:SetRevision("20240417180519")
 mod:SetCreatureID(129214)
 mod:SetEncounterID(2105)
 
@@ -12,7 +12,7 @@ mod:RegisterEventsInCombat(
 	"SPELL_AURA_APPLIED_DOSE 256493",
 	"SPELL_AURA_REFRESH 256493",
 	"SPELL_CAST_START 262347 257337 271903",
-	"SPELL_CAST_SUCCESS 269493",
+	"SPELL_CAST_SUCCESS 269493 262347",
 	"UNIT_SPELLCAST_SUCCEEDED boss1"
 )
 
@@ -32,10 +32,10 @@ local specWarnThrowCoins			= mod:NewSpecialWarningMove(271784, "Tank", nil, nil,
 --local specWarnGTFO				= mod:NewSpecialWarningGTFO(238028, nil, nil, nil, 1, 8)
 
 local timerStaticPulseCD			= mod:NewCDTimer(23.1, 262347, nil, nil, nil, 2)
-local timerFootbombLauncherCD		= mod:NewCDTimer(36.5, 269493, nil, nil, nil, 5)
+local timerFootbombLauncherCD		= mod:NewCDTimer(32.8, 269493, nil, nil, nil, 5)
 local timerBlazingAzeriteCD			= mod:NewBuffFadesTimer(15, 256493, nil, nil, nil, 5)
-local timerShockingClawCD			= mod:NewCDTimer(23, 257337, nil, nil, nil, 3)--14.3, 41.3 (not sure if still true, not going to leave it ai though, 23 it is til i see lower)
-local timerThrowCoinsCD				= mod:NewCDTimer(17.4, 271784, nil, nil, nil, 3, nil, DBM_CORE_L.HEROIC_ICON..DBM_CORE_L.TANK_ICON)--18.8, 17.4, 25.5, 25.5
+local timerShockingClawCD			= mod:NewCDTimer(21.8, 257337, nil, nil, nil, 3)--14.3, 41.3 (not sure if still true, not going to leave it ai though, 23 it is til i see lower)
+local timerThrowCoinsCD				= mod:NewCDTimer(17.4, 271784, nil, nil, nil, 3, nil, DBM_COMMON_L.HEROIC_ICON..DBM_COMMON_L.TANK_ICON)--18.8, 17.4, 25.5, 25.5
 
 
 mod.vb.coinCast = 0
@@ -43,7 +43,7 @@ mod.vb.coinCast = 0
 function mod:OnCombatStart(delay)
 	self.vb.coinCast = 0
 	timerStaticPulseCD:Start(5.7-delay)
-	timerFootbombLauncherCD:Start(9.4-delay)
+	timerFootbombLauncherCD:Start(9-delay)
 	timerShockingClawCD:Start(14.3-delay)
 	if not self:IsNormal() then
 		timerThrowCoinsCD:Start(18-delay)
@@ -65,7 +65,6 @@ function mod:SPELL_CAST_START(args)
 	if spellId == 262347 then
 		specWarnStaticPulse:Show()
 		specWarnStaticPulse:Play("carefly")
-		timerStaticPulseCD:Start()
 	elseif spellId == 257337 then
 		specWarnShockingClaw:Show()
 		specWarnShockingClaw:Play("shockwave")
@@ -80,6 +79,8 @@ function mod:SPELL_CAST_SUCCESS(args)
 	if spellId == 269493 then
 		warnFootbombLauncher:Show()
 		timerFootbombLauncherCD:Start()
+	elseif spellId == 262347 then
+		timerStaticPulseCD:Start(20.6)--23.1-2.5
 	end
 end
 

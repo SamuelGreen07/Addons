@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(814, "DBM-Pandaria", nil, 322)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240412041331")
+mod:SetRevision("20240426181222")
 mod:SetCreatureID(69099)
 mod:SetEncounterID(1571)
 mod:SetReCombatTime(20, 10)
@@ -30,7 +30,7 @@ mod:AddReadyCheckOption(32518, false)
 
 local stormcloudTargets = {}
 local tetherTargets = {}
-local cloudDebuff = DBM:GetSpellInfo(136340)
+local cloudDebuff = DBM:GetSpellName(136340)
 
 local debuffFilter
 do

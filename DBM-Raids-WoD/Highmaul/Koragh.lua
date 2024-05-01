@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(1153, "DBM-Raids-WoD", 3, 477)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240413054937")
+mod:SetRevision("20240426185029")
 mod:SetCreatureID(79015)
 mod:SetEncounterID(1723)
 mod:SetUsedIcons(8, 7, 6, 3, 2, 1)--Don't know total number of icons needed yet
@@ -75,7 +75,7 @@ mod.vb.ballsCount = 0
 mod.vb.shieldCharging = false
 mod.vb.fireActive = false
 local lastX, LastY = nil, nil--Not in VB table because it player personal position
-local barName, arcaneDebuff = DBM:GetSpellInfo(156803), DBM:GetSpellInfo(162186)
+local arcaneDebuff = DBM:GetSpellName(162186)
 
 local function closeRange(self)
 	if self.Options.RangeFrame and not DBM:UnitDebuff("player", arcaneDebuff) then

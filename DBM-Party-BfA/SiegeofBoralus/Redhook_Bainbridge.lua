@@ -4,10 +4,10 @@ if UnitFactionGroup("player") == "Alliance" then
 else
 	dungeonID, creatureID, encounterID = 2133, 130834, 2097--Bainbridge
 end
-local mod	= DBM:NewMod(dungeonID, "DBM-Party-BfA", 5, 1001)
+local mod	= DBM:NewMod(dungeonID, "DBM-Party-BfA", 5, 1023)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20200918131610")
+mod:SetRevision("20240417180519")
 mod:SetCreatureID(creatureID)
 mod:SetEncounterID(encounterID)
 
@@ -16,12 +16,13 @@ mod:RegisterCombat("combat")
 mod:RegisterEventsInCombat(
 	"SPELL_AURA_APPLIED 257459 260954 261428 256709",
 	"SPELL_CAST_START 257459 275107 257326 261428 260924",
-	"UNIT_DIED",
+--	"UNIT_DIED",
 	"UNIT_SPELLCAST_SUCCEEDED boss1"
 )
 
 --TODO, cannon barrage detection
 --TODO, verify some other spellIds
+--TODO, why are all timers disabled, and can they be made active/better
 --Chopper Redhook
 local warnOntheHook					= mod:NewTargetNoFilterAnnounce(257459, 2)
 local warnMeatHook					= mod:NewCastAnnounce(275107, 2)
@@ -46,13 +47,11 @@ local specWarnCannonBarrage			= mod:NewSpecialWarningDodge(257540, nil, nil, nil
 --Chopper Redhook
 --local timerOntheHookCD				= mod:NewCDTimer(13, 257459, nil, nil, nil, 3)
 --local timerGoreCrashCD				= mod:NewCDTimer(13, 257326, nil, nil, nil, 3)--24.9, 43.3
---local timerHeavySlashCD				= mod:NewCDTimer(13, 279761, nil, "Tank", nil, 5, nil, DBM_CORE_L.TANK_ICON)--Shared
+--local timerHeavySlashCD				= mod:NewCDTimer(13, 279761, nil, "Tank", nil, 5, nil, DBM_COMMON_L.TANK_ICON)--Shared
 --Sergeant Bainbridge
 --local timerIronGazeCD				= mod:NewCDTimer(13, 260954, nil, nil, nil, 3)
 --local timerSteelTempestCD			= mod:NewCDTimer(13, 260924, nil, nil, nil, 3)
---local timerHangmansNooseCD			= mod:NewCDTimer(13, 261428, nil, nil, nil, 3, nil, DBM_CORE_L.DEADLY_ICON)
-
---mod:AddRangeFrameOption(5, 194966)
+--local timerHangmansNooseCD			= mod:NewCDTimer(13, 261428, nil, nil, nil, 3, nil, DBM_COMMON_L.DEADLY_ICON)
 
 function mod:OnCombatStart()
 	if dungeonID == 2132 then--Redhook
@@ -116,7 +115,7 @@ function mod:SPELL_CAST_START(args)
 		--timerSteelTempestCD:Start()
 	elseif spellId == 261428 then
 		--timerHangmansNooseCD:Start()
-	elseif spellId == 260954 then
+--	elseif spellId == 260954 then
 		--timerIronGazeCD:Start()
 	end
 end

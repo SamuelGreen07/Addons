@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(691, "DBM-Pandaria", nil, 322)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240420125214")
+mod:SetRevision("20240428104741")
 mod:SetCreatureID(60491)
 mod:SetEncounterID(1564)
 mod:SetReCombatTime(20, 10)
@@ -29,10 +29,10 @@ local timerUnleashedWrathCD		= mod:NewCDTimer(53, 119488, nil, nil, nil, 2)--Bas
 local timerUnleashedWrath		= mod:NewBuffActiveTimer(24, 119488, nil, "Tank|Healer", nil, 5)
 
 mod:AddRangeFrameOption(5, 119622)
-mod:AddSetIconOption("SetIconOnMC2", 119626, false, false, {8, 7, 6, 5, 4, 3, 2, 1})
+mod:AddSetIconOption("SetIconOnMC2", 119626, false, 0, {8, 7, 6, 5, 4, 3, 2, 1})
 mod:AddReadyCheckOption(32099, false)
 
-local bitterThought, growingAnger = DBM:GetSpellInfo(119601), DBM:GetSpellInfo(119622)
+local bitterThought, growingAnger = DBM:GetSpellName(119601), DBM:GetSpellName(119622)
 local playerMCed = false
 
 local function debuffFilter(uId)

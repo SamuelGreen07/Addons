@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(683, "DBM-Raids-MoP", 3, 320)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240417040638")
+mod:SetRevision("20240426181222")
 mod:SetCreatureID(60585, 60586, 60583)--60583 Protector Kaolan, 60585 Elder Regail, 60586 Elder Asani
 mod:SetEncounterID(1409)
 mod:SetUsedIcons(5, 4, 3, 2, 1)
@@ -71,7 +71,7 @@ mod.vb.prisonIcon = 1--Will try to start from 1 and work up, to avoid using icon
 mod.vb.prisonCount = 0
 mod.vb.asaniCasts = 0
 mod.vb.corruptedCount = 0
-local prisonDebuff = DBM:GetSpellInfo(111850)
+local prisonDebuff = DBM:GetSpellName(111850)
 local prisonTargets = {}
 local myGroup = nil
 local notARaid = false

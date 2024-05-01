@@ -3,7 +3,7 @@ local L		= mod:GetLocalizedStrings()
 local Nefarian	= DBM:EJ_GetSectionInfo(3279)
 local Onyxia	= DBM:EJ_GetSectionInfo(3283)
 
-mod:SetRevision("20240420125225")
+mod:SetRevision("20240426180008")
 mod:SetCreatureID(41376, 41270)
 mod:SetEncounterID(1026) -- ES fires when Nefarian engaged.
 mod:SetUsedIcons(1, 2, 3)
@@ -63,7 +63,6 @@ mod.vb.shadowblazeTimer = 35
 mod.vb.cinderIcons = 1
 local castsPerGUID = {}
 local cinderTargets	= {}
-local cinderDebuff = DBM:GetSpellInfo(79339)
 local dominionTargets = {}
 local lastBlaze = 0--Do NOT use prototype for this, it's updated in a special way using different triggers then when method is called.
 local CVAR = false

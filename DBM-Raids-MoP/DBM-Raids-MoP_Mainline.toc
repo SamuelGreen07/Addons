@@ -22,7 +22,7 @@
 ## X-Curse-Project-ID: 85688
 ## X-WoWI-ID: 23199
 ## X-Wago-ID: 0mNwz4Go
-## Version: r165
+## Version: r166
 
 localization.en.lua
 localization.br.lua

@@ -2745,7 +2745,8 @@ do
     end
 
     local function CreateExportButton()
-        local button = CreateFrame("Button", addonName .. "_ExportButton", LFGListFrame) ---@class RaiderIOExportButton : Button
+        ---@class RaiderIOExportButton : Button
+        local button = CreateFrame("Button", addonName .. "_ExportButton", LFGListFrame)
         button:SetPoint("BOTTOMRIGHT", button:GetParent(), "BOTTOM", -12, 7) ---@diagnostic disable-line: param-type-mismatch
         button:SetSize(16, 16)
         -- script handlers
@@ -5151,7 +5152,7 @@ do
                     r, g, b = 0, 1, 0
                 end
                 local fatedTexture = fated and format("|A:%s-small:0:0:0:1|a", fated) or ""
-                tooltip:AddLine(format("%s %s", raid.name, fatedTexture), r, g, b) -- TODO: raid.dungeon?.nameLocale
+                tooltip:AddLine(format("%s %s", L["RAID_" .. raid.shortName], fatedTexture), r, g, b) -- TODO: raid.dungeon?.nameLocale
             end
             for j = 1, raid.bossCount do
                 local progressFound = false
@@ -9207,7 +9208,7 @@ if IS_RETAIL then
                 middlePadding = middlePadding or 0
                 fontObject = fontObject or "GameFontNormalHuge4"
                 local equalWidth = (self.widthMDI - (self.contentPaddingX * 2)) / 2 - (self.edgePaddingMDI * 3 / 2) - (middlePadding / 2)
-                local LF = self.MDI:CreateFontString(nil, "ARTWORK", fontObject)
+                local LF = self.MDI:CreateFontString(nil, "ARTWORK", fontObject) ---@diagnostic disable-line: param-type-mismatch
                 LF:SetTextColor(1, 1, 1)
                 LF:SetSize(equalWidth, self.textRowHeightMDI)
                 if previous then
@@ -9217,7 +9218,7 @@ if IS_RETAIL then
                 end
                 LF:SetJustifyH("RIGHT")
                 LF:SetJustifyV("MIDDLE")
-                local RF = self.MDI:CreateFontString(nil, "ARTWORK", fontObject)
+                local RF = self.MDI:CreateFontString(nil, "ARTWORK", fontObject) ---@diagnostic disable-line: param-type-mismatch
                 RF:SetTextColor(1, 1, 1)
                 RF:SetSize(equalWidth, self.textRowHeightMDI)
                 RF:SetPoint("TOPLEFT", LF, "TOPRIGHT", self.edgePaddingMDI + middlePadding, 0)
@@ -10658,7 +10659,8 @@ do
     ---@field public hasProfile boolean
 
     local function CreateEditBox()
-        local f = CreateFrame("EditBox", nil, UIParent, "AutoCompleteEditBoxTemplate") ---@class RaiderIOSearchAutoCompleteEditBox
+        ---@class RaiderIOSearchAutoCompleteEditBox
+        local f = CreateFrame("EditBox", nil, UIParent, "AutoCompleteEditBoxTemplate")
         -- autocomplete
         f.autoComplete = AutoCompleteBox
         f.autoCompleteParams = { include = AUTOCOMPLETE_FLAG_ALL, exclude = AUTOCOMPLETE_FLAG_NONE }
@@ -10747,7 +10749,7 @@ do
             end
             Frame.header = Frame:CreateFontString(nil, nil, "ChatFontNormal")
             Frame.header:SetPoint("TOPLEFT", 16, -12)
-            Frame.header:SetText("Enter realm and character name:")
+            Frame.header:SetText(L.ENTER_REALM_AND_CHARACTER)
             Frame:SetMovable(true)
             Frame:RegisterForDrag("LeftButton")
             Frame:SetClampedToScreen(true)
@@ -11679,7 +11681,8 @@ if IS_RETAIL then
         frame.TitleBar:SetPoint("TOPRIGHT", 0, 0)
         frame.TitleBar:Init(frame)
 
-        frame.Log = CreateFrame("Frame", nil, frame) ---@class RaiderIORWFLootFrameLog : Frame
+        ---@class RaiderIORWFLootFrameLog : Frame
+        frame.Log = CreateFrame("Frame", nil, frame)
         frame.Log:SetPoint("TOPLEFT", frame.TitleBar, "BOTTOMLEFT", 8, -32 + 24) ---@diagnostic disable-line: param-type-mismatch
         frame.Log:SetPoint("BOTTOMRIGHT", -9, 28)
 
@@ -13928,7 +13931,6 @@ do
 
     local LDB = LibStub("LibDataBroker-1.1", true)
     local LDBI = LibStub("LibDBIcon-1.0", true)
-    local currentFrame ---@type Frame?
     local anchorFrame ---@type Frame
 
     ---@return string? name, string realm
@@ -13949,7 +13951,6 @@ do
 
     ---@param frame Frame
     function shortcuts:OnButtonEnter(frame)
-        currentFrame = frame
         GameTooltip:SetOwner(frame, "ANCHOR_TOPRIGHT", -frame:GetWidth(), 0)
         GameTooltip:AddLine(L.MINIMAP_SHORTCUT_HELP)
         GameTooltip:Show()
@@ -13965,7 +13966,6 @@ do
 
     ---@param frame Frame
     function shortcuts:OnButtonLeave(frame)
-        currentFrame = nil
         if profile:IsProfileAnchored(anchorFrame) then
             profile:HideProfile()
         end
@@ -13991,7 +13991,9 @@ do
                 search:SearchAndShowProfile(ns.PLAYER_REGION, realm, name)
             end
         end
-        self:OnButtonEnter(frame)
+        if frame:IsVisible() then
+            self:OnButtonEnter(frame)
+        end
     end
 
     function shortcuts:InitializeDataBroker()
@@ -14033,26 +14035,20 @@ do
         end
     end
 
-    local EVENTS = {
-        "RAIDERIO_SETTINGS_SAVED",
-        "RAIDERIO_PROFILE_SHOW",
-        "RAIDERIO_PROFILE_HIDE",
-        "RAIDERIO_PROFILE_REFRESH",
-    }
+    function shortcuts:UpdateState()
+        local db = self:GetMinimapIconDB()
+        if db.hide then
+            self:HideIcon()
+            return
+        end
+        self:InitializeDataBroker()
+        self:InitializeDBIcon()
+        self:ShowIcon()
+    end
 
     local function OnEvent(event, ...)
         if event == "RAIDERIO_SETTINGS_SAVED" then
-            local db = shortcuts:GetMinimapIconDB()
-            if db.hide then
-                shortcuts:HideIcon()
-            else
-                shortcuts:ShowIcon()
-            end
-        elseif event == "RAIDERIO_PROFILE_SHOW" or event == "RAIDERIO_PROFILE_HIDE" or event == "RAIDERIO_PROFILE_REFRESH" then
-            if not currentFrame then
-                return
-            end
-            shortcuts:OnButtonEnter(currentFrame)
+            shortcuts:UpdateState()
         end
     end
 
@@ -14063,19 +14059,8 @@ do
     function shortcuts:OnLoad()
         anchorFrame = CreateFrame("Frame", nil, UIParent)
         anchorFrame:SetSize(1, 1)
-        self:InitializeDataBroker()
-        self:InitializeDBIcon()
-        self:Enable()
-    end
-
-    function shortcuts:OnEnable()
-        self:ShowIcon()
-        callback:RegisterEvent(OnEvent, unpack(EVENTS))
-    end
-
-    function shortcuts:OnDisable()
-        self:HideIcon()
-        callback:UnregisterEvent(OnEvent, unpack(EVENTS))
+        self:UpdateState()
+        callback:RegisterEvent(OnEvent, "RAIDERIO_SETTINGS_SAVED")
     end
 
 end

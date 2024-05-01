@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(2502, "DBM-Raids-Dragonflight", 3, 1200)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240424061710")
+mod:SetRevision("20240426174649")
 mod:SetCreatureID(189813)
 mod:SetEncounterID(2635)
 mod:SetUsedIcons(8, 7, 6, 5, 4)
@@ -100,7 +100,7 @@ function mod:OnCombatStart(delay)
 		timerColaescingStormCD:Start(80-delay, 1)
 	end
 --	if self.Options.InfoFrame then
---		DBM.InfoFrame:SetHeader(DBM:GetSpellInfo(391686))
+--		DBM.InfoFrame:SetHeader(DBM:GetSpellName(391686))
 --		DBM.InfoFrame:Show(self:IsMythic() and 20 or 10, "playerdebuffstacks", 391686)
 --	end
 end

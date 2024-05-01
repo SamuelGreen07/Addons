@@ -1,0 +1,26 @@
+## Interface: 30403
+## Version: 0.9.51
+## Title: SpecBisTooltip |T136031:16:16:0:0|t by |cff3FC7EBD4KiR |T132115:16:16:0:0|t
+## Notes: SpecBisTooltip
+## Author: D4KiR
+## DefaultState: enabled
+## SavedVariables: SBTTAB
+## SavedVariablesPerCharacter: SBTTABPC
+## X-Curse-Project-ID: 827800
+## X-Wago-ID: 56n9g2N9
+
+libs\D4Lib\D4Lib.xml
+
+locale\enUS.lua
+locale\deDE.lua
+locale\esES.lua
+locale\frFR.lua
+locale\itIT.lua
+locale\ptBR.lua
+locale\ruRU.lua
+locale\zhCN.lua
+
+data.lua
+data\datasod.lua
+data\datawowhead.lua
+core.lua

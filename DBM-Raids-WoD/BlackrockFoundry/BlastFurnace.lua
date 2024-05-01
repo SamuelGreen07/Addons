@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(1154, "DBM-Raids-WoD", 2, 457)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240413054511")
+mod:SetRevision("20240426185029")
 mod:SetCreatureID(76809, 76806)--76809 foreman feldspar, 76806 heart of the mountain, 76809 Security Guard, 76810 Furnace Engineer, 76811 Bellows Operator, 76815 Primal Elementalist, 78463 Slag Elemental, 76821 Firecaller
 mod:SetEncounterID(1690)
 mod:SetUsedIcons(6, 5, 4, 3, 2, 1)
@@ -107,7 +107,7 @@ mod.vb.bellowsOperator = 0
 mod.vb.secondSlagSpawned = false
 mod.vb.volatileActive = 0
 local playerVolatileCount = 0
-local bombDebuff, volatileFireDebuff, fixateDebuff, heatName = DBM:GetSpellInfo(155192), DBM:GetSpellInfo(176121), DBM:GetSpellInfo(155196), DBM:GetSpellInfo(155242)
+local bombDebuff, volatileFireDebuff, fixateDebuff, heatName = DBM:GetSpellName(155192), DBM:GetSpellName(176121), DBM:GetSpellName(155196), DBM:GetSpellName(155242)
 local activeSlagGUIDS = {}
 local activePrimalGUIDS = {}
 local activePrimal = 0 -- health report variable. no sync

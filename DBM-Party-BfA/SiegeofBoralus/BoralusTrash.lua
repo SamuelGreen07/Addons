@@ -1,15 +1,16 @@
 local mod	= DBM:NewMod("BoralusTrash", "DBM-Party-BfA", 5)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20200918131610")
+mod:SetRevision("20240417180519")
 --mod:SetModelID(47785)
 
 mod.isTrashMod = true
 
 mod:RegisterEvents(
 	"SPELL_CAST_START 275826 256627 256957 256709 257170 272546 257169 272713 274569 272571 272888",
-	"SPELL_AURA_APPLIED 256957 257168 272421 272571",
+	"SPELL_AURA_APPLIED 256957 257168 272421 272571 272888",
 --	"SPELL_CAST_SUCCESS",
+--	"UNIT_DIED",
 	"UNIT_SPELLCAST_START"
 )
 
@@ -33,13 +34,17 @@ local specWarnChokingWaters			= mod:NewSpecialWarningInterrupt(272571, false, ni
 local specWarnWatertightShellDispel	= mod:NewSpecialWarningDispel(256957, "MagicDispeller", nil, nil, 1, 2)
 local specWarnCursedSlash			= mod:NewSpecialWarningDispel(257168, "RemoveCurse", nil, nil, 1, 2)
 local specWarnFerocity				= mod:NewSpecialWarningDispel(272888, "RemoveEnrage", nil, 2, 1, 2)
-local specWarnChokingWatersDispel	= mod:NewSpecialWarningDispel(272571, "Healer", nil, nil, 1, 2)
+local specWarnChokingWatersDispel	= mod:NewSpecialWarningDispel(272571, "RemoveMagic", nil, 2, 1, 2)
 local specWarnFear					= mod:NewSpecialWarningSpell(257169, nil, nil, nil, 2, 2)
+
+--local timerRainofArrowsCD					= mod:NewCDNPTimer(15.7, 384476, nil, nil, nil, 3)
+
+--Antispam IDs for this mod: 1 run away, 2 dodge, 3 dispel, 4 incoming damage, 5 you/role, 6 misc, 7 off interrupt
 
 function mod:SPELL_CAST_START(args)
 	if not self.Options.Enabled then return end
 	local spellId = args.spellId
-	if spellId == 275826 and self:IsValidWarning(args.sourceGUID) and self:AntiSpam(4, 1) then
+	if spellId == 275826 and self:IsValidWarning(args.sourceGUID) and self:AntiSpam(4, 6) then
 		warnBolsteringShout:Show()
 	elseif spellId == 256627 and self:IsValidWarning(args.sourceGUID) and self:AntiSpam(2.5, 2) then
 		specWarnSlobberKnocker:Show()
@@ -47,12 +52,12 @@ function mod:SPELL_CAST_START(args)
 	elseif spellId == 256709 and self:IsValidWarning(args.sourceGUID) and self:AntiSpam(2.5, 2) then
 		specWarnSingingSteel:Show()
 		specWarnSingingSteel:Play("shockwave")
-	elseif spellId == 257170 and self:IsValidWarning(args.sourceGUID) and self:AntiSpam(4, 4) then
+	elseif spellId == 257170 and self:IsValidWarning(args.sourceGUID) and self:AntiSpam(4, 1) then
 		specWarnSavageTempest:Show()
 		specWarnSavageTempest:Play("whirlwind")
-	elseif spellId == 272546 and self:IsValidWarning(args.sourceGUID) and self:AntiSpam(4, 5) then
+	elseif spellId == 272546 and self:IsValidWarning(args.sourceGUID) and self:AntiSpam(4, 6) then
 		warnBananaRampage:Show()
-	elseif spellId == 257169 and self:IsValidWarning(args.sourceGUID) and self:AntiSpam(4, 6) then
+	elseif spellId == 257169 and self:IsValidWarning(args.sourceGUID) and self:AntiSpam(4, 5) then
 		specWarnFear:Show()
 		specWarnFear:Play("fearsoon")
 	elseif spellId == 256957 and self:CheckInterruptFilter(args.sourceGUID, false, true) then
@@ -64,7 +69,7 @@ function mod:SPELL_CAST_START(args)
 	elseif spellId == 272571 and self:CheckInterruptFilter(args.sourceGUID, false, true) then
 		specWarnChokingWaters:Show(args.sourceName)
 		specWarnChokingWaters:Play("kickcast")
-	elseif spellId == 272888 and self:IsValidWarning(args.sourceGUID) and self:AntiSpam(4, 7) then
+	elseif spellId == 272888 and self:IsValidWarning(args.sourceGUID) and self:AntiSpam(4, 6) then
 		warnFerocity:Show()
 	end
 end
@@ -75,14 +80,14 @@ function mod:SPELL_AURA_APPLIED(args)
 	if spellId == 256957 and self:IsValidWarning(args.sourceGUID) and not args:IsDestTypePlayer() then
 		specWarnWatertightShellDispel:CombinedShow(1, args.destName)
 		specWarnWatertightShellDispel:ScheduleVoice(1, "helpdispel")
-	elseif spellId == 257168 and self:IsValidWarning(args.sourceGUID) and self:CheckDispelFilter() then
+	elseif spellId == 257168 and self:IsValidWarning(args.sourceGUID) and self:CheckDispelFilter("curse") then
 		specWarnCursedSlash:Show(args.destName)
 		specWarnCursedSlash:Play("helpdispel")
 	elseif spellId == 272421 and args:IsPlayer() then
 		specWarnSightedArt:Show()
 		specWarnSightedArt:Play("targetyou")
 		yellSightedArt:Yell()
-	elseif spellId == 272571 and args:IsDestTypePlayer() and self:CheckDispelFilter() then
+	elseif spellId == 272571 and args:IsDestTypePlayer() and self:CheckDispelFilter("magic") then
 		specWarnChokingWatersDispel:Show(args.destName)
 		specWarnChokingWatersDispel:Play("helpdispel")
 	elseif spellId == 272888 and self:IsValidWarning(args.sourceGUID) then
@@ -98,6 +103,14 @@ function mod:SPELL_CAST_SUCCESS(args)
 	local spellId = args.spellId
 	if spellId == 200343 then
 
+	end
+end
+--]]
+
+--[[
+function mod:UNIT_DIED(args)
+	local cid = self:GetCIDFromGUID(args.destGUID)
+	if cid == 192796 then
 	end
 end
 --]]

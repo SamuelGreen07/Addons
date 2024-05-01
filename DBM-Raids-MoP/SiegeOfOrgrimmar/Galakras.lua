@@ -3,7 +3,7 @@ local L		= mod:GetLocalizedStrings()
 
 mod.statTypes = "normal,heroic,mythic,lfr"
 
-mod:SetRevision("20240412062605")
+mod:SetRevision("20240428104741")
 mod:SetCreatureID(72311, 72560, 72249, 73910, 72302, 72561, 73909)--Boss needs to engage off friendly NCPS, not the boss. I include the boss too so we don't detect a win off losing varian. :)
 mod:SetEncounterID(1622)
 --mod:DisableESCombatDetection()--Doesn't appear bugged anymore, IEEU still is
@@ -88,7 +88,7 @@ local timerPulsingFlamesCD			= mod:NewNextCountTimer(25, 147042, nil, nil, nil, 
 local timerPulsingFlames			= mod:NewBuffActiveTimer(7, 147042)
 
 mod:AddSetIconOption("FixateIcon", 147068)
-mod:AddSetIconOption("SetIconOnAdds", "ej8556", false, true)
+mod:AddSetIconOption("SetIconOnAdds", "ej8556", false, 5)
 
 --Important, needs recover
 mod.vb.addsCount = 0

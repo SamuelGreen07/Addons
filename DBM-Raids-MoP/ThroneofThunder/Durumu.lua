@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(818, "DBM-Raids-MoP", 2, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240412062605")
+mod:SetRevision("20240426181222")
 mod:SetCreatureID(68036)--Crimson Fog 69050
 mod:SetEncounterID(1572)
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 1)
@@ -88,7 +88,7 @@ local lfrEngaged = false
 local crimsonFog = DBM:EJ_GetSectionInfo(6892)
 local amberFog = DBM:EJ_GetSectionInfo(6895)
 local azureFog = DBM:EJ_GetSectionInfo(6898)
-local lifeDrain = DBM:GetSpellInfo(133795)
+local lifeDrain = DBM:GetSpellName(133795)
 local playerName = UnitName("player")
 local firstIcewall = false
 local CVAR = nil

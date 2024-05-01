@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(729, "DBM-Raids-MoP", 3, 320)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240415084442")
+mod:SetRevision("20240426181222")
 mod:SetCreatureID(62983)--62995 Animated Protector
 mod:SetEncounterID(1506)
 
@@ -45,7 +45,7 @@ mod.vb.addsIcon = 8
 local lostHealth = 0
 local prevlostHealth = 0
 local lastProtect = 0--No sense making syncable varaible, it's GetTime which differs PC to PC
-local hideName = DBM:GetSpellInfo(123244)
+local hideName = DBM:GetSpellName(123244)
 
 local bossTank
 do

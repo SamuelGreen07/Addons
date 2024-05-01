@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(1394, "DBM-Raids-WoD", 1, 669)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240413054937")
+mod:SetRevision("20240426185029")
 mod:SetCreatureID(90269)
 mod:SetEncounterID(1784)
 --mod:SetUsedIcons(8, 7, 6, 4, 2, 1)
@@ -104,7 +104,7 @@ local AncientSovereign = DBM:EJ_GetSectionInfo(11170)
 local TyrantVelhari = EJ_GetEncounterInfo(1394)
 
 local debuffFilter, debuffFilter2
-local debuffName = DBM:GetSpellInfo(180526)
+local debuffName = DBM:GetSpellName(180526)
 do
 	debuffFilter = function(uId)
 		if DBM:UnitDebuff(uId, debuffName) then

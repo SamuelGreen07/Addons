@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(2482, "DBM-Raids-Dragonflight", 3, 1200)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240424061710")
+mod:SetRevision("20240428104643")
 mod:SetCreatureID(187967)
 mod:SetEncounterID(2592)
 mod:SetUsedIcons(1, 2, 3)
@@ -80,7 +80,7 @@ local specWarnRepellingBurst						= mod:NewSpecialWarningSpell(371983, nil, nil,
 local timerSuffocatingWebsCD						= mod:NewCDCountTimer(38.8, 373048, nil, nil, nil, 3)--38-46
 local timerRepellingBurstCD							= mod:NewCDCountTimer(33.9, 371983, nil, nil, nil, 2)--33-37 (unknown on normal
 
-mod:AddSetIconOption("SetIconOnSufWeb", 373048, true, false, {1, 2, 3})
+mod:AddSetIconOption("SetIconOnSufWeb", 373048, true, 0, {1, 2, 3})
 
 local stickyStacks = {}
 mod.vb.webIcon = 1
@@ -120,7 +120,7 @@ local allTimers = {
 			--Gossamer Burst
 			[373405] = {31.4, 37.7, 63.1, 36.5, 59.6, 37.6},--likely 36 sec cd that resets on encounter events
 			--Call Spiderlings
-			[372238] = {0, 25.5, 25.5, 25.9, 35.1, 25.5, 25.5, 25.5, 19.4, 26.7, 26.7},--likely 25 sec cd that resets on encounter events
+			[372238] = {0, 25.5, 25.5, 25.9, 35.1, 25.5, 25.5, 25.5, 18.2, 26.7, 26.7},--likely 25 sec cd that resets on encounter events
 		},
 		--[2] = {
 		--	--Chilling Blast
@@ -192,7 +192,7 @@ function mod:OnCombatStart(delay)
 		difficultyName = "lfr"
 	end
 	if self.Options.InfoFrame then
-		DBM.InfoFrame:SetHeader(DBM:GetSpellInfo(372030))
+		DBM.InfoFrame:SetHeader(DBM:GetSpellName(372030))
 		DBM.InfoFrame:Show(20, "table", stickyStacks, 1)
 	end
 end

@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(824, "DBM-Raids-MoP", 2, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240203195113")
+mod:SetRevision("20240426181222")
 mod:SetCreatureID(69427)
 mod:SetEncounterID(1576)
 mod:SetUsedIcons(1)
@@ -55,7 +55,7 @@ local timerEmpowerGolemCD			= mod:NewCDTimer(16, 138780)
 
 local berserkTimer					= mod:NewBerserkTimer(600)
 
-local crimsonWake = DBM:GetSpellInfo(138485)--Debuff ID I believe, not cast one. Same spell name though
+local crimsonWake = DBM:GetSpellName(138485)--Debuff ID I believe, not cast one. Same spell name though
 local siphon = 0
 local jolt = 0
 

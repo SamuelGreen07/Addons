@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(1161, "DBM-Raids-WoD", 2, 457)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240413054937")
+mod:SetRevision("20240426185029")
 mod:SetCreatureID(76877)
 mod:SetEncounterID(1691)
 --mod:SetUsedIcons(8, 7, 6, 4, 2, 1)
@@ -52,7 +52,7 @@ mod.vb.sliceCount = 0
 mod.vb.petrifyCount = 0
 mod.vb.rampage = false
 mod.vb.firstWarned = false
-local petrifyDebuff = DBM:GetSpellInfo(155323)
+local petrifyDebuff = DBM:GetSpellName(155323)
 local debuffFilter
 do
 	debuffFilter = function(uId)

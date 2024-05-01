@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(1427, "DBM-Raids-WoD", 1, 669)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240413065503")
+mod:SetRevision("20240426185029")
 mod:SetCreatureID(92330)
 mod:SetEncounterID(1794)
 mod:SetUsedIcons(1)
@@ -100,7 +100,7 @@ mod.vb.dominatorCount = 0
 mod.vb.interruptBehavior = "Count3Resume"
 local soulsSeen = {}
 local playerInConstruct = false
-local exertSpellName, debuffName = DBM:GetSpellInfo(183331), DBM:GetSpellInfo(184124)
+local exertSpellName, debuffName = DBM:GetSpellName(183331), DBM:GetSpellName(184124)
 local debuffFilter
 do
 	debuffFilter = function(uId)

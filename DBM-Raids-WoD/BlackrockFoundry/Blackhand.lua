@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(959, "DBM-Raids-WoD", 2, 457)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240413054511")
+mod:SetRevision("20240426185029")
 mod:SetCreatureID(77325)--68168
 mod:SetEncounterID(1704)
 mod:SetUsedIcons(3, 2, 1)
@@ -102,7 +102,7 @@ local mortarsWarned = {}
 local tankFilter
 local yellMFD2 = mod:NewYell(156096, L.customMFDSay, true, false)
 local yellSlag2 = mod:NewYell(157000, L.customSlagSay, true, false)
-local mfdDebuff, slagDebuff1, slagDebuff2 = DBM:GetSpellInfo(156096), DBM:GetSpellInfo(157000), DBM:GetSpellInfo(159179)
+local mfdDebuff, slagDebuff1, slagDebuff2 = DBM:GetSpellName(156096), DBM:GetSpellName(157000), DBM:GetSpellName(159179)
 local playerName = UnitName("player")
 do
 	tankFilter = function(uId)

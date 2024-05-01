@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(2331, "DBM-Party-BfA", 11, 1178)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20201013203549")
+mod:SetRevision("20221230022007")
 mod:SetCreatureID(150396, 144249, 150397)
 mod:SetEncounterID(2260)
 mod:SetBossHPInfoToHighest()
@@ -10,7 +10,7 @@ mod:RegisterCombat("combat")
 
 mod:RegisterEventsInCombat(
 	"SPELL_CAST_START 291865 291928 292264 291613",
-	"SPELL_CAST_SUCCESS 291626 283551 283143",
+	"SPELL_CAST_SUCCESS 291626 283551 283143 292750",
 --	"SPELL_AURA_APPLIED 283143",
 --	"SPELL_AURA_REMOVED 283143",
 	"UNIT_DIED",
@@ -21,7 +21,7 @@ mod:RegisterEventsInCombat(
 --TODO, warn tank if not in range in p2 for Ninety-Nine?
 --[[
 (ability.id = 291865 or ability.id = 291928 or ability.id = 292264 or ability.id = 291613) and type = "begincast"
- or (ability.id = 291626 or ability.id = 283551 or ability.id = 283143) and type = "cast"
+ or (ability.id = 291626 or ability.id = 283551 or ability.id = 283143 or ability.id = 292750) and type = "cast"
  or (target.id = 150396 or target.id = 144249) and type = "death"
 --]]
 --Stage One: Aerial Unit R-21/X
@@ -30,7 +30,7 @@ local warnRecalibrate				= mod:NewSpellAnnounce(291865, 2, nil, nil, nil, nil, 2
 local warnCuttingBeam				= mod:NewSpellAnnounce(291626, 2)
 --Stage Two: Omega Buster
 local warnPhase2					= mod:NewPhaseAnnounce(2, 2, nil, nil, nil, nil, 2)
-local warnMagnetoArmSoon			= mod:NewSoonAnnounce(283551, 2)
+local warnMagnetoArmSoon			= mod:NewSoonAnnounce(283143, 2)
 
 --Stage One: Aerial Unit R-21/X
 --local specWarnRecalibrate			= mod:NewSpecialWarningDodge(291865, nil, nil, nil, 2, 2)
@@ -49,11 +49,8 @@ local timerTakeOffCD				= mod:NewCDTimer(35.2, 291613, nil, nil, nil, 6)
 local timerCuttingBeam				= mod:NewCastTimer(6, 291626, nil, nil, nil, 3)
 --Stage Two: Omega Buster
 local timerMagnetoArmCD				= mod:NewCDTimer(61.9, 283143, nil, nil, nil, 2)
-local timerHardModeCD				= mod:NewCDTimer(42.5, 292750, nil, nil, nil, 5, nil, DBM_CORE_L.MYTHIC_ICON)--42.5-46.1
+local timerHardModeCD				= mod:NewCDTimer(42.5, 292750, nil, nil, nil, 5, nil, DBM_COMMON_L.MYTHIC_ICON)--42.5-46.1
 
---mod:AddRangeFrameOption(5, 194966)
-
-mod.vb.phase = 1
 mod.vb.recalibrateCount = 0
 mod.vb.zapCount = 0
 local P1RecalibrateTimers = {5.9, 12, 27.9, 15.6, 19.4}
@@ -74,7 +71,7 @@ function mod:ZapTarget(targetname)
 end
 
 function mod:OnCombatStart(delay)
-	self.vb.phase = 1
+	self:SetStage(1)
 	self.vb.recalibrateCount = 0
 	self.vb.zapCount = 0
 	timerRecalibrateCD:Start(5.9-delay, 1)
@@ -133,6 +130,10 @@ function mod:SPELL_CAST_SUCCESS(args)
 		specWarnMagnetoArm:Play("justrun")
 		specWarnMagnetoArm:ScheduleVoice(1.5, "keepmove")
 		timerMagnetoArmCD:Start()
+	elseif spellId == 292750 then--H.A.R.D.M.O.D.E.
+		specWarnHardMode:Show()
+		specWarnHardMode:Play("stilldanger")
+		timerHardModeCD:Start()
 	end
 end
 
@@ -145,7 +146,7 @@ function mod:UNIT_DIED(args)
 		timerTakeOffCD:Stop()
 		timerCuttingBeam:Stop()
 	elseif cid == 144249 then--Omega Buster
-		self.vb.phase = 3
+		self:SetStage(3)
 		timerRecalibrateCD:Stop()
 		timerGigaZapCD:Stop()
 		timerMagnetoArmCD:Stop()
@@ -154,7 +155,7 @@ end
 
 function mod:UNIT_SPELLCAST_SUCCEEDED(_, _, spellId)
 	if spellId == 296323 then--Activate Omega Buster (Needed? Stage 2 should already be started by stage 1 boss death)
-		self.vb.phase = 2
+		self:SetStage(2)
 		self.vb.zapCount = 0
 		self.vb.recalibrateCount = 0
 		warnPhase2:Show()
@@ -165,10 +166,6 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(_, _, spellId)
 		timerMagnetoArmCD:Start(34)
 	elseif spellId == 292807 then--Cancel Skull Aura (Annihilo-tron 5000 activating on pull)
 		timerHardModeCD:Start(32.2)
-	elseif spellId == 292750 then--H.A.R.D.M.O.D.E.
-		specWarnHardMode:Show()
-		specWarnHardMode:Play("stilldanger")
-		timerHardModeCD:Start()
 	end
 end
 

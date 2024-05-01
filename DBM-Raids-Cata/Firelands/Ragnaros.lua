@@ -6,7 +6,7 @@ if not mod:IsClassic() then--Future planning, so cata classic uses regular rules
 	mod.statTypes = "normal,heroic,timewalker"
 end
 
-mod:SetRevision("20240412065037")
+mod:SetRevision("20240428104752")
 mod:SetCreatureID(52409)
 mod:SetEncounterID(1203)
 mod:SetHotfixNoticeRev(20200918000000)--2020, 09, 18
@@ -108,7 +108,7 @@ local timerDreadFlameCD		= mod:NewCDTimer(40, 100675, nil, false, nil, 5)--Off b
 local berserkTimer			= mod:NewBerserkTimer(1080)
 
 mod:AddRangeFrameOption("6/8")
-mod:AddSetIconOption("BlazingHeatIcons", 100460, true, false, {1, 2})
+mod:AddSetIconOption("BlazingHeatIcons", 100460, true, 0, {1, 2})
 mod:AddBoolOption("InfoHealthFrame", "Healer")--Phase 1 info framefor low health detection.
 mod:AddBoolOption("AggroFrame", false)--Phase 2 info frame for seed aggro detection.
 mod:AddBoolOption("MeteorFrame", true)--Phase 3 info frame for meteor fixate detection.
@@ -129,7 +129,7 @@ mod.vb.dreadFlameTimer = 45
 local magmaTrapGUID = {}
 local elementalsGUID = {}
 local meteorWarned = false
-local dreadflame, meteorTarget, staffDebuff = DBM:GetSpellInfo(100675), DBM:GetSpellInfo(99849), DBM:GetSpellInfo(101109)
+local dreadflame, meteorTarget, staffDebuff = DBM:GetSpellName(100675), DBM:GetSpellName(99849), DBM:GetSpellName(101109)
 
 local function showRangeFrame(self)
 	if DBM:UnitDebuff("player", staffDebuff) then return end--Staff debuff, don't change their range finder from 8.

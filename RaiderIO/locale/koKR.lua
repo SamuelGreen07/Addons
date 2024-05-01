@@ -21,6 +21,16 @@ L["AUTO_COMBATLOG_DESC"] = "지원되는 던전,공격대에 입장 및 퇴장 �
 L["BEST_FOR_DUNGEON"] = "던전 최고 기록"
 L["BEST_RUN"] = "최고 기록"
 L["BEST_SCORE"] = "최고 쐐기 점수 (%s)"
+--[[Translation missing --]]
+--[[ L["BINDING_CATEGORY_RAIDERIO"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["BINDING_HEADER_RAIDERIO_REPLAYUI"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["BINDING_NAME_RAIDERIO_REPLAYUI_TIMING_BOSS"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["BINDING_NAME_RAIDERIO_REPLAYUI_TIMING_DUNGEON"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["BINDING_NAME_RAIDERIO_REPLAYUI_TOGGLE"] = ""--]] 
 L["CANCEL"] = "취소"
 L["CHANGES_REQUIRES_UI_RELOAD"] = [=[변경 사항이 저장되었지만 변경 사항을 적용하려면 UI를 다시 불러와야 합니다.
 
@@ -205,6 +215,30 @@ L["PROFILE_BEST_RUNS"] = "던전별 최고 기록"
 L["PROVIDER_NOT_LOADED"] = "|cffFF0000경고:|r |cffFFFFFF%s|r은(는) 현재 진영에 대한 데이터를 찾을 수 없습니다. |cffFFFFFF/raiderio|r 설정을 확인하고 |cffFFFFFF%s|r에 대한 툴팁 데이터를 활성화하십시오."
 --[[Translation missing --]]
 --[[ L["PVP_DATA_HEADER"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_AATDH"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_AATSC"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_AVOTI"] = ""--]] 
+L["RAID_BOSS_AATDH_1"] = "옹이뿌리"
+L["RAID_BOSS_AATDH_2"] = "잔혹한 이기라"
+L["RAID_BOSS_AATDH_3"] = "볼코로스"
+L["RAID_BOSS_AATDH_4"] = "꿈의 의회"
+L["RAID_BOSS_AATDH_5"] = "불꽃지기 라로다르"
+L["RAID_BOSS_AATDH_6"] = "순환의 방직공 니무에"
+L["RAID_BOSS_AATDH_7"] = "스몰데론"
+L["RAID_BOSS_AATDH_8"] = "틴드랄 세이지스위프트"
+L["RAID_BOSS_AATDH_9"] = "광염의 피락"
+L["RAID_BOSS_AATSC_1"] = "지옥벼림 카자라"
+L["RAID_BOSS_AATSC_2"] = "융합체의 방"
+L["RAID_BOSS_AATSC_3"] = "잊힌 실험체"
+L["RAID_BOSS_AATSC_4"] = "자칼리의 습격"
+L["RAID_BOSS_AATSC_5"] = "장로 라소크"
+L["RAID_BOSS_AATSC_6"] = "경계하는 청지기 지스카른"
+L["RAID_BOSS_AATSC_7"] = "마그모락스"
+L["RAID_BOSS_AATSC_8"] = "넬타리온의 메아리"
+L["RAID_BOSS_AATSC_9"] = "비늘사령관 사카레스"
 L["RAID_BOSS_ATDH_1"] = "옹이뿌리"
 L["RAID_BOSS_ATDH_2"] = "잔혹한 이기라"
 L["RAID_BOSS_ATDH_3"] = "볼코로스"
@@ -223,6 +257,14 @@ L["RAID_BOSS_ATSC_6"] = "경계하는 청지기 지스카른"
 L["RAID_BOSS_ATSC_7"] = "마그모락스"
 L["RAID_BOSS_ATSC_8"] = "넬타리온의 메아리"
 L["RAID_BOSS_ATSC_9"] = "비늘사령관 사카레스"
+L["RAID_BOSS_AVOTI_1"] = "에라노그"
+L["RAID_BOSS_AVOTI_2"] = "테로스"
+L["RAID_BOSS_AVOTI_3"] = "원시 의회"
+L["RAID_BOSS_AVOTI_4"] = "차가운 숨결의 세나스"
+L["RAID_BOSS_AVOTI_5"] = "승천한 자 다테아"
+L["RAID_BOSS_AVOTI_6"] = "쿠로그 그림토템"
+L["RAID_BOSS_AVOTI_7"] = "혈족지기 디우르나"
+L["RAID_BOSS_AVOTI_8"] = "폭풍포식자 라자게스"
 L["RAID_BOSS_CN_1"] = "절규날개"
 L["RAID_BOSS_CN_10"] = "대영주 데나트리우스"
 L["RAID_BOSS_CN_2"] = "사냥꾼 알티모르"

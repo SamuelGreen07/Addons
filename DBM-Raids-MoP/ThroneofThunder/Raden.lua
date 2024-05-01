@@ -3,7 +3,7 @@ local L		= mod:GetLocalizedStrings()
 
 mod.statTypes = "heroic,heroic25"
 
-mod:SetRevision("20240412062605")
+mod:SetRevision("20240428104741")
 mod:SetCreatureID(69473)--69888
 mod:SetEncounterID(1580, 1581)
 mod:SetUsedIcons(1)
@@ -61,14 +61,14 @@ local timerCracklingStalkerCD	= mod:NewCDCountTimer(41, 138339, nil, nil, nil, 1
 local timerCreationCD			= mod:NewCDCountTimer(32.5, 138321, nil, nil, nil, 1, nil, nil, nil, 1, 4)--32.5-35second variation
 local timerCallEssenceCD		= mod:NewNextTimer(15.5, 139040, nil, nil, nil, 1)
 
-mod:AddSetIconOption("SetIconsOnVita", 418720, false, false, {1})
+mod:AddSetIconOption("SetIconsOnVita", 418720, false, 0, {1})
 
 local creationCount = 0
 local stalkerCount = 0
 local horrorCount = 0
 local lastStalker = 0
 local playerName = UnitName("player")
-local vitaName, animaName, animaDebuff = DBM:GetSpellInfo(138332), DBM:GetSpellInfo(138331), DBM:GetSpellInfo(138288)
+local vitaName, animaName = DBM:GetSpellName(138332), DBM:GetSpellName(138331)
 
 function mod:OnCombatStart(delay)
 	creationCount = 0

@@ -3,7 +3,7 @@ local L		= mod:GetLocalizedStrings()
 
 mod.statTypes = "normal,heroic,mythic,lfr"
 
-mod:SetRevision("20240412042046")
+mod:SetRevision("20240428104741")
 mod:SetCreatureID(71865)
 mod:SetEncounterID(1623)
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 2, 1)
@@ -107,7 +107,7 @@ local timerFixate					= mod:NewTargetTimer(12, 147665)
 local berserkTimer					= mod:NewBerserkTimer(1080)
 
 mod:AddBoolOption("yellMaliceFading", false)
-mod:AddSetIconOption("SetIconOnShaman", "ej8294", false, true)
+mod:AddSetIconOption("SetIconOnShaman", "ej8294", false, 5)
 mod:AddSetIconOption("SetIconOnMC", 145071, false)
 mod:AddSetIconOption("SetIconOnMalice", 147209, false)
 mod:AddArrowOption("ShowDesecrateArrow", 144748, false)
@@ -119,8 +119,8 @@ local UnitExists, UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
 local bombardCD = {55, 40, 40, 25, 25}
 local engineerTimers = {20, 45, 40, 40, 35, 35, 30, 30, 25, 25, 25}
 local shamanTimers = {31.5, 49.6, 49.6, 39.6, 39.6, 39.6, 29.6, 29.6, 29.6, 19.6}
-local spellName1, spellName2, spellName3 = DBM:GetSpellInfo(149004), DBM:GetSpellInfo(148983), DBM:GetSpellInfo(148994)
-local starFixate, grippingDespair, empGrippingDespair = DBM:GetSpellInfo(147665), DBM:GetSpellInfo(145183), DBM:GetSpellInfo(145195)
+local spellName1, spellName2, spellName3 = DBM:GetSpellName(149004), DBM:GetSpellName(148983), DBM:GetSpellName(148994)
+local starFixate, grippingDespair, empGrippingDespair = DBM:GetSpellName(147665), DBM:GetSpellName(145183), DBM:GetSpellName(145195)
 --Tables, can't recover
 local lines = {}
 --Not important, don't need to recover

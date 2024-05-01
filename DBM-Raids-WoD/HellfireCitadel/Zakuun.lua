@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(1391, "DBM-Raids-WoD", 1, 669)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240422191346")
+mod:SetRevision("20240426185029")
 mod:SetCreatureID(89890)
 mod:SetEncounterID(1777)
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 2, 1)
@@ -75,7 +75,7 @@ mod.vb.yellType = "Icon"
 mod.vb.latentIcon = 8
 local yellSeeds2 = mod:NewPosYell(181508, nil, true, false)
 local seedsTargets = {}
-local befouledName, latentDebuff = DBM:GetSpellInfo(179711), DBM:GetSpellInfo(182008)
+local befouledName, latentDebuff = DBM:GetSpellName(179711), DBM:GetSpellName(182008)
 local debuffFilter
 do
 	debuffFilter = function(uId)

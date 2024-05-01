@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(2480, "DBM-Raids-Dragonflight", 3, 1200)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240424061710")
+mod:SetRevision("20240426174649")
 mod:SetCreatureID(184972)
 mod:SetEncounterID(2587)
 mod:SetUsedIcons(1, 2, 3, 4, 5)
@@ -62,7 +62,7 @@ local specWarnKillOrder							= mod:NewSpecialWarningYou(370597, nil, nil, nil, 
 mod:AddNamePlateOption("NPAuraOnKillOrder", 370597, true)
 mod:AddNamePlateOption("NPAuraOnRampage", 371562, true)
 --Flamescale Captain (Mythic)
-mod:AddTimerLine(DBM:GetSpellInfo(396039))
+mod:AddTimerLine(DBM:GetSpellName(396039))
 local warnLeapingFlames							= mod:NewSpellAnnounce(394917, 3)
 
 local specWarnPyroBlast							= mod:NewSpecialWarningInterruptCount(396040, "HasInterrupt", nil, nil, 1, 2)

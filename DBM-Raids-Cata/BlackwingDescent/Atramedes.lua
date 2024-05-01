@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(171, "DBM-Raids-Cata", 5, 73)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240315100444")
+mod:SetRevision("20240426180008")
 mod:SetCreatureID(41442)
 mod:SetEncounterID(1022)
 mod:SetUsedIcons(8)
@@ -158,7 +158,7 @@ function mod:CHAT_MSG_MONSTER_YELL(msg)
 end
 
 do
-	local pestered = DBM:GetSpellInfo(92685)--TODO, if can verify exact spellID then no reason to localize spellname, just pass ID in unitDebuff
+	local pestered = DBM:GetSpellName(92685)--TODO, if can verify exact spellID then no reason to localize spellname, just pass ID in unitDebuff
 	local pesteredWarned = false
 	function mod:UNIT_AURA(uId)
 		local isPestered = DBM:UnitDebuff("player", pestered)

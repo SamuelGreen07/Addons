@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(679, "DBM-Raids-MoP", 5, 317)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240415052810")
+mod:SetRevision("20240426181222")
 mod:SetCreatureID(60051, 60043, 59915, 60047)--Cobalt: 60051, Jade: 60043, Jasper: 59915, Amethyst: 60047
 mod:SetEncounterID(1395)
 
@@ -61,10 +61,10 @@ local yellJasperChains				= mod:NewYell(130395, nil, false)
 local timerJasperChainsCD			= mod:NewCDTimer(12, 130395, nil, nil, nil, 3)--11-13
 
 local Overload = {
-	["Cobalt"] = DBM:GetSpellInfo(115840),
-	["Jade"] = DBM:GetSpellInfo(115842),
-	["Jasper"] = DBM:GetSpellInfo(115843),
-	["Amethyst"] = DBM:GetSpellInfo(115844)
+	["Cobalt"] = DBM:GetSpellName(115840),
+	["Jade"] = DBM:GetSpellName(115842),
+	["Jasper"] = DBM:GetSpellName(115843),
+	["Amethyst"] = DBM:GetSpellName(115844)
 }
 mod.vb.expectedBosses = 3
 mod.vb.activePetrification = "None"

@@ -3,7 +3,7 @@ local L		= mod:GetLocalizedStrings()
 
 mod.statTypes = "normal,heroic,mythic,lfr"
 
-mod:SetRevision("20240412052200")
+mod:SetRevision("20240426181222")
 mod:SetCreatureID(71479, 71475, 71480)--He-Softfoot, Rook Stonetoe, Sun Tenderheart
 mod:SetEncounterID(1598)
 mod:SetUsedIcons(7)
@@ -101,7 +101,7 @@ mod:AddRangeFrameOption(5, 143423, false)--For heroic. Need to chage smart range
 local UnitExists = UnitExists
 local UnitGUID = UnitGUID
 local UnitDetailedThreatSituation = UnitDetailedThreatSituation
-local calamitySpellText = DBM:GetSpellInfo(143491)
+local calamitySpellText = DBM:GetSpellName(143491)
 
 --Not important, don't need to recover
 local isInfernoTarget = false

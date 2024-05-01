@@ -12,7 +12,7 @@ local strfind = string.find
 -- Generate our version variables
 --
 
-local BIGWIGS_VERSION = 326
+local BIGWIGS_VERSION = 328
 local BIGWIGS_RELEASE_STRING, BIGWIGS_VERSION_STRING
 local versionQueryString, versionResponseString = "Q^%d^%s^%d^%s", "V^%d^%s^%d^%s"
 local customGuildName = false
@@ -29,6 +29,7 @@ do
 	public.isVanilla = tbl.isVanilla
 	public.isTBC = tbl.isTBC
 	public.isWrath = tbl.isWrath
+	public.isCata = tbl.isCata
 	public.dbmPrefix = "D5"
 
 	-- START: MAGIC PACKAGER VOODOO VERSION STUFF
@@ -36,12 +37,12 @@ do
 	local ALPHA = "ALPHA"
 
 	local releaseType
-	local myGitHash = "f34d158" -- The ZIP packager will replace this with the Git hash.
+	local myGitHash = "bded6d7" -- The ZIP packager will replace this with the Git hash.
 	local releaseString
-	--@alpha@
+	--[=[@alpha@
 	-- The following code will only be present in alpha ZIPs.
 	releaseType = ALPHA
-	--@end-alpha@
+	--@end-alpha@]=]
 
 	-- If we find "@" then we're running from Git directly.
 	if strfind(myGitHash, "@", nil, true) then
@@ -97,6 +98,7 @@ local myLocale = GetLocale()
 public.Ambiguate = Ambiguate
 public.CTimerAfter = CTimerAfter
 public.CTimerNewTicker = CTimerNewTicker
+public.DoCountdown = C_PartyInfo.DoCountdown
 public.GetBestMapForUnit = GetBestMapForUnit
 public.GetInstanceInfo = GetInstanceInfo
 public.GetMapInfo = GetMapInfo
@@ -195,6 +197,13 @@ do
 			littlewigsDefault = lw_wotlk,
 			zones = {},
 		}
+	elseif public.isCata then
+		public.currentExpansion = {
+			name = cata,
+			littlewigsName = lw_cata,
+			littlewigsDefault = lw_cata,
+			zones = {},
+		}
 	elseif public.isBeta then -- TWW Alpha/Beta
 		public.currentExpansion = { -- Change on new expansion releases
 			name = tww,
@@ -220,7 +229,7 @@ do
 	public.zoneTbl = {
 		[533] = public.isVanilla and c or wotlk, -- Naxxramas
 		[249] = public.isVanilla and c or wotlk, -- Onyxia's Lair
-		[568] = public.isClassic and bc or lw_cata, -- Zul'Aman
+		[568] = (public.isTBC or public.isWrath) and bc or lw_cata, -- Zul'Aman
 		[-947] = public.isClassic and c or bfa, -- Azeroth (Fake Menu)
 
 		--[[ BigWigs: Classic ]]--
@@ -674,9 +683,6 @@ do
 			meta = GetAddOnMetadata(i, "X-BigWigs-ExtraMenu")
 			if meta then
 				extraMenus[#extraMenus + 1] = i
-				if name == "LittleWigs" then -- A little yuck to detect if LW is a Git repo
-					public.usingLittleWigsRepo = true
-				end
 			end
 			meta = GetAddOnMetadata(i, "X-BigWigs-NoMenu")
 			if meta then
@@ -729,6 +735,11 @@ do
 					end
 				end
 			end
+		end
+
+		-- check if LittleWigs is installed from source
+		if name == "LittleWigs" and GetAddOnMetadata(i, "X-LittleWigs-Repo") then
+			public.usingLittleWigsRepo = true
 		end
 
 		if next(loadOnSlash) then
@@ -891,11 +902,17 @@ function mod:ADDON_LOADED(addon)
 	bwFrame:RegisterEvent("ZONE_CHANGED")
 	bwFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 	bwFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
+	if C_EventUtils.IsEventValid("START_PLAYER_COUNTDOWN") then
+		bwFrame:RegisterEvent("START_PLAYER_COUNTDOWN")
+		bwFrame:RegisterEvent("CANCEL_PLAYER_COUNTDOWN")
+		TimerTracker:UnregisterEvent("START_PLAYER_COUNTDOWN")
+		TimerTracker:UnregisterEvent("CANCEL_PLAYER_COUNTDOWN")
+	end
 
 	bwFrame:RegisterEvent("CHAT_MSG_ADDON")
-	local success = RegisterAddonMessagePrefix("BigWigs")
-	if not success then
-		sysprint("Failed to register the BigWigs addon message prefix.")
+	local oldResult, result = RegisterAddonMessagePrefix("BigWigs")
+	if type(result) == "number" and result > 2 then
+		sysprint("Failed to register the BigWigs addon message prefix. Error code: ".. result)
 	end
 	RegisterAddonMessagePrefix(dbmPrefix) -- DBM
 
@@ -999,6 +1016,19 @@ end
 function mod:GLOBAL_MOUSE_UP(button)
 	if button == "RightButton" then
 		isMouseDown = false
+	end
+end
+
+function mod:START_PLAYER_COUNTDOWN(initiatedBy, timeSeconds, totalTime)
+	loadAndEnableCore()
+	if BigWigs and BigWigs.GetPlugin then -- XXX Clean this up
+		BigWigs:GetPlugin("Pull"):START_PLAYER_COUNTDOWN(nil, initiatedBy, timeSeconds, totalTime)
+	end
+end
+function mod:CANCEL_PLAYER_COUNTDOWN(initiatedBy)
+	loadAndEnableCore()
+	if BigWigs and BigWigs.GetPlugin then -- XXX Clean this up
+		BigWigs:GetPlugin("Pull"):CANCEL_PLAYER_COUNTDOWN(nil, initiatedBy)
 	end
 end
 
@@ -1319,9 +1349,9 @@ end
 --
 
 do
-	local DBMdotRevision = "20240415215409" -- The changing version of the local client, changes with every new zip using the project-date-integer packager replacement.
-	local DBMdotDisplayVersion = "10.2.35" -- "N.N.N" for a release and "N.N.N alpha" for the alpha duration.
-	local DBMdotReleaseRevision = "20240415000000" -- Hardcoded time, manually changed every release, they use it to track the highest release version, a new DBM release is the only time it will change.
+	local DBMdotRevision = "20240429050831" -- The changing version of the local client, changes with every new zip using the project-date-integer packager replacement.
+	local DBMdotDisplayVersion = "10.2.37" -- "N.N.N" for a release and "N.N.N alpha" for the alpha duration.
+	local DBMdotReleaseRevision = "20240429000000" -- Hardcoded time, manually changed every release, they use it to track the highest release version, a new DBM release is the only time it will change.
 	local protocol = 3
 	local versionPrefix = "V"
 	local PForceDisable = 10
@@ -1411,7 +1441,10 @@ do
 	local timer = nil
 	local function sendMsg()
 		if IsInGroup() then
-			SendAddonMessage("BigWigs", versionResponseString, IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- LE_PARTY_CATEGORY_INSTANCE = 2
+			local _, result = SendAddonMessage("BigWigs", versionResponseString, IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- LE_PARTY_CATEGORY_INSTANCE = 2
+			if type(result) == "number" and result ~= 0 then
+				sysprint("Failed to send initial version. Error code: ".. result)
+			end
 		end
 		timer = nil
 	end
@@ -1617,7 +1650,10 @@ do
 		local groupType = (IsInGroup(2) and 3) or (IsInRaid() and 2) or (IsInGroup() and 1) -- LE_PARTY_CATEGORY_INSTANCE = 2
 		if (not grouped and groupType) or (grouped and groupType and grouped ~= groupType) then
 			grouped = groupType
-			SendAddonMessage("BigWigs", versionQueryString, groupType == 3 and "INSTANCE_CHAT" or "RAID")
+			local _, result = SendAddonMessage("BigWigs", versionQueryString, groupType == 3 and "INSTANCE_CHAT" or "RAID")
+			if type(result) == "number" and result ~= 0 then
+				sysprint("Failed to send version response. Error code: ".. result)
+			end
 			local name = UnitName("player")
 			local realm = GetRealmName()
 			local normalizedPlayerRealm = realm:gsub("[%s-]+", "") -- Has to mimic DBM code
@@ -1664,7 +1700,10 @@ function mod:BigWigs_CoreEnabled()
 	-- Send a version query on enable, should fix issues with joining a group then zoning into an instance,
 	-- which kills your ability to receive addon comms during the loading process.
 	if IsInGroup() then
-		SendAddonMessage("BigWigs", versionQueryString, IsInGroup(2) and "INSTANCE_CHAT" or "RAID")
+		local _, result = SendAddonMessage("BigWigs", versionQueryString, IsInGroup(2) and "INSTANCE_CHAT" or "RAID")
+		if type(result) == "number" and result ~= 0 then
+			sysprint("Failed to send initial (load) version. Error code: ".. result)
+		end
 		local name = UnitName("player")
 		local realm = GetRealmName()
 		local normalizedPlayerRealm = realm:gsub("[%s-]+", "") -- Has to mimic DBM code

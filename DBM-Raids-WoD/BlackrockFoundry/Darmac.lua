@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(1122, "DBM-Raids-WoD", 2, 457)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240413054937")
+mod:SetRevision("20240426173239")
 mod:SetCreatureID(76865)--No need to add beasts to this. It's always main boss that's engaged first and dies last.
 mod:SetEncounterID(1694)
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 2, 1)
@@ -263,7 +263,7 @@ function mod:SPELL_AURA_APPLIED(args)
 			warnPinDownTargets:ScheduleVoice(0.5, "helpme")
 		end
 	elseif spellId == 154981 then
-		if self:CheckDispelFilter() then
+		if self:CheckDispelFilter("magic") then
 			specWarnConflag:CombinedShow(2.3, args.destName)
 		end
 		if self.Options.SetIconOnConflag and not self:IsLFR() then

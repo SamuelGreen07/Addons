@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(861, "DBM-Pandaria", nil, 322, 1)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240412041201")
+mod:SetRevision("20240428104741")
 mod:SetCreatureID(72057)
 mod:SetReCombatTime(20, 10)
 mod:SetUsedIcons(8, 7, 6)
@@ -30,7 +30,7 @@ local timerBurningSoul			= mod:NewBuffFadesTimer(10, 144689, nil, nil, nil, 5)
 
 local berserkTimer				= mod:NewBerserkTimer(300)
 
-mod:AddSetIconOption("SetIconOnBurningSoul", 144689, true, false, {8, 7, 6})
+mod:AddSetIconOption("SetIconOnBurningSoul", 144689, true, 0, {8, 7, 6})
 mod:AddRangeFrameOption(8, 144689)
 mod:AddReadyCheckOption(33118, false, 90)
 
