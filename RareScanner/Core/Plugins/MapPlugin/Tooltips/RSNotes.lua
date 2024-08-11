@@ -112,7 +112,10 @@ function RSNotes.GetNote(entityID, mapID, minieventID)
 	-- Requires dreamsurge investigation in Dragon Isles
   	elseif (minieventID and minieventID == RSConstants.DRAGONFLIGHT_DREAMSURGE_MINIEVENT) then
     	return AL["NOTE_DREAMSURGE_EVENTS"]
-  	end
+    -- Requires wordlsoul memory event
+	elseif (minieventID and minieventID == RSConstants.WARWITHIN_RARES_WORLDSOUL_MINIEVENT) then
+		return AL["NOTE_WORLDSOUL_RARE_NPCS"]
+	end
 	
 	-- Rune of constructs Containers
 	if (RSUtils.Contains(RSConstants.RUNE_CONSTRUCTS_CONTAINERS, entityID)) then
@@ -159,5 +162,9 @@ function RSNotes.GetNote(entityID, mapID, minieventID)
 	-- Unwaking echo containers
 	elseif (RSUtils.Contains(RSConstants.CONTAINERS_UNWAKING_ECHO, entityID)) then
 		return AL["NOTE_UNWAKING_ECHO"]
+	-- Containers that despawn
+	elseif (RSUtils.Contains(RSConstants.DESPAWN_CONTAINERS, entityID)) then
+		return AL["NOTE_CONTAINER_DESPAWNS"]
 	end
+	
 end

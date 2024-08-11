@@ -38,6 +38,8 @@ if L then
 	L.tempest_channeler = "Tempest Channeler"
 	L.flame_channeler = "Flame Channeler"
 	L.high_channeler_ryvati = "High Channeler Ryvati"
+
+	L.kyrakka_and_erkhart_warmup_trigger = "Your false queen cannot stop us. We are the truth."
 end
 
 --------------------------------------------------------------------------------
@@ -95,6 +97,9 @@ function mod:GetOptions()
 end
 
 function mod:OnBossEnable()
+	-- Warmups
+	self:RegisterEvent("CHAT_MSG_MONSTER_YELL")
+
 	-- Primal Juggernaut
 	self:Log("SPELL_CAST_START", "ExcavatingBlast", 372696)
 
@@ -149,6 +154,20 @@ end
 -- Event Handlers
 --
 
+-- Warmups
+
+function mod:CHAT_MSG_MONSTER_YELL(event, msg)
+	if msg == L.kyrakka_and_erkhart_warmup_trigger then
+		-- Kyrakka and Erkhart Stormvein warmup
+		local kyrakkaAndErkhartModule = BigWigs:GetBossModule("Kyrakka and Erkhart Stormvein", true)
+		if kyrakkaAndErkhartModule then
+			kyrakkaAndErkhartModule:Enable()
+			kyrakkaAndErkhartModule:Warmup()
+			-- don't unregister the event, because if the boss respawns this will happen again
+		end
+	end
+end
+
 -- Primal Juggernaut
 
 function mod:ExcavatingBlast(args)
@@ -182,21 +201,37 @@ end
 
 -- Defier Draghar
 
-function mod:BlazingRush(args)
-	self:Message(args.spellId, "orange")
-	self:PlaySound(args.spellId, "alarm")
-	self:CDBar(args.spellId, 17.0)
-end
+do
+	local timer
 
-function mod:SteelBarrage(args)
-	self:Message(args.spellId, "purple")
-	self:PlaySound(args.spellId, "alert")
-	self:CDBar(args.spellId, 17.0)
-end
+	function mod:BlazingRush(args)
+		if timer then
+			self:CancelTimer(timer)
+		end
+		self:Message(args.spellId, "orange")
+		self:PlaySound(args.spellId, "alarm")
+		self:CDBar(args.spellId, 17.0)
+		timer = self:ScheduleTimer("DefierDragharDeath", 30)
+	end
 
-function mod:DefierDragharDeath(args)
-	self:StopBar(372087) -- Blazing Rush
-	self:StopBar(372047) -- Steel Barrage
+	function mod:SteelBarrage(args)
+		if timer then
+			self:CancelTimer(timer)
+		end
+		self:Message(args.spellId, "purple")
+		self:PlaySound(args.spellId, "alert")
+		self:CDBar(args.spellId, 17.0)
+		timer = self:ScheduleTimer("DefierDragharDeath", 30)
+	end
+
+	function mod:DefierDragharDeath(args)
+		if timer then
+			self:CancelTimer(timer)
+			timer = nil
+		end
+		self:StopBar(372087) -- Blazing Rush
+		self:StopBar(372047) -- Steel Barrage
+	end
 end
 
 -- Primalist Flamedancer

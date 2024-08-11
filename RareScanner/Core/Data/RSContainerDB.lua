@@ -531,3 +531,19 @@ function RSContainerDB.SetContainerReseteable(containerID)
 		private.dbglobal.containers_reseteable[containerID] = true
 	end
 end
+
+---============================================================================
+-- NPCs with pre-events
+----- Obtains the latest npcID in a chain of pre-events
+---============================================================================
+
+function RSContainerDB.GetFinalContainerID(containerPreEventID)
+	local containerID = tonumber(containerPreEventID)
+	
+	-- Container with pre-event
+	while (RSConstants.CONTAINERS_WITH_PRE_EVENT[containerID]) do
+		containerID = RSConstants.CONTAINERS_WITH_PRE_EVENT[containerID]
+	end
+	
+	return containerID
+end

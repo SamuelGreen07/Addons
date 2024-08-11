@@ -28,7 +28,7 @@ local CastingBarFrame_SetUnit = CastingBarFrame_SetUnit
 local PetCastingBarFrame_OnLoad = PetCastingBarFrame_OnLoad
 local CompactRaidFrameManager_SetSetting = CompactRaidFrameManager_SetSetting
 
-local IsAddOnLoaded = (C_AddOns and C_AddOns.IsAddOnLoaded) or IsAddOnLoaded
+local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
 local IsReplacingUnit = IsReplacingUnit or C_PlayerInteractionManager.IsReplacingUnit
 
 local SELECT_AGGRO = SOUNDKIT.IG_CREATURE_AGGRO_SELECT
@@ -425,7 +425,7 @@ function UF:UpdateColors()
 		ElvUF.colors.empoweredCast[i] = E:SetColorTable(ElvUF.colors.empoweredCast[i], db.empoweredCast[i])
 	end
 
-	--Evoker, Monk, Mage, Paladin and Warlock, Death Knight
+	-- Evoker, Monk, Mage, Paladin and Warlock, Death Knight
 	if not ElvUF.colors.ClassBars then ElvUF.colors.ClassBars = {} end
 	ElvUF.colors.ClassBars.PALADIN = E:SetColorTable(ElvUF.colors.ClassBars.PALADIN, db.classResources.PALADIN)
 	ElvUF.colors.ClassBars.MAGE = E:SetColorTable(ElvUF.colors.ClassBars.MAGE, db.classResources.MAGE)
@@ -442,6 +442,11 @@ function UF:UpdateColors()
 	for i = -1, 4 do
 		ElvUF.colors.ClassBars.DEATHKNIGHT[i] = E:SetColorTable(ElvUF.colors.ClassBars.DEATHKNIGHT[i], db.classResources.DEATHKNIGHT[i])
 	end
+
+	-- Druid (Cataclysm only)
+	if not ElvUF.colors.ClassBars.DRUID then ElvUF.colors.ClassBars.DRUID = {} end
+	ElvUF.colors.ClassBars.DRUID[1] = E:SetColorTable(ElvUF.colors.ClassBars.DRUID[1], db.classResources.DRUID[1])
+	ElvUF.colors.ClassBars.DRUID[2] = E:SetColorTable(ElvUF.colors.ClassBars.DRUID[2], db.classResources.DRUID[2])
 
 	-- these are just holders.. to maintain and update tables
 	if not ElvUF.colors.reaction.good then ElvUF.colors.reaction.good = {} end
@@ -556,7 +561,7 @@ do -- IDs maintained in Difficulty Datatext and Nameplate StyleFilters
 			dungeonHeroic = {2, 39, 174},
 			dungeonMythic = {23, 40},
 			dungeonMythicKeystone = {8},
-			raidNormal = {3, 4, 14, 148, 175, 176, 185, 186}, -- 148 is ZG/AQ40
+			raidNormal = {3, 4, 14, 148, 175, 176, 185, 186, 215}, -- 148 is ZG/AQ40, 215 is Sunken Temple
 			raidHeroic = {5, 6, 15, 193, 194},
 			raidMythic = {16},
 		}
@@ -687,7 +692,7 @@ function UF:CreateAndUpdateUFGroup(group, numGroup)
 			UF.groupunits[unit] = group -- keep above spawn, it's required
 
 			local frameName = gsub(E:StringTitle(unit), 't(arget)', 'T%1')
-			frame = ElvUF:Spawn(unit, 'ElvUF_'..frameName, 'SecureUnitButtonTemplate')
+			frame = ElvUF:Spawn(unit, 'ElvUF_'..frameName, E.Retail and 'SecureUnitButtonTemplate, PingableUnitFrameTemplate' or 'SecureUnitButtonTemplate')
 			frame:SetID(i)
 			frame.index = i
 
@@ -985,32 +990,38 @@ function UF:PLAYER_ENTERING_WORLD(_, initLogin, isReload)
 	end
 end
 
-function UF:CreateHeader(parent, groupFilter, overrideName, template, groupName, headerTemplate)
-	local group = parent.groupName or groupName
-	local db = UF.db.units[group]
-	ElvUF:SetActiveStyle('ElvUF_'..E:StringTitle(group))
+do
+	local attributes = {}
+	function UF:CreateHeader(parent, groupFilter, overrideName, template, groupName, headerTemplate)
+		local group = parent.groupName or groupName
+		local db = UF.db.units[group]
+		ElvUF:SetActiveStyle('ElvUF_'..E:StringTitle(group))
 
-	local header = ElvUF:SpawnHeader(overrideName, headerTemplate, nil,
-		'oUF-initialConfigFunction', format('self:SetWidth(%d); self:SetHeight(%d);', db.width, db.height),
-		'groupFilter', groupFilter, 'showParty', true, 'showRaid', group ~= 'party', 'showSolo', true,
-		template and 'template', template
-	)
+		-- setup the attributes for header
+		attributes['oUF-initialConfigFunction'] = format('self:SetWidth(%d); self:SetHeight(%d);', db.width, db.height)
+		attributes.template = template or nil
+		attributes.groupFilter = groupFilter
+		attributes.showRaid = group ~= 'party'
+		attributes.showParty = true
+		attributes.showSolo = true
 
-	header.groupName = group
-	header.UpdateHeader = format('Update_%sHeader', parent.isRaidFrame and 'Raid' or E:StringTitle(group))
-	header.UpdateFrames = format('Update_%sFrames', parent.isRaidFrame and 'Raid' or E:StringTitle(group))
+		local header = ElvUF:SpawnHeader(overrideName, headerTemplate, nil, attributes)
+		header.UpdateHeader = format('Update_%sHeader', parent.isRaidFrame and 'Raid' or E:StringTitle(group))
+		header.UpdateFrames = format('Update_%sFrames', parent.isRaidFrame and 'Raid' or E:StringTitle(group))
+		header.groupName = group
 
-	if parent ~= E.UFParent then
-		header:SetParent(parent)
+		if parent ~= E.UFParent then
+			header:SetParent(parent)
+		end
+
+		header:Show()
+
+		for k, v in pairs(UF.headerPrototype) do
+			header[k] = v
+		end
+
+		return header
 	end
-
-	header:Show()
-
-	for k, v in pairs(UF.headerPrototype) do
-		header[k] = v
-	end
-
-	return header
 end
 
 function UF:CreateAndUpdateHeaderGroup(group, groupFilter, template, headerTemplate, skip)
@@ -1106,7 +1117,7 @@ function UF:CreateAndUpdateUF(unit)
 	local frameName = gsub(E:StringTitle(unit), 't(arget)', 'T%1')
 	local frame = UF[unit]
 	if not frame then
-		frame = ElvUF:Spawn(unit, 'ElvUF_'..frameName, 'SecureUnitButtonTemplate')
+		frame = ElvUF:Spawn(unit, 'ElvUF_'..frameName, E.Retail and 'SecureUnitButtonTemplate, PingableUnitFrameTemplate' or 'SecureUnitButtonTemplate')
 
 		UF.units[unit] = frame
 		UF[unit] = frame

@@ -21,6 +21,7 @@ local addon, ns = ...
 local cargBags = ns.cargBags
 
 local isClassic = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE
+local isCata = WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC
 local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 
 local isDF = select(4,GetBuildInfo()) >= 100000
@@ -496,12 +497,18 @@ function Implementation:UpdateSlot(bagID, slotID)
 end
 
 local closed
+local bagIDstart = ((isClassic and not Cata) and -2) or -1
+local bagIDtoIgnore = {}
+if not KeyRingButtonIDToInvSlotID then
+	bagIDtoIgnore[-2] = true
+end
 
 --[[!
 	Updates a bag and its containing slots
 	@param bagID <number>
 ]]
 function Implementation:UpdateBag(bagID)
+	if bagIDtoIgnore[bagID] then return end
 	local numSlots
 	if(closed) then
 		numSlots, closed = 0
@@ -531,12 +538,13 @@ end
 	@callback Container:OnBagUpdate(bagID, slotID)
 ]]
 function Implementation:BAG_UPDATE(event, bagID, slotID)
+	if bagIDtoIgnore[bagID] then return end
 	if(bagID and slotID) then
 		self:UpdateSlot(bagID, slotID)
 	elseif(bagID) then
 		self:UpdateBag(bagID)
 	else
-		for bagID = -2, MaxNumContainer do
+		for bagID = bagIDstart, MaxNumContainer do
 			self:UpdateBag(bagID)
 		end
 	end
@@ -547,6 +555,7 @@ end
 	@param bagID <number>
 ]]
 function Implementation:BAG_CLOSED(event, bagID)
+	if bagIDtoIgnore[bagID] then return end
 	closed = bagID
 	self:BAG_UPDATE(event, bagID)
 end
@@ -556,6 +565,7 @@ end
 	@param bagID <number> [optional]
 ]]
 function Implementation:BAG_UPDATE_COOLDOWN(event, bagID)
+	if bagIDtoIgnore[bagID] then return end
 	if(bagID) then
 		for slotID=1, GetContainerNumSlots(bagID) do
 			local button = self:GetButton(bagID, slotID)
@@ -582,6 +592,7 @@ end
 ]]
 function Implementation:ITEM_LOCK_CHANGED(event, bagID, slotID)
 	if(not slotID) then return end
+	if bagIDtoIgnore[bagID] then return end
 
 	local button = self:GetButton(bagID, slotID)
 	if(button) then

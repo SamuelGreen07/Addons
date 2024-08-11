@@ -758,3 +758,19 @@ function RSNpcDB.GetNpcId(name, mapID)
 	
 	return nil
 end
+
+---============================================================================
+-- NPCs with pre-events
+----- Obtains the latest npcID in a chain of pre-events
+---============================================================================
+
+function RSNpcDB.GetFinalNpcID(npcPreEventID)
+	local npcID = tonumber(npcPreEventID)
+	
+	-- NPC with pre-event
+	while (RSConstants.NPCS_WITH_PRE_EVENT[npcID]) do
+		npcID = RSConstants.NPCS_WITH_PRE_EVENT[npcID]
+	end
+	
+	return npcID
+end

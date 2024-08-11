@@ -6,13 +6,14 @@ local _G = _G
 local select, unpack = select, unpack
 local hooksecurefunc = hooksecurefunc
 
-local ContainerIDToInventoryID = ContainerIDToInventoryID or (C_Container and C_Container.ContainerIDToInventoryID)
-local GetContainerNumFreeSlots = GetContainerNumFreeSlots or (C_Container and C_Container.GetContainerNumFreeSlots)
-local GetContainerItemLink = GetContainerItemLink or (C_Container and C_Container.GetContainerItemLink)
-local GetInventoryItemLink = GetInventoryItemLink or (C_Container and C_Container.GetInventoryItemLink)
-local GetItemQualityColor = GetItemQualityColor
+local ContainerIDToInventoryID = C_Container.ContainerIDToInventoryID
+local GetContainerNumFreeSlots = C_Container.GetContainerNumFreeSlots
+local GetContainerItemLink = C_Container.GetContainerItemLink
+local GetInventoryItemLink = C_Container.GetInventoryItemLink or GetInventoryItemLink
+local GetItemQualityColor = C_Item.GetItemQualityColor
+local GetItemInfo = C_Item.GetItemInfo
+local GetItemQualityByID = C_Item.GetItemQualityByID
 local GetInventoryItemID = GetInventoryItemID
-local GetItemInfo = GetItemInfo
 
 local BANK_CONTAINER = Enum.BagIndex.Bank
 local LE_ITEM_CLASS_QUESTITEM = LE_ITEM_CLASS_QUESTITEM
@@ -190,7 +191,7 @@ function S:ContainerFrame()
 
 			local link = GetInventoryItemLink('player', ContainerIDToInventoryID(id))
 			if link then
-				local _, _, quality = GetItemInfo(link)
+				local quality = GetItemQualityByID(link)
 				if quality and quality > 1 then
 					local r, g, b = GetItemQualityColor(quality)
 					button:SetBackdropBorderColor(r, g, b)

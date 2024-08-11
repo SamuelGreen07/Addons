@@ -365,6 +365,7 @@ AL["CONTAINER_381223"] = "开裂沙漏"
 AL["CONTAINER_381712"] = "水缚储物箱"
 AL["CONTAINER_382195"] = "元素束缚之箱"
 AL["CONTAINER_382325"] = "玛瑙宝石簇"
+AL["CONTAINER_383732"] = "海象人工具盒"
 AL["CONTAINER_384763"] = "禁忌宝藏"
 AL["CONTAINER_385565"] = "炽燃的暗影烈焰宝箱"
 AL["CONTAINER_386079"] = "嚼了很久的箱子"
@@ -855,7 +856,6 @@ AL["MAP_MENU_SHOW_NOT_TRACKABLE_CONTAINERS"] = "在地图上显示不可追踪�
 AL["MAP_MENU_SHOW_OPEN_CONTAINERS"] = "在地图上显示已打开容器图标"
 AL["MAP_MENU_SHOW_OTHER_CONTAINERS"] = "在地图上显示其他容器图标"
 AL["MAP_MENU_SHOW_OTHER_RARE_NPCS"] = "在地图上显示其他稀有 NPC 图标"
-AL["MAP_MENU_SHOW_PRIMAL_STORM_RARE_NPCS"] = "巨龙时代：在地图上显示原始风暴稀有 NPC 图标"
 AL["MAP_MENU_SHOW_PROFESSION_CONTAINERS"] = "在地图上显示专业容器图标"
 AL["MAP_MENU_SHOW_PROFESSION_RARE_NPCS"] = "在地图上显示专业稀有 NPC 图标"
 AL["MAP_MENU_SHOW_RARE_NPCS"] = "在地图上显示稀有 NPC 图标"
@@ -1797,5 +1797,6 @@ AL["ZONES_FILTERS_SEARCH_DESC"] = "输入地区名称过滤以下列表"
 		[9996] = "团队副本"; --Raids
 		[9995] = "未知"; --Unknown
 		[9994] = "海岛探险"; --Expedition islands
+		[9993] = "Delves"; --Delves
 	}
 end

@@ -14,7 +14,6 @@ local CreateFrame = CreateFrame
 local GetBindingKey = GetBindingKey
 local GetCurrentBindingSet = GetCurrentBindingSet
 local GetNumGroupMembers = GetNumGroupMembers
-local GetSpellInfo = GetSpellInfo
 local InCombatLockdown = InCombatLockdown
 local IsInGroup = IsInGroup
 local IsInGuild = IsInGuild
@@ -26,14 +25,12 @@ local UIParent = UIParent
 local UnitFactionGroup = UnitFactionGroup
 local UnitGUID = UnitGUID
 
-local GetSpecialization = (E.Classic or E.Wrath) and LCS.GetSpecialization or GetSpecialization
+local GetSpecialization = (E.Classic or E.Cata) and LCS.GetSpecialization or GetSpecialization
+local PlayerGetTimerunningSeasonID = PlayerGetTimerunningSeasonID
 
-local DisableAddOn = (C_AddOns and C_AddOns.DisableAddOn) or DisableAddOn
-local GetAddOnMetadata = (C_AddOns and C_AddOns.GetAddOnMetadata) or GetAddOnMetadata
+local DisableAddOn = C_AddOns.DisableAddOn
+local GetAddOnMetadata = C_AddOns.GetAddOnMetadata
 local GetCVarBool = C_CVar.GetCVarBool
-
-local C_AddOns_GetAddOnEnableState = C_AddOns and C_AddOns.GetAddOnEnableState
-local GetAddOnEnableState = GetAddOnEnableState -- eventually this will be on C_AddOns and args swap
 
 local LE_PARTY_CATEGORY_HOME = LE_PARTY_CATEGORY_HOME
 local LE_PARTY_CATEGORY_INSTANCE = LE_PARTY_CATEGORY_INSTANCE
@@ -522,14 +519,6 @@ do
 		popup.cancel = info.cancel or cancel
 
 		E:StaticPopup_Show('INCOMPATIBLE_ADDON', popup.button1, popup.button2)
-	end
-end
-
-function E:IsAddOnEnabled(addon)
-	if C_AddOns_GetAddOnEnableState then
-		return C_AddOns_GetAddOnEnableState(addon, E.myname) == 2
-	else
-		return GetAddOnEnableState(E.myname, addon) == 2
 	end
 end
 
@@ -1208,7 +1197,7 @@ do -- BFA Convert, deprecated..
 		local auraBarColors = E.global.unitframe.AuraBarColors
 		for spell, info in pairs(auraBarColors) do
 			if type(spell) == 'string' then
-				local spellID = select(7, GetSpellInfo(spell))
+				local _, _, _, _, _, _, spellID = E:GetSpellInfo(spell)
 				if spellID and not auraBarColors[spellID] then
 					auraBarColors[spellID] = info
 					auraBarColors[spell] = nil
@@ -1405,12 +1394,27 @@ function E:DBConvertDF()
 	local currency = E.global.datatexts.customCurrencies
 	if currency then
 		for id, data in next, E.global.datatexts.customCurrencies do
-			local info = { name = data.NAME, showMax = data.SHOW_MAX, currencyTooltip = data.DISPLAY_IN_MAIN_TOOLTIP, nameStyle = data.DISPLAY_STYLE and (strfind(data.DISPLAY_STYLE, 'ABBR') and 'abbr' or strfind(data.DISPLAY_STYLE, 'TEXT') and 'full' or 'none') or nil }
+			local info = {
+				name = data.NAME or nil,
+				showMax = data.SHOW_MAX or nil,
+				currencyTooltip = data.DISPLAY_IN_MAIN_TOOLTIP or nil,
+				nameStyle = data.DISPLAY_STYLE and (strfind(data.DISPLAY_STYLE, 'ABBR') and 'abbr' or strfind(data.DISPLAY_STYLE, 'TEXT') and 'full' or 'none') or nil
+			}
+
 			if next(info) then
 				E.global.datatexts.customCurrencies[id] = info
 			end
 		end
 	end
+
+	if E.private.general.gameMenuScale ~= nil then
+		E.db.general.gameMenuScale = E.private.general.gameMenuScale
+		E.private.general.gameMenuScale = nil
+	end
+end
+
+function E:DBConvertDev()
+
 end
 
 function E:UpdateDB()
@@ -1484,7 +1488,7 @@ function E:UpdateActionBars(skipCallback)
 		ActionBars:UpdateExtraButtons()
 	end
 
-	if E.Wrath and E.myclass == 'SHAMAN' then
+	if E.Cata and E.myclass == 'SHAMAN' then
 		ActionBars:UpdateTotemBindings()
 	end
 
@@ -1564,7 +1568,7 @@ function E:UpdateMisc(skipCallback)
 
 	if E.Retail then
 		TotemTracker:PositionAndSize()
-	elseif E.Wrath then
+	elseif E.Cata then
 		ActionBars:PositionAndSizeTotemBar()
 	end
 
@@ -1882,10 +1886,11 @@ function E:DBConversions()
 
 		E:DBConvertBFA()
 		E:DBConvertSL()
+		E:DBConvertDF()
 	end
 
 	-- development converts
-	E:DBConvertDF()
+	E:DBConvertDev()
 
 	-- always convert
 	if not ElvCharacterDB.ConvertKeybindings then
@@ -1960,6 +1965,8 @@ function E:Initialize()
 	E.serverID = tonumber(serverID)
 	E.myguid = playerGUID
 
+	E.TimerunningID = PlayerGetTimerunningSeasonID and PlayerGetTimerunningSeasonID()
+
 	E.data = E.Libs.AceDB:New('ElvDB', E.DF, true)
 	E.data.RegisterCallback(E, 'OnProfileChanged', 'StaggeredUpdateAll')
 	E.data.RegisterCallback(E, 'OnProfileCopied', 'StaggeredUpdateAll')
@@ -1993,7 +2000,7 @@ function E:Initialize()
 		E:Tutorials()
 	end
 
-	if E.Retail or E.Wrath then
+	if E.Retail or E.Cata or E.ClassicSOD then
 		E.Libs.DualSpec:EnhanceDatabase(E.data, 'ElvUI')
 	end
 

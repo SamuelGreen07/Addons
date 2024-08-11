@@ -15,8 +15,6 @@ if not TMW then return end
 local L = TMW.L
 
 local print = TMW.print
-local GetSpellInfo, GetSpellCooldown, GetSpellCharges, GetSpellCount, IsUsableSpell =
-	  GetSpellInfo, GetSpellCooldown, GetSpellCharges, GetSpellCount, IsUsableSpell
 local UnitRangedDamage =
 	  UnitRangedDamage
 local pairs, wipe, strlower =
@@ -24,11 +22,20 @@ local pairs, wipe, strlower =
 
 local OnGCD = TMW.OnGCD
 local SpellHasNoMana = TMW.SpellHasNoMana
+local GetSpellInfo = TMW.GetSpellInfo
+local GetSpellName = TMW.GetSpellName
 local GetSpellTexture = TMW.GetSpellTexture
+local GetSpellCharges = TMW.GetSpellCharges
+local GetSpellCooldown = TMW.GetSpellCooldown
+local IsUsableSpell = C_Spell.IsSpellUsable or _G.IsUsableSpell
+local GetSpellCount = C_Spell.GetSpellCastCount or _G.GetSpellCount
 local GetRuneCooldownDuration = TMW.GetRuneCooldownDuration
 
 local _, pclass = UnitClass("Player")
 
+-- TODO: Preliminary testing has shown that C_Spell.IsSpellInRange behaves properly 
+-- with all inputs in wow 11.0+. Once it makes it to all game versions,
+-- we can probably remove LibSpellRange.
 local IsSpellInRange = LibStub("SpellRange-1.0").IsSpellInRange
 
 
@@ -173,7 +180,7 @@ end
 
 local usableData = {}
 local unusableData = {}
-local mindfreeze = GetSpellInfo(47528) and strlower(GetSpellInfo(47528))
+local mindfreeze = GetSpellName(47528) and strlower(GetSpellName(47528))
 local function SpellCooldown_OnUpdate(icon, time)    
 	-- Upvalue things that will be referenced a lot in our loops.
 	local IgnoreRunes, RangeCheck, ManaCheck, GCDAsUnusable, NameArray =
@@ -305,7 +312,7 @@ function Type:Setup(icon)
 		icon.IgnoreRunes =  nil
 	end
 	
-	if icon.Spells.FirstString == strlower(GetSpellInfo(75)) and not icon.Spells.Array[2] then
+	if icon.Spells.FirstString == strlower(GetSpellName(75)) and not icon.Spells.Array[2] then
 		-- Auto shot needs special handling - it isn't a regular cooldown, so it gets its own update function.
 		icon:SetInfo("texture", GetSpellTexture(75))
 		icon.asStart = icon.asStart or 0

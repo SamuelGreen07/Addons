@@ -34,6 +34,7 @@ P.general = {
 	questRewardMostValueIcon = true,
 	questXPPercent = true,
 	durabilityScale = 1,
+	gameMenuScale = 1,
 	lockCameraDistanceMax = true,
 	cameraDistanceMax = E.Retail and 2.6 or 4,
 	afk = true,
@@ -58,6 +59,11 @@ P.general = {
 		transparent = true,
 		height = 22,
 		width = 0
+	},
+	raidUtility = {
+		modifier = 'SHIFT',
+		modifierSwap = 'world',
+		showTooltip = true
 	},
 	fonts = {
 		cooldown = { enable = true, font = 'Expressway', size = 20, outline = 'SHADOWOUTLINE' },
@@ -94,10 +100,17 @@ P.general = {
 	itemLevel = {
 		displayCharacterInfo = true,
 		displayInspectInfo = true,
+		enchantAbbrev = true,
+		showItemLevel = true,
+		showEnchants = true,
+		showGems = true,
 		itemLevelRarity = true,
 		itemLevelFont = 'PT Sans Narrow',
 		itemLevelFontSize = 12,
 		itemLevelFontOutline = 'OUTLINE',
+		totalLevelFont = 'PT Sans Narrow',
+		totalLevelFontSize = E.Retail and 20 or 18,
+		totalLevelFontOutline = 'OUTLINE',
 	},
 	customGlow = {
 		style = 'Pixel Glow',
@@ -206,7 +219,7 @@ P.general = {
 	},
 	totems = { -- totem tracker
 		growthDirection = 'VERTICAL',
-		sortDirection = (E.Wrath and 'DESCENDING') or 'ASCENDING',
+		sortDirection = (E.Cata and 'DESCENDING') or 'ASCENDING',
 		size = 40,
 		height = 40,
 		spacing = 4,
@@ -546,7 +559,7 @@ local NP_Health = {
 
 local NP_Power = {
 	enable = false,
-	classColor = false,
+	useClassColor = false,
 	hideWhenEmpty = false,
 	costPrediction = true,
 	width = 150,
@@ -873,7 +886,11 @@ P.nameplates = {
 				{r = .19, g = .48, b = .60}, -- water
 				{r = .42, g = .18, b = .74}, -- air
 			},
-			WARLOCK = {r = 0.58, g = 0.51, b = 0.79}
+			WARLOCK = {r = 0.58, g = 0.51, b = 0.79},
+			DRUID = {
+				{r = 0.30, g = 0.52, b = 0.90}, -- negative/lunar
+				{r = 0.80, g = 0.82, b = 0.60}, -- positive/solar
+			},
 		},
 	},
 	visibility = {
@@ -1097,6 +1114,8 @@ P.chat = {
 	keywordSound = 'None',
 	noAlertInCombat = false,
 	flashClientIcon = true,
+	timerunningIcon = true,
+	mentorshipIcon = true,
 	chatHistory = true,
 	lfgIcons = true,
 	maxLines = 100,
@@ -1319,6 +1338,7 @@ local UF_Auras = {
 	keepSizeRatio = true,
 	height = 30,
 	spacing = 1,
+	strataAndLevel = CopyTable(UF_StrataAndLevel),
 }
 
 local UF_AuraBars = {
@@ -1344,6 +1364,7 @@ local UF_AuraBars = {
 
 local UF_AuraWatch = {
 	enable = false,
+	petSpecific = E.Retail,
 	profileSpecific = false,
 	countFont = 'PT Sans Narrow',
 	countFontOutline = 'OUTLINE',
@@ -1526,6 +1547,8 @@ local UF_Portrait = {
 local UF_Power = {
 	attachTextTo = 'Health',
 	autoHide = false,
+	onlyHealer = false,
+	notInCombat = false,
 	detachedWidth = 250,
 	detachFromFrame = false,
 	enable = true,
@@ -1650,7 +1673,11 @@ local UF_SubGroup = {
 	width = 120,
 	height = 28,
 	threatStyle = 'GLOW',
+	threatPrimary = true,
 	colorOverride = 'USE_DEFAULT',
+	disableMouseoverGlow = false,
+	disableTargetGlow = true,
+	disableFocusGlow = true,
 	name = CopyTable(UF_Name),
 	raidicon = CopyTable(UF_RaidIcon),
 	buffIndicator = CopyTable(UF_AuraWatch),
@@ -1856,6 +1883,7 @@ P.unitframe = {
 			height = 54,
 			lowmana = 30,
 			threatStyle = 'GLOW',
+			threatPrimary = true,
 			smartAuraPosition = 'DISABLED',
 			colorOverride = 'USE_DEFAULT',
 			disableMouseoverGlow = false,
@@ -1912,6 +1940,8 @@ P.unitframe = {
 			height = 54,
 			orientation = 'RIGHT',
 			threatStyle = 'GLOW',
+			threatPrimary = true,
+			threatPlayer = false,
 			smartAuraPosition = 'DISABLED',
 			colorOverride = 'USE_DEFAULT',
 			middleClickFocus = true,
@@ -1944,6 +1974,7 @@ P.unitframe = {
 		targettarget = {
 			enable = true,
 			threatStyle = 'NONE',
+			threatPrimary = true,
 			orientation = 'MIDDLE',
 			smartAuraPosition = 'DISABLED',
 			colorOverride = 'USE_DEFAULT',
@@ -1969,6 +2000,8 @@ P.unitframe = {
 		focus = {
 			enable = true,
 			threatStyle = 'GLOW',
+			threatPrimary = true,
+			threatPlayer = false,
 			orientation = 'MIDDLE',
 			smartAuraPosition = 'DISABLED',
 			colorOverride = 'USE_DEFAULT',
@@ -2000,6 +2033,7 @@ P.unitframe = {
 			enable = true,
 			orientation = 'MIDDLE',
 			threatStyle = 'GLOW',
+			threatPrimary = true,
 			smartAuraPosition = 'DISABLED',
 			colorOverride = 'USE_DEFAULT',
 			width = 130,
@@ -2028,6 +2062,7 @@ P.unitframe = {
 		boss = {
 			enable = true,
 			threatStyle = 'NONE',
+			threatPrimary = true,
 			growthDirection = 'DOWN',
 			orientation = 'RIGHT',
 			smartAuraPosition = 'DISABLED',
@@ -2053,6 +2088,7 @@ P.unitframe = {
 			portrait = CopyTable(UF_Portrait),
 			power = CopyTable(UF_Power),
 			raidicon = CopyTable(UF_RaidIcon),
+			strataAndLevel = CopyTable(UF_StrataAndLevel),
 			privateAuras = CopyTable(UF_PrivateAuras)
 		},
 		arena = {
@@ -2089,11 +2125,13 @@ P.unitframe = {
 			portrait = CopyTable(UF_Portrait),
 			power = CopyTable(UF_Power),
 			pvpclassificationindicator = CopyTable(UF_PvPClassificationIndicator),
+			strataAndLevel = CopyTable(UF_StrataAndLevel),
 			raidicon = CopyTable(UF_RaidIcon),
 		},
 		party = {
 			enable = true,
 			threatStyle = 'GLOW',
+			threatPrimary = true,
 			orientation = 'LEFT',
 			visibility = '[@raid6,exists][@party1,noexists] hide;show',
 			growthDirection = 'UP_RIGHT',
@@ -2139,12 +2177,14 @@ P.unitframe = {
 			roleIcon = CopyTable(UF_RoleIcon),
 			summonIcon = CopyTable(UF_SummonIcon),
 			targetsGroup = CopyTable(UF_SubGroup),
+			strataAndLevel = CopyTable(UF_StrataAndLevel),
 			privateAuras = CopyTable(UF_PrivateAuras)
 		},
 		tank = {
 			enable = true,
 			orientation = 'LEFT',
 			threatStyle = 'GLOW',
+			threatPrimary = true,
 			colorOverride = 'USE_DEFAULT',
 			middleClickFocus = false,
 			width = 120,
@@ -2165,6 +2205,7 @@ P.unitframe = {
 			raidicon = CopyTable(UF_RaidIcon),
 			rdebuffs = CopyTable(UF_RaidDebuffs),
 			targetsGroup = CopyTable(UF_SubGroup),
+			strataAndLevel = CopyTable(UF_StrataAndLevel),
 			privateAuras = CopyTable(UF_PrivateAuras)
 		},
 	},
@@ -2648,13 +2689,15 @@ P.actionbar = {
 		fontOutline = 'OUTLINE',
 		fontSize = 12,
 		mouseover = false,
-		visibility = '[vehicleui] hide;show'
+		visibility = '[vehicleui] hide;show',
+		frameStrata = 'LOW',
+		frameLevel = 5,
 	},
 	microbar = {
 		enabled = false,
 		mouseover = false,
 		useIcons = true,
-		buttonsPerRow = 11,
+		buttonsPerRow = 12,
 		buttonSize = 20,
 		keepSizeRatio = false,
 		point = 'TOPLEFT',
@@ -2693,7 +2736,7 @@ P.actionbar = {
 if E.Retail then
 	P.actionbar.barPet.visibility = '[petbattle] hide; [novehicleui,pet,nooverridebar,nopossessbar] show; hide'
 	P.actionbar.stanceBar.visibility = '[vehicleui][petbattle] hide; show'
-elseif E.Wrath then
+elseif E.Cata then
 	P.actionbar.barPet.visibility = '[novehicleui,pet,nooverridebar,nopossessbar] show; hide'
 	P.actionbar.stanceBar.visibility = '[vehicleui] hide; show'
 else
@@ -2768,7 +2811,7 @@ for i = 1, 15 do
 
 		if E.Retail then
 			P.actionbar[barN].visibility = '[vehicleui][petbattle][overridebar] hide; show'
-		elseif E.Wrath then
+		elseif E.Cata then
 			P.actionbar[barN].visibility = '[vehicleui][overridebar] hide; show'
 		else
 			P.actionbar[barN].visibility = '[overridebar] hide; show'
@@ -2809,11 +2852,11 @@ end
 P.actionbar.bar1.enabled = true
 P.actionbar.bar1.visibility = E.Retail and '[petbattle] hide; show' or 'show'
 
-P.actionbar.bar1.paging.ROGUE = '[bonusbar:1] 7;'..(E.Wrath and ' [bonusbar:2] 8;' or '')
-P.actionbar.bar1.paging.WARLOCK = E.Wrath and '[form:1] 7;' or nil
+P.actionbar.bar1.paging.ROGUE = '[bonusbar:1] 7;'..(E.Cata and ' [bonusbar:2] 8;' or '')
+P.actionbar.bar1.paging.WARLOCK = E.Cata and '[form:1] 7;' or nil
 P.actionbar.bar1.paging.DRUID = '[bonusbar:1,nostealth] 7; [bonusbar:1,stealth] 8; [bonusbar:2] 10; [bonusbar:3] 9; [bonusbar:4] 10;'
 P.actionbar.bar1.paging.EVOKER = '[bonusbar:1] 7;'
-P.actionbar.bar1.paging.PRIEST = '[bonusbar:1] 7;'..(E.Classic and ' [possessbar] 16;' or '')
+P.actionbar.bar1.paging.PRIEST = E.Classic and '[form:1] 7;' or '[bonusbar:1] 7;'
 P.actionbar.bar1.paging.WARRIOR = '[bonusbar:1] 7; [bonusbar:2] 8; [bonusbar:3] 9;'
 
 P.actionbar.bar3.enabled = true

@@ -16,6 +16,7 @@ local RSGuideDB = private.ImportLib("RareScannerGuideDB")
 -- RareScanner service libraries
 local RSMinimap = private.ImportLib("RareScannerMinimap")
 local RSTooltip = private.ImportLib("RareScannerTooltip")
+local RSProvider = private.ImportLib("RareScannerProvider")
 
 -- RareScanner services
 local RSGuidePOI = private.ImportLib("RareScannerGuidePOI")
@@ -60,7 +61,7 @@ function RSEntityPinMixin:OnMouseLeave()
 end
 
 function RSEntityPinMixin:OnMouseDown(button)
-	if (button == "LeftButton") then
+	if (button == "LeftButton") then		
 		--Toggle state
 		if (IsShiftKeyDown() and IsAltKeyDown()) then
 			if (self.POI.isNpc) then
@@ -85,7 +86,7 @@ function RSEntityPinMixin:OnMouseDown(button)
 				end
 				self:Hide();
 			end
-			self:GetMap():RefreshAllDataProviders();
+			RSProvider.RefreshAllDataProviders()
 			RSMinimap.RefreshEntityState(self.POI.entityID)
 		-- Toggle overlay
 		elseif (not IsShiftKeyDown() and not IsAltKeyDown() and not IsControlKeyDown()) then
@@ -143,6 +144,8 @@ function RSEntityPinMixin:ShowOverlay()
 		overlay = RSNpcDB.GetInternalNpcOverlay(self.POI.entityID, self.POI.mapID)
 	elseif (self.POI.isContainer) then
 		overlay = RSContainerDB.GetInternalContainerOverlay(self.POI.entityID, self.POI.mapID)
+	elseif (self.POI.isEvent) then
+		overlay = RSEventDB.GetInternalEventOverlay(self.POI.entityID, self.POI.mapID)
 	end
 
 	if (overlay) then

@@ -14,8 +14,7 @@ local GetClassInfo = GetClassInfo
 local GetDifficultyInfo = GetDifficultyInfo
 local GetInstanceInfo = GetInstanceInfo
 local GetRealZoneText = GetRealZoneText
-local GetSpellInfo = GetSpellInfo
-local GetSpellTexture = GetSpellTexture
+local GetSpellTexture = C_Spell.GetSpellTexture or GetSpellTexture
 local tIndexOf = tIndexOf
 
 local C_Map_GetMapInfo = C_Map.GetMapInfo
@@ -79,7 +78,7 @@ local function GetSpellFilterInfo(name)
 	local spell, stacks = strmatch(name, NP.StyleFilterStackPattern)
 	local spellID = tonumber(spell)
 	if spellID then
-		local spellName = GetSpellInfo(spellID)
+		local spellName = E:GetSpellInfo(spellID)
 		if spellName then
 			if DisabledFilter() then
 				spell = format('%s (%d)', spellName, spellID)
@@ -291,7 +290,7 @@ StyleFilters.triggers.args.combat.args.unitGroup.args.notInParty = ACH:Toggle(L[
 StyleFilters.triggers.args.combat.args.unitGroup.args.inRaid = ACH:Toggle(L["In Raid"], L["If enabled then the filter will only activate when the unit is in your Raid."], 7)
 StyleFilters.triggers.args.combat.args.unitGroup.args.notInRaid = ACH:Toggle(L["Not in Raid"], L["If enabled then the filter will only activate when the unit is not in your Raid."], 8)
 StyleFilters.triggers.args.combat.args.unitGroup.args.isPet = ACH:Toggle(L["Is Pet"], L["If enabled then the filter will only activate when the unit is the active player's pet."], 9)
-StyleFilters.triggers.args.combat.args.unitGroup.args.isNotPet= ACH:Toggle(L["Not Pet"], L["If enabled then the filter will only activate when the unit is not the active player's pet."], 10)
+StyleFilters.triggers.args.combat.args.unitGroup.args.isNotPet = ACH:Toggle(L["Not Pet"], L["If enabled then the filter will only activate when the unit is not the active player's pet."], 10)
 StyleFilters.triggers.args.combat.args.unitGroup.args.isPlayerControlled = ACH:Toggle(L["Player Controlled"], L["If enabled then the filter will only activate when the unit is controlled by the player."], 11)
 StyleFilters.triggers.args.combat.args.unitGroup.args.isNotPlayerControlled = ACH:Toggle(L["Not Player Controlled"], L["If enabled then the filter will only activate when the unit is not controlled by the player."], 12)
 StyleFilters.triggers.args.combat.args.unitGroup.args.isOwnedByPlayer = ACH:Toggle(L["Owned By Player"], L["If enabled then the filter will only activate when the unit is owned by the player."], 13)
@@ -634,7 +633,7 @@ StyleFilters.triggers.args.location = ACH:Group(L["Location"], nil, 30, nil, fun
 StyleFilters.triggers.args.location.args.map = ACH:Group('', nil, 1)
 StyleFilters.triggers.args.location.args.map.inline = true
 StyleFilters.triggers.args.location.args.map.args.mapIDEnabled = ACH:Toggle(L["Use Map ID or Name"], L["If enabled, the style filter will only activate when you are in one of the maps specified in Map ID."], 1, nil, nil, 200)
-StyleFilters.triggers.args.location.args.map.args.mapIDs = ACH:Input(L["Add Map ID"], nil, 2, nil, nil, nil, function(_, value) local triggers = GetFilter(true) triggers.location.mapIDs[value] = true NP:ConfigureAll() end, function () local triggers = GetFilter(true) return not triggers.location.mapIDEnabled end, nil, function(_, value) local triggers = GetFilter(true) return not (strmatch(value, '^[%s%p]-$') or triggers.location.mapIDs[value]) end)
+StyleFilters.triggers.args.location.args.map.args.mapIDs = ACH:Input(L["Add Map ID"], nil, 2, nil, nil, nil, function(_, value) local triggers = GetFilter(true) triggers.location.mapIDs[value] = true NP:ConfigureAll() end, function() local triggers = GetFilter(true) return not triggers.location.mapIDEnabled end, nil, function(_, value) local triggers = GetFilter(true) return not (strmatch(value, '^[%s%p]-$') or triggers.location.mapIDs[value]) end)
 StyleFilters.triggers.args.location.args.map.args.removeMapID = ACH:Select(L["Remove Map ID"], nil, 3, removeLocationList, nil, nil, nil, function(_, value) local triggers = GetFilter(true) triggers.location.mapIDs[value] = nil NP:ConfigureAll() end, function() local triggers = GetFilter(true) local ids = triggers.location.mapIDs return not (triggers.location.mapIDEnabled and ids and next(ids)) end)
 
 StyleFilters.triggers.args.location.args.instance = ACH:Group('', nil, 2)
@@ -646,13 +645,13 @@ StyleFilters.triggers.args.location.args.instance.args.removeInstanceID = ACH:Se
 StyleFilters.triggers.args.location.args.zoneName = ACH:Group('', nil, 3)
 StyleFilters.triggers.args.location.args.zoneName.inline = true
 StyleFilters.triggers.args.location.args.zoneName.args.zoneNamesEnabled = ACH:Toggle(L["Use Zone Names"], L["If enabled, the style filter will only activate when you are in one of the zones specified in Add Zone Name."], 1, nil, nil, 200)
-StyleFilters.triggers.args.location.args.zoneName.args.zoneNames = ACH:Input(L["Add Zone Name"], nil, 2, nil, nil, nil, function(_, value) local triggers = GetFilter(true) triggers.location.zoneNames[value] = true NP:ConfigureAll() end, function () local triggers = GetFilter(true) return not triggers.location.zoneNamesEnabled end, nil, function(_, value) local triggers = GetFilter(true) return not (strmatch(value, '^[%s%p]-$') or triggers.location.zoneNames[value]) end)
+StyleFilters.triggers.args.location.args.zoneName.args.zoneNames = ACH:Input(L["Add Zone Name"], nil, 2, nil, nil, nil, function(_, value) local triggers = GetFilter(true) triggers.location.zoneNames[value] = true NP:ConfigureAll() end, function() local triggers = GetFilter(true) return not triggers.location.zoneNamesEnabled end, nil, function(_, value) local triggers = GetFilter(true) return not (strmatch(value, '^[%s%p]-$') or triggers.location.zoneNames[value]) end)
 StyleFilters.triggers.args.location.args.zoneName.args.removeZoneName = ACH:Select(L["Remove Zone Name"], nil, 3, removeLocationList, nil, nil, nil, function(_, value) local triggers = GetFilter(true) triggers.location.zoneNames[value] = nil NP:ConfigureAll() end, function() local triggers = GetFilter(true) local zone = triggers.location.zoneNames return not (triggers.location.zoneNamesEnabled and zone and next(zone)) end)
 
 StyleFilters.triggers.args.location.args.subZoneName = ACH:Group('', nil, 4)
 StyleFilters.triggers.args.location.args.subZoneName.inline = true
 StyleFilters.triggers.args.location.args.subZoneName.args.subZoneNamesEnabled = ACH:Toggle(L["Use Subzone Names"], L["If enabled, the style filter will only activate when you are in one of the subzones specified in Add Subzone Name."], 1, nil, nil, 200)
-StyleFilters.triggers.args.location.args.subZoneName.args.subZoneNames = ACH:Input(L["Add Subzone Name"], nil, 2, nil, nil, nil, function(_, value) local triggers = GetFilter(true) triggers.location.subZoneNames[value] = true NP:ConfigureAll() end, function () local triggers = GetFilter(true) return not triggers.location.subZoneNamesEnabled end)
+StyleFilters.triggers.args.location.args.subZoneName.args.subZoneNames = ACH:Input(L["Add Subzone Name"], nil, 2, nil, nil, nil, function(_, value) local triggers = GetFilter(true) triggers.location.subZoneNames[value] = true NP:ConfigureAll() end, function() local triggers = GetFilter(true) return not triggers.location.subZoneNamesEnabled end)
 StyleFilters.triggers.args.location.args.subZoneName.args.removeSubZoneName = ACH:Select(L["Remove Subzone Name"], nil, 3, removeLocationList, nil, nil, nil, function(_, value) local triggers = GetFilter(true) triggers.location.subZoneNames[value] = nil NP:ConfigureAll() end, function() local triggers = GetFilter(true) local zone = triggers.location.subZoneNames return not (triggers.location.subZoneNamesEnabled and zone and next(zone)) end)
 
 StyleFilters.triggers.args.location.args.btns = ACH:Group(L["Add Current"], nil, 5)
@@ -772,7 +771,7 @@ local function DecodeString(text)
 	local profileType, profileKey, profileData = D:Decode(text)
 	if profileType == 'styleFilters' then
 		local decodedText = (profileData and E:TableToLuaString(profileData)) or nil
-		return D:CreateProfileExport(decodedText, profileType, profileKey)
+		return D:CreateProfileExport(profileType, profileKey, decodedText)
 	else
 		return ''
 	end
@@ -841,8 +840,8 @@ do
 
 		local printableString
 		if which == 'text' then
-			local serialData = D:Serialize(data)
-			local exportString = D:CreateProfileExport(serialData, 'styleFilters', 'styleFilters')
+			local serialString = D:Serialize(data)
+			local exportString = D:CreateProfileExport('styleFilters', 'styleFilters', serialString)
 			local compressedData = LibDeflate:CompressDeflate(exportString, LibDeflate.compressLevel)
 			local printable = LibDeflate:EncodeForPrint(compressedData)
 			if printable then
@@ -850,7 +849,7 @@ do
 			end
 		elseif which == 'luaTable' then
 			local exportString = E:TableToLuaString(data)
-			printableString = D:CreateProfileExport(exportString, 'styleFilters', 'styleFilters')
+			printableString = D:CreateProfileExport('styleFilters', 'styleFilters', exportString)
 		elseif which == 'luaPlugin' then
 			printableString = E:ProfileTableToPluginFormat(data, 'styleFilters')
 		end

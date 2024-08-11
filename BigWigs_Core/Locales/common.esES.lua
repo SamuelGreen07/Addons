@@ -45,7 +45,10 @@ L.health = "Salud" -- The health of an NPC
 L.health_percent = "%d%% Salud" -- "10% Health" The health percentage of an NPC
 L.door_open = "Puerta abierta" -- When a door is open, usually after a speech from an NPC
 L.gate_open = "Puerta abierta" -- When a gate is open, usually after a speech from an NPC
+L.threat = "Amenaza"
+L.energy = "Energía"
 
+--L.remaining = "%d remaining" -- 5 remaining
 L.duration = "%s durante %s seg" -- Spell for 10 seconds
 L.over = "%s terminado" -- Spell Over
 L.removed = "%s eliminado" -- Spell Removed
@@ -63,10 +66,15 @@ L.cancelled = "%s cancelado" -- Spell Cancelled
 L.you_die = "Morirás" -- You will die
 L.you_die_sec = "Morirás en %d seg" -- "You die in 15 sec" (sec = seconds)
 L.next_ability = "Próxima habilidad" -- We don't know what ability will be next, we only know when it will happen (showing a bar)
+--L.landing = "%s is landing" -- "NPC_NAME is landing" Used when a flying NPC/dragon/boss is landing
+L.flying_available = "Puedes volar ahora"
 
 -- Add related
-L.add_spawned = "Esbirro apareció"
-L.adds_spawned = "Esbirros aparecieron"
+L.add_spawned = "Esbirro apareció" -- singular
+L.adds_spawned = "Esbirros aparecieron" -- plural
+--L.adds_spawned_count = "%d |4add:adds; spawned" -- 1 add spawned / 2 adds spawned
+--L.add_spawning = "Add spawning" -- singular
+--L.adds_spawning = "Adds spawning" -- plural
 L.spawned = "%s apareció"
 L.spawning = "%s aparece"
 L.next_add = "Siguiente esbirro"
@@ -106,9 +114,12 @@ L.marker_npc_desc = "Marca %s con %s, requiere ayudante o líder." -- Mark NPC_N
 L.link = "Enlace"
 L.link_with = "Enlazado con %s"
 L.link_with_icon = "Enlazado con |T13700%d:0|t%s"
-L.link_short = "Enlazado: %s"
-L.link_both = "%s enlazado con %s"
+L.link_with_rticon = "{rt%d}Enlazado con %s"
+L.link_both = "%s enlazado con %s" -- XXX needs updated
+L.link_both_icon = "|T13700%d:0|t%s enlazado con |T13700%d:0|t%s" -- XXX needs updated
 L.link_removed = "Enlace eliminado"
+--L.link_say_option_name = "Repeating 'Linked' say messages"
+--L.link_say_option_desc = "Repeating say messages in chat stating who you are linked with."
 
 -- Abbreviated numbers
 L.amount_one = "%dB" -- Billions 1,000,000,000
@@ -132,6 +143,18 @@ L.south = "Sur"
 L.south_west = "Suroeste"
 L.west = "Oeste"
 L.north_west = "Noroeste"
+
+-- Schools
+L.fire = "Fuego"
+L.frost = "Escarcha"
+L.shadow = "Sombras"
+L.nature = "Naturaleza"
+L.arcane = "Arcano"
+
+-- Autotalk
+--L.autotalk = "Automatic NPC interaction"
+--L.autotalk_boss_desc = "Automatically select the NPC dialog options that cause the boss encounter to begin."
+--L.autotalk_generic_desc = "Automatically select the NPC dialog options that cause you to progress to the next stage of the dungeon."
 
 -- Common ability name replacements
 L.absorb = "Absorber" -- Used for shield-like abilities that absorb damage or healing
@@ -160,6 +183,7 @@ L.charge = "Cargar" -- When a boss select a new target and charges at it quickly
 L.full_energy = "Energía Completa" -- When a boss reaches full/maximum energy, usually the boss will cast something big and powerful when this happens
 L.weakened = "Debilitado" -- When a boss becomes weakened and sometimes takes extra damage, usually the "hit all your cooldowns" part of the fight
 L.immune = "Inmune" -- When a boss becomes immune to all damage and you can no longer hurt it
+L.stunned = "Aturdido" -- When a boss becomes stunned and cannot cast abilities or move
 L.pool = "Charco" -- A pool or puddle on the ground, usually something bad that you should avoid standing in
 L.pools = "Charcos" -- Plural of L.pool
 L.totem = "Tótem" -- A totem, usually summoned by a boss, the same thing that shamans summon
@@ -173,6 +197,7 @@ L.orbs = "Orbes" -- Plural for L.orb
 L.curse = "Maldición" -- Any curse-type dispellable debuff, or debuffs called "Curse of XYZ", etc.
 L.curses = "Maldiciones" -- Plural of L.curse
 L.disease = "Enfermedad" -- Any disease-type dispellable debuff, or debuffs called "Disease of XYZ", etc.
+L.poison = "Veneno" -- Any poison-type dispellable debuff, or debuffs called "Poison of XYZ", etc.
 L.spirit = "Espíritu" -- Sometimes a boss will summon spirits, similar to ghosts, but not exactly, although you might have the same word for both. e.g. "Spirits of X" or "Wild Spirits"
 L.spirits = "Espíritus" -- Plural of L.spirit
 L.tornado = "Tornado" -- 'A tornado is a violently rotating column of air that is in contact with both the surface of the Earth and a cloud' - Wikipedia
@@ -186,3 +211,5 @@ L.mind_control_short = "CM" -- Short version of Mind Control, mainly for bars
 L.soak = "Soak" -- Abilities you have to stand in on purpose to soak the damage, like a sponge soaks water. Commonly for abilities that split damage between everyone standing in them.
 L.soaks = "Soaks" -- Plural of L.soak
 L.spell_reflection = "Reflejo de hechizos" -- Any ability that reflects spells
+L.parasite = "Parásito" -- Any ability where a parasite is involved e.g. "Parasitic Infection", "Parasitic Growth", etc
+L.rooted = "Enraizado" -- Any ability that roots you in place, preventing you from moving

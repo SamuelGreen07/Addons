@@ -899,7 +899,6 @@ AL["MAP_MENU_SHOW_NOT_TRACKABLE_CONTAINERS"] = "지도 위에 추적할 수 없�
 AL["MAP_MENU_SHOW_OPEN_CONTAINERS"] = "지도 위에 이미 열린 컨테이너(가방;상자;용기) 아이콘들 보이기"
 AL["MAP_MENU_SHOW_OTHER_CONTAINERS"] = "지도 위에 기타 컨테이너(가방;상자;용기) 아이콘들 보이기"
 AL["MAP_MENU_SHOW_OTHER_RARE_NPCS"] = "지도 위에 기타 희귀 NPC 아이콘들 보이기"
-AL["MAP_MENU_SHOW_PRIMAL_STORM_RARE_NPCS"] = "용군단: 지도 위에 원시 폭풍 희귀 NPC 아이콘들 보이기"
 AL["MAP_MENU_SHOW_PROFESSION_CONTAINERS"] = "지도 위에 전문 기술 컨테이너(가방;상자;용기) 아이콘들 보이기"
 AL["MAP_MENU_SHOW_PROFESSION_RARE_NPCS"] = "지도 위에 전문 기술 희귀 NPC 아이콘 보이기"
 AL["MAP_MENU_SHOW_RARE_NPCS"] = "지도 위에 희귀 NPC 아이콘 보이기"
@@ -1864,7 +1863,6 @@ AL["ZONE_943"] = "%s (격전지)"
 AL["ZONES_FILTER"] = "지역 필터"
 AL["ZONES_FILTERS_SEARCH_DESC"] = "아래 목록에 필터할 지역 이름을 입력합니다."
 
-
 	-- CONTINENT names
 	AL["ZONES_CONTINENT_LIST"] = {
 		[9999] = "직업 전당"; --Class Halls
@@ -1873,5 +1871,6 @@ AL["ZONES_FILTERS_SEARCH_DESC"] = "아래 목록에 필터할 지역 이름을 �
 		[9996] = "공격대들"; --Raids
 		[9995] = "알 수 없음"; --Unknown
 		[9994] = "원정대 섬"; --Expedition islands
+		[9993] = "Delves"; --Delves
 	}
 end

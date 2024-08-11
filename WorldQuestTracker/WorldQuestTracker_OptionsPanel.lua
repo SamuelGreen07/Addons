@@ -589,6 +589,17 @@ function WorldQuestTrackerAddon.OpenOptionsPanel()
                 name = "S_MAPBAR_OPTIONSMENU_SOUNDENABLED",
                 desc = "S_MAPBAR_OPTIONSMENU_SOUNDENABLED",
             },
+            {
+                type = "toggle",
+                get = function()
+                    return DB.profile.close_blizz_popups.ABANDON_QUEST
+                end,
+                set = function(self, fixedparam, value)
+                    DB.profile.close_blizz_popups.ABANDON_QUEST = value
+                end,
+                name = "S_OPTTIONS_AUTOACCEPT_ABANDONQUEST",
+                desc = "S_OPTTIONS_AUTOACCEPT_ABANDONQUEST_DESC",
+            },
 
             {type = "blank"},
 
@@ -1218,6 +1229,9 @@ function WorldQuestTrackerAddon.OpenOptionsPanel()
         }
 
         DF:BuildMenu(zoneMapSettingsFrame, optionsTable, xStart, yStart, tabFrameHeight, false, options_text_template, options_dropdown_template, options_switch_template, true, options_slider_template, options_button_template, globalCallback)
+
+        --local zonesIgnoredOptionTable = {
+        --}
     end
 
     do --Group Finder Settings

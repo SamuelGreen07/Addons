@@ -319,6 +319,12 @@ L = DBM:GetModLocalization("WarchiefRendBlackhand")
 L:SetGeneralLocalization{
 	name 		= "대족장 렌드 블랙핸드"
 }
+
+L:SetMiscLocalization{
+	Pull1 = "잘 됐군. 내 군단에게 먹일 보잘것없는 벌레들이 제시간에 도착한 것 같구나. 어서 오너라, 나약한 생명체들아!", -- Yell when you jump into the arena
+	Pull2 = "이건 말도 안 돼!! 렌드, 이 벌레들을 해치우도록 하라.", -- Yell when you defeat the last wave
+}
+
 -----------------------------
 --  The Beast  --
 -----------------------------
@@ -1531,4 +1537,56 @@ L = DBM:GetModLocalization(489)
 
 L:SetGeneralLocalization{
 	name 		= "족장 우르코즈 샌드스칼프"
+}
+
+-----------------------------
+--Demon Fall Canyon
+-----------------------------
+--  Grimroot  --
+-----------------------------
+L = DBM:GetModLocalization("Grimroot")
+
+L:SetGeneralLocalization{
+	name 		= "암울뿌리"
+}
+
+-----------------------------
+--  Diathorus the Seeker  --
+-----------------------------
+L = DBM:GetModLocalization("Diathorus")
+
+L:SetGeneralLocalization{
+	name 		= "수색자 디아토루스"
+}
+-----------------------------
+--  Destructor's Wraith  --
+-----------------------------
+L = DBM:GetModLocalization("DestructorsWraith")
+
+L:SetGeneralLocalization{
+	name 		= "파괴자의 망령"
+}
+-----------------------------
+--  Zilbagob  --
+-----------------------------
+L = DBM:GetModLocalization("Zilbagob")
+
+L:SetGeneralLocalization{
+	name 		= "질바고브"
+}
+-----------------------------
+--  Pyranis  --
+-----------------------------
+L = DBM:GetModLocalization("Pyranis")
+
+L:SetGeneralLocalization{
+	name 		= "피라니스"
+}
+-----------------------------
+--  Hellscream's Phantom  --
+-----------------------------
+L = DBM:GetModLocalization("HellscreamsPhantom")
+
+L:SetGeneralLocalization{
+	name 		= "헬스크림의 악령"
 }

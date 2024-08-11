@@ -14,7 +14,6 @@ local GetInventoryItemID = GetInventoryItemID
 local GetRaidTargetIndex = GetRaidTargetIndex
 local GetSpellCharges = GetSpellCharges
 local GetSpellCooldown = GetSpellCooldown
-local GetSpellInfo = GetSpellInfo
 local GetTime = GetTime
 local IsEquippedItem = IsEquippedItem
 local IsPlayerSpell = IsPlayerSpell
@@ -143,6 +142,7 @@ NP.TriggerConditions = {
 		[174] = 'heroic',
 		[185] = 'legacy20normal',
 		[186] = 'legacy40normal',
+		[215] = 'normal', -- Classic: Sunken Temple
 		-- wotlk
 		[175] = 'legacy10normal',
 		[176] = 'legacy25normal',
@@ -469,7 +469,7 @@ function NP:StyleFilterCooldownCheck(names, mustHaveAll)
 	local total, count = 0, 0
 
 	for name, value in pairs(names) do
-		if GetSpellInfo(name) then -- check spell name valid, GetSpellCharges/GetSpellCooldown will return nil if not known by your class
+		if E:GetSpellInfo(name) then -- check spell name valid, GetSpellCharges/GetSpellCooldown will return nil if not known by your class
 			if value == 'ONCD' or value == 'OFFCD' then -- only if they are turned on
 				total = total + 1 -- keep track of the names
 
@@ -942,13 +942,13 @@ function NP:StyleFilterConditionCheck(frame, filter, trigger)
 	end
 
 	-- Player Vehicle
-	if (E.Retail or E.Wrath) and (trigger.inVehicle or trigger.outOfVehicle) then
+	if (E.Retail or E.Cata) and (trigger.inVehicle or trigger.outOfVehicle) then
 		local inVehicle = UnitInVehicle('player')
 		if (trigger.inVehicle and inVehicle) or (trigger.outOfVehicle and not inVehicle) then passed = true else return end
 	end
 
 	-- Unit Vehicle
-	if (E.Retail or E.Wrath) and (trigger.inVehicleUnit or trigger.outOfVehicleUnit) then
+	if (E.Retail or E.Cata) and (trigger.inVehicleUnit or trigger.outOfVehicleUnit) then
 		if (trigger.inVehicleUnit and frame.inVehicle) or (trigger.outOfVehicleUnit and not frame.inVehicle) then passed = true else return end
 	end
 
@@ -1307,7 +1307,7 @@ end
 
 function NP:StyleFilterVehicleFunction(_, unit)
 	unit = unit or self.unit
-	self.inVehicle = (E.Retail or E.Wrath) and UnitInVehicle(unit) or nil
+	self.inVehicle = (E.Retail or E.Cata) and UnitInVehicle(unit) or nil
 end
 
 function NP:StyleFilterTargetFunction(_, unit)
@@ -1442,7 +1442,7 @@ function NP:StyleFilterConfigure()
 
 				if t.casting then
 					local spell
-					if next(t.casting.spells) then
+					if t.casting.spells and next(t.casting.spells) then
 						for _, value in pairs(t.casting.spells) do
 							if value then
 								spell = true

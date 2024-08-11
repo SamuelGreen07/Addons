@@ -12,8 +12,6 @@ local GetGuildBankItemInfo = GetGuildBankItemInfo
 local GetGuildBankItemLink = GetGuildBankItemLink
 local GetGuildBankTabInfo = GetGuildBankTabInfo
 local GetInventoryItemLink = GetInventoryItemLink
-local GetItemFamily = GetItemFamily
-local GetItemInfo = GetItemInfo
 local GetTime = GetTime
 local InCombatLockdown = InCombatLockdown
 local PickupGuildBankItem = PickupGuildBankItem
@@ -26,29 +24,32 @@ local BANK_CONTAINER = Enum.BagIndex.Bank
 local REAGENT_CONTAINER = E.Retail and Enum.BagIndex.ReagentBag or math.huge
 
 local BagSlotFlags = Enum.BagSlotFlags
-local FILTER_FLAG_TRADE_GOODS = LE_BAG_FILTER_FLAG_TRADE_GOODS or BagSlotFlags.PriorityTradeGoods
-local FILTER_FLAG_CONSUMABLES = LE_BAG_FILTER_FLAG_CONSUMABLES or BagSlotFlags.PriorityConsumables
-local FILTER_FLAG_EQUIPMENT = LE_BAG_FILTER_FLAG_EQUIPMENT or BagSlotFlags.PriorityEquipment
-local FILTER_FLAG_JUNK = LE_BAG_FILTER_FLAG_JUNK or BagSlotFlags.PriorityJunk
-local FILTER_FLAG_QUEST = (BagSlotFlags and BagSlotFlags.PriorityQuestItems) or 32 -- didnt exist
+local FILTER_FLAG_TRADE_GOODS = LE_BAG_FILTER_FLAG_TRADE_GOODS or BagSlotFlags.PriorityTradeGoods or BagSlotFlags.ClassProfessionGoods
+local FILTER_FLAG_CONSUMABLES = LE_BAG_FILTER_FLAG_CONSUMABLES or BagSlotFlags.PriorityConsumables or BagSlotFlags.ClassConsumables
+local FILTER_FLAG_EQUIPMENT = LE_BAG_FILTER_FLAG_EQUIPMENT or BagSlotFlags.PriorityEquipment or BagSlotFlags.ClassEquipment
+local FILTER_FLAG_JUNK = LE_BAG_FILTER_FLAG_JUNK or BagSlotFlags.PriorityJunk or BagSlotFlags.ClassJunk
+local FILTER_FLAG_QUEST = (BagSlotFlags and (BagSlotFlags.PriorityQuestItems or BagSlotFlags.ClassQuestItems)) or 32 -- didnt exist
+local FILTER_FLAG_REAGENTS = (BagSlotFlags and BagSlotFlags.ClassReagents) or 128 -- didnt exist
 
 local ItemClass_Armor = Enum.ItemClass.Armor
 local ItemClass_Weapon = Enum.ItemClass.Weapon
 
-local C_PetJournalGetPetInfoBySpeciesID = C_PetJournal and C_PetJournal.GetPetInfoBySpeciesID
-local ContainerIDToInventoryID = ContainerIDToInventoryID or (C_Container and C_Container.ContainerIDToInventoryID)
-local GetContainerItemID = GetContainerItemID or (C_Container and C_Container.GetContainerItemID)
-local GetContainerItemLink = GetContainerItemLink or (C_Container and C_Container.GetContainerItemLink)
-local GetContainerNumFreeSlots = GetContainerNumFreeSlots or (C_Container and C_Container.GetContainerNumFreeSlots)
-local GetContainerNumSlots = GetContainerNumSlots or (C_Container and C_Container.GetContainerNumSlots)
-local PickupContainerItem = PickupContainerItem or (C_Container and C_Container.PickupContainerItem)
-local SplitContainerItem = SplitContainerItem or (C_Container and C_Container.SplitContainerItem)
+local GetItemInfo = C_Item.GetItemInfo
+local GetItemFamily = C_Item.GetItemFamily
+local GetPetInfoBySpeciesID = C_PetJournal and C_PetJournal.GetPetInfoBySpeciesID
+local ContainerIDToInventoryID = C_Container.ContainerIDToInventoryID
+local GetContainerItemID = C_Container.GetContainerItemID
+local GetContainerItemLink = C_Container.GetContainerItemLink
+local GetContainerNumFreeSlots = C_Container.GetContainerNumFreeSlots
+local GetContainerNumSlots = C_Container.GetContainerNumSlots
+local PickupContainerItem = C_Container.PickupContainerItem
+local SplitContainerItem = C_Container.SplitContainerItem
 
 local guildBags = {51,52,53,54,55,56,57,58}
 local bankBags = {BANK_CONTAINER}
 local MAX_MOVE_TIME = 1.25
 
-local bankOffset, maxBankSlots = (E.Classic or E.Wrath) and 4 or 5, E.Classic and 10 or E.Wrath and 11 or 12
+local bankOffset, maxBankSlots = (E.Classic or E.Cata) and 4 or 5, E.Classic and 10 or E.Cata and 11 or 12
 for i = bankOffset + 1, maxBankSlots do
 	tinsert(bankBags, i)
 end
@@ -280,8 +281,8 @@ local function DefaultSort(a, b)
 	if not aID or not bID then return aID end
 
 	if E.Retail and bagPetIDs[a] and bagPetIDs[b] then
-		local aName, _, aType = C_PetJournalGetPetInfoBySpeciesID(aID)
-		local bName, _, bType = C_PetJournalGetPetInfoBySpeciesID(bID)
+		local aName, _, aType = GetPetInfoBySpeciesID(aID)
+		local bName, _, bType = GetPetInfoBySpeciesID(bID)
 
 		if aType and bType and aType ~= bType then
 			return aType > bType
@@ -550,6 +551,7 @@ do
 		[FILTER_FLAG_EQUIPMENT] = 'Equipment',
 		[FILTER_FLAG_CONSUMABLES] = 'Consumables',
 		[FILTER_FLAG_TRADE_GOODS] = 'TradeGoods',
+		[FILTER_FLAG_REAGENTS] = 'Reagents',
 		[FILTER_FLAG_JUNK] = 'Junk',
 		[FILTER_FLAG_QUEST] = 'QuestItems'
 	}
@@ -591,7 +593,9 @@ function B:CanItemGoInBag(bag, slot, targetBag)
 
 	local assigned = B:IsAssignedBag(targetBag)
 	if assigned then
-		if assigned == 'Consumables' then
+		if assigned == 'Reagents' then
+			return isReagent
+		elseif assigned == 'Consumables' then
 			return classID == 0
 		elseif assigned == 'TradeGoods' then
 			return classID == 7

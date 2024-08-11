@@ -1,3 +1,39 @@
+## v11.0.4
+* Fix: #2186 Activation overlays in Retail
+* The cooldown charge sweep is now skinned with Masque.
+
+## v11.0.3
+* Fix activation overlays in Classic
+* Fix the Tracking ACtive condition (again)
+
+## v11.0.2
+* Support Masque round spell activation overlays. 
+  * Must be enabled in Masque -> General Settings -> Advanced -> Spell Alert Style (pick anything other than "None").
+* Fix: #2178 Spell dragging to icons broken (again) in WoW 11.0
+* Fix: #2179 Tracking Active condition broken in WoW 11.0
+* Fix: #2182 Unlearned choice node talents missing from suggestion list
+* Fix: #2181 Totem tracking by name broken, added new warlock talents to Guardians icon type
+* Fix: #2183 Abilities like Void Eruption/Bolt not reflecting when the spell changes.
+
+## v11.0.1
+* Fix: #2174 - Autocast conditions not working
+* Fix: #2176, #2177, #2175, Many spells not tracking cooldowns properly
+
+## v11.0.0
+* Added the original Lightwell icon type back to Cata Classic
+* Fix: dragging a spell to an icon not working in WoW 10.2.7.
+* Fix: #2168 floating point errors in alpha animations
+* Fix: Icon fade animations not always working on condition icons
+* Fix: #2170 specific aura variable indexes 1,2,3 not working on buff/debuff icons
+
+## v10.2.7
+* Initial support for WoW 11.0
+* Fix GetTalentTabInfo call for SOD Phase 4
+* Fix Tooltip Number conditions for Cata
+
+## v10.2.6
+* Additional updates for Cataclysm Classic, including handling for new player resource types.
+
 ## v10.2.5
 * Support for Cata Classic.
 

@@ -5,6 +5,7 @@ local _
 local L = cBnivL
 
 local isClassic = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE
+local isCata = WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC
 local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 
 local isDF = select(4,GetBuildInfo()) >= 100000
@@ -824,7 +825,7 @@ function MyContainer:OnCreate(name, settings)
 		self.BagBar = bagButtons
 		
 		-- keyring button
-		if isClassic and tBag then
+		if tBag and (isClassic and not isCata) then
 			self.keyRing = createIconButton("Keyring", self, Textures.Keyring, "BOTTOMRIGHT", KEYRING, tBag)
 			self.keyRing:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", 0, 0)
 			self.keyRing:SetScript("OnClick", function()

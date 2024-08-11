@@ -76,10 +76,7 @@ function RareScannerDataProviderMixin:ShowAnimations()
 				local entityID = tonumber(vignetteObjectID)
 				if (RSConfigDB.IsShowingAnimationForNpcs()) then
 					-- If it's a pre-event
-					if (RSConstants.NPCS_WITH_PRE_EVENT[entityID]) then
-						entityID = RSConstants.NPCS_WITH_PRE_EVENT[entityID]
-						vignetteObjectID = tostring(entityID)
-					end
+					vignetteObjectID = tostring(RSGeneralDB.GetFinalEntityID(entityID))
 				
 					-- If it's a pre-spawn event
 					if (RSNpcDB.GetInternalNpcInfo(entityID)) then
@@ -194,8 +191,9 @@ local function initWorldMapVignette(parentFrame, pin, vignetteObjectID)
 	end
 	
 	-- This hook will be removed for entities not managed by this addon, so that's why it might be gone and it needs to rehook it
-	if (pin:GetScript("OnMouseDown") == nil) then
+	if (not pin.scriptOverrided) then
 		pin:SetScript("OnMouseDown", function(self, button)
+			pin.scriptOverrided = true
 			local POI = RSMap.GetWorldMapPOI(self:GetObjectGUID(), pin.vignetteInfo, self:GetMap():GetMapID())
 			if (not POI) then	
 				return
@@ -351,16 +349,13 @@ local function initWorldMapVignette(parentFrame, pin, vignetteObjectID)
 		if (POI) then
 			self.POI = POI
 			
-			-- With events ignore
-			if (self.POI.isEvent) then
-				return
-			end
-			
 			-- Just in case the user didnt have the questID when he found it
 			if (POI.isOpened) then
 				RSContainerDB.DeleteContainerOpened(POI.entityID)
 			elseif (POI.isDead) then
 				RSNpcDB.DeleteNpcKilled(POI.entityID)
+			elseif (POI.isCompleted) then
+				RSEventDB.DeleteEventCompleted(POI.entityID)
 			end
 			self.hasTooltip = false
 			RSTooltip.ShowSimpleTooltip(self)
@@ -411,7 +406,7 @@ function RareScannerDataProviderMixin:RefreshAllData(fromOnShow)
 			end
 			
 			-- Animate if matches with text filter
-			if (RSGeneralDB.GetWorldMapTextFilter()) then
+			if (RSGeneralDB.GetWorldMapTextFilter() and pin.ShowPingAnim) then
 				if (POI and RSUtils.Contains(POI.name, RSGeneralDB.GetWorldMapTextFilter())) then
 					if (not pin.ShowPingAnim:IsPlaying()) then
 						pin.ShowSearchAnim:Play()

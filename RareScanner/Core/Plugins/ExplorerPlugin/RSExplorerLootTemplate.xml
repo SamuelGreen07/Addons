@@ -6,7 +6,7 @@
 	<Frame name="RSExplorerCustomLootTemplate" virtual="true">
 		<Layers>
 			<Layer level="BACKGROUND">
-				<Texture parentKey="background" atlas="Dragonflight-Landingpage-Background">
+				<Texture parentKey="background" atlas="thewarwithin-landingpage-background">
 					<Anchors>
 						<Anchor point="TOPLEFT" />
 						<Anchor point="BOTTOMRIGHT" />
@@ -22,88 +22,46 @@
 					<Color r="0" g="0" b="0" a=".35" />
 				</Texture>
 			</Layer>
-			<Layer level="BORDER" textureSubLevel="4">
-				<Texture parentKey="BaseFrameTopEdge" atlas="_Dragonflight-Nineslice-EdgeTop" horizTile="true" useAtlasSize="false">
-					<Size y="5" />
-					<Anchors>
-						<Anchor point="TOPLEFT" x="2" />
-						<Anchor point="TOPRIGHT" x="-2" />
-					</Anchors>
-				</Texture>
-				<Texture parentKey="BaseFrameBottomEdge" atlas="_Dragonflight-Nineslice-EdgeBottom" horizTile="true" useAtlasSize="false">
-					<Size y="5" />
-					<Anchors>
-						<Anchor point="BOTTOMLEFT" x="2" />
-						<Anchor point="BOTTOMRIGHT" x="-2" />
-					</Anchors>
-				</Texture>
-				<Texture parentKey="BaseFrameLeftEdge" atlas="!Dragonflight-NineSlice-EdgeLeft" vertTile="true" useAtlasSize="false">
-					<Size x="5" />
-					<Anchors>
-						<Anchor point="TOPLEFT" y="-2" />
-						<Anchor point="BOTTOMLEFT" y="2" />
-					</Anchors>
-				</Texture>
-				<Texture parentKey="BaseFrameRightEdge" atlas="!Dragonflight-NineSlice-EdgeRight" vertTile="true" useAtlasSize="false">
-					<Size x="5" />
-					<Anchors>
-						<Anchor point="TOPRIGHT" y="-2" />
-						<Anchor point="BOTTOMRIGHT" y="2" />
-					</Anchors>
-				</Texture>
-			</Layer>
-			<Layer level="BORDER" textureSubLevel="5">
-				<Texture parentKey="BaseFrameTopLeftCorner" atlas="Dragonflight-NineSlice-CornerTopLeft" useAtlasSize="false">
-					<Size>
-						<AbsDimension x="32" y="32" />
-					</Size>
-					<Anchors>
-						<Anchor point="TOPLEFT" />
-					</Anchors>
-				</Texture>
-				<Texture parentKey="BaseFrameTopRightCorner" atlas="Dragonflight-NineSlice-CornerTopRight" useAtlasSize="false">
-					<Size>
-						<AbsDimension x="32" y="32" />
-					</Size>
-					<Anchors>
-						<Anchor point="TOPRIGHT" />
-					</Anchors>
-				</Texture>
-				<Texture parentKey="BaseFrameBottomLeftCorner" atlas="Dragonflight-NineSlice-CornerBottomLeft" useAtlasSize="false">
-					<Size>
-						<AbsDimension x="32" y="32" />
-					</Size>
-					<Anchors>
-						<Anchor point="BOTTOMLEFT" />
-					</Anchors>
-				</Texture>
-				<Texture parentKey="BaseFrameBottomRightCorner" atlas="Dragonflight-NineSlice-CornerBottomRight" useAtlasSize="false">
-					<Size>
-						<AbsDimension x="32" y="32" />
-					</Size>
-					<Anchors>
-						<Anchor point="BOTTOMRIGHT" />
-					</Anchors>
-				</Texture>
-			</Layer>
 		</Layers>
 		<Frames>
+			<Frame parentKey="Border" setAllPoints="true" frameLevel="100">
+				<Layers>
+					<Layer level="OVERLAY">
+						<Texture parentKey="Border" atlas="ui-frame-thewarwithin-border">
+							<Anchors>
+								<Anchor point="TOPLEFT" />
+								<Anchor point="BOTTOMRIGHT" />
+							</Anchors>
+						</Texture>
+						<Texture parentKey="BottomEmbellishment" atlas="ui-frame-thewarwithin-embellishmentbottom" useAtlasSize="true">
+							<Anchors>
+								<Anchor point="BOTTOM"/>
+							</Anchors>
+						</Texture>
+						<Texture parentKey="TopEmbellishment" atlas="ui-frame-thewarwithin-embellishmentbottom" useAtlasSize="true" rotation="180">
+							<Anchors>
+								<Anchor point="TOP"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+				</Layers>
+			</Frame>
 			<Frame parentKey="ControlFrame" inherits="RSExplorerLootControlTemplate" >
 				<Anchors>
-					<Anchor point="TOPLEFT" y="-10" />
-					<Anchor point="TOPRIGHT" />
+					<Anchor point="TOPLEFT" x="20" y="-25" />
+					<Anchor point="TOPRIGHT" x="20" y="25" />
 				</Anchors>
 			</Frame>
 			<Frame parentKey="GroupList" inherits="RSExplorerLootGroupListTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeKey="$parent.ControlFrame" relativePoint="BOTTOMLEFT"/>
-					<Anchor point="BOTTOM" relativeKey="$parent" relativePoint="BOTTOM" />
+					<Anchor point="BOTTOM" relativeKey="$parent" relativePoint="BOTTOM" y="15" />
 				</Anchors>
 			</Frame>
 			<Frame parentKey="GroupInfo" inherits="RSExplorerGroupInfo">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeKey="$parent.GroupList" relativePoint="TOPRIGHT" x="-25"/>
-					<Anchor point="BOTTOMRIGHT" relativeKey="$parent" relativePoint="BOTTOMRIGHT" y="5" />
+					<Anchor point="BOTTOMRIGHT" relativeKey="$parent" relativePoint="BOTTOMRIGHT" y="15" />
 				</Anchors>
 			</Frame>
 		</Frames>

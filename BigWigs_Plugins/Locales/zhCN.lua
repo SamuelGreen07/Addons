@@ -7,13 +7,27 @@ L.comma = "，"
 L.positionX = "水平位置"
 L.positionY = "垂直位置"
 L.positionExact = "精确位置"
-L.positionDesc = "在框中输入或移动滑块精准定位锚点位置。"
+L.positionDesc = "在框中输入数值或移动滑条精准定位锚点位置。"
 L.width = "宽度"
 L.height = "高度"
-L.sizeDesc = "通常通过拖动锚点设置尺寸。如果需要一个精确的尺寸，可以使用这个滑动条或者将数值输入到没有最大值的框中。"
-L.fontSizeDesc = "使用滑块或在框内输入数值可调整字体尺寸，最大数值为200。"
+L.sizeDesc = "通常情况下，您可以通过移动滑条来设置尺寸。如果需要精确的尺寸，可以使用该滑条下面的数字框中输入数值（需有效数值）。"
+L.fontSizeDesc = "使用滑条或在框内输入数值可调整字体尺寸，最大数值为200。"
 L.disableDesc = "将禁用“%s”功能，但|cffff4411不建议|r这么做。\n\n你确定要这么做吗？"
 L.transparency = "透明度"
+
+-- Anchor Points
+L.TOP = "顶部"
+L.RIGHT = "右侧"
+L.BOTTOM = "底部"
+L.LEFT = "左侧"
+L.TOPRIGHT = "右上"
+L.TOPLEFT = "左上"
+L.BOTTOMRIGHT = "右下"
+L.BOTTOMLEFT = "左下"
+L.CENTER = "中心"
+L.customAnchorPoint = "高级：自定义锚点"
+L.sourcePoint = "源点"
+L.destinationPoint = "目标点"
 
 -----------------------------------------------------------------------
 -- AltPower.lua
@@ -32,7 +46,7 @@ L.barColor = "条颜色"
 L.barTextColor = "条文本颜色"
 L.additionalWidth = "附加宽度"
 L.additionalHeight = "附加高度"
-L.additionalSizeDesc = "调整此滑块可增加标准显示的尺寸，或在框内输入数值，最大数值为100。"
+L.additionalSizeDesc = "移动此滑条可增加显示的尺寸，或在数字框内输入数值，最大数值为100。"
 L.yourPowerTest = "你的能量：%d" -- Your Power: 42
 L.yourAltPower = "你的 %s：%d" -- e.g. Your Corruption: 42
 L.player = "玩家 %d" -- Player 7
@@ -68,13 +82,21 @@ L.bars = "计时条"
 L.style = "风格"
 L.bigWigsBarStyleName_Default = "默认"
 L.resetBarsDesc = "重置全部计时条有关选项，包括计时条锚点位置。"
+L.testBarsBtn = "创建测试计时条"
+L.testBarsBtn_desc = "创建一个测试计时条以便于测试当前显示设置。"
+
+L.toggleAnchorsBtnShow = "显示移动锚点"
+L.toggleAnchorsBtnHide = "隐藏移动锚点"
+L.toggleAnchorsBtnHide_desc = "隐藏全部移动锚点，锁定一切就位。"
+L.toggleBarsAnchorsBtnShow_desc = "显示全部移动锚点，允许您移动计时条。"
 
 L.nameplateBars = "姓名板条"
 L.nameplateAutoWidth = "匹配姓名板宽度"
 L.nameplateAutoWidthDesc = "将姓名板条的宽度设置为其主姓名板。"
-L.nameplateOffsetY = "Y 偏移量"
-L.nameplateOffsetYDesc = "从姓名板顶部偏移量为向上的条，从姓名板底部偏移量为向下的条。"
+L.nameplateOffsetY = "垂直位置"
+L.nameplateOffsetYDesc = "启用 向上成长 时，在姓名板顶部的垂直位置。未启用 向上成长 时，在姓名板底部的垂直位置。"
 L.nameplateAlphaDesc = "控制姓名板条的透明度。"
+L.testNameplate = "检测到目标，在目标姓名板上创建一个测试计时条。 |cFF33FF99此功能很少用到，而且通常一次只存在一个计时条，用于追踪同时存在的多个目标的同个技能。|r"
 
 L.clickableBars = "可点击计时条"
 L.clickableBarsDesc = "BigWigs 计时条默认是点击穿越的。这样一来，当鼠标指针划过计时条，你仍然可以选择目标或使用 AoE 法术攻击物体、更改镜头角度等等。|cffff4411如果启用可点击计时条，这些将不能实现。|r计时条将拦截任何鼠标点击并阻止相应功能。\n"
@@ -245,7 +267,7 @@ L.countdownVoice = "倒数语音"
 L.countdownTest = "测试倒数"
 L.countdownAt = "倒数…（秒）"
 L.countdownAt_desc = "选择倒计时开始时首领技能应剩余多少时间（以秒为单位）。"
-L.countdown = "倒计时"
+L.countdown = "倒数"
 L.countdownDesc = "倒数功能包括语音倒计时和可视文字倒计时。默认情况下很少启用它，但是在查看特定的首领战斗设置时，可以为任何首领技能启用它。"
 L.countdownAudioHeader = "语音倒计时"
 L.countdownTextHeader = "可视文字倒计时"
@@ -265,6 +287,10 @@ L.infoBox = "信息盒"
 L.sinkDescription = "向外通过 BigWigs 插件信息显示。这些包含了图标，颜色和在同一时间在屏幕上的显示4条信息。新的信息将再一次快速的放大和缩小来提醒用户。新插入的信息将增大并立即缩小提醒用户注意。"
 L.emphasizedSinkDescription = "通过此插件输出到 BigWigs 醒目信息显示。此显示支持文本和颜色，每次只可显示一条信息。"
 L.resetMessagesDesc = "重置全部信息有关选项，包括信息锚点位置。"
+L.toggleMessagesAnchorsBtnShow_desc = "显示全部移动锚点，允许您移动消息显示。"
+
+L.testMessagesBtn = "创建测试信息"
+L.testMessagesBtn_desc = "创建一条信息，用于测试当前的显示设置。"
 
 L.bwEmphasized = "BigWigs 醒目"
 L.messages = "信息"
@@ -332,20 +358,20 @@ L.tooltipDesc = "显示或隐藏近距离显示从首领战斗技能获取的法
 
 L.countdownType = "倒数类型"
 L.combatLog = "自动战斗记录"
-L.combatLogDesc = "当拉怪计时器开始到战斗结束时自动开始战斗记录。"
+L.combatLogDesc = "当开怪倒数计时器开始到战斗结束时自动开始战斗记录。"
 
-L.pull = "拉怪"
+L.pull = "开怪"
 L.engageSoundTitle = "当首领战斗开始时播放音效"
-L.pullStartedSoundTitle = "当拉怪计时器开始时播放音效"
-L.pullFinishedSoundTitle = "当拉怪计时器结束时播放音效"
-L.pullStarted = "拉怪由%s玩家%s发起的计时器。"
-L.pullStopped = "%s取消了拉怪计时器。"
-L.pullStoppedCombat = "拉怪计时器因进入战斗而取消。"
-L.pullIn = "%d秒后拉怪"
-L.sendPull = "正在发送一个拉怪计时器到 BigWigs 和 DBM 玩家。"
-L.wrongPullFormat = "必须位于1到60秒之间。正确用法：/pull 5"
+L.pullStartedSoundTitle = "当开怪倒数计时器开始时播放音效"
+L.pullFinishedSoundTitle = "当开怪倒数计时器结束时播放音效"
+L.pullStartedBy = "%s 发起开怪倒数计时。"
+L.pullStopped = "%s 取消了开怪倒数计时。"
+L.pullStoppedCombat = "开怪倒数计时器因进入战斗而取消。"
+L.pullIn = "%d 秒后开怪"
+L.sendPull = "向您的队伍/团队发送开怪倒数计时器。"
+L.wrongPullFormat = "无效的开怪倒数。正确用法：/pull 5"
 L.countdownBegins = "开始倒计时"
-L.countdownBegins_desc = "选择拉怪计时器上倒计开始时应剩余多少时间（以秒为单位）。"
+L.countdownBegins_desc = "选择开怪计时器上倒计开始时应剩余多少时间（以秒为单位）。"
 
 -----------------------------------------------------------------------
 -- RaidIcon.lua
@@ -363,7 +389,7 @@ L.secondaryDesc = "战斗时使用的第二个团队标记。"
 --
 
 L.Sounds = "音效"
-L.soundsDesc = "BigWigs 使用“主音量”通道播放全部音效。如果发现音效过小或过大，打开游戏声音设置并调整“主音量”滑块到所需的级别。\n\n下面可以全局配置为特定操作播放的不同音效，或将它们设置为“无”以将其禁用。如果只想更改特定首领技能音效，可以在首领战斗进行设置。\n\n"
+L.soundsDesc = "BigWigs 使用“主音量”通道播放全部音效。如果发现音效过小或过大，打开游戏声音设置并调整“主音量”滑块到所需的级别。\n\n下面可以全局配置为特定操作播放的不同音效，或将它们设置为“无”来将其禁用。如果只想更改特定首领技能音效，可以在首领模块的技能列表内点击“>>”后进行指定设置。\n\n"
 L.oldSounds = "传统音效"
 
 L.Alarm = "警示"
@@ -373,6 +399,7 @@ L.Long = "长响"
 L.Warning = "警报"
 L.onyou = "一个法术，增益或负面效果在你身上"
 L.underyou = "你需要移动，离开你脚下的法术范围"
+L.privateaura = "只要“私有光环”出现在你身上"
 
 L.sound = "音效"
 
@@ -384,24 +411,20 @@ L.resetAllCustomSound = "如果设置全部首领战斗自定义的声音，此�
 -- Statistics.lua
 --
 
-L.bossDefeatDurationPrint = "“%s”已被击杀，用时%s。"
-L.bossWipeDurationPrint = "“%s”战斗团灭，用时%s。"
-L.newBestTime = "新的最快击杀！"
 L.bossStatistics = "首领统计"
-L.bossStatsDescription = "首领战斗相关的统计数据，如首领被击杀数量、团灭次数、战斗持续时间和最快的首领击杀记录。可以在配置屏幕上查看每个首领的统计数据，没有首领记录的统计数据会被隐藏。"
-L.enableStats = "启用统计"
-L.chatMessages = "聊天信息"
-L.printBestTimeOption = "最快击杀提醒"
-L.printDefeatOption = "击杀时间"
-L.printWipeOption = "团灭时间"
-L.countDefeats = "击杀次数"
-L.countWipes = "团灭次数"
-L.recordBestTime = "记忆最快击杀"
-L.createTimeBar = "显示“最快击杀”计时条"
+L.bossStatsDescription = "记录与 BOSS 有关的各种统计数据，如获胜次数、被击败次数、首次获胜日期和最快获胜时间。可以在配置屏幕上查看每个首领的统计数据，没有首领记录的统计数据会被隐藏。"
+L.createTimeBar = "显示“最快获胜”计时条"
 L.bestTimeBar = "最快时间"
-L.printHealthOption = "首领血量"
 L.healthPrint = "血量：%s。"
 L.healthFormat = "%s （%.1f%%）"
+L.chatMessages = "聊天信息"
+L.newFastestVictoryOption = "新的最快获胜"
+L.victoryOption = "你取得了胜利"
+L.defeatOption = "你被击败了"
+L.bossHealthOption = "首领血量"
+L.bossVictoryPrint = "你战胜了 “%s”，用时 %s 。" -- You were victorious against 'BOSS_NAME' after COMBAT_DURATION.
+L.bossDefeatPrint = "你被 “%s” 击败了，用时 %s 。" -- You were defeated by 'BOSS_NAME' after COMBAT_DURATION.
+L.newFastestVictoryPrint = "新的最快获胜：（-%s）" -- New fastest victory: (-COMBAT_DURATION)
 
 -----------------------------------------------------------------------
 -- Victory.lua

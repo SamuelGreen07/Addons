@@ -2,6 +2,7 @@ local addon, ns = ...
 local cargBags = ns.cargBags
 
 local isClassic = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE
+local isCata = WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC
 local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 
 local isDF = select(4,GetBuildInfo()) >= 100000
@@ -38,7 +39,12 @@ cB_Filters.fHideEmpty = function(item) if cBnivCfg.CompressEmpty then return ite
 ------------------------------------
 cB_Filters.fItemClass = function(item, container)
 	if not item.id or not item.name then	return false	end	-- incomplete data (itemID or itemName missing), return (item that aren't loaded yet will get classified on the next successful call)
-	if not cB_ItemClass[item.id] or item.bagID == -2 then cbNivaya:ClassifyItem(item) end
+	if cB_ItemClass[item.id] == "Keyring" and not KeyRingButtonIDToInvSlotID then
+		cB_ItemClass[item.id] = nil
+	end
+	if not cB_ItemClass[item.id] or (KeyRingButtonIDToInvSlotID and item.bagID == -2) then
+		cbNivaya:ClassifyItem(item)
+	end
 	
 	local t, bag = cB_ItemClass[item.id]
 
@@ -52,9 +58,13 @@ cB_Filters.fItemClass = function(item, container)
 	return bag == container
 end
 
+
 function cbNivaya:ClassifyItem(item)
 	-- keyring
-	if item.bagID == -2 then cB_ItemClass[item.id] = "Keyring"; return true end
+	if item.bagID == -2 and KeyRingButtonIDToInvSlotID then
+		cB_ItemClass[item.id] = "Keyring";
+		return true
+	end
 
 	-- user assigned containers
 	local tC = cBniv_CatInfo[item.id]

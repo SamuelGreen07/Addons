@@ -11,8 +11,14 @@ local L = PawnLocal.TooltipParsing
 
 if PawnLocal.ThousandsSeparator == "NBSP" then PawnLocal.ThousandsSeparator = "\194\160" end
 local Key, Value
+local NumberExpandedPattern = "(-?[%%d%%., ]+)"
+if LARGE_NUMBER_SEPERATOR == "-" then
+	-- French Cataclysm Classic uses a hyphen as the thousands separator, which is insane. We only include that as a valid component
+	-- of a number in this specific case to limit the risk to other versions.
+	NumberExpandedPattern = "(-?[%%d%%., %-]+)"
+end
 for Key, Value in pairs(L) do
-	L[Key] = gsub(Value, "#", "(-?[%%d%%., ]+)")
+	L[Key] = gsub(Value, "#", NumberExpandedPattern)
 end
 
 ------------------------------------------------------------
@@ -138,6 +144,11 @@ PawnRegexes =
 	{PawnGameConstant(INVTYPE_LEGS)}, -- Legs
 	{PawnGameConstant(INVTYPE_FINGER)}, -- Finger
 	{PawnGameConstant(INVTYPE_TRINKET)}, -- Trinket
+	{PawnGameConstant(INVTYPE_RELIC or "UNUSED")}, -- Relic
+	{PawnGameConstant(MAJOR_GLYPH)}, -- Major Glyph
+	{PawnGameConstant(MINOR_GLYPH)}, -- Minor Glyph
+	{PawnGameConstant(PRIME_GLYPH)}, -- Prime Glyph
+	{PawnGameConstant(REFORGED or "UNUSED")}, -- Reforged
 	{PawnGameConstant(MOUNT)}, -- Cenarion War Hippogryph
 	{PawnGameConstantIgnoredPlaceholder(ITEM_CLASSES_ALLOWED)}, -- Classes:
 	{PawnGameConstantIgnoredPlaceholder(ITEM_RACES_ALLOWED)}, -- Races:
@@ -375,6 +386,7 @@ PawnRightHandRegexes =
 	{L.Gun, "IsGun", 1, PawnMultipleStatsFixed},
 	{L.Mace, "IsMace", 1, PawnMultipleStatsFixed},
 	{L.Polearm, "IsPolearm", 1, PawnMultipleStatsFixed},
+	{INVTYPE_RELIC, "IsRelic", 1, PawnMultipleStatsFixed},
 	{L.Staff, "IsStaff", 1, PawnMultipleStatsFixed},
 	{L.Sword, "IsSword", 1, PawnMultipleStatsFixed},
 	{L.Warglaives, "IsWarglaive", 1, PawnMultipleStatsFixed},

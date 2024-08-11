@@ -403,7 +403,7 @@ L.SpamBlockNoRangeRestore	= "Ne pas restaurer le radar de portée quand les addo
 L.Area_SpamFilter			= "Options des filtres de spam"
 L.DontShowFarWarnings		= "Ne pas afficher les annonces/décomptes pour les événements lointains"
 L.StripServerName			= "Ne pas afficher le royaume sur les alertes et les décomptes"
-L.FilterVoidFormSay			= "Ne pas envoyer de message d'icône ou de décompte sous Forme du Vide (les messages normaux seront toujours envoyés)"
+L.FilterVoidFormSay2			= "Ne pas envoyer de message d'icône ou de décompte sous Forme du Vide (les messages normaux seront toujours envoyés)"
 
 L.Area_SpecFilter			= "Options de filtre par rôle"
 L.FilterTankSpec			= "Filtrer les alertes réservées aux tanks si vous n'êtes pas en spé tank. (Note: Désactivation non recommandée car les alertes de taunt sont activées en permanence par défaut.)"
@@ -418,7 +418,7 @@ L.FilterCrowdControl		= "Filtrer les annonces pour les interruptions basées sur
 L.FilterTrashWarnings		= "Filtrer toutes les annonces liées aux trash dans les donjons normaux &amp; héroïques"
 
 L.Area_PullTimer			= "Options du filtre des décomptes de pull, pause, & personnalisé"
-L.DontShowPTNoID			= "Bloquer les décomptes de pull envoyés depuis une zone différente de la vôtre (ne bloquera jamais les décomptes BigWigs envoyés sans ID de zone)"
+L.DontShowPTNoID			= "Bloquer les décomptes de pull envoyés depuis une zone différente de la vôtre"
 L.DontShowPT				= "Ne pas afficher la barre de pull/pause"
 L.DontShowPTText			= "Ne pas afficher le texte d'alerte du décompte de pull/pause"
 L.DontPlayPTCountdown		= "Ne jouer aucun son de décompte de pull/pause/perso"

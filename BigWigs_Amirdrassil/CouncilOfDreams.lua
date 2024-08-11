@@ -7,6 +7,9 @@ if not mod then return end
 mod:RegisterEnableMob(208363, 208365, 208367) -- Urctos, Aerwynn, Pip
 mod:SetEncounterID(2728)
 mod:SetRespawnTime(30)
+mod:SetPrivateAuraSounds({
+	418589, -- Polymorph Bomb (Pre-Bomb)
+})
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -85,7 +88,7 @@ function mod:GetOptions()
 		{421029, "CASTBAR", "ME_ONLY_EMPHASIZE"}, -- Song of the Dragon
 		{421032, "SAY"}, -- Captivating Finale
 		{421501, "OFF"}, -- Blink
-		{418720, "SAY_COUNTDOWN", "ME_ONLY_EMPHASIZE", "PRIVATE"}, -- Polymorph Bomb
+		{418720, "PRIVATE", "SAY_COUNTDOWN", "ME_ONLY_EMPHASIZE"}, -- Polymorph Bomb
 		421024, -- Emerald Winds
 		423551, -- Whimsical Gust (Damage)
 	},{
@@ -209,8 +212,6 @@ function mod:OnEngage()
 	self:Bar(421501, self:LFR() and 30.7 or 23) -- Blink
 	self:Bar(418720, self:LFR() and 46.6 or self:Normal() and 35 or 36, CL.count:format(L.polymorph_bomb, polymorphBombCount)) -- Polymorph Bomb
 	self:Bar(421024, self:Mythic() and 43 or self:LFR() and 60.2 or 45.5, CL.count:format(CL.pushback, emeraldWindsCount)) -- Emerald Winds
-
-	self:SetPrivateAuraSound(418720, 418589) -- Polymorph Bomb (Pre-Bomb)
 end
 
 function mod:BigWigs_EncounterEnd()
@@ -658,7 +659,7 @@ end
 
 function mod:SongOfTheDragonRemoved(args)
 	if self:Me(args.destGUID) then
-		self:PersonalMessage(421029, false, CL.removed:format(L.song_of_the_dragon))
+		self:PersonalMessage(421029, "removed", L.song_of_the_dragon)
 		self:PlaySound(421029, "warning", nil, args.destName)
 		self:SimpleTimer(function() songOnMe = false end, 1) -- Give some time to get out before showing a damage warning
 	end

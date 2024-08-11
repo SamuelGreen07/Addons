@@ -1,8 +1,15 @@
 # BigWigs
 
-## [v328.1](https://github.com/BigWigsMods/BigWigs/tree/v328.1) (2024-05-01)
-[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v328...v328.1) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
+## [v352](https://github.com/BigWigsMods/BigWigs/tree/v352) (2024-08-09)
+[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v351.1...v352) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
 
-- Plugins/Proximity: Remove the wrath combat exception  
-- Aberrus/EchoOfNeltharion: Update Sunder Reality, too  
-- Aberrus/EchoOfNeltharion: Update Ebon Destruction  
+- bump version  
+- Rename `NAMEPLATEBAR` to `NAMEPLATE` and remove old API  
+- VaultOfTheIncarnates: Remove commented out nameplate code  
+- Core/BossPrototype: Tweak nameplate API some more  
+- Update zhCN (#1745)  
+- Plugins/Proximity: Fix invalid ranges on classic era, and fix not being able to click the close button  
+- Core/BossPrototype: Some fixes to old deprecated API  
+- Core/BossPrototype: Drop support for functions in `:Log()`  
+- Core/BossPrototype: Allow registering `SPELL\_DISPEL` and `SPELL\_INTERRUPT` with a spell ID  
+- Update frFR (#1742)  

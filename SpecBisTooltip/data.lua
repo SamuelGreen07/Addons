@@ -1,5 +1,6 @@
 -- By D4KiR
 local _, SpecBisTooltip = ...
+SpecBisTooltip:SetAddonOutput("SpecBisTooltip", 136031)
 local classIcons = {
 	["DEATHKNIGHT"] = 135771,
 	["DEMONHUNTER"] = 1260827,
@@ -23,7 +24,7 @@ end
 function SpecBisTooltip:CheckIfTrinketData(invtype)
 	local _, class = UnitClass("player")
 	local specId = SpecBisTooltip:GetTalentInfo()
-	local tab = BIS[D4:GetWoWBuild()][class][specId]
+	local tab = BIS[SpecBisTooltip:GetWoWBuild()][class][specId]
 	for i, v in pairs(tab) do
 		local itemType = select(9, GetItemInfo(i))
 		if itemType == invtype then return true end

@@ -27,7 +27,7 @@ local RSLootTooltip = private.ImportLib("RareScannerLootTooltip")
 
 -- Thirdparty
 local LibDD = LibStub:GetLibrary("LibUIDropDownMenu-4.0")
-local LibDialog = LibStub("LibDialog-1.0")
+local LibDialog = LibStub("LibDialog-1.0RS")
 
 -----------------------------------------------------
 -- Filters panel
@@ -807,6 +807,10 @@ local function RSExplorerLoadMap(mapID, mapFrame)
 end
 
 local function AddIcon(icon, texture, x, y, r, g, b)
+	if (not x or not y) then
+		return
+	end
+	
 	icon.Texture:SetTexture(texture)
 	if (r and g and b) then
 		icon.Texture:SetVertexColor(r, g, b, 0.4)
@@ -872,8 +876,11 @@ function RSExplorerRareList:AddItems(parentFrame, itemType, customGroupKeys)
 	local collectionsLoot = RSCollectionsDB.GetAllEntitiesCollectionsLoot()[RSConstants.ITEM_SOURCE.NPC]
 	if (collectionsLoot and collectionsLoot[self.selectedNpcId]) then
 		local itemIDs = nil
-		if (itemType == RSConstants.ITEM_TYPE.APPEARANCE and collectionsLoot[self.selectedNpcId][itemType] and collectionsLoot[self.selectedNpcId][itemType][self.classIndex]) then
-			itemIDs = collectionsLoot[self.selectedNpcId][itemType][self.classIndex]
+		if (itemType == RSConstants.ITEM_TYPE.APPEARANCE and collectionsLoot[self.selectedNpcId][itemType]) then
+			-- Don't nest IFs!!
+			if (collectionsLoot[self.selectedNpcId][itemType][self.classIndex]) then
+				itemIDs = collectionsLoot[self.selectedNpcId][itemType][self.classIndex]
+			end
 		else
 			itemIDs = collectionsLoot[self.selectedNpcId][itemType]
 		end
@@ -883,7 +890,7 @@ function RSExplorerRareList:AddItems(parentFrame, itemType, customGroupKeys)
 			local yOffset = -8
 			local numColumn = 0
 			local numRow = 0
-			local maxLines = 0
+			local maxLines = 1
 			local maxItemsPerRow
     		if (itemType ~= RSConstants.ITEM_TYPE.APPEARANCE and not RSUtils.Contains(customGroupKeys, itemType)) then
     			maxItemsPerRow = 3
@@ -896,9 +903,9 @@ function RSExplorerRareList:AddItems(parentFrame, itemType, customGroupKeys)
 	    	if (RSUtils.Contains(customGroupKeys, itemType) and mainFrame.RareInfo.Custom.grid) then
 	    		xOffset, yOffset, numRow, numColumn, maxItemsPerRow = unpack(mainFrame.RareInfo.Custom.grid)
 	    	end
-    				
+   
 	    	for _, itemID in ipairs(itemIDs) do
-	    		local _, _, _, _, icon, _, _ = GetItemInfoInstant(itemID)
+	    		local _, _, _, _, icon, _, _ = C_Item.GetItemInfoInstant(itemID)
 	    		local lootItem = mainFrame.lootItemsPool:Acquire();
 	    		
 	    		if (math.fmod(numColumn, maxItemsPerRow) == 0) then
@@ -1415,7 +1422,7 @@ function RSExplorerLoot:AddItems(editbox)
 		local errorIDs = {}
 		for itemIDstring in string.gmatch(value, '([^,]+)') do
 			local itemID = tonumber(itemIDstring)
-			local ret, _, itemType, itemSubType, itemEquipLoc, icon, classID, subclassID = pcall(GetItemInfoInstant, itemID)
+			local ret, _, itemType, itemSubType, itemEquipLoc, icon, classID, subclassID = pcall(C_Item.GetItemInfoInstant, itemID)
 			if (not ret or not icon) then
 				tinsert(errorIDs, itemID)
 			else
@@ -1514,7 +1521,7 @@ function RSExplorerLoot:SelectGroup(groupKey, groupName)
 		local maxLines = 8
 		local maxItemsPerRow = 17
     	for _, itemID in ipairs(itemIDs) do
-    		local _, _, _, _, icon, _, _ = GetItemInfoInstant(itemID)
+    		local _, _, _, _, icon, _, _ = C_Item.GetItemInfoInstant(itemID)
     		local lootItem = self.GroupInfo.lootItemsPool:Acquire();
     		
     		if (math.fmod(numColumn, maxItemsPerRow) ~= 0) then
@@ -1689,14 +1696,7 @@ function RSExplorerMixin:HideCustomLootPanels()
 	self.CustomLoot:Hide()
 	self.CustomLoot.background:Hide()
 	self.CustomLoot.background2:Hide()
-	self.CustomLoot.BaseFrameTopEdge:Hide()
-	self.CustomLoot.BaseFrameBottomEdge:Hide()
-	self.CustomLoot.BaseFrameLeftEdge:Hide()
-	self.CustomLoot.BaseFrameRightEdge:Hide()
-	self.CustomLoot.BaseFrameTopLeftCorner:Hide()
-	self.CustomLoot.BaseFrameTopRightCorner:Hide()
-	self.CustomLoot.BaseFrameBottomLeftCorner:Hide()
-	self.CustomLoot.BaseFrameBottomRightCorner:Hide()
+	self.CustomLoot.Border:Hide()
 	self.CustomLoot.ControlFrame:Hide()
 	self.CustomLoot.ControlFrame.LootGroupDropDown:Hide()
 	self.CustomLoot.GroupList:Hide()
@@ -1705,28 +1705,25 @@ function RSExplorerMixin:HideCustomLootPanels()
 	-- Move to the center
 	self.ScanRequired:SetPoint("TOPLEFT")
 	self.ScanRequired:SetPoint("TOPRIGHT")
+	self.ScanRequired.moved = false
 end
 
 function RSExplorerMixin:ShowCustomLootPanels()
 	self.CustomLoot:Show()
 	self.CustomLoot.background:Show()
 	self.CustomLoot.background2:Show()
-	self.CustomLoot.BaseFrameTopEdge:Show()
-	self.CustomLoot.BaseFrameBottomEdge:Show()
-	self.CustomLoot.BaseFrameLeftEdge:Show()
-	self.CustomLoot.BaseFrameRightEdge:Show()
-	self.CustomLoot.BaseFrameTopLeftCorner:Show()
-	self.CustomLoot.BaseFrameTopRightCorner:Show()
-	self.CustomLoot.BaseFrameBottomLeftCorner:Show()
-	self.CustomLoot.BaseFrameBottomRightCorner:Show()
+	self.CustomLoot.Border:Show()
 	self.CustomLoot.ControlFrame:Show()
 	self.CustomLoot.ControlFrame.LootGroupDropDown:Show()
 	self.CustomLoot.GroupList:Show()
 	self.CustomLoot.GroupInfo:Show()
 	
 	-- Move to the bottom
-	local pointte, relativeTote, relativePointte, xOfste, yOfste = self.ScanRequired:GetPoint()
-	self.ScanRequired:SetPoint(pointte, relativeTote, relativePointte, xOfste, yOfste - 300)
+	if (not self.ScanRequired.moved) then
+		local pointte, relativeTote, relativePointte, xOfste, yOfste = self.ScanRequired:GetPoint()
+		self.ScanRequired:SetPoint(pointte, relativeTote, relativePointte, xOfste, yOfste - 300)
+		self.ScanRequired.moved = true
+	end
 end
 
 function RSExplorerMixin:HideContentPanels()

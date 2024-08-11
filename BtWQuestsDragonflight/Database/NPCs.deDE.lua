@@ -333,6 +333,12 @@ BtWQuestsDatabase:UpdateNPCsTable({
     [208151] = {
         name = "Maiev Schattensang",
     },
+    [208494] = {
+        name = "Oberste Konstrukteurin Ataanya",
+    },
+    [208496] = {
+        name = "Lehrling Beruun",
+    },
     [208503] = {
         name = "Alexstrasza die Lebensbinderin",
     },
@@ -351,10 +357,16 @@ BtWQuestsDatabase:UpdateNPCsTable({
     [208572] = {
         name = "Alexstrasza die Lebensbinderin",
     },
+    [208614] = {
+        name = "Roska Felszahn",
+    },
     [208669] = {
         name = "Lady Mondbeere",
     },
     [208713] = {
+        name = "Alexstrasza die Lebensbinderin",
+    },
+    [208833] = {
         name = "Alexstrasza die Lebensbinderin",
     },
     [209083] = {
@@ -372,14 +384,38 @@ BtWQuestsDatabase:UpdateNPCsTable({
     [210022] = {
         name = "Hüter Adranas",
     },
+    [210086] = {
+        name = "Hexendoktorin Tzadah",
+    },
+    [210092] = {
+        name = "Meister Gadrin",
+    },
     [210196] = {
         name = "Solarys Dornensturm",
+    },
+    [210340] = {
+        name = "Großkonstrukteur Romuul",
+    },
+    [210391] = {
+        name = "Häuptling Hatuun",
+    },
+    [210563] = {
+        name = "Häuptling Hatuun",
+    },
+    [210569] = {
+        name = "Oberste Konstrukteurin Ataanya",
     },
     [210646] = {
         name = "Traumkin",
     },
     [210813] = {
         name = "Eifrige Dryade",
+    },
+    [210904] = {
+        name = "Genn Graumähne",
+    },
+    [210905] = {
+        name = "Prinzessin Tess Graumähne",
     },
     [211193] = {
         name = "Tyrande Wisperwind",
@@ -390,8 +426,32 @@ BtWQuestsDatabase:UpdateNPCsTable({
     [211634] = {
         name = "Tyrande Wisperwind",
     },
+    [212187] = {
+        name = "Genn Graumähne",
+    },
+    [212387] = {
+        name = "Großanachoret Almonen",
+    },
     [212797] = {
         name = "Talisa Flüsterblüte",
+    },
+    [212899] = {
+        name = "Elitegraugarde",
+    },
+    [212916] = {
+        name = "Elitesoldat der Todeswache",
+    },
+    [213995] = {
+        name = "Gilnearische Alchemistin",
+    },
+    [214538] = {
+        name = "Genn Graumähne",
+    },
+    [216067] = {
+        name = "Shandris Mondfeder",
+    },
+    [221491] = {
+        name = "Khadgars Beschwörung",
     },
 })
 ]])()

@@ -46,7 +46,7 @@ MDT.mapPOIs[dungeonIndex] = {
       ["x"] = 126.82807502331,
       ["y"] = -197.80800969612,
       ["cageIndex"] = 2,
-      ["textAnchor"] = "TOP",
+      ["textAnchor"] = "CENTER",
       ["textAnchorTo"] = "BOTTOM",
     },
     [4] = {
@@ -3295,13 +3295,11 @@ MDT.dungeonEnemies[dungeonIndex] = {
       [18] = {
         ["x"] = 372.72869500937,
         ["y"] = -388.77929788716,
-        ["g"] = 38,
         ["sublevel"] = 1,
       },
       [19] = {
         ["x"] = 365.4620038254,
         ["y"] = -388.329829004,
-        ["g"] = 38,
         ["sublevel"] = 1,
       },
       [20] = {
@@ -4944,8 +4942,21 @@ MDT.dungeonEnemies[dungeonIndex] = {
     ["level"] = 70,
     ["characteristics"] = {
       ["Taunt"] = true,
+      ["Incapacitate"] = true,
       ["Silence"] = true,
+      ["Knock"] = true,
+      ["Grip"] = true,
+      ["Mind Control"] = true,
+      ["Polymorph"] = true,
+      ["Root"] = true,
+      ["Fear"] = true,
+      ["Disorient"] = true,
+      ["Repentance"] = true,
+      ["Imprison"] = true,
+      ["Sap"] = true,
       ["Stun"] = true,
+      ["Slow"] = true,
+      ["Sleep Walk"] = true,
       ["Mind Soothe"] = true,
     },
     ["spells"] = {

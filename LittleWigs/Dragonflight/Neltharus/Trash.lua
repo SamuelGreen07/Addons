@@ -232,7 +232,7 @@ end
 function mod:VolcanicGuard(args)
 	self:Message(args.spellId, "orange")
 	self:PlaySound(args.spellId, "alarm")
-	--self:NameplateCDBar(args.spellId, 25.5, args.sourceGUID)
+	--self:Nameplate(args.spellId, 25.5, args.sourceGUID)
 end
 
 do
@@ -246,7 +246,7 @@ do
 		end
 		-- technically outrangeable if you're fast and it won't go on CD unless it hits, so
 		-- if this is uncommented it should probably be moved to SUCCESS.
-		--self:NameplateCDBar(args.spellId, 13.4, args.sourceGUID)
+		--self:Nameplate(args.spellId, 13.4, args.sourceGUID)
 	end
 end
 
@@ -272,28 +272,44 @@ end
 
 -- Overseer Lahar
 
-function mod:BurningRoar(args)
-	self:Message(args.spellId, "red", CL.casting:format(args.spellName))
-	self:PlaySound(args.spellId, "warning")
-	self:CDBar(args.spellId, 20.6)
-end
+do
+	local timer
 
-function mod:EruptiveCrush(args)
-	self:Message(args.spellId, "orange")
-	self:PlaySound(args.spellId, "alarm")
-	self:CDBar(args.spellId, 20.6)
-end
-
-function mod:ImbuedMagmaApplied(args)
-	if self:Me(args.destGUID) or self:Dispeller("magic", nil, args.spellId) then
-		self:TargetMessage(args.spellId, "yellow", args.destName)
-		self:PlaySound(args.spellId, "alert", nil, args.destName)
+	function mod:BurningRoar(args)
+		if timer then
+			self:CancelTimer(timer)
+		end
+		self:Message(args.spellId, "red", CL.casting:format(args.spellName))
+		self:PlaySound(args.spellId, "warning")
+		self:CDBar(args.spellId, 20.6)
+		timer = self:ScheduleTimer("OverseerLaharDeath", 30)
 	end
-end
 
-function mod:OverseerLaharDeath(args)
-	self:StopBar(395427) -- Burning Roar
-	self:StopBar(376186) -- Eruptive Crush
+	function mod:EruptiveCrush(args)
+		if timer then
+			self:CancelTimer(timer)
+		end
+		self:Message(args.spellId, "orange")
+		self:PlaySound(args.spellId, "alarm")
+		self:CDBar(args.spellId, 20.6)
+		timer = self:ScheduleTimer("OverseerLaharDeath", 30)
+	end
+
+	function mod:ImbuedMagmaApplied(args)
+		if self:Me(args.destGUID) or self:Dispeller("magic", nil, args.spellId) then
+			self:TargetMessage(args.spellId, "yellow", args.destName)
+			self:PlaySound(args.spellId, "alert", nil, args.destName)
+		end
+	end
+
+	function mod:OverseerLaharDeath(args)
+		if timer then
+			self:CancelTimer(timer)
+			timer = nil
+		end
+		self:StopBar(395427) -- Burning Roar
+		self:StopBar(376186) -- Eruptive Crush
+	end
 end
 
 -- Qalashi Trainee
@@ -392,21 +408,38 @@ end
 
 -- Irontorch Commander
 
-function mod:ConflagrantBattery(args)
-	self:Message(args.spellId, "yellow")
-	self:PlaySound(args.spellId, "long")
-	self:CDBar(args.spellId, 23.1)
-end
 
-function mod:ScorchingFusillade(args)
-	self:Message(args.spellId, "red")
-	self:PlaySound(args.spellId, "alarm")
-	self:CDBar(args.spellId, 23.1)
-end
+do
+	local timer
 
-function mod:IrontorchCommanderDeath(args)
-	self:StopBar(372296) -- Conflagrant Battery
-	self:StopBar(373084) -- Scorching Fusillade
+	function mod:ConflagrantBattery(args)
+		if timer then
+			self:CancelTimer(timer)
+		end
+		self:Message(args.spellId, "yellow")
+		self:PlaySound(args.spellId, "long")
+		self:CDBar(args.spellId, 23.1)
+		timer = self:ScheduleTimer("IrontorchCommanderDeath", 30)
+	end
+
+	function mod:ScorchingFusillade(args)
+		if timer then
+			self:CancelTimer(timer)
+		end
+		self:Message(args.spellId, "red")
+		self:PlaySound(args.spellId, "alarm")
+		self:CDBar(args.spellId, 23.1)
+		timer = self:ScheduleTimer("IrontorchCommanderDeath", 30)
+	end
+
+	function mod:IrontorchCommanderDeath(args)
+		if timer then
+			self:CancelTimer(timer)
+			timer = nil
+		end
+		self:StopBar(372296) -- Conflagrant Battery
+		self:StopBar(373084) -- Scorching Fusillade
+	end
 end
 
 -- Qalashi Blacksmith
@@ -416,7 +449,7 @@ function mod:ReverberatingSlam(args)
 	self:PlaySound(args.spellId, "alert")
 	-- technically outrangeable if you're fast and it won't go on CD unless it hits, so
 	-- if this is uncommented it should probably be moved to SUCCESS.
-	--self:NameplateCDBar(args.spellId, 17.0, args.sourceGUID)
+	--self:Nameplate(args.spellId, 17.0, args.sourceGUID)
 end
 
 -- Forgewrought Monstrosity

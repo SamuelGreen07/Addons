@@ -4,7 +4,7 @@
 local LibStub = _G.LibStub
 local ADDON_NAME, private = ...
 
-local LibDialog = LibStub("LibDialog-1.0")
+local LibDialog = LibStub("LibDialog-1.0RS")
 
 local RSCollectionsDB = private.NewLib("RareScannerCollectionsDB")
 
@@ -104,7 +104,7 @@ local CLASS_MISSING_APPEARNACES = {
 
 local function PlayerCanUseItem(itemID)
 	local _, _, classIndex = UnitClass("player");
-	local _, _, _, itemEquipLoc, _, classID, subclassID = GetItemInfoInstant(itemID)
+	local _, _, _, itemEquipLoc, _, classID, subclassID = C_Item.GetItemInfoInstant(itemID)
 	
 	-- If cloak
 	if (itemEquipLoc == Enum.InventoryType.IndexCloakType) then
@@ -721,6 +721,7 @@ local function UpdateNotCollectedAppearanceItemIDs(routines, routineTextOutput)
 	private.dbchar.not_colleted_appearances_item_ids = {}
 	
 	-- Query	
+	local _, _, classIndex = UnitClass("player");
 	for transmogLocationName, transmogCollectionTypes in pairs (TRANSMOG_LOCATIONS) do
 		local transmogLocation = TransmogUtil.GetTransmogLocation(transmogLocationName, Enum.TransmogType.Appearance, Enum.TransmogModification.Main)
 		for _, categoryID in ipairs (transmogCollectionTypes) do
@@ -795,11 +796,11 @@ local function UpdateNotCollectedAppearanceItemIDs(routines, routineTextOutput)
 							if (not context.counter) then
 								context.counter = 0
 							end
-							if (not visualsList[j].isCollected) then
-								context.counter = context.counter + 1
-								local sources = C_TransmogCollection.GetAppearanceSources(visualsList[j].visualID, context.arguments[1], context.arguments[2])
+							if (visualsList[j] and not visualsList[j].isCollected) then
+								local sources = CollectionWardrobeUtil.GetSortedAppearanceSourcesForClass(visualsList[j].visualID, classIndex, context.arguments[1], context.arguments[2])
 								for k = 1, #sources do
 									if (sources[k].sourceType == 1 or sources[k].sourceType == 4) then --Boss Drop/World drop
+										context.counter = context.counter + 1
 										AddAppearanceItemID(sources[k].visualID, sources[k].itemID)
 								
 										if (not private.dbchar.not_colleted_appearances_item_ids[sources[k].itemID]) then
@@ -809,7 +810,7 @@ local function UpdateNotCollectedAppearanceItemIDs(routines, routineTextOutput)
 								end
 							end
 						end,
-						function(context)
+						function(context)							
 							local name, _, _, _, _ = C_TransmogCollection.GetCategoryInfo(context.arguments[1])
 							RSLogger:PrintDebugMessage(string.format("UpdateNotCollectedAppearanceItemIDs. [%s] [%s no conseguidas].", name, context.counter or "0"))
 							
@@ -1414,6 +1415,9 @@ local function LoadNotCollectedItems(callback, routineTextOutput, manualScan)
 	local chainRoutines = RSRoutines.ChainLoopRoutineNew()
 	chainRoutines:Init(routines)
 	chainRoutines:Run(function(context)
+		-- Reset filters
+		C_TransmogCollection.SetDefaultFilters()
+							
 		loaded = true
 		RSLogger:PrintMessage(AL["LOG_DONE"])
 		RSLogger:PrintMessage(AL["LOG_FILTERING_ENTITIES"])

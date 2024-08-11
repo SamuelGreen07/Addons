@@ -4,7 +4,6 @@ local DT = E:GetModule('DataTexts')
 local _G = _G
 local pairs, format, tinsert = pairs, format, tinsert
 
-local EasyMenu = EasyMenu
 local GetDungeonDifficultyID, GetRaidDifficultyID, GetLegacyRaidDifficultyID = GetDungeonDifficultyID, GetRaidDifficultyID, GetLegacyRaidDifficultyID
 local SetDungeonDifficultyID, SetRaidDifficultyID, SetLegacyRaidDifficultyID = SetDungeonDifficultyID, SetRaidDifficultyID, SetLegacyRaidDifficultyID
 local GetInstanceInfo, GetDifficultyInfo, ResetInstances = GetInstanceInfo, GetDifficultyInfo, ResetInstances
@@ -50,7 +49,7 @@ local DiffIDLabel = { -- also has IDs maintained in Nameplate StyleFilters
 	['N'] = { 1, 14, 38, 173, 198, 201 },
 	['H'] = { 2, 15, 39, 174 },
 	['M'] = { 16, 23, 40 },
-	['20'] = { 148, 185 },
+	['20'] = { 148, 185, 215 },
 	['10N'] = { 3, 175 },
 	['25N'] = { 4, 176 },
 	['10H'] = { 5, 193 },
@@ -107,7 +106,7 @@ end
 
 local function OnClick(self)
 	E:SetEasyMenuAnchor(E.EasyMenu, self)
-	EasyMenu(RightClickMenu, E.EasyMenu, nil, nil, nil, 'MENU')
+	E:ComplicatedMenu(RightClickMenu, E.EasyMenu, nil, nil, nil, 'MENU')
 end
 
 local function OnEvent(self)

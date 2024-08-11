@@ -1,6 +1,7 @@
 
-## v10.2.5
-* Support for Cata Classic.
+## v11.0.4
+* Fix: #2186 Activation overlays in Retail
+* The cooldown charge sweep is now skinned with Masque.
 
 
-[View Full Changelog](https://github.com/ascott18/TellMeWhen/blob/3d0b98f8196b82a78c605a54b13cd327efcca35d/CHANGELOG.md)
+[View Full Changelog](https://github.com/ascott18/TellMeWhen/blob/444d1399034a16df0aecaea1a31b3c3b6a954e91/CHANGELOG.md)

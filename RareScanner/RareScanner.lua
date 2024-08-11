@@ -29,6 +29,7 @@ local RSTimeUtils = private.ImportLib("RareScannerTimeUtils")
 local RSUtils = private.ImportLib("RareScannerUtils")
 local RSQuestTracker = private.ImportLib("RareScannerQuestTracker")
 local RSRoutines = private.ImportLib("RareScannerRoutines")
+local RSProvider = private.ImportLib("RareScannerProvider")
 
 -- RareScanner services
 local RSButtonHandler = private.ImportLib("RareScannerButtonHandler")
@@ -41,6 +42,8 @@ local RSEventHandler = private.ImportLib("RareScannerEventHandler")
 local RSEntityStateHandler = private.ImportLib("RareScannerEntityStateHandler")
 local RSCommandLine = private.ImportLib("RareScannerCommandLine")
 local RSTargetUnitTracker = private.ImportLib("RareScannerTargetUnitTracker")
+local RSRecentlySeenTracker = private.ImportLib("RareScannerRecentlySeenTracker")
+local RSWaypoints = private.ImportLib("RareScannerWaypoints")
 
 -- RareScanner other addons integration services
 local RSTomtom = private.ImportLib("RareScannerTomtom")
@@ -56,6 +59,30 @@ scanner_button:SetScale(0.8)
 scanner_button:RegisterForClicks("AnyUp","AnyDown")
 scanner_button:SetAttribute("type1", "macro")
 scanner_button:SetAttribute("type2", "closebutton")
+scanner_button:SetScript("PostClick", function(self, button)
+	if (button == "RightButton") then
+		return
+	end
+	
+	-- Set animation on npcs
+	if (RSConstants.IsNpcAtlas(self.atlasName) and RSConfigDB.IsShowingAnimationForNpcs() and RSConfigDB.GetAnimationForNpcs() ~= RSConstants.MAP_ANIMATIONS_ON_FOUND) then
+		RSRecentlySeenTracker.AddPendingAnimation(tonumber(self.entityID), self.mapID, self.x, self.y, true)
+	-- Set animation on containers
+	elseif (RSConstants.IsContainerAtlas(self.atlasName) and RSConfigDB.IsShowingAnimationForContainers() and RSConfigDB.GetAnimationForContainers() ~= RSConstants.MAP_ANIMATIONS_ON_FOUND) then
+		RSRecentlySeenTracker.AddPendingAnimation(tonumber(self.entityID), self.mapID, self.x, self.y, true)
+	-- Set animation on events
+	elseif (RSConstants.IsEventAtlas(self.atlasName) and RSConfigDB.IsShowingAnimationForEvents() and RSConfigDB.GetAnimationForEvents() ~= RSConstants.MAP_ANIMATIONS_ON_FOUND) then
+		RSRecentlySeenTracker.AddPendingAnimation(tonumber(self.entityID), self.mapID, self.x, self.y, true)
+	end
+	
+	-- Add waypoints
+	if (RSConfigDB.IsTomtomSupportEnabled() and not RSConfigDB.IsAddingTomtomWaypointsAutomatically()) then
+		RSTomtom.AddTomtomWaypoint(self.mapID, self.x, self.y, self.name)
+	end
+	if (RSConfigDB.IsWaypointsSupportEnabled() and not RSConfigDB.IsAddingWaypointsAutomatically()) then
+		RSWaypoints.AddWaypoint(self.mapID, self.x, self.y, self.name)
+	end
+end)
 scanner_button.closebutton = function(self)
 	if (not InCombatLockdown()) then
 		self.CloseButton:Click()
@@ -86,7 +113,7 @@ scanner_button:SetScript("OnLeave", function(self)
 	self:SetBackdropBorderColor(0, 0, 0)
 end)
 scanner_button:SetScript("OnHide", function(self)
-	self.npcID = nil
+	self.entityID = nil
 	self.name = nil
 	self.NextButton:Reset()
 	self.PreviousButton:Reset()
@@ -146,7 +173,7 @@ scanner_button.FilterEntityButton:SetPoint("BOTTOMLEFT", 5, 5)
 scanner_button.FilterEntityButton:SetSize(16, 16)
 scanner_button.FilterEntityButton:SetNormalTexture([[Interface\WorldMap\Dash_64]])
 scanner_button.FilterEntityButton:SetScript("OnClick", function(self)
-	local entityID = self:GetParent().npcID
+	local entityID = self:GetParent().entityID
 	if (entityID) then
 		if (RSConstants.IsNpcAtlas(self:GetParent().atlasName)) then
 			if (RSConfigDB.GetDefaultNpcFilter() == RSConstants.ENTITY_FILTER_WORLDMAP) then
@@ -196,7 +223,7 @@ scanner_button.UnfilterEnabledButton = CreateFrame("Button", "UnfilterEnabledBut
 scanner_button.UnfilterEnabledButton:SetPoint("BOTTOMLEFT", 5, 5)
 scanner_button.UnfilterEnabledButton:SetSize(16, 16)
 scanner_button.UnfilterEnabledButton:SetScript("OnClick", function(self)
-	local entityID = self:GetParent().npcID
+	local entityID = self:GetParent().entityID
 	if (entityID) then
 		if (RSConstants.IsNpcAtlas(self:GetParent().atlasName)) then
 			RSConfigDB.DeleteNpcFiltered(entityID)
@@ -315,7 +342,7 @@ scanner_button.LootBar.itemFramesPool.UpdateCacheItem = function(self, itemID, e
 			return
 		end
 		
-		local itemIDr, _, _, itemEquipLoc, _, itemClassID, itemSubClassID = GetItemInfoInstant(item:GetItemID())
+		local itemIDr, _, _, itemEquipLoc, _, itemClassID, itemSubClassID = C_Item.GetItemInfoInstant(item:GetItemID())
 		if (not itemIDr) then
 			return
 		end
@@ -418,7 +445,7 @@ end
 
 -- Show action
 function scanner_button:ShowButton()
-	if (not self.npcID) then
+	if (not self.entityID) then
 		return
 	end
 
@@ -430,7 +457,7 @@ function scanner_button:ShowButton()
 
 	-- show loot bar
 	if (RSConfigDB.IsDisplayingLootBar()) then
-		self.LootBar.itemFramesPool:InitItemList(self.atlasName, self.npcID)
+		self.LootBar.itemFramesPool:InitItemList(self.atlasName, self.entityID)
 	else
 		self.LootBar.itemFramesPool:ReleaseAll()
 	end
@@ -449,25 +476,10 @@ function scanner_button:ShowButton()
 			self.PreviousButton:Hide()
 		end
 	end
-	
-	-- In case it wasn't possible to extract the mapID
-	local mapID = self.mapID and self.mapID or ""	
 
 	-- Show button, model and loot panel
 	if (RSConstants.IsNpcAtlas(self.atlasName)) then
 		self.Description_text:SetText(AL["CLICK_TARGET"])
-
-		local macrotext = "/cleartarget\n/targetexact "..self.name
-		if (RSConfigDB.IsDisplayingMarkerOnTarget()) then
-			macrotext = string.format("%s\n/tm %s", macrotext, RSConfigDB.GetMarkerOnTarget())
-		end
-
-		macrotext = string.format("%s\n/rarescanner %s;%s;%s;%s;%s", macrotext, RSConstants.CMD_TOMTOM_WAYPOINT, mapID, self.x, self.y, self.name)
-		
-		if (RSConfigDB.IsShowingAnimationForNpcs() and RSConfigDB.GetAnimationForNpcs() ~= RSConstants.MAP_ANIMATIONS_ON_FOUND) then
-			macrotext = string.format("%s\n/rarescanner %s;%s", macrotext, RSConstants.CMD_RECENTLY_SEEN, self.npcID, mapID, self.x, self.y)
-		end
-		self:SetAttribute("macrotext", macrotext)
 
 		-- show model
 		if (self.displayID and RSConfigDB.IsDisplayingModel()) then
@@ -478,26 +490,22 @@ function scanner_button:ShowButton()
 		end
 	else
 		self.Description_text:SetText(AL["NOT_TARGETEABLE"])
-		
-		local macrotext = string.format("\n/rarescanner %s;%s;%s;%s;%s", RSConstants.CMD_TOMTOM_WAYPOINT, mapID, self.x, self.y, self.name)
-		
-		-- Set animation on containers
-		if (RSConstants.IsContainerAtlas(self.atlasName) and RSConfigDB.IsShowingAnimationForContainers() and RSConfigDB.GetAnimationForContainers() ~= RSConstants.MAP_ANIMATIONS_ON_FOUND) then
-			macrotext = string.format("%s\n/rarescanner %s;%s;%s;%s;%s", macrotext, RSConstants.CMD_RECENTLY_SEEN, self.npcID, mapID, self.x, self.y)
-		-- Set animation on events
-		elseif (RSConstants.IsEventAtlas(self.atlasName) and RSConfigDB.IsShowingAnimationForEvents() and RSConfigDB.GetAnimationForEvents() ~= RSConstants.MAP_ANIMATIONS_ON_FOUND) then
-			macrotext = string.format("%s\n/rarescanner %s;%s", macrotext, RSConstants.CMD_RECENTLY_SEEN, self.npcID)
-		end
-		
-		self:SetAttribute("macrotext", macrotext)
 
 		-- hide model if displayed
 		self.ModelView:ClearModel()
 		self.ModelView:Hide()
 	end
+		
+	-- Config the macro
+	local macrotext = "/cleartarget\n/targetexact "..self.name
+	if (RSConfigDB.IsDisplayingMarkerOnTarget()) then
+		macrotext = string.format("%s\n/tm %s", macrotext, RSConfigDB.GetMarkerOnTarget())
+	end
+	
+	self:SetAttribute("macrotext", macrotext);
 	
 	-- Toggle filter buttons
-	if ((RSConstants.IsNpcAtlas(self.atlasName) and RSConfigDB.GetNpcFiltered(self.npcID) == nil) or (RSConstants.IsContainerAtlas(self.atlasName) and RSConfigDB.GetContainerFiltered(self.npcID) == nil) or (RSConstants.IsEventAtlas(self.atlasName))) then
+	if ((RSConstants.IsNpcAtlas(self.atlasName) and RSConfigDB.GetNpcFiltered(self.entityID) == nil) or (RSConstants.IsContainerAtlas(self.atlasName) and RSConfigDB.GetContainerFiltered(self.entityID) == nil) or (RSConstants.IsEventAtlas(self.atlasName))) then
 		self.UnfilterEnabledButton:Hide()
 		self.FilterEntityButton:Show()
 	else
@@ -532,7 +540,7 @@ function RareScanner:Test()
 	local npcTestID = 32491
 	local npcTestDisplayID = 26711
 
-	scanner_button.npcID = npcTestID
+	scanner_button.entityID = npcTestID
 	scanner_button.name = npcTestName
 	scanner_button.displayID = npcTestDisplayID
 	scanner_button.mapID = 120
@@ -577,7 +585,11 @@ function RareScanner:OnInitialize()
 	RSMap.InitializeNotDiscoveredLists()
 
 	-- Setup our map provider
-	WorldMapFrame:AddDataProvider(CreateFromMixins(RareScannerDataProviderMixin));
+	local provider = CreateFromMixins(RareScannerDataProviderMixin)
+	WorldMapFrame:AddDataProvider(provider);
+	RSProvider.AddDataProvider(provider)
+	
+	-- Add search inputbox
 	local searchFrame = CreateFrame("FRAME", nil, WorldMapFrame, "WorldMapRSSearchTemplate");
 	searchFrame:SetPoint("CENTER", WorldMapFrame:GetCanvasContainer(), "TOP", 0, 0);
 	searchFrame.relativeFrame = WorldMapFrame:GetCanvasContainer()
@@ -807,6 +819,37 @@ local function RefreshDatabaseData(previousDbVersion)
 		end
 	)
 	table.insert(routines, dragonGlyphsNamesRoutine)
+	
+	-- Update entities state that are part of an achievement with criteria
+	local achievementCriteriaRoutine = RSRoutines.LoopRoutineNew()
+	achievementCriteriaRoutine:Init(function() return private.ACHIEVEMENT_WITH_CRITERIA end, 10,
+		function(context, _, achievementID)
+			for i=1, GetAchievementNumCriteria(achievementID) do
+				local _, _, completed = GetAchievementCriteriaInfo(achievementID, i)
+			   	if (completed) then
+					for _, entityID in ipairs(private.ACHIEVEMENT_TARGET_IDS[achievementID]) do
+						local containerInfo = RSContainerDB.GetInternalContainerInfo(entityID)
+						if (containerInfo) then
+							if (containerInfo.criteria == i and not RSContainerDB.IsContainerOpened(entityID)) then
+								RSContainerDB.SetContainerOpened(entityID)
+							end
+						else
+							local npcInfo = RSNpcDB.GetInternalNpcInfo(entityID)
+							if (npcInfo) then
+								if (npcInfo.criteria == i and not RSNpcDB.IsNpcKilled(entityID)) then
+									RSNpcDB.SetNpcKilled(entityID)
+								end
+							end
+						end
+					end
+				end
+			end
+		end, 
+		function(context)			
+			RSLogger:PrintDebugMessage("Actualizado el estado de entidades que son parte de un logro con criteria")
+		end
+	)
+	table.insert(routines, achievementCriteriaRoutine)
 	
 	-- Update older container filters system to newer (10.0.5)
 	if (RSUtils.GetTableLength(private.db.general.filteredContainers) > 0) then

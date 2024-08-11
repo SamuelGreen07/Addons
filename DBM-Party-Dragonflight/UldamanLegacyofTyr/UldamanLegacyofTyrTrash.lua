@@ -1,9 +1,10 @@
 local mod	= DBM:NewMod("UldamanLegacyofTyrTrash", "DBM-Party-Dragonflight", 2)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20231026112110")
+mod:SetRevision("20240808043723")
 --mod:SetModelID(47785)
 mod.isTrashMod = true
+mod.isTrashModBossFightAllowed = true
 
 mod:RegisterEvents(
 	"SPELL_CAST_START 369811 382578 369674 369823 369675 369806 377732 369399 369335 369400 369365 369423 369411 381593 382696 377500 369409",
@@ -120,7 +121,7 @@ function mod:SPELL_CAST_START(args)
 			specWarnSpikedCarapace:Show(args.sourceName)
 			specWarnSpikedCarapace:Play("kickcast")
 		end
-	elseif spellId == 369675 and args:GetSrcCreatureID() == 184022 then--184022 is trash version of mob (186658 is boss version)
+	elseif spellId == 369675 and args:GetSrcCreatureID() == 184022 then--184022 is trash version of mob (186658 is boss version)FUCK
 --		self:ScheduleMethod(0.2, "BossTargetScanner", args.sourceGUID, "LitTarget", 0.1, 8, true)
 		timerChainLightningCD:Start(nil, args.sourceGUID)
 		if self.Options.SpecWarn369675interrupt and self:CheckInterruptFilter(args.sourceGUID, false, true) then

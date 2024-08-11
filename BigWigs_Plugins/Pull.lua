@@ -190,6 +190,9 @@ do
 	end
 
 	function plugin:OnPluginEnable()
+		self:RegisterMessage("BigWigs_ProfileUpdate", updateProfile)
+		updateProfile()
+
 		self:RegisterMessage("BigWigs_PluginComm")
 		self:RegisterMessage("DBM_AddonMessage")
 
@@ -198,13 +201,8 @@ do
 
 		self:RegisterMessage("BigWigs_OnBossEngage")
 
-		self:RegisterMessage("BigWigs_ProfileUpdate", updateProfile)
-		updateProfile()
-
-		if C_EventUtils.IsEventValid("START_PLAYER_COUNTDOWN") then
-			self:RegisterEvent("START_PLAYER_COUNTDOWN")
-			self:RegisterEvent("CANCEL_PLAYER_COUNTDOWN")
-		end
+		self:RegisterMessage("Blizz_StartCountdown")
+		self:RegisterMessage("Blizz_StopCountdown")
 	end
 end
 
@@ -276,7 +274,7 @@ do
 				end
 			end
 			FlashClientIcon()
-			BigWigs:Print(L.pullStarted:format(isDBM and "DBM" or "BigWigs", nick))
+			BigWigs:Print(L.pullStartedBy:format(nick))
 			timer = self:ScheduleRepeatingTimer(printPull, 1, self)
 
 			if self.db.profile.combatLog then
@@ -298,16 +296,30 @@ do
 		end
 	end
 
-	function plugin:START_PLAYER_COUNTDOWN(_, initiatedBy, timeSeconds, totalTime)
+	function plugin:Blizz_StartCountdown(_, initiatedBy, timeSeconds, totalTime)
 		if IsEncounterInProgress() then return end -- Doesn't make sense to allow this in combat
-		if timeLeft == timeSeconds then return end -- Throttle
-		timeLeft = timeSeconds
-		local _, _, _, _, _, name = GetPlayerInfoByGUID(initiatedBy)
+		local unitToken
+		local _, instanceType, _, _, _, _, _, instanceId = GetInstanceInfo()
+		for unit in self:IterateGroup(true) do
+			if self:UnitGUID(unit) == initiatedBy then
+				local _, _, _, tarInstanceId = UnitPosition(unit)
+				-- Don't fire pull timers from people in different zones...
+				-- ...unless you're in a raid instance and the sender isn't, to allow raid leaders outside to send you pull timers
+				if instanceId ~= tarInstanceId and not (instanceType == "raid" and not zoneTable[tarInstanceId]) then
+					return
+				end
+				unitToken = unit
+				break
+			end
+		end
+
+		local name = unitToken and self:UnitName(unitToken) or "?"
 		if timer then
 			self:CancelTimer(timer)
 		end
+		timeLeft = timeSeconds
 		FlashClientIcon()
-		BigWigs:Print(L.pullStarted:format("BigWigs", name))
+		BigWigs:Print(L.pullStartedBy:format(name))
 		timer = self:ScheduleRepeatingTimer(printPull, 1, self)
 		if self.db.profile.combatLog then
 			isLogging = true
@@ -326,15 +338,34 @@ do
 		end
 	end
 
-	function plugin:CANCEL_PLAYER_COUNTDOWN(_, initiatedBy)
+	function plugin:Blizz_StopCountdown(_, initiatedBy)
 		if timer then
+			if initiatedBy then
+				local unitToken
+				local _, instanceType, _, _, _, _, _, instanceId = GetInstanceInfo()
+				for unit in self:IterateGroup(true) do
+					if self:UnitGUID(unit) == initiatedBy then
+						local _, _, _, tarInstanceId = UnitPosition(unit)
+						-- Don't fire pull timers from people in different zones...
+						-- ...unless you're in a raid instance and the sender isn't, to allow raid leaders outside to send you pull timers
+						if instanceId ~= tarInstanceId and not (instanceType == "raid" and not zoneTable[tarInstanceId]) then
+							return
+						end
+						unitToken = unit
+						break
+					end
+				end
+				local name = unitToken and self:UnitName(unitToken) or "?"
+				BigWigs:Print(L.pullStopped:format(name))
+				self:SendMessage("BigWigs_StopPull", self, name)
+			else
+				BigWigs:Print(L.pullStoppedCombat)
+				self:SendMessage("BigWigs_StopPull", self, "COMBAT")
+			end
 			self:CancelTimer(timer)
 			timer = nil
 			timeLeft = 0
-			local _, _, _, _, _, name = GetPlayerInfoByGUID(initiatedBy)
-			BigWigs:Print(L.pullStopped:format(name))
 			self:SendMessage("BigWigs_StopBar", self, L.pull)
-			self:SendMessage("BigWigs_StopPull", self, name)
 			self:SendMessage("BigWigs_StopCountdown", self, "pulling time")
 		end
 	end
@@ -360,7 +391,7 @@ function plugin:BigWigs_OnBossWin()
 end
 
 function plugin:BigWigs_OnBossEngage(_, module)
-	if module and module:GetJournalID() then
+	if module and (module:GetJournalID() or module:GetAllowWin()) then
 		local soundName = self.db.profile.engageSound
 		if soundName ~= "None" then
 			local sound = media:Fetch(SOUND, soundName, true)
@@ -405,16 +436,20 @@ SlashCmdList.BIGWIGSPULL = function(input)
 			BigWigs:Print(L.requiresLeadOrAssist)
 		end
 	else
-		if not plugin:IsEnabled() then BigWigs:Enable() end
-		if input == "" then
-			DoCountdown(10) -- Allow typing /pull to start a 10 second pull timer
-		else
-			local seconds = tonumber(input)
-			if not seconds or seconds < 0 or seconds > 60 then BigWigs:Print(L.wrongPullFormat) return end
-			if seconds ~= 0 then
-				BigWigs:Print(L.sendPull)
+		if not IsInGroup() or (IsInGroup(2) and UnitGroupRolesAssigned("player") == "TANK") or UnitIsGroupLeader("player") or UnitIsGroupAssistant("player") or (IsInGroup(1) and not IsInRaid()) then -- Solo, tank in LFG, leader, assist, anyone in 5m
+			if not plugin:IsEnabled() then BigWigs:Enable() end
+			if input == "" then
+				DoCountdown(10) -- Allow typing /pull to start a 10 second pull timer
+			else
+				local seconds = tonumber(input)
+				if not seconds or seconds < 0 or seconds > 86400 then BigWigs:Print(L.wrongPullFormat) return end
+				if seconds ~= 0 then
+					BigWigs:Print(L.sendPull)
+				end
+				DoCountdown(seconds)
 			end
-			DoCountdown(seconds)
+		else
+			BigWigs:Print(L.requiresLeadOrAssist)
 		end
 	end
 end

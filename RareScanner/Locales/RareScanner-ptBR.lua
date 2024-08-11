@@ -1623,5 +1623,6 @@ AL["ZONES_FILTERS_SEARCH_DESC"] = "Escreva o nome da zona para filtrar na lista 
 		[9996] = "Raides"; --Raids
 		[9995] = "Desconhecido"; --Unknown
 		[9994] = "Ilhas de expedições"; --Expedition islands
+		[9993] = "Delves"; --Delves
 	}
 end

@@ -5,7 +5,7 @@
 GTFO Spell List - Dragonflight
 ]]--
 
-if (not (GTFO.ClassicMode or GTFO.BurningCrusadeMode or GTFO.WrathMode)) then
+if (GTFO.RetailMode) then
 
 --- ************************
 --- * Dragon Isles (World) *
@@ -547,7 +547,33 @@ GTFO.SpellID["414235"] = {
   sound = 2;
 };
 
+GTFO.SpellID["419289"] = {
+  --desc = "Chaotic Breach";
+  sound = 1;
+  tankSound = 2;
+};
 
+GTFO.SpellID["423073"] = {
+  --desc = "Corrupting Felflame";
+  sound = 1;
+  ignoreApplication = true;
+};
+
+GTFO.SpellID["444640"] = {
+  --desc = "Infinite Arrows (Riftwalker Nilara)";
+  sound = 1;
+};
+
+GTFO.SpellID["443181"] = {
+  --desc = "Desecrating Blades (Corrupted Memory of Turalyon)";
+  sound = 1;
+};
+
+GTFO.SpellID["412360"] = {
+  --desc = "Calcifying Burst (Spinmarrow)";
+  applicationOnly = true;
+  sound = 2;
+};
 
 --- *******************
 --- * Ruby Life Pools *

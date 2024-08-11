@@ -368,7 +368,7 @@ end
 do
 	local prev = 0
 	function mod:RagestormDamage(args)
-		if self:Me(args.destGUID) and not self:Tank() then
+		if self:Me(args.destGUID) then
 			local t = args.time
 			if t - prev > 2 then
 				prev = t
@@ -391,13 +391,13 @@ end
 function mod:FishSlap(args)
 	self:Message(args.spellId, "orange")
 	self:PlaySound(args.spellId, "alarm")
-	--self:NameplateCDBar(args.spellId, 20.6, args.sourceGUID)
+	--self:Nameplate(args.spellId, 20.6, args.sourceGUID)
 end
 
 function mod:FreshCatch(args)
 	self:Message(args.spellId, "yellow")
 	self:PlaySound(args.spellId, "info")
-	--self:NameplateCDBar(args.spellId, 15.8, args.sourceGUID)
+	--self:Nameplate(args.spellId, 15.8, args.sourceGUID)
 end
 
 -- Rotting Creek
@@ -430,9 +430,16 @@ function mod:Stomp(args)
 	self:PlaySound(args.spellId, "alarm")
 end
 
-function mod:NecroticBreath(args)
-	self:Message(args.spellId, "red")
-	self:PlaySound(args.spellId, "alarm")
+do
+	local prev = 0
+	function mod:NecroticBreath(args)
+		local t = args.time
+		if t - prev > 1.5 then
+			prev = t
+			self:Message(args.spellId, "red")
+			self:PlaySound(args.spellId, "alarm")
+		end
+	end
 end
 
 -- Fetid Rotsinger
@@ -526,7 +533,7 @@ do
 			self:CancelTimer(timer)
 		end
 		self:GetUnitTarget(printTarget, 0.2, args.sourceGUID)
-		self:CDBar(args.spellId, 17.0)
+		self:CDBar(args.spellId, 15.8)
 		timer = self:ScheduleTimer("StinkbreathDeath", 30)
 	end
 
@@ -536,7 +543,7 @@ do
 		end
 		self:Message(args.spellId, "orange")
 		self:PlaySound(args.spellId, "alarm")
-		self:CDBar(args.spellId, 23.1)
+		self:CDBar(args.spellId, 18.2)
 		timer = self:ScheduleTimer("StinkbreathDeath", 30)
 	end
 

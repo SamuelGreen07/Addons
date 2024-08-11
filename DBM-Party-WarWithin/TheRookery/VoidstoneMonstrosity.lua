@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(2568, "DBM-Party-WarWithin", 3, 1268)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20240422080415")
+mod:SetRevision("20240506233911")
 mod:SetCreatureID(207207)
 mod:SetEncounterID(2836)
 --mod:SetHotfixNoticeRev(20220322000000)
@@ -51,8 +51,6 @@ local timerElectrocuted					= mod:NewBuffActiveTimer(33.9, 423839, nil, nil, nil
 
 mod:AddInfoFrameOption(445262)
 mod:AddNamePlateOption("NameplateOnReshape", 428269)
-
---local castsPerGUID = {}
 
 mod.vb.latentVoidCount = 0
 mod.vb.unleashedCount = 0

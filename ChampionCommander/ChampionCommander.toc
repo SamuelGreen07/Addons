@@ -1,4 +1,4 @@
-## Interface: 100206
+## Interface: 110000, 110002
 ## Title: ChampionCommander (BFA mission assistant)
 ## IconTexture: 134414
 ## Notes: Sending all follower to missions with just one click and more
@@ -13,8 +13,8 @@
 ## Notes-zhTW: 发送所有的追随者与点击多任务
 ## Notes-zhCN: 發送所有的追隨者與點擊多任務
 ## Author: Alar of Runetotem
-## Version: 1.10.0 100250
-## X-Revision: 964f0a2
+## Version: 1.12.0 100250
+## X-Revision: 66ecf61
 ## eMail: alar@aspide.it
 ## URL: http://wow.aspide.it
 ## OptionalDeps: Ace3,LibInit
@@ -29,7 +29,7 @@
 ## X-Category: Garrison
 ## X-License: GPL v3
 ## X-eMail: alar@aspide.it
-## X-Date: 2024-04-07T18:31:38Z
+## X-Date: 2024-08-10T10:58:32Z
 ## X-Embeds: LibInit
 ## X-Reboot: 1
 ## X-Curse-Project-ID: 300882

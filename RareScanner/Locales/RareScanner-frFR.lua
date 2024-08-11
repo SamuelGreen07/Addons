@@ -856,7 +856,6 @@ AL["MAP_MENU_SHOW_NOT_DISCOVERED"] = "Entités non découvertes"
 AL["MAP_MENU_SHOW_NOT_DISCOVERED_OLD"] = "Entités non découvertes (anciennes extensions)"
 AL["MAP_MENU_SHOW_NOT_TRACKABLE_CONTAINERS"] = "Afficher les icônes de conteneurs non traçables sur la carte"
 AL["MAP_MENU_SHOW_OPEN_CONTAINERS"] = "Afficher les icônes de conteneurs ouverts sur la carte"
-AL["MAP_MENU_SHOW_PRIMAL_STORM_RARE_NPCS"] = "Dragonflight : affichez les icônes de PNJ rares de la tempête primordiale sur la carte"
 AL["MAP_MENU_SHOW_RARE_NPCS"] = "Afficher les icônes rares des PNJ sur la carte"
 AL["MAP_NEVER"] = "Jamais"
 AL["MAP_NOT_DISCOVERED_ICONS"] = "Entités non découvertes"
@@ -1736,5 +1735,6 @@ AL["ZONES_FILTERS_SEARCH_DESC"] = "Tapez le nom de la zone pour filtrer la liste
 		[9996] = "Raids"; --Raids
 		[9995] = "Inconnu"; --Unknown
 		[9994] = "Expédition dans les îles"; --Expedition islands
+		[9993] = "Delves"; --Delves
 	}
 end

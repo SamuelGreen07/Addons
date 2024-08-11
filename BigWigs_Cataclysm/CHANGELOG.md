@@ -1,8 +1,7 @@
 # BigWigs [Cataclysm]
 
-## [v10.2.2](https://github.com/BigWigsMods/BigWigs_Cataclysm/tree/v10.2.2) (2024-04-30)
-[Full Changelog](https://github.com/BigWigsMods/BigWigs_Cataclysm/compare/v10.2.1...v10.2.2) [Previous Releases](https://github.com/BigWigsMods/BigWigs_Cataclysm/releases)
+## [v11.0.2](https://github.com/BigWigsMods/BigWigs_Cataclysm/tree/v11.0.2) (2024-08-02)
+[Full Changelog](https://github.com/BigWigsMods/BigWigs_Cataclysm/compare/v11.0.1...v11.0.2) [Previous Releases](https://github.com/BigWigsMods/BigWigs_Cataclysm/releases)
 
-- Publish to Wago addons  
-- bump toc  
-- Support Cataclysm Classic (#13)  
+- Updates and cleanups for classic  
+- Define X-BigWigs-Minimum  

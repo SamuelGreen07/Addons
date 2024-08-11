@@ -1,7 +1,8 @@
-# <DBM Mod> Scenario (MoP)
+# <DBM Mod> Raids (MoP)
 
-## [r166](https://github.com/DeadlyBossMods/DBM-MoP/tree/r166) (2024-04-28)
-[Full Changelog](https://github.com/DeadlyBossMods/DBM-MoP/compare/r165...r166) [Previous Releases](https://github.com/DeadlyBossMods/DBM-MoP/releases)
+## [r176](https://github.com/DeadlyBossMods/DBM-MoP/tree/r176) (2024-06-16)
+[Full Changelog](https://github.com/DeadlyBossMods/DBM-MoP/compare/r175...r176) [Previous Releases](https://github.com/DeadlyBossMods/DBM-MoP/releases)
 
-- Migrate all old icon options to numeric type system  
-- Use GetSpellName where appropriate  
+- Fix numerous cases where count was missing, or wrong object type was set (also causing count to be missing)  
+    Disabled some false diagnostics reports as well  
+- Fix bad option key  

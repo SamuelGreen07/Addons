@@ -335,34 +335,6 @@ if (BrokenIslesArgusButton) then
 	end)
 end
 
---8.0 doesnt work:
-
---WorldMapButton:HookScript("PreClick", deny_auto_switch)
---WorldMapButton:HookScript("PostClick", allow_map_change)
-
-
---[=[
-hooksecurefunc("WorldMap_CreatePOI", function(index, isObjectIcon, atlasIcon)
-	local POI = _G [ "WorldMapFramePOI"..index]
-	if (POI) then
-		POI:HookScript("PreClick", deny_auto_switch)
-		POI:HookScript("PostClick", allow_map_change)
-	end
-end)
---]=]
-
---troca a fun��o de click dos bot�es de quest no mapa da zona
---[=[
-hooksecurefunc("WorldMap_GetOrCreateTaskPOI", function(index)
-	local button = _G ["WorldMapFrameTaskPOI" .. index]
-	if (button:GetScript("OnClick") ~= WorldQuestTracker.OnQuestButtonClick) then
-		--button:SetScript("OnClick", WorldQuestTracker.OnQuestButtonClick)
-		table.insert(WorldQuestTracker.AllTaskPOIs, button)
-	end
-end)
---]=]
-
-
 WorldMapActionButtonPressed = function()
 	WorldQuestTracker.Temp_HideZoneWidgets = GetTime() + 5
 	WorldQuestTracker.UpdateZoneWidgets(true)
@@ -1888,7 +1860,7 @@ WorldQuestTracker.OnToggleWorldMap = function(self)
 				anchorButton.Anchor = anchor
 
 				--anchor pin - hack to set the anchor location in the map based in a x y coordinate
-				local pinAnchor = CreateFrame("frame", nil, worldFramePOIs, WorldQuestTracker.DataProvider:GetPinTemplate())
+				local pinAnchor = CreateFrame("button", nil, worldFramePOIs, WorldQuestTracker.DataProvider:GetPinTemplate())
 				pinAnchor.dataProvider = WorldQuestTracker.DataProvider
 				pinAnchor.worldQuest = true
 				pinAnchor.owningMap = WorldQuestTracker.DataProvider:GetMap()
@@ -2274,7 +2246,7 @@ WorldQuestTracker.OnToggleWorldMap = function(self)
 							anchorHeight = factionButton:GetHeight()
 
 							--see the reputation amount and change the alpha
-							local name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain, canBeLFGBonus = GetFactionInfoByID(factionButton.FactionID)
+							local name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain, canBeLFGBonus = WorldQuestTracker.GetFactionDataByID(factionButton.FactionID)
 							local repAmount = barValue
 							barMax = barMax - barMin
 							barValue = barValue - barMin
@@ -2361,7 +2333,7 @@ WorldQuestTracker.OnToggleWorldMap = function(self)
 
 					--local name = data.name
 
-					local name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain, canBeLFGBonus = GetFactionInfoByID(self.MyObject.FactionID)
+					local name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain, canBeLFGBonus = WorldQuestTracker.GetFactionDataByID(self.MyObject.FactionID)
 					barMax = barMax - barMin
 					barValue = barValue - barMin
 					barMin = 0
@@ -2446,10 +2418,9 @@ WorldQuestTracker.OnToggleWorldMap = function(self)
 				end
 
 				--create buttons
-				--for factionID, factionInfo in pairs(WorldQuestTracker.MapData.ReputationByFaction [playerFaction]) do
 				for factionID, _ in pairs(WorldQuestTracker.MapData.AllFactionIds) do --creates one button for each faction registered
 					if (type(factionID) == "number") then
-						local factionName = GetFactionInfoByID(factionID)
+						local factionName = WorldQuestTracker.GetFactionDataByID(factionID)
 						if (factionName) then
 							local factionButton = DF:CreateButton(factionAnchor, worldSummary.OnSelectFaction, 24, 25, "", factionButtonIndex)
 

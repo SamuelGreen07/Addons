@@ -8,7 +8,7 @@ L = BigWigs:NewBossLocale("Igira the Cruel", "frFR")
 if L then
 	L.blistering_spear = "Lances"
 	L.blistering_spear_single = "Lance"
-	L.blistering_torment = "Chaine"
+	L.blistering_torment = "Chaîne"
 	L.twisting_blade = "Lames"
 	L.marked_for_torment = "Tourment"
 end
@@ -20,7 +20,7 @@ if L then
 
 	L.flood_of_the_firelands_single_wait = "Attendez" -- Wait 3, Wait 2, Wait 1 countdown before soak debuff is applied
 	L.scorchtail_crash = "Coup de queue"
-	L.serpents_fury = "Flammes"
+	L.serpents_fury = "Fureur du serpent"
 	L.coiling_flames_single = "Flamme"
 end
 
@@ -46,7 +46,7 @@ if L then
 	L.custom_on_repeating_yell_smoldering_suffocation_desc = "Répète les messages en /crier à propos des suffocations ardentes pour prévenir les autres joueurs quand vous êtes en dessous de 75% de points de vie."
 
 	L.blazing_coalescence_on_player_note = "Lorsque c'est sur vous"
-	L.blazing_coalescence_on_boss_note = "Lors que c'est sur le boss"
+	L.blazing_coalescence_on_boss_note = "Lorsque c'est sur le boss"
 
 	L.scorching_roots = "Enracinements"
 	L.charred_brambles = "Racines soignables"
@@ -55,7 +55,7 @@ end
 
 L = BigWigs:NewBossLocale("Nymue, Weaver of the Cycle", "frFR")
 if L then
-	L.mythic_add_death = "%s Tué"
+	L.mythic_add_death = "%s tué"
 
 	L.continuum = "Nouvelles lignes"
 	L.surging_growth = "Nouveaux Soaks"
@@ -78,13 +78,12 @@ if L then
 	L.blazing_mushroom = "Champignons"
 	L.fiery_growth = "Dissipations"
 	L.mass_entanglement = "Enracinements"
-	L.incarnation_moonkin = "Forme de célénien"
+	L.incarnation_moonkin = "Forme de sélénien"
 	L.incarnation_tree_of_flame = "Forme d'arbre"
 	L.flaming_germination = "Graines"
-	L.flare_bomb = "Plumes"
+	L.flare_bomb = "Bombe éclairante"
 	L.too_close_to_edge = "Trop proche du bord"
 	L.taking_damage_from_edge = "Prends des dégats du bord"
-	L.flying_available = "Vous pouvez maintenant voler"
 
 	L.fly_time = "Temps en vol"
 	L.fly_time_desc = "Affiche un message qui indique combien de temps vous avez pris pour voler d'une plateforme à une autre."
@@ -96,7 +95,7 @@ if L then
 	L.spirits_trigger = "Esprit des Kaldorei"
 
 	L.fyralaths_bite = "Frontal"
-	L.fyralaths_bite_mythic = "Frontals"
+	L.fyralaths_bite_mythic = "Frontaux"
 	L.darkflame_shades = "Ombres"
 	L.darkflame_cleave = "Mythique Soaks"
 
@@ -111,11 +110,11 @@ if L then
 	L.eternal_firestorm_shortened_bar = "Tempête de feu [E]" -- E for Eternal
 	L.eternal_firestorm_message_full = "Tempête de feu [Éternelle]"
 
-	--L.eternal_firestorm_swirl = "Eternal Firestorm Pools"
-	--L.eternal_firestorm_swirl_desc = "Show timers for when the Eternal Firestorm will spawn the pools that you need to avoid standing in."
+	L.eternal_firestorm_swirl = "Tempête de feu éternelle"
+	L.eternal_firestorm_swirl_desc = "Montre les timers lorsque les tempêtes de feu éternelles feront apparaître des piscines dans lesquelles vous ne devez pas rester."
 
-	--L.flame_orb = "Flame Orb"
-	--L.shadow_orb = "Shadow Orb"
-	--L.orb_message_flame = "You are Flame"
-	--L.orb_message_shadow = "You are Shadow"
+	L.flame_orb = "Orbes enflammées"
+	L.shadow_orb = "Orbes d'ombre"
+	L.orb_message_flame = "Vous êtes Flamme"
+	L.orb_message_shadow = "Vous êtes Ombre"
 end

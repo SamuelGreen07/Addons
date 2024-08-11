@@ -108,14 +108,14 @@ function E:SetupChat(noDisplayMsg)
 	end
 
 	-- keys taken from `ChatTypeGroup` but doesnt add: 'OPENING', 'TRADESKILLS', 'PET_INFO', 'COMBAT_MISC_INFO', 'COMMUNITIES_CHANNEL', 'PET_BATTLE_COMBAT_LOG', 'PET_BATTLE_INFO', 'TARGETICONS'
-	local chatGroup = { 'SYSTEM', 'CHANNEL', 'SAY', 'EMOTE', 'YELL', 'WHISPER', 'PARTY', 'PARTY_LEADER', 'RAID', 'RAID_LEADER', 'RAID_WARNING', 'INSTANCE_CHAT', 'INSTANCE_CHAT_LEADER', 'GUILD', E.ClassicHC and 'GUILD_DEATHS' or nil, 'OFFICER', 'MONSTER_SAY', 'MONSTER_YELL', 'MONSTER_EMOTE', 'MONSTER_WHISPER', 'MONSTER_BOSS_EMOTE', 'MONSTER_BOSS_WHISPER', 'ERRORS', 'AFK', 'DND', 'IGNORED', 'BG_HORDE', 'BG_ALLIANCE', 'BG_NEUTRAL', 'ACHIEVEMENT', 'GUILD_ACHIEVEMENT', 'BN_WHISPER', 'BN_INLINE_TOAST_ALERT' }
+	local chatGroup = { 'SYSTEM', 'CHANNEL', 'SAY', 'EMOTE', 'YELL', 'WHISPER', 'PARTY', 'PARTY_LEADER', 'RAID', 'RAID_LEADER', 'RAID_WARNING', 'INSTANCE_CHAT', 'INSTANCE_CHAT_LEADER', 'GUILD', 'OFFICER', 'MONSTER_SAY', 'MONSTER_YELL', 'MONSTER_EMOTE', 'MONSTER_WHISPER', 'MONSTER_BOSS_EMOTE', 'MONSTER_BOSS_WHISPER', 'ERRORS', 'AFK', 'DND', 'IGNORED', 'BG_HORDE', 'BG_ALLIANCE', 'BG_NEUTRAL', 'ACHIEVEMENT', 'GUILD_ACHIEVEMENT', 'BN_WHISPER', 'BN_INLINE_TOAST_ALERT' }
 	ChatFrame_RemoveAllMessageGroups(_G.ChatFrame1)
 	for _, v in next, chatGroup do
 		ChatFrame_AddMessageGroup(_G.ChatFrame1, v)
 	end
 
-	-- keys taken from `ChatTypeGroup` which weren't added above to ChatFrame1
-	chatGroup = { E.Retail and 'PING' or nil, 'COMBAT_XP_GAIN', 'COMBAT_HONOR_GAIN', 'COMBAT_FACTION_CHANGE', 'SKILL', 'LOOT', 'CURRENCY', 'MONEY' }
+	-- keys taken from `ChatTypeGroup` which weren't added above to ChatFrame1 but keeping CHANNEL
+	chatGroup = { E.Retail and 'PING' or nil, 'CHANNEL', 'COMBAT_XP_GAIN', 'COMBAT_HONOR_GAIN', 'COMBAT_FACTION_CHANGE', 'SKILL', 'LOOT', 'CURRENCY', 'MONEY' }
 	ChatFrame_RemoveAllMessageGroups(rightChat)
 	for _, v in next, chatGroup do
 		ChatFrame_AddMessageGroup(rightChat, v)
@@ -683,7 +683,7 @@ function E:SetPage(PageNum)
 		InstallSlider.Max:SetText(1.15)
 
 		InstallOption1Button:Show()
-		InstallOption1Button:SetText(_G.SMALL)
+		InstallOption1Button:SetText(L["Small"])
 		InstallOption1Button:SetScript('OnClick', function()
 			E.global.general.UIScale = .6
 			InstallSlider.Cur:SetText(E.global.general.UIScale)
@@ -691,7 +691,7 @@ function E:SetPage(PageNum)
 		end)
 
 		InstallOption2Button:Show()
-		InstallOption2Button:SetText(_G.TIME_LEFT_MEDIUM)
+		InstallOption2Button:SetText(L["Medium"])
 		InstallOption2Button:SetScript('OnClick', function()
 			E.global.general.UIScale = .7
 			InstallSlider.Cur:SetText(E.global.general.UIScale)
@@ -699,7 +699,7 @@ function E:SetPage(PageNum)
 		end)
 
 		InstallOption3Button:Show()
-		InstallOption3Button:SetText(_G.LARGE)
+		InstallOption3Button:SetText(L["Large"])
 		InstallOption3Button:SetScript('OnClick', function()
 			E.global.general.UIScale = .8
 			InstallSlider.Cur:SetText(E.global.general.UIScale)

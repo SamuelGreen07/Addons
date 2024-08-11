@@ -3,20 +3,21 @@ local S = E:GetModule('Skins')
 local TT = E:GetModule('Tooltip')
 
 local _G = _G
-local strfind = strfind
 local next, unpack = next, unpack
 local ipairs, pairs = ipairs, pairs
+local select, strfind = select, strfind
+local hooksecurefunc = hooksecurefunc
 
 local CreateFrame = CreateFrame
-local GetItemInfo = GetItemInfo
 local PlayerHasToy = PlayerHasToy
-local hooksecurefunc = hooksecurefunc
-local BAG_ITEM_QUALITY_COLORS = BAG_ITEM_QUALITY_COLORS
-local GetItemQualityColor = GetItemQualityColor
+
 local C_Heirloom_PlayerHasHeirloom = C_Heirloom.PlayerHasHeirloom
 local C_TransmogCollection_GetSourceInfo = C_TransmogCollection.GetSourceInfo
+local GetItemQualityColor = C_Item.GetItemQualityColor
+local GetItemQualityByID = C_Item.GetItemQualityByID
 
 local QUALITY_7_R, QUALITY_7_G, QUALITY_7_B = GetItemQualityColor(7)
+local BAG_ITEM_QUALITY_COLORS = BAG_ITEM_QUALITY_COLORS
 
 local function clearBackdrop(backdrop)
 	backdrop:SetBackdropColor(0, 0, 0, 0)
@@ -120,17 +121,22 @@ local function JournalScrollButtons(frame)
 
 	for _, bu in next, { frame.ScrollTarget:GetChildren() } do
 		if not bu.IsSkinned then
+			local icon = bu.icon or bu.Icon
+			local savedIconTexture = icon:GetTexture()
+			icon:Size(40)
+			icon:Point('LEFT', -43, 0)
+			icon:SetTexCoord(unpack(E.TexCoords))
+			icon:CreateBackdrop('Transparent', nil, nil, true)
+
+			local savedPetTypeTexture = bu.petTypeIcon and bu.petTypeIcon:GetTexture()
+			local savedFactionAtlas = bu.factionIcon and bu.factionIcon:GetAtlas()
+
 			bu:StripTextures()
 			bu:CreateBackdrop('Transparent', nil, nil, true)
 			bu.backdrop:ClearAllPoints()
 			bu.backdrop:Point('TOPLEFT', bu, 0, -2)
 			bu.backdrop:Point('BOTTOMRIGHT', bu, 0, 2)
-
-			local icon = bu.icon or bu.Icon
-			icon:Size(40)
-			icon:Point('LEFT', -43, 0)
-			icon:SetTexCoord(unpack(E.TexCoords))
-			icon:CreateBackdrop('Transparent', nil, nil, true)
+			icon:SetTexture(savedIconTexture) -- restore the texture
 
 			bu:HookScript('OnEnter', buttonOnEnter)
 			bu:HookScript('OnLeave', buttonOnLeave)
@@ -140,7 +146,8 @@ local function JournalScrollButtons(frame)
 				bu.ProgressBar:SetVertexColor(0.251, 0.753, 0.251, 1) -- 0.0118, 0.247, 0.00392
 			end
 
-			if frame:GetParent() == _G.WardrobeCollectionFrame.SetsCollectionFrame then
+			local parent = frame:GetParent()
+			if parent == _G.WardrobeCollectionFrame.SetsCollectionFrame then
 				bu.Favorite:SetAtlas('PetJournal-FavoritesIcon', true)
 				bu.Favorite:Point('TOPLEFT', bu.Icon, 'TOPLEFT', -8, 8)
 
@@ -150,8 +157,9 @@ local function JournalScrollButtons(frame)
 				hooksecurefunc(bu.selectedTexture, 'Show', selectedTextureShow)
 				hooksecurefunc(bu.selectedTexture, 'Hide', selectedTextureHide)
 
-				if frame:GetParent() == _G.PetJournal then
+				if parent == _G.PetJournal then
 					bu.petList = true
+					bu.petTypeIcon:SetTexture(savedPetTypeTexture)
 					bu.petTypeIcon:Point('TOPRIGHT', -1, -1)
 					bu.petTypeIcon:Point('BOTTOMRIGHT', -1, 1)
 
@@ -160,8 +168,9 @@ local function JournalScrollButtons(frame)
 					bu.dragButton.levelBG:SetTexture()
 
 					S:HandleIconBorder(bu.iconBorder, nil, petNameColor)
-				elseif frame:GetParent() == _G.MountJournal then
+				elseif parent == _G.MountJournal then
 					bu.mountList = true
+					bu.factionIcon:SetAtlas(savedFactionAtlas)
 					bu.factionIcon:SetDrawLayer('OVERLAY')
 					bu.factionIcon:Point('TOPRIGHT', -1, -1)
 					bu.factionIcon:Point('BOTTOMRIGHT', -1, 1)
@@ -183,16 +192,137 @@ local function JournalScrollButtons(frame)
 	end
 end
 
+local function ToySpellButtonUpdateButton(button)
+	if button.itemID and PlayerHasToy(button.itemID) then
+		local quality = GetItemQualityByID(button.itemID)
+		if quality then
+			local r, g, b = GetItemQualityColor(quality)
+			button.backdrop:SetBackdropBorderColor(r, g, b)
+		else
+			button.backdrop:SetBackdropBorderColor(0.9, 0.9, 0.9)
+		end
+	else
+		local r, g, b = unpack(E.media.bordercolor)
+		button.backdrop:SetBackdropBorderColor(r, g, b)
+	end
+end
+
+local function HeirloomsJournalUpdateButton(_, button)
+	if not button.IsSkinned then
+		S:HandleItemButton(button, true)
+
+		button.iconTextureUncollected:SetTexCoord(unpack(E.TexCoords))
+		button.iconTextureUncollected:SetInside(button)
+		button.iconTexture:SetDrawLayer('ARTWORK')
+		button.hover:SetAllPoints(button.iconTexture)
+		button.slotFrameCollected:SetAlpha(0)
+		button.slotFrameUncollected:SetAlpha(0)
+		button.special:SetJustifyH('RIGHT')
+		button.special:ClearAllPoints()
+
+		button.cooldown:SetAllPoints(button.iconTexture)
+		E:RegisterCooldown(button.cooldown)
+
+		button.IsSkinned = true
+	end
+
+	button.levelBackground:SetTexture()
+
+	button.name:Point('LEFT', button, 'RIGHT', 4, 8)
+	button.level:Point('TOPLEFT', button.levelBackground,'TOPLEFT', 25, 2)
+
+	if C_Heirloom_PlayerHasHeirloom(button.itemID) then
+		button.name:SetTextColor(0.9, 0.9, 0.9)
+		button.level:SetTextColor(0.9, 0.9, 0.9)
+		button.special:SetTextColor(1, .82, 0)
+		button.backdrop:SetBackdropBorderColor(QUALITY_7_R, QUALITY_7_G, QUALITY_7_B)
+	else
+		button.name:SetTextColor(0.4, 0.4, 0.4)
+		button.level:SetTextColor(0.4, 0.4, 0.4)
+		button.special:SetTextColor(0.4, 0.4, 0.4)
+		button.backdrop:SetBackdropBorderColor(unpack(E.media.bordercolor))
+	end
+end
+
+local function HeirloomsJournalLayoutCurrentPage()
+	local headers = _G.HeirloomsJournal.heirloomHeaderFrames
+	if headers and next(headers) then
+		for _, header in next, headers do
+			header:StripTextures()
+			header.text:FontTemplate(nil, 15, 'SHADOW')
+			header.text:SetTextColor(0.9, 0.9, 0.9)
+		end
+	end
+end
+
+local function SetsFrame_ScrollBoxUpdate(button)
+	for _, child in next, { button.ScrollTarget:GetChildren() } do
+		if not child.IsSkinned then
+			child.Background:Hide()
+			child.HighlightTexture:SetTexture(E.ClearTexture)
+			child.IconFrame.Icon:SetSize(42, 42)
+			S:HandleIcon(child.IconFrame.Icon)
+
+			child.SelectedTexture:SetDrawLayer('BACKGROUND')
+			child.SelectedTexture:SetColorTexture(1, 1, 1, .25)
+			child.SelectedTexture:ClearAllPoints()
+			child.SelectedTexture:Point('TOPLEFT', 4, -2)
+			child.SelectedTexture:Point('BOTTOMRIGHT', -1, 2)
+			child.SelectedTexture:CreateBackdrop('Transparent')
+
+			child.IsSkinned = true
+		end
+	end
+end
+
+local function SetsFrame_SetItemFrameQuality(_, itemFrame)
+	local icon = itemFrame.Icon
+	if not icon.backdrop then
+		icon:CreateBackdrop()
+		icon:SetTexCoord(unpack(E.TexCoords))
+		itemFrame.IconBorder:Hide()
+	end
+
+	if itemFrame.collected then
+		local quality = C_TransmogCollection_GetSourceInfo(itemFrame.sourceID).quality
+		local color = BAG_ITEM_QUALITY_COLORS[quality or 1]
+		icon.backdrop:SetBackdropBorderColor(color.r, color.g, color.b)
+	else
+		local r, g, b = unpack(E.media.bordercolor)
+		icon.backdrop:SetBackdropBorderColor(r, g, b)
+	end
+end
+
+local function HandleDynamicFlightButton(button, index)
+	if button.Border then button.Border:Hide() end
+
+	button:SetPushedTexture(0)
+	button:GetHighlightTexture():SetColorTexture(1, 1, 1, .25)
+	button:SetNormalTexture(0)
+
+	local icon = select(index, button:GetRegions())
+	if icon then
+		S:HandleIcon(icon)
+	end
+end
+
 local function SkinMountFrame()
 	S:HandleItemButton(_G.MountJournalSummonRandomFavoriteButton)
-	S:HandleButton(_G.MountJournalFilterButton)
+	S:HandleButton(_G.MountJournal.FilterDropdown, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, true, 'right')
 
-	_G.MountJournalFilterButton:ClearAllPoints()
-	_G.MountJournalFilterButton:Point('LEFT', _G.MountJournalSearchBox, 'RIGHT', 5, 0)
+	local Flyout = _G.MountJournal.DynamicFlightFlyout
+	Flyout.Background:Hide()
 
-	S:HandleCloseButton(_G.MountJournalFilterButton.ResetButton)
-	_G.MountJournalFilterButton.ResetButton:ClearAllPoints()
-	_G.MountJournalFilterButton.ResetButton:Point('CENTER', _G.MountJournalFilterButton, 'TOPRIGHT', 0, 0)
+	HandleDynamicFlightButton(Flyout.DynamicFlightModeButton, 4)
+	HandleDynamicFlightButton(Flyout.OpenDynamicFlightSkillTreeButton, 4)
+	HandleDynamicFlightButton(_G.MountJournal.ToggleDynamicFlightFlyoutButton, 1)
+
+	_G.MountJournal.FilterDropdown:ClearAllPoints()
+	_G.MountJournal.FilterDropdown:Point('LEFT', _G.MountJournalSearchBox, 'RIGHT', 5, 0)
+
+	S:HandleCloseButton(_G.MountJournal.FilterDropdown.ResetButton)
+	_G.MountJournal.FilterDropdown.ResetButton:ClearAllPoints()
+	_G.MountJournal.FilterDropdown.ResetButton:Point('CENTER', _G.MountJournal.FilterDropdown, 'TOPRIGHT', 0, 0)
 
 	local MountJournal = _G.MountJournal
 	MountJournal:StripTextures()
@@ -242,13 +372,15 @@ local function SkinPetFrame()
 	S:HandleEditBox(_G.PetJournalSearchBox)
 	_G.PetJournalSearchBox:ClearAllPoints()
 	_G.PetJournalSearchBox:Point('TOPLEFT', _G.PetJournalLeftInset, 'TOPLEFT', (E.PixelMode and 13 or 10), -9)
-	S:HandleButton(_G.PetJournalFilterButton)
-	_G.PetJournalFilterButton:Height(E.PixelMode and 22 or 24)
-	_G.PetJournalFilterButton:ClearAllPoints()
-	_G.PetJournalFilterButton:Point('TOPRIGHT', _G.PetJournalLeftInset, 'TOPRIGHT', -5, -(E.PixelMode and 8 or 7))
-	S:HandleCloseButton(_G.PetJournalFilterButton.ResetButton)
-	_G.PetJournalFilterButton.ResetButton:ClearAllPoints()
-	_G.PetJournalFilterButton.ResetButton:Point('CENTER', _G.PetJournalFilterButton, 'TOPRIGHT', 0, 0)
+
+	S:HandleButton(_G.PetJournal.FilterDropdown, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, true, 'right')
+	_G.PetJournal.FilterDropdown:Height(E.PixelMode and 22 or 24)
+	_G.PetJournal.FilterDropdown:ClearAllPoints()
+	_G.PetJournal.FilterDropdown:Point('TOPRIGHT', _G.PetJournalLeftInset, 'TOPRIGHT', -5, -(E.PixelMode and 8 or 7))
+	S:HandleCloseButton(_G._G.PetJournal.FilterDropdown.ResetButton)
+	_G.PetJournal.FilterDropdown.ResetButton:ClearAllPoints()
+	_G.PetJournal.FilterDropdown.ResetButton:Point('CENTER', _G.PetJournal.FilterDropdown, 'TOPRIGHT', 0, 0)
+
 	S:HandleTrimScrollBar(_G.PetJournal.ScrollBar)
 	hooksecurefunc(PetJournal.ScrollBox, 'Update', JournalScrollButtons)
 
@@ -343,11 +475,12 @@ end
 local function SkinToyFrame()
 	local ToyBox = _G.ToyBox
 	S:HandleEditBox(ToyBox.searchBox)
-	S:HandleButton(_G.ToyBoxFilterButton)
-	_G.ToyBoxFilterButton:Point('LEFT', ToyBox.searchBox, 'RIGHT', 2, 0)
-	S:HandleCloseButton(_G.ToyBoxFilterButton.ResetButton)
-	_G.ToyBoxFilterButton.ResetButton:ClearAllPoints()
-	_G.ToyBoxFilterButton.ResetButton:Point('CENTER', _G.ToyBoxFilterButton, 'TOPRIGHT', 0, 0)
+
+	S:HandleButton(_G.ToyBox.FilterDropdown, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, true, 'right')
+	_G.ToyBox.FilterDropdown:Point('LEFT', ToyBox.searchBox, 'RIGHT', 2, 0)
+	S:HandleCloseButton(_G.ToyBox.FilterDropdown.ResetButton)
+	_G.ToyBox.FilterDropdown.ResetButton:ClearAllPoints()
+	_G.ToyBox.FilterDropdown.ResetButton:Point('CENTER', _G.ToyBox.FilterDropdown, 'TOPRIGHT', 0, 0)
 
 	ToyBox.iconsFrame:StripTextures()
 	S:HandleNextPrevButton(ToyBox.PagingFrame.NextPageButton, nil, nil, true)
@@ -375,19 +508,7 @@ local function SkinToyFrame()
 		E:RegisterCooldown(button.cooldown)
 	end
 
-	hooksecurefunc('ToySpellButton_UpdateButton', function(button)
-		if button.itemID and PlayerHasToy(button.itemID) then
-			local _, _, quality = GetItemInfo(button.itemID)
-			if quality then
-				local r, g, b = GetItemQualityColor(quality)
-				button.backdrop:SetBackdropBorderColor(r, g, b)
-			else
-				button.backdrop:SetBackdropBorderColor(0.9, 0.9, 0.9)
-			end
-		else
-			button.backdrop:SetBackdropBorderColor(unpack(E.media.bordercolor))
-		end
-	end)
+	hooksecurefunc('ToySpellButton_UpdateButton', ToySpellButtonUpdateButton)
 end
 
 local function SkinHeirloomFrame()
@@ -397,12 +518,12 @@ local function SkinHeirloomFrame()
 
 	S:HandleNextPrevButton(HeirloomsJournal.PagingFrame.NextPageButton, nil, nil, true)
 	S:HandleNextPrevButton(HeirloomsJournal.PagingFrame.PrevPageButton, nil, nil, true)
-	S:HandleDropDownBox(_G.HeirloomsJournalClassDropDown)
+	S:HandleDropDownBox(_G.HeirloomsJournal.ClassDropdown)
 
-	S:HandleButton(_G.HeirloomsJournal.FilterButton)
-	S:HandleCloseButton(_G.HeirloomsJournal.FilterButton.ResetButton)
-	_G.HeirloomsJournal.FilterButton.ResetButton:ClearAllPoints()
-	_G.HeirloomsJournal.FilterButton.ResetButton:Point('CENTER', _G.HeirloomsJournal.FilterButton, 'TOPRIGHT', 0, 0)
+	S:HandleButton(_G.HeirloomsJournal.FilterDropdown, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, true, 'right')
+	S:HandleCloseButton(_G.HeirloomsJournal.FilterDropdown.ResetButton)
+	_G.HeirloomsJournal.FilterDropdown.ResetButton:ClearAllPoints()
+	_G.HeirloomsJournal.FilterDropdown.ResetButton:Point('CENTER', _G.HeirloomsJournal.FilterDropdown, 'TOPRIGHT', 0, 0)
 
 	HeirloomsJournal.progressBar.border:Hide()
 	HeirloomsJournal.progressBar:DisableDrawLayer('BACKGROUND')
@@ -410,51 +531,8 @@ local function SkinHeirloomFrame()
 	HeirloomsJournal.progressBar:CreateBackdrop()
 	E:RegisterStatusBar(HeirloomsJournal.progressBar)
 
-	hooksecurefunc(HeirloomsJournal, 'UpdateButton', function(_, button)
-		if not button.IsSkinned then
-			S:HandleItemButton(button, true)
-
-			button.iconTextureUncollected:SetTexCoord(unpack(E.TexCoords))
-			button.iconTextureUncollected:SetInside(button)
-			button.iconTexture:SetDrawLayer('ARTWORK')
-			button.hover:SetAllPoints(button.iconTexture)
-			button.slotFrameCollected:SetAlpha(0)
-			button.slotFrameUncollected:SetAlpha(0)
-			button.special:SetJustifyH('RIGHT')
-			button.special:ClearAllPoints()
-
-			button.cooldown:SetAllPoints(button.iconTexture)
-			E:RegisterCooldown(button.cooldown)
-
-			button.IsSkinned = true
-		end
-
-		button.levelBackground:SetTexture()
-
-		button.name:Point('LEFT', button, 'RIGHT', 4, 8)
-		button.level:Point('TOPLEFT', button.levelBackground,'TOPLEFT', 25, 2)
-
-		if C_Heirloom_PlayerHasHeirloom(button.itemID) then
-			button.name:SetTextColor(0.9, 0.9, 0.9)
-			button.level:SetTextColor(0.9, 0.9, 0.9)
-			button.special:SetTextColor(1, .82, 0)
-			button.backdrop:SetBackdropBorderColor(QUALITY_7_R, QUALITY_7_G, QUALITY_7_B)
-		else
-			button.name:SetTextColor(0.4, 0.4, 0.4)
-			button.level:SetTextColor(0.4, 0.4, 0.4)
-			button.special:SetTextColor(0.4, 0.4, 0.4)
-			button.backdrop:SetBackdropBorderColor(unpack(E.media.bordercolor))
-		end
-	end)
-
-	hooksecurefunc(HeirloomsJournal, 'LayoutCurrentPage', function()
-		for i=1, #HeirloomsJournal.heirloomHeaderFrames do
-			local header = HeirloomsJournal.heirloomHeaderFrames[i]
-			header:StripTextures()
-			header.text:FontTemplate(nil, 15, 'SHADOW')
-			header.text:SetTextColor(0.9, 0.9, 0.9)
-		end
-	end)
+	hooksecurefunc(HeirloomsJournal, 'UpdateButton', HeirloomsJournalUpdateButton)
+	hooksecurefunc(HeirloomsJournal, 'LayoutCurrentPage', HeirloomsJournalLayoutCurrentPage)
 end
 
 local function SkinTransmogFrames()
@@ -473,13 +551,14 @@ local function SkinTransmogFrames()
 
 	S:HandleEditBox(_G.WardrobeCollectionFrameSearchBox)
 	_G.WardrobeCollectionFrameSearchBox:SetFrameLevel(5)
+	S:HandleDropDownBox(_G.WardrobeCollectionFrame.ClassDropdown, 145)
 
-	S:HandleButton(WardrobeCollectionFrame.FilterButton)
+	S:HandleButton(WardrobeCollectionFrame.FilterButton, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, true, 'right')
 	WardrobeCollectionFrame.FilterButton:Point('LEFT', WardrobeCollectionFrame.searchBox, 'RIGHT', 2, 0)
 	S:HandleCloseButton(WardrobeCollectionFrame.FilterButton.ResetButton)
 	WardrobeCollectionFrame.FilterButton.ResetButton:ClearAllPoints()
 	WardrobeCollectionFrame.FilterButton.ResetButton:Point('CENTER', WardrobeCollectionFrame.FilterButton, 'TOPRIGHT', 0, 0)
-	S:HandleDropDownBox(_G.WardrobeCollectionFrameWeaponDropDown)
+	S:HandleDropDownBox(_G.WardrobeCollectionFrame.ItemsCollectionFrame.WeaponDropdown)
 	WardrobeCollectionFrame.ItemsCollectionFrame:StripTextures()
 
 	for _, Frame in ipairs(WardrobeCollectionFrame.ContentFrames) do
@@ -559,68 +638,25 @@ local function SkinTransmogFrames()
 	SetsCollectionFrame.LeftInset:StripTextures()
 	S:HandleTrimScrollBar(SetsCollectionFrame.ListContainer.ScrollBar)
 
-	hooksecurefunc(SetsCollectionFrame.ListContainer.ScrollBox, 'Update', function(button)
-		for _, child in next, { button.ScrollTarget:GetChildren() } do
-			if not child.IsSkinned then
-				child.Background:Hide()
-				child.HighlightTexture:SetTexture(E.ClearTexture)
-				child.Icon:SetSize(42, 42)
-				S:HandleIcon(child.Icon)
-				child.IconCover:SetOutside(child.Icon)
-
-				child.SelectedTexture:SetDrawLayer('BACKGROUND')
-				child.SelectedTexture:SetColorTexture(1, 1, 1, .25)
-				child.SelectedTexture:ClearAllPoints()
-				child.SelectedTexture:Point('TOPLEFT', 4, -2)
-				child.SelectedTexture:Point('BOTTOMRIGHT', -1, 2)
-				child.SelectedTexture:CreateBackdrop('Transparent')
-
-				child.IsSkinned = true
-			end
-		end
-	end)
+	hooksecurefunc(SetsCollectionFrame.ListContainer.ScrollBox, 'Update', SetsFrame_ScrollBoxUpdate)
 
 	local DetailsFrame = SetsCollectionFrame.DetailsFrame
 	DetailsFrame.ModelFadeTexture:Hide()
 	DetailsFrame.IconRowBackground:Hide()
 	DetailsFrame.Name:FontTemplate(nil, 16)
 	DetailsFrame.LongName:FontTemplate(nil, 16)
-	S:HandleButton(DetailsFrame.VariantSetsButton)
-
-	hooksecurefunc(SetsCollectionFrame, 'SetItemFrameQuality', function(_, itemFrame)
-		local icon = itemFrame.Icon
-		if not icon.backdrop then
-			icon:CreateBackdrop()
-			icon:SetTexCoord(unpack(E.TexCoords))
-			itemFrame.IconBorder:Hide()
-		end
-
-		if itemFrame.collected then
-			local quality = C_TransmogCollection_GetSourceInfo(itemFrame.sourceID).quality
-			local color = BAG_ITEM_QUALITY_COLORS[quality or 1]
-			icon.backdrop:SetBackdropBorderColor(color.r, color.g, color.b)
-		else
-			icon.backdrop:SetBackdropBorderColor(unpack(E.media.bordercolor))
-		end
-	end)
-
-	_G.WardrobeSetsCollectionVariantSetsButton.Icon:SetTexture(E.Media.Textures.ArrowUp)
-	_G.WardrobeSetsCollectionVariantSetsButton.Icon:SetRotation(S.ArrowRotation.down)
+	S:HandleDropDownBox(DetailsFrame.VariantSetsDropdown)
+	hooksecurefunc(SetsCollectionFrame, 'SetItemFrameQuality', SetsFrame_SetItemFrameQuality)
 
 	local WardrobeFrame = _G.WardrobeFrame
 	S:HandlePortraitFrame(WardrobeFrame)
 
-	local WardrobeOutfitFrame = _G.WardrobeOutfitFrame
-	WardrobeOutfitFrame:StripTextures()
-	WardrobeOutfitFrame:SetTemplate('Transparent')
-	S:HandleButton(_G.WardrobeOutfitDropDown.SaveButton)
-	S:HandleDropDownBox(_G.WardrobeOutfitDropDown, 221)
-	_G.WardrobeOutfitDropDown:Height(34)
-	_G.WardrobeOutfitDropDown.SaveButton:ClearAllPoints()
-	_G.WardrobeOutfitDropDown.SaveButton:Point('TOPLEFT', _G.WardrobeOutfitDropDown, 'TOPRIGHT', -2, -2)
-
 	local WardrobeTransmogFrame = _G.WardrobeTransmogFrame
 	WardrobeTransmogFrame:StripTextures()
+	S:HandleButton(WardrobeTransmogFrame.OutfitDropdown.SaveButton)
+	S:HandleDropDownBox(WardrobeTransmogFrame.OutfitDropdown, 220)
+	WardrobeTransmogFrame.OutfitDropdown.SaveButton:ClearAllPoints()
+	WardrobeTransmogFrame.OutfitDropdown.SaveButton:Point('LEFT', WardrobeTransmogFrame.OutfitDropdown, 'RIGHT', 2, 0)
 
 	for i = 1, #WardrobeTransmogFrame.SlotButtons do
 		local slotButton = WardrobeTransmogFrame.SlotButtons[i]
@@ -646,9 +682,7 @@ local function SkinTransmogFrames()
 		end
 	end
 
-	WardrobeTransmogFrame.SpecButton:ClearAllPoints()
-	WardrobeTransmogFrame.SpecButton:Point('RIGHT', WardrobeTransmogFrame.ApplyButton, 'LEFT', -2, 0)
-	S:HandleButton(WardrobeTransmogFrame.SpecButton)
+	S:HandleButton(WardrobeTransmogFrame.SpecDropdown)
 	S:HandleButton(WardrobeTransmogFrame.ApplyButton)
 	S:HandleButton(WardrobeTransmogFrame.ModelScene.ClearAllPendingButton)
 	S:HandleCheckBox(WardrobeTransmogFrame.ToggleSecondaryAppearanceCheckbox)

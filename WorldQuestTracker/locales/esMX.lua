@@ -292,6 +292,10 @@ L["S_OPTIONS_WORLDMAP_ORGANIZEBY"] = "Organize Quests By"
 L["S_OPTIONS_WORLDMAP_WIDGET_ALPHA"] = "Pin Alpha"
 L["S_OPTIONS_ZONE_SHOWONLYTRACKED"] = "Sólo con Seguimiento"
 --[[Translation missing --]]
+L["S_OPTTIONS_AUTOACCEPT_ABANDONQUEST"] = "Auto Accept Abandon Quests"
+--[[Translation missing --]]
+L["S_OPTTIONS_AUTOACCEPT_ABANDONQUEST_DESC"] = "Don't show the confirmation dialog when abandoning a quest."
+--[[Translation missing --]]
 L["S_OPTTIONS_DRAGONRACE_MINIMAP"] = "Show Track Minimap"
 --[[Translation missing --]]
 L["S_OPTTIONS_DRAGONRACE_TRACKCOLOR"] = "Track Color"

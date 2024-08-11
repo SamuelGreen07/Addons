@@ -254,6 +254,12 @@ function RSMap.GetWorldMapPOI(objectGUID, vignetteInfo, mapID)
 		
 	if (vignetteInfo.type == Enum.VignetteType.Treasure or RSConstants.IsContainerAtlas(vignetteInfo.atlasName)) then
 		local containerID = tonumber(vignetteObjectID)
+		
+		-- If pre-event, sets the container ID
+		if (RSConstants.CONTAINERS_WITH_PRE_EVENT[containerID]) then
+			containerID = RSContainerDB.GetFinalContainerID(containerID)
+		end
+		
 		local containerInfo = RSContainerDB.GetInternalContainerInfo(containerID)
 		local alreadyFoundInfo = RSGeneralDB.GetAlreadyFoundEntity(containerID)
 		
@@ -268,7 +274,7 @@ function RSMap.GetWorldMapPOI(objectGUID, vignetteInfo, mapID)
 			npcID = RSNpcDB.GetNpcId(vignetteInfo.name, mapID)
 		-- If pre-event, sets the NPC ID
 		elseif (RSConstants.NPCS_WITH_PRE_EVENT[npcID]) then
-			npcID = RSConstants.NPCS_WITH_PRE_EVENT[npcID]
+			npcID = RSNpcDB.GetFinalNpcID(npcID)
 		end
 		
 		local npcInfo = RSNpcDB.GetInternalNpcInfo(npcID)

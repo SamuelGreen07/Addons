@@ -172,7 +172,7 @@ local function renderEmptyGear(container)
 	panelBlank:AddChild(lbl)
 	lbl:SetText(L.GearBlank)
 	lbl:SetWidth(700)
-	lbl:SetJustifyH("MIDDLE")
+	lbl:SetJustifyH("CENTER")
 	lbl:SetFont(Amr.CreateFont("Italic", 16, Amr.Colors.TextTan))		
 	lbl:SetPoint("BOTTOM", panelBlank.content, "CENTER", 0, 20)
 	
@@ -180,7 +180,7 @@ local function renderEmptyGear(container)
 	panelBlank:AddChild(lbl2)
 	lbl2:SetText(L.GearBlank2)
 	lbl2:SetWidth(700)
-	lbl2:SetJustifyH("MIDDLE")
+	lbl2:SetJustifyH("CENTER")
 	lbl2:SetFont(Amr.CreateFont("Italic", 16, Amr.Colors.TextTan))		
 	lbl2:SetPoint("TOP", lbl.frame, "CENTER", 0, -20)
 end
@@ -404,7 +404,7 @@ local function renderGear(setupId, container)
 							local socketBorder, socketIcon = createSocketWidget(panelMods, prevSocket or lblItem, prevSocket, isPowerActive)
 							
 							-- set icon and tooltip
-							local _, _, spellIcon = GetSpellInfo(spellId)
+							local spellIcon = C_Spell.GetSpellInfo(spellId).iconID
 							socketIcon:SetIcon(spellIcon)
 							Amr:SetSpellTooltip(socketIcon, spellId, "ANCHOR_TOPRIGHT")
 							
@@ -545,7 +545,7 @@ function Amr:RenderTabGear(container)
 	lbl:SetText(L.GearImportNote)
 	lbl:SetWidth(100)
 	lbl:SetFont(Amr.CreateFont("Italic", 12, Amr.Colors.TextTan))
-	lbl:SetJustifyH("MIDDLE")
+	lbl:SetJustifyH("CENTER")
 	lbl:SetPoint("TOP", btnImport.frame, "BOTTOM", 0, -5)
 	
 	local lbl2 = AceGUI:Create("AmrUiLabel")
@@ -553,7 +553,7 @@ function Amr:RenderTabGear(container)
 	lbl2:SetText(L.GearTipTitle)
 	lbl2:SetWidth(140)
 	lbl2:SetFont(Amr.CreateFont("Italic", 20, Amr.Colors.Text))
-	lbl2:SetJustifyH("MIDDLE")
+	lbl2:SetJustifyH("CENTER")
 	lbl2:SetPoint("TOP", lbl.frame, "BOTTOM", 0, -50)
 	
 	lbl = AceGUI:Create("AmrUiLabel")
@@ -561,7 +561,7 @@ function Amr:RenderTabGear(container)
 	lbl:SetText(L.GearTipText)
 	lbl:SetWidth(140)
 	lbl:SetFont(Amr.CreateFont("Italic", 12, Amr.Colors.Text))
-	lbl:SetJustifyH("MIDDLE")
+	lbl:SetJustifyH("CENTER")
 	lbl:SetPoint("TOP", lbl2.frame, "BOTTOM", 0, -5)
 	
 	lbl2 = AceGUI:Create("AmrUiLabel")
@@ -828,21 +828,18 @@ local function setTalents(setup)
 
 			-- UI needs to be opened once to create it, or else this stuff doesn't really work
 			local uiOpened = false
-			if not ClassTalentFrame then
-				ToggleTalentFrame()
+			if not PlayerSpellsFrame then
+				TogglePlayerSpellsFrame()
 				uiOpened = true
-			--else
-			--	ClassTalentFrame:Show()
-			--	uiOpened = true
 			end
 			
 			local specPos = GetSpecialization()
 			local specId = GetSpecializationInfo(specPos)
 
 			-- janky AF way to force the "default" loadout to be active
-			if ClassTalentFrame then
-				ClassTalentFrame.TalentsTab:ClearLastSelectedConfigID()
-				ClassTalentFrame.TalentsTab:MarkTreeDirty()
+			if PlayerSpellsFrame then
+				PlayerSpellsFrame.TalentsFrame:ClearLastSelectedConfigID()
+				PlayerSpellsFrame.TalentsFrame:MarkTreeDirty()
 			end
 			C_ClassTalents.UpdateLastSelectedSavedConfigID(specId, 0)
 
@@ -861,12 +858,17 @@ local function setTalents(setup)
 
 			-- get nodes and entries
 			local talMap = {}
-			local treeIds = config["treeIDs"];		
+			local treeIds = config["treeIDs"]
+			local heroTreeNodeId
 			for i = 1, #treeIds do
 				for _, nodeId in pairs(C_Traits.GetTreeNodes(treeIds[i])) do
 					local node = C_Traits.GetNodeInfo(configId, nodeId)
 					if node.ID and node.isVisible and node.maxRanks > 0 then
-						talMap[node.ID] = node.entryIDs
+						if node.type == 3 then
+							heroTreeNodeId = node.ID
+						else
+							talMap[node.ID] = node.entryIDs
+						end						
 					end
 				end		
 			end
@@ -895,6 +897,12 @@ local function setTalents(setup)
 				C_Traits.ResetTree(configId, treeIds[i])
 			end
 
+			-- start by activating the hero tree with the special selection node
+			if heroTreeNodeId and setup.HeroTreeEntryId > 0 then
+				local node = C_Traits.GetNodeInfo(configId, heroTreeNodeId)
+				C_Traits.SetSelection(configId, heroTreeNodeId, setup.HeroTreeEntryId)
+			end
+
 			-- pick all the nodes, kinda dumb but you have to "script" clicking on each node in a valid order
 			local loopSafety = 1000
 			while #path > 0 and loopSafety > 0 do
@@ -921,7 +929,7 @@ local function setTalents(setup)
 			C_Traits.CommitConfig(configId)
 
 			if uiOpened then
-				ClassTalentFrame:Hide()
+				PlayerSpellsFrame:Hide()
 			end			
 	
 		end	

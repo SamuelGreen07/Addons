@@ -1,4 +1,4 @@
-## Interface: 30401
+## Interface: 30403
 ## Title: cargBags_Nivaya
 ## Author: Luzzifus (Modified by Nibelheim, humfras)
 ## OptionalDeps: ItemRack, Outfitter

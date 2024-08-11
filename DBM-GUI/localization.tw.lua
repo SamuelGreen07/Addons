@@ -449,7 +449,7 @@ L.SpamBlockNoIconRestore			= "不在戰鬥結束後記住和還原團隊圖示�
 L.SpamBlockNoRangeRestore			= "不因模組預設值還原距離框架的狀態"
 
 L.Area_PullTimer					= "開怪、休息、戰鬥和自定義計時器過濾器選項"
-L.DontShowPTNoID					= "阻擋與你不同區域ID送出的開怪倒數計時條(永遠不會阻擋在沒有區域ID的情況下發送的Bigwigs計時器)"
+L.DontShowPTNoID					= "阻擋與你不同區域ID送出的開怪倒數計時條"
 L.DontShowPT						= "不要顯示開怪/休息倒數計時條"
 L.DontShowPTText					= "不要顯示開怪/休息計時提示文字"
 L.DontPlayPTCountdown				= "完全不要播放開怪/休息/開戰/自訂計時器倒數音效"
@@ -465,7 +465,7 @@ L.SpamBlockNoTrivialSpecWarnSound	= "如果相對你等級是不重要的內容�
 L.Area_SpamFilter					= "垃圾過濾選項"
 L.DontShowFarWarnings				= "不發送距離過遠的事件提示/計時器"
 L.StripServerName					= "隱藏警告、計時器、距離檢測以及資訊框架的玩家伺服器名稱"
-L.FilterVoidFormSay					= "在虛空型態時不要發送圖示/倒數計時聊天喊話(仍會發送標準聊天喊話)"
+L.FilterVoidFormSay2					= "在虛空型態時不要發送圖示/倒數計時聊天喊話(仍會發送標準聊天喊話)"
 
 L.Area_SpecFilter					= "角色職責過濾選項"
 L.FilterTankSpec					= "非坦克角色職責時過濾掉坦克專精的特定警告 (註:不建議玩家關閉此選項因大多數的坦克嘲諷警告都是預設開啟。)"

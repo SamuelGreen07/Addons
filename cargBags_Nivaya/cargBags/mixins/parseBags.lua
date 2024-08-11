@@ -44,7 +44,6 @@ local bagStrings = {
 	["bankframe+bank"]	= { -1, 5, 6, 7, 8, 9, 10, 11 },
 	["bankreagent"]		= { -3 },
 	["bank"]			= { 5, 6, 7, 8, 9, 10, 11 },
-	["keyring"]			= { -2 },
 }
 if isDF then
 	bagStrings = {
@@ -55,9 +54,9 @@ if isDF then
 	["bankframe+bank"]	= { -1, 6, 7, 8, 9, 10, 11, 12 },
 	["bankreagent"]		= { -3 },
 	["bank"]			= { 6, 7, 8, 9, 10, 11, 12 },
-	["keyring"]			= { -2 },
 }
 end
+if KeyRingButtonIDToInvSlotID then bagStrings["keyring"] = { -2 } end
 cargBags.BagStrings = bagStrings
 
 --[[!

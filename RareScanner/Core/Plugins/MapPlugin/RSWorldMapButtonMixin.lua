@@ -16,6 +16,7 @@ local RSNpcDB = private.ImportLib("RareScannerNpcDB")
 
 -- RareScanner service libraries
 local RSMinimap = private.ImportLib("RareScannerMinimap")
+local RSProvider = private.ImportLib("RareScannerProvider")
 
 -- Locales
 local AL = LibStub("AceLocale-3.0"):GetLocale("RareScanner");
@@ -30,10 +31,6 @@ local SHOW_NOT_DISCOVERED_RARE_NPC_ICONS = "rsHideNotDiscoveredRareNpcs"
 local SHOW_FRIENDLY_RARE_NPC_ICONS = "rsHideFriendlyRareNpcs"
 local SHOW_ACHIEVEMENT_NPC_ICONS = "rsHideAchievementRareNpcs"
 local SHOW_PROFESSION_NPC_ICONS = "rsHideProfessionRareNPCs"
-local SHOW_HUNTING_PARTY_NPC_ICONS = "rsHideHuntingPartyRareNpcs"
-local SHOW_PRIMAL_STORM_NPC_ICONS = "rsHidePrimalStormRareNpcs"
-local SHOW_DREAMSURGE_NPC_ICONS = "rsHideDreamsurgeRareNpcs"
-local SHOW_FYRAKK_NPC_ICONS = "rsHideFyrakkRareNpcs"
 local SHOW_CUSTOM_GROUP_NPC_ICONS = "rsHideCustomGroup"
 local SHOW_OTHER_NPC_ICONS = "rsHideOtherRareNpcs"
 local DISABLE_LAST_SEEN_FILTER = "rsDisableLastSeenFilter"
@@ -45,8 +42,6 @@ local SHOW_NOT_TRACKEABLE_CONTAINER_ICONS = "rsHideNotTrackeableContainers"
 local SHOW_ACHIEVEMENT_CONTAINER_ICONS = "rsHideAchievementContainers"
 local SHOW_PROFESSION_CONTAINER_ICONS = "rsHideProfessionContainers"
 local SHOW_OTHER_CONTAINER_ICONS = "rsHideOtherContainers"
-local SHOW_WARCRAFT_RUMBLE_CONTAINER_ICONS = "rsHideWarcraftRumbleContainers"
-local SHOW_DREAMSEED_CONTAINER_ICONS = "rsHideDreamseedContainers"
 local DISABLE_LAST_SEEN_CONTAINER_FILTER = "rsDisableLastSeenContainerFilter"
 
 local SHOW_EVENT_ICONS = "rsHideEvents"
@@ -57,6 +52,8 @@ local DISABLE_LAST_SEEN_EVENT_FILTER = "rsDisableLastSeenEventFilter"
 local SHOW_DRAGON_GLYPHS_ICONS = "rsHideDragonGlyphs"
 
 local SHOW_NOT_DISCOVERED_ICONS_OLD = "rsHideNotDiscoveredOld"
+
+local SHOW_MINIEVENT_ICON = "rsHideMinievent%sIcon"
 
 
 RSWorldMapButtonMixin = { }
@@ -104,12 +101,6 @@ local function WorldMapButtonDropDownMenu_Initialize(dropDown, mapID)
 			end
 		
 		-- Rare NPCs (types)
-		elseif (value == SHOW_HUNTING_PARTY_NPC_ICONS) then
-			if (RSConfigDB.IsMinieventFiltered(RSConstants.DRAGONFLIGHT_HUNTING_PARTY_MINIEVENT)) then
-				RSConfigDB.SetMinieventFiltered(RSConstants.DRAGONFLIGHT_HUNTING_PARTY_MINIEVENT, false)
-			else
-				RSConfigDB.SetMinieventFiltered(RSConstants.DRAGONFLIGHT_HUNTING_PARTY_MINIEVENT, true)
-			end
 		elseif (value == SHOW_ACHIEVEMENT_NPC_ICONS) then
 			if (RSConfigDB.IsShowingAchievementRareNPCs()) then
 				RSConfigDB.SetShowingAchievementRareNPCs(false)
@@ -121,30 +112,6 @@ local function WorldMapButtonDropDownMenu_Initialize(dropDown, mapID)
 				RSConfigDB.SetShowingProfessionRareNPCs(false)
 			else
 				RSConfigDB.SetShowingProfessionRareNPCs(true)
-			end
-		elseif (value == SHOW_PRIMAL_STORM_NPC_ICONS) then
-			if (RSConfigDB.IsMinieventFiltered(RSConstants.DRAGONFLIGHT_STORM_INVASTION_FIRE_MINIEVENT) and RSConfigDB.IsMinieventFiltered(RSConstants.DRAGONFLIGHT_STORM_INVASTION_WATER_MINIEVENT) and RSConfigDB.IsMinieventFiltered(RSConstants.DRAGONFLIGHT_STORM_INVASTION_EARTH_MINIEVENT) and RSConfigDB.IsMinieventFiltered(RSConstants.DRAGONFLIGHT_STORM_INVASTION_AIR_MINIEVENT)) then
-				RSConfigDB.SetMinieventFiltered(RSConstants.DRAGONFLIGHT_STORM_INVASTION_FIRE_MINIEVENT, false)
-				RSConfigDB.SetMinieventFiltered(RSConstants.DRAGONFLIGHT_STORM_INVASTION_WATER_MINIEVENT, false)
-				RSConfigDB.SetMinieventFiltered(RSConstants.DRAGONFLIGHT_STORM_INVASTION_EARTH_MINIEVENT, false)
-				RSConfigDB.SetMinieventFiltered(RSConstants.DRAGONFLIGHT_STORM_INVASTION_AIR_MINIEVENT, false)
-			else
-				RSConfigDB.SetMinieventFiltered(RSConstants.DRAGONFLIGHT_STORM_INVASTION_FIRE_MINIEVENT, true)
-				RSConfigDB.SetMinieventFiltered(RSConstants.DRAGONFLIGHT_STORM_INVASTION_WATER_MINIEVENT, true)
-				RSConfigDB.SetMinieventFiltered(RSConstants.DRAGONFLIGHT_STORM_INVASTION_EARTH_MINIEVENT, true)
-				RSConfigDB.SetMinieventFiltered(RSConstants.DRAGONFLIGHT_STORM_INVASTION_AIR_MINIEVENT, true)
-			end
-		elseif (value == SHOW_DREAMSURGE_NPC_ICONS) then
-			if (RSConfigDB.IsMinieventFiltered(RSConstants.DRAGONFLIGHT_DREAMSURGE_MINIEVENT)) then
-				RSConfigDB.SetMinieventFiltered(RSConstants.DRAGONFLIGHT_DREAMSURGE_MINIEVENT, false)
-			else
-				RSConfigDB.SetMinieventFiltered(RSConstants.DRAGONFLIGHT_DREAMSURGE_MINIEVENT, true)
-			end
-		elseif (value == SHOW_FYRAKK_NPC_ICONS) then
-			if (RSConfigDB.IsMinieventFiltered(RSConstants.DRAGONFLIGHT_FYRAKK_MINIEVENT)) then
-				RSConfigDB.SetMinieventFiltered(RSConstants.DRAGONFLIGHT_FYRAKK_MINIEVENT, false)
-			else
-				RSConfigDB.SetMinieventFiltered(RSConstants.DRAGONFLIGHT_FYRAKK_MINIEVENT, true)
 			end
 		elseif (value == SHOW_OTHER_NPC_ICONS) then
 			if (RSConfigDB.IsShowingOtherRareNPCs()) then
@@ -199,18 +166,6 @@ local function WorldMapButtonDropDownMenu_Initialize(dropDown, mapID)
 			else
 				RSConfigDB.SetShowingNotTrackeableContainers(true)
 			end
-		elseif (value == SHOW_WARCRAFT_RUMBLE_CONTAINER_ICONS) then
-			if (RSConfigDB.IsMinieventFiltered(RSConstants.DRAGONFLIGHT_WARCRAFT_RUMBLE_MINIEVENT)) then
-				RSConfigDB.SetMinieventFiltered(RSConstants.DRAGONFLIGHT_WARCRAFT_RUMBLE_MINIEVENT, false)
-			else
-				RSConfigDB.SetMinieventFiltered(RSConstants.DRAGONFLIGHT_WARCRAFT_RUMBLE_MINIEVENT, true)
-			end
-		elseif (value == SHOW_DREAMSEED_CONTAINER_ICONS) then
-			if (RSConfigDB.IsMinieventFiltered(RSConstants.DRAGONFLIGHT_DREAMSEED_MINIEVENT)) then
-				RSConfigDB.SetMinieventFiltered(RSConstants.DRAGONFLIGHT_DREAMSEED_MINIEVENT, false)
-			else
-				RSConfigDB.SetMinieventFiltered(RSConstants.DRAGONFLIGHT_DREAMSEED_MINIEVENT, true)
-			end
 		elseif (value == SHOW_OTHER_CONTAINER_ICONS) then
 			if (RSConfigDB.IsShowingOtherContainers()) then
 				RSConfigDB.SetShowingOtherContainers(false)
@@ -262,6 +217,17 @@ local function WorldMapButtonDropDownMenu_Initialize(dropDown, mapID)
 			end
 		end
 		
+		-- Minievents
+		for minieventID, _ in pairs(RSConstants.MINIEVENTS_WORLDMAP_FILTERS) do
+			if (value == string.format(SHOW_MINIEVENT_ICON, minieventID)) then
+				if (RSConfigDB.IsMinieventFiltered(minieventID)) then
+					RSConfigDB.SetMinieventFiltered(minieventID, false)
+				else
+					RSConfigDB.SetMinieventFiltered(minieventID, true)
+				end
+			end
+		end
+		
 		-- Custom NPCs
 		if (RSUtils.GetTableLength(groups) > 0) then
 			for _, group in ipairs(groups) do
@@ -276,7 +242,7 @@ local function WorldMapButtonDropDownMenu_Initialize(dropDown, mapID)
 		end
 		
 		RSMinimap.RefreshAllData(true)
-		WorldMapFrame:RefreshAllDataProviders();
+		RSProvider.RefreshAllDataProviders()
 	end
 		
 	LibDD:UIDropDownMenu_Initialize(dropDown, function(self, level, menuList)
@@ -379,36 +345,18 @@ local function WorldMapButtonDropDownMenu_Initialize(dropDown, mapID)
 				info.disabled = not RSConfigDB.IsShowingNpcs()
 				LibDD:UIDropDownMenu_AddButton(info, level);
 				
-				if (RSConstants.MINIEVENTS_WORLDMAP_FILTERS[RSConstants.DRAGONFLIGHT_HUNTING_PARTY_MINIEVENT].active and RSUtils.Contains(RSConstants.MINIEVENTS_WORLDMAP_FILTERS[RSConstants.DRAGONFLIGHT_HUNTING_PARTY_MINIEVENT].mapIDs, mapID)) then
-					info.text = "|A:"..RSConstants.HUNTING_PARTY_ICON_ATLAS..":18:18::::|a "..AL["MAP_MENU_SHOW_HUNTING_PARTY_RARE_NPCS"];
-					info.arg1 = SHOW_HUNTING_PARTY_NPC_ICONS;
-					info.checked = not RSConfigDB.IsMinieventFiltered(RSConstants.DRAGONFLIGHT_HUNTING_PARTY_MINIEVENT)
-					info.disabled = not RSConfigDB.IsShowingNpcs()
-					LibDD:UIDropDownMenu_AddButton(info, level);
-				end
-			
-				if (RSConstants.MINIEVENTS_WORLDMAP_FILTERS[RSConstants.DRAGONFLIGHT_STORM_INVASTION_FIRE_MINIEVENT].active and RSUtils.Contains(RSConstants.MINIEVENTS_WORLDMAP_FILTERS[RSConstants.DRAGONFLIGHT_STORM_INVASTION_FIRE_MINIEVENT].mapIDs, mapID)) then
-					info.text = "|A:"..RSConstants.PRIMAL_STORM_ICON_ATLAS..":18:18::::|a "..AL["MAP_MENU_SHOW_PRIMAL_STORM_RARE_NPCS"];
-					info.arg1 = SHOW_PRIMAL_STORM_NPC_ICONS;
-					info.checked = not RSConfigDB.IsMinieventFiltered(RSConstants.DRAGONFLIGHT_STORM_INVASTION_FIRE_MINIEVENT) and not RSConfigDB.IsMinieventFiltered(RSConstants.DRAGONFLIGHT_STORM_INVASTION_WATER_MINIEVENT) and not RSConfigDB.IsMinieventFiltered(RSConstants.DRAGONFLIGHT_STORM_INVASTION_EARTH_MINIEVENT) and not RSConfigDB.IsMinieventFiltered(RSConstants.DRAGONFLIGHT_STORM_INVASTION_AIR_MINIEVENT)
-					info.disabled = not RSConfigDB.IsShowingNpcs()
-					LibDD:UIDropDownMenu_AddButton(info, level);
-				end
-			
-				if (RSConstants.MINIEVENTS_WORLDMAP_FILTERS[RSConstants.DRAGONFLIGHT_DREAMSURGE_MINIEVENT].active and RSUtils.Contains(RSConstants.MINIEVENTS_WORLDMAP_FILTERS[RSConstants.DRAGONFLIGHT_DREAMSURGE_MINIEVENT].mapIDs, mapID)) then
-					info.text = "|A:"..RSConstants.DREAMSURGE_ICON_ATLAS..":18:18::::|a "..AL["MAP_MENU_SHOW_DREAMSURGE_RARE_NPCS"];
-					info.arg1 = SHOW_DREAMSURGE_NPC_ICONS;
-					info.checked = not RSConfigDB.IsMinieventFiltered(RSConstants.DRAGONFLIGHT_DREAMSURGE_MINIEVENT)
-					info.disabled = not RSConfigDB.IsShowingNpcs()
-					LibDD:UIDropDownMenu_AddButton(info, level);
-				end
-				
-				if (RSConstants.MINIEVENTS_WORLDMAP_FILTERS[RSConstants.DRAGONFLIGHT_FYRAKK_MINIEVENT].active and RSUtils.Contains(RSConstants.MINIEVENTS_WORLDMAP_FILTERS[RSConstants.DRAGONFLIGHT_FYRAKK_MINIEVENT].mapIDs, mapID)) then
-					info.text = "|A:"..RSConstants.FYRAKK_ICON_ATLAS..":18:18::::|a "..AL["MAP_MENU_SHOW_FYRAKK_RARE_NPCS"];
-					info.arg1 = SHOW_FYRAKK_NPC_ICONS;
-					info.checked = not RSConfigDB.IsMinieventFiltered(RSConstants.DRAGONFLIGHT_FYRAKK_MINIEVENT)
-					info.disabled = not RSConfigDB.IsShowingNpcs()
-					LibDD:UIDropDownMenu_AddButton(info, level);
+				for minieventID, minieventData in pairs (RSConstants.MINIEVENTS_WORLDMAP_FILTERS) do
+					if (minieventData.npcs and RSUtils.Contains(minieventData.mapIDs, mapID)) then
+						if (minieventData.atlas) then
+							info.text = "|A:"..minieventData.atlas..":18:18::::|a "..minieventData.text
+						else
+							info.text = "|T"..minieventData.texture..":18:18::::|a "..minieventData.text
+						end
+						info.arg1 = string.format(SHOW_MINIEVENT_ICON, minieventID)
+						info.checked = not RSConfigDB.IsMinieventFiltered(minieventID)
+						info.disabled = not RSConfigDB.IsShowingContainers()
+						LibDD:UIDropDownMenu_AddButton(info, level);
+					end
 				end
 			
 				info.text = AL["MAP_MENU_SHOW_OTHER_RARE_NPCS"];
@@ -445,7 +393,7 @@ local function WorldMapButtonDropDownMenu_Initialize(dropDown, mapID)
 				info.text = "|A:"..RSConstants.ACHIEVEMENT_ICON_ATLAS..":18:18::::|a "..AL["MAP_MENU_SHOW_ACHIEVEMENT_CONTAINERS"];
 				info.arg1 = SHOW_ACHIEVEMENT_CONTAINER_ICONS;
 				info.checked = RSConfigDB.IsShowingAchievementContainers()
-				info.disabled = not RSConfigDB.IsShowingNpcs()
+				info.disabled = not RSConfigDB.IsShowingContainers()
 				LibDD:UIDropDownMenu_AddButton(info, level);
 			
 				info.text = "|A:"..RSConstants.PROFFESION_ICON_ATLAS..":18:18::::|a "..AL["MAP_MENU_SHOW_PROFESSION_CONTAINERS"];
@@ -459,21 +407,19 @@ local function WorldMapButtonDropDownMenu_Initialize(dropDown, mapID)
 				info.checked = RSConfigDB.IsShowingNotTrackeableContainers()
 				info.disabled = not RSConfigDB.IsShowingContainers()
 				LibDD:UIDropDownMenu_AddButton(info, level);
-			
-				if (RSConstants.MINIEVENTS_WORLDMAP_FILTERS[RSConstants.DRAGONFLIGHT_WARCRAFT_RUMBLE_MINIEVENT].active and RSUtils.Contains(RSConstants.MINIEVENTS_WORLDMAP_FILTERS[RSConstants.DRAGONFLIGHT_WARCRAFT_RUMBLE_MINIEVENT].mapIDs, mapID)) then
-					info.text = "|A:"..RSConstants.WARCRAFT_RUMBLE_ICON_ATLAS..":18:18::::|a "..AL["MAP_MENU_SHOW_WARCRAFT_RUMBLE_CONTAINERS"];
-					info.arg1 = SHOW_WARCRAFT_RUMBLE_CONTAINER_ICONS;
-					info.checked = not RSConfigDB.IsMinieventFiltered(RSConstants.DRAGONFLIGHT_WARCRAFT_RUMBLE_MINIEVENT)
-					info.disabled = not RSConfigDB.IsShowingContainers()
-					LibDD:UIDropDownMenu_AddButton(info, level);
-				end
-			
-				if (RSConstants.MINIEVENTS_WORLDMAP_FILTERS[RSConstants.DRAGONFLIGHT_DREAMSEED_MINIEVENT].active and RSUtils.Contains(RSConstants.MINIEVENTS_WORLDMAP_FILTERS[RSConstants.DRAGONFLIGHT_DREAMSEED_MINIEVENT].mapIDs, mapID)) then
-					info.text = "|A:"..RSConstants.DREAMSEED_ATLAS..":18:18::::|a "..AL["MAP_MENU_SHOW_DREAMSEED_CONTAINERS"];
-					info.arg1 = SHOW_DREAMSEED_CONTAINER_ICONS;
-					info.checked = not RSConfigDB.IsMinieventFiltered(RSConstants.DRAGONFLIGHT_DREAMSEED_MINIEVENT)
-					info.disabled = not RSConfigDB.IsShowingContainers()
-					LibDD:UIDropDownMenu_AddButton(info, level);
+				
+				for minieventID, minieventData in pairs (RSConstants.MINIEVENTS_WORLDMAP_FILTERS) do
+					if (minieventData.containers and RSUtils.Contains(minieventData.mapIDs, mapID)) then
+						if (minieventData.atlas) then
+							info.text = "|A:"..minieventData.atlas..":18:18::::|a "..minieventData.text
+						else
+							info.text = "|T"..minieventData.texture..":18:18::::|a "..minieventData.text
+						end
+						info.arg1 = string.format(SHOW_MINIEVENT_ICON, minieventID)
+						info.checked = not RSConfigDB.IsMinieventFiltered(minieventID)
+						info.disabled = not RSConfigDB.IsShowingContainers()
+						LibDD:UIDropDownMenu_AddButton(info, level);
+					end
 				end
 			
 				info.text = AL["MAP_MENU_SHOW_OTHER_CONTAINERS"];

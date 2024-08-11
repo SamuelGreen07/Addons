@@ -45,6 +45,7 @@ local GetInstanceInfo = BigWigsLoader.GetInstanceInfo
 local zoneList = BigWigsLoader.zoneTbl
 local isTestBuild = BigWigsLoader.isTestBuild
 local isClassic = BigWigsLoader.isClassic
+local isVanilla = BigWigsLoader.isVanilla
 local GetSubZoneText = GetSubZoneText
 local TalkingHeadLineInfo = C_TalkingHead and C_TalkingHead.GetCurrentLineInfo
 local GetNextToastToDisplay = C_EventToastManager and C_EventToastManager.GetNextToastToDisplay
@@ -106,7 +107,7 @@ plugin.pluginOptions = {
 					desc = L.blockMoviesDesc,
 					width = "full",
 					order = 2,
-					hidden = isClassic,
+					hidden = isVanilla,
 				},
 				blockGarrison = {
 					type = "toggle",
@@ -144,7 +145,7 @@ plugin.pluginOptions = {
 					desc = L.blockTooltipQuestsDesc,
 					width = "full",
 					order = 7,
-					hidden = isClassic, -- TooltipDataProcessor doesn't exist on classic
+					hidden = GameTooltip and not GameTooltip.IsTooltipType, -- TooltipDataProcessor doesn't exist on classic
 				},
 				blockObjectiveTracker = {
 					type = "toggle",
@@ -152,7 +153,6 @@ plugin.pluginOptions = {
 					desc = L.blockObjectiveTrackerDesc,
 					width = "full",
 					order = 8,
-					hidden = isClassic, -- XXX make compatible with classic
 				},
 				blockTalkingHeads = {
 					type = "multiselect",
@@ -332,7 +332,7 @@ do
 		end
 	end
 	function plugin:OnRegister()
-		if TooltipDataProcessor then
+		if TooltipDataProcessor and GameTooltip and GameTooltip.IsTooltipType then
 			TooltipDataProcessor.AddLinePreCall(8, ShouldFilterQuestProgress) -- Enum.TooltipDataLineType.QuestObjective
 			TooltipDataProcessor.AddLinePreCall(17, ShouldFilterQuestProgress) -- Enum.TooltipDataLineType.QuestTitle
 			TooltipDataProcessor.AddLinePreCall(18, ShouldFilterQuestProgress) -- Enum.TooltipDataLineType.QuestPlayer
@@ -409,6 +409,13 @@ do
 			SetCVar("Sound_EnableErrorSpeech", "1")
 		end
 
+		if not isVanilla then
+			self:RegisterEvent("CINEMATIC_START")
+			self:RegisterEvent("PLAY_MOVIE")
+			self:SiegeOfOrgrimmarCinematics() -- Sexy hack until cinematics have an id system (never)
+			self:ToyCheck() -- Sexy hack until cinematics have an id system (never)
+		end
+
 		if not isClassic then
 			local _, _, _, _, _, _, _, id = GetInstanceInfo()
 			if self.db.profile.redirectToastMsgs and zoneList[id] then -- Instances only
@@ -419,12 +426,15 @@ do
 				self:RegisterEvent("DISPLAY_EVENT_TOASTS")
 			end
 			self:RegisterEvent("TALKINGHEAD_REQUESTED")
-			self:RegisterEvent("CINEMATIC_START")
-			self:RegisterEvent("PLAY_MOVIE")
-			self:SiegeOfOrgrimmarCinematics() -- Sexy hack until cinematics have an id system (never)
-			self:ToyCheck() -- Sexy hack until cinematics have an id system (never)
-
-			CheckElv(self)
+			local frame = ObjectiveTrackerFrame
+			if type(frame) == "table" and type(frame.GetObjectType) == "function" then
+				CheckElv(self, frame)
+			end
+		elseif not isVanilla then
+			local frame = WatchFrame
+			if type(frame) == "table" and type(frame.GetObjectType) == "function" then
+				CheckElv(self, frame)
+			end
 		end
 	end
 end
@@ -545,40 +555,45 @@ do
 		end
 	end
 
-	function CheckElv(self)
+	function CheckElv(self, targetFrame)
 		-- Undo damage by ElvUI (This frame makes the Objective Tracker protected)
-		if type(ObjectiveTrackerFrame.AutoHider) == "table" and bbFrame.GetParent(ObjectiveTrackerFrame.AutoHider) == ObjectiveTrackerFrame then
+		if type(targetFrame.AutoHider) == "table" and type(targetFrame.AutoHider.GetObjectType) == "function" and bbFrame.GetParent(targetFrame.AutoHider) == targetFrame then
 			if InCombatLockdown() or UnitAffectingCombat("player") then
 				self:RegisterEvent("PLAYER_REGEN_ENABLED", function()
-					bbFrame.SetParent(ObjectiveTrackerFrame.AutoHider, (CreateFrame("Frame")))
+					bbFrame.SetParent(targetFrame.AutoHider, (CreateFrame("Frame")))
 					self:UnregisterEvent("PLAYER_REGEN_ENABLED")
 				end)
 			else
-				bbFrame.SetParent(ObjectiveTrackerFrame.AutoHider, (CreateFrame("Frame")))
+				bbFrame.SetParent(targetFrame.AutoHider, (CreateFrame("Frame")))
 			end
 		end
 	end
 
 	local function EditEmotesOnPTR(event, msg, ...)
-		msg = "BigWigs |cFF3366ffNP|r: ".. msg
+		msg = "BigWigs PTR [E]: ".. msg
+		RaidBossEmoteFrame_OnEvent(RaidBossEmoteFrame, event, msg, ...)
+	end
+
+	local function EditWhispersOnPTR(event, msg, ...)
+		msg = "BigWigs PTR [W]: ".. msg
 		RaidBossEmoteFrame_OnEvent(RaidBossEmoteFrame, event, msg, ...)
 	end
 
 	local restoreObjectiveTracker = nil
 	function plugin:OnEngage(_, module)
-		if not module or not module:GetJournalID() or module.worldBoss then return end
+		if not module or (not module:GetJournalID() and not module:GetAllowWin()) or module.worldBoss then return end
 		if next(activatedModules) then
-			activatedModules[module:GetJournalID()] = true
+			activatedModules[module] = true
 			return
 		else
-			activatedModules[module:GetJournalID()] = true
+			activatedModules[module] = true
 		end
 
 		if isTestBuild then -- Don't block emotes on WoW PTR
 			KillEvent(RaidBossEmoteFrame, "RAID_BOSS_EMOTE")
 			KillEvent(RaidBossEmoteFrame, "RAID_BOSS_WHISPER")
 			self:RegisterEvent("RAID_BOSS_EMOTE", EditEmotesOnPTR)
-			self:RegisterEvent("RAID_BOSS_WHISPER", EditEmotesOnPTR)
+			self:RegisterEvent("RAID_BOSS_WHISPER", EditWhispersOnPTR)
 		elseif self.db.profile.blockEmotes then
 			KillEvent(RaidBossEmoteFrame, "RAID_BOSS_EMOTE")
 			KillEvent(RaidBossEmoteFrame, "RAID_BOSS_WHISPER")
@@ -617,16 +632,47 @@ do
 		end
 
 		if not isClassic then
-			CheckElv(self)
-			-- Never hide when tracking achievements or in Mythic+
-			local _, _, diff = GetInstanceInfo()
-			local trackedAchievements = C_ContentTracking.GetTrackedIDs(2) -- Enum.ContentTrackingType.Achievement = 2
-			if not restoreObjectiveTracker and self.db.profile.blockObjectiveTracker and not next(trackedAchievements) and diff ~= 8 and not bbFrame.IsProtected(ObjectiveTrackerFrame) then
-				restoreObjectiveTracker = bbFrame.GetParent(ObjectiveTrackerFrame)
-				if restoreObjectiveTracker then
-					bbFrame.SetFixedFrameStrata(ObjectiveTrackerFrame, true) -- Changing parent would change the strata & level, lock it first
-					bbFrame.SetFixedFrameLevel(ObjectiveTrackerFrame, true)
-					bbFrame.SetParent(ObjectiveTrackerFrame, bbFrame)
+			local frame = ObjectiveTrackerFrame
+			if type(frame) == "table" and type(frame.GetObjectType) == "function" then
+				CheckElv(self, frame)
+				-- Never hide when tracking achievements or in Mythic+
+				local _, _, diff = GetInstanceInfo()
+				local trackedAchievements = C_ContentTracking.GetTrackedIDs(2) -- Enum.ContentTrackingType.Achievement = 2
+				if not restoreObjectiveTracker and self.db.profile.blockObjectiveTracker and not next(trackedAchievements) and diff ~= 8 and not bbFrame.IsProtected(frame) then
+					restoreObjectiveTracker = bbFrame.GetParent(frame)
+					if restoreObjectiveTracker then
+						bbFrame.SetFixedFrameStrata(frame, true) -- Changing parent would change the strata & level, lock it first
+						bbFrame.SetFixedFrameLevel(frame, true)
+						bbFrame.SetParent(frame, bbFrame)
+					end
+				end
+			end
+		elseif not isVanilla then
+			local frame = Questie_BaseFrame or WatchFrame
+			if type(frame) == "table" and type(frame.GetObjectType) == "function" then
+				if frame == WatchFrame then
+					CheckElv(self, frame)
+				end
+				local trackedAchievements = GetTrackedAchievements and GetTrackedAchievements()
+				if not restoreObjectiveTracker and self.db.profile.blockObjectiveTracker and not trackedAchievements and not bbFrame.IsProtected(frame) then
+					restoreObjectiveTracker = bbFrame.GetParent(frame)
+					if restoreObjectiveTracker then
+						bbFrame.SetFixedFrameStrata(frame, true) -- Changing parent would change the strata & level, lock it first
+						bbFrame.SetFixedFrameLevel(frame, true)
+						bbFrame.SetParent(frame, bbFrame)
+					end
+				end
+			end
+		elseif isVanilla then
+			local frame = Questie_BaseFrame or QuestWatchFrame
+			if type(frame) == "table" and type(frame.GetObjectType) == "function" then
+				if not restoreObjectiveTracker and self.db.profile.blockObjectiveTracker and not bbFrame.IsProtected(frame) then
+					restoreObjectiveTracker = bbFrame.GetParent(frame)
+					if restoreObjectiveTracker then
+						bbFrame.SetFixedFrameStrata(frame, true) -- Changing parent would change the strata & level, lock it first
+						bbFrame.SetFixedFrameLevel(frame, true)
+						bbFrame.SetParent(frame, bbFrame)
+					end
 				end
 			end
 		end
@@ -671,16 +717,17 @@ do
 		end
 
 		if restoreObjectiveTracker then
-			bbFrame.SetParent(ObjectiveTrackerFrame, restoreObjectiveTracker)
-			bbFrame.SetFixedFrameStrata(ObjectiveTrackerFrame, false)
-			bbFrame.SetFixedFrameLevel(ObjectiveTrackerFrame, false)
+			local frame = not isClassic and ObjectiveTrackerFrame or Questie_BaseFrame or WatchFrame or QuestWatchFrame
+			bbFrame.SetParent(frame, restoreObjectiveTracker)
+			bbFrame.SetFixedFrameStrata(frame, false)
+			bbFrame.SetFixedFrameLevel(frame, false)
 			restoreObjectiveTracker = nil
 		end
 	end
 
 	function plugin:BigWigs_OnBossDisable(_, module)
-		if not module or not module:GetJournalID() or module.worldBoss then return end
-		activatedModules[module:GetJournalID()] = nil
+		if not module or (not module:GetJournalID() and not module:GetAllowWin()) or module.worldBoss then return end
+		activatedModules[module] = nil
 		if not next(activatedModules) then
 			activatedModules = {}
 			RestoreAll(self)
@@ -885,7 +932,7 @@ do
 	-- Cinematic skipping hack to workaround an item (Vision of Time) that creates cinematics in Siege of Orgrimmar.
 	function plugin:SiegeOfOrgrimmarCinematics()
 		local hasItem
-		local GetItemCount = C_Item and C_Item.GetItemCount or GetItemCount -- XXX 10.2.6
+		local GetItemCount = C_Item and C_Item.GetItemCount or GetItemCount -- XXX Wrath compat
 		for i = 105930, 105935 do -- Vision of Time items
 			local count = GetItemCount(i)
 			if count > 0 then hasItem = true break end -- Item is found in our inventory

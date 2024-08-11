@@ -1,3 +1,54 @@
+# v2.44.0
+
+- Added The War Within Introduction questline
+- Added the Tyr's Return questline
+- Fixed restrictions and prerequisites for Reforging the Tyr's Hand questline
+- Fixed an issue with tooltips not displaying in the category view
+- Fixed an issue with the nav bar dropdown menu not working correctly
+
+# v2.43.1
+
+- Fixed an issue that prevented copying outfits from the Dressing Room and possibly other "Blocked by addon" issues
+
+# v2.43.0
+
+- Updated for 11.0.0
+
+# v2.42.1
+
+- Updated to use multiple interface numbers
+- Updated some faction and quest handling for The War Within api changes
+- Fixed an error loading expansion extensions
+- Fixed errors with frame pools in The War Within
+- Fixed quest markers not showing on the world map in The War Within
+
+# v2.42.0
+
+- Updated waypoints to auto remove when going within 10 yards
+- Updated hanlding reputations for The War Within
+- Updated handling professions for Cataclysm Classic
+- Fixed an error for map waypoints without names
+- Fixed an error for new characters on first login
+
+# v2.41.0
+
+- Added Hunt of the Harbinger questline
+
+# v2.40.0
+
+- Added the Draenei heritage armor questline
+- Added the Troll heritage armor questline
+- Removed obsolete Flightstones questline
+- Fixed names of Embers of Neltharion major questlines
+
+# v2.39.0
+
+- Added Azerothian Archives questline
+
+# v2.38.0
+
+- Updated for 10.2.7
+
 # v2.37.0
 
 - Added Seeds of Renewal questline

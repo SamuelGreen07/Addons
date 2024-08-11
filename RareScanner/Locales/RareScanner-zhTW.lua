@@ -626,5 +626,6 @@ AL["ZONES_FILTERS_SEARCH_DESC"] = "輸入區域名稱來過濾下方的清單"
 		[9996] = "團隊"; --Raids
 		[9995] = "未知"; --Unknown
 		[9994] = "海嶼探險"; --Expedition islands
+		[9993] = "Delves"; --Delves
 	}
 end

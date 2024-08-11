@@ -2,7 +2,7 @@
 -- ChatBar Classic.lua 
 --------------------------------------------------------------------------
 --[[
-ChatBar Classic for Dragonflight
+ChatBar Classic for War Within prepatch
 
 Author: AnduinLothar - karlkfi@yahoo.com
 Graphics: Vynn, Zseton
@@ -11,8 +11,13 @@ Edited: Foxylittlething, aNNiPAk, Yarko
 -Button Bar for openning chat messages of each type.
 
 Change Log:
+v 3.5-WWpre (Foxylittlething)
+- fixed 11.0.0 and 11.0.2 version compatibility
+v 3.4-DF (Foxylittlething)
+- fixed 10.2.7 version compatibility
+- added addon icon in addon management menu
 v 3.3-DF (Foxylittlething)
-- fixed 10.1.5 and 10.1.7 versions compatibality
+- fixed 10.1.5 and 10.1.7 versions compatibility
 - fixed russian localization. Thanks to ZamestoTV
 v 3.22d-DF (Foxylittlething)
 - fixed 10.0.2 version compatibality

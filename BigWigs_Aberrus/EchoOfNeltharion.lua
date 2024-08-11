@@ -8,6 +8,10 @@ mod:RegisterEnableMob(201668) -- Neltharion
 mod:SetEncounterID(2684)
 mod:SetRespawnTime(30)
 mod:SetStage(1)
+mod:SetPrivateAuraSounds({
+	410966, -- Volcanic Heart
+	{407182, option = 407221}, -- Rushing Darkness
+})
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -134,8 +138,6 @@ function mod:OnEngage()
 	end
 
 	self:RegisterUnitEvent("UNIT_HEALTH", nil, "boss1")
-	self:SetPrivateAuraSound(410953, 410966) -- Volcanic Heart
-	self:SetPrivateAuraSound(407221, 407182) -- Rushing Darkness
 end
 
 --------------------------------------------------------------------------------
@@ -144,10 +146,13 @@ end
 
 -- General
 function mod:UNIT_HEALTH(event, unit)
-	if self:GetHealth(unit) < 63 then -- P2 at 60%
+	local hp = self:GetHealth(unit)
+	if hp < 63 then -- P2 at 60%
 		self:UnregisterUnitEvent(event, unit)
-		self:Message("stages", "cyan", CL.soon:format(CL.stage:format(2)), false)
-		self:PlaySound("stages", "info")
+		if hp > 60 then
+			self:Message("stages", "cyan", CL.soon:format(CL.stage:format(2)), false)
+			self:PlaySound("stages", "info")
+		end
 	end
 end
 

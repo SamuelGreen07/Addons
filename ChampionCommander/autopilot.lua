@@ -1,7 +1,7 @@
 local __FILE__=tostring(debugstack(1,2,0):match("(.*):1:")) -- Always check line number in regexp and file, must be 1
---[===[@debug@
+--[==[@debug@
 print('Loaded',__FILE__)
---@end-debug@]===]
+--@end-debug@]==]
 local function pp(...) print(GetTime(),"|cff009900",__FILE__:sub(-15),strjoin(",",tostringall(...)),"|r") end
 --*TYPE module
 --*CONFIG noswitch=false,profile=true,enhancedProfile=true
@@ -63,7 +63,7 @@ local HideTT=ChampionCommanderMixin.HideTT
 
 local dprint=print
 local ddump
---[===[@debug@
+--[==[@debug@
 C_AddOns.LoadAddOn("Blizzard_DebugTools")
 ddump=DevTools_Dump
 C_AddOns.LoadAddOn("LibDebug")
@@ -71,7 +71,7 @@ C_AddOns.LoadAddOn("LibDebug")
 if LibDebug then LibDebug() dprint=print end
 local safeG=addon.safeG
 
---@end-debug@]===]
+--@end-debug@]==]
 --@non-debug@
 dprint=function() end
 ddump=function() end
@@ -119,9 +119,9 @@ function module:Cleanup()
 	wipe(safeguard)
 end
 function module:GARRISON_MISSION_STARTED(event,missionType,missionID)
---[===[@debug@
+--[==[@debug@
   print(event,missionType,missionID)
---@end-debug@]===]
+--@end-debug@]==]
 
 	if missionType == LE_FOLLOWER_TYPE_GARRISON_8_0 then
 		self:UnregisterEvent("GARRISON_MISSION_STARTED")
@@ -193,18 +193,18 @@ function module:DoRunMissions()
 					G.StartMission(missionID)
 					addon:Print(C(L["Started with "],"green") ..info)
 					PlaySound(SOUNDKIT.UI_GARRISON_COMMAND_TABLE_MISSION_START)
-					--[===[@debug@
+					--[==[@debug@
 					dprint("Calling OHF:UpdateMissions")
-					--@end-debug@]===]
+					--@end-debug@]==]
 					OHFFollowerList.dirtyList=true
 					OHFFollowerList:UpdateFollowers();
 					OHFMissions:UpdateMissions()
-					--[===[@debug@
+					--[==[@debug@
 					if multiple then
 					  addon:Print("Multiple is running")
 						self:ScheduleTimer("DoRunMissions",1)
 					end
-					--@end-debug@]===]
+					--@end-debug@]==]
 					break
 				else
 					addon:Print(C(L["Would start with "],"green") ..info)
@@ -258,9 +258,9 @@ function module:FireMission(missionID,frame,truerun)
         G.StartMission(missionID)
         addon:Print(C(L["Started with "],"green") ..info)
         PlaySound(SOUNDKIT.UI_GARRISON_COMMAND_TABLE_MISSION_START)
-        --[===[@debug@
+        --[==[@debug@
         dprint("Calling OHF:UpdateMissions")
-        --@end-debug@]===]
+        --@end-debug@]==]
         OHFFollowerList.dirtyList=true
         OHFFollowerList:UpdateFollowers();
         OHFMissions:UpdateMissions()

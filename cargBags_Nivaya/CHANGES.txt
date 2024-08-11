@@ -1,14 +1,11 @@
 ------------------------------------------------------------------------
-r125 | humfras | 2023-05-20 13:28:31 +0000 (Sat, 20 May 2023) | 3 lines
+r132 | humfras | 2024-05-29 20:17:18 +0000 (Wed, 29 May 2024) | 1 line
 Changed paths:
-   M /trunk/cargBags/mixins-add/default.scaffold.lua
+   M /trunk/cargBags/base/implementation.lua
+   M /trunk/cargBags/mixins/parseBags.lua
    M /trunk/cargBags_Nivaya.toc
-   M /trunk/cargBags_Nivaya_TBC.toc
-   M /trunk/cargBags_Nivaya_Vanilla.toc
-   M /trunk/cargBags_Nivaya_Wrath.toc
+   M /trunk/filters.lua
 
-* update toc
-* update icon border scaling
-* add icon texture for addon menu
+*fix Cataclysm keyring bug
 ------------------------------------------------------------------------
 

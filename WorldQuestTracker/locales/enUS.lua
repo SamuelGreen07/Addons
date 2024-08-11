@@ -3,6 +3,9 @@ local languageTable = DetailsFramework.Language.RegisterLanguage(addonId, "enUS"
 local L = languageTable
 
 
+L["S_OPTTIONS_AUTOACCEPT_ABANDONQUEST"] = "Auto Accept Abandon Quests"
+L["S_OPTTIONS_AUTOACCEPT_ABANDONQUEST_DESC"] = "Don't show the confirmation dialog when abandoning a quest."
+
 L["S_TRACKEROPTIONS_BACKGROUNDALPHA"] = "Background Alpha"
 
 L["S_OPTTIONS_TAB_DRAGONRACE_SETTINGS"] = "Dragon Race"
@@ -325,6 +328,8 @@ L["S_OPTIONS_WORLDMAP_ANCHOR_TO"] = "Attach To"
 L["S_OPTIONS_WORLDMAP_ORGANIZEBY"] = "Organize Quests By"
 L["S_OPTIONS_WORLDMAP_WIDGET_ALPHA"] = "Pin Alpha"
 L["S_OPTIONS_ZONE_SHOWONLYTRACKED"] = "Only Tracked"
+L["S_OPTTIONS_AUTOACCEPT_ABANDONQUEST"] = "Auto Accept Abandon Quests"
+L["S_OPTTIONS_AUTOACCEPT_ABANDONQUEST_DESC"] = "Don't show the confirmation dialog when abandoning a quest."
 L["S_OPTTIONS_DRAGONRACE_MINIMAP"] = "Show Track Minimap"
 L["S_OPTTIONS_DRAGONRACE_TRACKCOLOR"] = "Track Color"
 L["S_OPTTIONS_TAB_DRAGONRACE_SETTINGS"] = "Dragon Race"

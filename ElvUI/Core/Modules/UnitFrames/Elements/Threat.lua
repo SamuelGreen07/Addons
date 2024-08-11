@@ -32,11 +32,15 @@ function UF:Configure_Threat(frame)
 	local threat = frame.ThreatIndicator
 	if not threat then return end
 
-	local threatStyle = frame.db and frame.db.threatStyle
+	local db = frame.db
+	local threatStyle = db and db.threatStyle
 	if threatStyle and threatStyle ~= 'NONE' then
 		if not frame:IsElementEnabled('ThreatIndicator') then
 			frame:EnableElement('ThreatIndicator')
 		end
+
+		local unit = frame.unitframeType
+		threat.feedbackUnit = db.threatPlayer and (unit == 'target' or unit == 'focus') and 'player' or nil
 
 		if threatStyle == 'GLOW' then
 			threat:SetFrameStrata('BACKGROUND')
@@ -97,6 +101,7 @@ do
 		if classPower then UF:ThreatBorderColor(classPower.backdrop, status, r, g, b) end
 		if parent.ClassPower then UF:ThreatBorderColor(parent.ClassPower.backdrop, status, r, g, b) end
 		if parent.AlternativePower then UF:ThreatBorderColor(parent.AlternativePower.backdrop, status, r, g, b) end
+		if parent.EclipseBar then UF:ThreatBorderColor(parent.EclipseBar.backdrop, status, r, g, b) end
 	end
 end
 
@@ -108,7 +113,7 @@ function UF:ThreatHandler(threat, parent, threatStyle, status, r, g, b)
 		threat.PowerGlow:SetShown(parent.USE_POWERBAR_OFFSET and status)
 		threat.PowerGlow:SetBackdropBorderColor(r, g, b)
 	elseif threatStyle == 'BORDERS' then
-		local cb = parent.Castbar
+		local cb = parent.db.castbar and parent.Castbar
 		if cb and parent.db.castbar.overlayOnFrame ~= 'None' then
 			UF:ThreatBorderColor(cb.backdrop, status, r, g, b)
 			UF:ThreatBorderColor(cb.ButtonIcon.bg, status, r, g, b)
@@ -125,7 +130,7 @@ function UF:ThreatHandler(threat, parent, threatStyle, status, r, g, b)
 		UF:ThreatBorderColor(parent.Health.backdrop, status, r, g, b)
 		UF:ThreatClassBarBorderColor(parent, status, r, g, b)
 	elseif threatStyle == 'HEALTHBORDER' then
-		local cb = parent.Castbar
+		local cb = parent.db.castbar and parent.Castbar
 		if cb and parent.db.castbar.overlayOnFrame == 'Health' then
 			UF:ThreatBorderColor(cb.backdrop, status, r, g, b)
 			UF:ThreatBorderColor(cb.ButtonIcon.bg, status, r, g, b)
@@ -133,7 +138,7 @@ function UF:ThreatHandler(threat, parent, threatStyle, status, r, g, b)
 
 		UF:ThreatBorderColor(parent.Health.backdrop, status, r, g, b)
 	elseif threatStyle == 'INFOPANELBORDER' then
-		local cb = parent.Castbar
+		local cb = parent.db.castbar and parent.Castbar
 		if cb and parent.db.castbar.overlayOnFrame == 'InfoPanel' then
 			UF:ThreatBorderColor(cb.backdrop, status, r, g, b)
 			UF:ThreatBorderColor(cb.ButtonIcon.bg, status, r, g, b)
@@ -150,12 +155,13 @@ end
 
 function UF:UpdateThreat(unit, status, r, g, b)
 	local parent = self:GetParent()
-	local db = parent.db and parent.db.threatStyle
-	local badunit = not unit or parent.unit ~= unit
 
-	if not badunit and status and status > 1 then
-		UF:ThreatHandler(self, parent, db, status, r, g, b)
+	local db = parent.db
+	if not db then return end
+
+	if (unit and parent.unit == unit) and status and status > (db.threatPrimary and 1 or 0) then
+		UF:ThreatHandler(self, parent, db.threatStyle, status, r, g, b)
 	else
-		UF:ThreatHandler(self, parent, db, nil, unpack(E.media.unitframeBorderColor))
+		UF:ThreatHandler(self, parent, db.threatStyle, nil, unpack(E.media.unitframeBorderColor))
 	end
 end

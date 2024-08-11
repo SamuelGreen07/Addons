@@ -101,6 +101,17 @@ function RSEventDB.GetInternalEventCoordinates(eventID, mapID)
 	return nil
 end
 
+function RSEventDB.GetInternalEventOverlay(eventID, mapID)
+	if (eventID and mapID) then
+		local eventInfo = GetInternalEventInfoByMapID(eventID, mapID)
+		if (eventInfo) then
+			return eventInfo.overlay
+		end
+	end
+
+	return nil
+end
+
 function RSEventDB.IsInternalEventMultiZone(eventID)
 	local eventInfo = RSEventDB.GetInternalEventInfo(eventID)
 	return eventInfo and type(eventInfo.zoneID) == "table"

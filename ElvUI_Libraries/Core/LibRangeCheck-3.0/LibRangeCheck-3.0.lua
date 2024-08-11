@@ -40,7 +40,7 @@ License: MIT
 -- @class file
 -- @name LibRangeCheck-3.0
 local MAJOR_VERSION = "LibRangeCheck-3.0-ElvUI"
-local MINOR_VERSION = 15 -- real minor version: 13
+local MINOR_VERSION = 19 -- based off real minor version: 21
 
 -- GLOBALS: LibStub, CreateFrame
 
@@ -63,17 +63,11 @@ local strsplit = strsplit
 local tostring = tostring
 local setmetatable = setmetatable
 
+local IsSpellKnownOrOverridesKnown = IsSpellKnownOrOverridesKnown
 local CheckInteractDistance = CheckInteractDistance
 local GetInventoryItemLink = GetInventoryItemLink
-local GetItemInfo = GetItemInfo
-local GetNumSpellTabs = GetNumSpellTabs
-local GetSpellBookItemInfo = GetSpellBookItemInfo
-local GetSpellInfo = GetSpellInfo
-local GetSpellTabInfo = GetSpellTabInfo
 local GetTime = GetTime
 local InCombatLockdown = InCombatLockdown
-local IsItemInRange = IsItemInRange
-local IsSpellInRange = IsSpellInRange
 local UnitCanAssist = UnitCanAssist
 local UnitCanAttack = UnitCanAttack
 local UnitClass = UnitClass
@@ -84,25 +78,71 @@ local UnitIsUnit = UnitIsUnit
 local UnitIsVisible = UnitIsVisible
 local UnitRace = UnitRace
 
+local GetItemInfo = C_Item.GetItemInfo
+local IsItemInRange = C_Item.IsItemInRange
+
+local BOOKTYPE_SPELL = (Enum.SpellBookSpellBank and Enum.SpellBookSpellBank.Player) or BOOKTYPE_SPELL or 'spell'
+
+local GetNumSpellTabs = C_SpellBook.GetNumSpellBookSkillLines or GetNumSpellTabs
+
+local C_SpellBook_GetSpellBookItemInfo = C_SpellBook.GetSpellBookItemInfo
+local CustomSpellBookItemData = C_SpellBook_GetSpellBookItemInfo and function(index, bookType)
+  local result = C_SpellBook_GetSpellBookItemInfo(index, bookType)
+  return result.name, result.subName, result.spellID, result.itemType, result.isPassive
+end or _G.GetSpellBookItemName
+
+local C_Spell_IsSpellInRange = C_Spell.IsSpellInRange
+local CustomSpellBookItemInRange = C_Spell_IsSpellInRange and function(spellID, spellBank, unit)
+  local result = C_Spell_IsSpellInRange(spellID, unit)
+  if result == true then
+    return 1
+  elseif result == false then
+    return 0
+  end
+  return nil
+end or _G.IsSpellInRange
+
+local C_Spell_GetSpellInfo = C_Spell.GetSpellInfo
+local CustomSpellInfo = C_Spell_GetSpellInfo and function(spellID)
+  if not spellID then
+    return nil;
+  end
+
+  local spellInfo = C_Spell_GetSpellInfo(spellID);
+  if spellInfo then
+    return spellInfo.name, nil, spellInfo.iconID, spellInfo.castTime, spellInfo.minRange, spellInfo.maxRange, spellInfo.spellID, spellInfo.originalIconID;
+  end
+end or _G.GetSpellInfo
+
+local C_SpellBook_GetSpellBookSkillLineInfo = C_SpellBook.GetSpellBookSkillLineInfo
+local CustomSpellTabInfo = C_SpellBook_GetSpellBookSkillLineInfo and function(index)
+  local skillLineInfo = C_SpellBook_GetSpellBookSkillLineInfo(index);
+  if skillLineInfo then
+    return skillLineInfo.name,
+        skillLineInfo.iconID,
+        skillLineInfo.itemIndexOffset,
+        skillLineInfo.numSpellBookItems,
+        skillLineInfo.isGuild,
+        skillLineInfo.offSpecID,
+        skillLineInfo.shouldHide,
+        skillLineInfo.specID;
+  end
+end or _G.GetSpellTabInfo
+
 local C_Timer = C_Timer
 local Item = Item
 
-local BOOKTYPE_SPELL = BOOKTYPE_SPELL
 local HandSlotId = GetInventorySlotInfo("HANDSSLOT")
 
 local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 local isWrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
 local isEra = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+local isCata = WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC
 
 local IsEngravingEnabled = C_Engraving and C_Engraving.IsEngravingEnabled
 local isEraSOD = IsEngravingEnabled and IsEngravingEnabled()
 
-local InCombatLockdownRestriction
-if isRetail or isEra then
-  InCombatLockdownRestriction = function(unit) return InCombatLockdown() and not UnitCanAttack("player", unit) end
-else
-  InCombatLockdownRestriction = function() return false end
-end
+local InCombatLockdownRestriction = function(unit) return InCombatLockdown() and not UnitCanAttack("player", unit) end
 
 -- << STATIC CONFIG
 
@@ -133,6 +173,7 @@ local InteractLists = {
 }
 
 local MeleeRange = 2
+local MatchSpellByID = {} -- specific matching to avoid incorrect index
 local FriendSpells, HarmSpells, ResSpells, PetSpells = {}, {}, {}, {}
 
 for _, n in ipairs({ "EVOKER", "DEATHKNIGHT", "DEMONHUNTER", "DRUID", "HUNTER", "SHAMAN", "MAGE", "PALADIN", "PRIEST", "WARLOCK", "WARRIOR", "MONK", "ROGUE" }) do
@@ -140,9 +181,10 @@ for _, n in ipairs({ "EVOKER", "DEATHKNIGHT", "DEMONHUNTER", "DRUID", "HUNTER", 
 end
 
 -- Evoker
-tinsert(HarmSpells.EVOKER, 369819) -- Disintegrate (25 yards)
+tinsert(HarmSpells.EVOKER, 362969) -- Azure Strike (25 yards)
 
 tinsert(FriendSpells.EVOKER, 361469) -- Living Flame (25 yards)
+tinsert(FriendSpells.EVOKER, 431443) -- Chrono Flames (25 yards) (Hero Talent, overrides Living Flame)
 tinsert(FriendSpells.EVOKER, 360823) -- Naturalize (Preservation) (30 yards)
 
 tinsert(ResSpells.EVOKER, 361227) -- Return (40 yards)
@@ -196,6 +238,8 @@ if not isRetail then
 end
 
 if isEraSOD then
+  MatchSpellByID[401417] = true -- Regeneration (Rune): Conflicts with Racial Passive on Trolls
+
   tinsert(FriendSpells.MAGE, 401417) -- Regeneration (40 yards)
   tinsert(FriendSpells.MAGE, 412510) -- Mass Regeneration (40 yards)
 end
@@ -208,7 +252,11 @@ tinsert(HarmSpells.MAGE, 133) -- Fireball (40 yards)
 tinsert(HarmSpells.MAGE, 44425) -- Arcane Barrage (40 yards)
 
 -- Monks
-tinsert(FriendSpells.MONK, 115450) -- Detox (40 yards)
+MatchSpellByID[218164] = true -- Detox
+MatchSpellByID[115450] = true -- Detox
+
+tinsert(FriendSpells.MONK, 218164) -- Detox (40 yards): Brewmaster, Windwalker
+tinsert(FriendSpells.MONK, 115450) -- Detox (40 yards): Mistweaver
 tinsert(FriendSpells.MONK, 115546) -- Provoke (30 yards)
 tinsert(FriendSpells.MONK, 116670) -- Vivify (40 yards)
 
@@ -551,7 +599,7 @@ local lastUpdate = 0
 local checkers_Spell = setmetatable({}, {
   __index = function(t, spellIdx)
     local func = function(unit)
-      if IsSpellInRange(spellIdx, BOOKTYPE_SPELL, unit) == 1 then
+      if CustomSpellBookItemInRange(spellIdx, BOOKTYPE_SPELL, unit) == 1 then
         return true
       end
     end
@@ -648,21 +696,20 @@ local function initItemRequests(cacheAll)
 end
 
 local function getNumSpells()
-  local _, _, offset, numSpells = GetSpellTabInfo(GetNumSpellTabs())
+  local _, _, offset, numSpells = CustomSpellTabInfo(GetNumSpellTabs())
   return offset + numSpells
 end
 
 -- return the spellIndex of the given spell by scanning the spellbook
-local allowSpellType = { SPELL = true, FUTURESPELL = true }
 local function findSpellIdx(spellName, sid)
   if not spellName or spellName == "" then
     return nil
   end
 
   for i = 1, getNumSpells() do
-    local spellType, id = GetSpellBookItemInfo(i, BOOKTYPE_SPELL)
-    if sid == id and allowSpellType[spellType] then
-      return i
+    local name, _, id, spellType, isPassive = CustomSpellBookItemData(i, BOOKTYPE_SPELL)
+    if (sid == id and IsSpellKnownOrOverridesKnown(id)) or (spellName == name and not MatchSpellByID[id]) then
+      return (not spellType and i) or (not isPassive and id)
     end
   end
 
@@ -676,13 +723,14 @@ local function fixRange(range)
 end
 
 local function getSpellData(sid)
-  local name, _, _, _, minRange, range = GetSpellInfo(sid)
+  local name, _, _, _, minRange, range = CustomSpellInfo(sid)
   return name, fixRange(minRange), fixRange(range), findSpellIdx(name, sid)
 end
 
 -- minRange should be nil if there's no minRange, not 0
 local function addChecker(t, range, minRange, checker, info)
-  local rc = { ["range"] = range, ["minRange"] = minRange, ["checker"] = checker, ["info"] = info }
+  local rc = { range = range, minRange = minRange, checker = checker, info = info }
+
   for i = 1, #t do
     local v = t[i]
     if rc.range == v.range then
@@ -992,7 +1040,7 @@ lib.CHECKERS_CHANGED = "CHECKERS_CHANGED"
 lib.MeleeRange = MeleeRange
 
 function lib:findSpellIndex(spell)
-  local name, _, _, _, _, _, sid = GetSpellInfo(spell)
+  local name, _, _, _, _, _, sid = CustomSpellInfo(spell)
   return findSpellIdx(name, sid)
 end
 
@@ -1384,11 +1432,11 @@ function lib:activate()
     frame:RegisterEvent("CHARACTER_POINTS_CHANGED")
     frame:RegisterEvent("SPELLS_CHANGED")
 
-    if isEra or isWrath then
+    if isEra or isCata then
       frame:RegisterEvent("CVAR_UPDATE")
     end
 
-    if isRetail or isWrath then
+    if isRetail or isCata then
       frame:RegisterEvent("PLAYER_TALENT_UPDATE")
     end
 

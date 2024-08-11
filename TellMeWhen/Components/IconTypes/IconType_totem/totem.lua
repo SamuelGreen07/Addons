@@ -19,8 +19,8 @@ local print = TMW.print
 
 local format, type, tonumber, wipe, bit =
 	  format, type, tonumber, wipe, bit
-local GetTotemInfo, GetSpellInfo =
-	  GetTotemInfo, GetSpellInfo
+local GetTotemInfo =
+	  GetTotemInfo
 
 local GetSpellTexture = TMW.GetSpellTexture
 local strlowerCache = TMW.strlowerCache
@@ -210,7 +210,7 @@ function Type:Setup(icon)
 		name = ""
 	end
 
-	icon.Spells = TMW:GetSpells(name, true)
+	icon.Spells = TMW:GetSpells(name, false)
 
 	icon.FirstTexture = icon.Spells.FirstString and GetSpellTexture(icon.Spells.FirstString) 
 	if not icon.FirstTexture and onlySlot then

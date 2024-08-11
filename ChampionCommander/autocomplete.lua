@@ -1,7 +1,7 @@
 local __FILE__=tostring(debugstack(1,2,0):match("(.*):1:")) -- Always check line number in regexp and file, must be 1
---[===[@debug@
+--[==[@debug@
 print('Loaded',__FILE__)
---@end-debug@]===]
+--@end-debug@]==]
 local function pp(...) print(GetTime(),"|cff009900",__FILE__:sub(-15),strjoin(",",tostringall(...)),"|r") end
 --*TYPE module
 --*CONFIG noswitch=false,profile=true,enhancedProfile=true
@@ -63,7 +63,7 @@ local HideTT=ChampionCommanderMixin.HideTT
 
 local dprint=print
 local ddump
---[===[@debug@
+--[==[@debug@
 C_AddOns.LoadAddOn("Blizzard_DebugTools")
 ddump=DevTools_Dump
 C_AddOns.LoadAddOn("LibDebug")
@@ -71,7 +71,7 @@ C_AddOns.LoadAddOn("LibDebug")
 if LibDebug then LibDebug() dprint=print end
 local safeG=addon.safeG
 
---@end-debug@]===]
+--@end-debug@]==]
 --@non-debug@
 dprint=function() end
 ddump=function() end
@@ -128,10 +128,10 @@ end
 function module:GenerateMissionCompleteList(title,anchor)
 ---@diagnostic disable-next-line: param-type-mismatch
 	local w=AceGUI:Create("BFAMissionsList")
---[===[@debug@
+--[==[@debug@
 ---@diagnostic disable-next-line: undefined-field
 	title=format("%s %s %s",title,w.frame:GetName(),GetTime()*1000)
---@end-debug@]===]
+--@end-debug@]==]
 ---@diagnostic disable-next-line: undefined-field
 	w:SetTitle(title)
 	w:SetCallback("OnClose",function(widget) return module:MissionsCleanup() end)
@@ -148,11 +148,11 @@ function module:GenerateMissionCompleteList(title,anchor)
 	w.frame:SetFrameStrata("HIGH")
 	return w
 end
---[===[@debug@
+--[==[@debug@
 function addon:ShowRewards()
 	return module:GenerateMissionCompleteList("Test",UIParent)
 end
---@end-debug@]===]
+--@end-debug@]==]
 local cappedCurrencies={
 	GARRISON_CURRENCY,
 	GARRISON_SHIP_OIL_CURRENCY
@@ -218,11 +218,11 @@ end
 function module:AutoClose()
 	if report then
 	 local rc,message=pcall(report.Close,report)
-	 --[===[@debug@
+	 --[==[@debug@
 	 if not rc then
 	   pp("Failed closing report due to",message)
 	 end
-	 --@end-debug@]===]
+	 --@end-debug@]==]
 	 report=nil
   end
 	pcall(OHF.CloseMissionComplete,OHF)
@@ -251,12 +251,12 @@ function module:MissionComplete(this,button,skiprescheck)
 		end
 		local message=C("WARNING",'red')
 		local wasted={}
-		--[===[@debug@
+		--[==[@debug@
 ---@diagnostic disable-next-line: undefined-field
 		if _G.ONEONE then
 		  missions={missions[1]}
 		end
-		--@end-debug@]===]
+		--@end-debug@]==]
 		for i=1,#missions do
 			for _,v in pairs(missions[i].followers) do
 				rewards.followerQLevel[v]=addon:GetFollowerData(v,'qLevel',0)
@@ -488,9 +488,9 @@ function module:MissionsPrintResults(success)
 	stopTimer()
 	local reported
 	local followers
-	--[===[@debug@
+	--[==[@debug@
 	_G["BFAtestrewards"]=rewards
-	--@end-debug@]===]
+	--@end-debug@]==]
 	for k,v in pairs(rewards.currencies) do
 		reported=true
 		if k == 0 then
@@ -551,10 +551,10 @@ function module:MissionsPrintResults(success)
 	end
 	if mebefore.level < 110 then
 		fillMyStatus(meafter)
-		--[===[@debug@
+		--[==[@debug@
 		--printMyStatus(mebefore)
 		--printMyStatus(meafter)
-		--@end-debug@]===]
+		--@end-debug@]==]
 		local xpgain=0
 		if meafter.level>mebefore.level then
 			xpgain=mebefore.xpMax-mebefore.xp + meafter.xp

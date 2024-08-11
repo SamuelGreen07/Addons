@@ -6,16 +6,13 @@
 ## Interface-Cata: 40400
 ## IconTexture: Interface\Icons\Spell_nature_heavypolymorph1
 ## Title: Lib: DRList-1.0
-## Version: 70ddc17
+## Version: c25c68c
 ## X-Category: Library
 ## X-License: MIT
 ## X-Curse-Project-ID: 315757
 ## X-Wago-ID: 9rN4BxKD
 
-#@no-lib-strip@
 libs\LibStub\LibStub.lua
-#@end-no-lib-strip@
-
 DRList-1.0.xml
 
 #@do-not-package@
@@ -24,4 +21,5 @@ tests\test-retail.lua
 tests\test-classic.lua
 tests\test-tbc.lua
 tests\test-wotlk.lua
+tests\test-cata.lua
 #@end-do-not-package@

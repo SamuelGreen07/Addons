@@ -64,10 +64,6 @@ function RSEntityStateHandler.SetDeadNpcByZone(npcID, mapID, loadingAddon)
 	elseif (RSMapDB.IsEntityInReseteableZone(npcID, mapID, alreadyFoundInfo)) then
 		RSLogger:PrintDebugMessage(string.format("NPC [%s]. Resetea con las misiones del mundo (por pertenecer a una zona reseteable)", npcID))
 		RSNpcDB.SetNpcKilled(npcID, time() + GetQuestResetTime())
-	-- If its a warfront reseteable rare
-	elseif (RSMapDB.IsEntityInWarfrontZone(npcID, mapID, alreadyFoundInfo)) then
-		RSLogger:PrintDebugMessage(string.format("NPC [%s]. Resetea cada 2 semanas (Warfront)", npcID))
-		RSNpcDB.SetNpcKilled(npcID, time() + C_DateAndTime.GetSecondsUntilWeeklyReset() + RSTimeUtils.DaysToSeconds(7))
 	-- If it wont ever be a rare anymore
 	elseif (RSMapDB.IsEntityInPermanentZone(npcID, mapID, alreadyFoundInfo)) then
 		RSLogger:PrintDebugMessage(string.format("NPC [%s]. Deja de ser un rare NPC", npcID))
@@ -246,10 +242,6 @@ local function SetContainerOpenByZone(containerID, mapID, loadingAddon)
 		elseif (RSContainerDB.IsContainerReseteable(containerID)) then
 			RSLogger:PrintDebugMessage(string.format("Contenedor [%s]. Resetea con las misiones del mundo (detectado al haberse encontrado por segunda vez)", containerID))
 			RSContainerDB.SetContainerOpened(containerID, time() + GetQuestResetTime())
-		-- If its a warfront reseteable container
-		elseif (RSMapDB.IsEntityInWarfrontZone(containerID, mapID, containerAlreadyFoundInfo)) then
-			RSLogger:PrintDebugMessage(string.format("Contenedor [%s]. Resetea cada 2 semanas (Warfront)", containerID))
-			RSContainerDB.SetContainerOpened(containerID, time() + C_DateAndTime.GetSecondsUntilWeeklyReset() + RSTimeUtils.DaysToSeconds(7))
 		-- If it wont ever be open anymore
 		elseif (RSMapDB.IsEntityInPermanentZone(containerID, mapID, containerAlreadyFoundInfo)) then
 			RSLogger:PrintDebugMessage(string.format("Contenedor [%s]. No se puede abrir de nuevo", containerID))
@@ -296,8 +288,8 @@ function RSEntityStateHandler.SetContainerOpen(containerID, loadingAddon)
 	end
 	
 	-- Mark as opened
-	local containerInfo = RSContainerDB.GetInternalContainerInfo(containerID)
-	if (containerInfo) then
+	local containerInfo = RSContainerDB.GetInternalContainerInfo(containerID)	
+	if (containerInfo) then	
 		-- Remove recently seen
 		local x, y = RSRecentlySeenTracker.RemoveRecentlySeen(containerID)
 	

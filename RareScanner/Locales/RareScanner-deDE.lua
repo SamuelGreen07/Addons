@@ -296,6 +296,7 @@ AL["CONTAINER_376584"] = "Vorratstruhe der Dracthyr"
 AL["CONTAINER_376585"] = "Vorratsdepot des Eisschlunds"
 AL["CONTAINER_376587"] = "Expeditionsspäherpack"
 AL["CONTAINER_376657"] = "Uraltes Monument"
+AL["CONTAINER_377317"] = "Schatzhort"
 AL["CONTAINER_377587"] = "Geschmolzene Kiste"
 AL["CONTAINER_377899"] = "Versteckte Flunkergeisel"
 AL["CONTAINER_377900"] = "Kriegsspeer der Nokhud"
@@ -801,5 +802,6 @@ AL["ZONES_FILTERS_SEARCH_DESC"] = "Gib den Namen der Zone ein, um die untenstehe
 		[9996] = "Schlachtzüge"; --Raids
 		[9995] = "Unbekannt"; --Unknown
 		[9994] = "Expedition islands"; --Expedition islands
+		[9993] = "Delves"; --Delves
 	}
 end

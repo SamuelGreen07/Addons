@@ -96,7 +96,7 @@ local function renderImportWindow(container, fromOverwolf)
 		_panelCover:AddChild(coverMsg)
 		coverMsg:SetWidth(500)
 		coverMsg:SetFont(Amr.CreateFont("Regular", 16, Amr.Colors.TextTan))
-		coverMsg:SetJustifyH("MIDDLE")
+		coverMsg:SetJustifyH("CENTER")
 		coverMsg:SetJustifyV("MIDDLE")
 		coverMsg:SetText(L.ImportOverwolfWait)
 		coverMsg:SetPoint("CENTER", _panelCover.frame, "CENTER", 0, 20)
@@ -393,11 +393,13 @@ function Amr:ImportCharacter(data, isTest, isChild)
         table.insert(talents, talCol)
     end
 
+    local heroTreeEntryId = tonumber(parts[14])
+
     --local soulbindId = tonumber(parts[14])
     --local soulbindNodes = parseSoulbinds(parts[15])
     --local essences = parseEssenceList(parts[15])
 
-    local importData = parseItemList(parts, 15, "n/a", true)
+    local importData = parseItemList(parts, 16, "n/a", true)
     
     -- extra information contains setup id, display label, then extra enchant info        
     parts = { strsplit("@", data1[3]) }
@@ -464,10 +466,11 @@ function Amr:ImportCharacter(data, isTest, isChild)
             Id = setupId,
             Label = setupName,
             Gear = importData,
-            Talents = talents,        
-            TalentConfigId = setupTalentConfigId,
-            SoulbindId = soulbindId,
-            SoulbindNodes = soulbindNodes
+            Talents = talents,
+            HeroTreeEntryId = heroTreeEntryId,
+            TalentConfigId = setupTalentConfigId
+            --SoulbindId = soulbindId,
+            --SoulbindNodes = soulbindNodes
             --Essences = essences
         }
 

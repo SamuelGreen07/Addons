@@ -950,7 +950,7 @@ function ChainMixin:GetSubtext(character, small)
 end
 function ChainMixin:GetLink()
     if self.link == nil then
-        self.link = format("\124cffffff00\124Hbtwquests:chain:%s\124h[%s]\124h\124r", self:GetID(), self:GetName())
+        self.link = format("\124cffffff00\124Hgarrmission:btwquests:chain:%s\124h[%s]\124h\124r", self:GetID(), self:GetName())
     end
 
     return self.link
@@ -1125,7 +1125,7 @@ function CategoryMixin:GetParent()
 end
 function CategoryMixin:GetLink()
     if self.link == nil then
-        self.link = format("\124cffffff00\124Hbtwquests:category:%s\124h[%s]\124h\124r", self:GetID(), self:GetName())
+        self.link = format("\124cffffff00\124Hgarrmission:btwquests:category:%s\124h[%s]\124h\124r", self:GetID(), self:GetName())
     end
 
     return self.link
@@ -1290,7 +1290,7 @@ end
 local ExpansionMixin = CreateFromMixins(CategoryMixin);
 function ExpansionMixin:GetLink()
     if self.link == nil then
-        self.link = format("\124cffffff00\124Hbtwquests:expansion:%s\124h[%s]\124h\124r", self:GetID(), self:GetName())
+        self.link = format("\124cffffff00\124Hgarrmission:btwquests:expansion:%s\124h[%s]\124h\124r", self:GetID(), self:GetName())
     end
 
     return self.link
@@ -1381,8 +1381,10 @@ function ExpansionMixin:SetAutoLoad(value)
 end
 function ExpansionMixin:Load()
     wipe(self.database.questCache);
-    for addon in pairs(self.addons) do
-        LoadAddOn(addon)
+    if self.addons then
+        for addon in pairs(self.addons) do
+            LoadAddOn(addon)
+        end
     end
 end
 
@@ -2188,7 +2190,7 @@ function ExperienceItemMixin:GetName(database, item, character)
     return format(GAIN_EXPERIENCE, math.floor(amount * modifier + .5))
 end
 function ExperienceItemMixin:Visible(database, item, character)
-    return character:GetLevel() < MAX_PLAYER_LEVEL
+    return character:GetLevel() < GetMaxLevelForPlayerExpansion()
 end
 function ExperienceItemMixin:IsActive(database, item, character)
     return true

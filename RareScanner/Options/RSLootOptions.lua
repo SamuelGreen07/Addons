@@ -6,7 +6,7 @@ local ADDON_NAME, private = ...
 local LibStub = _G.LibStub
 local RareScanner = LibStub("AceAddon-3.0"):GetAddon("RareScanner")
 local AL = LibStub("AceLocale-3.0"):GetLocale("RareScanner", false)
-local LibDialog = LibStub("LibDialog-1.0")
+local LibDialog = LibStub("LibDialog-1.0RS")
 
 local RSLootOptions = private.NewLib("RareScannerLootOptions")
 
@@ -80,7 +80,7 @@ local function GetMainCategories()
 		main_categories = {}
 		
 		for k, v in pairs(private.ITEM_CLASSES) do
-			main_categories[k] = GetItemClassInfo(k)
+			main_categories[k] = C_Item.GetItemClassInfo(k)
 		end
 	end
 	
@@ -90,7 +90,7 @@ end
 local function LoadSubcategoryCombo(mainClassID)
 	options.args.filters.args.category_filters.args.lootFilters.values = {}
 	for _, subcategoryID in ipairs(private.ITEM_CLASSES[mainClassID]) do
-		options.args.filters.args.category_filters.args.lootFilters.values[subcategoryID] = GetItemSubClassInfo(mainClassID, subcategoryID)
+		options.args.filters.args.category_filters.args.lootFilters.values[subcategoryID] = C_Item.GetItemSubClassInfo(mainClassID, subcategoryID)
 	end
 end
 

@@ -1,7 +1,7 @@
 local __FILE__=tostring(debugstack(1,2,0):match("(.*):1:")) -- Always check line number in regexp and file, must be 1
---[===[@debug@
+--[==[@debug@
 print('Loaded',__FILE__)
---@end-debug@]===]
+--@end-debug@]==]
 local function pp(...) print(GetTime(),"|cff009900",__FILE__:sub(-15),strjoin(",",tostringall(...)),"|r") end
 --*TYPE module
 --*CONFIG noswitch=false,profile=true,enhancedProfile=true
@@ -63,7 +63,7 @@ local HideTT=ChampionCommanderMixin.HideTT
 
 local dprint=print
 local ddump
---[===[@debug@
+--[==[@debug@
 C_AddOns.LoadAddOn("Blizzard_DebugTools")
 ddump=DevTools_Dump
 C_AddOns.LoadAddOn("LibDebug")
@@ -71,7 +71,7 @@ C_AddOns.LoadAddOn("LibDebug")
 if LibDebug then LibDebug() dprint=print end
 local safeG=addon.safeG
 
---@end-debug@]===]
+--@end-debug@]==]
 --@non-debug@
 dprint=function() end
 ddump=function() end
@@ -146,7 +146,7 @@ function module:FillMissionPage(missionInfo,key)
     stage.button:Show()
   end
   button:SetOnChange(function() module:Analyze(missionInfo) end)
---[===[@debug@
+--[==[@debug@
 	if not missionid then
 		missionid=stage:CreateFontString()
 		missionid:SetFontObject(model:GetFontObject())
@@ -154,7 +154,7 @@ function module:FillMissionPage(missionInfo,key)
 		missionid:SetPoint("TOPLEFT",button,"BOTTOMLEFT",0,-2)
 	end
 	missionid:SetFormattedText(GARRISON_MISSION_ID,missionInfo.missionID)
---@end-debug@]===]
+--@end-debug@]==]
 	if( IsControlKeyDown()) then self:Print("Ctrl key, ignoring mission prefill") return end
 	if (addon:GetBoolean("NOFILL")) then return end
 	OHF:ClearParty()
@@ -382,9 +382,9 @@ function module:Analyze(mission)
 --      button.BG:SetWidth(button:GetWidth())
 --      button.Title:SetWidth(button:GetWidth()-button.Perc:GetWidth())
 --      button.Status:SetWidth(button:GetWidth()-button.Perc:GetWidth())
---[===[@debug@
+--[==[@debug@
       button.tooltip=function(frame) module:Tooltip(frame) end
---@end-debug@]===]
+--@end-debug@]==]
       button:SetScript("OnClick",click)
     end
   end
@@ -404,9 +404,9 @@ function module:FillParty(missionID,key)
 	local missionPage=OHF:GetMissionPage()
 	for i=1,#party do
 		local followerID=party[i]
---[===[@debug@
+--[==[@debug@
     addon:Print("adding",addon:GetFollowerName(followerID))
---@end-debug@]===]
+--@end-debug@]==]
 		if followerID and not G.GetFollowerStatus(followerID) then
 			missionPage:AddFollower(followerID)
 		end

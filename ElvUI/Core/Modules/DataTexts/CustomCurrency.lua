@@ -26,7 +26,7 @@ local function OnEvent(self)
 		self.icon:SetShown(currency.showIcon)
 		self.icon:SetTexture(info.iconFileID)
 
-		if E.Wrath and self.name == HONOR_CURRENCY then
+		if E.Cata and self.name == HONOR_CURRENCY then
 			self.icon:SetTexCoord(0.06325, 0.59375, 0.03125, 0.57375)
 		end
 	end
@@ -60,8 +60,8 @@ function DT:RegisterCustomCurrencyDT(currencyID)
 	if currencyID then
 		if E.global.datatexts.customCurrencies[currencyID] then return end
 
-		local info = DT:CurrencyInfo(currencyID)
-		if not info then return end
+		local info, name = DT:CurrencyInfo(currencyID)
+		if not name then return end
 
 		G.datatexts.customCurrencies[currencyID] = defaults
 		E.global.datatexts.customCurrencies[currencyID] = E:CopyTable({ name = info.name }, defaults)

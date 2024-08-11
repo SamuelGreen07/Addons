@@ -5,7 +5,6 @@ local _G = _G
 local ipairs, tinsert, tremove = ipairs, tinsert, tremove
 local format, next, strjoin = format, next, strjoin
 
-local EasyMenu = EasyMenu
 local GetLootSpecialization = GetLootSpecialization
 local GetNumSpecializations = GetNumSpecializations
 local GetPvpTalentInfoByID = GetPvpTalentInfoByID
@@ -15,9 +14,9 @@ local IsControlKeyDown = IsControlKeyDown
 local IsShiftKeyDown = IsShiftKeyDown
 local SetLootSpecialization = SetLootSpecialization
 local SetSpecialization = SetSpecialization
-local ToggleTalentFrame = ToggleTalentFrame
+local TogglePlayerSpellsFrame = TogglePlayerSpellsFrame
 
-local LoadAddOn = (C_AddOns and C_AddOns.LoadAddOn) or LoadAddOn
+local LoadAddOn = C_AddOns.LoadAddOn
 local C_SpecializationInfo_GetAllSelectedPvpTalentIDs = C_SpecializationInfo.GetAllSelectedPvpTalentIDs
 local C_Traits_GetConfigInfo = C_Traits.GetConfigInfo
 
@@ -41,7 +40,7 @@ local inactiveString = strjoin('', '|cffFF0000', _G.FACTION_INACTIVE, '|r')
 
 local menuList = {
 	{ text = SELECT_LOOT_SPECIALIZATION, isTitle = true, notCheckable = true },
-	{ checked = function() return GetLootSpecialization() == 0 end, func = function() SetLootSpecialization(0) end },
+	{ checked = function() return GetLootSpecialization() == 0 end, func = function() SetLootSpecialization(0) DT:CloseMenus() end },
 }
 
 local specList = { { text = _G.SPECIALIZATION, isTitle = true, notCheckable = true } }
@@ -50,9 +49,10 @@ local loadoutList = { { text = L["Loadouts"], isTitle = true, notCheckable = tru
 local DEFAULT_TEXT = E:RGBToHex(0.9, 0.9, 0.9, nil, _G.TALENT_FRAME_DROP_DOWN_DEFAULT)
 local STARTER_TEXT = E:RGBToHex(BLUE_FONT_COLOR.r, BLUE_FONT_COLOR.g, BLUE_FONT_COLOR.b, nil, _G.TALENT_FRAME_DROP_DOWN_STARTER_BUILD)
 
-local mainIcon = '|T%s:16:16:0:0:64:64:4:60:4:60|t'
+local mainSize = 16
+local mainIcon = '|T%s:%d:%d:0:0:64:64:4:60:4:60|t'
 local listIcon = '|T%s:16:16:0:0:50:50:4:46:4:46|t'
-local specText = '|T%s:14:14:0:0:64:64:4:60:4:60|t  %s'
+local listText = '|T%s:14:14:0:0:64:64:4:60:4:60|t  %s'
 
 local function starter_checked()
 	return GetStarterBuildActive()
@@ -70,21 +70,21 @@ do
 	end
 
 	loadout_func = function(_, arg1)
-		if not _G.ClassTalentFrame then
-			_G.ClassTalentFrame_LoadUI()
+		if not _G.PlayerSpellsFrame then
+			_G.PlayerSpellsFrame_LoadUI()
 		end
 
 		loadoutID = arg1
 
-		_G.ClassTalentFrame.TalentsTab:LoadConfigByPredicate(loadout_callback)
+		_G.PlayerSpellsFrame.TalentsFrame:LoadConfigByPredicate(loadout_callback)
 	end
 end
 
 local function menu_checked(data) return data and data.arg1 == GetLootSpecialization() end
-local function menu_func(_, arg1) SetLootSpecialization(arg1) end
+local function menu_func(_, arg1) SetLootSpecialization(arg1) DT:CloseMenus() end
 
 local function spec_checked(data) return data and data.arg1 == GetSpecialization() end
-local function spec_func(_, arg1) SetSpecialization(arg1) end
+local function spec_func(_, arg1) SetSpecialization(arg1) DT:CloseMenus() end
 
 local function OnEvent(self, event, loadoutID)
 	if #menuList == 2 then
@@ -92,13 +92,13 @@ local function OnEvent(self, event, loadoutID)
 			local id, name, _, icon = GetSpecializationInfo(index)
 			if id then
 				menuList[index + 2] = { arg1 = id, text = name, checked = menu_checked, func = menu_func }
-				specList[index + 1] = { arg1 = index, text = format(specText, icon, name), checked = spec_checked, func = spec_func }
+				specList[index + 1] = { arg1 = index, text = format(listText, icon, name), checked = spec_checked, func = spec_func }
 			end
 		end
 	end
 
+	local specLoot = GetLootSpecialization()
 	local specIndex = GetSpecialization()
-	local specialization = GetLootSpecialization()
 	local info = DT.SPECIALIZATION_CACHE[specIndex]
 	local ID = info and info.id
 
@@ -147,20 +147,21 @@ local function OnEvent(self, event, loadoutID)
 	active = specIndex
 
 	local db = E.global.datatexts.settings["Talent/Loot Specialization"]
-	local spec, text = format(mainIcon, info.icon)
+	local size = db.iconSize or mainSize
+	local spec, text = format(mainIcon, info.icon, size, size)
 	if db.displayStyle == 'BOTH' or db.displayStyle == 'SPEC' then
-		if specialization == 0 or ID == specialization then
+		if (specLoot == 0 or ID == specLoot) and not db.showBoth then
 			if db.iconOnly then
 				text = format('%s', spec)
 			else
 				text = format('%s %s', spec, info.name)
 			end
 		else
-			info = DT.SPECIALIZATION_CACHE[specialization]
+			local cache = DT.SPECIALIZATION_CACHE[(specLoot == 0 and specIndex) or specLoot]
 			if db.iconOnly then
-				text = format('%s %s', spec, format(mainIcon, info.icon))
+				text = format('%s %s', spec, format(mainIcon, cache.icon, size, size))
 			else
-				text = format('%s: %s %s: %s', L["Spec"], spec, LOOT, format(mainIcon, info.icon))
+				text = format('%s: %s %s: %s', L["Spec"], spec, LOOT, format(mainIcon, cache.icon, size, size))
 			end
 		end
 	end
@@ -185,9 +186,9 @@ local function OnEnter()
 
 	DT.tooltip:AddLine(' ')
 
-	local specialization = GetLootSpecialization()
-	local sameSpec = specialization == 0 and GetSpecialization()
-	local specIndex = DT.SPECIALIZATION_CACHE[sameSpec or specialization]
+	local specLoot = GetLootSpecialization()
+	local sameSpec = specLoot == 0 and GetSpecialization()
+	local specIndex = DT.SPECIALIZATION_CACHE[sameSpec or specLoot]
 	if specIndex and specIndex.name then
 		DT.tooltip:AddLine(format('|cffFFFFFF%s:|r %s', SELECT_LOOT_SPECIALIZATION, sameSpec and format(LOOT_SPECIALIZATION_DEFAULT, specIndex.name) or specIndex.name))
 	end
@@ -237,7 +238,7 @@ local function OnClick(self, button)
 
 		if IsShiftKeyDown() then
 			if not E:AlertCombat() then
-				ToggleTalentFrame(_G.TalentMicroButton.suggestedTab)
+				TogglePlayerSpellsFrame(_G.PlayerSpellsMicroButton.suggestedTab)
 			end
 		else
 			menu = IsControlKeyDown() and loadoutList or specList
@@ -253,7 +254,7 @@ local function OnClick(self, button)
 
 	if menu then
 		E:SetEasyMenuAnchor(E.EasyMenu, self)
-		EasyMenu(menu, E.EasyMenu, nil, nil, nil, 'MENU')
+		E:ComplicatedMenu(menu, E.EasyMenu, nil, nil, nil, 'MENU')
 	end
 end
 
